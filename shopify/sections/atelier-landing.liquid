@@ -1,0 +1,70 @@
+{% comment %}Atelier Montres: storefront editorial homepage. Only real Shopify products are displayed.{% endcomment %}
+{{ 'atelier-montres.css' | asset_url | stylesheet_tag }}
+<section class="atelier-hero" aria-labelledby="atelier-headline">
+ <div class="atelier-container atelier-hero-layout">
+   <div class="atelier-copy">
+     <p class="atelier-overline">{{ section.settings.eyebrow | escape }}</p>
+     <h1 id="atelier-headline">{{ section.settings.heading | escape }}</h1>
+     <p class="atelier-lead">{{ section.settings.intro | escape }}</p>
+     <a class="atelier-button" href="{{ routes.all_products_collection_url }}">{{ section.settings.button_label | escape }} <span aria-hidden="true">↗</span></a>
+     <p class="atelier-aside">Une allure, une histoire, votre rythme.</p>
+   </div>
+   <div class="atelier-art" role="img" aria-label="Illustration stylisée d'une montre analogique élégante, non contractuelle">
+    <div class="atelier-orbit"></div><div class="atelier-watch">
+      <div class="atelier-strap atelier-strap-top"></div>
+      <div class="atelier-case"><div class="atelier-dial"><span class="atelier-mark a12"></span><span class="atelier-mark a3"></span><span class="atelier-mark a6"></span><span class="atelier-mark a9"></span><span class="atelier-hour"></span><span class="atelier-minute"></span><span class="atelier-center"></span></div></div>
+      <div class="atelier-crown"></div><div class="atelier-strap atelier-strap-bottom"></div>
+    </div>
+    <span class="atelier-art-caption">L'ESSENTIEL, AU POIGNET</span>
+   </div>
+ </div>
+</section>
+<section class="atelier-intro" aria-label="L'univers des montres">
+  <div class="atelier-container atelier-intro-layout">
+    <div><p class="atelier-overline atelier-overline-dark">NOTRE UNIVERS</p><h2>Le temps a du style.</h2></div>
+    <p>Une montre accompagne bien plus qu'une heure : une tenue, un mouvement, une occasion. Explorez notre univers horloger et trouvez le style qui vous ressemble.</p>
+  </div>
+</section>
+<section class="atelier-selection" aria-labelledby="atelier-selection-title">
+  <div class="atelier-container">
+    <div class="atelier-section-top"><div><p class="atelier-overline atelier-overline-dark">LA COLLECTION</p><h2 id="atelier-selection-title">Les montres à découvrir</h2></div><a href="{{ routes.all_products_collection_url }}" class="atelier-link">Voir toutes les montres <span aria-hidden="true">↗</span></a></div>
+    {% assign atelier_collection = collections['all'] %}
+    {% if atelier_collection.products_count > 0 %}
+      <div class="atelier-product-grid">
+        {% for item in atelier_collection.products limit: 8 %}
+          <article class="atelier-product">
+            <a class="atelier-product-image" href="{{ item.url }}">
+              {% if item.featured_image %}
+               {{ item.featured_image | image_url: width: 780 | image_tag: loading: 'lazy', widths: '320, 520, 780', sizes: '(min-width: 950px) 25vw, 50vw', alt: item.featured_image.alt | default: item.title }}
+              {% else %}<span class="atelier-empty-image" aria-hidden="true">◷</span>{% endif %}
+            </a>
+            <p class="atelier-product-vendor">{{ item.vendor | escape }}</p>
+            <h3><a href="{{ item.url }}">{{ item.title | escape }}</a></h3>
+            <p class="atelier-product-price">{{ item.price | money }}{% if item.compare_at_price > item.price %}<span class="atelier-product-old">{{ item.compare_at_price | money }}</span>{% endif %}</p>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="atelier-empty">
+        <span class="atelier-empty-icon" aria-hidden="true">◷</span>
+        <h3>La collection se prépare.</h3>
+        <p>Les premières montres seront présentées ici dès leur ajout au catalogue.</p>
+      </div>
+    {% endif %}
+  </div>
+</section>
+<section class="atelier-outro">
+ <div class="atelier-container atelier-outro-layout"><p class="atelier-overline">STYLE & TEMPS</p><h2>Un détail qui change tout.</h2><a class="atelier-button atelier-button-light" href="{{ routes.all_products_collection_url }}">Explorer la collection <span aria-hidden="true">↗</span></a></div>
+</section>
+{% schema %}
+{
+ "name": "Accueil Atelier Montres",
+ "settings": [
+  {"type":"text","id":"eyebrow","label":"Surtitre","default":"L'ÉLÉGANCE EN MOUVEMENT"},
+  {"type":"text","id":"heading","label":"Titre","default":"Le temps, à votre façon."},
+  {"type":"textarea","id":"intro","label":"Introduction","default":"Des montres pour donner du caractère à chaque instant. Découvrez un univers où l'allure rencontre la simplicité."},
+  {"type":"text","id":"button_label","label":"Texte du bouton","default":"Découvrir les montres"}
+ ],
+ "presets":[{"name":"Accueil Atelier Montres"}]
+}
+{% endschema %}
