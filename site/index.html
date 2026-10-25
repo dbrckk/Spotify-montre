@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1b2925">
+<meta name="description" content="Atelier Montres : l'univers des montres sélectionnées avec soin. Boutique en préparation.">
+<meta name="robots" content="noindex,nofollow">
+<title>Atelier Montres — Le temps, à votre façon</title>
+<style>
+:root{--ink:#162722;--forest:#1b2925;--forest2:#263c33;--gold:#d8b987;--cream:#f6f1e7;--white:#fffdf9;--muted:#69746d;color-scheme:light;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--white);color:var(--ink);line-height:1.6}
+a{color:inherit}
+a:focus-visible,button:focus-visible{outline:3px solid #cb9c4d;outline-offset:4px}
+[hidden]{display:none!important}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+.wrap{width:min(1220px,calc(100% - 52px));margin-inline:auto}
+.header{background:var(--forest);color:white;border-bottom:1px solid rgba(255,255,255,.12);position:relative;z-index:3}
+.header-inner{height:85px;display:flex;align-items:center;justify-content:space-between;gap:25px}
+.brand{text-decoration:none;font:400 28px Georgia,"Times New Roman",serif;letter-spacing:.035em;color:#f9f1e5}
+.brand .star{color:var(--gold);font-size:20px;padding-right:7px}
+.navigation{display:flex;align-items:center;gap:27px}
+.navigation a{font-size:12px;text-transform:uppercase;text-decoration:none;letter-spacing:.12em;color:#e7e7df}
+.navigation a:hover{color:var(--gold)}
+.tag{border:1px solid rgba(216,185,135,.6);padding:7px 13px;border-radius:100px;color:#dbc49e;font-size:10px;text-transform:uppercase;letter-spacing:.1em;white-space:nowrap}
+.hero{background:var(--forest);color:#faf5ed;overflow:hidden;position:relative}
+.hero:before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 76% 52%,rgba(167,138,82,.11),transparent 45%);pointer-events:none}
+.hero-grid{display:grid;grid-template-columns:1.03fr .97fr;align-items:center;min-height:635px;position:relative}
+.hero-copy{padding:100px 0 105px;z-index:1}
+.overline{font-weight:650;font-size:11px;text-transform:uppercase;letter-spacing:.29em;color:var(--gold);margin:0 0 24px}
+.hero h1{font:400 clamp(55px,7vw,109px)/1.02 Georgia,"Times New Roman",serif;letter-spacing:-.045em;margin:0 0 26px;max-width:670px}
+.hero-lead{font-size:17px;line-height:1.8;color:#d9dfd7;max-width:485px;margin:0 0 34px}
+.button{display:inline-flex;align-items:center;justify-content:center;gap:25px;padding:15px 24px;min-height:52px;background:var(--gold);border:1px solid var(--gold);font-size:12px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;text-decoration:none;color:var(--forest);transition:transform .2s,background .2s}
+.button:hover{background:#f1d5a9;transform:translateY(-2px)}
+.hero-note{font-size:12px;color:#9db4aa;margin-top:31px;letter-spacing:.03em}
+.hero-art{height:580px;display:grid;place-items:center;position:relative;isolation:isolate}
+.orbit{position:absolute;width:510px;height:510px;border:1px solid rgba(218,187,138,.23);border-radius:50%;box-shadow:0 0 0 46px rgba(197,157,101,.025),0 0 0 90px rgba(197,157,101,.025)}
+.watch{position:relative;width:260px;height:350px;transform:rotate(-17deg);filter:drop-shadow(28px 31px 28px rgba(0,0,0,.65))}
+.strap{position:absolute;left:71px;width:119px;height:160px;border-radius:24px;background:linear-gradient(90deg,#292622,#5a4838 50%,#2c2521);box-shadow:inset 8px 0 14px #1b1715,inset -8px 0 14px #241e1a}
+.strap.top{top:-61px}.strap.bottom{bottom:-58px}
+.case{position:absolute;left:16px;top:47px;width:229px;height:229px;border-radius:50%;padding:12px;background:linear-gradient(140deg,#f6daa8,#8a6137 38%,#ebc78e 69%,#65472d);box-shadow:0 0 0 3px #62482c,0 12px 30px #070c09}
+.dial{position:relative;height:100%;border-radius:50%;background:radial-gradient(circle at 34% 28%,#47594b,#14261e 71%);box-shadow:inset 0 0 0 6px #0d1913,inset 0 0 0 8px #d2b784}
+.mark{position:absolute;background:#f0d4a4;border-radius:2px}
+.twelve,.six{height:23px;width:5px;left:calc(50% - 2.5px)}.twelve{top:20px}.six{bottom:20px}
+.three,.nine{height:5px;width:23px;top:calc(50% - 2.5px)}.three{right:20px}.nine{left:20px}
+.hour,.minute{position:absolute;left:calc(50% - 2px);border-radius:3px;background:#f8e7c8;transform-origin:50% 100%}
+.hour{height:56px;width:5px;top:calc(50% - 56px);transform:rotate(310deg)}
+.minute{height:78px;width:3px;top:calc(50% - 78px);transform:rotate(116deg)}
+.center{position:absolute;left:calc(50% - 6px);top:calc(50% - 6px);width:12px;height:12px;background:#e0bd84;border-radius:50%}
+.crown{position:absolute;right:-2px;top:142px;width:20px;height:37px;background:linear-gradient(90deg,#a7854c,#edd0a0,#826039);border-radius:5px;z-index:-1}
+.art-label{position:absolute;bottom:27px;right:10px;font-size:10px;letter-spacing:.23em;color:#bdbaa9}
+.intro{padding:97px 0;background:var(--cream)}
+.intro-grid{display:grid;grid-template-columns:1fr 1fr;gap:70px;align-items:end}
+.kicker{color:#9d7750}
+h2{font:400 clamp(34px,4.3vw,60px)/1.14 Georgia,"Times New Roman",serif;letter-spacing:-.033em;margin:0}
+.intro-text{margin:0;color:#5a655e;max-width:510px;font-size:17px;line-height:1.85}
+.collection{background:var(--white);padding:110px 0 118px}
+.section-title{max-width:750px;margin:0 0 35px}
+.section-title p:last-child{color:var(--muted);font-size:16px}
+.empty-state{background:#f6f1e9;border:1px solid #e1d9cb;padding:64px 25px;display:grid;justify-items:center;text-align:center}
+.empty-state .symbol{font:normal 60px Georgia,serif;color:#bc9b6a}
+.empty-state h3{font:400 32px Georgia,serif;margin:8px 0 12px}
+.empty-state p{max-width:520px;color:#5d655e;margin:0 0 22px}
+.status{padding:7px 12px;border:1px solid #c8b99f;border-radius:100px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#5d675d}
+.steps{background:#e7eae4;padding:105px 0}
+.steps h2{margin-bottom:42px}
+.steps-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.step{padding:30px 28px 35px;background:#f8f8f4;border:1px solid #cfd6cc;min-height:218px}
+.step .number{font:400 33px Georgia,serif;color:#9d7d56}
+.step h3{font:400 25px Georgia,serif;margin:20px 0 11px}
+.step p{font-size:14px;line-height:1.7;color:#626c63;margin:0}
+.outro{background:var(--forest2);color:#fff;padding:110px 0}
+.outro-inner{display:grid;justify-items:center;text-align:center}
+.outro h2{color:#fff;margin-bottom:24px}
+.outro p{max-width:610px;color:#d1ddd6}
+.footer{background:#121d18;color:#d6e1d9;padding:35px 0 50px}
+.footer-inner{display:flex;justify-content:space-between;gap:26px;flex-wrap:wrap}
+.footer p{font-size:12px;color:#aebfb5;margin:4px 0 0}
+.footer a{color:#d7c29f}
+@media(max-width:930px){.hero-grid{grid-template-columns:1fr}.hero-copy{padding:80px 0 15px}.hero-art{height:390px}.watch{transform:scale(.72) rotate(-17deg)}.orbit{width:380px;height:380px}.intro-grid{grid-template-columns:1fr;gap:25px}.steps-grid{grid-template-columns:1fr}.step{min-height:auto}}
+@media(max-width:600px){.wrap{width:calc(100% - 38px)}.header-inner{height:auto;min-height:78px;align-items:flex-start;flex-wrap:wrap;padding:19px 0;gap:14px}.brand{font-size:24px}.navigation{width:100%;gap:23px;flex-wrap:wrap}.navigation a{font-size:10px}.tag{font-size:9px}.hero-copy{padding:66px 0 8px}.hero h1{font-size:clamp(49px,12.5vw,74px)}.hero-lead{font-size:15px}.hero-art{height:320px}.watch{transform:scale(.58) rotate(-17deg)}.orbit{width:300px;height:300px}.art-label{right:0;bottom:8px;font-size:9px}.intro,.collection,.steps,.outro{padding:70px 0}.empty-state{padding:45px 19px}.empty-state h3{font-size:27px}.steps h2{margin-bottom:26px}.footer-inner{flex-direction:column}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.button{transition:none}.button:hover{transform:none}}
+</style>
+</head>
+<body>
+<a class="sr-only" href="#contenu">Aller au contenu</a>
+<header class="header">
+  <div class="wrap header-inner">
+    <a href="#accueil" class="brand" aria-label="Atelier Montres - accueil"><span class="star" aria-hidden="true">✦</span>Atelier Montres</a>
+    <nav class="navigation" aria-label="Navigation principale">
+      <a href="#collection">Collection</a>
+      <a href="#approche">Notre approche</a>
+      <a href="#informations">Informations</a>
+    </nav>
+    <span class="tag" id="siteStatus">Projet en préparation</span>
+  </div>
+</header>
+<main id="contenu">
+<section class="hero" id="accueil" aria-labelledby="titre-principal">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <p class="overline">L'élégance en mouvement</p>
+      <h1 id="titre-principal">Le temps,<br>à votre façon.</h1>
+      <p class="hero-lead">Un univers de montres pensées pour accompagner les moments qui comptent. Une sélection en cours de préparation, avec stock et expédition depuis la France à l'ouverture.</p>
+      <a class="button" href="#collection">Découvrir notre univers <span aria-hidden="true">↗</span></a>
+      <p class="hero-note">Aucune commande n'est encore acceptée.</p>
+    </div>
+    <div class="hero-art" role="img" aria-label="Illustration artistique d'une montre analogique, ne représentant pas un produit en vente">
+      <div class="orbit" aria-hidden="true"></div>
+      <div class="watch" aria-hidden="true">
+        <div class="strap top"></div><div class="case"><div class="dial">
+        <span class="mark twelve"></span><span class="mark three"></span><span class="mark six"></span><span class="mark nine"></span>
+        <span class="hour"></span><span class="minute"></span><span class="center"></span>
+        </div></div><div class="crown"></div><div class="strap bottom"></div>
+      </div>
+      <span class="art-label">L'ESSENTIEL, AU POIGNET</span>
+    </div>
+  </div>
+</section>
+<section class="intro" aria-labelledby="titre-intro">
+  <div class="wrap intro-grid">
+    <div><p class="overline kicker">Notre univers</p><h2 id="titre-intro">Le temps a du style.</h2></div>
+    <p class="intro-text">Un détail discret ou une pièce affirmée : chaque montre raconte une façon d'être. Nous préparons une collection dont les modèles seront présentés avec leurs caractéristiques réelles, leur prix et leur disponibilité.</p>
+  </div>
+</section>
+<section class="collection" id="collection" aria-labelledby="titre-collection">
+  <div class="wrap">
+    <div class="section-title">
+      <p class="overline kicker">La collection</p>
+      <h2 id="titre-collection">Des montres à découvrir</h2>
+      <p>Les références seront ajoutées après vérification des fournisseurs et des produits.</p>
+    </div>
+    <div class="empty-state" id="emptyState">
+      <span class="symbol" aria-hidden="true">◷</span>
+      <h3>Notre sélection se prépare.</h3>
+      <p>Nous ne présentons pas de produits fictifs. La vente ouvrira après confirmation des stocks, des conditions de livraison et des informations légales.</p>
+      <span class="status">Aucune vente active</span>
+    </div>
+    <div class="empty-state" id="storeState" hidden>
+      <span class="symbol" aria-hidden="true">◷</span>
+      <h3>Découvrez les modèles disponibles.</h3>
+      <p>Retrouvez les prix, le stock à jour, le panier et le paiement sécurisé sur notre boutique Square.</p>
+      <a id="squareLink" class="button" href="#collection" rel="noopener noreferrer" target="_blank">Accéder à la boutique <span aria-hidden="true">↗</span></a>
+    </div>
+  </div>
+</section>
+<section class="steps" id="approche" aria-labelledby="titre-approche">
+  <div class="wrap">
+    <p class="overline kicker">Notre approche</p>
+    <h2 id="titre-approche">Simple. Clair. Maîtrisé.</h2>
+    <div class="steps-grid">
+      <article class="step"><span class="number">01</span><h3>Choisir</h3><p>Étudier les modèles, leurs matériaux et leurs caractéristiques avant leur mise en vente.</p></article>
+      <article class="step"><span class="number">02</span><h3>Contrôler</h3><p>Vérifier les fournisseurs, la conformité des produits et les pièces réceptionnées en stock.</p></article>
+      <article class="step"><span class="number">03</span><h3>Expédier</h3><p>Préparer les commandes en France avec une méthode de suivi adaptée à chaque envoi.</p></article>
+    </div>
+  </div>
+</section>
+<section class="outro" id="informations" aria-labelledby="titre-informations">
+  <div class="wrap outro-inner">
+    <p class="overline">Atelier Montres</p>
+    <h2 id="titre-informations">Une nouvelle histoire se prépare.</h2>
+    <p>La boutique est actuellement en construction. Les coordonnées professionnelles, les conditions de vente, les garanties et les informations relatives aux retours seront publiées avant son ouverture commerciale.</p>
+  </div>
+</section>
+</main>
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <div><strong>Atelier Montres</strong><p>Site de présentation — non marchand tant que la boutique n'est pas ouverte.</p></div>
+    <p>© <span id="year">2026</span> Atelier Montres. Aucune commande sur ce site de présentation.</p>
+  </div>
+</footer>
+<script>
+'use strict';
+document.getElementById('year').textContent = String(new Date().getFullYear());
+fetch('./config.json', { cache: 'no-store' }).then(function (r) {
+  if (!r.ok) throw new Error('Configuration unavailable');
+  return r.json();
+}).then(function (config) {
+  if (config.status !== 'open' || typeof config.squareStoreUrl !== 'string') return;
+  const url = new URL(config.squareStoreUrl);
+  const host = url.hostname.toLowerCase();
+  const isSquare = host === 'square.site' || host.endsWith('.square.site');
+  if (url.protocol !== 'https:' || !isSquare) return;
+  document.getElementById('squareLink').href = url.href;
+  document.getElementById('siteStatus').textContent = 'Boutique ouverte';
+  document.getElementById('emptyState').hidden = true;
+  document.getElementById('storeState').hidden = false;
+  document.querySelector('.hero-note').textContent = 'Commandes et paiements sécurisés par Square.';
+}).catch(function () {
+  // On failure, fail closed: never display a checkout link.
+});
+</script>
+</body>
+</html>
