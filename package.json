@@ -1,0 +1,13 @@
+{
+  "name": "spotify-montre-shopify",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Validation of the Atelier Montres Shopify Horizon overlay",
+  "scripts": {
+    "test": "node scripts/validate-theme.mjs",
+    "lint": "node scripts/validate-theme.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
