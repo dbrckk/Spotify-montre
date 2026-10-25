@@ -4,8 +4,8 @@
   "version": "0.1.0",
   "description": "Theme overlay and free independent storefront validation",
   "scripts": {
-    "test": "node scripts/validate-theme.mjs && node scripts/validate-free-store.mjs",
-    "lint": "node scripts/validate-theme.mjs && node scripts/validate-free-store.mjs"
+    "test": "node --check site/app.js && node scripts/validate-theme.mjs && node scripts/validate-free-store.mjs",
+    "lint": "node --check site/app.js && node scripts/validate-theme.mjs && node scripts/validate-free-store.mjs"
   },
   "engines": {
     "node": ">=20"
