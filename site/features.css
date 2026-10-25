@@ -1,0 +1,86 @@
+/* Atelier Montres - premium extensions, zero external libraries. */
+:root{--sand:#e8dcc8;--dark:#14251d;--muted2:#6a736b}
+html{scroll-padding-top:30px}
+.sr-only:focus{clip:auto;overflow:visible;width:auto;height:auto;position:fixed;z-index:9999;top:8px;left:8px;padding:12px 20px;background:#fff;color:#111}
+.navigation a:focus-visible,.newsletter-cta:focus-visible,.chat-launcher:focus-visible,.chat-close:focus-visible{outline:3px solid #f9d596;outline-offset:3px}
+.navigation a{white-space:nowrap}
+.nav-discover{border-bottom:1px solid #d8b987;padding-bottom:4px}
+.trust{background:#e9e5da;border-bottom:1px solid #d9d3c6}
+.trust .wrap{display:grid;grid-template-columns:repeat(3,1fr);padding:20px 0;gap:20px}
+.trust-item{display:flex;align-items:center;gap:13px;font-size:12px;letter-spacing:.025em;color:#31443a}
+.trust-item svg{flex:0 0 25px;stroke:#967a50}
+.designs{background:#f7f3ea;padding:100px 0 115px}
+.designs-head{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;margin-bottom:33px}
+.designs-head>p{max-width:415px;color:#5d685e;font-size:15px}
+.design-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.design-card{border:1px solid #e1d9cc;background:#fffaf3;overflow:hidden;min-width:0}
+.design-art{height:280px;display:grid;place-items:center;position:relative;overflow:hidden}
+.design-art:before{content:"";position:absolute;width:210px;height:210px;border:1px solid rgba(255,255,255,.3);border-radius:50%;transform:scale(1.5)}
+.design-green{background:linear-gradient(145deg,#1d3a33,#13221c 65%,#627365)}
+.design-blue{background:linear-gradient(145deg,#314b63,#142939 70%,#697989)}
+.design-black{background:linear-gradient(145deg,#353337,#1a1b1d 70%,#746459)}
+.design-dial{position:relative;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle at 33% 26%,var(--face-light),var(--face-dark) 80%);border:8px solid #d1c3a6;outline:2px solid #8c8474;box-shadow:0 0 0 16px rgba(7,10,8,.15),15px 18px 30px rgba(0,0,0,.37);transform:rotate(-15deg)}
+.design-dial:before,.design-dial:after{content:"";position:absolute;left:50%;top:50%;transform-origin:bottom}
+.design-dial:before{width:3px;height:48px;background:#f7e9cb;transform:translate(-50%,-100%) rotate(55deg)}
+.design-dial:after{width:4px;height:34px;background:#f7e9cb;transform:translate(-50%,-100%) rotate(288deg)}
+.design-dial .mark-top,.design-dial .mark-bottom{position:absolute;width:4px;height:14px;background:#f7e9cb;left:calc(50% - 2px)}
+.design-dial .mark-top{top:12px}.design-dial .mark-bottom{bottom:12px}
+.design-dial .centre{position:absolute;left:calc(50% - 5px);top:calc(50% - 5px);width:10px;height:10px;background:#e4c794;border-radius:50%;z-index:2}
+.design-green .design-dial{--face-light:#40766c;--face-dark:#0b241c}
+.design-blue .design-dial{--face-light:#6896b2;--face-dark:#183a50}
+.design-black .design-dial{--face-light:#635957;--face-dark:#151617}
+.design-caption{position:absolute;left:17px;bottom:14px;color:#eae2d1;font-size:10px;letter-spacing:.19em;text-transform:uppercase}
+.design-body{padding:24px 24px 27px}
+.design-body h3{font:400 26px Georgia,serif;margin:0 0 8px;color:#182822}
+.design-body p{font-size:14px;line-height:1.75;color:#667065;margin:0}
+.concept-disclaimer{margin:17px 0 0;color:#6f746e;font-size:12px}
+.howto{background:#172820;color:#f9f5eb;padding:97px 0}
+.howto-inner{display:grid;grid-template-columns:1fr 1fr;gap:70px;align-items:center}
+.howto h2{color:#fff;font-size:clamp(34px,4vw,58px)}
+.howto p{color:#d1ddd3;line-height:1.85}
+.howto-badges{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.howto-badges div{border:1px solid #617366;padding:25px;min-height:128px}
+.howto-badges strong{color:#e2c798;font:400 32px Georgia,serif;display:block}
+.howto-badges span{font-size:13px;color:#d4ddd3}
+.faq{padding:98px 0;background:#faf9f5}
+.faq-shell{max-width:860px;margin:0 auto}
+.faq-shell h2{margin:0 0 33px}
+.faq details{border-bottom:1px solid #ded8cb;padding:0}
+.faq summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:25px;padding:22px 0;font-size:18px;font-weight:560}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary:after{content:"+";font:400 27px Georgia,serif;color:#937348}
+.faq details[open] summary:after{content:"−"}
+.faq details p{max-width:760px;margin:-3px 0 24px;color:#536156;line-height:1.8;font-size:15px}
+.newsletter{padding:98px 0;background:#e9ddc7}
+.newsletter-shell{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.newsletter h2{font-size:clamp(38px,4.5vw,66px)}
+.newsletter-description{color:#455248;font-size:17px;line-height:1.75}
+.newsletter-box{background:#fffaf0;border:1px solid #cbbd9e;padding:38px;min-height:246px}
+.newsletter-box h3{font:400 28px Georgia,serif;margin:0 0 9px}
+.newsletter-box p{color:#57645b;font-size:14px;line-height:1.75;margin:0 0 22px}
+.newsletter-box .status{display:inline-flex;align-items:center;background:#f4eee2;white-space:normal}
+.newsletter-cta{background:#1b3527;color:#fff!important;border-color:#1b3527}
+.newsletter-cta:hover{background:#305342}
+.newsletter-note{font-size:11px!important;margin-top:20px!important;color:#667068!important}
+.chat-launcher{position:fixed;z-index:30;bottom:max(20px,env(safe-area-inset-bottom));right:22px;display:flex;gap:9px;align-items:center;border:1px solid #d5bc92;border-radius:999px;background:#172920;color:#f8e8ca;padding:15px 19px;box-shadow:0 8px 24px rgba(5,17,9,.29);font:600 13px system-ui;cursor:pointer}
+.chat-launcher:hover{background:#2c4b39}
+.chat-launcher svg{width:19px;height:19px}
+.chat-panel{position:fixed;z-index:31;right:22px;bottom:87px;width:min(390px,calc(100vw - 28px));height:min(570px,calc(100dvh - 115px));border:1px solid #bdb6a6;border-radius:15px;background:#fffdf9;box-shadow:0 16px 55px rgba(0,0,0,.3);display:flex;flex-direction:column;overflow:hidden;font-family:system-ui}
+.chat-head{padding:17px 18px;background:#172920;color:#fff;display:flex;justify-content:space-between;align-items:center}
+.chat-head strong{font:400 21px Georgia,serif}
+.chat-head small{display:block;font-size:11px;color:#d8d2bb;margin-top:3px}
+.chat-close{background:none;border:0;color:#fff;font-size:27px;line-height:1;cursor:pointer;min-width:36px;min-height:36px}
+.chat-history{padding:18px;overflow:auto;flex:1;background:#f8f6ef;display:flex;flex-direction:column;gap:12px}
+.chat-bubble{font-size:13px;line-height:1.7;max-width:94%;padding:12px 14px;border-radius:15px 15px 15px 4px;background:#e5e7df;color:#25372d;white-space:pre-wrap;overflow-wrap:anywhere;align-self:flex-start}
+.chat-bubble.user{background:#264437;color:#fff;align-self:flex-end;border-radius:15px 15px 4px 15px}
+.chat-topics{display:flex;flex-wrap:wrap;gap:7px;padding:10px 14px;background:#fffdf9;border-top:1px solid #e2ded3}
+.chat-topics button{border:1px solid #bdb7a7;border-radius:30px;background:#fff;font-size:11px;padding:8px 12px;color:#374938;cursor:pointer}
+.chat-topics button:hover{background:#eceae0}
+.chat-form{display:flex;border-top:1px solid #e0dbd0;padding:10px;gap:8px}
+.chat-form input{flex:1;min-width:0;padding:11px;border:1px solid #c8c5b8;border-radius:8px;font-size:14px;background:white;color:#10251a}
+.chat-form button{border:0;border-radius:8px;background:#1c3427;color:#fff;font-weight:650;padding:0 14px;cursor:pointer}
+.chat-footnote{font-size:10px;padding:0 15px 12px;background:#fffdf9;color:#717a70}
+.footer a:hover{text-decoration:underline}
+@media(max-width:950px){.newsletter-shell,.howto-inner{grid-template-columns:1fr;gap:30px}.designs-head{display:block}.designs-head>p{max-width:none}.design-art{height:220px}.design-dial{transform:scale(.82) rotate(-15deg)}}
+@media(max-width:680px){.design-grid{grid-template-columns:1fr}.design-art{height:260px}.trust .wrap{grid-template-columns:1fr;padding:18px 0;gap:15px}.trust-item{font-size:11px}.howto-badges{gap:8px}.howto-badges div{padding:18px;min-height:115px}.designs,.faq,.howto,.newsletter{padding:68px 0}.newsletter-box{padding:25px}.faq summary{font-size:16px}.chat-panel{right:14px;bottom:86px}.chat-launcher{right:14px;bottom:15px;padding:13px 16px}.chat-bubble{max-width:97%}}
+@media(prefers-reduced-motion:reduce){.chat-launcher,.newsletter-cta{transition:none}}
