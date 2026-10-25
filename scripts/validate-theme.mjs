@@ -9,7 +9,8 @@ const text = (path) => {
   return readFileSync(absolute, 'utf8');
 };
 
-const template = JSON.parse(text('shopify/templates/index.json'));
+const rawTemplate = text('shopify/templates/index.json');
+const template = JSON.parse(rawTemplate.replace(/^\s*\/\*[\s\S]*?\*\/\s*/, ''));
 assert.deepEqual(template.order, ['atelier'], 'Homepage should load Atelier section');
 assert.equal(template.sections?.atelier?.type, 'atelier-landing');
 
