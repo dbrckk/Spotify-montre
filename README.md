@@ -1,4 +1,20 @@
-# Spotify-montre — boutique de montres Shopify
+# Atelier Montres — boutique sans abonnement
+
+**Solution actuelle (25 octobre 2026) : vitrine premium statique gratuite + Square Online Gratuit pour le futur panier, les paiements, l'inventaire et les commandes.**
+
+- **Vitrine en ligne** : https://neutral-spark-t96k64b.shipstatic.com/
+- **Code de la vitrine** : [site/index.html](site/index.html) et [site/config.json](site/config.json)
+- **Guide d'architecture et de lancement** : [docs/architecture-gratuite-square.md](docs/architecture-gratuite-square.md)
+- **État** : pré-lancement. Aucune montre fictive, aucun paiement activé, aucun abonnement souscrit.
+- **Contrôles automatisés** : `npm test` vérifie le thème Shopify historique et la vitrine autonome, notamment le blocage du lien marchand avant la validation de Square.
+- **Hébergement** : ShipStatic plan gratuit, statut du déploiement confirmé `success`, expiration `null`.
+- **Compte Square** : à créer par le propriétaire. Aucune intégration marchande ne peut être activée sans son compte et ses informations légales.
+- **Frais** : hébergement à 0 €, pas d'abonnement imposé sur Square Gratuit, commissions par paiement et coûts physiques d'achat, livraison, retour, etc.
+  
+> Le fichier visuel est une vitrine de présentation. Les stocks et l'achat réel seront toujours administrés chez Square une fois la boutique ouverte, sans faux panier ni quantités locales désynchronisées.
+
+## Archive Shopify précédente
+
 
 Boutique Shopify française en cours de préparation, avec thème premium et catalogue alimenté exclusivement par de vrais produits Shopify.
 
