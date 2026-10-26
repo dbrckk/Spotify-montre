@@ -14,7 +14,7 @@ assert.match(markup, /aria-label="Navigation principale"/, 'Navigation should be
 const baseCss = readFileSync(resolve(root, 'base.css'), 'utf8');
 assert.match(baseCss, /prefers-reduced-motion/, 'Reduced motion rules required');
 assert.match(baseCss, /\[hidden\]\{display:none!important\}/, 'Hidden state CSS required');
-assert.match(markup, /href="\.\/catalogue\.html"/, 'Main site must link to internal catalogue');
+assert.match(markup, /href="\.\/affiliation\.html#montres"/, 'Main site must link to the 15 actual watch listings');
 assert.doesNotMatch(markup, /squareLink|storeState|Square Online/, 'No outbound checkout in current customer experience');
 assert.match(markup, /Aucune commande n'est encore acceptée/, 'Prelaunch should state no orders');
 assert.equal(typeof config,'object');
