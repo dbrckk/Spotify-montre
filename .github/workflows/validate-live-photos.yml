@@ -1,0 +1,38 @@
+name: Validate real product photography in Android browser
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/test-mobile-live-storefront.mjs'
+      - '.github/workflows/validate-live-photos.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  android-live-photos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Chromium browser test runtime
+        run: |
+          npm install --no-save --no-audit --no-fund playwright
+          npx playwright install --with-deps chromium
+      - name: Assert homepage and detail page show real same-domain images at Android viewport
+        env:
+          WATCH_STOREFRONT_URL: https://subtle-mirage-vgd4wt7.shipstatic.com
+        run: node scripts/test-mobile-live-storefront.mjs
+      - name: Preserve Android screenshots for design review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-watch-storefront-photos
+          path: artifacts/*.png
+          if-no-files-found: ignore
+          retention-days: 7
