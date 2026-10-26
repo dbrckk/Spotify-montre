@@ -19,7 +19,10 @@
    $('detailTitle').textContent=p.model;
    $('detailEditorial').textContent=p.title||'Notre sélection';
    $('detailStory').textContent=p.story||p.description;
-   if(window.AtelierWatch)window.AtelierWatch.render($('detailArtwork'),p);
+   const art=$('detailArtwork');const photo=p.photoReview;
+   if(art&&photo?.accuracy==='exact'){
+     art.replaceChildren();art.classList.add('am-real-photo-stage');const img=node('img','am-real-product-photo');img.alt=p.brand+' '+p.model+' — photographie du modèle';img.src=photo.url;img.loading='eager';img.decoding='async';img.referrerPolicy='no-referrer';img.onerror=()=>{img.remove();art.classList.remove('am-real-photo-stage');window.AtelierWatch?.render(art,p)};art.append(img);
+   }else if(window.AtelierWatch)window.AtelierWatch.render(art,p);
    $('detailHighlights').replaceChildren(...(p.highlights||[]).map(t=>node('span','',t)));
    $('detailOfficial').href=p.officialUrl;
    $('detailOfficial').setAttribute('aria-label','Voir '+p.model+' sur le site officiel '+p.brand);
