@@ -29,6 +29,13 @@ ALTERNATES = {
     'casio-mdv107': [
         'https://www.casio.com/content/dam/casio/product-info/locales/fr/fr/timepiece/product/watch/M/md/mdv/mdv-107-1a1v/local-assets/MDV-107-1A1V_2000x2000.png',
     ],
+    'swatch-clearly': [
+        'https://www.thejewelhut.co.uk/media/catalog/product/2/1/21-61-131_grey.jpg',
+    ],
+    'hamilton-khaki': [
+        'https://www.lepage.fr/71698-zoom_default/watch-hamilton-khaki-field-automatic-black-dial-steel-bracelet-38-mm.jpg',
+        'https://cdn2.lepage.fr/42577-large_default/montre-hamilton-khaki-field-cadran-noir-bracelet-acier-38-mm.jpg',
+    ],
     'seiko-sharp': [
         'https://www.seikowatches.com/fr-fr/-/media/Images/Product--Image/All/Seiko/2022/02/20/00/52/SPB165J1/SPB165J1.png?mh=300&mw=300',
     ],
