@@ -1,5 +1,5 @@
 {
   "status": "prelaunch",
-  "squareStoreUrl": null,
-  "newsletterUrl": null
+  "newsletterUrl": null,
+  "checkoutMode": "inactive"
 }
