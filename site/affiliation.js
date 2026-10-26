@@ -81,7 +81,12 @@
  fetch('./selection-affiliation.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('data');return r.json()}).then(x=>{
   if(x?.version!==1||!Array.isArray(x.products)||x.products.length!==15||x.affiliateEnabled!==false)throw Error('invalid');
   data=x.products.filter(valid);if(data.length!==15)throw Error('incomplete catalogue');
-  if($('heroWatch'))window.AtelierWatch?.render($('heroWatch'),data.find(p=>p.id==='citizen-tsuyosa'));
+  const hero=$('heroWatch'),featured=data.find(p=>p.id==='citizen-tsuyosa');
+  if(hero&&featured){
+    const fallback=()=>{hero.replaceChildren();hero.classList.remove('am-hero-real');window.AtelierWatch?.render(hero,featured);const caption=document.querySelector('.am-hero-label small');if(caption)caption.textContent='Illustration de secours · photographie indisponible'};
+    const photo=featured.photoReview;
+    if(photo?.url?.startsWith('https://')){const img=make('img','am-hero-real-photo');img.alt='Citizen Tsuyosa NJ0150-81X — photographie authentique';img.decoding='async';img.loading='eager';img.fetchPriority='high';img.onerror=fallback;img.src=photo.url;hero.classList.add('am-hero-real');hero.replaceChildren(img)}else fallback();
+  }
   render();
  }).catch(()=>{count.textContent='Catalogue temporairement indisponible';empty.hidden=false;grid.replaceChildren()});
 })();
