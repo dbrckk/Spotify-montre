@@ -35,3 +35,5 @@
 @media(max-width:900px){.brand-hero-grid{min-height:auto}.brand-display{height:380px}.brand-model-art{height:280px}}
 @media(max-width:620px){.am-brand-ribbon .wrap span{display:none}.am-brand-header .navigation{gap:12px}.am-brand-header .navigation a{font-size:10px}.brand-hero h1{font-size:clamp(45px,11.9vw,66px)}.brand-model:hover{transform:none}}
 @media(prefers-reduced-motion:reduce){.brand-model,.brand-model-text button{transition:none}.brand-model:hover{transform:none}}
+.am-brand-emblem{display:inline-block;vertical-align:middle;width:34px;height:34px;flex:none;margin-right:12px;filter:drop-shadow(0 2px 4px #0004)}.am-header .brand,.am-brand-header .brand{display:inline-flex;align-items:center;gap:0;white-space:nowrap}
+@media(max-width:600px){.am-brand-emblem{width:28px;height:28px;margin-right:8px}.am-header .brand,.am-brand-header .brand{font-size:24px}}
