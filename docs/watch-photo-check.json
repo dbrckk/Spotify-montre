@@ -1,0 +1,173 @@
+{
+  "version": 1,
+  "count": 15,
+  "items": [
+    {
+      "id": "casio-mtp-1302",
+      "ok": true,
+      "source": "https://www.casio.com/content/dam/casio/product-info/locales/my/en/timepiece/product/watch/M/MT/MTP/mtp-1302pd-2a2v/assets/MTP-1302PD-2A2V.png",
+      "size": [
+        1200,
+        1200
+      ],
+      "bytes": 139860,
+      "sha256": "cc12aa8857c0164de26c95723c7fa77e7d065552a944d97a353b44f4b9ab1dd2"
+    },
+    {
+      "id": "casio-mtp-b145",
+      "ok": true,
+      "source": "https://www.casio.com/content/dam/casio/product-info/locales/fr/fr/timepiece/product/watch/M/MT/MTP/mtp-b145d-2a2v/assets/MTP-B145D-2A2V.png",
+      "size": [
+        1200,
+        1200
+      ],
+      "bytes": 132844,
+      "sha256": "79c4cf69ff003afdb00bd46708f221ddf0c621a3a6caf329227f8e2e06037f98"
+    },
+    {
+      "id": "casio-a168wa",
+      "ok": true,
+      "source": "https://www.casio.com/content/dam/casio/product-info/locales/europe/en-gb/timepiece/product/watch/A/A1/A16/A168WA-1/assets/A168WA-1_01.jpg.transform/zoom-sp/image.jpg",
+      "size": [
+        750,
+        750
+      ],
+      "bytes": 34772,
+      "sha256": "bf97534c6a9eab9f1d59d494652435968fe4189c29b0e5d7e73abd686474e84c"
+    },
+    {
+      "id": "casio-mdv107",
+      "ok": true,
+      "source": "https://www.casio.com/content/dam/casio/product-info/locales/fr/fr/timepiece/product/watch/M/md/mdv/mdv-107-1a1v/local-assets/MDV-107-1A1V_2000x2000.png.transform/main-visual-sp/image.png",
+      "size": [
+        1200,
+        1200
+      ],
+      "bytes": 83108,
+      "sha256": "8dfb08b14f013bf76c4e9c374320cdf77d08c7450e4102a56410d2e4cda7cca4"
+    },
+    {
+      "id": "casio-ltp1302",
+      "ok": true,
+      "source": "https://www.casio.com/content/dam/casio/product-info/locales/fr/fr/timepiece/product/watch/L/LT/LTP/LTP-1302PD-7A1V/assets/LTP-1302PD-7A1V_1.png",
+      "size": [
+        1200,
+        1200
+      ],
+      "bytes": 73856,
+      "sha256": "aaad39ffbc8b2e5fcc94be7d9f326e2e2ae0c3f758fa41d63d67c8e6634da1ec"
+    },
+    {
+      "id": "swatch-clearly",
+      "ok": false,
+      "attempts": [
+        {
+          "source": "https://static.swatch.com/images/product/SO28K100-S06/sa200/SO28K100-S06_sa200_er005.png",
+          "error": "HTTPSConnectionPool(host='static.swatch.com', port=443): Read timed out. (read timeout=26)"
+        }
+      ]
+    },
+    {
+      "id": "citizen-eco",
+      "ok": true,
+      "source": "https://images.hbjo-online.com/webp/images/all/AW0100-86EC_Zoom.jpg",
+      "size": [
+        1000,
+        1000
+      ],
+      "bytes": 117826,
+      "sha256": "57eb90786bb6caf26563274aa69777db9b5508a0404b792472ab07333b3d267c"
+    },
+    {
+      "id": "citizen-openheart",
+      "ok": true,
+      "source": "https://fr.citizenwatch.eu/media/thumbs/71/4f/2920007adbbc7de476e6085fb5be66bbd21a/1400x_crop=center;format=webp/managed/9e/f9/9ef9c3e5a6b0fec9a76c584f63dd5016/NH9131-73L-1.png.thumb.webp",
+      "size": [
+        1200,
+        1200
+      ],
+      "bytes": 162162,
+      "sha256": "840341f4baa98248bf0d8af199865c6a2c094010ef606bd9d313b3e790d7876a"
+    },
+    {
+      "id": "citizen-tsuyosa",
+      "ok": true,
+      "source": "https://fr.citizenwatch.eu/media/thumbs/e1/be/3ca11f51f389400616f15404f1f80ece8dc3/1400x_crop=center;format=webp/managed/98/29/9829a4aca83a5df2747e95c666cd293a/NJ0150-81X.png.thumb.webp",
+      "size": [
+        1200,
+        1200
+      ],
+      "bytes": 76362,
+      "sha256": "fae0e2451ffdcc2014180b37cbd116f4fbb31a757e3f1766660b5b6c160d65bd"
+    },
+    {
+      "id": "orient-bambino",
+      "ok": true,
+      "source": "https://i8.amplience.net/i/epsonemear/RA-AC0M12L-580x580?$OC02-md-img1$&sm=c",
+      "size": [
+        580,
+        580
+      ],
+      "bytes": 45128,
+      "sha256": "9bf91742e1d943c619838a6239bdbdb7d0db4d1043c7597f9520e3330329596b"
+    },
+    {
+      "id": "seiko-5",
+      "ok": true,
+      "source": "https://www.seikowatches.com/fr-fr/-/media/Images/Product--Image/All/Seiko/2022/02/20/02/14/SRPD55K1/SRPD55K1.png?mh=1200&mw=1200",
+      "size": [
+        1102,
+        1102
+      ],
+      "bytes": 109984,
+      "sha256": "9bb61892cb792e8cc67809ca32b3c29f196693e99fee1c551fd893c3b0284e7b"
+    },
+    {
+      "id": "tissot-prx-quartz",
+      "ok": true,
+      "source": "https://www.tissotwatches.com/on/demandware.static/-/Sites-Tissot-Catalogue/default/dw9b840963/product-pictures/739cc440-025b-42e8-a5f9-ae33b31479b2_T137-410-11-041-00_shadow.png",
+      "size": [
+        1200,
+        1200
+      ],
+      "bytes": 104714,
+      "sha256": "35d29f0adc43f3ef82520817ff12c34841dce5d9dc0919978a6aa27097326444"
+    },
+    {
+      "id": "tissot-prx-auto",
+      "ok": true,
+      "source": "https://www.tissotwatches.com/on/demandware.static/-/Sites-Tissot-Catalogue/default/dw95c4331d/product-pictures/63f42767-a9f5-4cdd-b952-8ea7b82b7e0c_T137-407-11-041-00_shadow.png",
+      "size": [
+        1200,
+        1200
+      ],
+      "bytes": 132920,
+      "sha256": "9dade7e15fd8759e4aa486b5b2c754cd26369bdc93cea4d0365eb0fbe63ddb07"
+    },
+    {
+      "id": "hamilton-khaki",
+      "ok": false,
+      "attempts": [
+        {
+          "source": "https://www.hamiltonwatch.com/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/h/7/h70455133.png",
+          "error": "HTTPSConnectionPool(host='www.hamiltonwatch.com', port=443): Read timed out. (read timeout=26)"
+        }
+      ]
+    },
+    {
+      "id": "seiko-sharp",
+      "ok": true,
+      "source": "https://www.seikowatches.com/fr-fr/-/media/Images/Product--Image/All/Seiko/2022/02/20/00/52/SPB165J1/SPB165J1.png?mh=1200&mw=1200",
+      "size": [
+        1102,
+        1102
+      ],
+      "bytes": 99026,
+      "sha256": "ac0df83f00177dae098711fede504484e5a894421a27f4c288cdd85640413693"
+    }
+  ],
+  "unavailable": [
+    "swatch-clearly",
+    "hamilton-khaki"
+  ]
+}
