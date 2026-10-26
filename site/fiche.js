@@ -19,10 +19,21 @@
    $('detailTitle').textContent=p.model;
    $('detailEditorial').textContent=p.title||'Notre sélection';
    $('detailStory').textContent=p.story||p.description;
-   const art=$('detailArtwork');const photo=p.photoReview;
-   if(art&&photo?.accuracy==='exact'){
-     art.replaceChildren();art.classList.add('am-real-photo-stage');const img=node('img','am-real-product-photo');img.alt=p.brand+' '+p.model+' — photographie du modèle';img.src=photo.url;img.loading='eager';img.decoding='async';img.referrerPolicy='no-referrer';img.onerror=()=>{img.remove();art.classList.remove('am-real-photo-stage');window.AtelierWatch?.render(art,p)};art.append(img);
-   }else if(window.AtelierWatch)window.AtelierWatch.render(art,p);
+   const art=$('detailArtwork'),photo=p.photoReview,photoLabel=$('detailPhotoLabel'),photoNote=$('detailPhotoNote');
+   if(art){
+     const sources=[];
+     if(photo?.localUrl==='./assets/watches/'+p.id+'.webp')sources.push(photo.localUrl+(typeof photo.localSha256==='string'&&/^[a-f0-9]{64}$/.test(photo.localSha256)?'?v='+photo.localSha256.slice(0,12):''));
+     if(photo?.accuracy==='exact'&&typeof photo.url==='string'&&photo.url.startsWith('https://'))sources.push(photo.url);
+     const fallback=()=>{art.replaceChildren();art.classList.remove('am-real-photo-stage');window.AtelierWatch?.render(art,p);if(photoLabel)photoLabel.textContent='ILLUSTRATION DE SECOURS';if(photoNote)photoNote.textContent='Photo momentanément indisponible. Voir la photographie authentique chez le fabricant.'};
+     if(sources.length){
+       art.replaceChildren();art.classList.add('am-real-photo-stage');
+       const img=node('img','am-real-product-photo');img.alt=p.brand+' '+p.model+' — photographie du modèle réel';img.loading='eager';img.decoding='async';img.referrerPolicy='no-referrer';
+       let index=0;img.onerror=()=>{index++;if(index<sources.length)img.src=sources[index];else fallback()};
+       art.append(img);img.src=sources[0];
+       if(photoLabel)photoLabel.textContent='PHOTOGRAPHIE DU MODÈLE · '+(photo.provider||p.brand).toUpperCase();
+       if(photoNote)photoNote.textContent='Modèle original de '+p.brand+' · Référence '+p.model;
+     }else fallback();
+   }
    $('detailHighlights').replaceChildren(...(p.highlights||[]).map(t=>node('span','',t)));
    $('detailOfficial').href=p.officialUrl;
    $('detailOfficial').setAttribute('aria-label','Voir '+p.model+' sur le site officiel '+p.brand);
