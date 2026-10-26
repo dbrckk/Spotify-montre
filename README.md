@@ -2,7 +2,18 @@
 
 **Statut au 26 octobre 2026 : pré-lancement, vitrine gratuite, pas de paiement activé.**
 
-## Déploiements consultables
+## Dernière version V7 — refonte premium (26 octobre 2026)
+
+- **Vitrine multimarque actualisée** : https://laced-kernel-wfhq43s.shipstatic.com/
+- **Page de comparaison et fiche d'une montre** : https://laced-kernel-wfhq43s.shipstatic.com/montre.html?id=citizen-tsuyosa
+- **Vitrine alternative marque propre actualisée** : https://piercing-dome-9j8c8zm.shipstatic.com/
+- **Documents design / star-list** : [docs/refonte-horlogere-v6.md](docs/refonte-horlogere-v6.md).
+
+Fonctionnalités : 15 montres de marques existantes (6/6/3) avec rendus vectoriels originaux différenciés, navigation, recherche, tri, favoris locaux, comparateur de 2 à 3 modèles, fiches techniques sourcées, liens vers les fabricants et recherches Amazon/eBay. Monogramme provisoire Atelier Montres, style éditorial et smartphone responsive. **FAQ, newsletter désactivée et chatbot local restaurés sur les deux sites.**
+
+Les deux déploiements ont un état `success`, aucun délai d'expiration configuré. Les visuels ne sont **pas des photographies de la vraie montre**. Aucune licence fabricant/flux affilié n'est encore connectée, **aucun lien rémunéré**, aucun paiement ou stock commercial actif. Les deux sites sont au stade de pré-lancement.
+
+## Déploiements consultables (historique V5)
 
 - **Vitrine multimarque (6 + 6 + 3)** : https://baseless-gate-affxm28.shipstatic.com/
 - **Vitrine de notre future marque** : https://hazy-glow-qua5m5g.shipstatic.com/
