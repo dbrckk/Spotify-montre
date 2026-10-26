@@ -1,0 +1,52 @@
+name: Cache original watch photographs locally
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/sync-watch-images.py'
+      - '.github/workflows/cache-watch-photos.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: watch-photo-cache
+  cancel-in-progress: false
+
+jobs:
+  cache-photos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install image decoder and HTTP client
+        run: python -m pip install --disable-pip-version-check --quiet 'Pillow>=10,<12' 'requests>=2.31,<3'
+      - name: Download, decode and optimize authentic packshots
+        run: python scripts/sync-watch-images.py
+      - name: Commit validated local WebP files and catalogue URLs
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add site/assets/watches/ site/selection-affiliation.json docs/watch-photo-check.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'assets: store checked real watch photos locally [skip ci]'
+            git push
+          fi
+      - name: Assert all 15 exact references have saved files
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report=json.loads(Path('docs/watch-photo-check.json').read_text())
+          missing=[x['id'] for x in report['items'] if not x['ok']]
+          print('Verified product photos:',15-len(missing),'/15')
+          if missing:
+              raise SystemExit('Still missing: '+', '.join(missing))
+          PY
