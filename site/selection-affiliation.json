@@ -58,7 +58,17 @@
       },
       "imageMode": "custom_vector_illustration",
       "imageLicenseStatus": "official_photos_not_licensed",
-      "updatedAt": "2026-10-26"
+      "updatedAt": "2026-10-26",
+      "photoReview": {
+        "url": "https://www.casio.com/content/dam/casio/product-info/locales/my/en/timepiece/product/watch/M/MT/MTP/mtp-1302pd-2a2v/assets/MTP-1302PD-2A2V.png",
+        "source": "https://www.casio.com/my/watches/casio/product.MTP-1302PD-2A2V/",
+        "provider": "Casio",
+        "accuracy": "exact",
+        "quality": "manufacturer-packshot",
+        "licence": "permission_required",
+        "publicUsageApproved": false,
+        "researchedOn": "2026-10-26"
+      }
     },
     {
       "id": "casio-mtp-b145",
@@ -92,7 +102,17 @@
       },
       "imageMode": "custom_vector_illustration",
       "imageLicenseStatus": "official_photos_not_licensed",
-      "updatedAt": "2026-10-26"
+      "updatedAt": "2026-10-26",
+      "photoReview": {
+        "url": "https://www.casio.com/content/dam/casio/product-info/locales/fr/fr/timepiece/product/watch/M/MT/MTP/mtp-b145d-2a2v/assets/MTP-B145D-2A2V.png",
+        "source": "https://www.casio.com/fr/watches/casio/product.MTP-B145D-2A2V/",
+        "provider": "Casio",
+        "accuracy": "exact",
+        "quality": "manufacturer-packshot",
+        "licence": "permission_required",
+        "publicUsageApproved": false,
+        "researchedOn": "2026-10-26"
+      }
     },
     {
       "id": "casio-a168wa",
@@ -120,7 +140,17 @@
       "story": "Le charme rétro d’un afficheur digital et d’un bracelet métallique.",
       "imageMode": "custom_vector_illustration",
       "imageLicenseStatus": "official_photos_not_licensed",
-      "updatedAt": "2026-10-26"
+      "updatedAt": "2026-10-26",
+      "photoReview": {
+        "url": "https://www.casio.com/content/dam/casio/product-info/locales/europe/en-gb/timepiece/product/watch/A/A1/A16/A168WA-1/assets/A168WA-1_01.jpg.transform/zoom-sp/image.jpg",
+        "source": "https://www.casio.com/europe/watches/casio/product.A168WA-1/",
+        "provider": "Casio",
+        "accuracy": "exact",
+        "quality": "manufacturer-packshot",
+        "licence": "permission_required",
+        "publicUsageApproved": false,
+        "researchedOn": "2026-10-26"
+      }
     },
     {
       "id": "casio-mdv107",
@@ -148,7 +178,17 @@
       "story": "Une montre de plongée d’inspiration utilitaire, assumée et lisible.",
       "imageMode": "custom_vector_illustration",
       "imageLicenseStatus": "official_photos_not_licensed",
-      "updatedAt": "2026-10-26"
+      "updatedAt": "2026-10-26",
+      "photoReview": {
+        "url": "https://www.casio.com/content/dam/casio/product-info/locales/fr/fr/timepiece/product/watch/M/md/mdv/mdv-107-1a1v/local-assets/MDV-107-1A1V_2000x2000.png.transform/main-visual-sp/image.png",
+        "source": "https://www.casio.com/fr/watches/casio/product.MDV-107-1A1V/",
+        "provider": "Casio",
+        "accuracy": "exact",
+        "quality": "manufacturer-packshot",
+        "licence": "permission_required",
+        "publicUsageApproved": false,
+        "researchedOn": "2026-10-26"
+      }
     },
     {
       "id": "casio-ltp1302",
@@ -183,7 +223,17 @@
       },
       "imageMode": "custom_vector_illustration",
       "imageLicenseStatus": "official_photos_not_licensed",
-      "updatedAt": "2026-10-26"
+      "updatedAt": "2026-10-26",
+      "photoReview": {
+        "url": "https://www.casio.com/content/dam/casio/product-info/locales/fr/fr/timepiece/product/watch/L/LT/LTP/LTP-1302PD-7A1V/assets/LTP-1302PD-7A1V_1.png",
+        "source": "https://www.casio.com/fr/watches/casio/product.LTP-1302PD-7A1V/",
+        "provider": "Casio",
+        "accuracy": "exact",
+        "quality": "manufacturer-packshot",
+        "licence": "permission_required",
+        "publicUsageApproved": false,
+        "researchedOn": "2026-10-26"
+      }
     },
     {
       "id": "swatch-clearly",
@@ -211,7 +261,17 @@
       "story": "Un jeu de transparence et d’aiguilles colorées, léger et graphique.",
       "imageMode": "custom_vector_illustration",
       "imageLicenseStatus": "official_photos_not_licensed",
-      "updatedAt": "2026-10-26"
+      "updatedAt": "2026-10-26",
+      "photoReview": {
+        "url": "https://static.swatch.com/images/product/SO28K100-S06/sa200/SO28K100-S06_sa200_er005.png",
+        "source": "https://www.swatch.com/fr-fr/clearly-gent-so28k100-s06/SO28K100-S06.html",
+        "provider": "Swatch",
+        "accuracy": "exact",
+        "quality": "manufacturer-packshot",
+        "licence": "permission_required",
+        "publicUsageApproved": false,
+        "researchedOn": "2026-10-26"
+      }
     },
     {
       "id": "citizen-eco",
@@ -245,7 +305,17 @@
       },
       "imageMode": "custom_vector_illustration",
       "imageLicenseStatus": "official_photos_not_licensed",
-      "updatedAt": "2026-10-26"
+      "updatedAt": "2026-10-26",
+      "photoReview": {
+        "url": "https://images.hbjo-online.com/webp/images/all/AW0100-86EC_Zoom.jpg",
+        "source": "https://www.emileleon.fr/en/p/citizen-eco-drive-aw0100-86ec-watch-f241",
+        "provider": "Joaillerie Emile Léon",
+        "accuracy": "exact",
+        "quality": "retailer-packshot",
+        "licence": "permission_required",
+        "publicUsageApproved": false,
+        "researchedOn": "2026-10-26"
+      }
     },
     {
       "id": "citizen-openheart",
@@ -273,7 +343,17 @@
       "story": "L’horlogerie mécanique se révèle à travers une ouverture du cadran.",
       "imageMode": "custom_vector_illustration",
       "imageLicenseStatus": "official_photos_not_licensed",
-      "updatedAt": "2026-10-26"
+      "updatedAt": "2026-10-26",
+      "photoReview": {
+        "url": "https://fr.citizenwatch.eu/media/thumbs/71/4f/2920007adbbc7de476e6085fb5be66bbd21a/1400x_crop=center;format=webp/managed/9e/f9/9ef9c3e5a6b0fec9a76c584f63dd5016/NH9131-73L-1.png.thumb.webp",
+        "source": "https://fr.citizenwatch.eu/fr/p/nh9131-73l/",
+        "provider": "Citizen",
+        "accuracy": "exact",
+        "quality": "manufacturer-packshot",
+        "licence": "permission_required",
+        "publicUsageApproved": false,
+        "researchedOn": "2026-10-26"
+      }
     },
     {
       "id": "citizen-tsuyosa",
@@ -307,7 +387,17 @@
       },
       "imageMode": "custom_vector_illustration",
       "imageLicenseStatus": "official_photos_not_licensed",
-      "updatedAt": "2026-10-26"
+      "updatedAt": "2026-10-26",
+      "photoReview": {
+        "url": "https://fr.citizenwatch.eu/media/thumbs/e1/be/3ca11f51f389400616f15404f1f80ece8dc3/1400x_crop=center;format=webp/managed/98/29/9829a4aca83a5df2747e95c666cd293a/NJ0150-81X.png.thumb.webp",
+        "source": "https://fr.citizenwatch.eu/fr/p/nj0150-81x/",
+        "provider": "Citizen",
+        "accuracy": "exact",
+        "quality": "manufacturer-packshot",
+        "licence": "permission_required",
+        "publicUsageApproved": false,
+        "researchedOn": "2026-10-26"
+      }
     },
     {
       "id": "orient-bambino",
@@ -341,7 +431,17 @@
       },
       "imageMode": "custom_vector_illustration",
       "imageLicenseStatus": "official_photos_not_licensed",
-      "updatedAt": "2026-10-26"
+      "updatedAt": "2026-10-26",
+      "photoReview": {
+        "url": "https://i8.amplience.net/i/epsonemear/RA-AC0M12L-580x580?$OC02-md-img1$&sm=c",
+        "source": "https://www.orientwatch.fr/or/fr_FR/brands/orient/orient-bambino-38mm/p/RA-AC0M12L",
+        "provider": "Orient",
+        "accuracy": "exact",
+        "quality": "manufacturer-packshot",
+        "licence": "permission_required",
+        "publicUsageApproved": false,
+        "researchedOn": "2026-10-26"
+      }
     },
     {
       "id": "seiko-5",
@@ -369,7 +469,17 @@
       "story": "Une automatique sportive, robuste dans son expression, facile à porter.",
       "imageMode": "custom_vector_illustration",
       "imageLicenseStatus": "official_photos_not_licensed",
-      "updatedAt": "2026-10-26"
+      "updatedAt": "2026-10-26",
+      "photoReview": {
+        "url": "https://www.seikowatches.com/fr-fr/-/media/Images/Product--Image/All/Seiko/2022/02/20/02/14/SRPD55K1/SRPD55K1.png?mh=1200&mw=1200",
+        "source": "https://www.seikowatches.com/fr-fr/products/5sports/srpd55",
+        "provider": "Seiko",
+        "accuracy": "exact",
+        "quality": "manufacturer-packshot",
+        "licence": "permission_required",
+        "publicUsageApproved": false,
+        "researchedOn": "2026-10-26"
+      }
     },
     {
       "id": "tissot-prx-quartz",
@@ -403,7 +513,17 @@
       },
       "imageMode": "custom_vector_illustration",
       "imageLicenseStatus": "official_photos_not_licensed",
-      "updatedAt": "2026-10-26"
+      "updatedAt": "2026-10-26",
+      "photoReview": {
+        "url": "https://www.tissotwatches.com/on/demandware.static/-/Sites-Tissot-Catalogue/default/dw9b840963/product-pictures/739cc440-025b-42e8-a5f9-ae33b31479b2_T137-410-11-041-00_shadow.png",
+        "source": "https://www.tissotwatches.com/fr-fr/T1374101104100.html",
+        "provider": "Tissot",
+        "accuracy": "exact",
+        "quality": "manufacturer-packshot",
+        "licence": "permission_required",
+        "publicUsageApproved": false,
+        "researchedOn": "2026-10-26"
+      }
     },
     {
       "id": "tissot-prx-auto",
@@ -438,7 +558,17 @@
       },
       "imageMode": "custom_vector_illustration",
       "imageLicenseStatus": "official_photos_not_licensed",
-      "updatedAt": "2026-10-26"
+      "updatedAt": "2026-10-26",
+      "photoReview": {
+        "url": "https://www.tissotwatches.com/on/demandware.static/-/Sites-Tissot-Catalogue/default/dw95c4331d/product-pictures/63f42767-a9f5-4cdd-b952-8ea7b82b7e0c_T137-407-11-041-00_shadow.png",
+        "source": "https://www.tissotwatches.com/fr-fr/T1374071104100.html",
+        "provider": "Tissot",
+        "accuracy": "exact",
+        "quality": "manufacturer-packshot",
+        "licence": "permission_required",
+        "publicUsageApproved": false,
+        "researchedOn": "2026-10-26"
+      }
     },
     {
       "id": "hamilton-khaki",
@@ -473,7 +603,17 @@
       },
       "imageMode": "custom_vector_illustration",
       "imageLicenseStatus": "official_photos_not_licensed",
-      "updatedAt": "2026-10-26"
+      "updatedAt": "2026-10-26",
+      "photoReview": {
+        "url": "https://www.hamiltonwatch.com/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/h/7/h70455133.png",
+        "source": "https://www.hamiltonwatch.com/fr-fr/h70455133-khaki-field-auto.html",
+        "provider": "Hamilton",
+        "accuracy": "exact",
+        "quality": "manufacturer-packshot",
+        "licence": "permission_required",
+        "publicUsageApproved": false,
+        "researchedOn": "2026-10-26"
+      }
     },
     {
       "id": "seiko-sharp",
@@ -501,7 +641,17 @@
       "story": "Un motif géométrique inspiré de l’artisanat japonais, élégant sans ostentation.",
       "imageMode": "custom_vector_illustration",
       "imageLicenseStatus": "official_photos_not_licensed",
-      "updatedAt": "2026-10-26"
+      "updatedAt": "2026-10-26",
+      "photoReview": {
+        "url": "https://www.seikowatches.com/fr-fr/-/media/Images/Product--Image/All/Seiko/2022/02/20/00/52/SPB165J1/SPB165J1.png?mh=1200&mw=1200",
+        "source": "https://www.seikowatches.com/fr-fr/products/presage/lineup",
+        "provider": "Seiko",
+        "accuracy": "exact",
+        "quality": "manufacturer-packshot",
+        "licence": "permission_required",
+        "publicUsageApproved": false,
+        "researchedOn": "2026-10-26"
+      }
     }
   ],
   "imagePolicy": "Visuels vectoriels originaux représentant des styles, non des photographies ni des rendus exacts des modèles. Ouvrir le fabricant pour les photos réelles. Aucune image fabricant copiée sans droit."
