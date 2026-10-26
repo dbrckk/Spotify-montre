@@ -1,0 +1,104 @@
+{
+  "version": 1,
+  "researchedOn": "2026-10-26",
+  "label": "Pistes fournisseurs non contractuelles — aucune montre vendable",
+  "maxTargetLandedCostEur": 20,
+  "candidates": [
+    {
+      "id": "kastar-no-logo-quartz",
+      "supplier": "Shenzhen Kastar Timepieces Co., Ltd.",
+      "model": "Fashion Waterproof Business No Logo Dial Quartz Watch",
+      "family": "classic",
+      "sourceUrl": "https://www.alibaba.com/picks/non-branded-watches.html",
+      "supplierUrl": "https://suppliers.alibaba.com/shenzhen-kastar-timepieces-co-ltd_1653052195",
+      "price": {
+        "from": 5.89,
+        "to": 6.56,
+        "currency": "USD"
+      },
+      "minimumOrderQuantity": 5,
+      "branding": "Logo personnalisé mentionné, MOQ spécifique et frais à confirmer",
+      "visualFit": "Cadran sobre, quartz, piste pour une collection habillée",
+      "issues": [
+        "Référence SKU exacte non identifiée",
+        "Couleurs disponibles non confirmées",
+        "Composition boîtier et verre non confirmée",
+        "Aucun devis livré France",
+        "Documents GPSR et REACH modèle non reçus",
+        "Droits des photographies non confirmés"
+      ],
+      "status": "research_only"
+    },
+    {
+      "id": "eston-no-logo-steel",
+      "supplier": "Shenzhen Eston Watch Co., Ltd.",
+      "model": "Montre minimaliste quartz sans logo avec date et bracelet métal",
+      "family": "classic",
+      "sourceUrl": "https://french.alibaba.com/f/montre-sans-logo.html",
+      "supplierUrl": null,
+      "price": {
+        "from": 6.76,
+        "to": 7.66,
+        "currency": "EUR"
+      },
+      "minimumOrderQuantity": 2,
+      "branding": "Personnalisation mentionnée, minimum et coût à confirmer",
+      "visualFit": "Cadran simple, bracelet métallique, ligne principale à inspecter",
+      "issues": [
+        "Listing agrégé, lien vers SKU exact à obtenir",
+        "Aucune photo réutilisable autorisée",
+        "Verre, mouvement et étanchéité non prouvés",
+        "Aucun devis livré France",
+        "Documents UE spécifiques au modèle manquants"
+      ],
+      "status": "research_only"
+    },
+    {
+      "id": "daiyue-mesh",
+      "supplier": "Foshan Daiyue Watch Co., Ltd.",
+      "model": "No Logo Simple Wristwatch Mesh Stainless Steel Band",
+      "family": "minimal",
+      "sourceUrl": "https://www.alibaba.com/countrysearch/CN/wristwatch-quality.html",
+      "supplierUrl": null,
+      "price": {
+        "from": 3.2,
+        "to": 3.5,
+        "currency": "USD"
+      },
+      "minimumOrderQuantity": 2,
+      "branding": "Logo et frais à confirmer",
+      "visualFit": "Bracelet maille et cadran fin, option minimaliste très économique",
+      "issues": [
+        "Attention : bracelet acier ne prouve pas que boîtier est acier",
+        "Qualité du mouvement et du fermoir inconnue",
+        "MOQ logo inconnu",
+        "Documents REACH/nickel modèle manquants",
+        "Aucun devis complet"
+      ],
+      "status": "research_only"
+    },
+    {
+      "id": "wanzhou-generic",
+      "supplier": "Yiwu Wanzhou Electronic Commerce Co., Ltd.",
+      "model": "Montre quartz simple couple en acier inoxydable sans logo",
+      "family": "minimal",
+      "sourceUrl": "https://french.alibaba.com/f/montre-sans-logo.html",
+      "supplierUrl": null,
+      "price": {
+        "from": 10.23,
+        "to": 12.26,
+        "currency": "EUR"
+      },
+      "minimumOrderQuantity": 2,
+      "branding": "Cadran neutre annoncé, impression de marque non confirmée",
+      "visualFit": "Alternative finition sobre, à comparer sur photos réelles",
+      "issues": [
+        "Matière réelle à vérifier",
+        "Modèle exact et variantes inconnus",
+        "Rapport conformité absent",
+        "Marge après frais potentiellement limitée"
+      ],
+      "status": "research_only"
+    }
+  ]
+}
