@@ -1,0 +1,33 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {resolve} from 'node:path';
+const load=(file)=>readFileSync(resolve(import.meta.dirname,'..',file),'utf8');
+const research=JSON.parse(load('research/fournisseurs-candidats.json'));
+const website=JSON.parse(load('site/fournisseurs.json'));
+const html=load('site/studio.html');
+const js=load('site/studio.js');
+const css=load('site/studio.css');
+const base=load('site/base.css');
+const home=load('site/index.html');
+const selection=load('site/selection.html');
+const catalogue=load('site/catalogue.html');
+assert.deepEqual(website,research,'Deployed sourcing should exactly match tracked research');
+assert.equal(website.version,1);
+assert.ok(website.candidates.length>=3);
+assert.match(html,/name="robots" content="noindex,nofollow"/,'Sourcing studio must not be indexed');
+assert.match(html,/id="studioResults"/);
+assert.match(html,/id="studioCalc"/);
+assert.match(html,/id="studioUnitCost"/);
+assert.match(html,/aucune commande n.est possible ici/i);
+assert.match(js,/new FormData\(form\)/);
+assert.match(js,/total\/quantity/);
+assert.match(js,/localStorage\.setItem/);
+assert.match(js,/\.textContent=/);
+assert.doesNotMatch(js,/innerHTML\s*=/);
+assert.match(css,/@media\(max-width:600px\)/);
+assert.match(base,/\.header\{/,'Shared base must preserve header');
+for(const [name,page] of [['home',home],['selection',selection],['catalogue',catalogue],['studio',html]]){
+ assert.match(page,/href="\.\/base\.css"/,name+' missing shared CSS');
+}
+assert.doesNotMatch(home,/Square Online|squareLink|storeState/,'No offsite checkout');
+console.log('Shared brand CSS and sourcing studio validation — OK');
