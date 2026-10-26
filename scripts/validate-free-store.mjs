@@ -76,7 +76,7 @@ assert.match(markup, /href="\.\/selection\.html"/, 'Main site must link to watch
 assert.match(selector, /id="styleGrid"/, 'Style selector is missing its grid');
 assert.match(selector, /id="copyFav"/, 'Style shortlist must be shareable');
 assert.match(selector, /VISUELS?/i, 'Concept nature should be disclosed in selector');
-assert.match(selector, /aucun modèle présenté ici n.est encore un produit en vente/i, 'Do not imply that concepts are available products');
+assert.match(selector, /Tous les visuels sont des concepts, non des produits disponibles/i, 'Do not imply that concepts are available products');
 assert.match(selector, /<script src="\.\/selection\.js" defer><\/script>/, 'Selector script should defer');
 assert.match(selectorCss, /@media\(max-width:620px\)/, 'Selector mobile layout missing');
 assert.match(selectorJs, /localStorage\.setItem/, 'Favourite shortlist should be local-only');
