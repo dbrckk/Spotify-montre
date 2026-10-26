@@ -30,6 +30,7 @@ ALTERNATES = {
         'https://www.casio.com/content/dam/casio/product-info/locales/fr/fr/timepiece/product/watch/M/md/mdv/mdv-107-1a1v/local-assets/MDV-107-1A1V_2000x2000.png',
     ],
     'swatch-clearly': [
+        'https://www.watchit.ca/cdn/shop/files/SO28K100-S06.jpg?v=1773681796',
         'https://www.thejewelhut.co.uk/media/catalog/product/2/1/21-61-131_grey.jpg',
     ],
     'hamilton-khaki': [
