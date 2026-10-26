@@ -67,4 +67,22 @@ if (config.newsletterUrl !== null) {
   assert.ok(['brevo.com','sibforms.com','buttondown.com'].some((base) => host === base || host.endsWith('.'+base)), 'Unapproved newsletter provider');
 } else assert.equal(config.status,'prelaunch','Disable signup only for prelaunch state or configure approved provider');
 
+
+// Watch-style selector stays informational; it is not a fake shopping checkout.
+const selector = readFileSync(resolve(root, 'selection.html'), 'utf8');
+const selectorCss = readFileSync(resolve(root, 'selection.css'), 'utf8');
+const selectorJs = readFileSync(resolve(root, 'selection.js'), 'utf8');
+assert.match(markup, /href="\.\/selection\.html"/, 'Main site must link to watch selector');
+assert.match(selector, /id="styleGrid"/, 'Style selector is missing its grid');
+assert.match(selector, /id="copyFav"/, 'Style shortlist must be shareable');
+assert.match(selector, /VISUELS?/i, 'Concept nature should be disclosed in selector');
+assert.match(selector, /aucun modèle présenté ici n.est encore un produit en vente/i, 'Do not imply that concepts are available products');
+assert.match(selector, /<script src="\.\/selection\.js" defer><\/script>/, 'Selector script should defer');
+assert.match(selectorCss, /@media\(max-width:620px\)/, 'Selector mobile layout missing');
+assert.match(selectorJs, /localStorage\.setItem/, 'Favourite shortlist should be local-only');
+assert.match(selectorJs, /\.textContent\s*=/, 'Use safe text nodes for data');
+assert.doesNotMatch(selectorJs, /innerHTML\s*=/, 'Never interpolate HTML from products or users');
+assert.doesNotMatch(selectorJs, /fetch\s*\(/, 'Concept selector should not send data anywhere');
+assert.doesNotMatch(selector, /type="submit"|paiement sécurisé|Ajouter au panier/, 'Do not present an unavailable checkout');
+
 console.log('Free storefront checks OK: prelaunch safety, layout, Square checkout gating, config.');
