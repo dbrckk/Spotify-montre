@@ -15,14 +15,9 @@ ROOT=Path(__file__).resolve().parent.parent
 SITE=ROOT/'site'
 DOCS=ROOT/'docs'
 MAX_PART_BYTES=720000
-TEXT=[
-    'affiliation.html','affiliation.css','affiliation.js',
-    'selection-affiliation.json','watch-illustrations.js','app.js',
-    'base.css','features.css','horlogerie.css','montre.html',
-    'fiche.js','fiche.css','embleme.svg','favicon.svg',
-    'marque.html','marque.css','marque.js',
-    'confidentialite.html','config.json',
-]
+TEXT_SUFFIXES={'.html','.css','.js','.json','.svg','.txt','.xml'}
+IMAGE_SUFFIXES={'.webp','.png','.jpg','.jpeg','.gif','.ico'}
+EXCLUDED={'revue-photo.html','revue-photo.css','revue-photo.js'}
 
 def compact(data):
     return json.dumps(data,ensure_ascii=False,separators=(',',':'))
@@ -32,10 +27,22 @@ def assemble():
     products=catalog['products']
     assert len(products)==15, 'Expected 15 actual watch models'
     assets=[]
-    for name in TEXT:
-        path=SITE/name
-        assert path.is_file(), 'Missing page dependency: '+name
-        assets.append({'path':name,'content':path.read_text(encoding='utf-8')})
+    for path in sorted(SITE.rglob('*')):
+        if not path.is_file():
+            continue
+        relative=path.relative_to(SITE).as_posix()
+        if relative in EXCLUDED or relative=='index.html':
+            continue
+        if path.suffix.lower() in TEXT_SUFFIXES:
+            assets.append({'path':relative,'content':path.read_text(encoding='utf-8')})
+        elif path.suffix.lower() in IMAGE_SUFFIXES:
+            assets.append({
+                'path':relative,
+                'content':base64.b64encode(path.read_bytes()).decode('ascii'),
+                'encoding':'base64',
+            })
+        else:
+            raise ValueError('Unexpected site asset format: '+relative)
     assets.append({'path':'index.html','content':(SITE/'affiliation.html').read_text(encoding='utf-8')})
     ids=set()
     for p in products:
@@ -50,12 +57,7 @@ def assemble():
         data=path.read_bytes()
         assert data[:4]==b'RIFF' and data[8:12]==b'WEBP', 'Not actual WebP: '+id
         assert hashlib.sha256(data).hexdigest()==photo['localSha256'], 'Photo changed unexpectedly: '+id
-        assets.append({
-            'path':'assets/watches/'+id+'.webp',
-            'content':base64.b64encode(data).decode('ascii'),
-            'encoding':'base64',
-        })
-    assert len(assets)==len(TEXT)+1+15
+    assert len([a for a in assets if a['path'].startswith('assets/watches/')])==len(products)
     DOCS.mkdir(parents=True,exist_ok=True)
     chunks=[]
     part=[]
