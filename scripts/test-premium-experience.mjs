@@ -22,6 +22,12 @@ assert.match(js,/\.textContent=/);
 assert.doesNotMatch(js,/innerHTML\s*=/);
 assert.match(css,/@media\(max-width:680px\)/);
 assert.match(css,/prefers-reduced-motion:reduce/);
+assert.match(aff,/id="chatLauncher"/);
+assert.match(aff,/id="chatPanel"/);
+assert.match(aff,/id="newsletterCta"/);
+assert.match(aff,/id="faq"/);
+assert.match(aff,/src="\.\/app\.js" defer/);
+assert.match(aff,/src="\.\/embleme\.svg"/);
 assert.match(detail,/id="detailArtwork"/);
 assert.match(detail,/id="detailSpecList"/);
 assert.match(detail,/id="detailAmazon"/);
@@ -31,6 +37,11 @@ assert.match(detailJS,/encodeURIComponent/);
 assert.match(detailJS,/new URLSearchParams\(location\.search\)/);
 assert.doesNotMatch(detailJS,/innerHTML\s*=/);
 assert.match(read('marque.html'),/href="\.\/marque-refine\.css"/);
+assert.match(read('marque.html'),/id="chatPanel"/);
+assert.match(read('marque.html'),/id="newsletterCta"/);
+assert.match(read('marque.html'),/src="\.\/embleme\.svg"/);
+assert.match(read('marque-refine.css'),/\.am-brand-emblem/);
+assert.match(read('embleme.svg'),/<svg/);
 const nodes=[];
 class Node {
  constructor(tag){this.tag=tag;this.attrs={};this.children=[];this.textContent='';}
