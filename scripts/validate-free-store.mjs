@@ -13,22 +13,14 @@ assert.match(markup, /id="contenu"/, 'Main landmark anchor required');
 assert.match(markup, /aria-label="Navigation principale"/, 'Navigation should be labelled');
 assert.match(markup, /prefers-reduced-motion/, 'Reduced motion rules required');
 assert.match(markup, /\[hidden\]\{display:none!important\}/, 'Hidden state CSS required');
-assert.match(markup, /fetch\('\.\/config\.json'/, 'Configuration should be loaded from local JSON');
-assert.match(markup, /config\.status !== 'open'/, 'Unverified store must fail closed');
-assert.match(markup, /url\.protocol !== 'https:'/, 'Payment storefront must use HTTPS');
-assert.match(markup, /host\.endsWith\('\.square\.site'\)/, 'Square storefront host validation is required');
-assert.match(markup, /id="storeState" hidden/, 'Checkout must be hidden by default');
+assert.match(markup, /href="\.\/catalogue\.html"/, 'Main site must link to internal catalogue');
+assert.doesNotMatch(markup, /squareLink|storeState|Square Online/, 'No outbound checkout in current customer experience');
 assert.match(markup, /Aucune commande n'est encore acceptée/, 'Prelaunch should state no orders');
-assert.equal(typeof config, 'object', 'Config must be JSON object');
-assert.ok(['prelaunch', 'open'].includes(config.status), 'Status must be prelaunch or open');
-if (config.status === 'open') {
-  assert.ok(typeof config.squareStoreUrl === 'string', 'Live store needs verified Square URL');
-  const url = new URL(config.squareStoreUrl);
-  assert.equal(url.protocol, 'https:');
-  assert.ok(url.hostname === 'square.site' || url.hostname.endsWith('.square.site'));
-} else {
-  assert.equal(config.squareStoreUrl, null, 'Prelaunch must not expose payment URL');
-}
+assert.equal(typeof config,'object');
+assert.ok(['prelaunch','open'].includes(config.status), 'Valid commerce status');
+assert.ok(['inactive','embedded'].includes(config.checkoutMode), 'Offsite checkout is prohibited');
+assert.ok(!('squareStoreUrl' in config), 'Remove old outbound purchase URL');
+if(config.status === 'prelaunch') assert.equal(config.checkoutMode,'inactive','Prelaunch checkout must be inactive');
 for (const id of ['accueil', 'collection', 'approche', 'informations']) {
   assert.match(markup, new RegExp('id="' + id + '"'), 'Missing section: ' + id);
 }
