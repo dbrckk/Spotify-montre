@@ -12,6 +12,7 @@
  const official=url=>{try{const u=new URL(url);return u.protocol==='https:'&&!u.username&&!u.password&&approvedHosts.some(x=>u.hostname===x||u.hostname.endsWith('.'+x))}catch(_){return false}};
  const valid=p=>p&&p.affiliateUrl===null&&p.merchantLinkStatus==='untracked_official'&&p.photoRights==='not_licensed'&&p.imageMode==='custom_vector_illustration'&&Object.hasOwn(levels,p.tier)&&typeof p.id==='string'&&typeof p.brand==='string'&&typeof p.model==='string'&&typeof p.description==='string'&&official(p.officialUrl);
  const word=p=>[p.brand,p.model,p.title,p.description,p.style,p.tier,p.movement,...(p.highlights||[])].join(' ').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+ const photoSources=p=>{const t=p?.photoReview,files=[];if(t?.localUrl==='./assets/watches/'+p.id+'.webp')files.push(t.localUrl+(typeof t.localSha256==='string'&&/^[a-f0-9]{64}$/.test(t.localSha256)?'?v='+t.localSha256.slice(0,12):''));if(typeof t?.url==='string'&&t.url.startsWith('https://'))files.push(t.url);return files;};
  const detail=id=>'./montre.html?id='+encodeURIComponent(id);
  const compareTray=$('affCompareTray'),compareLabel=$('affCompareLabel'),compareOpen=$('affCompareOpen'),compareClear=$('affCompareClear'),dialog=$('affCompareDialog'),compareBody=$('affCompareBody');
  function updateCompare(){
@@ -23,13 +24,13 @@
  function card(p){
    const item=make('article','aff-card');
    const art=make('div','aff-illustration');art.dataset.tone=p.tone||'silver';
-   const photo=p.photoReview;
-   if(photo&&photo.accuracy==='exact'){
-     const img=make('img','aff-product-photo');img.src=photo.url;img.alt=p.brand+' '+p.model+' — photographie du modèle';img.loading='lazy';img.decoding='async';img.referrerPolicy='no-referrer';
-     img.onerror=()=>{img.remove();if(window.AtelierWatch)window.AtelierWatch.render(art,p);art.append(make('span','aff-art-label','ILLUSTRATION DE SECOURS'))};
-     art.append(img);
-     art.append(make('span','aff-art-label','PHOTO DU MODÈLE · SOURCE '+photo.provider.toUpperCase()));
-   }else{if(window.AtelierWatch)window.AtelierWatch.render(art,p);art.append(make('span','aff-art-label','ILLUSTRATION ORIGINALE'))}
+   const photo=p.photoReview,sources=photoSources(p);
+   const vector=()=>{art.replaceChildren();if(window.AtelierWatch)window.AtelierWatch.render(art,p);art.append(make('span','aff-art-label','PHOTO INDISPONIBLE · FICHE FABRICANT'))};
+   if(photo?.accuracy==='exact'&&sources.length){
+     const img=make('img','aff-product-photo');img.alt=p.brand+' '+p.model+' — photographie authentique';img.loading='lazy';img.decoding='async';img.referrerPolicy='no-referrer';
+     let sourceIndex=0;img.onerror=()=>{sourceIndex++;if(sourceIndex<sources.length)img.src=sources[sourceIndex];else vector()};
+     art.append(img,make('span','aff-art-label','PHOTOGRAPHIE DU MODÈLE · '+photo.provider.toUpperCase()));img.src=sources[0];
+   }else vector();
    const body=make('div','aff-card-body');
    body.append(make('p','aff-card-brand',p.brand.toUpperCase()),make('h3','',p.model),make('p','am-card-title',p.title||''),make('p','aff-card-desc',p.story||p.description));
    const chips=make('div','aff-chips');chips.append(make('span','',levels[p.tier]),make('span','',moves[p.movement]||'Horlogerie'));body.append(chips);
@@ -84,8 +85,8 @@
   const hero=$('heroWatch'),featured=data.find(p=>p.id==='citizen-tsuyosa');
   if(hero&&featured){
     const fallback=()=>{hero.replaceChildren();hero.classList.remove('am-hero-real');window.AtelierWatch?.render(hero,featured);const caption=document.querySelector('.am-hero-label small');if(caption)caption.textContent='Illustration de secours · photographie indisponible'};
-    const photo=featured.photoReview;
-    if(photo?.url?.startsWith('https://')){const img=make('img','am-hero-real-photo');img.alt='Citizen Tsuyosa NJ0150-81X — photographie authentique';img.decoding='async';img.loading='eager';img.fetchPriority='high';img.onerror=fallback;img.src=photo.url;hero.classList.add('am-hero-real');hero.replaceChildren(img)}else fallback();
+    const sources=photoSources(featured);
+    if(sources.length){const img=make('img','am-hero-real-photo');img.alt='Citizen Tsuyosa NJ0150-81X — photographie authentique';img.decoding='async';img.loading='eager';img.fetchPriority='high';img.referrerPolicy='no-referrer';let i=0;img.onerror=()=>{i++;if(i<sources.length)img.src=sources[i];else fallback()};hero.classList.add('am-hero-real');hero.replaceChildren(img);img.src=sources[0]}else fallback();
   }
   render();
  }).catch(()=>{count.textContent='Catalogue temporairement indisponible';empty.hidden=false;grid.replaceChildren()});
