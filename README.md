@@ -2,6 +2,24 @@
 
 **Statut au 26 octobre 2026 : pré-lancement, vitrine gratuite, pas de paiement activé.**
 
+## Déploiements consultables
+
+- **Vitrine multimarque (6 + 6 + 3)** : https://baseless-gate-affxm28.shipstatic.com/
+- **Vitrine de notre future marque** : https://hazy-glow-qua5m5g.shipstatic.com/
+- **Dossier de développement et conditions de lancement** : [docs/vitrines-affiliation-et-marque-propre.md](docs/vitrines-affiliation-et-marque-propre.md)
+
+Les deux adresses correspondent à des sites de pré-lancement en hébergement gratuit, avec statut de déploiement `success` et sans date d'expiration configurée. Il n'y a **ni panier actif, ni commande, ni rémunération d'affiliation configurée**. Les catalogues et les médias sont déclarés comme sélections éditoriales/illustrations, et jamais comme des stocks disponibles.
+
+### À connecter pour percevoir des commissions
+1. Créer un compte [Amazon Partenaires](https://partenaires.amazon.fr/) ; le site doit être déclaré, et l'inscription reste soumise à examen et conditions.
+2. En parallèle, candidater au réseau [Awin](https://www.awin.com/fr) et aux programmes CLEOR (ID 116169), ICE-WATCH (38756) ou autres marchands de montres adaptés.
+3. Utiliser leurs **vrais liens de suivi générés par les tableaux de bord autorisés** pour les produits correspondants, puis déployer les URL après leur validation. Aucun faux identifiant d'affilié ou de commission ne doit être généré.
+4. Respecter les obligations de transparence publicitaire et les licences d'images/prix. Les prix Amazon ne seront pas affichés sans accès aux flux/API autorisés.
+5. Vérifier une conversion rémunérée réelle dans le tableau de bord avant de qualifier le système d'opérationnel.
+
+### Pour lancer la marque propre
+Voir le sourcing, les montants indicatifs, les contrôles matière/conformité et les devis dans le dossier ci-dessus. Le cadran `A · M` est un **logo provisoire non déposé**. Aucun produit à marque propre ne sera commercialisé sans identité du vendeur et vérifications d'importation.
+
 ## Deux expériences principales — octobre 2026
 
 **1. Sélection multimarque (affiliation à connecter)** : `site/affiliation.html` présente 15 vraies références (6 Essentielle, 6 Signature, 3 Prestige). Filtres et favoris locaux, liens directs officiels vers les fabricants, aucun prix inventé ni photo piratée. Les liens actuels sont non rémunérés tant que les comptes Amazon Partenaires / Awin ne sont pas acceptés et que les liens spéciaux ne sont pas installés.
