@@ -41,7 +41,24 @@
       "merchantLinkStatus": "untracked_official",
       "photoRights": "not_licensed",
       "affiliateUrl": null,
-      "availability": "not_verified"
+      "availability": "not_verified",
+      "title": "Turquoise classique",
+      "highlights": [
+        "Quartz",
+        "38,5 mm",
+        "5 bar",
+        "Verre minéral"
+      ],
+      "story": "Un cadran turquoise lumineux qui modernise une silhouette classique.",
+      "specs": {
+        "diameter": "38,5 mm",
+        "movement": "Quartz",
+        "glass": "Minéral",
+        "waterResistance": "5 bar"
+      },
+      "imageMode": "custom_vector_illustration",
+      "imageLicenseStatus": "official_photos_not_licensed",
+      "updatedAt": "2026-10-26"
     },
     {
       "id": "casio-mtp-b145",
@@ -59,7 +76,23 @@
       "merchantLinkStatus": "untracked_official",
       "photoRights": "not_licensed",
       "affiliateUrl": null,
-      "availability": "not_verified"
+      "availability": "not_verified",
+      "title": "Rétro huities",
+      "highlights": [
+        "Quartz",
+        "35 mm",
+        "Boîtier acier"
+      ],
+      "story": "Une silhouette rectangulaire aux lignes franches, inspirée des années 1980.",
+      "specs": {
+        "diameter": "35 mm",
+        "movement": "Quartz",
+        "glass": "Minéral",
+        "waterResistance": "5 bar"
+      },
+      "imageMode": "custom_vector_illustration",
+      "imageLicenseStatus": "official_photos_not_licensed",
+      "updatedAt": "2026-10-26"
     },
     {
       "id": "casio-a168wa",
@@ -77,7 +110,17 @@
       "merchantLinkStatus": "untracked_official",
       "photoRights": "not_licensed",
       "affiliateUrl": null,
-      "availability": "not_verified"
+      "availability": "not_verified",
+      "title": "Icône digitale",
+      "highlights": [
+        "Digital",
+        "Rétro",
+        "Bracelet acier"
+      ],
+      "story": "Le charme rétro d’un afficheur digital et d’un bracelet métallique.",
+      "imageMode": "custom_vector_illustration",
+      "imageLicenseStatus": "official_photos_not_licensed",
+      "updatedAt": "2026-10-26"
     },
     {
       "id": "casio-mdv107",
@@ -95,7 +138,17 @@
       "merchantLinkStatus": "untracked_official",
       "photoRights": "not_licensed",
       "affiliateUrl": null,
-      "availability": "not_verified"
+      "availability": "not_verified",
+      "title": "Plongeuse urbaine",
+      "highlights": [
+        "Quartz",
+        "Noir",
+        "Lunette sportive"
+      ],
+      "story": "Une montre de plongée d’inspiration utilitaire, assumée et lisible.",
+      "imageMode": "custom_vector_illustration",
+      "imageLicenseStatus": "official_photos_not_licensed",
+      "updatedAt": "2026-10-26"
     },
     {
       "id": "casio-ltp1302",
@@ -113,7 +166,24 @@
       "merchantLinkStatus": "untracked_official",
       "photoRights": "not_licensed",
       "affiliateUrl": null,
-      "availability": "not_verified"
+      "availability": "not_verified",
+      "title": "Épure argentée",
+      "highlights": [
+        "Quartz",
+        "30,2 mm",
+        "5 bar",
+        "Verre minéral"
+      ],
+      "story": "Format compact et cadran clair pour un style discret au quotidien.",
+      "specs": {
+        "diameter": "30,2 mm",
+        "movement": "Quartz",
+        "glass": "Minéral",
+        "waterResistance": "5 bar"
+      },
+      "imageMode": "custom_vector_illustration",
+      "imageLicenseStatus": "official_photos_not_licensed",
+      "updatedAt": "2026-10-26"
     },
     {
       "id": "swatch-clearly",
@@ -131,7 +201,17 @@
       "merchantLinkStatus": "untracked_official",
       "photoRights": "not_licensed",
       "affiliateUrl": null,
-      "availability": "not_verified"
+      "availability": "not_verified",
+      "title": "Transparence pop",
+      "highlights": [
+        "Quartz",
+        "Polymère biosourcé",
+        "Transparent"
+      ],
+      "story": "Un jeu de transparence et d’aiguilles colorées, léger et graphique.",
+      "imageMode": "custom_vector_illustration",
+      "imageLicenseStatus": "official_photos_not_licensed",
+      "updatedAt": "2026-10-26"
     },
     {
       "id": "citizen-eco",
@@ -149,7 +229,23 @@
       "merchantLinkStatus": "untracked_official",
       "photoRights": "not_licensed",
       "affiliateUrl": null,
-      "availability": "not_verified"
+      "availability": "not_verified",
+      "title": "Solaire essentielle",
+      "highlights": [
+        "Eco-Drive",
+        "40 mm",
+        "Acier"
+      ],
+      "story": "Énergie lumineuse et cadran noir, un choix rationnel à l’allure sobre.",
+      "specs": {
+        "diameter": "40 mm",
+        "movement": "Citizen Eco-Drive J800",
+        "glass": "Verre cristal",
+        "waterResistance": "3 bar"
+      },
+      "imageMode": "custom_vector_illustration",
+      "imageLicenseStatus": "official_photos_not_licensed",
+      "updatedAt": "2026-10-26"
     },
     {
       "id": "citizen-openheart",
@@ -167,7 +263,17 @@
       "merchantLinkStatus": "untracked_official",
       "photoRights": "not_licensed",
       "affiliateUrl": null,
-      "availability": "not_verified"
+      "availability": "not_verified",
+      "title": "Le mécanisme visible",
+      "highlights": [
+        "Automatique",
+        "Cadran bleu",
+        "Cœur ouvert"
+      ],
+      "story": "L’horlogerie mécanique se révèle à travers une ouverture du cadran.",
+      "imageMode": "custom_vector_illustration",
+      "imageLicenseStatus": "official_photos_not_licensed",
+      "updatedAt": "2026-10-26"
     },
     {
       "id": "citizen-tsuyosa",
@@ -185,7 +291,23 @@
       "merchantLinkStatus": "untracked_official",
       "photoRights": "not_licensed",
       "affiliateUrl": null,
-      "availability": "not_verified"
+      "availability": "not_verified",
+      "title": "Vert signature",
+      "highlights": [
+        "Automatique",
+        "40 mm",
+        "Verre saphir"
+      ],
+      "story": "Un vert profond et un bracelet intégré au dessin sport chic.",
+      "specs": {
+        "diameter": "40 mm",
+        "movement": "Automatique calibre 8210",
+        "glass": "Saphir",
+        "waterResistance": "5 bar"
+      },
+      "imageMode": "custom_vector_illustration",
+      "imageLicenseStatus": "official_photos_not_licensed",
+      "updatedAt": "2026-10-26"
     },
     {
       "id": "orient-bambino",
@@ -203,7 +325,23 @@
       "merchantLinkStatus": "untracked_official",
       "photoRights": "not_licensed",
       "affiliateUrl": null,
-      "availability": "not_verified"
+      "availability": "not_verified",
+      "title": "L’élégance vintage",
+      "highlights": [
+        "Automatique",
+        "38,4 mm",
+        "Verre bombé"
+      ],
+      "story": "Cadran bleu et bracelet cuir : une montre habillée d’inspiration vintage.",
+      "specs": {
+        "diameter": "38,4 mm",
+        "movement": "Orient F6724 automatique",
+        "glass": "Minéral bombé",
+        "waterResistance": "3 bar"
+      },
+      "imageMode": "custom_vector_illustration",
+      "imageLicenseStatus": "official_photos_not_licensed",
+      "updatedAt": "2026-10-26"
     },
     {
       "id": "seiko-5",
@@ -221,7 +359,17 @@
       "merchantLinkStatus": "untracked_official",
       "photoRights": "not_licensed",
       "affiliateUrl": null,
-      "availability": "not_verified"
+      "availability": "not_verified",
+      "title": "Sport mécanique",
+      "highlights": [
+        "Automatique",
+        "Sport",
+        "Acier"
+      ],
+      "story": "Une automatique sportive, robuste dans son expression, facile à porter.",
+      "imageMode": "custom_vector_illustration",
+      "imageLicenseStatus": "official_photos_not_licensed",
+      "updatedAt": "2026-10-26"
     },
     {
       "id": "tissot-prx-quartz",
@@ -239,7 +387,23 @@
       "merchantLinkStatus": "untracked_official",
       "photoRights": "not_licensed",
       "affiliateUrl": null,
-      "availability": "not_verified"
+      "availability": "not_verified",
+      "title": "Lignes seventies",
+      "highlights": [
+        "Quartz suisse",
+        "40 mm",
+        "Verre saphir"
+      ],
+      "story": "Le dessin intégré emblématique des années 1970 dans une exécution contemporaine.",
+      "specs": {
+        "diameter": "40 mm",
+        "movement": "Quartz suisse",
+        "glass": "Saphir",
+        "waterResistance": "10 bar"
+      },
+      "imageMode": "custom_vector_illustration",
+      "imageLicenseStatus": "official_photos_not_licensed",
+      "updatedAt": "2026-10-26"
     },
     {
       "id": "tissot-prx-auto",
@@ -257,7 +421,24 @@
       "merchantLinkStatus": "untracked_official",
       "photoRights": "not_licensed",
       "affiliateUrl": null,
-      "availability": "not_verified"
+      "availability": "not_verified",
+      "title": "PRX mécanique",
+      "highlights": [
+        "Automatique",
+        "80 h",
+        "40 mm",
+        "Saphir"
+      ],
+      "story": "Une automatique suisse au cadran bleu texturé et au mouvement Powermatic 80.",
+      "specs": {
+        "diameter": "40 mm",
+        "movement": "Powermatic 80 automatique",
+        "glass": "Saphir antireflet",
+        "waterResistance": "10 bar"
+      },
+      "imageMode": "custom_vector_illustration",
+      "imageLicenseStatus": "official_photos_not_licensed",
+      "updatedAt": "2026-10-26"
     },
     {
       "id": "hamilton-khaki",
@@ -275,7 +456,24 @@
       "merchantLinkStatus": "untracked_official",
       "photoRights": "not_licensed",
       "affiliateUrl": null,
-      "availability": "not_verified"
+      "availability": "not_verified",
+      "title": "Field iconique",
+      "highlights": [
+        "Automatique",
+        "38 mm",
+        "80 h",
+        "Saphir"
+      ],
+      "story": "Lisibilité militaire et mécanique suisse dans un boîtier compact.",
+      "specs": {
+        "diameter": "38 mm",
+        "movement": "Hamilton H-10 automatique",
+        "glass": "Saphir",
+        "waterResistance": "10 bar"
+      },
+      "imageMode": "custom_vector_illustration",
+      "imageLicenseStatus": "official_photos_not_licensed",
+      "updatedAt": "2026-10-26"
     },
     {
       "id": "seiko-sharp",
@@ -293,7 +491,18 @@
       "merchantLinkStatus": "untracked_official",
       "photoRights": "not_licensed",
       "affiliateUrl": null,
-      "availability": "not_verified"
+      "availability": "not_verified",
+      "title": "Texture japonaise",
+      "highlights": [
+        "Automatique",
+        "Cadran texturé",
+        "Acier"
+      ],
+      "story": "Un motif géométrique inspiré de l’artisanat japonais, élégant sans ostentation.",
+      "imageMode": "custom_vector_illustration",
+      "imageLicenseStatus": "official_photos_not_licensed",
+      "updatedAt": "2026-10-26"
     }
-  ]
+  ],
+  "imagePolicy": "Visuels vectoriels originaux représentant des styles, non des photographies ni des rendus exacts des modèles. Ouvrir le fabricant pour les photos réelles. Aucune image fabricant copiée sans droit."
 }
