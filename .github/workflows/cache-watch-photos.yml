@@ -37,7 +37,9 @@ jobs:
           git add site/assets/watches/ site/selection-affiliation.json docs/watch-photo-check.json
           if ! git diff --cached --quiet; then
             git commit -m 'assets: store checked real watch photos locally [skip ci]'
-            git push
+            git fetch origin main
+            git rebase origin/main
+            git push origin HEAD:main
           fi
       - name: Assert all 15 exact references have saved files
         run: |
