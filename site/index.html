@@ -98,7 +98,7 @@ h2{font:400 clamp(34px,4.3vw,60px)/1.14 Georgia,"Times New Roman",serif;letter-s
   <div class="wrap header-inner">
     <a href="#accueil" class="brand" aria-label="Atelier Montres - accueil"><span class="star" aria-hidden="true">✦</span>Atelier Montres</a>
     <nav class="navigation" aria-label="Navigation principale">
-      <a href="#collection">Collection</a>
+      <a href="./catalogue.html">Collection</a>
       <a href="#inspirations">Inspirations</a>
       <a href="./selection.html">Choisir un style</a>
       <a href="#approche">Notre approche</a>
@@ -155,14 +155,9 @@ h2{font:400 clamp(34px,4.3vw,60px)/1.14 Georgia,"Times New Roman",serif;letter-s
       <h3>Notre sélection se prépare.</h3>
       <p>Nous ne présentons pas de produits fictifs. La vente ouvrira après confirmation des stocks, des conditions de livraison et des informations légales.</p>
       <span class="status">Aucune vente active</span>
-      <a class="button" href="./selection.html" style="margin-top:24px">Comparer les styles <span aria-hidden="true">↗</span></a>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:24px"><a class="button" href="./catalogue.html">La collection <span aria-hidden="true">↗</span></a><a class="button" href="./selection.html">Comparer les styles <span aria-hidden="true">↗</span></a></div>
     </div>
-    <div class="empty-state" id="storeState" hidden>
-      <span class="symbol" aria-hidden="true">◷</span>
-      <h3>Découvrez les modèles disponibles.</h3>
-      <p>Retrouvez les prix, le stock à jour, le panier et le paiement sécurisé sur notre boutique Square.</p>
-      <a id="squareLink" class="button" href="#collection" rel="noopener noreferrer" target="_blank">Accéder à la boutique <span aria-hidden="true">↗</span></a>
-    </div>
+
   </div>
 </section>
 <section class="designs" id="inspirations" aria-labelledby="styles-title"><div class="wrap">
@@ -234,23 +229,6 @@ h2{font:400 clamp(34px,4.3vw,60px)/1.14 Georgia,"Times New Roman",serif;letter-s
 <script>
 'use strict';
 document.getElementById('year').textContent = String(new Date().getFullYear());
-fetch('./config.json', { cache: 'no-store' }).then(function (r) {
-  if (!r.ok) throw new Error('Configuration unavailable');
-  return r.json();
-}).then(function (config) {
-  if (config.status !== 'open' || typeof config.squareStoreUrl !== 'string') return;
-  const url = new URL(config.squareStoreUrl);
-  const host = url.hostname.toLowerCase();
-  const isSquare = host === 'square.site' || host.endsWith('.square.site');
-  if (url.protocol !== 'https:' || !isSquare) return;
-  document.getElementById('squareLink').href = url.href;
-  document.getElementById('siteStatus').textContent = 'Boutique ouverte';
-  document.getElementById('emptyState').hidden = true;
-  document.getElementById('storeState').hidden = false;
-  document.querySelector('.hero-note').textContent = 'Commandes et paiements sécurisés par Square.';
-}).catch(function () {
-  // On failure, fail closed: never display a checkout link.
-});
 </script>
 </body>
 </html>
