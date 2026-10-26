@@ -38,7 +38,7 @@ jobs:
           if ! git diff --cached --quiet; then
             git commit -m 'assets: store checked real watch photos locally [skip ci]'
             git fetch origin main
-            git rebase origin/main
+            git rebase -X theirs origin/main
             git push origin HEAD:main
           fi
       - name: Assert all 15 exact references have saved files
