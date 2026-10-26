@@ -59,17 +59,14 @@
     },
     {
       "id": "swatch-clearly",
-      "ok": false,
-      "attempts": [
-        {
-          "source": "https://static.swatch.com/images/product/SO28K100-S06/sa200/SO28K100-S06_sa200_er005.png",
-          "error": "HTTPSConnectionPool(host='static.swatch.com', port=443): Read timed out. (read timeout=26)"
-        },
-        {
-          "source": "https://www.thejewelhut.co.uk/media/catalog/product/2/1/21-61-131_grey.jpg",
-          "error": "403 Client Error: Forbidden for url: https://www.thejewelhut.co.uk/media/catalog/product/2/1/21-61-131_grey.jpg"
-        }
-      ]
+      "ok": true,
+      "source": "https://www.watchit.ca/cdn/shop/files/SO28K100-S06.jpg?v=1773681796",
+      "size": [
+        399,
+        685
+      ],
+      "bytes": 36216,
+      "sha256": "9dc84b49501436f534e26bfe5c10cb7707edf7e4bdc6dd046b7f338bce4484d1"
     },
     {
       "id": "citizen-eco",
@@ -171,7 +168,5 @@
       "sha256": "ac0df83f00177dae098711fede504484e5a894421a27f4c288cdd85640413693"
     }
   ],
-  "unavailable": [
-    "swatch-clearly"
-  ]
+  "unavailable": []
 }

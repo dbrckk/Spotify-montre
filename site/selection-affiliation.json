@@ -300,7 +300,13 @@
         "quality": "manufacturer-packshot",
         "licence": "permission_required",
         "publicUsageApproved": false,
-        "researchedOn": "2026-10-26"
+        "researchedOn": "2026-10-26",
+        "localUrl": "./assets/watches/swatch-clearly.webp",
+        "localSha256": "9dc84b49501436f534e26bfe5c10cb7707edf7e4bdc6dd046b7f338bce4484d1",
+        "localWidth": 399,
+        "localHeight": 685,
+        "localBytes": 36216,
+        "originalFetchedFrom": "https://www.watchit.ca/cdn/shop/files/SO28K100-S06.jpg?v=1773681796"
       }
     },
     {
