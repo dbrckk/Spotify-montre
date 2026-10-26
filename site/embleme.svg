@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80" role="img" aria-label="Monogramme provisoire Atelier Montres">
+<circle cx="40" cy="40" r="36" fill="none" stroke="#dac496" stroke-width="1.7"/>
+<circle cx="40" cy="40" r="31" fill="none" stroke="#dac496" stroke-opacity=".48" stroke-width=".8"/>
+<g stroke="#dac496" stroke-width="1.2" stroke-linecap="round">
+<path d="M40 3v7M40 70v7M3 40h7M70 40h7"/>
+<path d="M13 13l4 4M63 63l4 4M67 13l-4 4M17 63l-4 4" stroke-opacity=".6"/>
+</g>
+<path d="M17 53l11-27h2l11 27M22 43h15" fill="none" stroke="#dac496" stroke-width="2.6" stroke-linecap="square"/>
+<path d="M42 53V27l9 13 9-13v26" fill="none" stroke="#dac496" stroke-width="2.6" stroke-linecap="square"/>
+<path d="M28 19h24" stroke="#dac496" stroke-width=".7" opacity=".65"/>
+</svg>
