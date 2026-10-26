@@ -2,6 +2,16 @@
 
 **Statut au 26 octobre 2026 : pré-lancement, vitrine gratuite, pas de paiement activé.**
 
+## Deux expériences principales — octobre 2026
+
+**1. Sélection multimarque (affiliation à connecter)** : `site/affiliation.html` présente 15 vraies références (6 Essentielle, 6 Signature, 3 Prestige). Filtres et favoris locaux, liens directs officiels vers les fabricants, aucun prix inventé ni photo piratée. Les liens actuels sont non rémunérés tant que les comptes Amazon Partenaires / Awin ne sont pas acceptés et que les liens spéciaux ne sont pas installés.
+
+**2. Maison Atelier Montres (marque propre)** : `site/marque.html` illustre trois concepts Émeraude, Glacier et Minuit. Leur production, personnalisation et stock restent à confirmer. **Aucun article en vente ni aucun encaissement sur ce site**.
+
+Les deux projets partagent la charte vert profond, or et crème et sont conçus pour un hébergement gratuit indépendant. Tous les fichiers sont conservés dans ce dépôt.
+
+Documents : [Stratégie détaillée des deux vitrines](docs/vitrines-affiliation-et-marque-propre.md).
+
 ## Architecture actuelle
 - **Vitrine de marque** : `site/index.html`, `site/base.css`, `site/features.css`.
 - **Choisir un style** : `site/selection.html` — six illustrations conceptuelles homogènes, favoris locaux, aucun faux produit.
