@@ -4,8 +4,8 @@
   "version": "0.1.0",
   "description": "Theme overlay and free independent storefront validation",
   "scripts": {
-    "test": "node --check site/app.js && node --check site/selection.js && node scripts/validate-theme.mjs && node scripts/validate-free-store.mjs && node scripts/test-chatbot.mjs",
-    "lint": "node --check site/app.js && node --check site/selection.js && node scripts/validate-theme.mjs && node scripts/validate-free-store.mjs && node scripts/test-chatbot.mjs"
+    "test": "node --check site/app.js && node --check site/selection.js && node --check site/catalogue.js && node scripts/validate-theme.mjs && node scripts/validate-free-store.mjs && node scripts/test-chatbot.mjs && node scripts/validate-catalogue.mjs",
+    "lint": "node --check site/app.js && node --check site/selection.js && node --check site/catalogue.js && node scripts/validate-theme.mjs && node scripts/validate-free-store.mjs && node scripts/test-chatbot.mjs && node scripts/validate-catalogue.mjs"
   },
   "engines": {
     "node": ">=20"
