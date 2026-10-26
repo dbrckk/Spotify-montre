@@ -23,8 +23,13 @@
  function card(p){
    const item=make('article','aff-card');
    const art=make('div','aff-illustration');art.dataset.tone=p.tone||'silver';
-   if(window.AtelierWatch)window.AtelierWatch.render(art,p);
-   art.append(make('span','aff-art-label','ILLUSTRATION ORIGINALE'));
+   const photo=p.photoReview;
+   if(photo&&photo.accuracy==='exact'){
+     const img=make('img','aff-product-photo');img.src=photo.url;img.alt=p.brand+' '+p.model+' — photographie du modèle';img.loading='lazy';img.decoding='async';img.referrerPolicy='no-referrer';
+     img.onerror=()=>{img.remove();if(window.AtelierWatch)window.AtelierWatch.render(art,p);art.append(make('span','aff-art-label','ILLUSTRATION DE SECOURS'))};
+     art.append(img);
+     art.append(make('span','aff-art-label','PHOTO DU MODÈLE · SOURCE '+photo.provider.toUpperCase()));
+   }else{if(window.AtelierWatch)window.AtelierWatch.render(art,p);art.append(make('span','aff-art-label','ILLUSTRATION ORIGINALE'))}
    const body=make('div','aff-card-body');
    body.append(make('p','aff-card-brand',p.brand.toUpperCase()),make('h3','',p.model),make('p','am-card-title',p.title||''),make('p','aff-card-desc',p.story||p.description));
    const chips=make('div','aff-chips');chips.append(make('span','',levels[p.tier]),make('span','',moves[p.movement]||'Horlogerie'));body.append(chips);
