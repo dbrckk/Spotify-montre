@@ -1,53 +1,48 @@
-# Atelier Montres — boutique sans abonnement
+# Atelier Montres — boutique de montres indépendante
 
-**Solution actuelle (25 octobre 2026) : vitrine premium statique gratuite + Square Online Gratuit pour le futur panier, les paiements, l'inventaire et les commandes.**
+**Statut au 26 octobre 2026 : pré-lancement, vitrine gratuite, pas de paiement activé.**
 
-- **Vitrine en ligne** : https://neutral-spark-t96k64b.shipstatic.com/
-- **Code de la vitrine** : [site/index.html](site/index.html) et [site/config.json](site/config.json)
-- **Guide d'architecture et de lancement** : [docs/architecture-gratuite-square.md](docs/architecture-gratuite-square.md)
-- **État** : pré-lancement. Aucune montre fictive, aucun paiement activé, aucun abonnement souscrit.
-- **Contrôles automatisés** : `npm test` vérifie le thème Shopify historique et la vitrine autonome, notamment le blocage du lien marchand avant la validation de Square.
-- **Hébergement** : ShipStatic plan gratuit, statut du déploiement confirmé `success`, expiration `null`.
-- **Compte Square** : à créer par le propriétaire. Aucune intégration marchande ne peut être activée sans son compte et ses informations légales.
-- **Frais** : hébergement à 0 €, pas d'abonnement imposé sur Square Gratuit, commissions par paiement et coûts physiques d'achat, livraison, retour, etc.
-  
-> Le fichier visuel est une vitrine de présentation. Les stocks et l'achat réel seront toujours administrés chez Square une fois la boutique ouverte, sans faux panier ni quantités locales désynchronisées.
+## Architecture actuelle
+- **Vitrine de marque** : `site/index.html`, `site/base.css`, `site/features.css`.
+- **Choisir un style** : `site/selection.html` — six illustrations conceptuelles homogènes, favoris locaux, aucun faux produit.
+- **Catalogue vérifié** : `site/catalogue.html`, `site/catalogue.json`, `site/catalogue.js` — aucune montre en vente avant vérification fournisseur, photo, conformité et prix.
+- **Studio fournisseurs** : `site/studio.html`, `site/fournisseurs.json` — outil d'étude comparatif sans authentification, à usage préparatoire, non destiné au client ; pas de données confidentielles.
+- **Données sources** : `research/fournisseurs-candidats.json` — annonces à confirmer.
+- **Chatbot FAQ et newsletter** : `site/app.js` — chatbot local sans coût d'API, newsletter inactive tant qu'un formulaire conforme n'est pas connecté.
+- **Protection** : `site/config.json` doit rester `status:"prelaunch"` et `checkoutMode:"inactive"` jusqu'au lancement vérifié.
 
-## Archive Shopify précédente
+### Vente directe sans redirection
 
+Le précédent projet **Square Online** est abandonné comme parcours commercial parce que l'utilisateur exige le paiement sur Atelier Montres. L'ancien document `docs/architecture-gratuite-square.md` est **historique, non applicable à l'architecture actuelle**.
 
-Boutique Shopify française en cours de préparation, avec thème premium et catalogue alimenté exclusivement par de vrais produits Shopify.
+La direction prévue est un **paiement embarqué** (Stripe Embedded Checkout ou mécanisme équivalent), avec backend sécurisé, authentification du marchand, webhook vérifié, et synchronisation réelle du stock. Le paiement ne peut pas être considéré comme opérationnel ni lancé tant que l'entreprise, les fournisseurs, les conditions de vente et le compte de paiement ne sont pas en règle. Certaines authentifications bancaires peuvent ouvrir une étape externe imposée par les banques.
 
-> **Nom du dépôt historique** : « Spotify-montre ». La plateforme e-commerce employée est **Shopify** (et non Spotify).
+L'affiliation Amazon standard exige un achat final sur Amazon et n'autorise pas l'encaissement Amazon sur Atelier Montres contre commission classique. Amazon peut servir de **source d'étude de marché**, pas de prestataire de paiement intégré pour des achats affiliés.
 
-## État
-- Shopify connecté : `mu9rf9-xp.myshopify.com` (France, EUR, essai gratuit).
-- Thème en ligne (à préserver) : Horizon.
-- Brouillon personnalisé : **Atelier Montres — Brouillon** (ID `207266382172`), non publié.
-- Accueil : section `sections/atelier-landing.liquid` + `assets/atelier-montres.css` + `templates/index.json`.
-- Navigation : Accueil, Montres, Notre univers, Contact.
-- Catalogue : aucun produit à vendre tant qu'un fournisseur réel, les stocks, les délais et les prix ne sont pas validés.
+### Conditions d'approvisionnement
+Objectif : montres élégantes **sans logo tiers**, maximum **20 € rendues en France** par pièce, incluant coûts répartis. **Aucun fabricant confirmé, aucune commande d'échantillon.** `site/studio.html` conserve quatre pistes et indique les points manquants : référence exacte, autorisation photos, matériaux, conformité/traçabilité UE, MOQ logo, prix importé et SAV.
 
-## Arborescence
-```
-shopify/
-  sections/atelier-landing.liquid
-  assets/atelier-montres.css
-  templates/index.json
-```
-Les fichiers du sous-répertoire `shopify/` sont une **surcouche de thème**, conçue pour s'appliquer à une copie du thème Shopify Horizon. Le sous-répertoire n'est pas, à lui seul, un thème complet installable par ZIP.
+### Qualité technique
+`npm test` vérifie :
+- le thème Shopify historique (archive),
+- la vitrine, l'accessibilité de base, la sécurité du chatbot et des liens newsletter,
+- le sélecteur de concepts,
+- le catalogue sans paiement par défaut,
+- la parité entre les données fournisseur publiées et leur source,
+- la syntaxe JavaScript via `node --check`.
 
-## Déploiement
-Les fichiers Shopify sont synchronisés directement vers le **brouillon** à l'aide de l'Admin GraphQL API. Ne jamais écrire automatiquement dans le thème `MAIN`. La publication doit attendre des tests visuels, des produits réels et la configuration des paiements, des livraisons, des retours et des mentions légales.
+Aucun prix de vente, avis, stock, logo, caractéristique ni garantie non vérifié ne doit être affiché comme réel.
 
-Aperçu provisoire dans l'interface d'administration Shopify : **Boutique en ligne > Thèmes > Atelier Montres — Brouillon > Aperçu**.
+## Hébergement
+Le site se déploie sur ShipStatic gratuit, les liens actifs des déploiements sont donnés au fil des mises à jour. Un déploiement `success` prouve que les fichiers sont servis ; **cela ne prouve pas qu'un parcours d'achat est fonctionnel**.
 
-## Vérifications avant lancement
-1. Tester l'affichage Android/desktop : accueil, fiche produit, variantes, panier, recherche, menus.
-2. Sélectionner un fournisseur légalement exploitable depuis la France ; vérifier les droits des images, stocks, coûts, délais, origine et garanties.
-3. Paramétrer TVA, livraison, retours, CGV, identité du vendeur, confidentialité et droit de rétractation.
-4. Activer un forfait Shopify et le système de paiement, puis réaliser une commande test.
-5. Publier le thème seulement après une validation complète.
+## Ancien thème Shopify (conservé)
+`shopify/` contient une surcouche du thème Horizon sauvegardée. Shopify n'est plus le parcours marchand cible. Ne pas publier son ancien brouillon ou modifier le thème principal sans accord.
 
-## Règles
-Ne pas importer de faux produits comme de vrais articles, ne pas inventer de prix, d'avis clients, de réduction, de garantie ou de délais de livraison. Préserver les thèmes publiés pendant le développement.
+## Documents
+- [Stratégie de vente sans redirection](docs/selection-et-vente-directe-sans-redirection.md)
+- [Recherche de fournisseurs à moins de 20 €](docs/selection-montres-20-euros.md)
+- [Conformité et lancement France](docs/preparation-lancement-fr.md)
+- [Vitrine précédente et newsletter](docs/vitrine-premium-v2.md)
+
+Le projet est expérimental tant que l'identité du vendeur, les conditions légales, les paiements et l'approvisionnement ne sont pas mis en place.
