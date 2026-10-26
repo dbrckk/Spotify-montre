@@ -684,7 +684,13 @@
         "quality": "manufacturer-packshot",
         "licence": "permission_required",
         "publicUsageApproved": false,
-        "researchedOn": "2026-10-26"
+        "researchedOn": "2026-10-26",
+        "localUrl": "./assets/watches/hamilton-khaki.webp",
+        "localSha256": "03e5a9efbbd0cc1b3adbe8560edb559cd3ff30b6d83877b163de59d4a8594da8",
+        "localWidth": 1200,
+        "localHeight": 1200,
+        "localBytes": 91686,
+        "originalFetchedFrom": "https://www.lepage.fr/71698-zoom_default/watch-hamilton-khaki-field-automatic-black-dial-steel-bracelet-38-mm.jpg"
       }
     },
     {

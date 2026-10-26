@@ -64,6 +64,10 @@
         {
           "source": "https://static.swatch.com/images/product/SO28K100-S06/sa200/SO28K100-S06_sa200_er005.png",
           "error": "HTTPSConnectionPool(host='static.swatch.com', port=443): Read timed out. (read timeout=26)"
+        },
+        {
+          "source": "https://www.thejewelhut.co.uk/media/catalog/product/2/1/21-61-131_grey.jpg",
+          "error": "403 Client Error: Forbidden for url: https://www.thejewelhut.co.uk/media/catalog/product/2/1/21-61-131_grey.jpg"
         }
       ]
     },
@@ -146,13 +150,14 @@
     },
     {
       "id": "hamilton-khaki",
-      "ok": false,
-      "attempts": [
-        {
-          "source": "https://www.hamiltonwatch.com/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/h/7/h70455133.png",
-          "error": "HTTPSConnectionPool(host='www.hamiltonwatch.com', port=443): Read timed out. (read timeout=26)"
-        }
-      ]
+      "ok": true,
+      "source": "https://www.lepage.fr/71698-zoom_default/watch-hamilton-khaki-field-automatic-black-dial-steel-bracelet-38-mm.jpg",
+      "size": [
+        1200,
+        1200
+      ],
+      "bytes": 91686,
+      "sha256": "03e5a9efbbd0cc1b3adbe8560edb559cd3ff30b6d83877b163de59d4a8594da8"
     },
     {
       "id": "seiko-sharp",
@@ -167,7 +172,6 @@
     }
   ],
   "unavailable": [
-    "swatch-clearly",
-    "hamilton-khaki"
+    "swatch-clearly"
   ]
 }
