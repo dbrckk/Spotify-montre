@@ -1,0 +1,19 @@
+name: Check real watch photo URLs
+on:
+  push:
+    paths:
+      - 'site/selection-affiliation.json'
+      - 'scripts/audit-watch-photos.mjs'
+      - '.github/workflows/watch-photo-audit.yml'
+  workflow_dispatch:
+jobs:
+  verify-images:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Probe all 15 exact image URLs and report failures
+        run: node scripts/audit-watch-photos.mjs
