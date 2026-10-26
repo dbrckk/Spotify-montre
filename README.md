@@ -13,6 +13,10 @@ Fonctionnalités : 15 montres de marques existantes (6/6/3) avec rendus vectorie
 
 Les deux déploiements ont un état `success`, aucun délai d'expiration configuré. Les visuels ne sont **pas des photographies de la vraie montre**. Aucune licence fabricant/flux affilié n'est encore connectée, **aucun lien rémunéré**, aucun paiement ou stock commercial actif. Les deux sites sont au stade de pré-lancement.
 
+## Photographies exactes des 15 modèles
+
+Une galerie photographique privée a été déployée pour choisir les photos réelles sans copier les fichiers des fabricants dans le dépôt public. Les 15 URL sources exactes sont disponibles dans `site/selection-affiliation.json`, avec `publicUsageApproved: false` tant qu'aucun droit d'utilisation commerciale n'a été accordé. Voir [sources, accès de prévisualisation et conformité](docs/photographies-source-15-montres.md).
+
 ## Déploiements consultables (historique V5)
 
 - **Vitrine multimarque (6 + 6 + 3)** : https://baseless-gate-affxm28.shipstatic.com/
