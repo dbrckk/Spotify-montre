@@ -1,0 +1,37 @@
+/* A coherent watch-house design language shared in spirit with the multibrand store. */
+.am-brand-ribbon{background:#102218;color:#dbc69e;font-size:9px;letter-spacing:.2em}
+.am-brand-ribbon .wrap{min-height:35px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.am-brand-header{background:#152b20;border-bottom:1px solid #c7ab6e33;position:sticky;top:0;z-index:19;backdrop-filter:blur(16px)}
+.am-brand-header .header-inner{min-height:82px;height:auto;padding-block:15px}
+.am-brand-header .brand{font:400 29px Georgia,serif}
+.brand-hero{background:radial-gradient(ellipse at 73% 49%,#45624965 0%,transparent 42%),linear-gradient(130deg,#102419,#223b2d 80%);isolation:isolate}
+.brand-hero-grid{min-height:670px}
+.brand-hero h1{font-size:clamp(54px,6.6vw,96px);font-weight:400;max-width:790px;letter-spacing:-.055em}
+.brand-hero h1 em{color:#e8ce9f}
+.brand-hero .overline{color:#e0c391}
+.brand-hero .button{background:#dec49a;border-color:#dec49a;color:#1b2c21}
+.brand-display{height:585px}
+.brand-orbit{width:465px;height:465px;border-color:#c8af8333;box-shadow:0 0 0 71px #f9e6b808}
+.brand-watch{filter:drop-shadow(26px 34px 19px #0007)}
+.brand-values{background:#f0ece4;border-bottom:1px solid #ddd1bb}
+.brand-values-grid{padding-block:43px}
+.brand-values strong{font-size:25px}
+.brand-line{background:#fbfaf6;padding-block:115px}
+.brand-line-header h2{font-size:clamp(37px,4.5vw,63px);letter-spacing:-.038em}
+.brand-model{border-color:#e4ded2;transition:transform .23s ease,box-shadow .23s ease}
+.brand-model:hover{transform:translateY(-4px);box-shadow:0 23px 50px #23352d17}
+.brand-model-art{height:330px}
+.brand-mini-band{height:260px}
+.brand-model-text{padding:26px}
+.brand-model-text h3{letter-spacing:-.015em}
+.brand-model-text button{min-height:46px;transition:background .2s}
+.brand-model-text button:hover{background:#355843}
+.brand-disclaimer{border-left:3px solid #ba9a63;background:#f2ede3}
+.brand-quality{background:#1a3426}
+.brand-steps>div{border-color:#74917b55}
+.brand-custom{background:#ede8df}
+.brand-custom article{border-color:#e4dac9;box-shadow:0 12px 24px #1a35250a}
+.brand-status{background:#233c2d}
+@media(max-width:900px){.brand-hero-grid{min-height:auto}.brand-display{height:380px}.brand-model-art{height:280px}}
+@media(max-width:620px){.am-brand-ribbon .wrap span{display:none}.am-brand-header .navigation{gap:12px}.am-brand-header .navigation a{font-size:10px}.brand-hero h1{font-size:clamp(45px,11.9vw,66px)}.brand-model:hover{transform:none}}
+@media(prefers-reduced-motion:reduce){.brand-model,.brand-model-text button{transition:none}.brand-model:hover{transform:none}}
