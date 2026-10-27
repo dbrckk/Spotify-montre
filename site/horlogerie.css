@@ -133,3 +133,13 @@ html{scroll-padding-top:95px}
 .am-compare-name{display:block;white-space:normal;line-height:1.5}
 .am-dialog .am-compare-body{overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
 .aff-selection,.aff-tiers,.am-editorial,.am-partners{scroll-margin-top:90px}
+
+
+/* Precision filters and factual comparison cues */
+.am-movement-wrap{min-width:185px}
+.am-movement-wrap select{max-width:230px}
+.aff-reset{min-height:44px;margin:8px 0 24px;padding:12px 20px;border:1px solid #b49a70;background:#234631;color:#fff;cursor:pointer;font:700 12px system-ui,sans-serif}
+.aff-reset:hover{background:#355c43}
+.am-compare-diff-note{font-size:12px;color:#566a58;padding:0 0 12px;margin:0}
+.am-compare-table .am-compare-different{background:#f2e7ce;color:#2a402e;border-left:2px solid #c7aa78;font-weight:650}
+@media(max-width:680px){.am-movement-wrap{width:100%;display:flex;align-items:center;justify-content:space-between;margin:9px 0}.am-movement-wrap select{width:70%;max-width:none}.aff-photo-expand{padding:13px}}
