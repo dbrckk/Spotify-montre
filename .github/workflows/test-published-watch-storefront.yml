@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/test-published-watch-storefront.yml'
       - 'scripts/test-selection-share.mjs'
+      - 'scripts/test-mobile-storefront-v8.mjs'
       - 'scripts/test-mobile-live-storefront.mjs'
       - 'scripts/test-recently-viewed.mjs'
   workflow_dispatch:
@@ -25,9 +26,10 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Verify deployed website, 15 local photos, sharing and watch history
         env:
-          WATCH_STOREFRONT_URL: https://pure-shade-mku576j.shipstatic.com
+          WATCH_STOREFRONT_URL: https://dynamic-drone-r397dgc.shipstatic.com
         run: |
           node scripts/test-mobile-live-storefront.mjs
+          node scripts/test-mobile-storefront-v8.mjs
           node scripts/test-selection-share.mjs
           node scripts/test-recently-viewed.mjs
       - name: Save real deployment screenshots
