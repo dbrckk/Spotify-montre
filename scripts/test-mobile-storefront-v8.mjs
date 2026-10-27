@@ -90,7 +90,7 @@ await page.locator('#affGrid .aff-card input[type="checkbox"]').nth(0).check();
  assert.equal(await page.locator('#affGrid .aff-card input[type="checkbox"]').nth(1).isChecked(),true,'The other comparison remains checked');
  await page.locator('#affGrid .aff-card input[type="checkbox"]').nth(0).check();
  await page.locator('#affGrid .aff-card input[type="checkbox"]').nth(2).check();
- await page.locator('#affGrid .aff-card input[type="checkbox"]').nth(3).check();
+ await page.locator('#affGrid .aff-card input[type="checkbox"]').nth(3).click();
  assert.equal(await page.locator('#affCompareSelected .am-compare-selected-chip').count(),3,'Maximum three compared watches');
  assert.equal(await page.locator('#affGrid .aff-card input[type="checkbox"]').nth(3).isChecked(),false,'A fourth selection is refused');
  assert.match(await page.locator('#affCompareNotice').innerText(),/Limite atteinte/,'Limit feedback must be explained');
