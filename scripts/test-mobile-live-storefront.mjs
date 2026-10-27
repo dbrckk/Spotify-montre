@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {mkdirSync} from 'node:fs';
 import {chromium} from 'playwright';
 
-const base=process.env.WATCH_STOREFRONT_URL||'https://subtle-mirage-vgd4wt7.shipstatic.com';
+const base=process.env.WATCH_STOREFRONT_URL||'https://hyped-logic-88n9yg5.shipstatic.com';
 const root=new URL(base);
 assert.equal(root.protocol,'https:');
 const browser=await chromium.launch({headless:true});
