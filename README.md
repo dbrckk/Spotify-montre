@@ -1,8 +1,24 @@
 # Atelier Montres — boutique de montres indépendante
 
-**Statut au 26 octobre 2026 : pré-lancement, vitrine gratuite, pas de paiement activé.**
+**Statut au 27 octobre 2026 : pré-lancement, vitrine gratuite, pas de paiement activé.**
 
-## Dernière version V7 — refonte premium (26 octobre 2026)
+## Version actuelle — V8 mobile et photographies réelles (27 octobre 2026)
+
+**Ouvrir la boutique : https://hyped-logic-88n9yg5.shipstatic.com/**
+
+Cette version est une **vitrine éditoriale de pré-lancement**. Elle ne propose ni paiement ni stock synchronisé. Les liens vers les fabricants ne sont pas rémunérés. Les droits de reproduction commerciale des photos de marques restent à confirmer.
+
+- Quinze photos de **quinze références exactes**, converties en WebP et servies avec le site, empreintes SHA-256 contrôlées dans la sélection JSON. Le catalogue et les fiches utilisent les photos locales puis, si nécessaire, l'original externe.
+- Menu Android compact et accessible, fermeture automatique au choix d'un lien.
+- Fiches détaillées : liens précédent/suivant, trois modèles recommandés avec photos, favoris synchronisés avec le catalogue, partage natif ou copie de lien.
+- Comparateur de 2 à 3 montres avec photos réelles, filtres, recherche et tri.
+- Aucun prix ou stock inventé, images de secours si les fichiers deviennent indisponibles.
+
+**Tests :** [parcours mobile et desktop Chromium](https://github.com/dbrckk/Spotify-montre/actions/runs/40490044458) et [audit des 15 images](https://github.com/dbrckk/Spotify-montre/actions/runs/40418018437).
+
+Voir [notes de livraison V8](docs/release-mobile-v8.md).
+
+## Historique : version V7 — refonte premium (26 octobre 2026)
 
 - **Vitrine multimarque actualisée** : https://laced-kernel-wfhq43s.shipstatic.com/
 - **Page de comparaison et fiche d'une montre** : https://laced-kernel-wfhq43s.shipstatic.com/montre.html?id=citizen-tsuyosa
@@ -11,7 +27,7 @@
 
 Fonctionnalités : 15 montres de marques existantes (6/6/3) avec rendus vectoriels originaux différenciés, navigation, recherche, tri, favoris locaux, comparateur de 2 à 3 modèles, fiches techniques sourcées, liens vers les fabricants et recherches Amazon/eBay. Monogramme provisoire Atelier Montres, style éditorial et smartphone responsive. **FAQ, newsletter désactivée et chatbot local restaurés sur les deux sites.**
 
-Les deux déploiements ont un état `success`, aucun délai d'expiration configuré. Les visuels ne sont **pas des photographies de la vraie montre**. Aucune licence fabricant/flux affilié n'est encore connectée, **aucun lien rémunéré**, aucun paiement ou stock commercial actif. Les deux sites sont au stade de pré-lancement.
+Les deux déploiements ont un état `success`, aucun délai d'expiration configuré. À ce stade historique, les visuels n'étaient **pas des photographies de la vraie montre** ; ce point a été corrigé en V8. Aucune licence fabricant/flux affilié n'est encore connectée, **aucun lien rémunéré**, aucun paiement ou stock commercial actif. Les deux sites sont au stade de pré-lancement.
 
 ## Photographies exactes des 15 modèles
 
