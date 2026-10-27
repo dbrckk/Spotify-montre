@@ -48,3 +48,40 @@
 @media(max-width:1050px){.am-recent-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:620px){.am-recent{margin-bottom:26px;padding:17px 14px 19px}.am-recent-grid{display:flex;overflow-x:auto;gap:10px;scroll-snap-type:x mandatory;scroll-padding-left:1px;padding:2px 2px 12px;overscroll-behavior-inline:contain}.am-recent-card{flex:none;width:min(74vw,265px);scroll-snap-align:start;min-height:100px}.am-recent-head{align-items:flex-start}.am-recent-head h3{font-size:23px}.am-recent-head button{padding:9px 13px}}
 @media(prefers-reduced-motion:reduce){.am-recent-card{transition:none}.am-recent-card:hover{transform:none}}
+
+/* Floating premium comparison dock: immediately visible after the first selection. */
+.am-compare-tray{
+ position:fixed;z-index:38;left:50%;right:auto;bottom:max(12px,env(safe-area-inset-bottom));
+ transform:translateX(-50%);margin:0;box-sizing:border-box;
+ width:min(720px,calc(100vw - 24px));max-width:none;max-height:44dvh;
+ padding:12px 15px 14px;display:flex;flex-direction:column;align-items:stretch;gap:9px;
+ overflow-y:auto;overscroll-behavior:contain;border-radius:8px;
+ box-shadow:0 19px 55px #071b13a6;
+}
+.am-compare-tray-heading{display:flex;align-items:baseline;justify-content:space-between;gap:9px;flex-wrap:wrap}
+.am-compare-tray .am-compare-tray-heading strong{font:650 13px/1.3 system-ui,sans-serif;color:#f1e5d2}
+.am-compare-tray .am-compare-tray-heading #affCompareNotice{font:500 11px/1.4 system-ui,sans-serif;color:#ead1a0;flex:none}
+.am-compare-selected{display:flex;gap:7px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;scroll-padding-inline:4px;padding:2px 0 4px}
+.am-compare-tray .am-compare-selected .am-compare-selected-chip{
+ flex:0 0 auto;display:flex;align-items:center;gap:7px;max-width:215px;
+ min-height:48px;padding:4px 8px 4px 4px;box-sizing:border-box;background:#fcfaf4;
+ border:1px solid #cbb991;border-radius:5px;color:#213b2b;
+}
+.am-compare-tray .am-compare-selected-chip img{display:block;flex:none;width:40px;height:40px;object-fit:contain;background:#f0ede4;border-radius:3px}
+.am-compare-tray .am-compare-selected-chip .am-compare-chip-name{
+ flex:none;min-width:0;max-width:125px;overflow:hidden;text-overflow:ellipsis;
+ display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+ white-space:normal;text-align:left;font:650 10px/1.35 system-ui,sans-serif;
+}
+.am-compare-tray .am-compare-selected-chip .am-compare-chip-remove{flex:none;font-size:19px;line-height:1;color:#526956}
+.am-compare-tray .am-compare-tray-actions{display:flex;justify-content:flex-end;gap:9px}
+.am-compare-tray .am-compare-tray-actions button{min-height:42px;flex:0 1 auto;border-radius:3px}
+.am-compare-tray .am-compare-tray-actions #affCompareClear{background:transparent;color:#e6d7ba}
+.am-compare-tray .am-compare-selected-chip:focus-visible,.am-compare-tray .am-compare-tray-actions button:focus-visible{outline:3px solid #e7c992;outline-offset:2px}
+body:has(#affCompareTray:not([hidden])) main{padding-bottom:175px}
+@media(max-width:620px){
+ .am-compare-tray{bottom:max(6px,env(safe-area-inset-bottom));width:calc(100vw - 12px);padding:10px 11px;max-height:38dvh;gap:7px}
+ .am-compare-tray .am-compare-tray-actions button{flex:1;min-height:44px}
+ .am-compare-tray .am-compare-selected .am-compare-selected-chip{max-width:188px}
+ .am-compare-tray .am-compare-selected-chip .am-compare-chip-name{max-width:110px}
+}
