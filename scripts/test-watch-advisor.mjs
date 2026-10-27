@@ -1,0 +1,55 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {resolve} from 'node:path';
+import {runInNewContext} from 'node:vm';
+const root=resolve(import.meta.dirname,'..');
+const read=p=>readFileSync(resolve(root,p),'utf8');
+const context={};
+runInNewContext(read('site/conseiller-engine.js'),context,{timeout:2500});
+const e=context.AtelierAdvisorEngine;
+assert.equal(typeof e?.recommend,'function');
+const feed=JSON.parse(read('site/selection-affiliation.json'));
+const products=feed.products;
+assert.equal(products.length,15);
+const ids=r=>r.map(x=>x.product.id);
+const featured=e.recommend(products,{},3);
+assert.deepEqual(Array.from(ids(featured)),['casio-mtp-1302','citizen-tsuyosa','tissot-prx-auto']);
+const affordable=e.recommend(products,{tier:'essential',style:'retro'},3);
+assert.equal(affordable.length,3);
+assert.equal(affordable[0].product.id,'casio-a168wa');
+assert.equal(affordable[0].matched,2);
+const eco=e.recommend(products,{movement:'eco-drive'},3);
+assert.equal(eco[0].product.id,'citizen-eco');
+const prestige=e.recommend(products,{tier:'prestige',movement:'automatic'},3);
+assert.equal(prestige.length,3);
+assert.ok(prestige.every(x=>x.product.tier==='prestige'&&x.product.movement==='automatic'));
+const all=e.recommend(products,{tier:'all',style:'all',movement:'all'},15);
+assert.equal(all.length,15);
+assert.equal(new Set(ids(all)).size,15);
+for(const tier of ['essential','signature','prestige'])
+ for(const style of ['sport','classic','minimal','retro','statement'])
+  for(const movement of ['quartz','automatic','eco-drive']){
+   const r=e.recommend(products,{tier,style,movement},3);
+   assert.equal(r.length,3);
+   assert.equal(new Set(ids(r)).size,3);
+   assert.ok(r.every(x=>x.matched>=0&&x.matched<=3&&x.criteria===3));
+  }
+assert.equal(e.choices({tier:'bad',style:'bad',movement:'bad'}).tier,'all');
+assert.equal(e.choices({tier:'bad',style:'bad',movement:'bad'}).style,'all');
+assert.equal(e.choices({tier:'bad',style:'bad',movement:'bad'}).movement,'all');
+assert.deepEqual(Array.from(ids(e.recommend(products,{},3))),Array.from(ids(featured)),'No arbitrary randomness');
+const html=read('site/conseiller.html'),ui=read('site/conseiller.js'),css=read('site/conseiller.css');
+for(const id of ['advisorForm','advisorResults','advisorStatus','advisorSummary','advisorCriteria','advisorError','advisorReset'])assert.ok(html.includes('id="'+id+'"'),id);
+for(const value of ['essential','signature','prestige','sport','classic','minimal','retro','statement','quartz','automatic','eco-drive'])assert.ok(html.includes('value="'+value+'"'),value);
+assert.match(html,/assets\/watches\/citizen-tsuyosa\.webp/);
+assert.match(html,/src="\.\/conseiller-engine\.js" defer/);
+assert.match(html,/src="\.\/conseiller\.js" defer/);
+assert.match(html,/Sans inscription/);
+assert.match(ui,/encodeURIComponent\(p\.id\)/);
+assert.match(ui,/photoReview/);
+assert.match(ui,/localUrl/);
+assert.doesNotMatch(ui,/innerHTML\s*=/);
+assert.match(css,/@media\(max-width:560px\)/);
+assert.match(read('site/affiliation.html'),/href="\.\/conseiller\.html"/);
+assert.match(read('site/montre.html'),/href="\.\/conseiller\.html"/);
+console.log('Advisor: 15 exact watches, 45 preference combinations, real photos, safe interactive navigation — OK');
