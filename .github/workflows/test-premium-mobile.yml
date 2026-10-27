@@ -4,6 +4,13 @@ on:
     branches: [main]
     paths:
       - 'scripts/test-mobile-storefront-v8.mjs'
+      - 'site/affiliation.js'
+      - 'site/affiliation.html'
+      - 'site/montre.html'
+      - 'site/fiche.js'
+      - 'site/photo-zoom.js'
+      - 'site/photo-zoom.css'
+      - 'site/horlogerie.css'
       - '.github/workflows/test-premium-mobile.yml'
   workflow_dispatch:
 
