@@ -46,5 +46,5 @@ assert.match(storefrontJs,/function renderActiveFilters\(\)/,'Filter chips must 
 assert.match(storefrontJs,/if\(key==='brand'\)/,'Removing brand chip must reset brand selector');
 assert.match(storefrontJs,/if\(key==='movement'\)/,'Removing movement chip must reset movement selector');
 assert.match(storefrontJs,/if\(key==='query'\)/,'Removing search chip must clear the query');
-assert.match(storefrontJs,/renderActiveFilters\(\);empty\.hidden/,'Chips must update on every catalogue render');
+assert.match(storefrontJs,/renderActiveFilters\(\);renderRecentlyViewed\(\);empty\.hidden/,'Chips and recent history must update on each catalogue render');
 console.log('Photo source review: 15 exact packshot references; public license gate and responsive preview — OK');
