@@ -207,3 +207,7 @@ html{scroll-padding-top:95px}
  .am-dialog-note{padding:0 13px 15px;font-size:10px}
 }
 @media(prefers-reduced-motion:reduce){.am-compare-mobile-track{scroll-behavior:auto}}
+
+/* Keep explanatory copy measurable even when large compare tables overflow. */
+.am-dialog .am-compare-body{display:block;box-sizing:border-box;width:100%;min-width:0}
+.am-dialog .am-compare-diff-note{display:block;box-sizing:border-box;width:100%;min-width:min(180px,100%);line-height:1.6}
