@@ -6,6 +6,7 @@ on:
       - '.github/workflows/test-published-watch-storefront.yml'
       - 'scripts/test-selection-share.mjs'
       - 'scripts/test-mobile-live-storefront.mjs'
+      - 'scripts/test-recently-viewed.mjs'
   workflow_dispatch:
 permissions:
   contents: read
@@ -22,12 +23,13 @@ jobs:
         run: |
           npm install --no-save --no-audit --no-fund playwright
           npx playwright install --with-deps chromium
-      - name: Verify deployed website, 15 local watch photos and sharing
+      - name: Verify deployed website, 15 local photos, sharing and watch history
         env:
-          WATCH_STOREFRONT_URL: https://vivid-seed-ef477pv.shipstatic.com
+          WATCH_STOREFRONT_URL: https://nano-frame-2cb9avu.shipstatic.com
         run: |
           node scripts/test-mobile-live-storefront.mjs
           node scripts/test-selection-share.mjs
+          node scripts/test-recently-viewed.mjs
       - name: Save real deployment screenshots
         if: always()
         uses: actions/upload-artifact@v4
