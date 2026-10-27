@@ -1,0 +1,39 @@
+name: Verify recently viewed watch history on Android
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'site/affiliation.js'
+      - 'site/affiliation.html'
+      - 'site/affiliation.css'
+      - 'site/fiche.js'
+      - 'scripts/test-recently-viewed.mjs'
+      - '.github/workflows/test-recently-viewed.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  recent-mobile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check syntax
+        run: |
+          node --check site/affiliation.js
+          node --check site/fiche.js
+          node --check scripts/test-recently-viewed.mjs
+      - name: Install Chromium
+        run: |
+          npm install --no-save --no-audit --no-fund playwright
+          npx playwright install --with-deps chromium
+      - name: Exercise local watch history at Android viewport
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 --directory site > /tmp/watch-recent-http.log 2>&1 &
+          pid=$!
+          trap 'kill "$pid" 2>/dev/null || true' EXIT
+          sleep 2
+          WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-recently-viewed.mjs
