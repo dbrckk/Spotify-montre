@@ -2,7 +2,21 @@
 
 **Statut au 27 octobre 2026 : pré-lancement, vitrine gratuite, pas de paiement activé.**
 
-## Version actuelle — V8 mobile et photographies réelles (27 octobre 2026)
+## Version actuelle — V9 galerie de photographies (27 octobre 2026)
+
+**Boutique : https://slippery-lens-4x9n6zu.shipstatic.com/**
+
+- 15 photographies authentiques **hébergées localement**, 6 montres accessibles, 6 intermédiaires et 3 prestige.
+- Visionneuse plein écran sur chaque photo, agrandissement x2, navigation clavier / mobile.
+- Nouveaux filtres quartz / automatique / solaire avec restauration du catalogue quand la recherche ne donne rien.
+- Comparateur de 2 à 3 montres : photographies et différences techniques mises en évidence.
+- Fiches avec vue agrandie, trois suggestions, favoris, partage et accès aux fabricants.
+- Tests locaux Chromium avec assertions de la visionneuse, des images et des fiches, tests de navigation Android et vérification du site public.
+- Vitrine de pré-lancement : sans paiement, sans inventaire synchronisé et avec droits de diffusion commerciale des photos restant à confirmer.
+
+**Détails techniques :** [notes de livraison V9](docs/release-gallery-v9.md).
+
+## Historique — V8 mobile et photographies réelles (27 octobre 2026)
 
 **Ouvrir la boutique : https://hyped-logic-88n9yg5.shipstatic.com/**
 
