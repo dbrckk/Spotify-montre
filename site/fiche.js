@@ -35,6 +35,7 @@
      }else fallback();
    }
    $('detailHighlights').replaceChildren(...(p.highlights||[]).map(t=>node('span','',t)));
+   const compareLink=$('detailCompare');if(compareLink){const url=new URL('./affiliation.html',location.href);url.searchParams.set('compare',p.id);url.hash='montres';compareLink.href=url.href}
    $('detailOfficial').href=p.officialUrl;
    $('detailOfficial').setAttribute('aria-label','Voir '+p.model+' sur le site officiel '+p.brand);
    const q=encodeURIComponent((p.brand+' '+p.model).slice(0,90));
