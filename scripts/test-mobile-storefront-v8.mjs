@@ -85,7 +85,7 @@ await page.locator('#affGrid .aff-card input[type="checkbox"]').nth(0).check();
  await page.locator('#affCompareDialog').waitFor({state:'visible'});
  assert.equal(await page.locator('#affCompareDialog .am-compare-thumb').count(),2,'Both compared models should display real photographs');
  const note=page.locator('.am-compare-diff-note');
- if(!(await note.isVisible()))console.error('COMPARISON NOTE DEBUG',await note.evaluateAll(nodes=>nodes.map(n=>({outer:n.outerHTML,rect:n.getBoundingClientRect().toJSON(),css:getComputedStyle(n).display,parent:n.parentElement?.outerHTML.slice(0,200)}))));
+ if(!(await note.isVisible())){console.error('COMPARISON NOTE DEBUG',await note.evaluateAll(nodes=>nodes.map(n=>[n,n.parentElement,n.parentElement?.parentElement].map(e=>e&&({tag:e.tagName,class:e.className,rect:e.getBoundingClientRect().toJSON(),display:getComputedStyle(e).display,width:getComputedStyle(e).width,flex:getComputedStyle(e).flex,overflow:getComputedStyle(e).overflow})))));await page.screenshot({path:'artifacts/mobile-compare-debug.png',fullPage:true})}
  assert.ok(await note.isVisible(),'Explain factual differences');
  assert.equal(await page.locator('.am-compare-mobile-card').count(),2,'Comparison must create two readable mobile swipe cards');
  assert.ok(await page.locator('.am-compare-mobile-track').isVisible(),'Touch carousel must appear on mobile');
