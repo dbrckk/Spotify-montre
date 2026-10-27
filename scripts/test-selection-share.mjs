@@ -23,6 +23,8 @@ try{
   await page.waitForFunction(()=>document.querySelector('#affBrand')?.value==='Tissot',{timeout:10000});
   assert.equal(await page.locator('#affGrid .aff-card').count(),1,'One Tissot PRX automatic model');
   assert.equal(await page.locator('#affBrand').inputValue(),'Tissot');
+  assert.equal(await page.locator('#affReset').isVisible(),true,'Clear-all button should remain visible with active filters and matching results');
+  assert.match(await page.locator('#affBrand option[value="Tissot"]').textContent(),/Tissot \(2\)/,'Brand filter shows accurate catalogue counts');
   assert.equal(await page.locator('#affMovement').inputValue(),'automatic');
   assert.equal(await page.locator('#affSearch').inputValue(),'PRX');
   assert.equal(await page.locator('#affSort').inputValue(),'name');
@@ -39,6 +41,9 @@ try{
   await page.locator('.am-filter-chip[aria-label="Supprimer le filtre Tissot"]').click();
   assert.equal(await page.locator('#affBrand').inputValue(),'all','One filter chip clears just that brand');
   assert.equal(await page.locator('#affMovement').inputValue(),'automatic','Other filters survive chip reset');
+  await page.locator('#affReset').click();
+  assert.equal(await page.locator('#affGrid .aff-card').count(),15,'Reset restores all 15 watches');
+  assert.equal(await page.locator('#affReset').isVisible(),false,'Reset button hides only after all filters are cleared');
   assert.deepEqual(errors,[],'No browser runtime exceptions');
   console.log('PASS SHARE: Android viewport, 5 restored URL filters, native share link, single filter reset');
 }finally{await browser.close()}
