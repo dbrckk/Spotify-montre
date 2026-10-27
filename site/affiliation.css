@@ -17,3 +17,11 @@
 
 /* Removable filters: touch-friendly, compact and visible without opening selects. */
 .am-active-filters{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:0 0 22px}.am-active-filters[hidden]{display:none}.am-filter-chip{appearance:none;border:1px solid #c7bca8;background:#e9e6dc;color:#1d3829;border-radius:100px;min-height:42px;padding:9px 15px;font:650 12px/1.4 system-ui,sans-serif;cursor:pointer;transition:background .18s ease,border-color .18s ease}.am-filter-chip:hover{background:#d9e0d5;border-color:#79977f}.am-filter-chip:focus-visible{outline:3px solid #c7a56c;outline-offset:3px}@media(prefers-reduced-motion:reduce){.am-filter-chip{transition:none}}
+
+/* Shareable catalogue link: clear 44px touch target and safe mobile wrapping. */
+.am-share-selection{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 24px}
+.am-share-selection button{min-height:44px;border:1px solid #b7a88d;padding:11px 17px;background:#faf8f2;color:#244431;font:650 12px system-ui,sans-serif;letter-spacing:.025em;cursor:pointer}
+.am-share-selection button:hover{background:#e9e6da}
+.am-share-selection button:focus-visible{outline:3px solid #c9a668;outline-offset:3px}
+.am-share-selection [role="status"]{color:#315942;font:12px/1.6 system-ui,sans-serif;overflow-wrap:anywhere;max-width:100%}
+@media(max-width:620px){.am-share-selection button{width:100%;text-align:center}.am-share-selection{align-items:stretch}}
