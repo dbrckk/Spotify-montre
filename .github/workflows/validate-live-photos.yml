@@ -4,6 +4,12 @@ on:
   push:
     branches: [main]
     paths:
+      - 'site/affiliation.html'
+      - 'site/affiliation.js'
+      - 'site/affiliation.css'
+      - 'site/fiche.js'
+      - 'site/fiche.css'
+      - 'site/selection-affiliation.json'
       - 'scripts/test-mobile-live-storefront.mjs'
       - '.github/workflows/validate-live-photos.yml'
   workflow_dispatch:
