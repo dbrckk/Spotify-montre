@@ -41,4 +41,10 @@ assert.match(storefront,/id="affBrand"/,'Brand filter must be available in colle
 assert.match(storefrontJs,/new Set\(data\.map\(p=>p\.brand\)\)/,'Brand options must derive from the catalogue');
 assert.match(storefrontJs,/brand==='all'\|\|p\.brand===brand/,'Brand filtering must combine with other criteria');
 assert.match(storefrontJs,/brand='all';query=''/,'Reset must also clear brand filter');
+assert.match(storefront,/id="affActiveFilters"/,'Active filter chip region must be present');
+assert.match(storefrontJs,/function renderActiveFilters\(\)/,'Filter chips must be rendered');
+assert.match(storefrontJs,/if\(key==='brand'\)/,'Removing brand chip must reset brand selector');
+assert.match(storefrontJs,/if\(key==='movement'\)/,'Removing movement chip must reset movement selector');
+assert.match(storefrontJs,/if\(key==='query'\)/,'Removing search chip must clear the query');
+assert.match(storefrontJs,/renderActiveFilters\(\);empty\.hidden/,'Chips must update on every catalogue render');
 console.log('Photo source review: 15 exact packshot references; public license gate and responsive preview — OK');
