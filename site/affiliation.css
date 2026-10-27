@@ -50,7 +50,7 @@
 @media(prefers-reduced-motion:reduce){.am-recent-card{transition:none}.am-recent-card:hover{transform:none}}
 
 /* Floating premium comparison dock: immediately visible after the first selection. */
-.am-compare-tray{
+body .aff-selection .am-compare-tray{
  position:fixed;z-index:38;left:50%;right:auto;bottom:max(12px,env(safe-area-inset-bottom));
  transform:translateX(-50%);margin:0;box-sizing:border-box;
  width:min(720px,calc(100vw - 24px));max-width:none;max-height:44dvh;
