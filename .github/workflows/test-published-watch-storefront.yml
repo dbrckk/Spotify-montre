@@ -25,7 +25,7 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Verify deployed website, 15 local photos, sharing and watch history
         env:
-          WATCH_STOREFRONT_URL: https://nano-frame-2cb9avu.shipstatic.com
+          WATCH_STOREFRONT_URL: https://pure-shade-mku576j.shipstatic.com
         run: |
           node scripts/test-mobile-live-storefront.mjs
           node scripts/test-selection-share.mjs
