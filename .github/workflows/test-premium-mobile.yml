@@ -4,6 +4,11 @@ on:
     branches: [main]
     paths:
       - 'scripts/test-mobile-storefront-v8.mjs'
+      - 'site/conseiller.html'
+      - 'site/conseiller.css'
+      - 'site/conseiller.js'
+      - 'site/conseiller-engine.js'
+      - 'scripts/test-adviser-browser.mjs'
       - 'site/affiliation.js'
       - 'site/affiliation.html'
       - 'site/montre.html'
@@ -37,11 +42,12 @@ jobs:
           trap 'kill "$pid" 2>/dev/null || true' EXIT
           sleep 2
           WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-mobile-storefront-v8.mjs
+          WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-adviser-browser.mjs
       - name: Preserve mobile and desktop screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: premium-watch-mobile-desktop
-          path: artifacts/*related-watch-detail.png
+          path: artifacts/*.png
           if-no-files-found: ignore
           retention-days: 7
