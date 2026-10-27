@@ -1,0 +1,34 @@
+'use strict';
+/* Deterministic editorial recommendation engine — no network, no tracking, no prices invented. */
+(function(scope){
+ const tierNames={essential:'Essentielle',signature:'Signature',prestige:'Prestige'};
+ const movementNames={quartz:'Quartz',automatic:'Automatique','eco-drive':'Solaire Eco-Drive'};
+ const styleNames={sport:'Sport chic',classic:'Élégance classique',minimal:'Épuré',retro:'Vintage',statement:'Audacieux'};
+ const allowed={tier:new Set(['all',...Object.keys(tierNames)]),movement:new Set(['all',...Object.keys(movementNames)]),style:new Set(['all',...Object.keys(styleNames)])};
+ function choices(input){
+  const v=input&&typeof input==='object'?input:{};
+  return {tier:allowed.tier.has(v.tier)?v.tier:'all',style:allowed.style.has(v.style)?v.style:'all',movement:allowed.movement.has(v.movement)?v.movement:'all'};
+ }
+ function score(p,c,index){
+  const details=[];
+  let total=0,exact=0;
+  if(c.tier!=='all'){if(p.tier===c.tier){total+=8;exact++;details.push('Gamme '+tierNames[p.tier])}else total-=3}
+  if(c.style!=='all'){if(p.style===c.style){total+=7;exact++;details.push(styleNames[p.style])}else if((c.style==='classic'&&p.style==='minimal')||(c.style==='minimal'&&p.style==='classic')){total+=2}else total-=2}
+  if(c.movement!=='all'){if(p.movement===c.movement){total+=7;exact++;details.push(movementNames[p.movement])}else total-=3}
+  const selected=Number(c.tier!=='all')+Number(c.style!=='all')+Number(c.movement!=='all');
+  return {product:p,score:total,matched:exact,criteria:selected,details,index};
+ }
+ function recommend(products,selection,limit=3){
+  if(!Array.isArray(products))return [];
+  const c=choices(selection),allEmpty=c.tier==='all'&&c.style==='all'&&c.movement==='all';
+  const valid=products.filter(p=>p&&typeof p.id==='string'&&Object.hasOwn(tierNames,p.tier)&&Object.hasOwn(styleNames,p.style)&&Object.hasOwn(movementNames,p.movement));
+  if(allEmpty){
+    const preferred=['casio-mtp-1302','citizen-tsuyosa','tissot-prx-auto'];
+    const selected=preferred.map(id=>valid.find(p=>p.id===id)).filter(Boolean);
+    const remaining=valid.filter(p=>!selected.includes(p));
+    return selected.concat(remaining).slice(0,Math.max(0,Math.min(15,limit))).map((p,i)=>({product:p,score:0,matched:0,criteria:0,details:['Choix de la rédaction'],index:i}));
+  }
+  return valid.map((p,i)=>score(p,c,i)).sort((a,b)=>b.matched-a.matched||b.score-a.score||a.index-b.index).slice(0,Math.max(0,Math.min(15,limit)));
+ }
+ scope.AtelierAdvisorEngine=Object.freeze({recommend,choices,tierNames,movementNames,styleNames});
+})(globalThis);
