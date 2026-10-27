@@ -1,0 +1,38 @@
+/* Atelier Montres · genuine-watch photographic viewer */
+.am-photo-dialog{position:fixed;inset:0;width:min(1020px,calc(100vw - 30px));max-width:1020px;max-height:min(95dvh,950px);margin:auto;padding:0;border:1px solid #c6ae83;background:#f8f6ef;color:#20392a;box-shadow:0 32px 90px #09150cc2;overflow:auto;overscroll-behavior:contain}
+.am-photo-dialog::backdrop{background:#07120bd9;backdrop-filter:blur(7px)}
+.am-photo-top{padding:17px 24px;background:#172e22;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.am-photo-meta{min-width:0}
+.am-photo-kicker{font:700 9px/1.4 system-ui,sans-serif;letter-spacing:.2em;color:#d8b987;margin:0 0 5px}
+.am-photo-title{font:400 clamp(19px,3vw,30px)/1.2 Georgia,serif;color:#fff;overflow-wrap:anywhere;margin:0}
+.am-photo-close{width:44px;height:44px;flex:none;border:1px solid #e1cfaf66;border-radius:50%;background:transparent;color:#fff;font:400 30px/1 system-ui;cursor:pointer}
+.am-photo-canvas{height:clamp(300px,59dvh,650px);background:radial-gradient(circle at center,#fffefa 0%,#eeeae1 80%);position:relative;display:flex;align-items:center;justify-content:center;overflow:auto;overscroll-behavior:contain;padding:16px}
+.am-photo-large{width:auto;height:auto;max-height:100%;max-width:100%;object-fit:contain;mix-blend-mode:multiply;filter:drop-shadow(0 15px 25px #071c1324);transition:width .18s ease,max-width .18s ease}
+.am-photo-canvas.am-photo-expanded{justify-content:flex-start;align-items:flex-start}
+.am-photo-canvas.am-photo-expanded .am-photo-large{max-width:none;max-height:none;width:175%;height:auto;margin:auto}
+.am-photo-status{max-width:250px;text-align:center;font-size:13px;color:#617063}
+.am-photo-bottom{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;padding:17px 22px 8px}
+.am-photo-bottom button,.am-photo-official{font:650 12px system-ui,sans-serif;border:1px solid #c9c2b3;background:#fffefa;color:#23432f;padding:11px 15px;min-height:44px;cursor:pointer;border-radius:2px;text-decoration:none}
+.am-photo-bottom button:hover,.am-photo-official:hover{background:#e7e8df}
+.am-photo-bottom button:disabled{opacity:.4;cursor:default}
+.am-photo-position{font-size:12px;letter-spacing:.12em;color:#6d756e;min-width:43px;text-align:center}
+.am-photo-official{background:#244532;color:#fff;border-color:#244532}
+.am-photo-official:hover{background:#315740;color:#fff}
+.am-photo-note{padding:0 24px 14px;color:#737b71;font-size:10px;line-height:1.6;text-align:center;margin:5px 0 0}
+.aff-illustration{overflow:hidden}
+.aff-photo-expand{position:absolute;inset:0;z-index:4;border:0;background:transparent;color:#263f31;cursor:zoom-in;display:flex;align-items:flex-end;justify-content:flex-end;padding:14px}
+.aff-photo-expand span{background:#fffefaeb;border:1px solid #e0d6c6;padding:8px 11px;box-shadow:0 4px 12px #14231b16;font:700 10px system-ui,sans-serif;letter-spacing:.03em}
+.aff-photo-expand:hover span,.aff-photo-expand:focus-visible span{background:#244532;color:#fff}
+.aff-photo-expand:focus-visible{outline:3px solid #d7af70;outline-offset:-3px}
+.aff-card .aff-illustration:has(.aff-photo-expand) .aff-art-label{pointer-events:none}
+.detail-photo-expand{min-height:44px;border:1px solid #c2b79f;background:#fffdf7;color:#234531;font:700 12px system-ui,sans-serif;padding:12px 18px;cursor:zoom-in;margin:12px 0 2px}
+.detail-photo-expand:hover{background:#294c36;color:#fff}
+@media(max-width:650px){
+ .am-photo-dialog{width:calc(100vw - 12px);max-height:96dvh}
+ .am-photo-top{padding:12px 14px}
+ .am-photo-canvas{height:clamp(280px,54dvh,560px)}
+ .am-photo-bottom{gap:7px;padding:12px 9px 7px}
+ .am-photo-bottom button,.am-photo-official{font-size:11px;padding:9px 11px}
+ .am-photo-note{padding-inline:12px}
+}
+@media(prefers-reduced-motion:reduce){.am-photo-large{transition:none}}
