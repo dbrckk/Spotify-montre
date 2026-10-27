@@ -48,12 +48,31 @@
    body.append(make('p','aff-card-foot','Modèle réel · Liens actuellement non rémunérés'));
    item.append(art,body);return item;
  }
+ function renderActiveFilters(){
+   const target=$('affActiveFilters');if(!target)return;
+   const active=[];
+   if(tier!=='all')active.push(['tier',tier==='favourites'?'Favoris':levels[tier]]);
+   if(brand!=='all')active.push(['brand',brand]);
+   if(movement!=='all')active.push(['movement',moves[movement]||movement]);
+   if(query.trim())active.push(['query','Recherche : '+query.trim()]);
+   target.hidden=active.length===0;
+   target.replaceChildren(...active.map(([key,label])=>{
+     const b=make('button','am-filter-chip',label+' ×');b.type='button';b.setAttribute('aria-label','Supprimer le filtre '+label);
+     b.addEventListener('click',()=>{
+       if(key==='tier')tier='all';
+       if(key==='brand'){brand='all';if(brandSelect)brandSelect.value='all'}
+       if(key==='movement'){movement='all';if(movementSelect)movementSelect.value='all'}
+       if(key==='query'){query='';search.value=''}
+       render();
+     });return b;
+   }));
+ }
  function render(){
    const q=query.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
    visible=data.filter(p=>(tier==='all'||(tier==='favourites'?saved.has(p.id):p.tier===tier))&&(movement==='all'||p.movement===movement)&&(brand==='all'||p.brand===brand)&&word(p).includes(q));
    if(order==='brand')visible=visible.slice().sort((a,b)=>(a.brand+' '+a.model).localeCompare(b.brand+' '+b.model,'fr'));
    if(order==='name')visible=visible.slice().sort((a,b)=>a.model.localeCompare(b.model,'fr'));
-   grid.replaceChildren(...visible.map(card));empty.hidden=visible.length>0;if(reset)reset.hidden=visible.length>0;
+   grid.replaceChildren(...visible.map(card));renderActiveFilters();empty.hidden=visible.length>0;if(reset)reset.hidden=visible.length>0;
    savedCount.textContent=String([...saved].filter(id=>data.some(p=>p.id===id)).length);
    count.textContent=visible.length+' montre'+(visible.length>1?'s':'')+' sélectionnée'+(visible.length>1?'s':'');
    tabs.querySelectorAll('button[data-tier]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.tier===tier)));
