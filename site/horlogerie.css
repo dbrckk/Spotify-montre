@@ -211,3 +211,8 @@ html{scroll-padding-top:95px}
 /* Keep explanatory copy measurable even when large compare tables overflow. */
 .am-dialog .am-compare-body{display:block;box-sizing:border-box;width:100%;min-width:0}
 .am-dialog .am-compare-diff-note{display:block;box-sizing:border-box;width:100%;min-width:min(180px,100%);line-height:1.6}
+
+/* Dialog children must stack vertically: avoid the old zero-width flex shrink in Chromium mobile. */
+dialog.am-dialog[open]{display:block!important;box-sizing:border-box}
+#affCompareDialog #affCompareBody{display:block;box-sizing:border-box;width:auto;min-width:0;max-width:100%;float:none}
+#affCompareDialog .am-compare-diff-note{display:block;width:auto;min-width:0;max-width:100%;overflow-wrap:break-word}
