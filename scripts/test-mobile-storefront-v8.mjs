@@ -63,6 +63,11 @@ try{
  }
  
  // Movement refinement is independent of pricing tiers and brand.
+ await page.locator('#affBrand').selectOption('Citizen');
+ assert.equal(await cards.count(),3,'Brand filter must show the three Citizen references');
+ assert.ok(await page.locator('#affActiveFilters .am-filter-chip').count()>=1,'Active brand should create a removable filter');
+ await page.locator('#affActiveFilters .am-filter-chip',{hasText:'Citizen'}).click();
+ assert.equal(await cards.count(),15,'Removing a single brand filter returns to all 15 models');
  await page.locator('#affMovement').selectOption('eco-drive');
  assert.equal(await cards.count(),1,'Eco-Drive movement must show the matching Citizen');
  await page.locator('#affMovement').selectOption('automatic');
@@ -79,7 +84,14 @@ await page.locator('#affGrid .aff-card input[type="checkbox"]').nth(0).check();
  await page.locator('#affCompareOpen').click();
  await page.locator('#affCompareDialog').waitFor({state:'visible'});
  assert.equal(await page.locator('#affCompareDialog .am-compare-thumb').count(),2,'Both compared models should display real photographs');
- assert.ok(await page.locator('.am-compare-diff-note').isVisible(),'Explain factual differences');
+ const note=page.locator('.am-compare-diff-note');
+ if(!(await note.isVisible()))console.error('COMPARISON NOTE DEBUG',await note.evaluateAll(nodes=>nodes.map(n=>({outer:n.outerHTML,rect:n.getBoundingClientRect().toJSON(),css:getComputedStyle(n).display,parent:n.parentElement?.outerHTML.slice(0,200)}))));
+ assert.ok(await note.isVisible(),'Explain factual differences');
+ assert.equal(await page.locator('.am-compare-mobile-card').count(),2,'Comparison must create two readable mobile swipe cards');
+ assert.ok(await page.locator('.am-compare-mobile-track').isVisible(),'Touch carousel must appear on mobile');
+ await page.locator('.am-compare-mobile-nav button').last().click();
+ await page.waitForFunction(()=>document.querySelector('.am-compare-mobile-position')?.textContent==='2 / 2',{timeout:5000});
+
  for(const comparisonImg of await page.locator('#affCompareDialog .am-compare-thumb').all()){
    const state=await checkPhoto(comparisonImg);assert.ok(state.width>200,'Comparison photograph must decode');
  }
@@ -111,6 +123,10 @@ await page.locator('#affGrid .aff-card input[type="checkbox"]').nth(0).check();
  await page.locator('#detailFavorite').click();
  assert.equal(await page.locator('#detailFavorite').getAttribute('aria-pressed'),'false','Detail favorite must toggle and persist');
  assert.ok(await page.locator('#detailShare').isVisible(),'Native sharing action should be present');
+ assert.ok(await page.locator('#detailCompare').isVisible(),'Product detail must offer one-tap comparison');
+ const comparisonUrl=await page.locator('#detailCompare').getAttribute('href');
+ assert.ok(comparisonUrl.includes('compare=citizen-tsuyosa'),'Product link must carry the actual selected model');
+
  await page.screenshot({path:'artifacts/mobile-related-watch-detail.png',fullPage:true});
  console.log('PASS: responsive header, real images, filters, photo comparator, related watch images, synced favorites and product navigation');
 
