@@ -125,3 +125,11 @@ html{scroll-padding-top:95px}
 }
 @media(max-width:370px){.am-header .brand{font-size:20px}.am-mobile-nav>summary{padding-inline:9px;gap:7px}}
 @media(prefers-reduced-motion:reduce){.am-mobile-nav-icon,.am-mobile-nav-icon::before,.am-mobile-nav-icon::after{transition:none}}
+
+
+/* Real watch thumbnail comparison: horizontal scrolling stays inside the modal. */
+.am-compare-head{min-width:155px;width:165px}
+.am-compare-thumb{display:block;width:100px;height:105px;max-width:100%;object-fit:contain;mix-blend-mode:multiply;margin:0 auto 9px}
+.am-compare-name{display:block;white-space:normal;line-height:1.5}
+.am-dialog .am-compare-body{overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+.aff-selection,.aff-tiers,.am-editorial,.am-partners{scroll-margin-top:90px}
