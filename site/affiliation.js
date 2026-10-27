@@ -1,11 +1,11 @@
 'use strict';
 (() => {
  const $=id=>document.getElementById(id);
- const grid=$('affGrid'),tabs=$('affTabs'),search=$('affSearch'),count=$('affResultCount'),savedCount=$('affSavedCount'),empty=$('affEmpty'),sort=$('affSort'),movementSelect=$('affMovement'),reset=$('affReset');
+ const grid=$('affGrid'),tabs=$('affTabs'),search=$('affSearch'),count=$('affResultCount'),savedCount=$('affSavedCount'),empty=$('affEmpty'),sort=$('affSort'),movementSelect=$('affMovement'),brandSelect=$('affBrand'),reset=$('affReset');
  if(!grid||!tabs||!search||!count||!savedCount||!empty)return;
  const levels={essential:'Essentielle',signature:'Signature',prestige:'Prestige'},moves={quartz:'Quartz',automatic:'Automatique','eco-drive':'Solaire'};
  const approvedHosts=['casio.com','swatch.com','citizenwatch.eu','orientwatch.fr','seikowatches.com','tissotwatches.com','hamiltonwatch.com'];
- let data=[],tier='all',query='',order='editorial',movement='all',visible=[],saved=new Set(),compare=[];
+ let data=[],tier='all',query='',order='editorial',movement='all',brand='all',visible=[],saved=new Set(),compare=[];
  const KEY='atelier-montres-multibrand-favorites-v1';
  try{const x=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(x))saved=new Set(x.filter(y=>typeof y==='string'&&y.length<80))}catch(_){}
  const make=(tag,cls,txt)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n;};
@@ -50,7 +50,7 @@
  }
  function render(){
    const q=query.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
-   visible=data.filter(p=>(tier==='all'||(tier==='favourites'?saved.has(p.id):p.tier===tier))&&(movement==='all'||p.movement===movement)&&word(p).includes(q));
+   visible=data.filter(p=>(tier==='all'||(tier==='favourites'?saved.has(p.id):p.tier===tier))&&(movement==='all'||p.movement===movement)&&(brand==='all'||p.brand===brand)&&word(p).includes(q));
    if(order==='brand')visible=visible.slice().sort((a,b)=>(a.brand+' '+a.model).localeCompare(b.brand+' '+b.model,'fr'));
    if(order==='name')visible=visible.slice().sort((a,b)=>a.model.localeCompare(b.model,'fr'));
    grid.replaceChildren(...visible.map(card));empty.hidden=visible.length>0;if(reset)reset.hidden=visible.length>0;
@@ -64,7 +64,8 @@
  search.addEventListener('input',()=>{query=search.value.slice(0,100);render()});
  if(sort)sort.addEventListener('change',()=>{order=sort.value;render()});
  if(movementSelect)movementSelect.addEventListener('change',()=>{movement=movementSelect.value;render()});
- if(reset)reset.addEventListener('click',()=>{tier='all';movement='all';query='';order='editorial';search.value='';if(sort)sort.value='editorial';if(movementSelect)movementSelect.value='all';render();search.focus()});
+ if(brandSelect)brandSelect.addEventListener('change',()=>{brand=brandSelect.value;render()});
+ if(reset)reset.addEventListener('click',()=>{tier='all';movement='all';brand='all';query='';order='editorial';search.value='';if(sort)sort.value='editorial';if(movementSelect)movementSelect.value='all';if(brandSelect)brandSelect.value='all';render();search.focus()});
  document.querySelectorAll('a[data-goto-tier]').forEach(a=>a.addEventListener('click',()=>{tier=a.dataset.gotoTier;render()}));
  function showComparison(){
    if(!dialog||!compareBody||compare.length<2)return;
@@ -101,6 +102,7 @@
  fetch('./selection-affiliation.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('data');return r.json()}).then(x=>{
   if(x?.version!==1||!Array.isArray(x.products)||x.products.length!==15||x.affiliateEnabled!==false)throw Error('invalid');
   data=x.products.filter(valid);if(data.length!==15)throw Error('incomplete catalogue');
+  if(brandSelect){for(const name of [...new Set(data.map(p=>p.brand))].sort((a,b)=>a.localeCompare(b,'fr'))){const option=make('option','',name);option.value=name;brandSelect.append(option)}}
   const hero=$('heroWatch'),featured=data.find(p=>p.id==='citizen-tsuyosa');
   if(hero&&featured){
     const fallback=()=>{hero.replaceChildren();hero.classList.remove('am-hero-real');window.AtelierWatch?.render(hero,featured);const caption=document.querySelector('.am-hero-label small');if(caption)caption.textContent='Illustration de secours · photographie indisponible'};
