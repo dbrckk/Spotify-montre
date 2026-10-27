@@ -86,41 +86,103 @@
  if(brandSelect)brandSelect.addEventListener('change',()=>{brand=brandSelect.value;render()});
  if(reset)reset.addEventListener('click',()=>{tier='all';movement='all';brand='all';query='';order='editorial';search.value='';if(sort)sort.value='editorial';if(movementSelect)movementSelect.value='all';if(brandSelect)brandSelect.value='all';render();search.focus()});
  document.querySelectorAll('a[data-goto-tier]').forEach(a=>a.addEventListener('click',()=>{tier=a.dataset.gotoTier;render()}));
+ function comparisonRows(selected){
+   return [
+     ['Gamme',p=>levels[p.tier]],
+     ['Mouvement',p=>p.specs?.movement||moves[p.movement]||'Non confirmé'],
+     ['Diamètre',p=>p.specs?.diameter||'À vérifier'],
+     ['Verre',p=>p.specs?.glass||'À vérifier'],
+     ['Étanchéité',p=>p.specs?.waterResistance||'À vérifier']
+   ].map(([label,get])=>{
+     const values=selected.map(get);
+     return {label,values,different:new Set(values).size>1};
+   });
+ }
+ function compareImage(p,cls){
+   const sources=photoSources(p),img=make('img',cls);
+   img.alt='Photographie '+p.brand+' '+p.model;img.decoding='async';img.loading='lazy';img.referrerPolicy='no-referrer';
+   if(sources.length){let pos=0;img.onerror=()=>{pos++;if(pos<sources.length)img.src=sources[pos];else img.remove()};img.src=sources[0]}
+   return sources.length?img:null;
+ }
  function showComparison(){
    if(!dialog||!compareBody||compare.length<2)return;
    const selected=compare.map(id=>data.find(p=>p.id===id)).filter(Boolean);
+   if(selected.length<2)return;
+   const rows=comparisonRows(selected);
    const table=make('table','am-compare-table'),head=make('thead'),tr=make('tr');
-   tr.append(make('th','','Critère'));
+   tr.append(make('th','am-compare-criterion','Critère'));
    for(const p of selected){
      const th=make('th','am-compare-head');
-     const photos=photoSources(p);
-     if(photos.length){
-       const img=make('img','am-compare-thumb');img.alt='Photographie '+p.brand+' '+p.model;img.loading='lazy';img.decoding='async';img.referrerPolicy='no-referrer';
-       let source=0;img.onerror=()=>{source++;if(source<photos.length)img.src=photos[source];else img.remove()};
-       img.src=photos[0];th.append(img);
-     }
-     th.append(make('span','am-compare-name',p.brand+' '+p.model));
-     tr.append(th);
+     const image=compareImage(p,'am-compare-thumb');if(image)th.append(image);
+     th.append(make('span','am-compare-name',p.brand+' '+p.model));tr.append(th);
    }
    head.append(tr);table.append(head);
    const tbody=make('tbody');
-   const rows=[['Gamme',p=>levels[p.tier]],['Mouvement',p=>p.specs?.movement||moves[p.movement]||'Non confirmé'],['Diamètre',p=>p.specs?.diameter||'À vérifier'],['Verre',p=>p.specs?.glass||'À vérifier'],['Étanchéité',p=>p.specs?.waterResistance||'À vérifier']];
-   for(const [label,fn] of rows){
-     const values=selected.map(fn),different=new Set(values).size>1;
-     const row=make('tr');row.append(make('th','',label));
-     selected.forEach((p,i)=>{const td=make('td',different?'am-compare-different':'',values[i]);row.append(td)});
+   for(const item of rows){
+     const row=make('tr');row.append(make('th','am-compare-criterion',item.label));
+     item.values.forEach(value=>row.append(make('td',item.different?'am-compare-different':'',value)));
      tbody.append(row);
    }
-   const row=make('tr');row.append(make('th','','Fiche'));for(const p of selected){const td=make('td'),a=make('a','','Découvrir ↗');a.href=detail(p.id);td.append(a);row.append(td)}tbody.append(row);table.append(tbody);
-   compareBody.replaceChildren(make('p','am-compare-diff-note','Les différences entre les modèles sont mises en évidence.'),table);if(typeof dialog.showModal==='function')dialog.showModal();
+   const row=make('tr');row.append(make('th','am-compare-criterion','Fiche'));
+   for(const p of selected){const td=make('td'),a=make('a','','Découvrir ↗');a.href=detail(p.id);td.append(a);row.append(td)}
+   tbody.append(row);table.append(tbody);
+   const mobile=make('div','am-compare-mobile');
+   const guide=make('p','am-compare-mobile-hint','Faites glisser pour consulter chaque montre.');
+   const track=make('div','am-compare-mobile-track');track.tabIndex=0;track.setAttribute('role','region');track.setAttribute('aria-label','Comparatif des montres, balayage horizontal');
+   const slides=selected.map((p,index)=>{
+     const card=make('article','am-compare-mobile-card');
+     const header=make('div','am-compare-mobile-product');
+     header.append(make('span','am-compare-mobile-counter',(index+1)+' / '+selected.length));
+     const photo=compareImage(p,'am-compare-mobile-photo');if(photo)header.append(photo);
+     header.append(make('h3','',p.brand+' '+p.model));card.append(header);
+     const dl=make('dl','am-compare-mobile-specs');
+     for(const item of rows){
+       const line=make('div',item.different?'am-compare-mobile-diff':'');
+       line.append(make('dt','',item.label),make('dd','',item.values[index]));dl.append(line);
+     }
+     card.append(dl);
+     const link=make('a','am-compare-mobile-detail','Découvrir la fiche →');link.href=detail(p.id);card.append(link);
+     return card;
+   });
+   track.append(...slides);
+   const nav=make('div','am-compare-mobile-nav');
+   const prev=make('button','','← Précédente'),next=make('button','','Suivante →'),position=make('span','am-compare-mobile-position','1 / '+slides.length);
+   prev.type='button';next.type='button';prev.disabled=true;
+   const select=i=>{
+     const n=Math.min(slides.length-1,Math.max(0,i));
+     track.scrollTo({left:slides[n].offsetLeft-slides[0].offsetLeft,behavior:'smooth'});
+     position.textContent=(n+1)+' / '+slides.length;prev.disabled=n===0;next.disabled=n===slides.length-1;
+   };
+   prev.addEventListener('click',()=>select(Math.max(0,Math.round(track.scrollLeft/Math.max(1,slides[1]?.offsetLeft-slides[0].offsetLeft))-1)));
+   next.addEventListener('click',()=>select(Math.min(slides.length-1,Math.round(track.scrollLeft/Math.max(1,slides[1]?.offsetLeft-slides[0].offsetLeft))+1)));
+   track.addEventListener('scroll',()=>{
+     const step=slides[1]?.offsetLeft-slides[0].offsetLeft||track.clientWidth;
+     const i=Math.min(slides.length-1,Math.max(0,Math.round(track.scrollLeft/Math.max(1,step))));
+     position.textContent=(i+1)+' / '+slides.length;prev.disabled=i===0;next.disabled=i===slides.length-1;
+   },{passive:true});
+   nav.append(prev,position,next);mobile.append(guide,track,nav);
+   compareBody.replaceChildren(make('p','am-compare-diff-note','Les caractéristiques différentes sont mises en évidence. Aucune donnée de prix ou de stock n’est estimée.'),table,mobile);
+   if(typeof dialog.showModal==='function'&&!dialog.open)dialog.showModal();
  }
  if(compareOpen)compareOpen.addEventListener('click',showComparison);
  if(compareClear)compareClear.addEventListener('click',()=>{compare=[];render()});
+ if($('affCompareShare'))$('affCompareShare').addEventListener('click',async()=>{
+   if(compare.length<2)return;
+   const url=new URL('./affiliation.html',location.href);url.searchParams.set('compare',compare.join(','));url.hash='montres';
+   const button=$('affCompareShare'),label=button.textContent;
+   try{
+     if(navigator.share){await navigator.share({title:'Comparaison de montres — Atelier Montres',url:url.href});return}
+     await navigator.clipboard.writeText(url.href);button.textContent='Lien copié ✓';
+   }catch(e){if(e?.name==='AbortError')return;button.textContent='Copie indisponible'}
+   setTimeout(()=>{button.textContent=label},2500);
+ });
  if($('affCompareClose'))$('affCompareClose').addEventListener('click',()=>dialog.close());
  if(dialog)dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close()});
  fetch('./selection-affiliation.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('data');return r.json()}).then(x=>{
   if(x?.version!==1||!Array.isArray(x.products)||x.products.length!==15||x.affiliateEnabled!==false)throw Error('invalid');
   data=x.products.filter(valid);if(data.length!==15)throw Error('incomplete catalogue');
+  const initial=new URLSearchParams(location.search).get('compare');
+  if(initial){compare=[...new Set(initial.split(',').slice(0,3))].filter(id=>data.some(p=>p.id===id));}
   if(brandSelect){for(const name of [...new Set(data.map(p=>p.brand))].sort((a,b)=>a.localeCompare(b,'fr'))){const option=make('option','',name);option.value=name;brandSelect.append(option)}}
   const hero=$('heroWatch'),featured=data.find(p=>p.id==='citizen-tsuyosa');
   if(hero&&featured){
@@ -129,5 +191,6 @@
     if(sources.length){const img=make('img','am-hero-real-photo');img.alt='Citizen Tsuyosa NJ0150-81X — photographie authentique';img.decoding='async';img.loading='eager';img.fetchPriority='high';img.referrerPolicy='no-referrer';let i=0;img.onerror=()=>{i++;if(i<sources.length)img.src=sources[i];else fallback()};hero.classList.add('am-hero-real');hero.replaceChildren(img);img.src=sources[0]}else fallback();
   }
   render();
+  if(compare.length>=2)showComparison();
  }).catch(()=>{count.textContent='Catalogue temporairement indisponible';empty.hidden=false;grid.replaceChildren()});
 })();
