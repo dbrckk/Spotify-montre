@@ -12,6 +12,13 @@
    if(x?.version!==1||!Array.isArray(x.products)||x.affiliateEnabled!==false)throw Error('Invalid feed');
    const p=x.products.find(t=>t.id===id);
    if(!p||!safeOfficial(p.officialUrl)||p.affiliateUrl!==null||p.merchantLinkStatus!=='untracked_official')throw Error('Invalid model');
+   // Keep a short device-local browsing history. No cookies or remote tracking.
+   try{
+     const key='atelier-montres-recent-v1';
+     const stored=JSON.parse(localStorage.getItem(key)||'[]');
+     const ids=Array.isArray(stored)?stored.filter(v=>typeof v==='string'&&v.length<80):[];
+     localStorage.setItem(key,JSON.stringify([p.id,...ids.filter(v=>v!==p.id)].slice(0,5)));
+   }catch(_){}
    document.title=p.brand+' '+p.model+' — Atelier Montres';
    $('detailCrumb').textContent=p.brand+' '+p.model;
    $('detailTier').textContent=({essential:'Collection Essentielle',signature:'Collection Signature',prestige:'Collection Prestige'})[p.tier]||'Collection';
