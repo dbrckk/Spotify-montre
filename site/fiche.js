@@ -43,6 +43,55 @@
    const rows=[['Référence',p.model],['Maison',p.brand],['Type de mouvement',p.specs?.movement||'À confirmer sur la fiche fabricant'],['Diamètre du boîtier',p.specs?.diameter||'À confirmer'],['Verre',p.specs?.glass||'À confirmer'],['Étanchéité',p.specs?.waterResistance||'À confirmer'],['Stock marchand','Non synchronisé'],['Prix actuel','Voir le fabricant']];
    const list=$('detailSpecList');
    list.replaceChildren(...rows.map(([label,val])=>{const line=node('div');line.append(node('dt','',label),node('dd','',val));return line}));
+
+   // Local-first discovery: never present prices, inventory or affiliate commissions we cannot verify.
+   const all=x.products.filter(t=>t&&typeof t.id==='string'&&typeof t.model==='string'&&safeOfficial(t.officialUrl));
+   const index=all.findIndex(t=>t.id===p.id);
+   const adjacent=$('detailAdjacent');
+   if(adjacent&&index>=0){
+     const mk=(t,label)=>{const a=node('a','detail-adjacent-link');a.href='./montre.html?id='+encodeURIComponent(t.id);a.append(node('span','',label),node('strong','',t.brand+' '+t.model));return a};
+     adjacent.replaceChildren();
+     if(index>0)adjacent.append(mk(all[index-1],'← Modèle précédent'));
+     if(index<all.length-1)adjacent.append(mk(all[index+1],'Modèle suivant →'));
+   }
+   const relatedGrid=$('detailRelatedGrid');
+   if(relatedGrid){
+     const score=q=>(q.tier===p.tier?6:0)+(q.brand===p.brand?4:0)+(q.movement===p.movement?3:0)+(q.style===p.style?1:0);
+     const suggestions=all.filter(q=>q.id!==p.id).sort((a,b)=>score(b)-score(a)).slice(0,3);
+     const cards=suggestions.map(q=>{
+       const a=node('a','detail-related-card');a.href='./montre.html?id='+encodeURIComponent(q.id);
+       const frame=node('span','detail-related-photo');const imageUrl=q.photoReview?.localUrl;
+       if(imageUrl==='./assets/watches/'+q.id+'.webp'){
+         const img=node('img');img.alt='Photographie de '+q.brand+' '+q.model;img.loading='lazy';img.decoding='async';
+         img.width=320;img.height=320;img.onerror=()=>{img.remove();frame.append(node('span','detail-related-empty','Voir la fiche officielle'))};img.src=imageUrl;
+         frame.append(img);
+       }else frame.append(node('span','detail-related-empty','Photographie indisponible'));
+       a.append(frame,node('span','detail-related-brand',q.brand),node('strong','detail-related-model',q.model),node('span','detail-related-action','Découvrir ce modèle ↗'));
+       return a;
+     });
+     relatedGrid.replaceChildren(...cards);
+   }
+   const fav=$('detailFavorite'),key='atelier-montres-multibrand-favorites-v1';
+   if(fav){
+     let ids=[];
+     try{const stored=JSON.parse(localStorage.getItem(key)||'[]');if(Array.isArray(stored))ids=stored.filter(v=>typeof v==='string'&&v.length<80)}catch(_){}
+     const update=()=>{const checked=ids.includes(p.id);fav.textContent=checked?'♥ Retirer des favoris':'♡ Ajouter aux favoris';fav.setAttribute('aria-pressed',String(checked))};
+     fav.addEventListener('click',()=>{
+       ids=ids.includes(p.id)?ids.filter(value=>value!==p.id):[...ids,p.id];
+       try{localStorage.setItem(key,JSON.stringify(ids))}catch(_){}
+       update();
+     });
+     update();
+   }
+   const share=$('detailShare');
+   if(share)share.addEventListener('click',async()=>{
+     const url=new URL('./montre.html?id='+encodeURIComponent(p.id),location.href).href;
+     const text=p.brand+' '+p.model+' — Atelier Montres';
+     if(navigator.share){try{await navigator.share({title:text,url});return}catch(e){if(e.name==='AbortError')return}}
+     try{await navigator.clipboard.writeText(url);share.textContent='Lien copié ✓'}catch(_){share.textContent='Partager : '+p.model}
+   });
+   document.querySelectorAll('.am-mobile-nav a').forEach(a=>a.addEventListener('click',()=>{const menu=a.closest('details');if(menu)menu.open=false}));
+
    status.hidden=true;shell.hidden=false;
  }).catch(fail);
 })();
