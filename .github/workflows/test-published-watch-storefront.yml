@@ -1,0 +1,38 @@
+name: Verify published watch storefront on Android
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/test-published-watch-storefront.yml'
+      - 'scripts/test-selection-share.mjs'
+      - 'scripts/test-mobile-live-storefront.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  published-android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser testing
+        run: |
+          npm install --no-save --no-audit --no-fund playwright
+          npx playwright install --with-deps chromium
+      - name: Verify deployed website, 15 local watch photos and sharing
+        env:
+          WATCH_STOREFRONT_URL: https://vivid-seed-ef477pv.shipstatic.com
+        run: |
+          node scripts/test-mobile-live-storefront.mjs
+          node scripts/test-selection-share.mjs
+      - name: Save real deployment screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: published-watch-storefront-android
+          path: artifacts/*.png
+          if-no-files-found: ignore
+          retention-days: 7
