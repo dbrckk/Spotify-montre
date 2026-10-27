@@ -68,7 +68,8 @@
          img.width=320;img.height=320;img.onerror=()=>{img.remove();frame.append(node('span','detail-related-empty','Voir la fiche officielle'))};img.src=imageUrl;
          frame.append(img);
        }else frame.append(node('span','detail-related-empty','Photographie indisponible'));
-       a.append(frame,node('span','detail-related-brand',q.brand),node('strong','detail-related-model',q.model),node('span','detail-related-action','Découvrir ce modèle ↗'));
+       const reason=q.brand===p.brand?'Même maison horlogère':q.movement===p.movement?'Même type de mouvement':q.tier===p.tier?'Même gamme':'Autre style à explorer';
+       a.append(frame,node('span','detail-related-brand',q.brand),node('strong','detail-related-model',q.model),node('span','detail-related-why',reason),node('span','detail-related-action','Découvrir ce modèle ↗'));
        return a;
      });
      relatedGrid.replaceChildren(...cards);
