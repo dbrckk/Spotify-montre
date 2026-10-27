@@ -33,3 +33,10 @@
 @media(max-width:760px){.detail-adjacent{margin-top:34px}.detail-related{padding:48px 0 0}.detail-related-heading{grid-template-columns:1fr;gap:0}.detail-related-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.detail-related-photo{height:185px}}
 @media(max-width:470px){.detail-related-grid{grid-template-columns:1fr}.detail-related-photo{height:260px}.detail-related-card{padding:14px}.detail-adjacent{gap:7px}.detail-adjacent-link{padding:11px 10px}.detail-adjacent-link strong{font-size:11px}.detail-quick-actions button{flex:1}}
 @media(prefers-reduced-motion:reduce){.detail-quick-actions button,.detail-related-card{transition:none}.detail-related-card:hover{transform:none}}
+
+/* Deep-linked product-to-product comparison, with generous touch targets. */
+.detail-quick-actions .detail-compare{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;color:#254431;background:#f0ede3;border:1px solid #c7bba3;min-height:44px;padding:12px 16px;font:650 12px/1.4 system-ui,sans-serif;transition:background .18s ease}
+.detail-quick-actions .detail-compare:hover{background:#e4e2d5}
+.detail-quick-actions .detail-compare:focus-visible{outline:3px solid #b18d4d;outline-offset:3px}
+@media(max-width:580px){.detail-quick-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.detail-quick-actions .detail-compare{grid-column:1/-1;width:100%;text-align:center}.detail-quick-actions button{padding:11px 9px}}
+@media(prefers-reduced-motion:reduce){.detail-quick-actions .detail-compare{transition:none}}
