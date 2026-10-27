@@ -10,6 +10,7 @@ on:
       - 'site/conseiller-engine.js'
       - 'scripts/test-adviser-browser.mjs'
       - 'site/affiliation.js'
+      - 'site/affiliation.css'
       - 'site/affiliation.html'
       - 'site/montre.html'
       - 'site/fiche.js'
