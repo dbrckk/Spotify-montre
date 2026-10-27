@@ -1,0 +1,35 @@
+import assert from 'node:assert/strict';
+import {readFileSync,statSync} from 'node:fs';
+import {resolve} from 'node:path';
+const root=resolve(import.meta.dirname,'..');
+const read=name=>readFileSync(resolve(root,'site',name),'utf8');
+const aff=read('affiliation.html'),detail=read('montre.html');
+const app=read('affiliation.js'),product=read('fiche.js'),viewer=read('photo-zoom.js');
+const css=read('photo-zoom.css');
+const catalogue=JSON.parse(read('selection-affiliation.json'));
+assert.equal(catalogue.products.length,15);
+assert.equal(new Set(catalogue.products.map(p=>p.id)).size,15);
+for(const p of catalogue.products){
+ assert.ok(p.photoReview?.localUrl==='./assets/watches/'+p.id+'.webp','Actual local photograph is required');
+ assert.ok(statSync(resolve(root,'site/assets/watches/'+p.id+'.webp')).size>20000,'Photo should not be tiny or missing');
+}
+assert.match(aff,/src="\.\/photo-zoom\.js" defer/);
+assert.match(detail,/src="\.\/photo-zoom\.js" defer/);
+assert.match(aff,/href="\.\/photo-zoom\.css"/);
+assert.match(detail,/href="\.\/photo-zoom\.css"/);
+assert.match(aff,/id="affMovement"/);
+assert.match(aff,/id="affReset"/);
+assert.match(detail,/id="detailPhotoZoom"/);
+assert.match(app,/window\.AtelierPhoto\?\.open\(visible,p\.id\)/);
+assert.match(app,/movement==='all'\|\|p\.movement===movement/);
+assert.match(app,/am-compare-different/);
+assert.match(product,/window\.AtelierPhoto\?\.open\(all,p\.id\)/);
+assert.match(viewer,/dialog\.showModal/);
+assert.match(viewer,/ArrowLeft/);
+assert.match(viewer,/touchend/);
+assert.match(viewer,/am-photo-expanded/);
+assert.match(viewer,/photo\.alt=/);
+assert.doesNotMatch(viewer,/innerHTML\s*=/);
+assert.match(css,/@media\(max-width:650px\)/);
+assert.match(css,/prefers-reduced-motion:reduce/);
+console.log('V9 genuine photograph zoom, movement filtering, differences and 15 local photo assets — OK');
