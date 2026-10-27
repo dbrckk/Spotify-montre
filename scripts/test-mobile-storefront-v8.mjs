@@ -39,18 +39,47 @@ try{
  const img=cards.first().locator('img.aff-product-photo');
  const firstPhoto=await checkPhoto(img);
  assert.ok(firstPhoto.width>200&&firstPhoto.src.includes('/assets/watches/'),'First model must use real same-origin WebP photo');
+ // Real watch photo lightbox: open from the card, navigate, zoom and exit.
+ await cards.first().locator('.aff-photo-expand').click();
+ await page.locator('#amPhotoDialog').waitFor({state:'visible'});
+ assert.match(await page.locator('#amPhotoDialog .am-photo-title').innerText(),/Casio/i);
+ const modalPhoto=page.locator('#amPhotoDialog img.am-photo-large');
+ await modalPhoto.evaluate(img=>img.decode());
+ assert.ok((await modalPhoto.evaluate(img=>img.naturalWidth))>200,'Zoom must display a genuine local photograph');
+ await page.locator('.am-photo-next').click();
+ assert.match(await page.locator('.am-photo-position').innerText(),/2 \/ 15/);
+ await page.locator('.am-photo-prev').click();
+ assert.match(await page.locator('.am-photo-position').innerText(),/1 \/ 15/);
+ await page.locator('.am-photo-zoom').click();
+ assert.ok(await page.locator('.am-photo-canvas').evaluate(x=>x.classList.contains('am-photo-expanded')),'Magnify the actual photograph');
+ await page.locator('.am-photo-close').click();
+ assert.ok(!(await page.locator('#amPhotoDialog').isVisible()),'Close the photo viewer');
+
 
  // Discover filters must work, including the most expensive collection.
  for(const [key,n] of [['essential',6],['signature',6],['prestige',3],['all',15]]){
    await page.locator('#affTabs button[data-tier="'+key+'"]').click();
    assert.equal(await cards.count(),n,key+' filter must display the correct count');
  }
- await page.locator('#affGrid .aff-card input[type="checkbox"]').nth(0).check();
+ 
+ // Movement refinement is independent of pricing tiers and brand.
+ await page.locator('#affMovement').selectOption('eco-drive');
+ assert.equal(await cards.count(),1,'Eco-Drive movement must show the matching Citizen');
+ await page.locator('#affMovement').selectOption('automatic');
+ assert.equal(await cards.count(),7,'Seven mechanical automatic references in the original catalogue');
+ await page.locator('#affMovement').selectOption('all');
+ await page.locator('#affSearch').fill('ref-does-not-exist-987');
+ assert.equal(await cards.count(),0,'An impossible search must show an empty state');
+ assert.ok(await page.locator('#affReset').isVisible(),'No-results recovery control');
+ await page.locator('#affReset').click();
+ assert.equal(await cards.count(),15,'One-tap filter reset must restore the entire collection');
+await page.locator('#affGrid .aff-card input[type="checkbox"]').nth(0).check();
  await page.locator('#affGrid .aff-card input[type="checkbox"]').nth(1).check();
  assert.ok(await page.locator('#affCompareTray').isVisible(),'Comparison tray should appear after selecting 2 watches');
  await page.locator('#affCompareOpen').click();
  await page.locator('#affCompareDialog').waitFor({state:'visible'});
  assert.equal(await page.locator('#affCompareDialog .am-compare-thumb').count(),2,'Both compared models should display real photographs');
+ assert.ok(await page.locator('.am-compare-diff-note').isVisible(),'Explain factual differences');
  for(const comparisonImg of await page.locator('#affCompareDialog .am-compare-thumb').all()){
    const state=await checkPhoto(comparisonImg);assert.ok(state.width>200,'Comparison photograph must decode');
  }
@@ -69,6 +98,12 @@ try{
  assert.equal(await page.locator('#detailFavorite').getAttribute('aria-pressed'),'true','Favorites should sync from collection to detail');
  const actual=await checkPhoto(page.locator('#detailArtwork img.am-real-product-photo'));
  assert.ok(actual.width>=240&&actual.src.includes('/assets/watches/citizen-tsuyosa.webp'),'Main detail must use local authentic photo');
+ await page.locator('#detailPhotoZoom').click();
+ await page.locator('#amPhotoDialog').waitFor({state:'visible'});
+ await page.locator('#amPhotoDialog img.am-photo-large').evaluate(img=>img.decode());
+ await page.locator('#amPhotoDialog .am-photo-close').click();
+ assert.ok(!(await page.locator('#amPhotoDialog').isVisible()),'Detail photo viewer closes safely');
+
  assert.equal(await page.locator('#detailRelatedGrid .detail-related-card').count(),3,'Show exactly 3 related genuine models');
  const suggestion=await checkPhoto(page.locator('#detailRelatedGrid .detail-related-card img').first());
  assert.ok(suggestion.width>=200&&suggestion.src.includes('/assets/watches/'),'Related watches should use real photos');
