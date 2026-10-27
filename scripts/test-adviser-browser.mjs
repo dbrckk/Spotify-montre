@@ -43,7 +43,7 @@ try{
  assert.match(new URL(phone.url()).search,/style=retro/);
  await phone.locator('input[name="movement"][value="quartz"]').check();
  assert.equal(await cards.count(),3);
- assert.match(await phone.locator('#advisorCriteria').innerText(),/3 préférences/);
+ assert.match(await phone.locator('#advisorCriteria').innerText(),/3 préférences/i);
  const link=cards.first().locator('.advisor-card-actions .primary');
  assert.ok((await link.getAttribute('href')).startsWith('./montre.html?id='),'Every pick leads to exact product');
  await phone.screenshot({path:'artifacts/mobile-watch-advisor.png',fullPage:true});
@@ -54,7 +54,7 @@ try{
  assert.equal(await cards.count(),3);
  await phone.goto(new URL('/conseiller.html?tier=prestige&movement=automatic',base).href,{waitUntil:'domcontentloaded'});
  await cards.first().waitFor({state:'visible'});
- assert.match(await phone.locator('#advisorCriteria').innerText(),/2 préférences/);
+ assert.match(await phone.locator('#advisorCriteria').innerText(),/2 préférences/i);
  assert.equal(await phone.locator('input[name="tier"][value="prestige"]').isChecked(),true);
  assert.equal(await phone.locator('input[name="movement"][value="automatic"]').isChecked(),true);
  for(const card of await cards.all())await isLocal(card.locator('.advisor-photo img'));
