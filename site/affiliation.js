@@ -1,11 +1,11 @@
 'use strict';
 (() => {
  const $=id=>document.getElementById(id);
- const grid=$('affGrid'),tabs=$('affTabs'),search=$('affSearch'),count=$('affResultCount'),savedCount=$('affSavedCount'),empty=$('affEmpty'),sort=$('affSort');
+ const grid=$('affGrid'),tabs=$('affTabs'),search=$('affSearch'),count=$('affResultCount'),savedCount=$('affSavedCount'),empty=$('affEmpty'),sort=$('affSort'),movementSelect=$('affMovement'),reset=$('affReset');
  if(!grid||!tabs||!search||!count||!savedCount||!empty)return;
  const levels={essential:'Essentielle',signature:'Signature',prestige:'Prestige'},moves={quartz:'Quartz',automatic:'Automatique','eco-drive':'Solaire'};
  const approvedHosts=['casio.com','swatch.com','citizenwatch.eu','orientwatch.fr','seikowatches.com','tissotwatches.com','hamiltonwatch.com'];
- let data=[],tier='all',query='',order='editorial',saved=new Set(),compare=[];
+ let data=[],tier='all',query='',order='editorial',movement='all',visible=[],saved=new Set(),compare=[];
  const KEY='atelier-montres-multibrand-favorites-v1';
  try{const x=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(x))saved=new Set(x.filter(y=>typeof y==='string'&&y.length<80))}catch(_){}
  const make=(tag,cls,txt)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n;};
@@ -29,7 +29,8 @@
    if(photo?.accuracy==='exact'&&sources.length){
      const img=make('img','aff-product-photo');img.alt=p.brand+' '+p.model+' — photographie authentique';img.loading='lazy';img.decoding='async';img.referrerPolicy='no-referrer';
      let sourceIndex=0;img.onerror=()=>{sourceIndex++;if(sourceIndex<sources.length)img.src=sources[sourceIndex];else vector()};
-     art.append(img,make('span','aff-art-label','PHOTOGRAPHIE DU MODÈLE · '+photo.provider.toUpperCase()));img.src=sources[0];
+     art.append(img,make('span','aff-art-label','PHOTOGRAPHIE DU MODÈLE · '+photo.provider.toUpperCase()));
+     const expand=make('button','aff-photo-expand');expand.type='button';expand.setAttribute('aria-label','Agrandir la photographie de '+p.brand+' '+p.model);expand.append(make('span','','⤢ Agrandir'));expand.addEventListener('click',()=>window.AtelierPhoto?.open(visible,p.id));art.append(expand);img.src=sources[0];
    }else vector();
    const body=make('div','aff-card-body');
    body.append(make('p','aff-card-brand',p.brand.toUpperCase()),make('h3','',p.model),make('p','am-card-title',p.title||''),make('p','aff-card-desc',p.story||p.description));
@@ -49,10 +50,10 @@
  }
  function render(){
    const q=query.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
-   let visible=data.filter(p=>(tier==='all'||(tier==='favourites'?saved.has(p.id):p.tier===tier))&&word(p).includes(q));
+   visible=data.filter(p=>(tier==='all'||(tier==='favourites'?saved.has(p.id):p.tier===tier))&&(movement==='all'||p.movement===movement)&&word(p).includes(q));
    if(order==='brand')visible=visible.slice().sort((a,b)=>(a.brand+' '+a.model).localeCompare(b.brand+' '+b.model,'fr'));
    if(order==='name')visible=visible.slice().sort((a,b)=>a.model.localeCompare(b.model,'fr'));
-   grid.replaceChildren(...visible.map(card));empty.hidden=visible.length>0;
+   grid.replaceChildren(...visible.map(card));empty.hidden=visible.length>0;if(reset)reset.hidden=visible.length>0;
    savedCount.textContent=String([...saved].filter(id=>data.some(p=>p.id===id)).length);
    count.textContent=visible.length+' montre'+(visible.length>1?'s':'')+' sélectionnée'+(visible.length>1?'s':'');
    tabs.querySelectorAll('button[data-tier]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.tier===tier)));
@@ -62,6 +63,8 @@
  document.querySelectorAll('.am-mobile-nav a').forEach(a=>a.addEventListener('click',()=>{const menu=a.closest('details');if(menu)menu.open=false}));
  search.addEventListener('input',()=>{query=search.value.slice(0,100);render()});
  if(sort)sort.addEventListener('change',()=>{order=sort.value;render()});
+ if(movementSelect)movementSelect.addEventListener('change',()=>{movement=movementSelect.value;render()});
+ if(reset)reset.addEventListener('click',()=>{tier='all';movement='all';query='';order='editorial';search.value='';if(sort)sort.value='editorial';if(movementSelect)movementSelect.value='all';render();search.focus()});
  document.querySelectorAll('a[data-goto-tier]').forEach(a=>a.addEventListener('click',()=>{tier=a.dataset.gotoTier;render()}));
  function showComparison(){
    if(!dialog||!compareBody||compare.length<2)return;
@@ -82,9 +85,14 @@
    head.append(tr);table.append(head);
    const tbody=make('tbody');
    const rows=[['Gamme',p=>levels[p.tier]],['Mouvement',p=>p.specs?.movement||moves[p.movement]||'Non confirmé'],['Diamètre',p=>p.specs?.diameter||'À vérifier'],['Verre',p=>p.specs?.glass||'À vérifier'],['Étanchéité',p=>p.specs?.waterResistance||'À vérifier']];
-   for(const [label,fn] of rows){const row=make('tr');row.append(make('th','',label));for(const p of selected)row.append(make('td','',fn(p)));tbody.append(row)}
+   for(const [label,fn] of rows){
+     const values=selected.map(fn),different=new Set(values).size>1;
+     const row=make('tr');row.append(make('th','',label));
+     selected.forEach((p,i)=>{const td=make('td',different?'am-compare-different':'',values[i]);row.append(td)});
+     tbody.append(row);
+   }
    const row=make('tr');row.append(make('th','','Fiche'));for(const p of selected){const td=make('td'),a=make('a','','Découvrir ↗');a.href=detail(p.id);td.append(a);row.append(td)}tbody.append(row);table.append(tbody);
-   compareBody.replaceChildren(table);if(typeof dialog.showModal==='function')dialog.showModal();
+   compareBody.replaceChildren(make('p','am-compare-diff-note','Les différences entre les modèles sont mises en évidence.'),table);if(typeof dialog.showModal==='function')dialog.showModal();
  }
  if(compareOpen)compareOpen.addEventListener('click',showComparison);
  if(compareClear)compareClear.addEventListener('click',()=>{compare=[];render()});
