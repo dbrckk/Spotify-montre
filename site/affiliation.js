@@ -48,6 +48,38 @@
    body.append(make('p','aff-card-foot','Modèle réel · Liens actuellement non rémunérés'));
    item.append(art,body);return item;
  }
+ const recentlyKey='atelier-montres-recent-v1';
+ function renderRecentlyViewed(){
+   const section=$('affRecentlyViewed'),target=$('affRecentlyGrid');
+   if(!section||!target)return;
+   let ids=[];
+   try{
+     const previous=JSON.parse(localStorage.getItem(recentlyKey)||'[]');
+     if(Array.isArray(previous))ids=[...new Set(previous.filter(id=>typeof id==='string'&&id.length<80))].slice(0,5);
+   }catch(_){}
+   const models=ids.map(id=>data.find(p=>p.id===id)).filter(Boolean);
+   section.hidden=models.length===0;
+   const nodes=models.map(p=>{
+     const a=make('a','am-recent-card');
+     a.href=detail(p.id);a.setAttribute('aria-label','Revoir '+p.brand+' '+p.model);
+     const picture=make('span','am-recent-image');
+     if(p.photoReview?.localUrl==='./assets/watches/'+p.id+'.webp'){
+       const img=make('img');img.src=p.photoReview.localUrl;img.alt='';img.loading='lazy';img.decoding='async';img.width=120;img.height=120;
+       img.onerror=()=>{img.remove();picture.append(make('span','am-recent-photo-missing','Photo indisponible'))};
+       picture.append(img);
+     }else picture.append(make('span','am-recent-photo-missing','Voir le modèle'));
+     const label=make('span','am-recent-name');
+     label.append(make('small','',p.brand),make('strong','',p.model));
+     a.append(picture,label);
+     return a;
+   });
+   target.replaceChildren(...nodes);
+ }
+ if($('affRecentlyClear'))$('affRecentlyClear').addEventListener('click',()=>{
+   try{localStorage.removeItem(recentlyKey)}catch(_){}
+   renderRecentlyViewed();
+ });
+ window.addEventListener('pageshow',()=>{if(data.length)renderRecentlyViewed()});
  function renderActiveFilters(){
    const target=$('affActiveFilters');if(!target)return;
    const active=[];
@@ -72,7 +104,7 @@
    visible=data.filter(p=>(tier==='all'||(tier==='favourites'?saved.has(p.id):p.tier===tier))&&(movement==='all'||p.movement===movement)&&(brand==='all'||p.brand===brand)&&word(p).includes(q));
    if(order==='brand')visible=visible.slice().sort((a,b)=>(a.brand+' '+a.model).localeCompare(b.brand+' '+b.model,'fr'));
    if(order==='name')visible=visible.slice().sort((a,b)=>a.model.localeCompare(b.model,'fr'));
-   grid.replaceChildren(...visible.map(card));renderActiveFilters();empty.hidden=visible.length>0;if(reset)reset.hidden=visible.length>0;
+   grid.replaceChildren(...visible.map(card));renderActiveFilters();renderRecentlyViewed();empty.hidden=visible.length>0;if(reset)reset.hidden=visible.length>0;
    savedCount.textContent=String([...saved].filter(id=>data.some(p=>p.id===id)).length);
    count.textContent=visible.length+' montre'+(visible.length>1?'s':'')+' sélectionnée'+(visible.length>1?'s':'');
    tabs.querySelectorAll('button[data-tier]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.tier===tier)));
