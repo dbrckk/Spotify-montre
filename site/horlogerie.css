@@ -143,3 +143,21 @@ html{scroll-padding-top:95px}
 .am-compare-diff-note{font-size:12px;color:#566a58;padding:0 0 12px;margin:0}
 .am-compare-table .am-compare-different{background:#f2e7ce;color:#2a402e;border-left:2px solid #c7aa78;font-weight:650}
 @media(max-width:680px){.am-movement-wrap{width:100%;display:flex;align-items:center;justify-content:space-between;margin:9px 0}.am-movement-wrap select{width:70%;max-width:none}.aff-photo-expand{padding:13px}}
+
+/* Adviser discovery from the multi-brand storefront */
+.aff-find-link{display:inline-flex;align-items:center;gap:8px;margin:14px 0 0 17px;padding:12px 0;color:#e8cf9f;font:650 12px system-ui,sans-serif;letter-spacing:.01em;text-decoration:none;border-bottom:1px solid #cdb27d85}
+.aff-find-link:hover{color:#ffe8b8;border-color:#ffe8b8}
+.aff-advisor-teaser{background:#21392d;color:#f8f3e7;padding:66px 0;position:relative;overflow:hidden;border-block:1px solid #ccb17c45}
+.aff-advisor-teaser:before{content:"";position:absolute;right:-180px;top:-160px;width:550px;height:550px;border-radius:50%;border:1px solid #d9bc8f40;box-shadow:0 0 0 80px #bbaa7507;pointer-events:none}
+.aff-advisor-teaser-grid{position:relative;z-index:1;display:grid;grid-template-columns:1.2fr .8fr;gap:50px;align-items:center}
+.aff-advisor-teaser .overline{margin-bottom:12px}
+.aff-advisor-teaser h2{color:#fff;font:400 clamp(36px,5vw,63px)/1.13 Georgia,serif;letter-spacing:-.04em;margin:0 0 13px}
+.aff-advisor-teaser h2 em{color:#d8c08f}
+.aff-advisor-teaser p:not(.overline){font-size:14px;line-height:1.8;color:#d1ddd2;max-width:640px;margin:0}
+.aff-advisor-teaser-actions{display:flex;flex-direction:column;align-items:flex-start;gap:13px}
+.aff-advisor-stages{display:flex;gap:8px;flex-wrap:wrap}
+.aff-advisor-stages span{color:#e1c796;font:700 10px system-ui,sans-serif;border:1px solid #d8c39466;padding:8px 10px;letter-spacing:.06em}
+.aff-advisor-teaser-actions small{color:#c7d2c6;font-size:11px}
+.detail-advisor-shortcut{display:inline-flex;color:#d9c595;border-bottom:1px solid #b8a26e;font:650 12px system-ui,sans-serif;text-decoration:none;margin:0 15px 16px 0;padding-bottom:5px}
+@media(max-width:900px){.aff-advisor-teaser-grid{grid-template-columns:1fr;gap:26px}}
+@media(max-width:680px){.aff-find-link{display:flex;width:max-content;margin:13px 0 0 0}.aff-advisor-teaser{padding:52px 0}.aff-advisor-teaser .button{width:100%;gap:10px}.aff-advisor-teaser-actions{width:100%}}
