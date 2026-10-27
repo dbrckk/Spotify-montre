@@ -104,7 +104,7 @@
    visible=data.filter(p=>(tier==='all'||(tier==='favourites'?saved.has(p.id):p.tier===tier))&&(movement==='all'||p.movement===movement)&&(brand==='all'||p.brand===brand)&&word(p).includes(q));
    if(order==='brand')visible=visible.slice().sort((a,b)=>(a.brand+' '+a.model).localeCompare(b.brand+' '+b.model,'fr'));
    if(order==='name')visible=visible.slice().sort((a,b)=>a.model.localeCompare(b.model,'fr'));
-   grid.replaceChildren(...visible.map(card));renderActiveFilters();renderRecentlyViewed();empty.hidden=visible.length>0;if(reset)reset.hidden=visible.length>0;
+   grid.replaceChildren(...visible.map(card));renderActiveFilters();renderRecentlyViewed();empty.hidden=visible.length>0;if(reset)reset.hidden=tier==='all'&&brand==='all'&&movement==='all'&&!query.trim()&&order==='editorial';
    savedCount.textContent=String([...saved].filter(id=>data.some(p=>p.id===id)).length);
    count.textContent=visible.length+' montre'+(visible.length>1?'s':'')+' sélectionnée'+(visible.length>1?'s':'');
    tabs.querySelectorAll('button[data-tier]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.tier===tier)));
@@ -215,7 +215,7 @@
   data=x.products.filter(valid);if(data.length!==15)throw Error('incomplete catalogue');
   const initial=new URLSearchParams(location.search).get('compare');
   if(initial){compare=[...new Set(initial.split(',').slice(0,3))].filter(id=>data.some(p=>p.id===id));}
-  if(brandSelect){for(const name of [...new Set(data.map(p=>p.brand))].sort((a,b)=>a.localeCompare(b,'fr'))){const option=make('option','',name);option.value=name;brandSelect.append(option)}}
+  if(brandSelect){for(const name of [...new Set(data.map(p=>p.brand))].sort((a,b)=>a.localeCompare(b,'fr'))){const total=data.filter(p=>p.brand===name).length;const option=make('option','',name+' ('+total+')');option.value=name;brandSelect.append(option)}}
   const hero=$('heroWatch'),featured=data.find(p=>p.id==='citizen-tsuyosa');
   if(hero&&featured){
     const fallback=()=>{hero.replaceChildren();hero.classList.remove('am-hero-real');window.AtelierWatch?.render(hero,featured);const caption=document.querySelector('.am-hero-label small');if(caption)caption.textContent='Illustration de secours · photographie indisponible'};
