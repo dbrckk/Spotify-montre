@@ -59,6 +59,7 @@
    updateCompare();
  }
  tabs.addEventListener('click',e=>{const b=e.target.closest('button[data-tier]');if(!b)return;tier=b.dataset.tier;render()});
+ document.querySelectorAll('.am-mobile-nav a').forEach(a=>a.addEventListener('click',()=>{const menu=a.closest('details');if(menu)menu.open=false}));
  search.addEventListener('input',()=>{query=search.value.slice(0,100);render()});
  if(sort)sort.addEventListener('change',()=>{order=sort.value;render()});
  document.querySelectorAll('a[data-goto-tier]').forEach(a=>a.addEventListener('click',()=>{tier=a.dataset.gotoTier;render()}));
@@ -67,7 +68,17 @@
    const selected=compare.map(id=>data.find(p=>p.id===id)).filter(Boolean);
    const table=make('table','am-compare-table'),head=make('thead'),tr=make('tr');
    tr.append(make('th','','Critère'));
-   for(const p of selected)tr.append(make('th','',p.brand+' '+p.model));
+   for(const p of selected){
+     const th=make('th','am-compare-head');
+     const photos=photoSources(p);
+     if(photos.length){
+       const img=make('img','am-compare-thumb');img.alt='Photographie '+p.brand+' '+p.model;img.loading='lazy';img.decoding='async';img.referrerPolicy='no-referrer';
+       let source=0;img.onerror=()=>{source++;if(source<photos.length)img.src=photos[source];else img.remove()};
+       img.src=photos[0];th.append(img);
+     }
+     th.append(make('span','am-compare-name',p.brand+' '+p.model));
+     tr.append(th);
+   }
    head.append(tr);table.append(head);
    const tbody=make('tbody');
    const rows=[['Gamme',p=>levels[p.tier]],['Mouvement',p=>p.specs?.movement||moves[p.movement]||'Non confirmé'],['Diamètre',p=>p.specs?.diameter||'À vérifier'],['Verre',p=>p.specs?.glass||'À vérifier'],['Étanchéité',p=>p.specs?.waterResistance||'À vérifier']];
