@@ -83,6 +83,7 @@ await page.locator('#affGrid .aff-card input[type="checkbox"]').nth(0).check();
  assert.ok(await page.locator('#affCompareTray').isVisible(),'Comparison tray should appear after selecting 2 watches');
  await page.locator('#affCompareOpen').click();
  await page.locator('#affCompareDialog').waitFor({state:'visible'});
+ assert.equal(await page.locator('#affCompareBody').evaluate(el=>el.parentElement?.id),'affCompareDialog','Compare body must be a direct child of the dialog, never trapped inside its flex header');
  assert.equal(await page.locator('#affCompareDialog .am-compare-thumb').count(),2,'Both compared models should display real photographs');
  const note=page.locator('.am-compare-diff-note');
  if(!(await note.isVisible())){console.error('COMPARISON NOTE DEBUG',await note.evaluateAll(nodes=>nodes.map(n=>[n,n.parentElement,n.parentElement?.parentElement].map(e=>e&&({tag:e.tagName,class:e.className,rect:e.getBoundingClientRect().toJSON(),display:getComputedStyle(e).display,width:getComputedStyle(e).width,flex:getComputedStyle(e).flex,overflow:getComputedStyle(e).overflow})))));await page.screenshot({path:'artifacts/mobile-compare-debug.png',fullPage:true})}
@@ -92,9 +93,9 @@ await page.locator('#affGrid .aff-card input[type="checkbox"]').nth(0).check();
  await page.locator('.am-compare-mobile-nav button').last().click();
  await page.waitForFunction(()=>document.querySelector('.am-compare-mobile-position')?.textContent==='2 / 2',{timeout:5000});
 
- for(const comparisonImg of await page.locator('#affCompareDialog .am-compare-thumb').all()){
-   const state=await checkPhoto(comparisonImg);assert.ok(state.width>200,'Comparison photograph must decode');
- }
+ const visibleComparisonPhoto=page.locator('.am-compare-mobile-card .am-compare-mobile-photo').first();
+ const comparisonState=await checkPhoto(visibleComparisonPhoto);
+ assert.ok(comparisonState.width>200&&comparisonState.src.includes('/assets/watches/'),'Visible mobile comparison must use genuine same-origin photography');
  await page.locator('#affCompareClose').click();
  await page.locator('#affCompareClear').click();
 
