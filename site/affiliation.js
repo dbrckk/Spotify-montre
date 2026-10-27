@@ -14,12 +14,30 @@
  const word=p=>[p.brand,p.model,p.title,p.description,p.style,p.tier,p.movement,...(p.highlights||[])].join(' ').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
  const photoSources=p=>{const t=p?.photoReview,files=[];if(t?.localUrl==='./assets/watches/'+p.id+'.webp')files.push(t.localUrl+(typeof t.localSha256==='string'&&/^[a-f0-9]{64}$/.test(t.localSha256)?'?v='+t.localSha256.slice(0,12):''));if(typeof t?.url==='string'&&t.url.startsWith('https://'))files.push(t.url);return files;};
  const detail=id=>'./montre.html?id='+encodeURIComponent(id);
- const compareTray=$('affCompareTray'),compareLabel=$('affCompareLabel'),compareOpen=$('affCompareOpen'),compareClear=$('affCompareClear'),dialog=$('affCompareDialog'),compareBody=$('affCompareBody');
+ const compareTray=$('affCompareTray'),compareLabel=$('affCompareLabel'),compareSelected=$('affCompareSelected'),compareNotice=$('affCompareNotice'),compareOpen=$('affCompareOpen'),compareClear=$('affCompareClear'),dialog=$('affCompareDialog'),compareBody=$('affCompareBody');
+ let compareWarning='';
  function updateCompare(){
    compare=compare.filter(id=>data.some(p=>p.id===id));
    if(compareTray)compareTray.hidden=compare.length===0;
-   if(compareLabel)compareLabel.textContent=compare.length+' montre'+(compare.length>1?'s':'')+' à comparer (3 max)';
+   if(compareLabel)compareLabel.textContent=compare.length+' montre'+(compare.length>1?'s':'')+' sélectionnée'+(compare.length>1?'s':'')+' · 3 maximum';
    if(compareOpen)compareOpen.disabled=compare.length<2;
+   if(compareNotice)compareNotice.textContent=compareWarning||(compare.length===1?'Sélectionnez une deuxième montre pour comparer.':'');
+   if(compareSelected){
+     const chips=compare.map(id=>{
+       const p=data.find(item=>item.id===id);
+       const button=make('button','am-compare-selected-chip');
+       button.type='button';
+       button.setAttribute('aria-label','Retirer '+p.brand+' '+p.model+' de la comparaison');
+       if(p.photoReview?.localUrl==='./assets/watches/'+p.id+'.webp'){
+         const img=make('img');img.src=p.photoReview.localUrl;img.alt='';img.width=40;img.height=40;img.decoding='async';
+         button.append(img);
+       }
+       button.append(make('span','am-compare-chip-name',p.brand+' '+p.model),make('span','am-compare-chip-remove','×'));
+       button.addEventListener('click',()=>{compare=compare.filter(value=>value!==id);compareWarning='';render()});
+       return button;
+     });
+     compareSelected.replaceChildren(...chips);
+   }
  }
  function card(p){
    const item=make('article','aff-card');
@@ -43,7 +61,7 @@
    const compareWrap=make('div','am-card-footer');
    const maker=make('a','','Photos officielles ↗');maker.href=p.officialUrl;maker.target='_blank';maker.rel='noopener noreferrer nofollow';maker.setAttribute('aria-label','Voir '+p.model+' chez '+p.brand);
    const select=make('label','am-compare-check');const cb=make('input');cb.type='checkbox';cb.checked=compare.includes(p.id);cb.setAttribute('aria-label','Comparer '+p.model);
-   cb.addEventListener('change',()=>{if(cb.checked&&!compare.includes(p.id)){if(compare.length>=3){cb.checked=false;return;}compare.push(p.id)}else compare=compare.filter(id=>id!==p.id);updateCompare()});
+   cb.addEventListener('change',()=>{if(cb.checked&&!compare.includes(p.id)){if(compare.length>=3){cb.checked=false;compareWarning='Limite atteinte : retirez une montre avant d’en ajouter une autre.';updateCompare();return;}compare.push(p.id)}else compare=compare.filter(id=>id!==p.id);compareWarning='';updateCompare()});
    select.append(cb,document.createTextNode(' Comparer'));compareWrap.append(maker,select);body.append(compareWrap);
    body.append(make('p','aff-card-foot','Modèle réel · Liens actuellement non rémunérés'));
    item.append(art,body);return item;
@@ -197,7 +215,7 @@
    if(typeof dialog.showModal==='function'&&!dialog.open)dialog.showModal();
  }
  if(compareOpen)compareOpen.addEventListener('click',showComparison);
- if(compareClear)compareClear.addEventListener('click',()=>{compare=[];render()});
+ if(compareClear)compareClear.addEventListener('click',()=>{compare=[];compareWarning='';render()});
  if($('affCompareShare'))$('affCompareShare').addEventListener('click',async()=>{
    if(compare.length<2)return;
    const url=new URL('./affiliation.html',location.href);url.searchParams.set('compare',compare.join(','));url.hash='montres';
