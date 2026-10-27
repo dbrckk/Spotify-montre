@@ -40,3 +40,6 @@
 .detail-quick-actions .detail-compare:focus-visible{outline:3px solid #b18d4d;outline-offset:3px}
 @media(max-width:580px){.detail-quick-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.detail-quick-actions .detail-compare{grid-column:1/-1;width:100%;text-align:center}.detail-quick-actions button{padding:11px 9px}}
 @media(prefers-reduced-motion:reduce){.detail-quick-actions .detail-compare{transition:none}}
+
+/* Factual reasons for recommendations, no invented stock or prices. */
+.detail-related-why{display:inline-flex;align-self:flex-start;border:1px solid #cfcdbd;border-radius:100px;padding:6px 10px;margin:0 8px 18px;background:#f0f2eb;color:#526e58;font:650 10px/1.4 system-ui,sans-serif}
