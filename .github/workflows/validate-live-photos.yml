@@ -26,7 +26,7 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Assert homepage and detail page show real same-domain images at Android viewport
         env:
-          WATCH_STOREFRONT_URL: https://subtle-mirage-vgd4wt7.shipstatic.com
+          WATCH_STOREFRONT_URL: https://hyped-logic-88n9yg5.shipstatic.com
         run: node scripts/test-mobile-live-storefront.mjs
       - name: Preserve Android screenshots for design review
         if: always()
