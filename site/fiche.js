@@ -20,6 +20,30 @@
      localStorage.setItem(key,JSON.stringify([p.id,...ids.filter(v=>v!==p.id)].slice(0,5)));
    }catch(_){}
    document.title=p.brand+' '+p.model+' — Atelier Montres';
+   // Accurate product discovery metadata: no invented price, offer, rating or stock.
+   const summary=[p.brand,p.model,p.title||'',p.story||p.description||''].filter(Boolean).join(' · ').slice(0,300);
+   let description=document.querySelector('meta[name="description"]');
+   if(!description){description=node('meta');description.name='description';document.head.append(description)}
+   description.content=summary;
+   const canonical=new URL('./montre.html',location.href);
+   canonical.searchParams.set('id',p.id);
+   canonical.hash='';
+   const structured={
+     '@context':'https://schema.org',
+     '@type':'Product',
+     name:p.brand+' '+p.model,
+     brand:{'@type':'Brand',name:p.brand},
+     model:p.model,
+     description:(p.story||p.description||'').slice(0,500),
+     url:canonical.href,
+     image:p.photoReview?.localUrl==='./assets/watches/'+p.id+'.webp'?[new URL(p.photoReview.localUrl,location.href).href]:undefined,
+     additionalProperty:[
+       { '@type':'PropertyValue',name:'Mouvement',value:p.specs?.movement||p.movement },
+       { '@type':'PropertyValue',name:'Collection',value:p.tier }
+     ]
+   };
+   const jsonLd=node('script');jsonLd.type='application/ld+json';jsonLd.id='detailProductStructuredData';
+   jsonLd.textContent=JSON.stringify(structured);document.head.append(jsonLd);
    $('detailCrumb').textContent=p.brand+' '+p.model;
    $('detailTier').textContent=({essential:'Collection Essentielle',signature:'Collection Signature',prestige:'Collection Prestige'})[p.tier]||'Collection';
    $('detailBrand').textContent=p.brand;
