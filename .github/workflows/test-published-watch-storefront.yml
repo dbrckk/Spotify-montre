@@ -26,7 +26,7 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Verify deployed website, 15 local photos, sharing and watch history
         env:
-          WATCH_STOREFRONT_URL: https://dynamic-drone-r397dgc.shipstatic.com
+          WATCH_STOREFRONT_URL: https://timeless-star-2w72k8n.shipstatic.com
         run: |
           node scripts/test-mobile-live-storefront.mjs
           node scripts/test-mobile-storefront-v8.mjs
