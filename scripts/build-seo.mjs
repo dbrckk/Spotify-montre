@@ -14,7 +14,7 @@ import {validateAffiliateConfig} from './affiliate-policy.mjs';
     const model=products.find(p=>p.id===id);
     if (model?.photoReview?.publicUsageApproved!==true) throw Error('Publication affiliée bloquée : droits commerciaux de la photographie à vérifier pour '+id);
   }
-  const amazonStatement = 'En tant que Partenaire d’Amazon, je suis rémunéré(e) pour les achats éligibles.';
+  const amazonStatement = 'En tant que Partenaire Amazon, je réalise un bénéfice sur les achats remplissant les conditions requises';
   const e = value => String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   const u = path => new URL(path, site).href;
   const schema = obj => JSON.stringify(obj).replace(/</g, '\\u003c');
