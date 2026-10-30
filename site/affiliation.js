@@ -1,11 +1,11 @@
 'use strict';
 (() => {
  const $=id=>document.getElementById(id);
- const grid=$('affGrid'),tabs=$('affTabs'),search=$('affSearch'),count=$('affResultCount'),savedCount=$('affSavedCount'),empty=$('affEmpty'),sort=$('affSort'),movementSelect=$('affMovement'),brandSelect=$('affBrand'),reset=$('affReset');
+ const grid=$('affGrid'),tabs=$('affTabs'),search=$('affSearch'),count=$('affResultCount'),savedCount=$('affSavedCount'),empty=$('affEmpty'),sort=$('affSort'),movementSelect=$('affMovement'),brandSelect=$('affBrand'),diameterSelect=$('affDiameter'),reset=$('affReset');
  if(!grid||!tabs||!search||!count||!savedCount||!empty)return;
  const levels={essential:'Essentielle',signature:'Signature',prestige:'Prestige'},moves={quartz:'Quartz',automatic:'Automatique','eco-drive':'Solaire'};
  const approvedHosts=['casio.com','swatch.com','citizenwatch.eu','orientwatch.fr','seikowatches.com','tissotwatches.com','hamiltonwatch.com'];
- let data=[],tier='all',query='',order='editorial',movement='all',brand='all',visible=[],saved=new Set(),compare=[];
+ let data=[],tier='all',query='',order='editorial',movement='all',brand='all',diameter='all',visible=[],saved=new Set(),compare=[];
  const KEY='atelier-montres-multibrand-favorites-v1';
  const COMPARE_KEY='atelier-montres-comparison-v1';
  // The SEO build adds crawlable, richer product comparisons. Historical standalone snapshots stay compatible.
@@ -14,6 +14,9 @@
  const make=(tag,cls,txt)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n;};
  const official=url=>{try{const u=new URL(url);return u.protocol==='https:'&&!u.username&&!u.password&&approvedHosts.some(x=>u.hostname===x||u.hostname.endsWith('.'+x))}catch(_){return false}};
  const valid=p=>p&&p.affiliateUrl===null&&p.merchantLinkStatus==='untracked_official'&&p.photoRights==='not_licensed'&&p.imageMode==='custom_vector_illustration'&&Object.hasOwn(levels,p.tier)&&typeof p.id==='string'&&typeof p.brand==='string'&&typeof p.model==='string'&&typeof p.description==='string'&&official(p.officialUrl);
+ const diameterMm=p=>{const match=/^(\d{1,2})(?:[,.](\d+))?\s*mm$/i.exec((p.specs?.diameter||'').trim());return match?Number(match[1]+'.'+(match[2]||'0')):null};
+ const matchesDiameter=p=>{const n=diameterMm(p);return diameter==='all'||(diameter==='unknown'&&n===null)||(diameter==='compact'&&n!==null&&n<=38)||(diameter==='medium'&&n!==null&&n>38&&n<=40)};
+ const diameterLabels={compact:'≤ 38 mm',medium:'38,1–40 mm',unknown:'Diamètre à confirmer'};
  const word=p=>[p.brand,p.model,p.title,p.description,p.style,p.tier,p.movement,...(p.highlights||[])].join(' ').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
  const photoSources=p=>{const t=p?.photoReview,files=[];if(t?.publicUsageApproved!==true)return files;if(t?.localUrl==='./assets/watches/'+p.id+'.webp')files.push(t.localUrl+(typeof t.localSha256==='string'&&/^[a-f0-9]{64}$/.test(t.localSha256)?'?v='+t.localSha256.slice(0,12):''));if(typeof t?.url==='string'&&t.url.startsWith('https://'))files.push(t.url);return files;};
  const detail=id=>'./montre.html?id='+encodeURIComponent(id);
@@ -121,6 +124,7 @@
    if(tier!=='all')active.push(['tier',tier==='favourites'?'Favoris':levels[tier]]);
    if(brand!=='all')active.push(['brand',brand]);
    if(movement!=='all')active.push(['movement',moves[movement]||movement]);
+   if(diameter!=='all')active.push(['diameter',diameterLabels[diameter]]);
    if(query.trim())active.push(['query','Recherche : '+query.trim()]);
    target.hidden=active.length===0;
    target.replaceChildren(...active.map(([key,label])=>{
@@ -129,6 +133,7 @@
        if(key==='tier')tier='all';
        if(key==='brand'){brand='all';if(brandSelect)brandSelect.value='all'}
        if(key==='movement'){movement='all';if(movementSelect)movementSelect.value='all'}
+       if(key==='diameter'){diameter='all';if(diameterSelect)diameterSelect.value='all'}
        if(key==='query'){query='';search.value=''}
        render();
      });return b;
@@ -136,10 +141,11 @@
  }
  function render(){
    const q=query.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
-   visible=data.filter(p=>(tier==='all'||(tier==='favourites'?saved.has(p.id):p.tier===tier))&&(movement==='all'||p.movement===movement)&&(brand==='all'||p.brand===brand)&&word(p).includes(q));
+   visible=data.filter(p=>(tier==='all'||(tier==='favourites'?saved.has(p.id):p.tier===tier))&&(movement==='all'||p.movement===movement)&&(brand==='all'||p.brand===brand)&&matchesDiameter(p)&&word(p).includes(q));
    if(order==='brand')visible=visible.slice().sort((a,b)=>(a.brand+' '+a.model).localeCompare(b.brand+' '+b.model,'fr'));
    if(order==='name')visible=visible.slice().sort((a,b)=>a.model.localeCompare(b.model,'fr'));
-   grid.replaceChildren(...visible.map(card));renderActiveFilters();renderRecentlyViewed();empty.hidden=visible.length>0;if(reset)reset.hidden=tier==='all'&&brand==='all'&&movement==='all'&&!query.trim()&&order==='editorial';
+   if(order==='diameter-asc'||order==='diameter-desc')visible=visible.slice().sort((a,b)=>{const da=diameterMm(a),db=diameterMm(b);if(da===null)return db===null?0:1;if(db===null)return -1;return order==='diameter-asc'?da-db:db-da});
+   grid.replaceChildren(...visible.map(card));renderActiveFilters();renderRecentlyViewed();empty.hidden=visible.length>0;if(reset)reset.hidden=tier==='all'&&brand==='all'&&movement==='all'&&diameter==='all'&&!query.trim()&&order==='editorial';
    savedCount.textContent=String([...saved].filter(id=>data.some(p=>p.id===id)).length);
    count.textContent=visible.length+' montre'+(visible.length>1?'s':'')+' sélectionnée'+(visible.length>1?'s':'');
    tabs.querySelectorAll('button[data-tier]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.tier===tier)));
@@ -150,8 +156,9 @@
  search.addEventListener('input',()=>{query=search.value.slice(0,100);render()});
  if(sort)sort.addEventListener('change',()=>{order=sort.value;render()});
  if(movementSelect)movementSelect.addEventListener('change',()=>{movement=movementSelect.value;render()});
+ if(diameterSelect)diameterSelect.addEventListener('change',()=>{diameter=diameterSelect.value;render()});
  if(brandSelect)brandSelect.addEventListener('change',()=>{brand=brandSelect.value;render()});
- if(reset)reset.addEventListener('click',()=>{tier='all';movement='all';brand='all';query='';order='editorial';search.value='';if(sort)sort.value='editorial';if(movementSelect)movementSelect.value='all';if(brandSelect)brandSelect.value='all';render();search.focus()});
+ if(reset)reset.addEventListener('click',()=>{tier='all';movement='all';brand='all';diameter='all';query='';order='editorial';search.value='';if(sort)sort.value='editorial';if(movementSelect)movementSelect.value='all';if(brandSelect)brandSelect.value='all';if(diameterSelect)diameterSelect.value='all';render();search.focus()});
  document.querySelectorAll('a[data-goto-tier]').forEach(a=>a.addEventListener('click',()=>{tier=a.dataset.gotoTier;render()}));
  function comparisonRows(selected){
    return [
