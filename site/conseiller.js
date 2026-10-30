@@ -18,7 +18,7 @@
    img.alt='Photographie réelle de '+p.brand+' '+p.model;
    img.width=540;img.height=540;img.loading='lazy';img.decoding='async';img.referrerPolicy='no-referrer';
    let i=0;
-   img.onerror=()=>{i++;if(i<urls.length)img.src=urls[i];else wrap.classList.add('fallback')};
+   img.onerror=()=>{i++;if(i<urls.length)img.src=urls[i];else{wrap.classList.add('fallback');window.AtelierWatch?.render(wrap,p)}};
    wrap.append(img,missing,chip);
    if(urls.length)img.src=urls[0];else{img.remove();wrap.classList.add('fallback');window.AtelierWatch?.render(wrap,p);}
    return wrap;
@@ -79,7 +79,15 @@
      if(field)field.value=initial[key];
    }
    const hero=document.getElementById('advisorHeroArt');const featured=catalogue.find(p=>p.id==='citizen-tsuyosa');
-   if(hero&&featured)window.AtelierWatch?.render(hero,featured);
+   if(hero&&featured){
+     const review=featured.photoReview;
+     if(review?.publicUsageApproved===true&&review.localUrl==='./assets/watches/'+featured.id+'.webp'){
+       const heroPhoto=node('img','advisor-hero-photo');
+       heroPhoto.src=review.localUrl;heroPhoto.alt=featured.brand+' '+featured.model+' — photographie du modèle';heroPhoto.width=540;heroPhoto.height=540;heroPhoto.decoding='async';heroPhoto.fetchPriority='high';
+       heroPhoto.onerror=()=>{hero.replaceChildren();window.AtelierWatch?.render(hero,featured)};
+       hero.replaceChildren(heroPhoto);
+     }else window.AtelierWatch?.render(hero,featured);
+   }
    render();
  }).catch(()=>{
    results.replaceChildren();status.textContent='Conseiller temporairement indisponible';
