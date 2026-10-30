@@ -64,7 +64,7 @@
         const url=local(item.product);
         if(url){
           const img=node('img');img.src=url;img.alt='';img.width=65;img.height=65;
-          img.loading=i?'lazy':'eager';img.decoding='async';
+          img.loading='eager';img.decoding='async';
           img.onerror=()=>{img.remove();pic.append(node('span','am-hero-option-fallback',item.name.slice(0,2).toUpperCase()))};
           pic.append(img);
         } else pic.append(node('span','am-hero-option-fallback',item.name.slice(0,2).toUpperCase()));
