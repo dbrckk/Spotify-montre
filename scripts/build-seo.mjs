@@ -165,9 +165,11 @@ import {buildSearchCollections} from './build-search-collections.mjs';
   collection=collection.replace('</head>','<!-- AM_SEO_HEAD_START -->'+headExtra+'<!-- AM_SEO_HEAD_END --></head>');
   if(firstPhotoSrc){
     const emptyHero='<div class="am-hero-watch" id="heroWatch" role="img" aria-label="Photographie de Citizen Tsuyosa NJ0150-81X"></div>';
-    if(!collection.includes(emptyHero))throw Error('Public hero photo insertion point missing');
-    collection=collection.replace(emptyHero,
-      '<div class="am-hero-watch" id="heroWatch" role="img" aria-label="Photographie de Citizen Tsuyosa NJ0150-81X"><img class="am-hero-real-photo" src="'+e(firstPhotoSrc)+'" alt="Citizen Tsuyosa NJ0150-81X — montre automatique au cadran vert" width="520" height="520" decoding="async" fetchpriority="high"></div>');
+    const heroWithPhoto='<div class="am-hero-watch" id="heroWatch" role="img" aria-label="Photographie de Citizen Tsuyosa NJ0150-81X"><img class="am-hero-real-photo" src="'+e(firstPhotoSrc)+'" alt="Citizen Tsuyosa NJ0150-81X — montre automatique au cadran vert" width="520" height="520" decoding="async" fetchpriority="high"></div>';
+    if(collection.includes(emptyHero))collection=collection.replace(emptyHero,heroWithPhoto);
+    else if(!collection.includes(heroWithPhoto))throw Error('Public hero photo insertion point missing or unexpectedly modified');
+    // On the second SEO build, preserve exactly the first injected image.
+    // A developer build must be safe when repeated against the same directory.
   }
   writeFileSync(join(root,'index.html'),collection);
   writeFileSync(join(root,'affiliation.html'),collection);
