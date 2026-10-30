@@ -1,0 +1,8 @@
+/* Affiliate calls to action are entirely absent while the programme is inactive. */
+.aff-card .am-affiliate-cta{display:inline-flex;justify-content:center;align-items:center;min-height:44px;padding:10px 13px;margin-top:8px;width:100%;background:#173d2b;color:#fff;border:1px solid #173d2b;font-size:12px;font-weight:700;letter-spacing:.02em;text-decoration:none;text-align:center;line-height:1.45}
+.aff-card .am-affiliate-cta:hover{background:#305943}
+.aff-card .am-affiliate-note{display:block;margin:5px 0 8px;color:#536b5b;font-size:11px;line-height:1.55}
+.detail-cta.am-affiliate-detail{display:inline-flex;background:#193d29;color:#fff;border-color:#193d29;margin:8px 8px 16px 0}
+.detail-cta.am-affiliate-detail:hover{background:#345b43}
+.am-affiliate-cta:focus-visible,.am-affiliate-detail:focus-visible{outline:3px solid #b99760;outline-offset:3px}
+@media(max-width:620px){.aff-card .am-affiliate-cta{min-height:48px}.detail-cta.am-affiliate-detail{width:100%}}
