@@ -1,0 +1,35 @@
+name: SEO storefront checks
+on:
+  push:
+    branches: [main, 'feat/seo-watch-catalog-20261030']
+    paths:
+      - 'site/**'
+      - 'scripts/**'
+      - 'package.json'
+      - '.github/workflows/seo-storefront.yml'
+  pull_request:
+    paths:
+      - 'site/**'
+      - 'scripts/**'
+      - 'package.json'
+      - '.github/workflows/seo-storefront.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Existing storefront functional checks
+        run: npm test
+      - name: Generate deployable SEO storefront
+        env:
+          PUBLIC_SITE_URL: https://atelier-montres-selection-fr.onrender.com/
+        run: node scripts/build-seo.mjs
+      - name: Validate published website output
+        run: node scripts/validate-seo.mjs
