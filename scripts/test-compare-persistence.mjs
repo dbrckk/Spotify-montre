@@ -28,7 +28,7 @@ try {
   const ids=await page.evaluate(()=>JSON.parse(sessionStorage.getItem('atelier-montres-comparison-v1')||'[]'));
   assert.equal(ids.length,2,'Comparison must persist for the current tab');
 
-  await cards.first().locator('.aff-card-actions a').click();
+  await cards.first().locator('.aff-card-actions a[href^="./montre.html?id="]').click();
   await page.locator('#detailShell').waitFor({state:'visible',timeout:20000});
   const link=await page.locator('#detailCompare').getAttribute('href');
   const selectedFromDetail=new URL(link,page.url()).searchParams.get('compare')?.split(',');
