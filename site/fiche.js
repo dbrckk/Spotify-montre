@@ -70,7 +70,7 @@
      let selections=[];
      try{
        const stored=JSON.parse(sessionStorage.getItem('atelier-montres-comparison-v1')||'[]');
-       if(Array.isArray(stored))selections=[...new Set(stored.filter(id=>typeof id==='string'&&all.some(t=>t.id===id)))].slice(0,3);
+       if(Array.isArray(stored))selections=[...new Set(stored.filter(id=>typeof id==='string'&&x.products.some(t=>t.id===id&&safeOfficial(t.officialUrl))))].slice(0,3);
      }catch(_){}
      if(!selections.includes(p.id)&&selections.length<3)selections.push(p.id);
      const url=new URL('./affiliation.html',location.href);
