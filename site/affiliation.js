@@ -21,6 +21,13 @@
    compare=compare.filter(id=>data.some(p=>p.id===id)).slice(0,3);
    // Keep the short-list within this tab across detail pages and reloads.
    try{if(compare.length)sessionStorage.setItem(COMPARE_KEY,JSON.stringify(compare));else sessionStorage.removeItem(COMPARE_KEY)}catch(_){}
+   // Keep shared links consistent after user removes or clears watches.
+   if(location.search.includes('compare=')){
+     const url=new URL(location.href);
+     if(compare.length)url.searchParams.set('compare',compare.join(','));
+     else url.searchParams.delete('compare');
+     history.replaceState(history.state,'',url.pathname+url.search+url.hash);
+   }
    if(compareTray)compareTray.hidden=compare.length===0;
    if(compareLabel)compareLabel.textContent=compare.length+' montre'+(compare.length>1?'s':'')+' sélectionnée'+(compare.length>1?'s':'')+' · 3 maximum';
    if(compareOpen)compareOpen.disabled=compare.length<2;
@@ -253,6 +260,6 @@
     if(sources.length){const img=make('img','am-hero-real-photo');img.alt='Citizen Tsuyosa NJ0150-81X — photographie authentique';img.decoding='async';img.loading='eager';img.fetchPriority='high';img.referrerPolicy='no-referrer';let i=0;img.onerror=()=>{i++;if(i<sources.length)img.src=sources[i];else fallback()};hero.classList.add('am-hero-real');hero.replaceChildren(img);img.src=sources[0]}else fallback();
   }
   render();
-  if(compare.length>=2)showComparison();
+  if(compare.length>=2&&params.has('compare'))showComparison();
  }).catch(()=>{count.textContent='Catalogue temporairement indisponible';empty.hidden=false;grid.replaceChildren()});
 })();
