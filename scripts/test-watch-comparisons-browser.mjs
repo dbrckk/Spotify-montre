@@ -41,7 +41,9 @@ try{
     }
     const table=page.locator('.headtohead-evidence .spec-matrix');
     assert.equal(await table.locator('tbody tr').count(),4,'Four true catalogue attributes');
-    assert.ok(await page.locator('link[rel="canonical"]').getAttribute('href').then(x=>x===url.href),'Correct canonical');
+    const canonical=new URL(await page.locator('link[rel="canonical"]').getAttribute('href'));
+    assert.equal(canonical.pathname,url.pathname,'Each comparison canonical must reference the same static path');
+    assert.equal(canonical.origin,'https://atelier-montres-selection-fr.onrender.com','SEO canonical targets the public HTTPS domain, not the local test server');
     await checkWidth(page,pair.slug);
     if(pair.slug==='tissot-prx-quartz-vs-powermatic-80')
       await page.screenshot({path:'artifacts/mobile-watch-pair-prx.png',fullPage:true});
