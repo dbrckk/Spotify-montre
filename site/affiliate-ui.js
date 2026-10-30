@@ -35,7 +35,10 @@
       }
     }
     const paid=new Map();
-    if(config?.version===1&&config.enabled===true&&config.approved===true&&
+    if(config?.version===1&&config.enabled===true&&
+       (config.approved===true&&(!config.enrollmentStatus||config.enrollmentStatus==='approved')||
+        config.approved===false&&config.enrollmentStatus==='registered_pending_review'&&
+        config.ownerConfirmedEnrollment===true&&config.specialLinksCreatedInAccount===true)&&
        typeof config.amazonPartnerTag==='string'&&/^[a-z0-9][a-z0-9-]{1,48}-21$/i.test(config.amazonPartnerTag)&&
        config.links&&!Array.isArray(config.links)) {
       const entries=Object.entries(config.links);
