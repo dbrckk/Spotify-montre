@@ -10,6 +10,28 @@ Dernière mise à jour : 30 octobre 2026. Cette feuille de route concerne **une 
 - Les photographies fabricant actuellement publiées ne disposent pas encore d'une preuve de licence commerciale (`publicUsageApproved:false`). **Vérifier ces droits en priorité** ; ne jamais confondre accès à une image publique et autorisation de redistribution.
 - Aucun fournisseur chinois, prix final rendu, échantillon testé ou référence de marque propre validés.
 
+## Vue de préparation vérifiable
+
+Le dépôt produit désormais un rapport public dans les résumés GitHub Actions, avec **15 références et 2 preuves distinctes par modèle** : lien spécial validé dans la configuration et autorisation de diffusion commerciale des photographies. Ce sont des déclarations techniques, pas une vérification indépendante des contrats ou de la présence du produit.
+
+- Depuis un terminal : `npm run affiliate:status`.
+- Depuis Android sans ordinateur : ouvrir **GitHub → Actions → SEO storefront checks → dernier run → Summary**.
+- En dehors des tests, le rapport n'envoie aucune donnée et ne crée aucun achat.
+- **Compte Partenaires et droits actuels : non confirmés**. L'état « 0 lien spécial activé » est attendu.
+
+### Activation du référencement Google sans modifier le code
+
+1. Ajouter la propriété de type **Préfixe d'URL** `https://atelier-montres-selection-fr.onrender.com/` dans [Search Console](https://search.google.com/search-console/).
+2. Choisir l'option **Balise HTML**. Copier uniquement la valeur de l'attribut `content` de `<meta name="google-site-verification" content="...">` ; ne pas copier la balise entière.
+3. Configurer la variable Render **`GOOGLE_SITE_VERIFICATION`** avec cette valeur dans les paramètres d'environnement du site statique (aucun accès à GitHub nécessaire), puis laisser Render reconstruire le site.
+4. Dans Search Console, cliquer « Valider ». Soumettre ensuite `https://atelier-montres-selection-fr.onrender.com/sitemap.xml`, puis inspecter quelques pages de montres et guides.
+5. Le jeton de validation est publié comme prévu dans la balise HTML : il ne s'agit pas d'un secret d'API. **Ne pas** saisir un mot de passe Google, un jeton OAuth ou une clé de service à cet emplacement.
+6. Google peut découvrir ces pages sans indexer toutes les URL : contrôler la couverture et les impressions réelles avant d'augmenter la production de contenu.
+
+### Déclaration de commission visible
+
+La déclaration en français sur les pages activées est désormais le **libellé exact** exigé par l'aide Amazon France : « En tant que Partenaire Amazon, je réalise un bénéfice sur les achats remplissant les conditions requises ». Les liens rémunérés portent une mention visible adjacente. [Source Amazon](https://partenaires.amazon.fr/help/node/topic/GHQNZAU6669EZS98).
+
 ## Phase A : rendre l'affiliation réellement opérationnelle
 
 1. Confirmer un compte **Amazon Partenaires France** accepté et déclarer l'adresse publique de la boutique. Ne jamais recycler automatiquement un identifiant Amazon US d'un autre dépôt.
