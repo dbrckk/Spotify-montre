@@ -33,7 +33,7 @@ assert.match(detail,/id="detailSpecList"/);
 assert.match(detail,/id="detailAmazon"/);
 assert.match(detail,/id="detailEbay"/);
 assert.match(detail,/id="detailPhotoLabel"/);
-assert.match(detail,/ILLUSTRATION ORIGINALE/);
+assert.match(detail,/PHOTOGRAPHIE DU MODÈLE/);
 assert.match(detailJS,/encodeURIComponent/);
 assert.match(detailJS,/publicUsageApproved===true/);
 assert.match(js,/publicUsageApproved===true/);
