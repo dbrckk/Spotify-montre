@@ -45,3 +45,35 @@
 /* Product cards surface the full static comparison without changing their primary interactive route. */
 .aff-card .am-card-seo-link{display:inline-block;margin:4px 20px 7px;color:#1e5441;font-size:12px;font-weight:700;text-underline-offset:3px;line-height:1.6}
 .aff-card .am-card-seo-link:hover{color:#0b3425}
+
+/* Editorial head-to-head comparisons: no third-party assets, keyboard-safe. */
+.headtohead-home{background:#f4efe4;border-top:1px solid #e1d9cb}
+.headtohead-home .seo-guide-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.headtohead-home .seo-guide-grid article{background:#fffdf8}
+.headtohead{padding-bottom:60px}
+.headtohead>.disclosure{max-width:900px}
+.headtohead-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin:32px 0 30px;align-items:stretch}
+.headtohead-watch{display:flex;flex-direction:column;border:1px solid var(--line);background:#fffdf8;min-width:0}
+.headtohead-watch-visual{display:grid;place-items:center;padding:20px;background:radial-gradient(circle at 50% 40%,#fcfbf6,#eae8df 85%);border-bottom:1px solid var(--line)}
+.headtohead-watch-visual .watch-vector{margin:0 auto;min-height:250px;width:min(100%,320px)}
+.headtohead-watch-visual .am-watch-svg{max-height:360px}
+.headtohead-watch-body{display:flex;flex:1;flex-direction:column;padding:clamp(18px,2.8vw,30px)}
+.headtohead-watch-body h2{font:400 clamp(26px,3vw,35px)/1.18 Georgia,serif;margin:12px 0 10px;overflow-wrap:anywhere}
+.headtohead-watch-body>p{color:#516458;font-size:14px;line-height:1.75}
+.headtohead-watch-evidence{margin-top:auto;padding-top:12px}
+.headtohead-watch-evidence a{font-weight:700;color:#25513b}
+.headtohead-watch-actions{display:flex;flex-wrap:wrap;gap:10px;padding-top:8px}
+.headtohead-watch-actions .primary,.headtohead-watch-actions .secondary{flex:1 1 195px;margin:0;display:flex;align-items:center;justify-content:center}
+.headtohead-watch-body>.headtohead-watch-legal{font-size:12px;margin-bottom:0}
+.headtohead-evidence{max-width:none}
+.headtohead-evidence>p{max-width:900px}
+.headtohead-evidence .comparison-scroll{max-width:100%}
+.headtohead-evidence .spec-matrix{min-width:580px}
+.headtohead-evidence .comparison-different{background:#f5f0e3}
+.headtohead-evidence .comparison-different th{border-left:3px solid #b39059}
+.headtohead-choice{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;margin:22px 0 32px}
+.headtohead-choice>div{padding:18px;background:#f1ece1;border:1px solid #e0d5c3}
+.headtohead-choice h3{font:400 21px/1.25 Georgia,serif;margin:0 0 8px}
+.headtohead-choice p{font-size:14px;margin:0;line-height:1.8}
+@media(max-width:780px){.headtohead-grid,.headtohead-choice,.headtohead-home .seo-guide-grid{grid-template-columns:1fr}.headtohead-watch-visual .watch-vector{min-height:230px}.headtohead-watch-body{padding:20px}.headtohead-watch-actions a{width:100%}}
+@media(prefers-reduced-motion:reduce){.headtohead a{scroll-behavior:auto}}
