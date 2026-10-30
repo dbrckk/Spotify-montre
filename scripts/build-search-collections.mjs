@@ -45,6 +45,8 @@ export function buildSearchCollections({root,products,amazonLinks,partners,pageH
       predicate:p=>p.brand==='Casio',
       narrative:`<h2>Une collection Casio aux usages différents</h2>
       <p>La Casio A168WA-1 revendique un affichage numérique rétro, la MDV-107-1A1V une allure de plongeuse et la MTP-B145D-2A2V une silhouette d’acier compacte. La MTP-1302PD-2A2V mise sur un cadran turquoise ; la LTP-1302PD-7A1V se distingue par un format réduit. Ce sont des différences de conception et de style, pas des notes de qualité ou de fiabilité.</p>
+      <h2>Casio vintage : numérique rétro ou cadran classique ?</h2>
+      <p>La Casio A168WA-1 reprend une esthétique digitale rétro, alors que la MTP-B145D-2A2V associe une silhouette compacte à un cadran analogique. Ces deux références peuvent intéresser quelqu’un qui recherche une montre Casio vintage, mais elles diffèrent par leur affichage et leur dessin. Vérifiez le code exact de la variante avant achat.</p>
       <h2>Comparer les dimensions documentées</h2>
       <p>Notre catalogue confirme 35 mm pour la MTP-B145D-2A2V, 38,5 mm pour la MTP-1302PD-2A2V et 30,2 mm pour la LTP-1302PD-7A1V. Les dimensions de l’A168WA-1 et de la MDV-107-1A1V ne sont pas enregistrées ici et doivent être vérifiées sur leur fiche fabricant. L’épaisseur et l’entre-cornes comptent autant que le diamètre pour le confort.</p>
       <h2>Comment vérifier la bonne référence Casio ?</h2>
