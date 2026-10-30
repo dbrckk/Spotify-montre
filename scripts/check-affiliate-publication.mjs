@@ -33,7 +33,7 @@ try {
   assert.match(html,/Voir ce modèle sur Amazon.fr · lien rémunéré/);
   assert.match(html,/rel="noopener noreferrer nofollow sponsored"/);
   assert.match(html,/https:\/\/www\.amazon\.fr\/dp\/B012345678\?tag=example-21/);
-  assert.match(html,/En tant que Partenaire d’Amazon/);
+  assert.match(html,/En tant que Partenaire Amazon/);
   const other=readFileSync(join(target,'montres/casio-mtp-1302.html'),'utf8');
   assert.doesNotMatch(other,/Voir ce modèle sur Amazon.fr · lien rémunéré/,'Not all products are automatically monetized');
   const home=readFileSync(join(target,'index.html'),'utf8');
