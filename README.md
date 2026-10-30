@@ -1,5 +1,18 @@
 # Atelier Montres — boutique de montres indépendante
 
+## Publication SEO sur Render — 30 octobre 2026
+
+**[Ouvrir le catalogue de montres](https://atelier-montres-selection-fr.onrender.com/)** (nouvelle adresse stable, déploiement automatique depuis `main`).
+
+- [15 fiches de montres générées côté build](https://atelier-montres-selection-fr.onrender.com/montres/citizen-tsuyosa.html), [guide d'achat](https://atelier-montres-selection-fr.onrender.com/montres/guide-choisir-montre.html) et [sitemap.xml](https://atelier-montres-selection-fr.onrender.com/sitemap.xml).
+- Construction gratuite : `npm test && node scripts/build-seo.mjs && node scripts/validate-seo.mjs` ; publication du dossier `site/`.
+- Les 15 fiches éditoriales sont des pages HTML indexables, sans prix de vente ni stock supposés. Les pages produit interactives historiques et la vitrine ShipStatic restent conservées.
+- SEO technique validé par GitHub Actions et build Render. Une indexation dans Google ou l'obtention de trafic ne sont **pas** encore confirmées : la propriété Search Console et l'acceptation du sitemap restent à faire.
+- **Aucun paiement n'est actif.** Une affiliation Amazon FR exige un compte Partenaires autorisé et des liens spécifiques. Une vente encaissée sur Atelier Montres impose d'être vendeur et de disposer d'un prestataire de paiement, de stocks, de CGV et d'obligations légales conformes.
+- Les droits commerciaux des 15 photos constructeur ne sont pas vérifiés : obtenir des autorisations ou réaliser des photos originales avant un lancement marchand.
+
+Voir [le guide d'exploitation SEO et commercial](docs/seo-publication-et-affiliation.md).
+
 **Statut au 30 octobre 2026 : vitrine multimarque gratuite publiée, affiliation non activée, aucun paiement.**
 
 ## Version actuelle — V10 : interface mobile stabilisée (30 octobre 2026)
