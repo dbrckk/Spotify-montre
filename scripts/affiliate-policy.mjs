@@ -20,7 +20,18 @@ export function validateAffiliateConfig(config, productIds) {
     config.enrollmentStatus==='registered_pending_review'&&
     config.ownerConfirmedEnrollment===true&&
     config.specialLinksCreatedInAccount===true;
-  if(config.approved!==true&&!pendingEnrollment)fail('no verified enrollment or final Amazon account approval');
+  // The operating policies explicitly allow an enrolled partner to CREATE
+  // their own tagged Special Links. The owner confirmed both their tracking
+  // ID and the listed storefront, but Amazon's final review remains unknown.
+  const selfCreatedOnSite=config.approved===false&&
+    config.enrollmentStatus==='enrolled_approval_unverified'&&
+    config.ownerConfirmedEnrollment===true&&
+    config.ownerConfirmedTrackingId===true&&
+    config.ownerConfirmedSiteListed===true&&
+    config.specialLinksCreatedOnSite===true&&
+    config.specialLinksCreatedInAccount!==true;
+  if(config.approved!==true&&!pendingEnrollment&&!selfCreatedOnSite)
+    fail('no confirmed enrollment/owned tag and attributable Special Links');
   if(config.approved===true&&config.enrollmentStatus&&config.enrollmentStatus!=='approved')fail('final account approval contradicts enrollment status');
   const tag=config.amazonPartnerTag;
   if (typeof tag !== 'string' || !/^[a-z0-9][a-z0-9-]{1,48}-21$/i.test(tag)) fail('invalid Amazon.fr tag');
@@ -41,5 +52,7 @@ export function validateAffiliateConfig(config, productIds) {
     if ([...url.searchParams.keys()].some(k=>!['tag','th','psc'].includes(k))) fail('unexpected query field for '+id);
     links.set(id,Object.freeze({url:url.href,provider:'Amazon.fr',verifiedAt:item.verifiedAt}));
   }
-  return Object.freeze({enabled:true,approved:config.approved===true,enrollmentStatus:pendingEnrollment?'registered_pending_review':'approved',links});
+  return Object.freeze({enabled:true,approved:config.approved===true,
+    enrollmentStatus:selfCreatedOnSite?'enrolled_approval_unverified':pendingEnrollment?'registered_pending_review':'approved',
+    links});
 }
