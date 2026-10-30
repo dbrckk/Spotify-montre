@@ -162,7 +162,7 @@ for(const c of comparisons.comparisons){
 const seoCategories=[
  {slug:'montres-quartz',members:feed.products.filter(p=>p.movement==='quartz'),title:'Montres à quartz'},
  {slug:'montres-casio',members:feed.products.filter(p=>p.brand==='Casio'),title:'Montres Casio'},
- {slug:'montres-petit-boitier',members:feed.products.filter(p=>{const m=/^(\\d{1,2})(?:[,.](\\d{1,2}))?\\s*mm$/i.exec((p.specs?.diameter||'').trim());return m&&Number(m[1]+'.'+(m[2]||'0'))<=38}),title:'Montres à petit boîtier'}
+ {slug:'montres-petit-boitier',members:feed.products.filter(p=>{const m=/^(\d{1,2})(?:[,.](\d{1,2}))?\s*mm$/i.exec((p.specs?.diameter||'').trim());return m&&Number(m[1]+'.'+(m[2]||'0'))<=38}),title:'Montres à petit boîtier'}
 ];
 assert.deepEqual(seoCategories.map(x=>x.members.length),[7,5,3]);
 for(const category of seoCategories){
@@ -179,11 +179,12 @@ for(const category of seoCategories){
  assert.match(html,/class="seo-collection-grid"/,'Visible accessible photographic product cards');
  assert.match(html,/class="spec-matrix"/,'Source-backed facts table is required');
  assert.match(html,/class="comparison-scroll"/,'Mobile table must be scrollable');
- assert.match(html,/Non renseigné|À vérifier/,'Unknown specification values must stay explicitly unknown');
- assert.doesNotMatch(html,/"offers"\\s*:|"price"\\s*:|"availability"\\s*:|"aggregateRating"\\s*:/,'No fabricated merchant/ratings metadata');
+ if(category.members.some(p=>!p.specs?.diameter||!p.specs?.glass||!p.specs?.waterResistance)) assert.match(html,/Non renseigné|À vérifier/,'Unknown specification values must stay explicitly unknown');
+ else assert.match(html,/Une mesure absente n’est jamais estimée/,'Even complete categories need an evidence disclaimer');
+ assert.doesNotMatch(html,/"offers"\s*:|"price"\s*:|"availability"\s*:|"aggregateRating"\s*:/,'No fabricated merchant/ratings metadata');
  assert.equal(html.includes('cloud.umami.is/script.js'),analyticsConfigured,'Tracking remains opt-in');
  assert.equal((html.match(/class="seo-collection-card"/g)||[]).length,category.members.length,'Exactly the catalogued products, not arbitrary keyword landing pages');
- const graphMatch=html.match(/<script type="application\\/ld\\+json">([\\s\\S]*?)<\\/script>/);
+ const graphMatch=html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
  assert.ok(graphMatch,'Structured metadata must be server-rendered');
  const graph=JSON.parse(graphMatch[1]);
  assert.deepEqual(graph['@graph'].map(n=>n['@type']),['CollectionPage','ItemList','BreadcrumbList']);
