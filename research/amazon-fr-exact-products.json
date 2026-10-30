@@ -3,8 +3,8 @@
   "checkedOn": "2026-10-30",
   "marketplace": "amazon.fr",
   "amazonPartnerTag": "drackk04-21",
-  "status": "research_only_not_enabled_on_storefront",
-  "notes": "Correspondance du modèle vérifiée dans les pages produits Amazon.fr ; disponibilité/prix non garantis. Les suffixes régionaux E/F/J1 désignent les références explicitées ci-dessous et ont été contrôlés. La présence du tag ne prouve pas l'approbation du compte Partenaires, la conformité du lien spécial ni les droits de reproduction des photographies. Ne pas activer automatiquement l'encaissement ou les commissions.",
+  "status": "source_research_not_account_approval",
+  "notes": "Source de recherche ASIN (13 références rapprochées, 2 non confirmées). Le propriétaire a confirmé le 30 octobre 2026 que drackk04-21 est son ID Amazon Partenaires et que le site Atelier Montres est déclaré dans son compte. Les liens balisés directs sont activés séparément par site/affiliate-links.json, sans preuve indépendante de l’approbation finale Amazon ni de commissions. Les suffixes régionaux sont documentés dans les correspondances existantes. Prix et disponibilité non garantis ; les preuves commerciales du compte ne se déduisent pas de ce fichier.",
   "products": {
     "casio-mtp-1302": {
       "status": "matched_on_amazon_fr",
