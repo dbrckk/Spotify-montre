@@ -1,5 +1,19 @@
 # Atelier Montres — boutique de montres indépendante
 
+## Comparer deux montres : quatre guides vérifiables (30 octobre 2026)
+
+**Nouvelle fonctionnalité :** quatre pages de comparaison point à point, accessibles depuis l'accueil et les fiches SEO concernées. Les tableaux reprennent **uniquement les données du catalogue fabricant** (mouvement, diamètre, verre, étanchéité), distinguent les différences des critères subjectifs et renvoient vers les deux fiches officielles.
+
+- Tissot PRX Quartz face à PRX Powermatic 80 ;
+- Citizen Tsuyosa face à Tissot PRX Powermatic 80 ;
+- Casio MTP-1302 face à MTP-B145 ;
+- Orient Bambino 38 face à Hamilton Khaki Field Auto.
+
+Chaque page conserve les liens Amazon.fr exacts **non rémunérés** lorsque la référence est identifiée, les illustrations originales, le lien vers le comparateur interactif prérempli et l'absence de prix ou disponibilité inventés. Le sitemap passe de 21 à **25 URLs** (15 fiches, 4 comparatifs, 4 guides, accueil et conseiller).
+
+Sources éditoriales structurées dans `scripts/watch-comparisons.mjs` ; rendu par `scripts/build-seo.mjs`, vérifié par `scripts/validate-seo.mjs`. [Documentation du parcours de comparaison](docs/guide-comparatifs-directs.md).
+
+
 ## Publication des visuels sans licence constructeur — 30 octobre 2026
 
 **Correctif de conformité :** les quinze photographies constructeur du dépôt indiquent `publicUsageApproved:false`. Le générateur du site public les remplace donc par les **15 illustrations vectorielles originales** et retire les fichiers photographiques non autorisés du dossier public Render. Les visiteurs accèdent à la vraie photographie exacte via le lien du fabricant. Cette mesure couvre le catalogue, les fiches, les pages SEO, le conseiller et le comparateur.
