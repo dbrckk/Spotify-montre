@@ -66,7 +66,17 @@
      }else fallback();
    }
    $('detailHighlights').replaceChildren(...(p.highlights||[]).map(t=>node('span','',t)));
-   const compareLink=$('detailCompare');if(compareLink){const url=new URL('./affiliation.html',location.href);url.searchParams.set('compare',p.id);url.hash='montres';compareLink.href=url.href}
+   const compareLink=$('detailCompare');if(compareLink){
+     let selections=[];
+     try{
+       const stored=JSON.parse(sessionStorage.getItem('atelier-montres-comparison-v1')||'[]');
+       if(Array.isArray(stored))selections=[...new Set(stored.filter(id=>typeof id==='string'&&all.some(t=>t.id===id)))].slice(0,3);
+     }catch(_){}
+     if(!selections.includes(p.id)&&selections.length<3)selections.push(p.id);
+     const url=new URL('./affiliation.html',location.href);
+     url.searchParams.set('compare',selections.join(','));url.hash='montres';compareLink.href=url.href;
+     if(selections.length>1)compareLink.textContent='⇄ Reprendre la comparaison ('+selections.length+')';
+   }
    $('detailOfficial').href=p.officialUrl;
    $('detailOfficial').setAttribute('aria-label','Voir '+p.model+' sur le site officiel '+p.brand);
    const q=encodeURIComponent((p.brand+' '+p.model).slice(0,90));
