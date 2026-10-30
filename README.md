@@ -11,6 +11,13 @@
 
 [Feuille de route commerciale complète](docs/commerce-affiliation-marque-propre.md) · [Schéma d'un devis fournisseur](research/supplier-quote.schema.json) · [Vitrine publique](https://atelier-montres-selection-fr.onrender.com/).
 
+## Mesure gratuite du trafic et des clics (30 octobre 2026)
+
+- **Umami (open source)** : instrumentation des pages vues et clics Amazon par montre, facultative, via `UMAMI_WEBSITE_ID` dans Render. Aucun appel analytics tant que la variable n'est pas renseignée.
+- **Statut commercial inchangé** : les 13 liens Amazon.fr exacts sont accessibles, sans activation rémunérée par défaut. Seuls les rapports Amazon Partenaires peuvent prouver clics attribués, commandes et commissions réellement dues.
+- Tests de génération avec analytics activées/désactivées, notice de confidentialité cohérente et navigation non bloquée.
+- Guide Android : [Analytics gratuites et rapports Amazon](docs/analytics-gratuites-et-revenus-amazon.md).
+
 ## Publication SEO sur Render — 30 octobre 2026
 
 **[Ouvrir le catalogue de montres](https://atelier-montres-selection-fr.onrender.com/)** (nouvelle adresse stable, déploiement automatique depuis `main`).
