@@ -8,7 +8,7 @@ const tmp=mkdtempSync(join(tmpdir(),'atelier-affiliate-integration-'));
 try {
   const target=join(tmp,'site');
   mkdirSync(target,{recursive:true});
-  for(const name of ['selection-affiliation.json','affiliation.html','confidentialite.html','affiliate-links.json']){
+  for(const name of ['selection-affiliation.json','affiliation.html','confidentialite.html','affiliate-links.json','comparaisons-montres.json']){
     cpSync(join(repository,'site',name),join(target,name));
   }
   mkdirSync(join(tmp,'research'),{recursive:true});
@@ -55,12 +55,22 @@ try {
   const feed=JSON.parse(readFileSync(feedPath,'utf8'));
   feed.products.find(p=>p.id==='citizen-tsuyosa').photoReview.publicUsageApproved=true;
   writeFileSync(feedPath,JSON.stringify(feed));
+  let wrongAsinBlocked=false;
+  try {build()}catch{wrongAsinBlocked=true}
+  assert.equal(wrongAsinBlocked,true,'Even with photo rights, a paid link for the wrong model must fail');
+  cfg.links['citizen-tsuyosa'].asin='B0BG7VD5YL';
+  cfg.links['citizen-tsuyosa'].url='https://www.amazon.fr/dp/B0BG7VD5YL?tag=example-21';
+  writeFileSync(join(target,'affiliate-links.json'),JSON.stringify(cfg));
   build();
   html=readFileSync(join(target,'montres/citizen-tsuyosa.html'),'utf8');
   assert.match(html,/Voir ce modèle sur Amazon.fr · lien rémunéré/);
   assert.match(html,/rel="noopener noreferrer nofollow sponsored"/);
-  assert.match(html,/https:\/\/www\.amazon\.fr\/dp\/B012345678\?tag=example-21/);
+  assert.match(html,/https:\/\/www\.amazon\.fr\/dp\/B0BG7VD5YL\?tag=example-21/);
   assert.match(html,/En tant que Partenaire Amazon/);
+  const duel=readFileSync(join(target,'montres/comparer-citizen-tsuyosa-vs-tissot-prx-automatique.html'),'utf8');
+  assert.match(duel,/https:\/\/www\.amazon\.fr\/dp\/B0BG7VD5YL\?tag=example-21/);
+  assert.match(duel,/rel="noopener noreferrer nofollow sponsored"/);
+  assert.match(duel,/En tant que Partenaire Amazon/);
   const other=readFileSync(join(target,'montres/casio-mtp-1302.html'),'utf8');
   assert.doesNotMatch(other,/Voir ce modèle sur Amazon.fr · lien rémunéré/,'Not all products are automatically monetized');
   const home=readFileSync(join(target,'index.html'),'utf8');
