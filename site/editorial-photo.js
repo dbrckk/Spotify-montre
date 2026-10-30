@@ -35,6 +35,7 @@
   const vector=(target,p)=>{
     target.replaceChildren();
     target.classList.remove('am-hero-real');
+    target.removeAttribute('aria-busy');
     window.AtelierWatch?.render(target,p);
   };
   const openViewer=(catalogue,id)=>window.AtelierPhoto?.open(catalogue,id);
@@ -105,11 +106,15 @@
         img.onload=()=>{
           if(token!==request)return;
           stage.classList.add('am-hero-real');
+          stage.removeAttribute('aria-busy');
           stage.replaceChildren(img);
           if(provenance)provenance.textContent='Photographie du modèle exact · '+(p.photoReview.provider||p.brand);
           if(zoom){zoom.hidden=false;zoom.setAttribute('aria-label','Agrandir '+p.brand+' '+p.model);zoom.onclick=()=>openViewer(catalogue,p.id);}
         };
         img.onerror=fallback;
+        stage.setAttribute('aria-busy','true');
+        stage.replaceChildren(node('span','am-hero-loading','Chargement de la photographie…'));
+        if(zoom)zoom.hidden=true;
         img.src=url;
       };
       select(0);
