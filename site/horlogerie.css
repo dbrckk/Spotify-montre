@@ -32,6 +32,10 @@ html{scroll-padding-top:95px}
 .aff-heading h2{max-width:740px}
 .aff-disclosure{background:#eeeade;border-left:3px solid #ad915f;color:#566257}
 .aff-tools{gap:12px;padding-bottom:18px;border-bottom:1px solid #e0d9cf}
+.am-diameter-wrap{min-width:155px}.am-diameter-wrap select{max-width:190px}
+.am-size-note{margin:8px 0 16px;font:400 12px/1.65 system-ui;color:#647568}
+.am-size-note a{color:#214c39;font-weight:650;text-underline-offset:3px}
+@media(max-width:620px){.am-diameter-wrap{min-width:0}.am-diameter-wrap select{max-width:165px}.am-size-note{font-size:12px}}
 .aff-tabs button{transition:background .2s ease;border-radius:2px}
 .aff-tabs button:hover{background:#ebede5}
 .aff-tabs button[aria-pressed=true]:hover{background:#264734}
