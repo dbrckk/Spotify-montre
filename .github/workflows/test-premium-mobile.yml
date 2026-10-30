@@ -4,6 +4,8 @@ on:
     branches: [main]
     paths:
       - 'scripts/test-mobile-storefront-v8.mjs'
+      - 'scripts/test-compare-persistence.mjs'
+      - 'site/selection-affiliation.json'
       - 'site/conseiller.html'
       - 'site/conseiller.css'
       - 'site/conseiller.js'
@@ -18,6 +20,7 @@ on:
       - 'site/photo-zoom.css'
       - 'site/horlogerie.css'
       - '.github/workflows/test-premium-mobile.yml'
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -43,6 +46,7 @@ jobs:
           trap 'kill "$pid" 2>/dev/null || true' EXIT
           sleep 2
           WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-mobile-storefront-v8.mjs
+          WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-compare-persistence.mjs
           WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-adviser-browser.mjs
       - name: Preserve mobile and desktop screenshots
         if: always()
