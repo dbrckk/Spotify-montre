@@ -99,18 +99,30 @@
           if(zoom)zoom.hidden=true;
         };
         if(!url){fallback();return}
+        const show=img=>{
+          if(token!==request)return;
+          if(!img.naturalWidth){fallback();return}
+          stage.classList.add('am-hero-real');
+          stage.removeAttribute('aria-busy');
+          if(stage.firstElementChild!==img)stage.replaceChildren(img);
+          if(provenance)provenance.textContent='Photographie du modèle exact · '+(p.id==='orient-bambino'?'vue du fond du boîtier':(p.photoReview.provider||p.brand));
+          if(zoom){zoom.hidden=false;zoom.setAttribute('aria-label','Agrandir '+p.brand+' '+p.model);zoom.onclick=()=>openViewer(catalogue,p.id);}
+        };
+        // Render injects the genuine Citizen photo directly into static HTML,
+        // before JavaScript loads. Reuse it without blanking an already-visible
+        // LCP image or downloading it a second time.
+        const existing=stage.querySelector('img.am-hero-real-photo');
+        if(existing&&existing.getAttribute('src')===url){
+          existing.onload=()=>show(existing);
+          existing.onerror=fallback;
+          if(existing.complete)show(existing);
+          return;
+        }
         const img=node('img','am-hero-real-photo');
         img.alt=p.brand+' '+p.model+' — photographie de la référence réelle';
         img.decoding='async';img.loading='eager';
         img.referrerPolicy='no-referrer';if(i===0)img.fetchPriority='high';
-        img.onload=()=>{
-          if(token!==request)return;
-          stage.classList.add('am-hero-real');
-          stage.removeAttribute('aria-busy');
-          stage.replaceChildren(img);
-          if(provenance)provenance.textContent='Photographie du modèle exact · '+(p.id==='orient-bambino'?'vue du fond du boîtier':(p.photoReview.provider||p.brand));
-          if(zoom){zoom.hidden=false;zoom.setAttribute('aria-label','Agrandir '+p.brand+' '+p.model);zoom.onclick=()=>openViewer(catalogue,p.id);}
-        };
+        img.onload=()=>show(img);
         img.onerror=fallback;
         stage.setAttribute('aria-busy','true');
         stage.replaceChildren(node('span','am-hero-loading','Chargement de la photographie…'));

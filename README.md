@@ -1,5 +1,14 @@
 # Atelier Montres — boutique de montres indépendante
 
+## Référencement SEO : 28 pages HTML indexables (30 octobre 2026)
+
+Trois collections utiles et autonomes complètent les 25 pages existantes : **[montres quartz](https://atelier-montres-selection-fr.onrender.com/montres/montres-quartz.html)** (7 modèles), **[montres Casio](https://atelier-montres-selection-fr.onrender.com/montres/montres-casio.html)** (5 modèles) et **[montres à petit boîtier](https://atelier-montres-selection-fr.onrender.com/montres/montres-petit-boitier.html)** (3 modèles de 38 mm ou moins). Les pages reposent sur les vraies références et les photos locales déclarées autorisées, avec des tableaux documentés, canoniques, maillage aller-retour et `CollectionPage` / `ItemList` / `BreadcrumbList` JSON-LD. Aucun prix, stock ou avis fictif.
+
+La couverture Citizen est aussi injectée **directement dans le HTML** avec préchargement et vraie image de partage social, sans attendre JavaScript. La configuration Amazon des 13 liens suivis reste inchangée. [Méthode de référencement, sources officielles et étapes de mesure Search Console](docs/strategie-seo-montres-2026-10-30.md).
+
+**Le classement pour « montres » n'est pas garanti** : vérifier la propriété du site dans Search Console, soumettre `sitemap.xml` et mesurer le trafic et l'indexation avant de conclure à une amélioration effective.
+
+
 ## Nouvelle photographie éditoriale — 30 octobre 2026
 
 **Refonte visuelle réelle :** couverture interactive avec quatre véritables packshots de montres, galerie photographique de trois modèles (Seiko 5 Sports, Orient Bambino, Tissot PRX), fiches accessibles d'un clic et visionneuse plein écran. Les images proviennent uniquement des fichiers `site/assets/watches/<id>.webp` associés à la référence exacte ; le statut de publication du modèle est contrôlé avant chargement. Un SVG est affiché en secours, sans le présenter comme une vraie photo.
