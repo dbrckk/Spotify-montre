@@ -14,7 +14,7 @@ try {
   mkdirSync(join(tmp,'research'),{recursive:true});
   cpSync(join(repository,'research','amazon-fr-exact-products.json'),join(tmp,'research','amazon-fr-exact-products.json'));
   const build=(extraEnv={})=>execFileSync(process.execPath,[join(repository,'scripts/build-seo.mjs')],{
-    cwd:tmp,env:{...process.env,PUBLIC_SITE_URL:'https://atelier-montres-selection-fr.onrender.com/',...extraEnv},encoding:'utf8',timeout:15000
+    cwd:tmp,env:{...process.env,PUBLIC_SITE_URL:'https://atelier-montres-selection-fr.onrender.com/',UMAMI_WEBSITE_ID:'',...extraEnv},encoding:'utf8',timeout:15000
   });
   build({GOOGLE_SITE_VERIFICATION:'Valid_Example_Token_123456'});
   assert.match(readFileSync(join(target,'index.html'),'utf8'),/<meta name="google-site-verification" content="Valid_Example_Token_123456">/);
@@ -23,6 +23,25 @@ try {
   assert.equal(tokenBlocked,true,'HTML-injection attempts in verification metadata must fail');
   build({GOOGLE_SITE_VERIFICATION:''});
   assert.doesNotMatch(readFileSync(join(target,'index.html'),'utf8'),/name="google-site-verification"/);
+  // Exercise the real published output rather than mocking the tracker.
+  const umamiId='94db1cb1-74f4-4a40-ad6c-962362670409';
+  build({UMAMI_WEBSITE_ID:umamiId});
+  const privacyText=()=>readFileSync(join(target,'confidentialite.html'),'utf8');
+  let trackedHome=readFileSync(join(target,'index.html'),'utf8');
+  let trackedProduct=readFileSync(join(target,'montres/citizen-tsuyosa.html'),'utf8');
+  assert.match(trackedHome,/cloud\\.umami\\.is\\/script\\.js/);
+  assert.ok(trackedHome.includes('data-website-id="'+umamiId+'"'));
+  assert.ok(trackedHome.includes('src="./analytics.js"'));
+  assert.ok(trackedProduct.includes('src="../analytics.js"'));
+  assert.ok(trackedProduct.includes('data-amazon-product="citizen-tsuyosa"'));
+  assert.match(privacyText(),/Les visites et clics vers Amazon sont mesurés avec Umami Cloud/);
+  build({UMAMI_WEBSITE_ID:umamiId}); // repeat deploy must be idempotent
+  build({UMAMI_WEBSITE_ID:''}); // turning metrics off restores the privacy notice
+  assert.doesNotMatch(readFileSync(join(target,'index.html'),'utf8'),/cloud\\.umami\\.is/);
+  assert.doesNotMatch(privacyText(),/Les visites et clics vers Amazon sont mesurés avec Umami Cloud/);
+  let invalidAnalyticsIdBlocked=false;
+  try {build({UMAMI_WEBSITE_ID:'"><img src=x onerror=alert(1)>'})}catch{invalidAnalyticsIdBlocked=true}
+  assert.equal(invalidAnalyticsIdBlocked,true,'Invalid analytics identifiers must not inject arbitrary HTML');
   let html=readFileSync(join(target,'montres/citizen-tsuyosa.html'),'utf8');
   assert.doesNotMatch(html,/Voir ce modèle sur Amazon.fr · lien rémunéré/,'Disabled mode must not render paid CTA');
   const cfg={version:1,enabled:true,approved:true,amazonPartnerTag:'example-21',links:{
