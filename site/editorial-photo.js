@@ -10,12 +10,12 @@
   const featured=[
     {id:'citizen-tsuyosa',name:'Tsuyosa',theme:'jade',note:'Un vert de cadran qui ne passe pas inaperçu.',kicker:'01 · SPORT CHIC'},
     {id:'tissot-prx-quartz',name:'PRX Quartz',theme:'blue',note:'Lignes intégrées, allure graphique et mouvement quartz.',kicker:'02 · DESIGN'},
-    {id:'orient-bambino',name:'Bambino 38',theme:'ivory',note:'Les codes d’une montre habillée, revisités avec sobriété.',kicker:'03 · CLASSIQUE'},
+    {id:'orient-bambino',name:'Bambino 38',theme:'ivory',note:'Une vue du fond de boîte laisse découvrir sa mécanique.',kicker:'03 · CLASSIQUE'},
     {id:'casio-mtp-b145',name:'MTP-B145',theme:'steel',note:'Un format compact et une silhouette sans détour.',kicker:'04 · ESSENTIEL'}
   ];
   const editorial=[
     {id:'seiko-5',label:'Mécanique sportive',index:'01',description:'Automatique et cadran lisible : une référence pensée pour le quotidien.'},
-    {id:'orient-bambino',label:'Élégance classique',index:'02',description:'Un cadran bleu et une silhouette habillée pour comparer les proportions.'},
+    {id:'orient-bambino',label:'La mécanique côté fond',index:'02',description:'Une photographie réelle du dos du boîtier : découvrez le mécanisme visible de cette Bambino.'},
     {id:'tissot-prx-quartz',label:'Design intégré',index:'03',description:'Une silhouette seventies revisitée dans une montre quartz contemporaine.'}
   ];
   const node=(tag,cls,content)=>{
@@ -108,7 +108,7 @@
           stage.classList.add('am-hero-real');
           stage.removeAttribute('aria-busy');
           stage.replaceChildren(img);
-          if(provenance)provenance.textContent='Photographie du modèle exact · '+(p.photoReview.provider||p.brand);
+          if(provenance)provenance.textContent='Photographie du modèle exact · '+(p.id==='orient-bambino'?'vue du fond du boîtier':(p.photoReview.provider||p.brand));
           if(zoom){zoom.hidden=false;zoom.setAttribute('aria-label','Agrandir '+p.brand+' '+p.model);zoom.onclick=()=>openViewer(catalogue,p.id);}
         };
         img.onerror=fallback;
@@ -145,9 +145,10 @@
       const desc=node('p','am-story-desc',item.description);
       const link=node('a','am-story-link','Découvrir le modèle ↗');
       link.href='./montre.html?id='+encodeURIComponent(p.id);
+      const movementLabel={quartz:'Quartz',automatic:'Automatique','eco-drive':'Solaire'};
       const factual=node('p','am-story-fact',[
         p.specs?.diameter||'Diamètre à vérifier',
-        p.specs?.movement||'Mouvement à vérifier'
+        p.specs?.movement||movementLabel[p.movement]||'Mouvement à vérifier'
       ].join(' · '));
       copy.append(top,name,desc,factual,link);
       card.append(media,copy);cards.push(card);
