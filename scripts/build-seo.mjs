@@ -16,7 +16,7 @@ import {validateAffiliateConfig} from './affiliate-policy.mjs';
   }
   const amazonStatement = 'En tant que Partenaire Amazon, je réalise un bénéfice sur les achats remplissant les conditions requises';
   const searchConsoleToken=(process.env.GOOGLE_SITE_VERIFICATION||'').trim();
-  if(searchConsoleToken&&!/^[a-zA-Z0-9_-]{10,160}$/.test(searchConsoleToken)){
+  if(searchConsoleToken&&!/^[a-zA-Z0-9_.=-]{10,160}$/.test(searchConsoleToken)){
     throw Error('GOOGLE_SITE_VERIFICATION invalide : saisir uniquement le code content de la balise Google (sans HTML)');
   }
   const searchConsoleMeta=searchConsoleToken?'<meta name="google-site-verification" content="'+searchConsoleToken+'">':'';
