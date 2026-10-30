@@ -1,0 +1,181 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Atelier Montres — devis fournisseur réel (non publié sur le site)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "reference",
+    "supplierName",
+    "originCountry",
+    "order",
+    "sale",
+    "evidence"
+  ],
+  "properties": {
+    "reference": {
+      "type": "string",
+      "minLength": 1
+    },
+    "supplierName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "originCountry": {
+      "const": "CN"
+    },
+    "order": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "quantity",
+        "unitFactoryPriceEur",
+        "freightEur",
+        "customsDutyEur",
+        "inspectionEur",
+        "packagingEur",
+        "otherImportCostsEur",
+        "nonRecoverableImportVatEur"
+      ],
+      "properties": {
+        "quantity": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "unitFactoryPriceEur": {
+          "type": "number",
+          "minimum": 0
+        },
+        "freightEur": {
+          "type": "number",
+          "minimum": 0
+        },
+        "customsDutyEur": {
+          "type": "number",
+          "minimum": 0
+        },
+        "inspectionEur": {
+          "type": "number",
+          "minimum": 0
+        },
+        "packagingEur": {
+          "type": "number",
+          "minimum": 0
+        },
+        "otherImportCostsEur": {
+          "type": "number",
+          "minimum": 0
+        },
+        "nonRecoverableImportVatEur": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "sale": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "retailPriceInclVatEur",
+        "outputVatRate",
+        "paymentRate",
+        "paymentFeeFixedEur",
+        "shippingAndPackingPerUnitEur",
+        "marketingPerSaleEur",
+        "warrantyReservePerUnitEur",
+        "returnsReservePerUnitEur"
+      ],
+      "properties": {
+        "retailPriceInclVatEur": {
+          "type": "number",
+          "minimum": 0
+        },
+        "outputVatRate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "paymentRate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "paymentFeeFixedEur": {
+          "type": "number",
+          "minimum": 0
+        },
+        "shippingAndPackingPerUnitEur": {
+          "type": "number",
+          "minimum": 0
+        },
+        "marketingPerSaleEur": {
+          "type": "number",
+          "minimum": 0
+        },
+        "warrantyReservePerUnitEur": {
+          "type": "number",
+          "minimum": 0
+        },
+        "returnsReservePerUnitEur": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "supplierIdentity",
+        "sampleTested",
+        "materialSpecifications",
+        "batchTraceability",
+        "gpsrRiskAssessment",
+        "euResponsibleOperator",
+        "customsAndVatReviewed",
+        "batteryAndWasteCompliance",
+        "commercialImageRights",
+        "sellerRegistration",
+        "customerReturnsProcess",
+        "warrantyAndRecallProcess"
+      ],
+      "properties": {
+        "supplierIdentity": {
+          "type": "boolean"
+        },
+        "sampleTested": {
+          "type": "boolean"
+        },
+        "materialSpecifications": {
+          "type": "boolean"
+        },
+        "batchTraceability": {
+          "type": "boolean"
+        },
+        "gpsrRiskAssessment": {
+          "type": "boolean"
+        },
+        "euResponsibleOperator": {
+          "type": "boolean"
+        },
+        "customsAndVatReviewed": {
+          "type": "boolean"
+        },
+        "batteryAndWasteCompliance": {
+          "type": "boolean"
+        },
+        "commercialImageRights": {
+          "type": "boolean"
+        },
+        "sellerRegistration": {
+          "type": "boolean"
+        },
+        "customerReturnsProcess": {
+          "type": "boolean"
+        },
+        "warrantyAndRecallProcess": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}
