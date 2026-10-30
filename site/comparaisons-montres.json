@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "comparisons": [
+    {
+      "slug": "tissot-prx-quartz-vs-powermatic-80",
+      "left": "tissot-prx-quartz",
+      "right": "tissot-prx-auto",
+      "title": "Tissot PRX Quartz ou Powermatic 80 : que choisir ?",
+      "description": "Comparatif Tissot PRX Quartz et PRX Powermatic 80 : mouvements, 40 mm, verre saphir, étanchéité et liens vers les références exactes.",
+      "intro": "Deux interprétations de la PRX à boîtier de 40 mm : une version quartz suisse et une version mécanique automatique. Les spécifications connues permettent de comparer leur usage sans inventer de prix ni de disponibilité.",
+      "leftAdvice": "Pour privilégier le fonctionnement quartz et une utilisation quotidienne sans s'occuper du remontage mécanique.",
+      "rightAdvice": "Pour privilégier un mouvement mécanique automatique et accepter de le remettre à l'heure après une longue période sans être porté.",
+      "caution": "La réserve de marche, les conditions de garantie et les éventuelles différences de bracelet doivent être vérifiées sur la fiche de la référence exacte."
+    },
+    {
+      "slug": "citizen-tsuyosa-vs-tissot-prx-automatique",
+      "left": "citizen-tsuyosa",
+      "right": "tissot-prx-auto",
+      "title": "Citizen Tsuyosa ou Tissot PRX automatique : comparatif",
+      "description": "Citizen Tsuyosa NJ0150-81X face à Tissot PRX Powermatic 80 : diamètre, mouvement, saphir et étanchéité documentés.",
+      "intro": "Ces deux montres automatiques sont présentées dans notre sélection avec un diamètre de 40 mm et un verre saphir. Le style du cadran et les différences documentées d'étanchéité permettent d'orienter le choix.",
+      "leftAdvice": "Si vous recherchez l'identité visuelle de la Tsuyosa à cadran vert et un mouvement automatique Citizen.",
+      "rightAdvice": "Si vous préférez les lignes de la PRX à cadran bleu et le calibre mécanique Powermatic 80.",
+      "caution": "Les valeurs en bar ne constituent pas une garantie pour la plongée : suivre les usages autorisés par chaque fabricant."
+    },
+    {
+      "slug": "casio-mtp-b145-vs-mtp-1302",
+      "left": "casio-mtp-b145",
+      "right": "casio-mtp-1302",
+      "title": "Casio MTP-B145 ou MTP-1302 : quelle taille et quel style ?",
+      "description": "Casio MTP-B145D-2A2V (35 mm) ou MTP-1302PD-2A2V (38,5 mm) : comparer les dimensions et caractéristiques vérifiées.",
+      "intro": "Deux montres Casio à quartz avec verre minéral et étanchéité indiquée à 5 bar, mais des diamètres de boîtier différents. Le style et les proportions sont les principaux critères à vérifier sur ces références.",
+      "leftAdvice": "Si vous souhaitez examiner un boîtier plus compact de 35 mm et une esthétique sobre.",
+      "rightAdvice": "Si vous recherchez une présence de boîtier plus importante de 38,5 mm et le dessin de la MTP-1302.",
+      "caution": "Le diamètre n'est pas la longueur corne à corne : un essayage ou des dimensions complémentaires restent utiles."
+    },
+    {
+      "slug": "orient-bambino-38-vs-hamilton-khaki-field",
+      "left": "orient-bambino",
+      "right": "hamilton-khaki",
+      "title": "Orient Bambino 38 ou Hamilton Khaki Field Auto : comparatif",
+      "description": "Orient Bambino 38 et Hamilton Khaki Field Auto : comparer mouvements automatiques, boîtiers 38,4 et 38 mm, verre et étanchéité.",
+      "intro": "Deux montres automatiques aux dimensions proches, mais aux partis pris différents : Orient Bambino de style classique et Hamilton Khaki Field inspirée des montres de terrain.",
+      "leftAdvice": "Si vous privilégiez une allure classique avec verre minéral bombé et boîtier de 38,4 mm.",
+      "rightAdvice": "Si vous préférez un cadran de style field watch, un boîtier de 38 mm et un verre saphir.",
+      "caution": "Le type de verre et la résistance à l'eau ne remplacent pas la vérification des usages et recommandations d'entretien du fabricant."
+    }
+  ]
+}
