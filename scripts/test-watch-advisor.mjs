@@ -65,6 +65,8 @@ for(const id of ['advisorForm','advisorResults','advisorStatus','advisorSummary'
 for(const value of ['essential','signature','prestige','sport','classic','minimal','retro','statement','quartz','automatic','eco-drive','compact','medium'])assert.ok(html.includes('value="'+value+'"'),value);
 assert.match(html,/id="advisorHeroArt"/);
 assert.match(html,/name="size"/);
+assert.match(html,/id="advisorCompare"/,'Shortlist requires a one-tap compare action');
+assert.match(ui,/ids\.map\(encodeURIComponent\)\.join\(','\)/,'All recommended IDs must reach the compare deep link');
 assert.ok(html.includes('04</span> Quelle taille de boîtier'));
 assert.ok(!html.includes('Habituellement sous 120 €'),'Unverified shop prices may not be used as purchase guidance');
 assert.match(ui,/entry\.sizeNote/);
