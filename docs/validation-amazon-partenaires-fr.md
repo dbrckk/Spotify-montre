@@ -2,6 +2,19 @@
 
 Date : 30 octobre 2026.
 
+## Mise à jour : ID et site confirmés par le propriétaire
+
+Le propriétaire s'est connecté aux paramètres de son compte Amazon Partenaires France et a confirmé que l'ID **`drackk04-21`** lui appartient et que **`https://atelier-montres-selection-fr.onrender.com/`** est dans sa liste de sites. L'accès et le statut exact du compte n'ont pas été inspectés indépendamment depuis GitHub.
+
+Les **13 URL de produits Amazon.fr avec ASIN rapproché** ont été construites par le site à l'aide du tag confirmé, conformément aux règles permettant au Partenaire inscrit de créer lui-même ses Liens Spéciaux : https://partenaires.amazon.fr/help/operating/linkingrequirement. Les produits `citizen-eco` et `tissot-prx-auto` n'ont toujours pas de correspondance vérifiée et restent sans lien suivi.
+
+Configuration actuelle : `enabled:true`, `approved:false`, `enrollmentStatus:"enrolled_approval_unverified"`, `ownerConfirmedEnrollment:true`, `ownerConfirmedTrackingId:true`, `ownerConfirmedSiteListed:true`, `specialLinksCreatedOnSite:true`. **L'examen final d'Amazon, les restrictions éventuelles sur le compte et la rémunération effective ne sont pas confirmés.**
+
+Les liens sont marqués « lien rémunéré » et la mention Amazon requise est affichée. Le paiement s'effectue sur Amazon. Le propriétaire peut contrôler le marquage grâce au **Vérificateur de liens** dans Amazon Partenaires : https://partenaires.amazon.fr/help/node/topic/G6253GFSARDQENZR. En cas de rejet ou fermeture du compte, désactiver immédiatement les liens balisés et ne pas reprendre le tag sur une nouvelle candidature.
+
+**Le texte ci-dessous conserve l'état antérieur à la confirmation et ne doit plus être lu comme l'état de production.**
+
+
 ## Ce que ce dépôt peut vérifier
 
 **Site candidat :** https://atelier-montres-selection-fr.onrender.com/
