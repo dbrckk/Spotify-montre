@@ -6,6 +6,7 @@ const read=p=>readFileSync(resolve(root,p),'utf8');
 const feed=JSON.parse(read('selection-affiliation.json'));
 const manifest=JSON.parse(read('seo-manifest.json'));
 assert.equal(manifest.productCount,15);
+assert.equal(manifest.comparisonCount,4,'Four evidence-based pairs must be indexable');
 const config=JSON.parse(read('affiliate-links.json'));
 assert.equal(manifest.affiliateActive,config.enabled);
 assert.equal(manifest.affiliateCount,Object.keys(config.links).length);
@@ -26,7 +27,7 @@ for(const [id,entry] of Object.entries(amazon.links)){
  assert.ok(!entry.url.includes('?tag='),'Unapproved affiliate tracking cannot be published');
 }
 
-assert.equal(manifest.paths.length,21);
+assert.equal(manifest.paths.length,25);
 assert.ok(manifest.paths.every(url=>url.startsWith(manifest.siteUrl)));
 const home=read('index.html');
 assert.match(home,/<h1>/i);
@@ -37,7 +38,8 @@ assert.match(home,/rel="canonical"/);
 assert.match(home,/application\/ld\+json/);
 assert.match(home,/Les 15 montres, modèle par modèle/);
 assert.match(home,/Avant de choisir sa montre/);
-for(const marker of ['AM_SEO_LINKS_START','AM_SEO_LINKS_END','AM_SEO_HEAD_START','AM_SEO_HEAD_END','AM_SEO_GUIDES_START','AM_SEO_GUIDES_END']){
+assert.match(home,/id="comparaisons"/,'Homepage must promote head-to-head comparison pages');
+for(const marker of ['AM_SEO_LINKS_START','AM_SEO_LINKS_END','AM_SEO_HEAD_START','AM_SEO_HEAD_END','AM_SEO_GUIDES_START','AM_SEO_GUIDES_END','AM_SEO_COMPARISONS_START','AM_SEO_COMPARISONS_END']){
  assert.equal(home.split(marker).length-1,1,'Idempotent build marker: '+marker);
 }
 assert.equal((home.match(/rel="canonical"/g)||[]).length,1,'Homepage has exactly one canonical link');
@@ -86,7 +88,48 @@ for(const name of ['revue-photo.html','revue-photo.js','revue-photo.css']){
 }
 assert.ok(existsSync(resolve(root,'seo-watch-art.js')),'SEO watch illustrations script is required');
 const sitemap=read('sitemap.xml');
-assert.equal((sitemap.match(/<loc>/g)||[]).length,21);
+assert.equal((sitemap.match(/<loc>/g)||[]).length,25);
+const comparisons=JSON.parse(read('comparaisons-montres.json'));
+assert.equal(comparisons.version,1);
+assert.equal(comparisons.comparisons.length,4);
+for(const c of comparisons.comparisons){
+  const left=feed.products.find(p=>p.id===c.left);
+  const right=feed.products.find(p=>p.id===c.right);
+  assert.ok(left&&right&&left.id!==right.id,'Both compared references must exist');
+  const path='montres/comparer-'+c.slug+'.html';
+  const html=read(path);
+  assert.ok(statSync(resolve(root,path)).size>2000,'Full editorial page: '+path);
+  assert.ok(manifest.paths.includes(manifest.siteUrl+path),'Comparison must enter manifest');
+  assert.ok(sitemap.includes(manifest.siteUrl+path),'Comparison must enter sitemap');
+  assert.ok(home.includes('./'+path),'Comparison must link from homepage');
+  assert.ok(html.includes('href="./'+left.id+'.html"')&&html.includes('href="./'+right.id+'.html"'),'Each side links to exact SEO product');
+  assert.ok(html.includes('href="'+left.officialUrl+'"')&&html.includes('href="'+right.officialUrl+'"'),'Each side links to official manufacturer');
+  assert.ok(html.includes(left.model)&&html.includes(right.model));
+  assert.match(html,/class="spec-matrix"/,'Actual side-by-side evidence');
+  assert.match(html,/class="watch-vector"/,'Both sides use original license-safe illustrations');
+  assert.equal((html.match(/class="watch-vector"/g)||[]).length,2);
+  assert.ok(!html.includes('../assets/watches/'),'Comparison must not expose unlicensed photos');
+  assert.match(html,/<h1>/);
+  assert.match(html,/rel="canonical"/);
+  assert.equal((html.match(/rel="canonical"/g)||[]).length,1,'Single canonical comparison URL');
+  assert.equal(html.includes('cloud.umami.is/script.js'),analyticsConfigured,'Umami remains explicitly optional');
+  assert.doesNotMatch(html,/"offers"\s*:|"price"\s*:|"availability"\s*:|"aggregateRating"\s*:/,'Never invent price, stock, reviews or offers');
+  const json=html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
+  const schema=JSON.parse(json[1]);
+  assert.equal(schema['@graph'][0]['@type'],'Article');
+  assert.equal(schema['@graph'][2]['@type'],'ItemList');
+  assert.equal(schema['@graph'][2].numberOfItems,2);
+  for(const p of [left,right]){
+    assert.match(read('montres/'+p.id+'.html'),new RegExp('comparer-'+c.slug+'\\.html'),'Relevant product page must cross-link comparison');
+    const match=amazon.links[p.id];
+    if(match){
+      const selected=config.enabled&&config.links[p.id]?config.links[p.id].url:match.url;
+      assert.ok(html.includes('href="'+selected+'"'),'Direct exact Amazon URL on comparison: '+p.id);
+      assert.ok(html.includes('data-amazon-product="'+p.id+'"'),'Optional event hook on comparison: '+p.id);
+      assert.ok(html.includes(config.enabled&&config.links[p.id]?'lien rémunéré':'lien non rémunéré'));
+    }
+  }
+}
 const editorialPaths=['quartz-ou-automatique','taille-boitier-montre','montres-automatiques'];
 for(const slug of editorialPaths){
  const path='montres/'+slug+'.html',page=read(path);
@@ -106,4 +149,4 @@ assert.equal(privacy.includes('Les visites et clics vers Amazon sont mesurés av
 assert.ok(privacy.includes('chez Render'),'Privacy notice must identify actual host');
 const guide=read('montres/guide-choisir-montre.html');
 assert.match(guide,/<h1>Comment choisir une montre/);
-console.log('SEO validation OK: 15 watch pages, 13 exact Amazon.fr product links, four editorial guides, 21 sitemap URLs');
+console.log('SEO validation OK: 15 watch pages, 13 exact Amazon.fr product links, four editorial guides, four head-to-head comparisons, 25 sitemap URLs');
