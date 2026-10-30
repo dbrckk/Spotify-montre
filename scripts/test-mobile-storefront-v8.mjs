@@ -29,6 +29,21 @@ try{
  const cards=page.locator('#affGrid .aff-card');
  await cards.first().waitFor({state:'visible',timeout:20000});
  assert.equal(await cards.count(),15,'The full genuine catalogue should render');
+ // The real browser must publish all 13 tagged Amazon.fr destinations, but
+ // never manufacture the two ASINs absent from the source catalogue.
+ const ctas=page.locator('#affGrid .am-affiliate-cta');
+ await ctas.first().waitFor({state:'visible',timeout:15000});
+ assert.equal(await ctas.count(),13,'All exact model matches have tagged Amazon Special Links');
+ const citizenPaid=page.locator('#affGrid .aff-card[data-watch-id="citizen-tsuyosa"] .am-affiliate-cta');
+ assert.equal(await citizenPaid.getAttribute('href'),'https://www.amazon.fr/dp/B0BG7VD5YL?tag=drackk04-21');
+ assert.match(await citizenPaid.getAttribute('rel'),/nofollow sponsored/,'Paid links must be labelled to crawlers');
+ assert.match(await citizenPaid.innerText(),/lien rémunéré/i,'Visible disclosure on paid destination');
+ for(const id of ['citizen-eco','tissot-prx-auto']){
+   assert.equal(await page.locator('#affGrid .aff-card[data-watch-id="'+id+'"] .am-affiliate-cta').count(),0,'No fabricated paid product for '+id);
+ }
+ assert.match(await page.locator('.aff-disclosure').innerText(),/En tant que Partenaire Amazon/);
+ assert.equal(await ctas.evaluateAll(nodes=>nodes.every(a=>a.href.startsWith('https://www.amazon.fr/dp/')&&new URL(a.href).searchParams.get('tag')==='drackk04-21')),true,'Every outbound paid link must use the owner-confirmed ID');
+
  await checkWidth('Mobile collection');
  assert.ok((await page.locator('.am-header').boundingBox()).height<=100,'Mobile header must stay compact');
  assert.ok(await page.locator('.am-mobile-nav>summary').isVisible(),'Mobile navigation must be visible');
