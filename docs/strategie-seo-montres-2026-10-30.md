@@ -13,6 +13,23 @@ Faire découvrir **Atelier Montres** aux personnes qui comparent des montres en 
 
 Le site disposait initialement de **25 URL HTML déclarées dans le sitemap**, dont 15 fiches, 4 comparatifs et 4 guides. Les filtres de la boutique, purement interactifs, ne donnaient pas trois points d'entrée stables pour des recherches de type catégorie.
 
+## Estimations de demande mesurées (Ubersuggest, France, français — 30 octobre 2026)
+
+Données d'un service tiers de recherche de mots-clés, **estimatives**, et non impressions réellement obtenues par Atelier Montres. La difficulté SEO est le score Ubersuggest (0 à 100), pas une probabilité garantie de classement.
+
+| Requête | Volume mensuel estimé | Difficulté SEO | Décision |
+| --- | ---: | ---: | --- |
+| « montres » | 135 000 | 32/100 | Objectif générique de long terme ; intention concurrentielle très large |
+| « montres quartz » | 4 400 | 14/100 | **Priorité n° 1** : collection dédiée de sept modèles réels |
+| « montres Casio » | 33 100 | 50/100 | Collection de cinq références exactes, compétition plus élevée |
+| « montres Casio vintage » | 4 400 | 22/100 | Sous-thème utile sur la même collection Casio, pas de page quasi dupliquée |
+| « montres quartz ou automatique » | 480 | 14/100 | Guide existant à maintenir et relier depuis la page quartz |
+| « montre petit boîtier » | Indisponible | Indisponible | Page utile au choix du diamètre ; ne pas lui attribuer un potentiel chiffré |
+
+Ces valeurs sont des indicateurs Ubersuggest à la date indiquée. La saisonnalité et les méthodes d'estimation peuvent faire varier les volumes. Le site **ne dispose pas encore de rapport Search Console confirmé** pour vérifier sa position réelle, son CTR, ses clics ou ses impressions.
+
+Ne pas créer de pages « Casio G-Shock », calculatrices ou connectées pour capter des recherches alors qu'aucun modèle exact correspondant n'existe dans le catalogue. Les descriptions doivent rester factuelles.
+
 ## Trois nouvelles collections — 100 % issues des modèles réels
 
 | URL indexable | Intention de recherche | Taille de l'ensemble | Différenciation utile |
