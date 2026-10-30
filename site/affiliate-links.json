@@ -1,7 +1,117 @@
 {
   "version": 1,
-  "enabled": false,
+  "enabled": true,
   "approved": false,
-  "amazonPartnerTag": null,
-  "links": {}
+  "enrollmentStatus": "enrolled_approval_unverified",
+  "ownerConfirmedEnrollment": true,
+  "ownerConfirmedTrackingId": true,
+  "ownerConfirmedSiteListed": true,
+  "specialLinksCreatedOnSite": true,
+  "amazonPartnerTag": "drackk04-21",
+  "links": {
+    "casio-mtp-1302": {
+      "provider": "amazon.fr",
+      "asin": "B0BRPD1FTX",
+      "url": "https://www.amazon.fr/dp/B0BRPD1FTX?tag=drackk04-21",
+      "verifiedAt": "2026-10-30",
+      "productMatchConfirmed": true,
+      "linkApproved": true
+    },
+    "casio-mtp-b145": {
+      "provider": "amazon.fr",
+      "asin": "B0CJRNV2XS",
+      "url": "https://www.amazon.fr/dp/B0CJRNV2XS?tag=drackk04-21",
+      "verifiedAt": "2026-10-30",
+      "productMatchConfirmed": true,
+      "linkApproved": true
+    },
+    "casio-a168wa": {
+      "provider": "amazon.fr",
+      "asin": "B01D6XLV5A",
+      "url": "https://www.amazon.fr/dp/B01D6XLV5A?tag=drackk04-21",
+      "verifiedAt": "2026-10-30",
+      "productMatchConfirmed": true,
+      "linkApproved": true
+    },
+    "casio-mdv107": {
+      "provider": "amazon.fr",
+      "asin": "B09TV2TZY9",
+      "url": "https://www.amazon.fr/dp/B09TV2TZY9?tag=drackk04-21",
+      "verifiedAt": "2026-10-30",
+      "productMatchConfirmed": true,
+      "linkApproved": true
+    },
+    "casio-ltp1302": {
+      "provider": "amazon.fr",
+      "asin": "B0039UT5HC",
+      "url": "https://www.amazon.fr/dp/B0039UT5HC?tag=drackk04-21",
+      "verifiedAt": "2026-10-30",
+      "productMatchConfirmed": true,
+      "linkApproved": true
+    },
+    "swatch-clearly": {
+      "provider": "amazon.fr",
+      "asin": "B0C3WQ8YXJ",
+      "url": "https://www.amazon.fr/dp/B0C3WQ8YXJ?tag=drackk04-21",
+      "verifiedAt": "2026-10-30",
+      "productMatchConfirmed": true,
+      "linkApproved": true
+    },
+    "citizen-openheart": {
+      "provider": "amazon.fr",
+      "asin": "B0CSPHFBY4",
+      "url": "https://www.amazon.fr/dp/B0CSPHFBY4?tag=drackk04-21",
+      "verifiedAt": "2026-10-30",
+      "productMatchConfirmed": true,
+      "linkApproved": true
+    },
+    "citizen-tsuyosa": {
+      "provider": "amazon.fr",
+      "asin": "B0BG7VD5YL",
+      "url": "https://www.amazon.fr/dp/B0BG7VD5YL?tag=drackk04-21",
+      "verifiedAt": "2026-10-30",
+      "productMatchConfirmed": true,
+      "linkApproved": true
+    },
+    "orient-bambino": {
+      "provider": "amazon.fr",
+      "asin": "B0DR39WLP9",
+      "url": "https://www.amazon.fr/dp/B0DR39WLP9?tag=drackk04-21",
+      "verifiedAt": "2026-10-30",
+      "productMatchConfirmed": true,
+      "linkApproved": true
+    },
+    "seiko-5": {
+      "provider": "amazon.fr",
+      "asin": "B07WGML3VN",
+      "url": "https://www.amazon.fr/dp/B07WGML3VN?tag=drackk04-21",
+      "verifiedAt": "2026-10-30",
+      "productMatchConfirmed": true,
+      "linkApproved": true
+    },
+    "tissot-prx-quartz": {
+      "provider": "amazon.fr",
+      "asin": "B08TB1MF6F",
+      "url": "https://www.amazon.fr/dp/B08TB1MF6F?tag=drackk04-21",
+      "verifiedAt": "2026-10-30",
+      "productMatchConfirmed": true,
+      "linkApproved": true
+    },
+    "hamilton-khaki": {
+      "provider": "amazon.fr",
+      "asin": "B001QT1LWK",
+      "url": "https://www.amazon.fr/dp/B001QT1LWK?tag=drackk04-21",
+      "verifiedAt": "2026-10-30",
+      "productMatchConfirmed": true,
+      "linkApproved": true
+    },
+    "seiko-sharp": {
+      "provider": "amazon.fr",
+      "asin": "B08HR9PC4K",
+      "url": "https://www.amazon.fr/dp/B08HR9PC4K?tag=drackk04-21",
+      "verifiedAt": "2026-10-30",
+      "productMatchConfirmed": true,
+      "linkApproved": true
+    }
+  }
 }

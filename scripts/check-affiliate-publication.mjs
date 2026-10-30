@@ -11,6 +11,9 @@ try {
   for(const name of ['selection-affiliation.json','affiliation.html','confidentialite.html','affiliate-links.json','comparaisons-montres.json']){
     cpSync(join(repository,'site',name),join(target,name));
   }
+  // Test a disabled fixture before reviewing the real owner-tagged 13-link site.
+  const enabledSourceConfig=JSON.parse(readFileSync(join(repository,'site','affiliate-links.json'),'utf8'));
+  writeFileSync(join(target,'affiliate-links.json'),JSON.stringify({version:1,enabled:false,approved:false,amazonPartnerTag:null,links:{}}));
   mkdirSync(join(tmp,'research'),{recursive:true});
   cpSync(join(repository,'research','amazon-fr-exact-products.json'),join(tmp,'research','amazon-fr-exact-products.json'));
   const build=(extraEnv={})=>execFileSync(process.execPath,[join(repository,'scripts/build-seo.mjs')],{
@@ -96,7 +99,31 @@ try {
   let noEnrollmentBlocked=false;
   try{build()}catch{noEnrollmentBlocked=true}
   assert.equal(noEnrollmentBlocked,true,'Unconfirmed pending participation must be blocked');
-  console.log('Affiliate publication functional check OK: inactive, approved, provisional Amazon enrollment, exact ASIN and disclosures');
+  // Final real publication, not a synthetic mock.
+  writeFileSync(join(target,'affiliate-links.json'),JSON.stringify(enabledSourceConfig));
+  build();
+  const manifest=JSON.parse(readFileSync(join(target,'seo-manifest.json'),'utf8'));
+  assert.equal(manifest.affiliateActive,true);
+  assert.equal(manifest.affiliateCount,13,'Publish the 13 owner-tagged product matches');
+  const realResearch=JSON.parse(readFileSync(join(repository,'research','amazon-fr-exact-products.json'),'utf8'));
+  const publicHome=readFileSync(join(target,'index.html'),'utf8');
+  assert.match(publicHome,/En tant que Partenaire Amazon/,'The homepage must disclose paid links');
+  assert.doesNotMatch(publicHome,/Liens actuellement non affiliés|aucun identifiant Partenaires Amazon/);
+  for(const [id,item] of Object.entries(realResearch.products)) {
+    const published=readFileSync(join(target,'montres',id+'.html'),'utf8');
+    if(item.status==='matched_on_amazon_fr') {
+      assert.ok(published.includes('href="'+item.affiliateUrl+'"'),'Exact tag/ASIN: '+id);
+      assert.match(published,/nofollow sponsored/,'Paid destination must be marked: '+id);
+      assert.match(published,/lien rémunéré/,'Paid destination must be disclosed: '+id);
+    }else {
+      assert.ok(!published.includes('?tag='),'No fabricated Amazon match: '+id);
+    }
+  }
+  const comparison=readFileSync(join(target,'montres/comparer-casio-mtp-b145-vs-mtp-1302.html'),'utf8');
+  assert.match(comparison,/tag=drackk04-21/,'Curated comparisons must carry the confirmed tag');
+  build();
+  assert.equal(JSON.parse(readFileSync(join(target,'seo-manifest.json'),'utf8')).affiliateCount,13,'Idempotent second build');
+  console.log('Affiliate publication functional check OK: 13 owned tagged links, disclosures, exact ASIN, pending final review and idempotent build');
 } finally {
   rmSync(tmp,{recursive:true,force:true});
 }

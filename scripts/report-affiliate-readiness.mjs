@@ -34,7 +34,11 @@ const totals={
   commerciallyReady:entries.filter(x=>x.commercialReady).length,
   accountApprovalDeclared:config.approved===true,
   accountReviewStatus:config.approved===true?'approved_declared':
+    config.enrollmentStatus==='enrolled_approval_unverified'&&config.ownerConfirmedTrackingId===true&&config.ownerConfirmedSiteListed===true?'owner_confirmed_enrolled_final_review_unverified':
     config.enrollmentStatus==='registered_pending_review'&&config.ownerConfirmedEnrollment===true?'registered_pending_review_declared':'unverified',
+  ownerConfirmedTrackingId:config.ownerConfirmedTrackingId===true,
+  ownerConfirmedSiteListed:config.ownerConfirmedSiteListed===true,
+  siteCreatedSpecialLinks:config.specialLinksCreatedOnSite===true,
   linksActivated:validated.enabled,
   purchaseCheckoutOnSite:false
 };
@@ -45,8 +49,9 @@ const lines=[
  '',
  '> Rapport automatique basé sur les fichiers du dépôt : il ne prouve pas que le compte Amazon est approuvé, qu’un ASIN correspond à un produit réel, ou qu’une autorisation photographique est authentique.',
  '',
- `- Programme déclaré approuvé : **${icon(totals.accountApprovalDeclared)}**. État de la candidature (déclaratif) : **${totals.accountReviewStatus}**. Configuration de liens activée : **${icon(totals.linksActivated)}**.`,
+ `- Approbation finale déclarée : **${icon(totals.accountApprovalDeclared)}**. État du compte (déclaratif) : **${totals.accountReviewStatus}**. Liens balisés actifs : **${icon(totals.linksActivated)}**.`,
  `- **${totals.configuredSpecialLinks} / ${totals.models}** liens spéciaux déclarés ; **${totals.declaredPhotoRights} / ${totals.models}** permissions d'image déclarées par le responsable ; **${totals.independentlyVerifiedPhotoRights} / ${totals.models}** justificatifs vérifiés indépendamment ; **${totals.commerciallyReady} / ${totals.models}** modèles techniquement configurés.`,
+ '- Identifiant de suivi confirmé par le propriétaire : **'+icon(totals.ownerConfirmedTrackingId)+'** ; site inscrit déclaré : **'+icon(totals.ownerConfirmedSiteListed)+'** ; liens créés directement par le site : **'+icon(totals.siteCreatedSpecialLinks)+'**. Le statut d’examen Amazon et l’attribution des commissions demeurent non vérifiés.',
  '- Paiement direct sur ce site : **désactivé**. Une commission ne peut être prouvée que dans les rapports officiels du programme Partenaires.',
  '',
  '| Référence | Lien spécial | Droit image déclaré | Preuve vérifiée | Prochaine action |',
@@ -54,8 +59,8 @@ const lines=[
  ...entries.map(x=>`| ${esc(x.label)} (${x.id}) | ${icon(x.specialLinkConfigured)} | ${icon(x.photoRightsDeclared)} | ${icon(x.photoProofVerified)} | ${esc(x.next)} |`),
  '',
  '## Actions restantes',
- ...(!config.approved?['- Vérifier le compte Amazon Partenaires France et enregistrer cette URL de boutique. Les premiers Liens Spéciaux peuvent être utilisés par un candidat inscrit en attente de l’examen final, si l’identité et la validité des liens ont été confirmées.']:[]),
- ...(!config.enabled?['- Renseigner un vrai tag Amazon.fr et au moins un lien spécial de produit exact, puis activer la configuration.']:[]),
+ ...(!config.approved?['- Identifiant et site confirmés par le propriétaire. Contrôler désormais dans Amazon le statut réel du compte (non vérifiable par ce script), les 3 ventes éligibles et l’éventuelle décision finale.']:[]),
+ ...(!config.enabled?['- Renseigner un vrai tag Amazon.fr et au moins un lien spécial de produit exact, puis activer la configuration.']:['- Liens actifs créés par le site : utiliser le Vérificateur de liens Amazon Partenaires pour confirmer l’attribution sur le compte avant de considérer les revenus comme acquis.']),
  ...entries.some(x=>!x.photoProofVerified)?['- Archiver les autorisations écrites des marques / ayants droit pour les 15 photos. Le responsable du site a déclaré disposer de ces droits ; ce rapport ne vérifie pas ses pièces justificatives.']:[],
  '- Vérifier chaque lien et la correspondance du produit dans un navigateur, puis comparer les revenus réellement attribués dans les rapports Amazon.',
  '- Soumettre le sitemap dans Google Search Console et inspecter les pages produits réellement indexées.',
