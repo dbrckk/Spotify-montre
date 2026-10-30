@@ -11,6 +11,8 @@ try {
   for(const name of ['selection-affiliation.json','affiliation.html','confidentialite.html','affiliate-links.json']){
     cpSync(join(repository,'site',name),join(target,name));
   }
+  mkdirSync(join(tmp,'research'),{recursive:true});
+  cpSync(join(repository,'research','amazon-fr-exact-products.json'),join(tmp,'research','amazon-fr-exact-products.json'));
   const build=(extraEnv={})=>execFileSync(process.execPath,[join(repository,'scripts/build-seo.mjs')],{
     cwd:tmp,env:{...process.env,PUBLIC_SITE_URL:'https://atelier-montres-selection-fr.onrender.com/',...extraEnv},encoding:'utf8',timeout:15000
   });

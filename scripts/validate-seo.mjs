@@ -10,6 +10,17 @@ const config=JSON.parse(read('affiliate-links.json'));
 assert.equal(manifest.affiliateActive,config.enabled);
 assert.equal(manifest.affiliateCount,Object.keys(config.links).length);
 assert.equal(manifest.checkoutActive,false);
+const amazon=JSON.parse(read('amazon-product-links.json'));
+assert.equal(amazon.version,1);
+assert.equal(Object.keys(amazon.links).length,13,'13 exact, untracked Amazon.fr listings in build');
+assert.deepEqual(new Set(Object.keys(amazon.links)).size,13);
+for(const [id,entry] of Object.entries(amazon.links)){
+ assert.ok(feed.products.some(p=>p.id===id),'Unknown Amazon reference');
+ assert.match(entry.asin,/^[A-Z0-9]{10}$/);
+ assert.equal(entry.url,'https://www.amazon.fr/dp/'+entry.asin);
+ assert.ok(!entry.url.includes('?tag='),'Unapproved affiliate tracking cannot be published');
+}
+
 assert.equal(manifest.paths.length,21);
 assert.ok(manifest.paths.every(url=>url.startsWith(manifest.siteUrl)));
 const home=read('index.html');
@@ -38,6 +49,12 @@ for(const product of feed.products){
   assert.ok(home.includes('./'+path),'Missing static crawlable home link: '+path);
   assert.match(html,/class="spec-matrix"/,'Model-to-model comparisons required');
   assert.ok(html.includes('montre.html?id='+encodeURIComponent(product.id)), 'Interactive product page must remain accessible');
+  const amazonMatch=amazon.links[product.id];
+  if(amazonMatch) {
+    const selected=config.enabled&&config.links[product.id]?config.links[product.id].url:amazonMatch.url;
+    assert.ok(html.includes('href="'+selected+'"'),'Exact Amazon URL should be crawlable: '+product.id);
+    assert.ok(html.includes(config.enabled&&config.links[product.id]?'lien rémunéré':'sans lien rémunéré'));
+  }
   assert.equal((html.match(/rel="canonical"/g)||[]).length,1,'Single product canonical');
   const schema=html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
   assert.ok(schema,'JSON-LD required');
@@ -63,4 +80,4 @@ assert.ok(sitemap.includes(manifest.siteUrl+'montres/guide-choisir-montre.html')
 assert.match(read('robots.txt'),/Sitemap: https:\/\//);
 const guide=read('montres/guide-choisir-montre.html');
 assert.match(guide,/<h1>Comment choisir une montre/);
-console.log('SEO validation OK: 15 watch pages, four editorial guides, comparison tables, 21 sitemap URLs, idempotent canonical');
+console.log('SEO validation OK: 15 watch pages, 13 exact Amazon.fr product links, four editorial guides, 21 sitemap URLs');
