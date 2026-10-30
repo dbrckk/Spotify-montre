@@ -13,7 +13,15 @@ export function validateAffiliateConfig(config, productIds) {
     if (config.approved !== false || config.amazonPartnerTag !== null || entries.length) fail('inactive configuration must be empty');
     return Object.freeze({enabled:false,links:new Map()});
   }
-  if (config.approved !== true) fail('Amazon.fr partner account is not approved');
+  // Amazon France reviews a new application only after the initial eligible
+  // sales. An enrolled applicant must be able to publish genuine Special Links
+  // without falsely claiming the *final* account approval.
+  const pendingEnrollment=config.approved===false&&
+    config.enrollmentStatus==='registered_pending_review'&&
+    config.ownerConfirmedEnrollment===true&&
+    config.specialLinksCreatedInAccount===true;
+  if(config.approved!==true&&!pendingEnrollment)fail('no verified enrollment or final Amazon account approval');
+  if(config.approved===true&&config.enrollmentStatus&&config.enrollmentStatus!=='approved')fail('final account approval contradicts enrollment status');
   const tag=config.amazonPartnerTag;
   if (typeof tag !== 'string' || !/^[a-z0-9][a-z0-9-]{1,48}-21$/i.test(tag)) fail('invalid Amazon.fr tag');
   const ids=new Set(productIds);
@@ -33,5 +41,5 @@ export function validateAffiliateConfig(config, productIds) {
     if ([...url.searchParams.keys()].some(k=>!['tag','th','psc'].includes(k))) fail('unexpected query field for '+id);
     links.set(id,Object.freeze({url:url.href,provider:'Amazon.fr',verifiedAt:item.verifiedAt}));
   }
-  return Object.freeze({enabled:true,links});
+  return Object.freeze({enabled:true,approved:config.approved===true,enrollmentStatus:pendingEnrollment?'registered_pending_review':'approved',links});
 }

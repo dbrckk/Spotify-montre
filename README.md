@@ -6,7 +6,7 @@
 
 **Amazon Partenaires non validé à ce stade** : le site a 25 URL et 13 références Amazon.fr repérées, mais `site/affiliate-links.json` demeure désactivé. Le tag candidat présent dans la recherche n'est **pas** une preuve de propriété ni d'approbation. Amazon examine les candidatures après au moins 3 ventes éligibles en 180 jours et demande notamment 10 publications originales ; le nombre de fiches produit ne garantit pas leur appréciation.
 
-Les étapes réelles et le statut de candidature sont documentés dans [Validation Amazon Partenaires France](docs/validation-amazon-partenaires-fr.md) ; la traçabilité des photos est dans [Licences visuels](docs/licences-visuels-publication.md).
+Le mécanisme sait désormais distinguer une candidature **inscrite et en attente d'examen** (liens spéciaux d'un compte confirmé, approbation définitive encore `false`) d'un compte totalement approuvé : cette distinction est nécessaire pour obtenir les premières ventes éligibles. Aucun lien rémunéré n'a été publié sans identifiant vérifié du compte utilisateur. Les étapes réelles et le statut de candidature sont documentés dans [Validation Amazon Partenaires France](docs/validation-amazon-partenaires-fr.md) ; la traçabilité des photos est dans [Licences visuels](docs/licences-visuels-publication.md).
 
 
 ## Conseiller évolué : 4 critères et comparaison directe (30 octobre 2026)
