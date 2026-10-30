@@ -47,9 +47,11 @@
         for(const [id,item] of entries)paid.set(id,item.url);
       }
     }
-    const makeLink=(url,compensated,cls)=>{
+    const makeLink=(url,compensated,cls,id,placement)=>{
       const a=document.createElement('a');
       a.className=cls;a.href=url;a.target='_blank';
+      a.dataset.amazonProduct=id;
+      a.dataset.amazonPlacement=placement;
       a.rel=compensated?'noopener noreferrer nofollow sponsored':'noopener noreferrer nofollow';
       a.textContent=compensated?'Voir sur Amazon.fr · lien rémunéré ↗':'Voir sur Amazon.fr · lien non rémunéré ↗';
       return a;
@@ -63,7 +65,7 @@
         const compensated=paid.has(id);
         const actions=card.querySelector('.aff-card-actions');
         if(!actions)continue;
-        actions.append(makeLink(url,compensated,'am-affiliate-cta'));
+        actions.append(makeLink(url,compensated,'am-affiliate-cta',id,'catalogue'));
         const foot=card.querySelector('.aff-card-foot');
         if(foot)foot.textContent=compensated?
           'Fiche Amazon vérifiée · lien rémunéré':
@@ -89,6 +91,8 @@
       const amazon=document.getElementById('detailAmazon');
       if(amazon) {
         amazon.href=url;
+        amazon.dataset.amazonProduct=id;
+        amazon.dataset.amazonPlacement='fiche';
         amazon.rel=compensated?'noopener noreferrer nofollow sponsored':'noopener noreferrer nofollow';
         amazon.textContent=compensated?'Voir sur Amazon.fr · lien rémunéré ↗':'Voir ce modèle sur Amazon.fr ↗';
       }
@@ -98,7 +102,7 @@
         'Fiche Amazon vérifiée, lien non rémunéré. Vérifiez le prix, la disponibilité et le vendeur.';
       if(compensated) {
         const official=document.getElementById('detailOfficial');
-        if(official)official.before(makeLink(url,true,'button detail-cta am-affiliate-detail'));
+        if(official)official.before(makeLink(url,true,'button detail-cta am-affiliate-detail',id,'fiche'));
         if(amazon)amazon.hidden=true; // One clear paid call-to-action, not duplicate exits.
         const msg=detail.querySelector('.detail-disclosure');
         if(msg)msg.textContent='Lien rémunéré : '+statement+'. Aucun paiement n’est encaissé par Atelier Montres.';
