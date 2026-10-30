@@ -30,7 +30,7 @@ assert.doesNotMatch(js,/fetch\s*\(/,'No additional network dependency or third-p
 assert.match(js,/window\.AtelierPhoto\?\.open/,'Reuse the existing keyboard and touch photographic zoom');
 assert.match(js,/event\.key==='ArrowRight'/,'Hero must support keyboard navigation');
 assert.match(js,/event\.key==='Home'/,'Hero must support accessible first/last navigation');
-assert.match(js,/request\+\+/,'Ignore stale image fetch completion');
+assert.match(js,/\+\+request/,'Ignore stale image fetch completion');
 assert.match(js,/aria-busy/,'Loading an alternative must not mislabel the previous image');
 assert.match(js,/aria-pressed/,'Hero controls must announce their selection');
 assert.match(html,/id="heroVariants"/);
