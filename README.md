@@ -1,5 +1,14 @@
 # Atelier Montres — boutique de montres indépendante
 
+## Activation Amazon Partenaires — situation actuelle (30 octobre 2026)
+
+Le propriétaire a confirmé depuis son tableau de bord Amazon Partenaires France que **`drackk04-21` est son ID de suivi** et que **`https://atelier-montres-selection-fr.onrender.com/` figure parmi les sites inscrits**. En conséquence, **13 liens de produits exacts ont été créés par le site au format balisé `?tag=drackk04-21`**. Les deux modèles sans ASIN exact n'ont pas de lien inventé. Cette méthode de création directe est autorisée dans les règles officielles du programme : https://partenaires.amazon.fr/help/operating/linkingrequirement.
+
+La configuration active porte `approved:false` et `enrollmentStatus:"enrolled_approval_unverified"` : **l'inscription et la propriété du tag sont confirmées par le propriétaire, mais l'approbation finale, le statut précis du compte et les commissions ne sont pas vérifiés indépendamment**. Le site doit afficher les mentions obligatoires et ne promet ni paiement ni ventes attribuées. Le contrôle d'attribution doit s'effectuer depuis le Vérificateur de liens et les rapports Amazon. Documentation : [validation Partenaires France](docs/validation-amazon-partenaires-fr.md).
+
+**Les sections plus bas relatant une affiliation désactivée constituent l'historique de préparation antérieur à cette activation.**
+
+
 ## Images des modèles et programme Amazon — 30 octobre 2026
 
 **15 photographies des modèles exacts activées sur déclaration d'autorisation du responsable du site.** Chaque entrée porte une provenance explicite (`site_owner_explicit_confirmation_2026-10-30`) et ne prétend pas avoir fait l'objet d'une vérification documentaire indépendante. Les images locales et leur empreinte SHA-256 sont vérifiées lors du build SEO ; les SVG originaux restent des solutions de secours.
