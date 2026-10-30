@@ -14,7 +14,7 @@
  const make=(tag,cls,txt)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n;};
  const official=url=>{try{const u=new URL(url);return u.protocol==='https:'&&!u.username&&!u.password&&approvedHosts.some(x=>u.hostname===x||u.hostname.endsWith('.'+x))}catch(_){return false}};
  const valid=p=>p&&p.affiliateUrl===null&&p.merchantLinkStatus==='untracked_official'&&p.photoRights==='not_licensed'&&p.imageMode==='custom_vector_illustration'&&Object.hasOwn(levels,p.tier)&&typeof p.id==='string'&&typeof p.brand==='string'&&typeof p.model==='string'&&typeof p.description==='string'&&official(p.officialUrl);
- const diameterMm=p=>{const match=/^(\\d{1,2})(?:[,.](\\d+))?\\s*mm$/i.exec((p.specs?.diameter||'').trim());return match?Number(match[1]+'.'+(match[2]||'0')):null};
+ const diameterMm=p=>{const match=/^(\d{1,2})(?:[,.](\d+))?\s*mm$/i.exec((p.specs?.diameter||'').trim());return match?Number(match[1]+'.'+(match[2]||'0')):null};
  const matchesDiameter=p=>{const n=diameterMm(p);return diameter==='all'||(diameter==='unknown'&&n===null)||(diameter==='compact'&&n!==null&&n<=38)||(diameter==='medium'&&n!==null&&n>38&&n<=40)};
  const diameterLabels={compact:'≤ 38 mm',medium:'38,1–40 mm',unknown:'Diamètre à confirmer'};
  const word=p=>[p.brand,p.model,p.title,p.description,p.style,p.tier,p.movement,...(p.highlights||[])].join(' ').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
