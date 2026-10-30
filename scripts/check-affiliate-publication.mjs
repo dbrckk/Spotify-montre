@@ -29,7 +29,7 @@ try {
   const privacyText=()=>readFileSync(join(target,'confidentialite.html'),'utf8');
   let trackedHome=readFileSync(join(target,'index.html'),'utf8');
   let trackedProduct=readFileSync(join(target,'montres/citizen-tsuyosa.html'),'utf8');
-  assert.match(trackedHome,/cloud\\.umami\\.is\\/script\\.js/);
+  assert.ok(trackedHome.includes('cloud.umami.is/script.js'));
   assert.ok(trackedHome.includes('data-website-id="'+umamiId+'"'));
   assert.ok(trackedHome.includes('src="./analytics.js"'));
   assert.ok(trackedProduct.includes('src="../analytics.js"'));
@@ -37,7 +37,7 @@ try {
   assert.match(privacyText(),/Les visites et clics vers Amazon sont mesurés avec Umami Cloud/);
   build({UMAMI_WEBSITE_ID:umamiId}); // repeat deploy must be idempotent
   build({UMAMI_WEBSITE_ID:''}); // turning metrics off restores the privacy notice
-  assert.doesNotMatch(readFileSync(join(target,'index.html'),'utf8'),/cloud\\.umami\\.is/);
+  assert.ok(!readFileSync(join(target,'index.html'),'utf8').includes('cloud.umami.is'));
   assert.doesNotMatch(privacyText(),/Les visites et clics vers Amazon sont mesurés avec Umami Cloud/);
   let invalidAnalyticsIdBlocked=false;
   try {build({UMAMI_WEBSITE_ID:'"><img src=x onerror=alert(1)>'})}catch{invalidAnalyticsIdBlocked=true}
