@@ -8,12 +8,12 @@ assert.ok(origin.protocol==='https:'||(origin.protocol==='http:'&&['localhost','
 const browser=await chromium.launch({headless:true});
 mkdirSync('artifacts',{recursive:true});
 const errors=[];
-const isLocal=async img=>{
- await img.scrollIntoViewIfNeeded();
- await img.evaluate(el=>el.decode());
- const photo=await img.evaluate(el=>({src:el.currentSrc,width:el.naturalWidth,height:el.naturalHeight}));
- assert.ok(photo.width>=240&&photo.height>=240,'Real photograph must decode at sufficient quality: '+JSON.stringify(photo));
- assert.ok(photo.src.includes('/assets/watches/'),'Real photograph must be first-party local WebP: '+photo.src);
+const isVector=async wrap=>{
+ await wrap.scrollIntoViewIfNeeded();
+ const svg=wrap.locator('svg.am-watch-svg');
+ await svg.waitFor({state:'visible',timeout:8000});
+ assert.match(await svg.getAttribute('aria-label')||'',/Interprétation vectorielle/,'Original unlicensed-image fallback required');
+ assert.equal(await wrap.locator('img[src*="assets/watches/"]').count(),0,'Unlicensed photo must not be loaded');
 };
 const noOverflow=async(page,label)=>{
  const dimensions=await page.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
@@ -29,8 +29,8 @@ try{
  assert.equal(await cards.count(),3,'Three editorial starter recommendations');
  assert.match(await cards.first().locator('h3').innerText(),/MTP-1302PD-2A2V/);
  await noOverflow(phone,'Mobile adviser');
- await isLocal(phone.locator('.advisor-hero-frame img'));
- for(const card of await cards.all())await isLocal(card.locator('.advisor-photo img'));
+ await isVector(phone.locator('.advisor-hero-frame'));
+ for(const card of await cards.all())await isVector(card.locator('.advisor-photo'));
  assert.ok(await phone.locator('.am-mobile-nav>summary').isVisible(),'Mobile navigation must be visible');
  await phone.locator('.am-mobile-nav>summary').click();
  assert.ok(await phone.locator('.am-mobile-links a[href="./affiliation.html#montres"]').isVisible(),'Navigation can reach full collection');
@@ -57,7 +57,7 @@ try{
  assert.match(await phone.locator('#advisorCriteria').innerText(),/2 préférences/i);
  assert.equal(await phone.locator('input[name="tier"][value="prestige"]').isChecked(),true);
  assert.equal(await phone.locator('input[name="movement"][value="automatic"]').isChecked(),true);
- for(const card of await cards.all())await isLocal(card.locator('.advisor-photo img'));
+ for(const card of await cards.all())await isVector(card.locator('.advisor-photo'));
  await noOverflow(phone,'Adviser URL filters');
  await phone.close();
 
@@ -72,7 +72,7 @@ try{
  await desktop.screenshot({path:'artifacts/desktop-watch-advisor.png',fullPage:true});
  await desktop.close();
  assert.deepEqual(errors,[],'No uncaught client-side JavaScript errors');
- console.log('PASS: Android + desktop watch adviser, 15 local photo catalogue, selectable preferences, deep links, matching models, no overflow');
+ console.log('PASS: Android + desktop watch adviser, 15 original illustration catalogue, selectable preferences, deep links, matching models, no overflow');
 }finally{
  await browser.close();
 }

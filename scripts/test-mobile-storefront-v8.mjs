@@ -15,10 +15,13 @@ const checkWidth=async label=>{
  const box=await page.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
  assert.ok(box.scroll<=box.client+2,label+' must not horizontally overflow '+JSON.stringify(box));
 };
-const checkPhoto=async img=>{
- await img.scrollIntoViewIfNeeded();
- await img.evaluate(el=>el.decode());
- return img.evaluate(el=>({width:el.naturalWidth,src:el.currentSrc}));
+const checkVector=async target=>{
+ await target.scrollIntoViewIfNeeded();
+ const svg=target.locator('svg.am-watch-svg');
+ await svg.waitFor({state:'visible',timeout:8000});
+ const label=await svg.getAttribute('aria-label');
+ assert.match(label||'',/Interprétation vectorielle/,'Original art must be clearly labeled');
+ return label;
 };
 
 try{
@@ -36,24 +39,9 @@ try{
  await page.locator('.am-mobile-links a[href="#gammes"]').click();
  assert.ok(!(await page.locator('.am-mobile-links a').first().isVisible()),'Mobile menu should close after navigation');
 
- const img=cards.first().locator('img.aff-product-photo');
- const firstPhoto=await checkPhoto(img);
- assert.ok(firstPhoto.width>200&&firstPhoto.src.includes('/assets/watches/'),'First model must use real same-origin WebP photo');
- // Real watch photo lightbox: open from the card, navigate, zoom and exit.
- await cards.first().locator('.aff-photo-expand').click();
- await page.locator('#amPhotoDialog').waitFor({state:'visible'});
- assert.match(await page.locator('#amPhotoDialog .am-photo-title').innerText(),/Casio/i);
- const modalPhoto=page.locator('#amPhotoDialog img.am-photo-large');
- await modalPhoto.evaluate(img=>img.decode());
- assert.ok((await modalPhoto.evaluate(img=>img.naturalWidth))>200,'Zoom must display a genuine local photograph');
- await page.locator('.am-photo-next').click();
- assert.match(await page.locator('.am-photo-position').innerText(),/2 \/ 15/);
- await page.locator('.am-photo-prev').click();
- assert.match(await page.locator('.am-photo-position').innerText(),/1 \/ 15/);
- await page.locator('.am-photo-zoom').click();
- assert.ok(await page.locator('.am-photo-canvas').evaluate(x=>x.classList.contains('am-photo-expanded')),'Magnify the actual photograph');
- await page.locator('.am-photo-close').click();
- assert.ok(!(await page.locator('#amPhotoDialog').isVisible()),'Close the photo viewer');
+ await checkVector(cards.first().locator('.aff-illustration'));
+ assert.equal(await page.locator('.aff-card img.aff-product-photo').count(),0,'Unlicensed manufacturer photos must never be loaded');
+ assert.equal(await page.locator('.aff-photo-expand').count(),0,'Photo zoom controls must stay absent until licensing is approved');
 
 
  // Discover filters must work, including the most expensive collection.
@@ -82,7 +70,7 @@ await page.locator('#affGrid .aff-card input[type="checkbox"]').nth(0).check();
  await page.locator('#affGrid .aff-card input[type="checkbox"]').nth(1).check();
  assert.ok(await page.locator('#affCompareTray').isVisible(),'Comparison tray should appear after selecting 2 watches');
  assert.equal(await page.locator('#affCompareSelected .am-compare-selected-chip').count(),2,'Both selected watches have removable previews');
- assert.equal(await page.locator('#affCompareSelected img').count(),2,'Comparison dock shows genuine watch photo thumbnails');
+ assert.equal(await page.locator('#affCompareSelected img').count(),0,'No unlicensed thumbnail should load in the comparison dock');
  assert.equal(await page.locator('#affCompareTray').evaluate(el=>getComputedStyle(el).position),'fixed','Dock must be visible immediately on mobile');
  await page.locator('#affCompareSelected .am-compare-selected-chip').first().click();
  assert.equal(await page.locator('#affCompareSelected .am-compare-selected-chip').count(),1,'Removing one watch preserves the other');
@@ -100,7 +88,7 @@ await page.locator('#affGrid .aff-card input[type="checkbox"]').nth(0).check();
  await page.locator('#affCompareOpen').click();
  await page.locator('#affCompareDialog').waitFor({state:'visible'});
  assert.equal(await page.locator('#affCompareBody').evaluate(el=>el.parentElement?.id),'affCompareDialog','Compare body must be a direct child of the dialog, never trapped inside its flex header');
- assert.equal(await page.locator('#affCompareDialog .am-compare-thumb').count(),2,'Both compared models should display real photographs');
+ assert.equal(await page.locator('#affCompareDialog .am-compare-thumb').count(),0,'Comparison must not display unlicensed photos');
  const note=page.locator('.am-compare-diff-note');
  if(!(await note.isVisible())){console.error('COMPARISON NOTE DEBUG',await note.evaluateAll(nodes=>nodes.map(n=>[n,n.parentElement,n.parentElement?.parentElement].map(e=>e&&({tag:e.tagName,class:e.className,rect:e.getBoundingClientRect().toJSON(),display:getComputedStyle(e).display,width:getComputedStyle(e).width,flex:getComputedStyle(e).flex,overflow:getComputedStyle(e).overflow})))));await page.screenshot({path:'artifacts/mobile-compare-debug.png',fullPage:true})}
  assert.ok(await note.isVisible(),'Explain factual differences');
@@ -109,9 +97,8 @@ await page.locator('#affGrid .aff-card input[type="checkbox"]').nth(0).check();
  await page.locator('.am-compare-mobile-nav button').last().click();
  await page.waitForFunction(()=>document.querySelector('.am-compare-mobile-position')?.textContent==='2 / 2',{timeout:5000});
 
- const visibleComparisonPhoto=page.locator('.am-compare-mobile-card .am-compare-mobile-photo').first();
- const comparisonState=await checkPhoto(visibleComparisonPhoto);
- assert.ok(comparisonState.width>200&&comparisonState.src.includes('/assets/watches/'),'Visible mobile comparison must use genuine same-origin photography');
+ assert.equal(await page.locator('.am-compare-mobile-card').count(),2,'Mobile comparison has a readable entry for each selected watch');
+ assert.equal(await page.locator('.am-compare-mobile-photo').count(),0,'Mobile comparison must not show unlicensed images');
  await page.locator('#affCompareClose').click();
  await page.locator('#affCompareClear').click();
 
@@ -126,24 +113,19 @@ await page.locator('#affGrid .aff-card input[type="checkbox"]').nth(0).check();
  assert.equal(productSchema['@type'],'Product','Product details expose accurate structured data');
  assert.equal(productSchema.brand.name,'Citizen');
  assert.match(productSchema.model,/NJ0150-81X/);
- assert.ok(productSchema.image?.[0]?.includes('/assets/watches/citizen-tsuyosa.webp'),'Product schema links to genuine local watch photography');
+ assert.equal(productSchema.image,undefined,'Never add unlicensed photos to structured data');
  assert.equal(productSchema.offers,undefined,'No fabricated commercial offers or prices');
  assert.equal(productSchema.aggregateRating,undefined,'No invented product ratings');
  assert.match(await page.locator('meta[name="description"]').getAttribute('content'),/Citizen/,'Each watch has an informative meta description');
  await checkWidth('Mobile detail');
  assert.ok(await page.locator('#detailFavorite').isVisible(),'Detail page must have favorites');
  assert.equal(await page.locator('#detailFavorite').getAttribute('aria-pressed'),'true','Favorites should sync from collection to detail');
- const actual=await checkPhoto(page.locator('#detailArtwork img.am-real-product-photo'));
- assert.ok(actual.width>=240&&actual.src.includes('/assets/watches/citizen-tsuyosa.webp'),'Main detail must use local authentic photo');
- await page.locator('#detailPhotoZoom').click();
- await page.locator('#amPhotoDialog').waitFor({state:'visible'});
- await page.locator('#amPhotoDialog img.am-photo-large').evaluate(img=>img.decode());
- await page.locator('#amPhotoDialog .am-photo-close').click();
- assert.ok(!(await page.locator('#amPhotoDialog').isVisible()),'Detail photo viewer closes safely');
+ await checkVector(page.locator('#detailArtwork'));
+ assert.ok(await page.locator('#detailPhotoZoom').isHidden(),'Do not enable photo zoom without a license');
 
  assert.equal(await page.locator('#detailRelatedGrid .detail-related-card').count(),3,'Show exactly 3 related genuine models');
- const suggestion=await checkPhoto(page.locator('#detailRelatedGrid .detail-related-card img').first());
- assert.ok(suggestion.width>=200&&suggestion.src.includes('/assets/watches/'),'Related watches should use real photos');
+ assert.equal(await page.locator('#detailRelatedGrid .detail-related-card img').count(),0,'Related products must not show unlicensed photos');
+ await checkVector(page.locator('#detailRelatedGrid .detail-related-card').first());
  assert.ok(await page.locator('#detailAdjacent a').count()>=1,'Allow visiting neighboring watch products');
  await page.locator('#detailFavorite').click();
  assert.equal(await page.locator('#detailFavorite').getAttribute('aria-pressed'),'false','Detail favorite must toggle and persist');
@@ -153,7 +135,7 @@ await page.locator('#affGrid .aff-card input[type="checkbox"]').nth(0).check();
  assert.ok(comparisonUrl.includes('compare=citizen-tsuyosa'),'Product link must carry the actual selected model');
 
  await page.screenshot({path:'artifacts/mobile-related-watch-detail.png',fullPage:true});
- console.log('PASS: responsive header, real images, filters, photo comparator, related watch images, synced favorites and product navigation');
+ console.log('PASS: responsive header, licensed-only vector visuals, filters, comparator, favorites and product navigation');
 
  const desktop=await browser.newPage({viewport:{width:1366,height:850},locale:'fr-FR'});
  await desktop.goto(new URL('/montre.html?id=tissot-prx-auto',base).href,{waitUntil:'domcontentloaded',timeout:30000});
@@ -161,15 +143,14 @@ await page.locator('#affGrid .aff-card input[type="checkbox"]').nth(0).check();
  assert.ok(!(await desktop.locator('.am-mobile-nav').isVisible()),'Mobile nav should be hidden on desktop');
  assert.ok(await desktop.locator('.am-header .navigation').isVisible(),'Desktop nav should remain visible');
  assert.equal(await desktop.locator('#detailRelatedGrid .detail-related-card').count(),3);
- const tissot=desktop.locator('#detailArtwork img.am-real-product-photo');
- await tissot.evaluate(img=>img.decode());
- assert.ok((await tissot.evaluate(img=>img.naturalWidth))>400,'Tissot main real photo must decode on desktop');
+ await checkVector(desktop.locator('#detailArtwork'));
+ assert.equal(await desktop.locator('#detailArtwork img').count(),0,'Desktop detail must also avoid unlicensed photos');
  const dimensions=await desktop.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
  assert.ok(dimensions.scroll<=dimensions.client+2,'Desktop product page must not horizontally overflow');
  await desktop.screenshot({path:'artifacts/desktop-related-watch-detail.png',fullPage:true});
  await desktop.close();
  assert.deepEqual(errors,[],'No JavaScript uncaught errors in mobile browser');
- console.log('PASS: desktop real Tissot photo, desktop navigation, recommendations, no overflow');
+ console.log('PASS: desktop vector Tissot, desktop navigation, recommendations, no overflow');
 }finally{
  await browser.close();
 }

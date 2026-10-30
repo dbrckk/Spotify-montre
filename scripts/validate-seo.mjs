@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {readFileSync,statSync} from 'node:fs';
+import {readFileSync,statSync,existsSync} from 'node:fs';
 import {resolve} from 'node:path';
 const root=resolve(process.cwd(),'site');
 const read=p=>readFileSync(resolve(root,p),'utf8');
@@ -10,6 +10,7 @@ const config=JSON.parse(read('affiliate-links.json'));
 assert.equal(manifest.affiliateActive,config.enabled);
 assert.equal(manifest.affiliateCount,Object.keys(config.links).length);
 assert.equal(manifest.checkoutActive,false);
+assert.equal(manifest.licensedImageCount,feed.products.filter(p=>p.photoReview?.publicUsageApproved===true).length);
 const analyticsConfigured=Boolean((process.env.UMAMI_WEBSITE_ID||'').trim());
 assert.equal(manifest.analyticsActive,analyticsConfigured);
 assert.equal(manifest.analyticsProvider,analyticsConfigured?'umami':null);
@@ -64,6 +65,15 @@ for(const product of feed.products){
     assert.ok(html.includes(config.enabled&&config.links[product.id]?'lien rémunéré':'sans lien rémunéré'));
     assert.ok(html.includes('data-amazon-product="'+product.id+'"'),'SEO click event needs exact watch id');
   }
+  if(product.photoReview?.publicUsageApproved!==true) {
+    assert.match(html,/watch-vector/,'Original vector illustration instead of unlicensed image');
+    assert.ok(html.includes('../seo-watch-art.js'),'SEO product page must render original art');
+    assert.ok(!html.includes('../assets/watches/'+product.id+'.webp'),'No unlicensed image in product HTML');
+    assert.ok(!existsSync(resolve(root,'assets/watches/'+product.id+'.webp')),'No unlicensed assets on the public deployment');
+    assert.equal(product.photoReview?.url,undefined,'Never publish unlicensed manufacturer image URL');
+    assert.equal(product.photoReview?.localUrl,undefined,'Never publish unlicensed WebP image path');
+    assert.equal(product.photoReview?.source,undefined,'Never publish research photo-source URL');
+  }
   assert.equal((html.match(/rel="canonical"/g)||[]).length,1,'Single product canonical');
   const schema=html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
   assert.ok(schema,'JSON-LD required');
@@ -71,6 +81,10 @@ for(const product of feed.products){
 }
 assert.match(read('affiliation.js'),/hasEditorialPages/);
 assert.match(read('affiliation.js'),/am-card-seo-link/);
+for(const name of ['revue-photo.html','revue-photo.js','revue-photo.css']){
+  assert.ok(!existsSync(resolve(root,name)),'No internal photo-research UI exposed on the public site: '+name);
+}
+assert.ok(existsSync(resolve(root,'seo-watch-art.js')),'SEO watch illustrations script is required');
 const sitemap=read('sitemap.xml');
 assert.equal((sitemap.match(/<loc>/g)||[]).length,21);
 const editorialPaths=['quartz-ou-automatique','taille-boitier-montre','montres-automatiques'];

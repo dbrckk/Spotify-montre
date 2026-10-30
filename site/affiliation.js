@@ -15,7 +15,7 @@
  const official=url=>{try{const u=new URL(url);return u.protocol==='https:'&&!u.username&&!u.password&&approvedHosts.some(x=>u.hostname===x||u.hostname.endsWith('.'+x))}catch(_){return false}};
  const valid=p=>p&&p.affiliateUrl===null&&p.merchantLinkStatus==='untracked_official'&&p.photoRights==='not_licensed'&&p.imageMode==='custom_vector_illustration'&&Object.hasOwn(levels,p.tier)&&typeof p.id==='string'&&typeof p.brand==='string'&&typeof p.model==='string'&&typeof p.description==='string'&&official(p.officialUrl);
  const word=p=>[p.brand,p.model,p.title,p.description,p.style,p.tier,p.movement,...(p.highlights||[])].join(' ').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
- const photoSources=p=>{const t=p?.photoReview,files=[];if(t?.localUrl==='./assets/watches/'+p.id+'.webp')files.push(t.localUrl+(typeof t.localSha256==='string'&&/^[a-f0-9]{64}$/.test(t.localSha256)?'?v='+t.localSha256.slice(0,12):''));if(typeof t?.url==='string'&&t.url.startsWith('https://'))files.push(t.url);return files;};
+ const photoSources=p=>{const t=p?.photoReview,files=[];if(t?.publicUsageApproved!==true)return files;if(t?.localUrl==='./assets/watches/'+p.id+'.webp')files.push(t.localUrl+(typeof t.localSha256==='string'&&/^[a-f0-9]{64}$/.test(t.localSha256)?'?v='+t.localSha256.slice(0,12):''));if(typeof t?.url==='string'&&t.url.startsWith('https://'))files.push(t.url);return files;};
  const detail=id=>'./montre.html?id='+encodeURIComponent(id);
  const compareTray=$('affCompareTray'),compareLabel=$('affCompareLabel'),compareSelected=$('affCompareSelected'),compareNotice=$('affCompareNotice'),compareOpen=$('affCompareOpen'),compareClear=$('affCompareClear'),dialog=$('affCompareDialog'),compareBody=$('affCompareBody');
  let compareWarning='';
@@ -40,7 +40,7 @@
        const button=make('button','am-compare-selected-chip');
        button.type='button';
        button.setAttribute('aria-label','Retirer '+p.brand+' '+p.model+' de la comparaison');
-       if(p.photoReview?.localUrl==='./assets/watches/'+p.id+'.webp'){
+       if(p.photoReview?.publicUsageApproved===true&&p.photoReview?.localUrl==='./assets/watches/'+p.id+'.webp'){
          const img=make('img');img.src=p.photoReview.localUrl;img.alt='';img.width=40;img.height=40;img.decoding='async';
          button.append(img);
        }
@@ -55,7 +55,7 @@
    const item=make('article','aff-card');item.dataset.watchId=p.id;
    const art=make('div','aff-illustration');art.dataset.tone=p.tone||'silver';
    const photo=p.photoReview,sources=photoSources(p);
-   const vector=()=>{art.replaceChildren();if(window.AtelierWatch)window.AtelierWatch.render(art,p);art.append(make('span','aff-art-label','PHOTO INDISPONIBLE · FICHE FABRICANT'))};
+   const vector=()=>{art.replaceChildren();if(window.AtelierWatch)window.AtelierWatch.render(art,p);art.append(make('span','aff-art-label','ILLUSTRATION ORIGINALE · PHOTO CHEZ LE FABRICANT'))};
    if(photo?.accuracy==='exact'&&sources.length){
      const img=make('img','aff-product-photo');img.alt=p.brand+' '+p.model+' — photographie authentique';img.loading='lazy';img.decoding='async';img.referrerPolicy='no-referrer';
      let sourceIndex=0;img.onerror=()=>{sourceIndex++;if(sourceIndex<sources.length)img.src=sources[sourceIndex];else vector()};
@@ -98,7 +98,7 @@
      const a=make('a','am-recent-card');
      a.href=detail(p.id);a.setAttribute('aria-label','Revoir '+p.brand+' '+p.model);
      const picture=make('span','am-recent-image');
-     if(p.photoReview?.localUrl==='./assets/watches/'+p.id+'.webp'){
+     if(p.photoReview?.publicUsageApproved===true&&p.photoReview?.localUrl==='./assets/watches/'+p.id+'.webp'){
        const img=make('img');img.src=p.photoReview.localUrl;img.alt='';img.loading='lazy';img.decoding='async';img.width=120;img.height=120;
        img.onerror=()=>{img.remove();picture.append(make('span','am-recent-photo-missing','Photo indisponible'))};
        picture.append(img);
@@ -167,7 +167,7 @@
  }
  function compareImage(p,cls){
    const sources=photoSources(p),img=make('img',cls);
-   img.alt='Photographie '+p.brand+' '+p.model;img.decoding='async';img.loading='lazy';img.referrerPolicy='no-referrer';
+   img.alt='Photographie autorisée de '+p.brand+' '+p.model;img.decoding='async';img.loading='lazy';img.referrerPolicy='no-referrer';
    if(sources.length){let pos=0;img.onerror=()=>{pos++;if(pos<sources.length)img.src=sources[pos];else img.remove()};img.src=sources[0]}
    return sources.length?img:null;
  }
@@ -262,7 +262,7 @@
   if(brandSelect){for(const name of [...new Set(data.map(p=>p.brand))].sort((a,b)=>a.localeCompare(b,'fr'))){const total=data.filter(p=>p.brand===name).length;const option=make('option','',name+' ('+total+')');option.value=name;brandSelect.append(option)}}
   const hero=$('heroWatch'),featured=data.find(p=>p.id==='citizen-tsuyosa');
   if(hero&&featured){
-    const fallback=()=>{hero.replaceChildren();hero.classList.remove('am-hero-real');window.AtelierWatch?.render(hero,featured);const caption=document.querySelector('.am-hero-label small');if(caption)caption.textContent='Illustration de secours · photographie indisponible'};
+    const fallback=()=>{hero.replaceChildren();hero.classList.remove('am-hero-real');window.AtelierWatch?.render(hero,featured);const caption=document.querySelector('.am-hero-label small');if(caption)caption.textContent='Illustration originale de style · photo exacte chez le fabricant'};
     const sources=photoSources(featured);
     if(sources.length){const img=make('img','am-hero-real-photo');img.alt='Citizen Tsuyosa NJ0150-81X — photographie authentique';img.decoding='async';img.loading='eager';img.fetchPriority='high';img.referrerPolicy='no-referrer';let i=0;img.onerror=()=>{i++;if(i<sources.length)img.src=sources[i];else fallback()};hero.classList.add('am-hero-real');hero.replaceChildren(img);img.src=sources[0]}else fallback();
   }
