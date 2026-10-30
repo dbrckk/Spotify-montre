@@ -41,6 +41,8 @@ for(const product of feed.products){
   assert.ok(schema,'JSON-LD required');
   assert.equal(JSON.parse(schema[1])['@graph'][0]['@type'],'Product');
 }
+assert.match(read('affiliation.js'),/hasEditorialPages/);
+assert.match(read('affiliation.js'),/am-card-seo-link/);
 const sitemap=read('sitemap.xml');
 assert.equal((sitemap.match(/<loc>/g)||[]).length,21);
 const editorialPaths=['quartz-ou-automatique','taille-boitier-montre','montres-automatiques'];
