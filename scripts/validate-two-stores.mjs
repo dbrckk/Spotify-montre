@@ -32,7 +32,7 @@ for(const p of products.products){
 assert.match(page,/Quinze façons d'affirmer son style/);
 assert.match(page,/id="affGrid"/);
 assert.match(page,/id="affSavedCount"/);
-assert.match(page,/liens vers les fiches officielles sont <strong>non rémunérés/);
+assert.match(page,/liens rémunérés, lorsqu'ils sont actifs, sont identifiés clairement/,'The source storefront must truthfully disclose possible tracked links');
 assert.match(page,/id="affSearch"/);
 assert.match(code,/x\.affiliateEnabled!==false/);
 assert.match(code,/p\.affiliateUrl===null/);
