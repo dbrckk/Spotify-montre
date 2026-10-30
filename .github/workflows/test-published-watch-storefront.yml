@@ -8,6 +8,9 @@ on:
       - 'scripts/test-mobile-storefront-v8.mjs'
       - 'scripts/test-mobile-live-storefront.mjs'
       - 'scripts/test-recently-viewed.mjs'
+      - 'scripts/test-compare-persistence.mjs'
+      - 'site/affiliation.js'
+      - 'site/fiche.js'
   workflow_dispatch:
 permissions:
   contents: read
@@ -26,12 +29,13 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Verify deployed website, 15 local photos, sharing and watch history
         env:
-          WATCH_STOREFRONT_URL: https://timeless-star-2w72k8n.shipstatic.com
+          WATCH_STOREFRONT_URL: https://neutral-shell-t3y4rs7.shipstatic.com
         run: |
           node scripts/test-mobile-live-storefront.mjs
           node scripts/test-mobile-storefront-v8.mjs
           node scripts/test-selection-share.mjs
           node scripts/test-recently-viewed.mjs
+          node scripts/test-compare-persistence.mjs
       - name: Save real deployment screenshots
         if: always()
         uses: actions/upload-artifact@v4
