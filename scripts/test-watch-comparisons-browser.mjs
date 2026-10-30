@@ -30,8 +30,13 @@ try{
     assert.equal(await page.locator('.headtohead-watch').count(),2);
     const left=catalogue.find(p=>p.id===pair.left),right=catalogue.find(p=>p.id===pair.right);
     assert.ok((await page.locator('h1').innerText()).includes(pair.title));
-    assert.equal(await page.locator('.headtohead-watch svg.am-watch-svg').count(),2,'Original SVG art, not unlicensed photos');
-    assert.equal(await page.locator('img[src*="assets/watches/"]').count(),0,'No manufacturer images');
+    assert.equal(await page.locator('.headtohead-watch img.headtohead-photo').count(),2,'Both models use owner-authorized local photos');
+    assert.equal(await page.locator('img[src*="assets/watches/"]').count(),2,'Photos of both exact source products');
+    for(const photo of await page.locator('.headtohead-watch img.headtohead-photo').all()){
+      await photo.scrollIntoViewIfNeeded();
+      await photo.evaluate(async el=>{if(!el.complete)await new Promise(resolve=>{el.addEventListener('load',resolve,{once:true});el.addEventListener('error',resolve,{once:true})})});
+      assert.ok(await photo.evaluate(el=>el.naturalWidth>100),'Real comparison photo must decode');
+    }
     assert.equal(await page.locator('.headtohead-watch .primary').count(),2,'Two official product destinations');
     assert.equal(await page.locator('.headtohead-watch .secondary').count(),[pair.left,pair.right].filter(id=>!['citizen-eco','tissot-prx-auto'].includes(id)).length,'Only matched Amazon links');
     for(const [i,p] of [left,right].entries()){
@@ -63,7 +68,7 @@ try{
   await desktop.screenshot({path:'artifacts/desktop-watch-pair-orient-hamilton.png',fullPage:true});
   await desktop.close();
   assert.deepEqual(errors,[],'No unhandled browser errors');
-  console.log('PASS: 4 actual mobile head-to-head pages, verified links, vector images, SEO deep links and desktop layout');
+  console.log('PASS: 4 mobile head-to-head pages, owner-authorized local photos, verified links, SEO deep links and desktop layout');
 }finally{
   await browser.close();
 }
