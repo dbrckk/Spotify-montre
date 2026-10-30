@@ -267,11 +267,14 @@
    }catch(_){}
   }
   if(brandSelect){for(const name of [...new Set(data.map(p=>p.brand))].sort((a,b)=>a.localeCompare(b,'fr'))){const total=data.filter(p=>p.brand===name).length;const option=make('option','',name+' ('+total+')');option.value=name;brandSelect.append(option)}}
+  if(window.AtelierEditorial?.init)window.AtelierEditorial.init(data);
+  else {
   const hero=$('heroWatch'),featured=data.find(p=>p.id==='citizen-tsuyosa');
   if(hero&&featured){
     const fallback=()=>{hero.replaceChildren();hero.classList.remove('am-hero-real');window.AtelierWatch?.render(hero,featured);const caption=document.querySelector('.am-hero-label small');if(caption)caption.textContent='Illustration originale de style · photo exacte chez le fabricant'};
     const sources=photoSources(featured);
     if(sources.length){const img=make('img','am-hero-real-photo');img.alt='Citizen Tsuyosa NJ0150-81X — photographie authentique';img.decoding='async';img.loading='eager';img.fetchPriority='high';img.referrerPolicy='no-referrer';let i=0;img.onerror=()=>{i++;if(i<sources.length)img.src=sources[i];else fallback()};hero.classList.add('am-hero-real');hero.replaceChildren(img);const caption=document.querySelector('.am-hero-label small');if(caption)caption.textContent='Photographie du modèle exact · source '+(photoSources(featured).length?featured.photoReview.provider:'fabricant');img.src=sources[0]}else fallback();
+  }
   }
   render();
   if(compare.length>=2&&params.has('compare'))showComparison();
