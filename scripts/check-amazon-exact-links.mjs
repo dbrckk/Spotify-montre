@@ -48,15 +48,30 @@ for(const [id,item] of all){
 assert.equal(exact,13,'13 liens exacts trouvés');
 assert.equal(unmatched,2,'2 modèles sans lien exact');
 const active=load('site/affiliate-links.json');
-assert.equal(active.enabled,false,'Ne pas activer les commissions à partir de simples pages Amazon');
-assert.equal(active.approved,false,'Validation du statut du compte requise');
+assert.equal(active.approved,false,"Amazon's final review must not be misrepresented as approved");
+assert.equal(active.enabled,true,'The owner confirmed tracking ID and registered domain');
+assert.equal(active.enrollmentStatus,'enrolled_approval_unverified');
+assert.equal(active.amazonPartnerTag,research.amazonPartnerTag,'Only the user-confirmed Tracking ID may be published');
+assert.equal(active.ownerConfirmedTrackingId,true);
+assert.equal(active.ownerConfirmedSiteListed,true);
+assert.equal(active.specialLinksCreatedOnSite,true);
+assert.equal(Object.keys(active.links).length,exact,'Enable only exact matches, never substitutes');
+for(const [id,item] of all){
+ const link=active.links[id];
+ if(item.status!=='matched_on_amazon_fr'){assert.equal(link,undefined,'No fabricated ASIN for '+id);continue}
+ assert.ok(link,'Missing approved site-created special link for '+id);
+ assert.equal(link.asin,item.asin);
+ assert.equal(link.url,item.affiliateUrl);
+ assert.equal(link.provider,'amazon.fr');
+ assert.equal(link.linkApproved,true,'Site-owner approved for publication, not Amazon final account approval');
+}
 if(process.argv.includes('--markdown')){
  console.log('# Montres Amazon.fr vérifiées le '+research.checkedOn+'\n');
- console.log('Tag indiqué : `'+research.amazonPartnerTag+'`. Les liens ci-dessous sont reconstruits ; leur présence ne confirme pas une commission active.\n');
+ console.log('Tag confirmé par le propriétaire : `'+research.amazonPartnerTag+'`. 13 liens créés par le site pour commencer la période de ventes éligibles, sans preuve d’approbation finale ni de revenus.\n');
  console.log('| Modèle | Amazon.fr (avec tag) | Statut |\n|---|---|---|');
  for(const p of catalog.products){
   const x=research.products[p.id];
   console.log('| '+p.brand+' '+p.model+' | '+(x.affiliateUrl?'[ASIN '+x.asin+']('+x.affiliateUrl+')':'Aucun lien exact')+' | '+(x.status==='matched_on_amazon_fr'?(x.availabilityAtCheck==='unavailable_at_check'?'Page trouvée, indisponible au contrôle':'Fiche exacte trouvée'):'À rechercher')+' |');
  }
- console.log('\n'+exact+'/15 pages exactes, '+unmatched+'/15 non confirmées. Affiliation actuellement désactivée.');
-}else console.log('Amazon.fr: '+exact+'/15 fiches ASIN exactes, '+unmatched+' absentes, liens reconstitués avec tag ; aucune activation commerciale.');
+ console.log('\n'+exact+'/15 liens partenaires balisés et activés, '+unmatched+'/15 non confirmés. Revenus et approbation Amazon à vérifier dans le tableau de bord.');
+}else console.log('Amazon.fr: '+exact+'/15 liens partenaires balisés activés, '+unmatched+' absents ; approbation finale Amazon et ventes non vérifiées.');
