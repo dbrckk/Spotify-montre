@@ -16,6 +16,9 @@ try {
   });
   build({GOOGLE_SITE_VERIFICATION:'Valid_Example_Token_123456'});
   assert.match(readFileSync(join(target,'index.html'),'utf8'),/<meta name="google-site-verification" content="Valid_Example_Token_123456">/);
+  let tokenBlocked=false;
+  try { build({GOOGLE_SITE_VERIFICATION:'\"><script>alert(1)</script>'}); } catch { tokenBlocked=true; }
+  assert.equal(tokenBlocked,true,'HTML-injection attempts in verification metadata must fail');
   build({GOOGLE_SITE_VERIFICATION:''});
   assert.doesNotMatch(readFileSync(join(target,'index.html'),'utf8'),/name="google-site-verification"/);
   let html=readFileSync(join(target,'montres/citizen-tsuyosa.html'),'utf8');
