@@ -14,7 +14,12 @@ import {validateAffiliateConfig} from './affiliate-policy.mjs';
     const model=products.find(p=>p.id===id);
     if (model?.photoReview?.publicUsageApproved!==true) throw Error('Publication affiliée bloquée : droits commerciaux de la photographie à vérifier pour '+id);
   }
-  const amazonStatement = 'En tant que Partenaire d’Amazon, je suis rémunéré(e) pour les achats éligibles.';
+  const amazonStatement = 'En tant que Partenaire Amazon, je réalise un bénéfice sur les achats remplissant les conditions requises';
+  const searchConsoleToken=(process.env.GOOGLE_SITE_VERIFICATION||'').trim();
+  if(searchConsoleToken&&!/^[a-zA-Z0-9_.=-]{10,160}$/.test(searchConsoleToken)){
+    throw Error('GOOGLE_SITE_VERIFICATION invalide : saisir uniquement le code content de la balise Google (sans HTML)');
+  }
+  const searchConsoleMeta=searchConsoleToken?'<meta name="google-site-verification" content="'+searchConsoleToken+'">':'';
   const e = value => String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   const u = path => new URL(path, site).href;
   const schema = obj => JSON.stringify(obj).replace(/</g, '\\u003c');
@@ -100,7 +105,7 @@ import {validateAffiliateConfig} from './affiliate-policy.mjs';
   collection=collection.replace(/<title>[^<]+<\/title>/,'<title>Montres homme et femme : 15 modèles à comparer | Atelier Montres</title>');
   collection=collection.replace(/<meta name="description" content="[^"]*">/,'<meta name="description" content="Découvrez 15 montres Casio, Citizen, Seiko, Tissot et autres : modèles quartz, solaires et automatiques, photos, caractéristiques et comparatif indépendant.">');
   const homepage=u('');
-  const headExtra=`<link rel="canonical" href="${e(homepage)}"><meta name="robots" content="index,follow,max-image-preview:large"><meta property="og:type" content="website"><meta property="og:locale" content="fr_FR"><meta property="og:site_name" content="Atelier Montres"><meta property="og:title" content="15 montres à comparer · Atelier Montres"><meta property="og:description" content="Sélection indépendante de 15 montres, fiches et guide d'achat."><meta property="og:url" content="${e(homepage)}"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="./seo-guides.css"><script type="application/ld+json">${schema({'@context':'https://schema.org','@graph':[{'@type':'WebSite',name:'Atelier Montres',url:homepage,inLanguage:'fr-FR'},{'@type':'ItemList',name:'15 montres à découvrir',numberOfItems:products.length,itemListElement:products.map((p,i)=>({'@type':'ListItem',position:i+1,name:p.brand+' '+p.model,url:u('montres/'+p.id+'.html')}))}]})}</script>`;
+  const headExtra=`${searchConsoleMeta}<link rel="canonical" href="${e(homepage)}"><meta name="robots" content="index,follow,max-image-preview:large"><meta property="og:type" content="website"><meta property="og:locale" content="fr_FR"><meta property="og:site_name" content="Atelier Montres"><meta property="og:title" content="15 montres à comparer · Atelier Montres"><meta property="og:description" content="Sélection indépendante de 15 montres, fiches et guide d'achat."><meta property="og:url" content="${e(homepage)}"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="./seo-guides.css"><script type="application/ld+json">${schema({'@context':'https://schema.org','@graph':[{'@type':'WebSite',name:'Atelier Montres',url:homepage,inLanguage:'fr-FR'},{'@type':'ItemList',name:'15 montres à découvrir',numberOfItems:products.length,itemListElement:products.map((p,i)=>({'@type':'ListItem',position:i+1,name:p.brand+' '+p.model,url:u('montres/'+p.id+'.html')}))}]})}</script>`;
   collection=collection.replace('</head>','<!-- AM_SEO_HEAD_START -->'+headExtra+'<!-- AM_SEO_HEAD_END --></head>');
   writeFileSync(join(root,'index.html'),collection);
   writeFileSync(join(root,'affiliation.html'),collection);

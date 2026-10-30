@@ -33,3 +33,5 @@ jobs:
         run: node scripts/build-seo.mjs && node scripts/build-seo.mjs
       - name: Validate published website output
         run: node scripts/validate-seo.mjs
+      - name: Amazon launch readiness status
+        run: node scripts/report-affiliate-readiness.mjs --ci-summary

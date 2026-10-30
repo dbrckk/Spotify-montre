@@ -39,7 +39,7 @@
         if(feed.products.find(p=>p.id===id)?.photoReview?.publicUsageApproved!==true)return;
       }
     } catch { return; }
-    const disclosure='En tant que Partenaire d’Amazon, je suis rémunéré(e) pour les achats éligibles.';
+    const disclosure='En tant que Partenaire Amazon, je réalise un bénéfice sur les achats remplissant les conditions requises';
     window.AtelierAffiliatesActive=true;
     const link=(url,cls)=>{
       const a=document.createElement('a');a.href=url;a.className=cls;
@@ -57,7 +57,7 @@
         const foot=card.querySelector('.aff-card-foot');
         if(foot)foot.textContent='Modèle réel · Lien Amazon rémunéré identifié ci-dessus';
         const note=document.createElement('small');
-        note.className='am-affiliate-note';note.textContent='Le paiement et les retours sont assurés par le vendeur externe.';
+        note.className='am-affiliate-note';note.textContent=disclosure+' Le paiement et les retours sont assurés par le vendeur externe.';
         actions.after(note);
       }
     };
