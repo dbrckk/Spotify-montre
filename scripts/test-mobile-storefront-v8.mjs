@@ -44,6 +44,43 @@ try{
  assert.match(await page.locator('.aff-disclosure').innerText(),/En tant que Partenaire Amazon/);
  assert.equal(await ctas.evaluateAll(nodes=>nodes.every(a=>a.href.startsWith('https://www.amazon.fr/dp/')&&new URL(a.href).searchParams.get('tag')==='drackk04-21')),true,'Every outbound paid link must use the owner-confirmed ID');
 
+ // Premium real-photography editorial journey (actual catalogue, no mock assets).
+ const variants=page.locator('#heroVariants .am-hero-option');
+ await variants.first().waitFor({state:'visible',timeout:15000});
+ assert.equal(await variants.count(),4,'Four curated source-backed cover watches');
+ assert.equal(await variants.first().getAttribute('aria-pressed'),'true','Citizen is initially featured');
+ const heroPhoto=page.locator('#heroWatch img.am-hero-real-photo');
+ await checkPhoto(page.locator('#heroWatch'));
+ assert.match(await heroPhoto.getAttribute('alt'),/Citizen Tsuyosa/);
+ await page.locator('#heroVariants button[data-watch-id="tissot-prx-quartz"]').click();
+ await heroPhoto.waitFor({state:'visible',timeout:15000});
+ assert.match(await heroPhoto.getAttribute('alt'),/Tissot PRX Quartz/,'Selected cover must show exact PRX photograph');
+ assert.equal(await page.locator('#heroVariants button[data-watch-id="tissot-prx-quartz"]').getAttribute('aria-pressed'),'true');
+ assert.match(await page.locator('#heroEditorialLink').getAttribute('href'),/tissot-prx-quartz/,'Featured link must open matching product');
+ await page.locator('#heroEditorialZoom').click();
+ await page.locator('#amPhotoDialog').waitFor({state:'visible',timeout:15000});
+ assert.match(await page.locator('#amPhotoDialog .am-photo-title').innerText(),/Tissot/);
+ await page.locator('#amPhotoDialog .am-photo-close').click();
+ await page.locator('#heroVariants button[data-watch-id="orient-bambino"]').focus();
+ await page.keyboard.press('ArrowRight');
+ assert.equal(await page.locator('#heroVariants button[data-watch-id="casio-mtp-b145"]').getAttribute('aria-pressed'),'true','Right arrow switches cover by keyboard');
+ await heroPhoto.waitFor({state:'visible',timeout:15000});
+ assert.match(await heroPhoto.getAttribute('alt'),/Casio MTP-B145/);
+ const lookbook=page.locator('#amEditorialGallery');
+ await lookbook.waitFor({state:'visible',timeout:15000});
+ const photoCards=page.locator('#amEditorialGrid .am-story-card');
+ assert.equal(await photoCards.count(),3,'Three independently sourced real-watch editorial images');
+ for(const id of ['seiko-5','orient-bambino','tissot-prx-quartz']){
+   assert.ok(await page.locator('#amEditorialGrid .am-story-card[data-watch-id="'+id+'"]').count(),'Source-backed gallery: '+id);
+ }
+ await checkPhoto(photoCards.first().locator('.am-story-media'));
+ await page.locator('#amEditorialGrid .am-story-card[data-watch-id="seiko-5"] .am-story-zoom').click();
+ await page.locator('#amPhotoDialog').waitFor({state:'visible'});
+ assert.match(await page.locator('#amPhotoDialog .am-photo-title').innerText(),/Seiko/,'Gallery zoom opens exact product');
+ await page.locator('#amPhotoDialog .am-photo-close').click();
+ await checkWidth('Mobile photographic lookbook');
+ await page.screenshot({path:'artifacts/mobile-genuine-watch-lookbook.png',fullPage:true});
+
  await checkWidth('Mobile collection');
  assert.ok((await page.locator('.am-header').boundingBox()).height<=100,'Mobile header must stay compact');
  assert.ok(await page.locator('.am-mobile-nav>summary').isVisible(),'Mobile navigation must be visible');
@@ -168,6 +205,13 @@ await page.locator('#affGrid .aff-card input[type="checkbox"]').nth(0).check();
  console.log('PASS: responsive header, 15 owner-authorized source photos, filters, comparator, favorites and product navigation');
 
  const desktop=await browser.newPage({viewport:{width:1366,height:850},locale:'fr-FR'});
+ await desktop.goto(new URL('/affiliation.html',base).href,{waitUntil:'domcontentloaded',timeout:30000});
+ await desktop.locator('#amEditorialGrid .am-story-card').first().waitFor({state:'visible',timeout:20000});
+ assert.equal(await desktop.locator('#amEditorialGrid .am-story-card').count(),3,'Desktop editorial photography layout');
+ assert.equal(await desktop.locator('#heroVariants .am-hero-option').count(),4,'Desktop hero selection');
+ const desktopHomeSize=await desktop.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
+ assert.ok(desktopHomeSize.scroll<=desktopHomeSize.client+2,'Desktop editorial layout must not overflow');
+ await desktop.screenshot({path:'artifacts/desktop-genuine-watch-lookbook.png',fullPage:true});
  await desktop.goto(new URL('/montre.html?id=tissot-prx-auto',base).href,{waitUntil:'domcontentloaded',timeout:30000});
  await desktop.locator('#detailShell').waitFor({state:'visible',timeout:20000});
  assert.ok(!(await desktop.locator('.am-mobile-nav').isVisible()),'Mobile nav should be hidden on desktop');
