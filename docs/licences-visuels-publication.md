@@ -1,5 +1,16 @@
 # Publication des photographies et illustrations — Atelier Montres
 
+## Actualisation — déclaration d'autorisation du responsable, 30 octobre 2026
+
+Le responsable du projet a **déclaré expressément disposer du droit de publier les photographies des marques pour les 15 références**. Sur cette base, la boutique utilise désormais les fichiers WebP locaux des modèles exacts ; les illustrations SVG originales sont conservées en remplacement de secours.
+
+Pour chaque photo : `publicUsageApproved:true`, `permissionDeclaration:site_owner_explicit_confirmation_2026-10-30` et `permissionIndependentlyVerified:false`. Cette dernière valeur est intentionnelle : **aucune pièce justificative du titulaire des droits n'a été fournie et vérifiée ici**, et le programme Amazon ne confère pas automatiquement un droit sur des photos d'origine fabricant ou revendeur.
+
+Le responsable doit conserver hors GitHub les conditions d'autorisation et vérifier la couverture commerciale, les canaux, l'hébergement, les modifications et l'éventuelle révocation. Une photo provenant d'un distributeur (notamment Citizen Eco-Drive) peut relever de droits distincts de ceux de la marque. En cas de retrait d'autorisation, repasser `publicUsageApproved:false` pour la référence et exécuter le build ; le site retombera sur les illustrations d'origine. La diffusion commerciale est une responsabilité réelle, pas une validation juridique automatique.
+
+Le texte historique ci-dessous documente le régime de précaution précédent, **désormais remplacé par cette déclaration de l'éditeur**.
+
+
 Mise à jour : 30 octobre 2026.
 
 ## Décision de publication
