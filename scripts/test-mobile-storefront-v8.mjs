@@ -48,6 +48,13 @@ try{
  const variants=page.locator('#heroVariants .am-hero-option');
  await variants.first().waitFor({state:'visible',timeout:15000});
  assert.equal(await variants.count(),4,'Four curated source-backed cover watches');
+ const thumbnailImages=page.locator('#heroVariants .am-hero-option-photo img');
+ assert.equal(await thumbnailImages.count(),4,'Every cover option needs a real local photographic thumbnail');
+ for(const thumb of await thumbnailImages.all()){
+   await thumb.evaluate(async el=>{if(!el.complete)await new Promise(resolve=>{el.addEventListener('load',resolve,{once:true});el.addEventListener('error',resolve,{once:true})})});
+   assert.ok(await thumb.evaluate(el=>el.naturalWidth>100&&el.naturalHeight>100),'Hero thumbnail must decode');
+ }
+ assert.match(await page.locator('.am-hero-label').evaluate(el=>getComputedStyle(el).backgroundImage),/linear-gradient/,'Cover captions need a dark opaque contrast surface');
  assert.equal(await variants.first().getAttribute('aria-pressed'),'true','Citizen is initially featured');
  const heroPhoto=page.locator('#heroWatch img.am-hero-real-photo');
  await checkPhoto(page.locator('#heroWatch'));
