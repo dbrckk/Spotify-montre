@@ -82,7 +82,21 @@ try {
   assert.equal((home.match(/rel="canonical"/g)||[]).length,1);
   assert.match(readFileSync(join(target,'seo-manifest.json'),'utf8'),/"affiliateCount": 1/);
   assert.match(readFileSync(join(target,'confidentialite.html'),'utf8'),/Certains liens Amazon.fr peuvent être rémunérés/);
-  console.log('Affiliate publication functional check OK: inactive, verified single-product activation, disclosures and non-affiliated fallback');
+  // Initial eligible sales must be possible while Amazon's final review is pending.
+  cfg.approved=false;
+  cfg.enrollmentStatus='registered_pending_review';
+  cfg.ownerConfirmedEnrollment=true;
+  cfg.specialLinksCreatedInAccount=true;
+  writeFileSync(join(target,'affiliate-links.json'),JSON.stringify(cfg));
+  build();
+  assert.match(readFileSync(join(target,'montres/citizen-tsuyosa.html'),'utf8'),/Voir ce modèle sur Amazon.fr · lien rémunéré/,'Provisional special link must be functional');
+  assert.match(readFileSync(join(target,'seo-manifest.json'),'utf8'),/"affiliateCount": 1/,'Pending applicant must have a real linked product');
+  cfg.specialLinksCreatedInAccount=false;
+  writeFileSync(join(target,'affiliate-links.json'),JSON.stringify(cfg));
+  let noEnrollmentBlocked=false;
+  try{build()}catch{noEnrollmentBlocked=true}
+  assert.equal(noEnrollmentBlocked,true,'Unconfirmed pending participation must be blocked');
+  console.log('Affiliate publication functional check OK: inactive, approved, provisional Amazon enrollment, exact ASIN and disclosures');
 } finally {
   rmSync(tmp,{recursive:true,force:true});
 }
