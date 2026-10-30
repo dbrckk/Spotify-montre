@@ -35,7 +35,7 @@ try{
  assert.ok(await compareLink.isVisible(),'Personalized shortlist must offer direct comparison');
  const deepLink=await compareLink.getAttribute('href');
  assert.match(deepLink||'',/compare=casio-mtp-1302,citizen-tsuyosa,tissot-prx-auto/,'Three accurate IDs pass to comparison');
- const compareTab=await phone.context().newPage();
+ const compareTab=await browser.newPage({viewport:{width:393,height:852},deviceScaleFactor:1,isMobile:true,hasTouch:true,locale:'fr-FR'});
  try{
    await compareTab.goto(new URL(deepLink,phone.url()).href,{waitUntil:'domcontentloaded',timeout:30000});
    await compareTab.locator('#affCompareDialog').waitFor({state:'visible',timeout:20000});
