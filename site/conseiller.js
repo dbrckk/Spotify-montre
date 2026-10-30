@@ -9,18 +9,18 @@
  const read=()=>engine.choices(Object.fromEntries(new FormData(form).entries()));
  let catalogue=[];
  function photo(p,rank){
-   const wrap=node('div','advisor-photo'),img=node('img'),missing=node('p','advisor-fallback','Photographie indisponible. Consultez la fiche du fabricant.');
+   const wrap=node('div','advisor-photo'),img=node('img'),missing=node('p','advisor-fallback','Illustration éditoriale, photo exacte chez le fabricant.');
    const chip=node('span','advisor-rank',String(rank+1).padStart(2,'0')+' / 03');
    const t=p.photoReview||{};
    const urls=[];
-   if(t.localUrl==='./assets/watches/'+p.id+'.webp')urls.push(t.localUrl);
-   if(typeof t.url==='string'&&t.url.startsWith('https://'))urls.push(t.url);
+   if(t.publicUsageApproved===true&&t.localUrl==='./assets/watches/'+p.id+'.webp')urls.push(t.localUrl);
+   if(t.publicUsageApproved===true&&typeof t.url==='string'&&t.url.startsWith('https://'))urls.push(t.url);
    img.alt='Photographie réelle de '+p.brand+' '+p.model;
    img.width=540;img.height=540;img.loading='lazy';img.decoding='async';img.referrerPolicy='no-referrer';
    let i=0;
    img.onerror=()=>{i++;if(i<urls.length)img.src=urls[i];else wrap.classList.add('fallback')};
    wrap.append(img,missing,chip);
-   if(urls.length)img.src=urls[0];else wrap.classList.add('fallback');
+   if(urls.length)img.src=urls[0];else{img.remove();wrap.classList.add('fallback');window.AtelierWatch?.render(wrap,p);}
    return wrap;
  }
  function card(entry,i){
@@ -64,13 +64,15 @@
  reset.addEventListener('click',()=>{form.reset();if(catalogue.length)render();form.querySelector('input[name="tier"]')?.focus()});
  fetch('./selection-affiliation.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('Catalogue indisponible');return r.json()}).then(data=>{
    if(data?.version!==1||data.affiliateEnabled!==false||!Array.isArray(data.products)||data.products.length!==15)throw Error('Catalogue invalide');
-   catalogue=data.products.filter(p=>p?.photoReview?.localUrl==='./assets/watches/'+p.id+'.webp'&&typeof p.officialUrl==='string'&&p.officialUrl.startsWith('https://'));
-   if(catalogue.length!==15)throw Error('Références photo incomplètes');
+   catalogue=data.products.filter(p=>typeof p.id==='string'&&typeof p.officialUrl==='string'&&p.officialUrl.startsWith('https://'));
+   if(catalogue.length!==15)throw Error('Références catalogue incomplètes');
    const params=new URLSearchParams(location.search),initial=engine.choices(Object.fromEntries(params));
    for(const key of ['tier','style','movement']){
      const field=form.elements.namedItem(key);
      if(field)field.value=initial[key];
    }
+   const hero=document.getElementById('advisorHeroArt');const featured=catalogue.find(p=>p.id==='citizen-tsuyosa');
+   if(hero&&featured)window.AtelierWatch?.render(hero,featured);
    render();
  }).catch(()=>{
    results.replaceChildren();status.textContent='Conseiller temporairement indisponible';
