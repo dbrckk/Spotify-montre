@@ -7,6 +7,7 @@
  const approvedHosts=['casio.com','swatch.com','citizenwatch.eu','orientwatch.fr','seikowatches.com','tissotwatches.com','hamiltonwatch.com'];
  let data=[],tier='all',query='',order='editorial',movement='all',brand='all',visible=[],saved=new Set(),compare=[];
  const KEY='atelier-montres-multibrand-favorites-v1';
+ const COMPARE_KEY='atelier-montres-comparison-v1';
  try{const x=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(x))saved=new Set(x.filter(y=>typeof y==='string'&&y.length<80))}catch(_){}
  const make=(tag,cls,txt)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n;};
  const official=url=>{try{const u=new URL(url);return u.protocol==='https:'&&!u.username&&!u.password&&approvedHosts.some(x=>u.hostname===x||u.hostname.endsWith('.'+x))}catch(_){return false}};
@@ -17,7 +18,16 @@
  const compareTray=$('affCompareTray'),compareLabel=$('affCompareLabel'),compareSelected=$('affCompareSelected'),compareNotice=$('affCompareNotice'),compareOpen=$('affCompareOpen'),compareClear=$('affCompareClear'),dialog=$('affCompareDialog'),compareBody=$('affCompareBody');
  let compareWarning='';
  function updateCompare(){
-   compare=compare.filter(id=>data.some(p=>p.id===id));
+   compare=compare.filter(id=>data.some(p=>p.id===id)).slice(0,3);
+   // Keep the short-list within this tab across detail pages and reloads.
+   try{if(compare.length)sessionStorage.setItem(COMPARE_KEY,JSON.stringify(compare));else sessionStorage.removeItem(COMPARE_KEY)}catch(_){}
+   // Keep shared links consistent after user removes or clears watches.
+   if(location.search.includes('compare=')){
+     const url=new URL(location.href);
+     if(compare.length)url.searchParams.set('compare',compare.join(','));
+     else url.searchParams.delete('compare');
+     history.replaceState(history.state,'',url.pathname+url.search+url.hash);
+   }
    if(compareTray)compareTray.hidden=compare.length===0;
    if(compareLabel)compareLabel.textContent=compare.length+' montre'+(compare.length>1?'s':'')+' sélectionnée'+(compare.length>1?'s':'')+' · 3 maximum';
    if(compareOpen)compareOpen.disabled=compare.length<2;
@@ -231,8 +241,17 @@
  fetch('./selection-affiliation.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('data');return r.json()}).then(x=>{
   if(x?.version!==1||!Array.isArray(x.products)||x.products.length!==15||x.affiliateEnabled!==false)throw Error('invalid');
   data=x.products.filter(valid);if(data.length!==15)throw Error('incomplete catalogue');
-  const initial=new URLSearchParams(location.search).get('compare');
-  if(initial){compare=[...new Set(initial.split(',').slice(0,3))].filter(id=>data.some(p=>p.id===id));}
+  const params=new URLSearchParams(location.search);
+  // A shared comparison URL always wins over an older selection in this tab.
+  if(params.has('compare')){
+   const initial=params.get('compare')||'';
+   compare=[...new Set(initial.split(',').slice(0,3))].filter(id=>data.some(p=>p.id===id));
+  }else{
+   try{
+    const stored=JSON.parse(sessionStorage.getItem(COMPARE_KEY)||'[]');
+    if(Array.isArray(stored))compare=[...new Set(stored.filter(id=>typeof id==='string'))].filter(id=>data.some(p=>p.id===id)).slice(0,3);
+   }catch(_){}
+  }
   if(brandSelect){for(const name of [...new Set(data.map(p=>p.brand))].sort((a,b)=>a.localeCompare(b,'fr'))){const total=data.filter(p=>p.brand===name).length;const option=make('option','',name+' ('+total+')');option.value=name;brandSelect.append(option)}}
   const hero=$('heroWatch'),featured=data.find(p=>p.id==='citizen-tsuyosa');
   if(hero&&featured){
@@ -241,6 +260,6 @@
     if(sources.length){const img=make('img','am-hero-real-photo');img.alt='Citizen Tsuyosa NJ0150-81X — photographie authentique';img.decoding='async';img.loading='eager';img.fetchPriority='high';img.referrerPolicy='no-referrer';let i=0;img.onerror=()=>{i++;if(i<sources.length)img.src=sources[i];else fallback()};hero.classList.add('am-hero-real');hero.replaceChildren(img);img.src=sources[0]}else fallback();
   }
   render();
-  if(compare.length>=2)showComparison();
+  if(compare.length>=2&&params.has('compare'))showComparison();
  }).catch(()=>{count.textContent='Catalogue temporairement indisponible';empty.hidden=false;grid.replaceChildren()});
 })();
