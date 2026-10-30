@@ -30,6 +30,15 @@
       } catch { return; }
     }
     if(!validated.size) return;
+    try {
+      const res=await fetch('./selection-affiliation.json',{cache:'no-store'});
+      if(!res.ok)return;
+      const feed=await res.json();
+      if(!Array.isArray(feed.products))return;
+      for(const id of validated.keys()){
+        if(feed.products.find(p=>p.id===id)?.photoReview?.publicUsageApproved!==true)return;
+      }
+    } catch { return; }
     const disclosure='En tant que Partenaire d’Amazon, je suis rémunéré(e) pour les achats éligibles.';
     window.AtelierAffiliatesActive=true;
     const link=(url,cls)=>{
