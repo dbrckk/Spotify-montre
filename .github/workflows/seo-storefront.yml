@@ -30,6 +30,6 @@ jobs:
       - name: Generate deployable SEO storefront
         env:
           PUBLIC_SITE_URL: https://atelier-montres-selection-fr.onrender.com/
-        run: node scripts/build-seo.mjs
+        run: node scripts/build-seo.mjs && node scripts/build-seo.mjs
       - name: Validate published website output
         run: node scripts/validate-seo.mjs
