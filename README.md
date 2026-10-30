@@ -1,5 +1,13 @@
 # Atelier Montres — boutique de montres indépendante
 
+## Publication des visuels sans licence constructeur — 30 octobre 2026
+
+**Correctif de conformité :** les quinze photographies constructeur du dépôt indiquent `publicUsageApproved:false`. Le générateur du site public les remplace donc par les **15 illustrations vectorielles originales** et retire les fichiers photographiques non autorisés du dossier public Render. Les visiteurs accèdent à la vraie photographie exacte via le lien du fabricant. Cette mesure couvre le catalogue, les fiches, les pages SEO, le conseiller et le comparateur.
+
+Les fichiers sources restent dans l'historique/dépôt pour recherche ; leur accès public GitHub peut encore nécessiter une régularisation distincte. Toute autorisation doit être documentée avant de passer `publicUsageApproved:true`. **Un build statique seul ne régularise pas les droits sur une image.** Les vérifications CI contrôlent désormais l'absence des fichiers non approuvés dans la sortie publiée.
+
+Voir [procédure de publication des images et limites](docs/licences-visuels-publication.md).
+
 ## Commerce : affiliation puis marque propre (30 octobre 2026)
 
 **Objectif : une seule boutique, avec affiliation en première phase et vente directe de nos propres montres dans une deuxième phase.**
