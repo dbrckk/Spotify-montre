@@ -34,7 +34,11 @@ import {buildComparisonPages} from './build-comparisons.mjs';
     links:Object.fromEntries(amazonLinks)
   },null,2)+'\n');
   const partners = validateAffiliateConfig(JSON.parse(readFileSync(join(root,'affiliate-links.json'),'utf8')),products.map(p=>p.id));
-  if (partners.enabled) for (const id of partners.links.keys()) {
+  if (partners.enabled) for (const [id,affiliate] of partners.links) {
+    const verified=amazonLinks.get(id);
+    const destination=new URL(affiliate.url);
+    if(!verified||destination.hostname!=='www.amazon.fr'||destination.pathname!=='/dp/'+verified.asin)
+      throw Error('Lien rémunéré bloqué : la référence Amazon doit correspondre au modèle confirmé '+id);
     const model=products.find(p=>p.id===id);
     if (model?.photoReview?.publicUsageApproved!==true) throw Error('Publication affiliée bloquée : droits commerciaux de la photographie à vérifier pour '+id);
   }
