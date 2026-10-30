@@ -1,8 +1,21 @@
 # Atelier Montres — boutique de montres indépendante
 
-**Statut au 27 octobre 2026 : pré-lancement, vitrine gratuite, pas de paiement activé.**
+**Statut au 30 octobre 2026 : vitrine multimarque gratuite publiée, affiliation non activée, aucun paiement.**
 
-## Version actuelle — V9 galerie de photographies (27 octobre 2026)
+## Version actuelle — comparaison persistante et parcours Android vérifié (30 octobre 2026)
+
+**Boutique publique : https://neutral-shell-t3y4rs7.shipstatic.com/**
+
+- 15 photographies réelles WebP hébergées avec le site (6 Essentielle, 6 Signature, 3 Prestige).
+- La comparaison garde jusqu'à 3 références dans l'onglet même après une fiche produit et un rafraîchissement, sans cookies et sans suivi.
+- Les URL de comparaison partagée priment sur la sélection locale. Quand la sélection est vidée, l'URL est nettoyée pour éviter sa réapparition.
+- Le bouton « Comparer » sur les fiches conserve les modèles déjà choisis.
+- [Validation Android fonctionnelle sur code source](https://github.com/dbrckk/Spotify-montre/actions/runs/41016057161) et [validation du nouveau déploiement public](https://github.com/dbrckk/Spotify-montre/actions/runs/41016368177) : succès.
+- Le déploiement gratuit est enregistré sans date d'expiration. Les programmes partenaires et autorisations de diffusion des images restent à régulariser avant une exploitation commerciale.
+
+**Dépôt :** `site/affiliation.js`, `site/fiche.js`, `scripts/test-compare-persistence.mjs` et workflows mobiles.
+
+## Historique — V9 galerie de photographies (27 octobre 2026)
 
 **Boutique : https://slippery-lens-4x9n6zu.shipstatic.com/**
 
