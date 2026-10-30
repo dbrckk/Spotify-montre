@@ -37,6 +37,7 @@ try {
   if(await page.locator('#affCompareDialog').isVisible())await page.locator('#affCompareClose').click();
 
   await page.locator('#affCompareClear').click();
+  assert.equal(new URL(page.url()).searchParams.has('compare'),false,'Clearing comparison also clears URL deep-link state');
   assert.equal(await page.evaluate(()=>sessionStorage.getItem('atelier-montres-comparison-v1')),null,'Clear removes stored selection');
   await page.reload({waitUntil:'domcontentloaded'});
   await cards.first().waitFor({state:'visible',timeout:20000});
