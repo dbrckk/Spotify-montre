@@ -1,5 +1,13 @@
 # Atelier Montres — boutique de montres indépendante
 
+## Conseiller évolué : 4 critères et comparaison directe (30 octobre 2026)
+
+Le conseiller gratuit et 100 % local sur `site/conseiller.html` permet désormais de choisir **la gamme, le style, le mouvement et le diamètre souhaité**. Les 3 montres aux boîtiers compacts (≤ 38 mm) et les 6 intermédiaires (38,1–40 mm) sont identifiées grâce aux dimensions présentes dans les sources ; les 6 autres mesures manquantes restent explicitement signalées, sans approximation.
+
+Les recommandations s'ajustent immédiatement sur Android, sont partageables par URL, et un bouton envoie les trois résultats vers le **comparateur interactif** prérempli. Les prix indicatifs non vérifiés ont été retirés du formulaire. La validation couvre 135 combinaisons de filtres et le parcours navigateur Android/desktop.
+
+Méthode, limites et tests : [documentation du conseiller de tailles](docs/conseiller-taille-boitier.md).
+
 ## Comparateur : 4 duels approfondis et 25 pages SEO (30 octobre 2026)
 
 Quatre comparaisons détaillées de références exactes (PRX quartz/automatique, Tsuyosa/PRX, Casio MTP-B145/MTP-1302, Orient Bambino/Hamilton Field Auto) sont désormais générées avec le site. Chaque page possède ses caractéristiques sourcées depuis le catalogue, des SVG originaux, des liens fabricants et, quand le modèle est confirmé, un accès Amazon.fr non rémunéré par défaut. Les pages sont liées depuis l'accueil et les fiches produits ; elles entrent au sitemap et aux contrôles Android/desktop.
