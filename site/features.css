@@ -84,3 +84,5 @@ html{scroll-padding-top:30px}
 @media(max-width:950px){.newsletter-shell,.howto-inner{grid-template-columns:1fr;gap:30px}.designs-head{display:block}.designs-head>p{max-width:none}.design-art{height:220px}.design-dial{transform:scale(.82) rotate(-15deg)}}
 @media(max-width:680px){.design-grid{grid-template-columns:1fr}.design-art{height:260px}.trust .wrap{grid-template-columns:1fr;padding:18px 0;gap:15px}.trust-item{font-size:11px}.howto-badges{gap:8px}.howto-badges div{padding:18px;min-height:115px}.designs,.faq,.howto,.newsletter{padding:68px 0}.newsletter-box{padding:25px}.faq summary{font-size:16px}.chat-panel{right:14px;bottom:86px}.chat-launcher{right:14px;bottom:15px;padding:13px 16px}.chat-bubble{max-width:97%}}
 @media(prefers-reduced-motion:reduce){.chat-launcher,.newsletter-cta{transition:none}}
+/* Keep the assistant dismissed until the visitor explicitly opens it. */
+.chat-panel[hidden]{display:none}

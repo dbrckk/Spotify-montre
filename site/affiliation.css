@@ -85,3 +85,5 @@ body:has(#affCompareTray:not([hidden])) main{padding-bottom:175px}
  .am-compare-tray .am-compare-selected .am-compare-selected-chip{max-width:188px}
  .am-compare-tray .am-compare-selected-chip .am-compare-chip-name{max-width:110px}
 }
+/* The floating comparison dock must never cover content before selection or after clearing. */
+body .aff-selection .am-compare-tray[hidden]{display:none}
