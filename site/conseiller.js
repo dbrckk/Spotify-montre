@@ -56,6 +56,12 @@
    const active=[choices.tier,choices.style,choices.movement,choices.size].filter(x=>x!=='all').length;
    const matches=recommendations.filter(x=>x.criteria>0&&x.matched===x.criteria).length;
    results.replaceChildren(...recommendations.map(card));
+   const compareLink=document.getElementById('advisorCompare');
+   if(compareLink){
+     const ids=recommendations.map(item=>item.product?.id).filter(id=>typeof id==='string'&&/^[a-z0-9-]{4,64}$/.test(id));
+     compareLink.hidden=ids.length<2;
+     if(ids.length>=2)compareLink.href='./affiliation.html?compare='+ids.map(encodeURIComponent).join(',')+'#montres';
+   }
    status.textContent=recommendations.length+' montre'+(recommendations.length>1?'s':'')+' à explorer';
    criteria.textContent=active?active+' préférence'+(active>1?'s':'')+' retenue'+(active>1?'s':''):'Sélection de départ';
    summary.textContent=active?matches+' modèle'+(matches>1?'s':'')+' sur '+recommendations.length+' répond'+(matches>1?'ent':'')+' à tous vos critères. Les autres sont des alternatives proches.':'Notre sélection de départ, issue de trois gammes différentes.';
