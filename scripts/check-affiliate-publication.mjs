@@ -11,10 +11,13 @@ try {
   for(const name of ['selection-affiliation.json','affiliation.html','confidentialite.html','affiliate-links.json']){
     cpSync(join(repository,'site',name),join(target,name));
   }
-  const build=()=>execFileSync(process.execPath,[join(repository,'scripts/build-seo.mjs')],{
-    cwd:tmp,env:{...process.env,PUBLIC_SITE_URL:'https://atelier-montres-selection-fr.onrender.com/'},encoding:'utf8',timeout:15000
+  const build=(extraEnv={})=>execFileSync(process.execPath,[join(repository,'scripts/build-seo.mjs')],{
+    cwd:tmp,env:{...process.env,PUBLIC_SITE_URL:'https://atelier-montres-selection-fr.onrender.com/',...extraEnv},encoding:'utf8',timeout:15000
   });
-  build();
+  build({GOOGLE_SITE_VERIFICATION:'Valid_Example_Token_123456'});
+  assert.match(readFileSync(join(target,'index.html'),'utf8'),/<meta name="google-site-verification" content="Valid_Example_Token_123456">/);
+  build({GOOGLE_SITE_VERIFICATION:''});
+  assert.doesNotMatch(readFileSync(join(target,'index.html'),'utf8'),/name="google-site-verification"/);
   let html=readFileSync(join(target,'montres/citizen-tsuyosa.html'),'utf8');
   assert.doesNotMatch(html,/Voir ce modèle sur Amazon.fr · lien rémunéré/,'Disabled mode must not render paid CTA');
   const cfg={version:1,enabled:true,approved:true,amazonPartnerTag:'example-21',links:{
