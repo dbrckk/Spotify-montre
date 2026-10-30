@@ -1,5 +1,16 @@
 # Atelier Montres — boutique de montres indépendante
 
+## Commerce : affiliation puis marque propre (30 octobre 2026)
+
+**Objectif : une seule boutique, avec affiliation en première phase et vente directe de nos propres montres dans une deuxième phase.**
+
+- **Phase 1 — affiliation Amazon.fr :** module disponible dans `site/affiliate-links.json`, strictement **inactif** jusqu'à l'approbation du vrai compte, la confirmation de chaque lien produit et des droits sur les photos. Les boutons sont affichés uniquement sur les produits validés ; le paiement affilié s'effectue toujours chez Amazon.
+- **Phase 2 — notre marque :** fournisseurs chinois en prospection seulement. Outil `npm run supplier:check -- chemin/devis-reel.json` pour vérifier coûts rendus, marge de contribution et preuves de conformité. Aucune montre, photo ou spécification propre n'est présentée comme vendable.
+- **Boutique directe :** pas de panier ni de checkout actif tant que stocks, vendeur légal, taxes, conditions de vente, garanties, webhooks et paiements réels ne sont pas disponibles.
+- **Publication :** hébergement Render statique sans abonnement ajouté ; build et contrôles fonctionnels via GitHub Actions. Les 21 URL SEO demeurent accessibles.
+
+[Feuille de route commerciale complète](docs/commerce-affiliation-marque-propre.md) · [Schéma d'un devis fournisseur](research/supplier-quote.schema.json) · [Vitrine publique](https://atelier-montres-selection-fr.onrender.com/).
+
 ## Publication SEO sur Render — 30 octobre 2026
 
 **[Ouvrir le catalogue de montres](https://atelier-montres-selection-fr.onrender.com/)** (nouvelle adresse stable, déploiement automatique depuis `main`).
