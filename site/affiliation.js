@@ -8,6 +8,8 @@
  let data=[],tier='all',query='',order='editorial',movement='all',brand='all',visible=[],saved=new Set(),compare=[];
  const KEY='atelier-montres-multibrand-favorites-v1';
  const COMPARE_KEY='atelier-montres-comparison-v1';
+ // The SEO build adds crawlable, richer product comparisons. Historical standalone snapshots stay compatible.
+ const hasEditorialPages=Boolean(document.querySelector('.seo-guides'));
  try{const x=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(x))saved=new Set(x.filter(y=>typeof y==='string'&&y.length<80))}catch(_){}
  const make=(tag,cls,txt)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n;};
  const official=url=>{try{const u=new URL(url);return u.protocol==='https:'&&!u.username&&!u.password&&approvedHosts.some(x=>u.hostname===x||u.hostname.endsWith('.'+x))}catch(_){return false}};
@@ -73,6 +75,11 @@
    const select=make('label','am-compare-check');const cb=make('input');cb.type='checkbox';cb.checked=compare.includes(p.id);cb.setAttribute('aria-label','Comparer '+p.model);
    cb.addEventListener('change',()=>{if(cb.checked&&!compare.includes(p.id)){if(compare.length>=3){cb.checked=false;compareWarning='Limite atteinte : retirez une montre avant d’en ajouter une autre.';updateCompare();return;}compare.push(p.id)}else compare=compare.filter(id=>id!==p.id);compareWarning='';updateCompare()});
    select.append(cb,document.createTextNode(' Comparer'));compareWrap.append(maker,select);body.append(compareWrap);
+   if(hasEditorialPages){
+     const analysis=make('a','am-card-seo-link','Comparer les caractéristiques détaillées →');
+     analysis.href='./montres/'+encodeURIComponent(p.id)+'.html';
+     body.append(analysis);
+   }
    body.append(make('p','aff-card-foot','Modèle réel · Liens actuellement non rémunérés'));
    item.append(art,body);return item;
  }
