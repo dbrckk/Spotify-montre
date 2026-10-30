@@ -36,3 +36,7 @@
 .seo-guide-grid article p{font-size:14px;line-height:1.75;color:#5c685f;flex:1}
 .seo-guide-grid article a{font-size:13px;font-weight:700;text-decoration:underline;line-height:1.6;color:#204c39}
 @media(max-width:820px){.seo-guide-grid{grid-template-columns:1fr}.seo-guide-grid article{padding:22px}.seo-guides{padding:54px 0}}
+
+/* Product cards surface the full static comparison without changing their primary interactive route. */
+.aff-card .am-card-seo-link{display:inline-block;margin:4px 20px 7px;color:#1e5441;font-size:12px;font-weight:700;text-underline-offset:3px;line-height:1.6}
+.aff-card .am-card-seo-link:hover{color:#0b3425}
