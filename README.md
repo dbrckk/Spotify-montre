@@ -1,5 +1,12 @@
 # Atelier Montres — boutique de montres indépendante
 
+## Nouvelle photographie éditoriale — 30 octobre 2026
+
+**Refonte visuelle réelle :** couverture interactive avec quatre véritables packshots de montres, galerie photographique de trois modèles (Seiko 5 Sports, Orient Bambino, Tissot PRX), fiches accessibles d'un clic et visionneuse plein écran. Les images proviennent uniquement des fichiers `site/assets/watches/<id>.webp` associés à la référence exacte ; le statut de publication du modèle est contrôlé avant chargement. Un SVG est affiché en secours, sans le présenter comme une vraie photo.
+
+Interactions entièrement locales, compatibles Android, flèches clavier et réduction du mouvement ; aucun framework, crédit IA ou hébergement d'images extérieur. Les 13 liens Amazon balisés, le catalogue et le SEO sont conservés et testés. [Revue visuelle : Tissot, Seiko, Chrono24, Hodinkee et star-list](docs/refonte-photographique-2026-10-30.md).
+
+
 ## Activation Amazon Partenaires — situation actuelle (30 octobre 2026)
 
 Le propriétaire a confirmé depuis son tableau de bord Amazon Partenaires France que **`drackk04-21` est son ID de suivi** et que **`https://atelier-montres-selection-fr.onrender.com/` figure parmi les sites inscrits**. En conséquence, **13 liens de produits exacts ont été créés par le site au format balisé `?tag=drackk04-21`**. Les deux modèles sans ASIN exact n'ont pas de lien inventé. Cette méthode de création directe est autorisée dans les règles officielles du programme : https://partenaires.amazon.fr/help/operating/linkingrequirement.
