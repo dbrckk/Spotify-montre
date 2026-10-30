@@ -55,6 +55,7 @@
 .headtohead-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin:32px 0 30px;align-items:stretch}
 .headtohead-watch{display:flex;flex-direction:column;border:1px solid var(--line);background:#fffdf8;min-width:0}
 .headtohead-watch-visual{display:grid;place-items:center;padding:20px;background:radial-gradient(circle at 50% 40%,#fcfbf6,#eae8df 85%);border-bottom:1px solid var(--line)}
+.headtohead-watch-visual .headtohead-photo{display:block;width:min(100%,360px);aspect-ratio:1;max-height:370px;object-fit:contain;filter:drop-shadow(0 12px 20px #18322722)}
 .headtohead-watch-visual .watch-vector{margin:0 auto;min-height:250px;width:min(100%,320px)}
 .headtohead-watch-visual .am-watch-svg{max-height:360px}
 .headtohead-watch-body{display:flex;flex:1;flex-direction:column;padding:clamp(18px,2.8vw,30px)}
