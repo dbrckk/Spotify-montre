@@ -56,6 +56,21 @@ try{
  assert.ok(await page.locator('#affActiveFilters .am-filter-chip').count()>=1,'Active brand should create a removable filter');
  await page.locator('#affActiveFilters .am-filter-chip',{hasText:'Citizen'}).click();
  assert.equal(await cards.count(),15,'Removing a single brand filter returns to all 15 models');
+ // A factual size filter must include measured watches only and keep unknowns explicit.
+ await page.locator('#affDiameter').selectOption('compact');
+ assert.equal(await cards.count(),3,'Three documented cases have diameter at most 38 mm');
+ await page.locator('#affDiameter').selectOption('medium');
+ assert.equal(await cards.count(),6,'Six documented cases have diameter above 38 and at most 40 mm');
+ await page.locator('#affDiameter').selectOption('unknown');
+ assert.equal(await cards.count(),6,'Six catalogue references have no documented diameter');
+ assert.ok(await page.locator('#affActiveFilters .am-filter-chip').count()>=1);
+ await page.locator('#affActiveFilters .am-filter-chip',{hasText:'Diamètre à confirmer'}).click();
+ assert.equal(await cards.count(),15,'Clearing diameter chip restores the catalogue');
+ await page.locator('#affSort').selectOption('diameter-asc');
+ assert.match(await cards.first().innerText(),/LTP-1302PD/,'Ascending diameter places 30.2mm first');
+ await page.locator('#affSort').selectOption('diameter-desc');
+ assert.ok((await cards.first().innerText()).includes('40'),'Descending diameter places 40mm models first');
+ await page.locator('#affSort').selectOption('editorial');
  await page.locator('#affMovement').selectOption('eco-drive');
  assert.equal(await cards.count(),1,'Eco-Drive movement must show the matching Citizen');
  await page.locator('#affMovement').selectOption('automatic');
