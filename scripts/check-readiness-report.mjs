@@ -1,0 +1,29 @@
+import assert from 'node:assert/strict';
+import {execFileSync} from 'node:child_process';
+import {readFileSync} from 'node:fs';
+import {join,resolve} from 'node:path';
+const root=resolve(import.meta.dirname,'..');
+const command=(...args)=>execFileSync(process.execPath,[join(root,'scripts/report-affiliate-readiness.mjs'),...args],{cwd:root,encoding:'utf8',timeout:10000});
+const input=JSON.parse(readFileSync(join(root,'site/affiliate-links.json'),'utf8'));
+const feed=JSON.parse(readFileSync(join(root,'site/selection-affiliation.json'),'utf8'));
+const report=JSON.parse(command('--json'));
+assert.equal(report.totals.models,feed.products.length);
+assert.equal(report.totals.configuredSpecialLinks,Object.keys(input.links).length);
+assert.equal(report.totals.linksActivated,input.enabled);
+assert.equal(report.totals.accountApprovalDeclared,input.approved);
+assert.equal(report.totals.purchaseCheckoutOnSite,false);
+assert.equal(report.products.length,15);
+assert.equal(new Set(report.products.map(p=>p.id)).size,15);
+for(const p of report.products){
+ const model=feed.products.find(x=>x.id===p.id);
+ assert.ok(model);
+ assert.equal(p.photoRightsConfirmed,model.photoReview?.publicUsageApproved===true);
+ assert.equal(p.specialLinkConfigured,Boolean(input.links[p.id]));
+ assert.equal(p.commercialReady,p.photoRightsConfirmed&&p.specialLinkConfigured);
+}
+const human=command();
+assert.match(human,/préparation affiliation Amazon\.fr/);
+assert.match(human,/droit image|Droit image/i);
+assert.match(human,/15/);
+assert.doesNotMatch(human,/example-21|B012345678/,'Do not leak synthetic activation records into the report');
+console.log('Affiliate launch report functional checks OK: 15 exact watches and honest blocker statuses');
