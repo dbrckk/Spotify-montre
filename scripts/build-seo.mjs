@@ -129,6 +129,42 @@ import {watchComparisons} from './watch-comparisons.mjs';
     const html = `<div class="wrap editorial"><nav class="crumb"><a href="../index.html">Collection</a> / Guides horlogers</nav><p class="eyebrow">Le guide Atelier Montres</p><h1>${e(a.headline)}</h1><p class="lead">${e(a.intro)}</p><section class="content">${a.sections}<p><a class="primary" href="../index.html#montres">Explorer les 15 montres</a></p><p><a href="./guide-choisir-montre.html">Guide général</a> · <a href="./taille-boitier-montre.html">Tailles</a> · <a href="./montres-automatiques.html">Automatiques</a> · <a href="./quartz-ou-automatique.html">Mouvements</a></p></section></div>`;
     writeFileSync(join(root,a.path),page(pageHead({title:a.title,description:a.description,path:a.path}),html,{'@context':'https://schema.org','@type':'Article',headline:a.headline,inLanguage:'fr-FR',author:{'@type':'Organization',name:'Atelier Montres'},mainEntityOfPage:u(a.path)}));
   }
+
+  // Four real, searchable side-by-side buying guides: models and numerical
+  // specifications are always read from the verified public catalogue.
+  const pairName=p=>p.brand+' '+p.model;
+  const pairSpecs=[
+    ['Mouvement',p=>p.specs?.movement||movement[p.movement]||'Non renseigné'],
+    ['Diamètre du boîtier',p=>p.specs?.diameter||'Non renseigné'],
+    ['Verre',p=>p.specs?.glass||'Non renseigné'],
+    ['Étanchéité déclarée',p=>p.specs?.waterResistance||'Non renseigné'],
+  ];
+  const pairArt=p=>`<div class="watch-vector" data-watch-id="${e(p.id)}" data-brand="${e(p.brand)}" data-model="${e(p.model)}" data-tone="${e(p.tone||'silver')}"><span>Illustration originale ${e(pairName(p))}</span></div>`;
+  for(const comparison of watchComparisons){
+    const [first,second]=comparison.ids.map(id=>products.find(p=>p.id===id));
+    const path='montres/'+comparison.slug+'.html';
+    const names=comparison.ids.map(id=>pairName(products.find(p=>p.id===id)));
+    const facts=pairSpecs.map(([label,read])=>{
+      const values=[read(first),read(second)];
+      const isDifferent=values.every(x=>x!=='Non renseigné')&&values[0]!==values[1];
+      return `<tr${isDifferent?' class="pair-difference"':''}><th scope="row">${e(label)}</th><td>${e(values[0])}</td><td>${e(values[1])}</td></tr>`;
+    }).join('');
+    const modelCard=(p,index)=>{
+      const verified=partners.links.get(p.id)||amazonLinks.get(p.id);
+      const sponsored=partners.links.has(p.id);
+      const external=verified
+        ? `<a class="secondary" href="${e(verified.url)}" data-amazon-product="${e(p.id)}" data-amazon-placement="seo" target="_blank" rel="noopener noreferrer nofollow${sponsored?' sponsored':''}">Amazon.fr · ${sponsored?'lien rémunéré':'lien non rémunéré'} ↗</a>` : '';
+      return `<article class="pair-product"><span class="eyebrow">Modèle ${index+1} · ${e(category[p.tier])}</span>${pairArt(p)}<p class="pair-art-note">Illustration originale de style, non contractuelle</p><h2>${e(pairName(p))}</h2><p>${e(p.story||p.description)}</p><div class="pair-actions"><a class="primary" href="./${e(p.id)}.html">Fiche détaillée</a><a class="secondary" href="${e(p.officialUrl)}" target="_blank" rel="noopener noreferrer nofollow">Fiche fabricant ↗</a>${external}</div></article>`;
+    };
+    const alternatives=watchComparisons.filter(c=>c.slug!==comparison.slug).map(c=>
+      `<li><a href="./${e(c.slug)}.html">${e(c.headline)}</a><small>Autre comparaison fondée sur les références documentées.</small></li>`
+    ).join('');
+    const body=`<div class="wrap editorial pair-guide"><nav class="crumb" aria-label="Fil d’Ariane"><a href="../index.html">Collection</a> / Comparatifs horlogers</nav><p class="eyebrow">Comparaison de modèles · Fiches fabricant</p><h1>${e(comparison.headline)}</h1><p class="lead">${e(comparison.intro)}</p><p class="pair-disclaimer">Notre analyse compare les informations documentées du catalogue. Elle ne constitue ni un essai en laboratoire ni un classement commercial. Prix, stock et garanties sont à confirmer chez chaque vendeur.</p><div class="pair-grid">${modelCard(first,0)}${modelCard(second,1)}</div><section class="content pair-analysis" aria-labelledby="pair-facts-title"><h2 id="pair-facts-title">Différences techniques vérifiables</h2><p>Les lignes contrastées signalent une différence déclarée, sans attribuer automatiquement un avantage. Les caractéristiques absentes restent « Non renseigné ».</p><div class="comparison-scroll" role="region" tabindex="0" aria-label="Tableau de comparaison des deux modèles, défilable horizontalement"><table class="spec-matrix"><caption>${e(names[0])} et ${e(names[1])}</caption><thead><tr><th scope="col">Critère</th><th scope="col">${e(names[0])}</th><th scope="col">${e(names[1])}</th></tr></thead><tbody>${facts}</tbody></table></div><h2>À qui peut convenir ${e(names[0])} ?</h2><p>${e(comparison.first)}</p><h2>Pourquoi considérer ${e(names[1])} ?</h2><p>${e(comparison.second)}</p><h2>Points à vérifier avant de choisir</h2><p>${e(comparison.caution)}</p><p>Consultez les deux fiches fabricant accessibles ci-dessus pour les spécifications à jour et la référence exacte. Aucun prix, stock, avis client ni score de fiabilité n'est inventé.</p><h2>Autres comparaisons indépendantes</h2><ul class="related">${alternatives}</ul><p><a href="./guide-choisir-montre.html">Guide général : mouvement, taille et usages</a> · <a href="../index.html#montres">Comparer les 15 références</a></p></section></div>`;
+    const structured={'@context':'https://schema.org','@type':'Article',headline:comparison.headline,description:comparison.description,inLanguage:'fr-FR',author:{'@type':'Organization',name:'Atelier Montres'},mainEntityOfPage:u(path),about:[first,second].map(p=>({'@type':'Product',name:pairName(p),brand:{'@type':'Brand',name:p.brand},model:p.model,url:u('montres/'+p.id+'.html')}))};
+    writeFileSync(join(root,path),page(pageHead({title:comparison.title+' | Atelier Montres',description:comparison.description,path,illustration:true}),body,structured));
+  }
+  const pairCards=`<section class="seo-pairs" aria-labelledby="seo-pairs-title"><div class="wrap"><p class="overline kicker">Face à face · sans classement sponsorisé</p><h2 id="seo-pairs-title">Comparer deux montres avant d’acheter.</h2><p>Quatre dossiers précis : caractéristiques documentées, différences utiles, points à vérifier et liens vers les fabricants. Aucun prix ou stock inventé.</p><div class="seo-pair-grid">${watchComparisons.map((c,i)=>`<article><span>${String(i+1).padStart(2,'0')} / COMPARATIF</span><h3>${e(c.headline)}</h3><p>${e(c.intro)}</p><a href="./montres/${e(c.slug)}.html">Lire le comparatif ↗</a></article>`).join('')}</div></div></section>`;
+
   const selection = `<section class="seo-links" aria-labelledby="seo-links-title"><div class="wrap"><p class="overline kicker">Explorer avant de choisir</p><h2 id="seo-links-title">Les 15 montres, modèle par modèle</h2><p>Des fiches éditoriales avec caractéristiques documentées et liens vers les fabricants. Aucun prix ou stock non vérifié.</p><ul>${allLinks()}</ul><p><a href="./montres/guide-choisir-montre.html">Notre guide pour choisir une montre : mouvements et tailles</a></p></div></section>`;
   const guideCards = `<section class="seo-guides" aria-labelledby="seo-guides-title"><div class="wrap"><p class="overline kicker">Conseils pour choisir</p><h2 id="seo-guides-title">Avant de choisir sa montre.</h2><p class="seo-guides-lead">Comparer un boîtier, comprendre le mouvement ou choisir une belle mécanique : trois guides pour affiner votre sélection à partir des informations documentées.</p><div class="seo-guide-grid"><article><span>01 / MOUVEMENT</span><h3>Quartz ou automatique ?</h3><p>Les différences de fonctionnement et d’entretien, illustrées par les modèles de notre collection.</p><a href="./montres/quartz-ou-automatique.html">Comparer les mouvements →</a></article><article><span>02 / PROPORTIONS</span><h3>Choisir le bon diamètre.</h3><p>Mesures confirmées, confort et proportions : comprendre ce qui compte vraiment au poignet.</p><a href="./montres/taille-boitier-montre.html">Consulter le guide des tailles →</a></article><article><span>03 / MÉCANIQUE</span><h3>${products.filter(p=>p.movement==='automatic').length} montres automatiques.</h3><p>Citizen, Orient, Seiko, Tissot et Hamilton : comparer leurs lignes et caractéristiques documentées.</p><a href="./montres/montres-automatiques.html">Découvrir les automatiques →</a></article></div></div></section>`;
   let collection = readFileSync(join(root,'affiliation.html'),'utf8');
@@ -143,7 +179,7 @@ import {watchComparisons} from './watch-comparisons.mjs';
   }
   if (!collection.includes('<section class="faq" id="faq"')) throw Error('Point insertion SEO absent');
   collection=collection.replace('<section class="faq" id="faq"', '<!-- AM_SEO_LINKS_START -->' + selection + '<!-- AM_SEO_LINKS_END -->\n<section class="faq" id="faq"');
-  collection=collection.replace('<section id="gammes"', '<!-- AM_SEO_GUIDES_START -->'+guideCards+'<!-- AM_SEO_GUIDES_END -->\n<section id="gammes"');
+  collection=collection.replace('<section id="gammes"', '<!-- AM_SEO_GUIDES_START -->'+guideCards+pairCards+'<!-- AM_SEO_GUIDES_END -->\n<section id="gammes"');
   collection=collection.replace(/<title>[^<]+<\/title>/,'<title>Montres homme et femme : 15 modèles à comparer | Atelier Montres</title>');
   collection=collection.replace(/<meta name="description" content="[^"]*">/,'<meta name="description" content="Découvrez 15 montres Casio, Citizen, Seiko, Tissot et autres : modèles quartz, solaires et automatiques, photos, caractéristiques et comparatif indépendant.">');
   const homepage=u('');
