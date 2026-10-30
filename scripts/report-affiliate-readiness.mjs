@@ -15,18 +15,22 @@ const validated=validateAffiliateConfig(config,catalog.products.map(p=>p.id));
 const entries=catalog.products.map(p=>{
   const linked=validated.links.has(p.id);
   const photoApproved=p.photoReview?.publicUsageApproved===true;
+  const permissionDeclared=photoApproved&&p.photoReview?.permissionDeclaration==='site_owner_explicit_confirmation_2026-10-30';
+  const permissionEvidenceVerified=photoApproved&&p.photoReview?.permissionIndependentlyVerified===true;
   return {
     id:p.id,label:p.brand+' '+p.model,
-    specialLinkConfigured:linked,photoRightsConfirmed:photoApproved,
+    specialLinkConfigured:linked,photoRightsDeclared:permissionDeclared,photoProofVerified:permissionEvidenceVerified,
     commercialReady:linked&&photoApproved,
-    next:linked?(photoApproved?'Prêt pour une revue finale':'Autorisation de photographie nécessaire'):
-       'Vérifier le produit Amazon et obtenir un lien spécial valide'
+    next:!linked?'Confirmer compte et lien spécial du modèle exact':
+      !photoApproved?'Publication de la photo non autorisée':
+      !permissionEvidenceVerified?'Conserver la preuve des droits image et contrôler le compte Amazon':'Revue finale Amazon requise'
   };
 });
 const totals={
   models:entries.length,
   configuredSpecialLinks:entries.filter(x=>x.specialLinkConfigured).length,
-  confirmedPhotoRights:entries.filter(x=>x.photoRightsConfirmed).length,
+  declaredPhotoRights:entries.filter(x=>x.photoRightsDeclared).length,
+  independentlyVerifiedPhotoRights:entries.filter(x=>x.photoProofVerified).length,
   commerciallyReady:entries.filter(x=>x.commercialReady).length,
   accountApprovalDeclared:config.approved===true,
   linksActivated:validated.enabled,
@@ -40,17 +44,17 @@ const lines=[
  '> Rapport automatique basé sur les fichiers du dépôt : il ne prouve pas que le compte Amazon est approuvé, qu’un ASIN correspond à un produit réel, ou qu’une autorisation photographique est authentique.',
  '',
  `- Programme déclaré approuvé : **${icon(totals.accountApprovalDeclared)}**. Configuration de liens activée : **${icon(totals.linksActivated)}**.`,
- `- **${totals.configuredSpecialLinks} / ${totals.models}** liens spéciaux déclarés, **${totals.confirmedPhotoRights} / ${totals.models}** droits d’image déclarés, **${totals.commerciallyReady} / ${totals.models}** modèles réunissant les préconditions techniques.`,
+ `- **${totals.configuredSpecialLinks} / ${totals.models}** liens spéciaux déclarés ; **${totals.declaredPhotoRights} / ${totals.models}** permissions d'image déclarées par le responsable ; **${totals.independentlyVerifiedPhotoRights} / ${totals.models}** justificatifs vérifiés indépendamment ; **${totals.commerciallyReady} / ${totals.models}** modèles techniquement configurés.`,
  '- Paiement direct sur ce site : **désactivé**. Une commission ne peut être prouvée que dans les rapports officiels du programme Partenaires.',
  '',
- '| Référence | Lien spécial | Droit image | Prochaine action |',
- '|---|:---:|:---:|---|',
- ...entries.map(x=>`| ${esc(x.label)} (${x.id}) | ${icon(x.specialLinkConfigured)} | ${icon(x.photoRightsConfirmed)} | ${esc(x.next)} |`),
+ '| Référence | Lien spécial | Droit image déclaré | Preuve vérifiée | Prochaine action |',
+ '|---|:---:|:---:|:---:|---|',
+ ...entries.map(x=>`| ${esc(x.label)} (${x.id}) | ${icon(x.specialLinkConfigured)} | ${icon(x.photoRightsDeclared)} | ${icon(x.photoProofVerified)} | ${esc(x.next)} |`),
  '',
  '## Actions restantes',
  ...(!config.approved?['- Faire confirmer le compte Amazon Partenaires France et enregistrer cette URL de boutique.']:[]),
  ...(!config.enabled?['- Renseigner un vrai tag Amazon.fr et au moins un lien spécial de produit exact, puis activer la configuration.']:[]),
- ...entries.some(x=>!x.photoRightsConfirmed)?['- Obtenir les autorisations de diffusion commerciale des photographies ou produire des images originales réellement utilisables.']:[],
+ ...entries.some(x=>!x.photoProofVerified)?['- Archiver les autorisations écrites des marques / ayants droit pour les 15 photos. Le responsable du site a déclaré disposer de ces droits ; ce rapport ne vérifie pas ses pièces justificatives.']:[],
  '- Vérifier chaque lien et la correspondance du produit dans un navigateur, puis comparer les revenus réellement attribués dans les rapports Amazon.',
  '- Soumettre le sitemap dans Google Search Console et inspecter les pages produits réellement indexées.',
  '',
