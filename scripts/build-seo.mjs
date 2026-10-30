@@ -148,13 +148,14 @@ import {validateAffiliateConfig} from './affiliate-policy.mjs';
     const currentPrivacy=readFileSync(privacyPath,'utf8');
     writeFileSync(privacyPath,currentPrivacy.replace('Ces liens ne sont actuellement pas rémunérés.','Certains liens Amazon.fr peuvent être rémunérés et sont signalés près du lien.'));
   }
-  if (umamiId) {
+  {
     const privacyPath=join(root,'confidentialite.html');
     const currentPrivacy=readFileSync(privacyPath,'utf8');
-    const privacyIntro="Nous n'avons pas installé de système de publicité ciblée, de cookies de suivi ou de régie analytique sur la page.";
-    if (!currentPrivacy.includes(privacyIntro)) throw Error('Notice de vie privée à mettre à jour avant activation Umami');
-    writeFileSync(privacyPath,currentPrivacy.replace(privacyIntro,
-      'Les visites et clics vers Amazon sont mesurés avec Umami Cloud (statistiques agrégées et anonymisées, sans cookies). Seuls la référence publique de la montre, l’emplacement du lien et des données techniques de navigation sont traités ; aucun nom, email, identifiant utilisateur ni donnée de commande n’est envoyé. Le paramètre Do Not Track est respecté. La conservation dépend du forfait Umami actif.'));
+    const inactive="Nous n'avons pas installé de système de publicité ciblée, de cookies de suivi ou de régie analytique sur la page.";
+    const active="Les visites et clics vers Amazon sont mesurés avec Umami Cloud (statistiques agrégées et anonymisées, sans cookies). Seuls la référence publique de la montre, l’emplacement du lien et des données techniques de navigation sont traités ; aucun nom, email, identifiant utilisateur ni donnée de commande n’est envoyé. Le paramètre Do Not Track est respecté. La conservation dépend du forfait Umami actif.";
+    if(!currentPrivacy.includes(inactive)&&!currentPrivacy.includes(active))throw Error('Notice de vie privée obsolète');
+    const updated=umamiId?currentPrivacy.replace(inactive,active):currentPrivacy.replace(active,inactive);
+    if(updated!==currentPrivacy)writeFileSync(privacyPath,updated);
   }
   writeFileSync(join(root,'robots.txt'),`User-agent: *\nAllow: /\nSitemap: ${u('sitemap.xml')}\n`);
   const manifest={siteUrl:homepage,productCount:products.length,paths:paths.map(u),affiliateActive:partners.enabled,affiliateCount:partners.links.size,checkoutActive:false,analyticsActive:Boolean(umamiId),analyticsProvider:umamiId?"umami":null};
