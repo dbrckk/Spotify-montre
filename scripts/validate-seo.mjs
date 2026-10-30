@@ -70,6 +70,9 @@ for(const product of feed.products){
     assert.ok(html.includes('../seo-watch-art.js'),'SEO product page must render original art');
     assert.ok(!html.includes('../assets/watches/'+product.id+'.webp'),'No unlicensed image in product HTML');
     assert.ok(!existsSync(resolve(root,'assets/watches/'+product.id+'.webp')),'No unlicensed assets on the public deployment');
+    assert.equal(product.photoReview?.url,undefined,'Never publish unlicensed manufacturer image URL');
+    assert.equal(product.photoReview?.localUrl,undefined,'Never publish unlicensed WebP image path');
+    assert.equal(product.photoReview?.source,undefined,'Never publish research photo-source URL');
   }
   assert.equal((html.match(/rel="canonical"/g)||[]).length,1,'Single product canonical');
   const schema=html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
