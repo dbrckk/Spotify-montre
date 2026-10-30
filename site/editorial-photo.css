@@ -27,6 +27,7 @@
  mix-blend-mode:normal;filter:drop-shadow(17px 33px 20px #0008);
  transition:opacity .22s ease,transform .35s ease}
 .am-hero-art .am-hero-watch svg{height:95%;width:min(100%,450px)}
+.am-hero-loading{font:500 12px/1.7 system-ui,sans-serif;letter-spacing:.07em;color:#d7e2d2;background:#132c2088;padding:14px 19px;border:1px solid #a2b59b33}
 .am-hero-art .am-hero-label{z-index:2;bottom:108px;right:2px;text-align:right;max-width:68%}
 .am-hero-art .am-hero-label strong{font-size:clamp(16px,1.8vw,22px);letter-spacing:.065em}
 .am-hero-art .am-hero-label small{font-size:11px;line-height:1.5}
