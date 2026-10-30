@@ -13,6 +13,14 @@ try {
   const cards=page.locator('#affGrid .aff-card');
   await cards.first().waitFor({state:'visible',timeout:20000});
   assert.equal(await cards.count(),15,'All watches must be available');
+  const tray=page.locator('#affCompareTray');
+  const chat=page.locator('#chatPanel');
+  assert.equal(await tray.evaluate(el=>getComputedStyle(el).display),'none','Comparison dock must not obstruct the empty catalogue');
+  assert.equal(await chat.evaluate(el=>getComputedStyle(el).display),'none','Chat assistant must be dismissed by default');
+  await page.locator('#chatLauncher').click();
+  assert.equal(await chat.isVisible(),true,'Visitor can open the assistant');
+  await page.locator('#chatClose').click();
+  assert.equal(await chat.evaluate(el=>getComputedStyle(el).display),'none','Closing the assistant must hide it');
 
   await cards.nth(0).locator('.am-compare-check input').check();
   await cards.nth(1).locator('.am-compare-check input').check();
@@ -37,6 +45,7 @@ try {
   if(await page.locator('#affCompareDialog').isVisible())await page.locator('#affCompareClose').click();
 
   await page.locator('#affCompareClear').click();
+  assert.equal(await tray.evaluate(el=>getComputedStyle(el).display),'none','Clearing selection must hide the floating dock');
   assert.equal(new URL(page.url()).searchParams.has('compare'),false,'Clearing comparison also clears URL deep-link state');
   assert.equal(await page.evaluate(()=>sessionStorage.getItem('atelier-montres-comparison-v1')),null,'Clear removes stored selection');
   await page.reload({waitUntil:'domcontentloaded'});
