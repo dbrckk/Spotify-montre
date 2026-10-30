@@ -10,6 +10,10 @@ const config=JSON.parse(read('affiliate-links.json'));
 assert.equal(manifest.affiliateActive,config.enabled);
 assert.equal(manifest.affiliateCount,Object.keys(config.links).length);
 assert.equal(manifest.checkoutActive,false);
+const analyticsConfigured=Boolean((process.env.UMAMI_WEBSITE_ID||'').trim());
+assert.equal(manifest.analyticsActive,analyticsConfigured);
+assert.equal(manifest.analyticsProvider,analyticsConfigured?'umami':null);
+assert.equal(Boolean(manifest.analyticsActive),analyticsConfigured);
 const amazon=JSON.parse(read('amazon-product-links.json'));
 assert.equal(amazon.version,1);
 assert.equal(Object.keys(amazon.links).length,13,'13 exact, untracked Amazon.fr listings in build');
@@ -26,6 +30,8 @@ assert.ok(manifest.paths.every(url=>url.startsWith(manifest.siteUrl)));
 const home=read('index.html');
 assert.match(home,/<h1>/i);
 assert.match(home,/id="affGrid"/);
+assert.equal(home.includes('cloud.umami.is/script.js'),analyticsConfigured,'Homepage Umami opt-in only');
+assert.equal(home.includes('./analytics.js'),analyticsConfigured,'Homepage click instrumentation opt-in only');
 assert.match(home,/rel="canonical"/);
 assert.match(home,/application\/ld\+json/);
 assert.match(home,/Les 15 montres, modèle par modèle/);
@@ -49,11 +55,14 @@ for(const product of feed.products){
   assert.ok(home.includes('./'+path),'Missing static crawlable home link: '+path);
   assert.match(html,/class="spec-matrix"/,'Model-to-model comparisons required');
   assert.ok(html.includes('montre.html?id='+encodeURIComponent(product.id)), 'Interactive product page must remain accessible');
+  assert.equal(html.includes('cloud.umami.is/script.js'),analyticsConfigured,'SEO page Umami opt-in only');
+  if(analyticsConfigured)assert.match(html,/data-watch-id=/);
   const amazonMatch=amazon.links[product.id];
   if(amazonMatch) {
     const selected=config.enabled&&config.links[product.id]?config.links[product.id].url:amazonMatch.url;
     assert.ok(html.includes('href="'+selected+'"'),'Exact Amazon URL should be crawlable: '+product.id);
     assert.ok(html.includes(config.enabled&&config.links[product.id]?'lien rémunéré':'sans lien rémunéré'));
+    assert.ok(html.includes('data-amazon-product="'+product.id+'"'),'SEO click event needs exact watch id');
   }
   assert.equal((html.match(/rel="canonical"/g)||[]).length,1,'Single product canonical');
   const schema=html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
@@ -78,6 +87,9 @@ for(const slug of editorialPaths){
 assert.ok(!read('affiliation.html').includes('AM_SEO_LINKS_START') || read('affiliation.html').includes('AM_SEO_LINKS_END'));
 assert.ok(sitemap.includes(manifest.siteUrl+'montres/guide-choisir-montre.html'));
 assert.match(read('robots.txt'),/Sitemap: https:\/\//);
+const privacy=read('confidentialite.html');
+assert.equal(privacy.includes('Les visites et clics vers Amazon sont mesurés avec Umami Cloud'),analyticsConfigured);
+assert.ok(privacy.includes('chez Render'),'Privacy notice must identify actual host');
 const guide=read('montres/guide-choisir-montre.html');
 assert.match(guide,/<h1>Comment choisir une montre/);
 console.log('SEO validation OK: 15 watch pages, 13 exact Amazon.fr product links, four editorial guides, 21 sitemap URLs');
