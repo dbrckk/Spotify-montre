@@ -7,7 +7,7 @@ const catalog=load('site/selection-affiliation.json');
 const research=load('research/amazon-fr-exact-products.json');
 assert.equal(research.version,1);
 assert.equal(research.marketplace,'amazon.fr');
-assert.equal(research.status,'research_only_not_enabled_on_storefront');
+assert.equal(research.status,'source_research_not_account_approval','Research alone never certifies the enrolled Amazon account');
 assert.match(research.amazonPartnerTag,/^[a-z0-9][a-z0-9-]{1,48}-21$/i);
 const all=Object.entries(research.products);
 assert.equal(all.length,catalog.products.length,'Aucun modèle ne doit être omis');
