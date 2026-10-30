@@ -14,10 +14,12 @@ for(const p of catalogue.products){
   const photo=p.photoReview;
   assert.ok(photo,'Missing official photo research for '+p.id);
   assert.equal(photo.accuracy,'exact');
-  assert.equal(photo.publicUsageApproved,false,'A licence must be confirmed before commercial publishing');
-  assert.equal(photo.licence,'permission_required');
-  assert.equal(p.photoRights,'not_licensed');
-  assert.equal(p.imageMode,'custom_vector_illustration','Public site retains original illustrations');
+  assert.equal(photo.publicUsageApproved,true,'The site owner has explicitly authorized publication in this revision');
+  assert.equal(photo.licence,'permission_declared_by_site_owner');
+  assert.equal(photo.permissionDeclaration,'site_owner_explicit_confirmation_2026-10-30');
+  assert.equal(photo.permissionIndependentlyVerified,false,'Do not invent third-party proof');
+  assert.equal(p.photoRights,'permission_declared_by_site_owner');
+  assert.equal(p.imageMode,'manufacturer_product_photo','User-declared authorized photos should be served');
   for(const field of ['url','source']){
     const url=new URL(photo[field]);
     assert.equal(url.protocol,'https:');
@@ -50,4 +52,4 @@ assert.match(storefrontJs,/if\(key==='brand'\)/,'Removing brand chip must reset 
 assert.match(storefrontJs,/if\(key==='movement'\)/,'Removing movement chip must reset movement selector');
 assert.match(storefrontJs,/if\(key==='query'\)/,'Removing search chip must clear the query');
 assert.match(storefrontJs,/renderActiveFilters\(\);renderRecentlyViewed\(\);empty\.hidden/,'Chips and recent history must update on each catalogue render');
-console.log('Photo source review: 15 exact packshot references; public license gate and responsive preview — OK');
+console.log('Photo source review: 15 source packshots, owner-declared permissions and honest evidence provenance — OK');

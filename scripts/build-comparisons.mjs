@@ -27,7 +27,11 @@ export function buildComparisonPages({root,products,amazonLinks,partners,pageHea
     const url=paid?.url||plain.url;
     return '<a class="secondary" target="_blank" rel="'+(paid?'noopener noreferrer nofollow sponsored':'noopener noreferrer nofollow')+'" data-amazon-product="'+e(p.id)+'" data-amazon-placement="seo" href="'+e(url)+'">'+(paid?'Voir sur Amazon.fr · lien rémunéré':'Voir sur Amazon.fr · lien non rémunéré')+' ↗</a>';
   };
-  const art=p=>'<div class="watch-vector" data-watch-id="'+e(p.id)+'" data-brand="'+e(p.brand)+'" data-model="'+e(p.model)+'" data-tone="'+e(p.tone||'silver')+'" role="img" aria-label="Illustration éditoriale du style '+e(display(p))+'"></div>';
+  const authorizedPhoto=p=>p.photoReview?.publicUsageApproved===true&&
+    p.photoReview.localUrl==='./assets/watches/'+p.id+'.webp';
+  const art=p=>authorizedPhoto(p)
+    ? '<img class="headtohead-photo" src="../assets/watches/'+e(p.id)+'.webp" alt="Photographie de '+e(display(p))+'" width="900" height="900" loading="lazy" decoding="async">'
+    : '<div class="watch-vector" data-watch-id="'+e(p.id)+'" data-brand="'+e(p.brand)+'" data-model="'+e(p.model)+'" data-tone="'+e(p.tone||'silver')+'" role="img" aria-label="Illustration éditoriale du style '+e(display(p))+'"></div>';
   for(const pair of source.comparisons){
     if(!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(pair?.slug||'')||pair.slug.length>90||slugs.has(pair.slug))
       throw Error('Slug de comparaison absent, répété ou invalide');
@@ -72,7 +76,7 @@ export function buildComparisonPages({root,products,amazonLinks,partners,pageHea
       '<nav class="crumb" aria-label="Fil d’Ariane"><a href="../index.html">Collection</a> / <a href="../index.html#comparaisons">Comparaisons</a> / '+e(pair.title)+'</nav>',
       '<p class="eyebrow">Duel horloger · Références vérifiables</p><h1>'+e(pair.title)+'</h1>',
       '<p class="lead">'+e(pair.intro)+'</p>',
-      '<p class="disclosure">Comparatif éditorial sans prix ni disponibilité synchronisés. Les illustrations sont originales et ne remplacent pas les photographies exactes accessibles sur les fiches des fabricants.</p>',
+      '<p class="disclosure">Comparatif éditorial sans prix ni disponibilité synchronisés. Les photographies de modèles sont affichées sur déclaration d’autorisation du responsable du site ; vérifiez les fiches fabricants pour des visuels et données à jour.</p>',
       '<section class="headtohead-grid" aria-label="Les deux montres à comparer">',
         buyerCard(left,pair.leftAdvice,0),buyerCard(right,pair.rightAdvice,1),
       '</section>',
@@ -103,7 +107,7 @@ export function buildComparisonPages({root,products,amazonLinks,partners,pageHea
         '@type':'ListItem',position:i+1,name:display(p),url:u('montres/'+p.id+'.html')
       }))}
     ]};
-    writeFileSync(join(root,path),page(pageHead({title,description:pair.description,path,illustration:true}),html,schema));
+    writeFileSync(join(root,path),page(pageHead({title,description:pair.description,path,image:authorizedPhoto(left)?u('assets/watches/'+left.id+'.webp'):undefined,illustration:!authorizedPhoto(left)||!authorizedPhoto(right)}),html,schema));
     cards.push('<article><span>COMPARAISON · 2 MODÈLES</span><h3>'+e(pair.title)+'</h3>'+
       '<p>'+e(pair.intro)+'</p><a href="./'+e(path)+'">Voir le comparatif détaillé →</a></article>');
   }

@@ -18,7 +18,9 @@ assert.deepEqual(tiers,{essential:6,signature:6,prestige:3});
 const domains=['casio.com','swatch.com','citizenwatch.eu','orientwatch.fr','seikowatches.com','tissotwatches.com','hamiltonwatch.com'];
 for(const p of products.products){
  assert.ok(p.id&&p.brand&&p.model&&p.description&&p.tone);
- assert.equal(p.photoRights,'not_licensed');
+ assert.equal(p.photoRights,'permission_declared_by_site_owner');
+ assert.equal(p.photoReview?.publicUsageApproved,true);
+ assert.equal(p.photoReview?.permissionIndependentlyVerified,false);
  assert.equal(p.availability,'not_verified');
  assert.equal(p.affiliateUrl,null);
  assert.equal(p.priceDisplay,false);

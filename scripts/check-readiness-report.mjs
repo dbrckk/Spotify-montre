@@ -17,10 +17,13 @@ assert.equal(new Set(report.products.map(p=>p.id)).size,15);
 for(const p of report.products){
  const model=feed.products.find(x=>x.id===p.id);
  assert.ok(model);
- assert.equal(p.photoRightsConfirmed,model.photoReview?.publicUsageApproved===true);
+ assert.equal(p.photoRightsDeclared,model.photoReview?.permissionDeclaration==='site_owner_explicit_confirmation_2026-10-30');
+ assert.equal(p.photoProofVerified,model.photoReview?.permissionIndependentlyVerified===true);
  assert.equal(p.specialLinkConfigured,Boolean(input.links[p.id]));
- assert.equal(p.commercialReady,p.photoRightsConfirmed&&p.specialLinkConfigured);
+ assert.equal(p.commercialReady,model.photoReview?.publicUsageApproved===true&&p.specialLinkConfigured);
 }
+assert.equal(report.totals.declaredPhotoRights,15);
+assert.equal(report.totals.independentlyVerifiedPhotoRights,0);
 const human=command();
 assert.match(human,/préparation affiliation Amazon\.fr/);
 assert.match(human,/droit image|Droit image/i);

@@ -4,6 +4,9 @@ Dernière mise à jour : 30 octobre 2026. Cette feuille de route concerne **une 
 
 ## État vérifié
 
+**Mise à jour du 30 octobre 2026 (après les points historiques ci-dessous).** Le responsable a déclaré disposer des autorisations de diffusion des 15 photos ; la vitrine peut les afficher sous `permissionIndependentlyVerified:false` sans présenter l'existence d'un accord écrit comme vérifiée. Le compte Amazon Partenaires reste **non approuvé/non vérifié** via ce dépôt et le paiement direct demeure inactif. Consulter [le processus officiel de validation](validation-amazon-partenaires-fr.md) pour ne pas confondre déclaration, vérification technique et accord Amazon.
+
+
 - URL Render : https://atelier-montres-selection-fr.onrender.com/
 - 15 montres de marques tierces présentées dans un catalogue éditorial indépendant.
 - Partenariat Amazon France **non confirmé** ; aucun lien spécial rémunéré actif, aucun paiement, aucun stock propre.

@@ -1,5 +1,14 @@
 # Atelier Montres — boutique de montres indépendante
 
+## Images des modèles et programme Amazon — 30 octobre 2026
+
+**15 photographies des modèles exacts activées sur déclaration d'autorisation du responsable du site.** Chaque entrée porte une provenance explicite (`site_owner_explicit_confirmation_2026-10-30`) et ne prétend pas avoir fait l'objet d'une vérification documentaire indépendante. Les images locales et leur empreinte SHA-256 sont vérifiées lors du build SEO ; les SVG originaux restent des solutions de secours.
+
+**Amazon Partenaires non validé à ce stade** : le site a 25 URL et 13 références Amazon.fr repérées, mais `site/affiliate-links.json` demeure désactivé. Le tag candidat présent dans la recherche n'est **pas** une preuve de propriété ni d'approbation. Amazon examine les candidatures après au moins 3 ventes éligibles en 180 jours et demande notamment 10 publications originales ; le nombre de fiches produit ne garantit pas leur appréciation.
+
+Les étapes réelles et le statut de candidature sont documentés dans [Validation Amazon Partenaires France](docs/validation-amazon-partenaires-fr.md) ; la traçabilité des photos est dans [Licences visuels](docs/licences-visuels-publication.md).
+
+
 ## Conseiller évolué : 4 critères et comparaison directe (30 octobre 2026)
 
 Le conseiller gratuit et 100 % local sur `site/conseiller.html` permet désormais de choisir **la gamme, le style, le mouvement et le diamètre souhaité**. Les 3 montres aux boîtiers compacts (≤ 38 mm) et les 6 intermédiaires (38,1–40 mm) sont identifiées grâce aux dimensions présentes dans les sources ; les 6 autres mesures manquantes restent explicitement signalées, sans approximation.

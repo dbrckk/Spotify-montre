@@ -13,7 +13,7 @@
  try{const x=JSON.parse(localStorage.getItem(KEY)||'[]');if(Array.isArray(x))saved=new Set(x.filter(y=>typeof y==='string'&&y.length<80))}catch(_){}
  const make=(tag,cls,txt)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n;};
  const official=url=>{try{const u=new URL(url);return u.protocol==='https:'&&!u.username&&!u.password&&approvedHosts.some(x=>u.hostname===x||u.hostname.endsWith('.'+x))}catch(_){return false}};
- const valid=p=>p&&p.affiliateUrl===null&&p.merchantLinkStatus==='untracked_official'&&p.photoRights==='not_licensed'&&p.imageMode==='custom_vector_illustration'&&Object.hasOwn(levels,p.tier)&&typeof p.id==='string'&&typeof p.brand==='string'&&typeof p.model==='string'&&typeof p.description==='string'&&official(p.officialUrl);
+ const valid=p=>p&&p.affiliateUrl===null&&p.merchantLinkStatus==='untracked_official'&&p.photoRights==='permission_declared_by_site_owner'&&p.imageMode==='manufacturer_product_photo'&&Object.hasOwn(levels,p.tier)&&typeof p.id==='string'&&typeof p.brand==='string'&&typeof p.model==='string'&&typeof p.description==='string'&&official(p.officialUrl);
  const diameterMm=p=>{const match=/^(\d{1,2})(?:[,.](\d+))?\s*mm$/i.exec((p.specs?.diameter||'').trim());return match?Number(match[1]+'.'+(match[2]||'0')):null};
  const matchesDiameter=p=>{const n=diameterMm(p);return diameter==='all'||(diameter==='unknown'&&n===null)||(diameter==='compact'&&n!==null&&n<=38)||(diameter==='medium'&&n!==null&&n>38&&n<=40)};
  const diameterLabels={compact:'≤ 38 mm',medium:'38,1–40 mm',unknown:'Diamètre à confirmer'};
@@ -271,7 +271,7 @@
   if(hero&&featured){
     const fallback=()=>{hero.replaceChildren();hero.classList.remove('am-hero-real');window.AtelierWatch?.render(hero,featured);const caption=document.querySelector('.am-hero-label small');if(caption)caption.textContent='Illustration originale de style · photo exacte chez le fabricant'};
     const sources=photoSources(featured);
-    if(sources.length){const img=make('img','am-hero-real-photo');img.alt='Citizen Tsuyosa NJ0150-81X — photographie authentique';img.decoding='async';img.loading='eager';img.fetchPriority='high';img.referrerPolicy='no-referrer';let i=0;img.onerror=()=>{i++;if(i<sources.length)img.src=sources[i];else fallback()};hero.classList.add('am-hero-real');hero.replaceChildren(img);img.src=sources[0]}else fallback();
+    if(sources.length){const img=make('img','am-hero-real-photo');img.alt='Citizen Tsuyosa NJ0150-81X — photographie authentique';img.decoding='async';img.loading='eager';img.fetchPriority='high';img.referrerPolicy='no-referrer';let i=0;img.onerror=()=>{i++;if(i<sources.length)img.src=sources[i];else fallback()};hero.classList.add('am-hero-real');hero.replaceChildren(img);const caption=document.querySelector('.am-hero-label small');if(caption)caption.textContent='Photographie du modèle exact · source '+(photoSources(featured).length?featured.photoReview.provider:'fabricant');img.src=sources[0]}else fallback();
   }
   render();
   if(compare.length>=2&&params.has('compare'))showComparison();

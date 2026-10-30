@@ -33,7 +33,7 @@ assert.match(detail,/id="detailSpecList"/);
 assert.match(detail,/id="detailAmazon"/);
 assert.match(detail,/id="detailEbay"/);
 assert.match(detail,/id="detailPhotoLabel"/);
-assert.match(detail,/ILLUSTRATION ORIGINALE/);
+assert.match(detail,/PHOTOGRAPHIE DU MODÈLE/);
 assert.match(detailJS,/encodeURIComponent/);
 assert.match(detailJS,/publicUsageApproved===true/);
 assert.match(js,/publicUsageApproved===true/);
@@ -76,4 +76,4 @@ assert.ok(visit(surface).some(n=>n.tag==='text'&&n.textContent==='10:28'),'Digit
 const field=data.products.find(p=>p.id==='hamilton-khaki');
 const fieldMount=new Node('container');root.window.AtelierWatch.render(fieldMount,field);
 assert.ok(visit(fieldMount).some(n=>n.tag==='text'&&n.textContent==='12'),'Field watch should display numeric markers');
-console.log('15 differentiated vector watches, editorial detail page, comparison and accessible watch store checks — OK');
+console.log('15 differentiated original SVG fallbacks, verified model photos, and accessible watch store checks — OK');

@@ -186,7 +186,7 @@ import {buildComparisonPages} from './build-comparisons.mjs';
   writeFileSync(join(root,'selection-affiliation.json'),JSON.stringify(data,null,2)+'\n');
   // Internal photography review is research material, not a public product page.
   for(const name of ['revue-photo.html','revue-photo.js','revue-photo.css'])rmSync(join(root,name),{force:true});
-  const manifest={siteUrl:homepage,productCount:products.length,paths:paths.map(u),affiliateActive:partners.enabled,affiliateCount:partners.links.size,checkoutActive:false,comparisonCount:comparisons.comparisonPaths.length,analyticsActive:Boolean(umamiId),analyticsProvider:umamiId?"umami":null,licensedImageCount:products.filter(p=>p.photoReview?.publicUsageApproved===true).length};
+  const manifest={siteUrl:homepage,productCount:products.length,paths:paths.map(u),affiliateActive:partners.enabled,affiliateCount:partners.links.size,checkoutActive:false,comparisonCount:comparisons.comparisonPaths.length,analyticsActive:Boolean(umamiId),analyticsProvider:umamiId?"umami":null,licensedImageCount:products.filter(p=>p.photoReview?.publicUsageApproved===true).length,photoPermissionEvidenceStatus:'owner_declared_not_independently_verified'};
   writeFileSync(join(root,'seo-manifest.json'),JSON.stringify(manifest,null,2)+'\n');
   console.log('SEO build: '+products.length+' montres + '+(editorialPaths.length+1)+' guides + '+comparisons.comparisonPaths.length+' comparaisons, '+paths.length+' URLs sur '+homepage);
 })();

@@ -48,11 +48,15 @@ try {
     'citizen-tsuyosa':{provider:'amazon.fr',asin:'B012345678',url:'https://www.amazon.fr/dp/B012345678?tag=example-21',verifiedAt:'2026-10-30',productMatchConfirmed:true,linkApproved:true}
   }};
   writeFileSync(join(target,'affiliate-links.json'),JSON.stringify(cfg));
-  let blocked=false;
-  try { build(); } catch { blocked=true; }
-  assert.equal(blocked,true,'Commercial activation must refuse unlicensed watch photos');
   const feedPath=join(target,'selection-affiliation.json');
   const feed=JSON.parse(readFileSync(feedPath,'utf8'));
+  // A local negative scenario must still reject an image whose publication
+  // approval is revoked, even when the standard catalogue is owner-approved.
+  feed.products.find(p=>p.id==='citizen-tsuyosa').photoReview.publicUsageApproved=false;
+  writeFileSync(feedPath,JSON.stringify(feed));
+  let blocked=false;
+  try { build(); } catch { blocked=true; }
+  assert.equal(blocked,true,'Commercial activation must refuse an unapproved photograph');
   feed.products.find(p=>p.id==='citizen-tsuyosa').photoReview.publicUsageApproved=true;
   writeFileSync(feedPath,JSON.stringify(feed));
   let wrongAsinBlocked=false;
