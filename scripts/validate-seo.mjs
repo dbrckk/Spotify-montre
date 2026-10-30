@@ -8,6 +8,7 @@ const feed=JSON.parse(read('selection-affiliation.json'));
 const manifest=JSON.parse(read('seo-manifest.json'));
 assert.equal(manifest.productCount,15);
 assert.equal(manifest.comparisonCount,4,'Four evidence-based pairs must be indexable');
+assert.equal(manifest.categoryCount,3,'Three distinct editorial search-intent collections are required');
 const config=JSON.parse(read('affiliate-links.json'));
 assert.equal(manifest.affiliateActive,config.enabled);
 assert.equal(manifest.affiliateCount,Object.keys(config.links).length);
@@ -29,7 +30,7 @@ for(const [id,entry] of Object.entries(amazon.links)){
  assert.ok(!entry.url.includes('?tag='),'Unapproved affiliate tracking cannot be published');
 }
 
-assert.equal(manifest.paths.length,25);
+assert.equal(manifest.paths.length,28);
 assert.ok(manifest.paths.every(url=>url.startsWith(manifest.siteUrl)));
 const home=read('index.html');
 assert.match(home,/<h1>/i);
@@ -41,7 +42,16 @@ assert.match(home,/application\/ld\+json/);
 assert.match(home,/Les 15 montres, modèle par modèle/);
 assert.match(home,/Avant de choisir sa montre/);
 assert.match(home,/id="comparaisons"/,'Homepage must promote head-to-head comparison pages');
-for(const marker of ['AM_SEO_LINKS_START','AM_SEO_LINKS_END','AM_SEO_HEAD_START','AM_SEO_HEAD_END','AM_SEO_GUIDES_START','AM_SEO_GUIDES_END','AM_SEO_COMPARISONS_START','AM_SEO_COMPARISONS_END']){
+assert.match(home,/id="seo-collections-title"/,'Homepage must link to explanatory indexable watch collections');
+assert.match(home,/id="heroWatch"[^>]*><img class="am-hero-real-photo"/,'First genuine watch must render in initial HTML for early LCP');
+const first=feed.products.find(p=>p.id==='citizen-tsuyosa');
+assert.equal(first.photoReview.publicUsageApproved,true);
+const heroPhoto='./assets/watches/'+first.id+'.webp?v='+first.photoReview.localSha256.slice(0,12);
+assert.ok(home.includes('src="'+heroPhoto+'"'),'HTML hero must use exact locally versioned image');
+assert.ok(home.includes('<link rel="preload" as="image" fetchpriority="high" href="'+heroPhoto+'">'),'Matching LCP preload must be present');
+assert.ok(home.includes('<meta property="og:image" content="'+manifest.siteUrl+'assets/watches/'+first.id+'.webp">'),'Social sharing must use the real published photograph');
+assert.ok(home.includes('<meta name="twitter:card" content="summary_large_image">'),'Large social image requested');
+for(const marker of ['AM_SEO_LINKS_START','AM_SEO_LINKS_END','AM_SEO_HEAD_START','AM_SEO_HEAD_END','AM_SEO_GUIDES_START','AM_SEO_GUIDES_END','AM_SEO_CATEGORIES_START','AM_SEO_CATEGORIES_END','AM_SEO_COMPARISONS_START','AM_SEO_COMPARISONS_END']){
  assert.equal(home.split(marker).length-1,1,'Idempotent build marker: '+marker);
 }
 assert.equal((home.match(/rel="canonical"/g)||[]).length,1,'Homepage has exactly one canonical link');
@@ -100,7 +110,7 @@ for(const name of ['revue-photo.html','revue-photo.js','revue-photo.css']){
 }
 assert.ok(existsSync(resolve(root,'seo-watch-art.js')),'SEO watch illustrations script is required');
 const sitemap=read('sitemap.xml');
-assert.equal((sitemap.match(/<loc>/g)||[]).length,25);
+assert.equal((sitemap.match(/<loc>/g)||[]).length,28);
 const comparisons=JSON.parse(read('comparaisons-montres.json'));
 assert.equal(comparisons.version,1);
 assert.equal(comparisons.comparisons.length,4);
@@ -149,6 +159,57 @@ for(const c of comparisons.comparisons){
     }
   }
 }
+const seoCategories=[
+ {slug:'montres-quartz',members:feed.products.filter(p=>p.movement==='quartz'),title:'Montres à quartz'},
+ {slug:'montres-casio',members:feed.products.filter(p=>p.brand==='Casio'),title:'Montres Casio'},
+ {slug:'montres-petit-boitier',members:feed.products.filter(p=>{const m=/^(\\d{1,2})(?:[,.](\\d{1,2}))?\\s*mm$/i.exec((p.specs?.diameter||'').trim());return m&&Number(m[1]+'.'+(m[2]||'0'))<=38}),title:'Montres à petit boîtier'}
+];
+assert.deepEqual(seoCategories.map(x=>x.members.length),[7,5,3]);
+for(const category of seoCategories){
+ const path='montres/'+category.slug+'.html';
+ const html=read(path);
+ assert.ok(statSync(resolve(root,path)).size>3000,'Unique editorial category with real comparisons: '+path);
+ assert.ok(manifest.paths.includes(manifest.siteUrl+path),'Search collection must be in published manifest: '+path);
+ assert.ok(sitemap.includes(manifest.siteUrl+path),'Search collection must appear in sitemap: '+path);
+ assert.ok(home.includes('./'+path),'Homepage category link is crawlable: '+path);
+ assert.ok(html.includes(category.title),'Category must match a real search intent: '+path);
+ assert.ok(html.includes('<link rel="canonical" href="'+manifest.siteUrl+path+'">'));
+ assert.equal((html.match(/rel="canonical"/g)||[]).length,1,'Only one canonical per category');
+ assert.match(html,/<h1>/,'An actual category H1 is required');
+ assert.match(html,/class="seo-collection-grid"/,'Visible accessible photographic product cards');
+ assert.match(html,/class="spec-matrix"/,'Source-backed facts table is required');
+ assert.match(html,/class="comparison-scroll"/,'Mobile table must be scrollable');
+ assert.match(html,/Non renseigné|À vérifier/,'Unknown specification values must stay explicitly unknown');
+ assert.doesNotMatch(html,/"offers"\\s*:|"price"\\s*:|"availability"\\s*:|"aggregateRating"\\s*:/,'No fabricated merchant/ratings metadata');
+ assert.equal(html.includes('cloud.umami.is/script.js'),analyticsConfigured,'Tracking remains opt-in');
+ assert.equal((html.match(/class="seo-collection-card"/g)||[]).length,category.members.length,'Exactly the catalogued products, not arbitrary keyword landing pages');
+ const graphMatch=html.match(/<script type="application\\/ld\\+json">([\\s\\S]*?)<\\/script>/);
+ assert.ok(graphMatch,'Structured metadata must be server-rendered');
+ const graph=JSON.parse(graphMatch[1]);
+ assert.deepEqual(graph['@graph'].map(n=>n['@type']),['CollectionPage','ItemList','BreadcrumbList']);
+ assert.equal(graph['@graph'][0].url,manifest.siteUrl+path);
+ assert.equal(graph['@graph'][1].numberOfItems,category.members.length);
+ assert.equal(graph['@graph'][1].itemListElement.length,category.members.length);
+ assert.deepEqual(graph['@graph'][1].itemListElement.map(n=>n.url),category.members.map(p=>manifest.siteUrl+'montres/'+p.id+'.html'));
+ for(const p of category.members){
+   assert.ok(html.includes(p.brand+' '+p.model),'Model name must be accurate: '+p.id);
+   assert.ok(html.includes('href="./'+p.id+'.html"'),'Exact internal product link missing: '+p.id);
+   assert.ok(html.includes('href="'+p.officialUrl+'"'),'Manufacturer link missing: '+p.id);
+   assert.ok(read('montres/'+p.id+'.html').includes('./'+category.slug+'.html'),'Product must link back to its relevant category: '+p.id);
+   const image='src="../assets/watches/'+p.id+'.webp"';
+   assert.equal(html.includes(image),p.photoReview?.publicUsageApproved===true,'Only owner-approved exact photos in collection: '+p.id);
+   const match=amazon.links[p.id];
+   if(match){
+     const selected=config.enabled&&config.links[p.id]?config.links[p.id].url:match.url;
+     assert.ok(html.includes('href="'+selected+'"'),'Only exact Amazon listing may be linked: '+p.id);
+     if(config.enabled&&config.links[p.id]){
+       assert.ok(html.includes('data-amazon-product="'+p.id+'"'),'Same product id used by existing analytics');
+       assert.ok(html.includes('rel="nofollow sponsored noopener noreferrer"'),'Affiliate link must be sponsored');
+       assert.ok(html.includes('lien rémunéré'),'Clear paid disclosure');
+     }
+   }
+ }
+}
 const editorialPaths=['quartz-ou-automatique','taille-boitier-montre','montres-automatiques'];
 for(const slug of editorialPaths){
  const path='montres/'+slug+'.html',page=read(path);
@@ -168,4 +229,4 @@ assert.equal(privacy.includes('Les visites et clics vers Amazon sont mesurés av
 assert.ok(privacy.includes('chez Render'),'Privacy notice must identify actual host');
 const guide=read('montres/guide-choisir-montre.html');
 assert.match(guide,/<h1>Comment choisir une montre/);
-console.log('SEO validation OK: 15 watch pages, 13 exact Amazon.fr product links, four editorial guides, four head-to-head comparisons, 25 sitemap URLs');
+console.log('SEO validation OK: 15 model pages, 3 real search-intent categories, 4 guides, 4 comparisons, 13 exact Amazon links, 28 sitemap URLs and genuine hero LCP preload');
