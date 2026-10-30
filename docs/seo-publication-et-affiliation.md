@@ -5,7 +5,7 @@
 - Vitrine actuelle : sélection de 15 références authentiques, **pas un commerçant actif**.
 - Catalogue : `site/selection-affiliation.json` (6 Essentielle, 6 Signature, 3 Prestige).
 - Génération : `node scripts/build-seo.mjs`, sans appel d'API ni dépendance supplémentaire.
-- Sortie du build : `site/index.html` (vraie sélection en page d'accueil), `site/montres/*.html` (15 fiches et guide), `sitemap.xml`, `robots.txt`.
+- Sortie du build : `site/index.html` (vraie sélection en page d'accueil), `site/montres/*.html` (15 fiches, 4 guides éditoriaux et 4 comparaisons entre références), `sitemap.xml`, `robots.txt` (25 URL indexables à ce stade).
 
 ## Publication automatique sur Render (site statique gratuit)
 - **Repository** : https://github.com/dbrckk/Spotify-montre
@@ -17,6 +17,10 @@
 - Préférer un vrai domaine de marque détenu par le vendeur une fois son identité légale confirmée : il évite la dilution SEO en cas de changement d'hébergeur.
 
 **Important :** ne pas déployer `site/index.html` brut sans le build : cette ancienne page est la vitrine de pré-lancement historique. Le générateur met la vraie collection à sa place durant la publication, après les anciens contrôles.
+
+## Comparaison des modèles : transparence sur les données
+
+Les quatre duels sont décrits dans [comparaisons-horlogeres.md](comparaisons-horlogeres.md). Ils n'affichent pas d'offre, de prix, d'avis ni de stock non vérifiés. Un lien Partenaires ne peut maintenant être publié que s'il correspond à l'ASIN exact figurant dans la recherche de produits documentée.
 
 ## Référencement opérationnel
 1. Une fois l'adresse publique stable et les droits sur les images vérifiés, ajouter la propriété dans [Google Search Console](https://search.google.com/search-console/about).
