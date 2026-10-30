@@ -121,7 +121,7 @@ await page.locator('#affGrid .aff-card input[type="checkbox"]').nth(0).check();
  await citizen.locator('.aff-card-actions button').click();
  await page.locator('#affTabs button[data-tier="favourites"]').click();
  assert.equal(await cards.count(),1,'Favorites collection should show the saved Citizen watch');
- await cards.first().locator('.aff-card-actions a').click();
+ await cards.first().locator('.aff-card-actions a[href^="./montre.html?id="]').click();
  await page.locator('#detailShell').waitFor({state:'visible',timeout:20000});
  assert.match(await page.locator('#detailTitle').innerText(),/NJ0150-81X/);
  const productSchema=JSON.parse(await page.locator('#detailProductStructuredData').textContent());
