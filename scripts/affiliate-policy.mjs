@@ -1,0 +1,37 @@
+/**
+ * Rules for turning verified Amazon.fr Special Links into published CTAs.
+ * These values are public; credentials/payment tokens must never be committed.
+ * One invalid link aborts the whole build before any storefront is published.
+ */
+export function validateAffiliateConfig(config, productIds) {
+  const fail = reason => { throw new Error('Affiliate config rejected: ' + reason); };
+  if (!config || typeof config !== 'object' || Array.isArray(config) || config.version !== 1) fail('schema version');
+  if (typeof config.enabled !== 'boolean' || typeof config.approved !== 'boolean') fail('activation flags');
+  if (!config.links || typeof config.links !== 'object' || Array.isArray(config.links)) fail('links map');
+  const entries=Object.entries(config.links);
+  if (config.enabled === false) {
+    if (config.approved !== false || config.amazonPartnerTag !== null || entries.length) fail('inactive configuration must be empty');
+    return Object.freeze({enabled:false,links:new Map()});
+  }
+  if (config.approved !== true) fail('Amazon.fr partner account is not approved');
+  const tag=config.amazonPartnerTag;
+  if (typeof tag !== 'string' || !/^[a-z0-9][a-z0-9-]{1,48}-21$/i.test(tag)) fail('invalid Amazon.fr tag');
+  const ids=new Set(productIds);
+  if (entries.length===0) fail('no approved product links');
+  const links=new Map();
+  for (const [id,item] of entries) {
+    if (!ids.has(id)) fail('unknown product '+id);
+    if (!item || typeof item!=='object' || Array.isArray(item)) fail('invalid link for '+id);
+    if (item.provider!=='amazon.fr' || item.productMatchConfirmed!==true || item.linkApproved!==true) fail('link not verified for '+id);
+    if (typeof item.verifiedAt!=='string' || !/^20\d{2}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(item.verifiedAt) || !Number.isFinite(Date.parse(item.verifiedAt))) fail('missing verification date for '+id);
+    if (typeof item.asin!=='string' || !/^[A-Z0-9]{10}$/.test(item.asin)) fail('invalid ASIN for '+id);
+    let url;
+    try { url=new URL(item.url); } catch { fail('invalid URL for '+id); }
+    if (url.protocol!=='https:' || !['www.amazon.fr','amazon.fr'].includes(url.hostname.toLowerCase()) || url.username || url.password || url.port || url.hash) fail('non-approved Amazon.fr destination for '+id);
+    if (!['/dp/'+item.asin,'/gp/product/'+item.asin].includes(url.pathname)) fail('ASIN/path mismatch for '+id);
+    if (url.searchParams.getAll('tag').length!==1 || url.searchParams.get('tag')!==tag) fail('wrong Partner tag for '+id);
+    if ([...url.searchParams.keys()].some(k=>!['tag','th','psc'].includes(k))) fail('unexpected query field for '+id);
+    links.set(id,Object.freeze({url:url.href,provider:'Amazon.fr',verifiedAt:item.verifiedAt}));
+  }
+  return Object.freeze({enabled:true,links});
+}

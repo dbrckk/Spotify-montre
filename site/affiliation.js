@@ -52,7 +52,7 @@
    }
  }
  function card(p){
-   const item=make('article','aff-card');
+   const item=make('article','aff-card');item.dataset.watchId=p.id;
    const art=make('div','aff-illustration');art.dataset.tone=p.tone||'silver';
    const photo=p.photoReview,sources=photoSources(p);
    const vector=()=>{art.replaceChildren();if(window.AtelierWatch)window.AtelierWatch.render(art,p);art.append(make('span','aff-art-label','PHOTO INDISPONIBLE · FICHE FABRICANT'))};
