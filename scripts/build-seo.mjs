@@ -150,8 +150,25 @@ import {buildSearchCollections} from './build-search-collections.mjs';
   collection=collection.replace(/<title>[^<]+<\/title>/,'<title>Montres homme et femme : 15 modèles à comparer | Atelier Montres</title>');
   collection=collection.replace(/<meta name="description" content="[^"]*">/,'<meta name="description" content="Découvrez 15 montres Casio, Citizen, Seiko, Tissot et autres : modèles quartz, solaires et automatiques, photos des références exactes, caractéristiques documentées et guides pour bien choisir.">');
   const homepage=u('');
-  const headExtra=`${searchConsoleMeta}<link rel="canonical" href="${e(homepage)}"><meta name="robots" content="index,follow,max-image-preview:large"><meta property="og:type" content="website"><meta property="og:locale" content="fr_FR"><meta property="og:site_name" content="Atelier Montres"><meta property="og:title" content="15 montres à comparer · Atelier Montres"><meta property="og:description" content="Sélection indépendante de 15 montres, fiches et guide d'achat."><meta property="og:url" content="${e(homepage)}"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="./seo-guides.css">${umamiScripts("./")}<script type="application/ld+json">${schema({'@context':'https://schema.org','@graph':[{'@type':'WebSite',name:'Atelier Montres',url:homepage,inLanguage:'fr-FR'},{'@type':'ItemList',name:'15 montres à découvrir',numberOfItems:products.length,itemListElement:products.map((p,i)=>({'@type':'ListItem',position:i+1,name:p.brand+' '+p.model,url:u('montres/'+p.id+'.html')}))}]})}</script>`;
+  // Feature the original, owner-declared exact product photograph before
+  // client-side catalogue JavaScript, improving early image discovery and LCP.
+  const firstPhoto=products.find(p=>p.id==='citizen-tsuyosa');
+  const firstPhotoApproved=firstPhoto?.photoReview?.publicUsageApproved===true&&
+    firstPhoto.photoReview.localUrl==='./assets/watches/citizen-tsuyosa.webp';
+  const firstPhotoSrc=firstPhotoApproved?'./assets/watches/citizen-tsuyosa.webp'+
+    (typeof firstPhoto.photoReview.localSha256==='string'&&/^[a-f0-9]{64}$/i.test(firstPhoto.photoReview.localSha256)
+      ?'?v='+firstPhoto.photoReview.localSha256.slice(0,12):''):'';
+  const firstPhotoUrl=firstPhotoApproved?u('assets/watches/citizen-tsuyosa.webp'):undefined;
+  const photoPreload=firstPhotoSrc?'<link rel="preload" as="image" fetchpriority="high" href="'+e(firstPhotoSrc)+'">':'';
+  const socialImage=firstPhotoUrl?'<meta property="og:image" content="'+e(firstPhotoUrl)+'"><meta property="og:image:alt" content="Citizen Tsuyosa NJ0150-81X — photographie de la montre au cadran vert"><meta name="twitter:image" content="'+e(firstPhotoUrl)+'">':'';
+  const headExtra=`${searchConsoleMeta}${photoPreload}<link rel="canonical" href="${e(homepage)}"><meta name="robots" content="index,follow,max-image-preview:large"><meta property="og:type" content="website"><meta property="og:locale" content="fr_FR"><meta property="og:site_name" content="Atelier Montres"><meta property="og:title" content="15 montres à comparer · Atelier Montres"><meta property="og:description" content="Sélection indépendante de 15 montres, fiches et guide d'achat."><meta property="og:url" content="${e(homepage)}">${socialImage}<meta name="twitter:card" content="${firstPhotoUrl?'summary_large_image':'summary'}"><link rel="stylesheet" href="./seo-guides.css">${umamiScripts("./")}<script type="application/ld+json">${schema({'@context':'https://schema.org','@graph':[{'@type':'WebSite',name:'Atelier Montres',url:homepage,inLanguage:'fr-FR'},{'@type':'ItemList',name:'15 montres à découvrir',numberOfItems:products.length,itemListElement:products.map((p,i)=>({'@type':'ListItem',position:i+1,name:p.brand+' '+p.model,url:u('montres/'+p.id+'.html')}))}]})}</script>`;
   collection=collection.replace('</head>','<!-- AM_SEO_HEAD_START -->'+headExtra+'<!-- AM_SEO_HEAD_END --></head>');
+  if(firstPhotoSrc){
+    const emptyHero='<div class="am-hero-watch" id="heroWatch" role="img" aria-label="Photographie de Citizen Tsuyosa NJ0150-81X"></div>';
+    if(!collection.includes(emptyHero))throw Error('Public hero photo insertion point missing');
+    collection=collection.replace(emptyHero,
+      '<div class="am-hero-watch" id="heroWatch" role="img" aria-label="Photographie de Citizen Tsuyosa NJ0150-81X"><img class="am-hero-real-photo" src="'+e(firstPhotoSrc)+'" alt="Citizen Tsuyosa NJ0150-81X — montre automatique au cadran vert" width="520" height="520" decoding="async" fetchpriority="high"></div>');
+  }
   writeFileSync(join(root,'index.html'),collection);
   writeFileSync(join(root,'affiliation.html'),collection);
   const paths=['','conseiller.html',guidePath,...editorialPaths,...collections.paths,...comparisons.comparisonPaths,...products.map(p=>'montres/'+p.id+'.html')];
