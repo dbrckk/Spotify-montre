@@ -99,7 +99,7 @@ export function buildSearchCollections({root,products,amazonLinks,partners,pageH
         {'@type':'ListItem',position:2,name:g.heading,item:u(rel)}
       ]}
     ]};
-    writeFileSync(join(root,rel),page(pageHead({title:g.title,description:g.description,path:rel,image:image?u('assets/watches/'+image.id+'.webp'):undefined}),main,structured));
+    writeFileSync(join(root,rel),page(pageHead({title:g.title,description:g.description,path:rel,type:'website',image:image?u('assets/watches/'+image.id+'.webp'):undefined}),main,structured));
   }
   const homeCards='<section class="seo-search-collections" id="collections" aria-labelledby="seo-collections-title"><div class="wrap"><p class="overline kicker">Explorer par style et critères</p><h2 id="seo-collections-title">Quel type de montre recherchez-vous ?</h2><p>Des sélections indépendantes avec les vraies références, leurs photographies et uniquement les caractéristiques documentées. Sans tarif ni classement inventés.</p><div class="seo-search-collection-grid">'+groups.map((g,i)=>'<article><span>0'+(i+1)+' / '+e(g.audience.toUpperCase())+'</span><h3>'+e(g.heading)+'</h3><p>'+e(g.intro)+'</p><a href="./montres/'+e(g.slug)+'.html">Explorer les modèles →</a></article>').join('')+'</div></div></section>';
   return {paths,byProduct,homeCards,navigation};
