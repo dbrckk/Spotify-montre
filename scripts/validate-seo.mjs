@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFileSync,statSync,existsSync} from 'node:fs';
 import {resolve} from 'node:path';
+import {createHash} from 'node:crypto';
 const root=resolve(process.cwd(),'site');
 const read=p=>readFileSync(resolve(root,p),'utf8');
 const feed=JSON.parse(read('selection-affiliation.json'));
@@ -12,6 +13,7 @@ assert.equal(manifest.affiliateActive,config.enabled);
 assert.equal(manifest.affiliateCount,Object.keys(config.links).length);
 assert.equal(manifest.checkoutActive,false);
 assert.equal(manifest.licensedImageCount,feed.products.filter(p=>p.photoReview?.publicUsageApproved===true).length);
+assert.equal(manifest.photoPermissionEvidenceStatus,'owner_declared_not_independently_verified');
 const analyticsConfigured=Boolean((process.env.UMAMI_WEBSITE_ID||'').trim());
 assert.equal(manifest.analyticsActive,analyticsConfigured);
 assert.equal(manifest.analyticsProvider,analyticsConfigured?'umami':null);
@@ -67,7 +69,17 @@ for(const product of feed.products){
     assert.ok(html.includes(config.enabled&&config.links[product.id]?'lien rémunéré':'sans lien rémunéré'));
     assert.ok(html.includes('data-amazon-product="'+product.id+'"'),'SEO click event needs exact watch id');
   }
-  if(product.photoReview?.publicUsageApproved!==true) {
+  if(product.photoReview?.publicUsageApproved===true){
+    const photoPath='assets/watches/'+product.id+'.webp';
+    assert.equal(product.photoReview.permissionDeclaration,'site_owner_explicit_confirmation_2026-10-30','Declared authorization provenance must be explicit');
+    assert.equal(product.photoReview.permissionIndependentlyVerified,false,'Never invent third-party proof');
+    assert.ok(existsSync(resolve(root,photoPath)),'Locally published model photograph required: '+product.id);
+    const bytes=readFileSync(resolve(root,photoPath));
+    assert.ok(bytes.length>20000,'Local photo should be a full product picture');
+    assert.equal(createHash('sha256').update(bytes).digest('hex'),product.photoReview.localSha256,'Photograph checksum mismatch: '+product.id);
+    assert.ok(html.includes('../'+photoPath),'SEO product detail should serve authorized image');
+    assert.ok(html.includes('property="og:image"'),'Authorized picture is used for social sharing');
+  }else {
     assert.match(html,/watch-vector/,'Original vector illustration instead of unlicensed image');
     assert.ok(html.includes('../seo-watch-art.js'),'SEO product page must render original art');
     assert.ok(!html.includes('../assets/watches/'+product.id+'.webp'),'No unlicensed image in product HTML');
@@ -106,9 +118,16 @@ for(const c of comparisons.comparisons){
   assert.ok(html.includes('href="'+left.officialUrl+'"')&&html.includes('href="'+right.officialUrl+'"'),'Each side links to official manufacturer');
   assert.ok(html.includes(left.model)&&html.includes(right.model));
   assert.match(html,/class="spec-matrix"/,'Actual side-by-side evidence');
-  assert.match(html,/class="watch-vector"/,'Both sides use original license-safe illustrations');
-  assert.equal((html.match(/class="watch-vector"/g)||[]).length,2);
-  assert.ok(!html.includes('../assets/watches/'),'Comparison must not expose unlicensed photos');
+  for(const p of [left,right]){
+    if(p.photoReview?.publicUsageApproved===true){
+      assert.ok(html.includes('src="../assets/watches/'+p.id+'.webp"'),'Approved photo in head-to-head comparison: '+p.id);
+    }else {
+      assert.ok(html.includes('data-watch-id="'+p.id+'"'),'Original vector fallback for unapproved comparison image: '+p.id);
+      assert.ok(!html.includes('src="../assets/watches/'+p.id+'.webp"'),'Never publish unapproved comparison photo: '+p.id);
+    }
+  }
+  assert.equal((html.match(/class="headtohead-photo"/g)||[]).length,
+    [left,right].filter(p=>p.photoReview?.publicUsageApproved===true).length,'One photograph per approved compared model');
   assert.match(html,/<h1>/);
   assert.match(html,/rel="canonical"/);
   assert.equal((html.match(/rel="canonical"/g)||[]).length,1,'Single canonical comparison URL');
