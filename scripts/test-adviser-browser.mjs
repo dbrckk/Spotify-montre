@@ -31,6 +31,16 @@ try{
  await noOverflow(phone,'Mobile adviser');
  await isVector(phone.locator('.advisor-hero-frame'));
  for(const card of await cards.all())await isVector(card.locator('.advisor-photo'));
+ const compareLink=phone.locator('#advisorCompare');
+ assert.ok(await compareLink.isVisible(),'Personalized shortlist must offer direct comparison');
+ const deepLink=await compareLink.getAttribute('href');
+ assert.match(deepLink||'',/compare=casio-mtp-1302,citizen-tsuyosa,tissot-prx-auto/,'Three accurate IDs pass to comparison');
+ const compareTab=await phone.context().newPage();
+ try{
+   await compareTab.goto(new URL(deepLink,phone.url()).href,{waitUntil:'domcontentloaded',timeout:30000});
+   await compareTab.locator('#affCompareDialog').waitFor({state:'visible',timeout:20000});
+   assert.equal(await compareTab.locator('#affCompareSelected .am-compare-selected-chip').count(),3,'One-tap compare must preserve all 3 recommended models');
+ }finally{await compareTab.close()}
  assert.ok(await phone.locator('.am-mobile-nav>summary').isVisible(),'Mobile navigation must be visible');
  await phone.locator('.am-mobile-nav>summary').click();
  assert.ok(await phone.locator('.am-mobile-links a[href="./affiliation.html#montres"]').isVisible(),'Navigation can reach full collection');
@@ -64,6 +74,7 @@ try{
  assert.match(new URL(phone.url()).search,/size=medium/);
  await phone.locator('#advisorReset').click();
  assert.equal(new URL(phone.url()).search,'','Reset must clear the size preference');
+ assert.match(await compareLink.getAttribute('href'),/compare=casio-mtp-1302,citizen-tsuyosa,tissot-prx-auto/,'Shortlist link updates after resetting filters');
  await phone.goto(new URL('/conseiller.html?tier=prestige&movement=automatic&size=compact',base).href,{waitUntil:'domcontentloaded'});
  await cards.first().waitFor({state:'visible'});
  assert.match(await phone.locator('#advisorCriteria').innerText(),/3 préférences/i);
