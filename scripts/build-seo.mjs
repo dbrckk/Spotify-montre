@@ -10,6 +10,10 @@ import {validateAffiliateConfig} from './affiliate-policy.mjs';
   if (data.version !== 1 || data.affiliateEnabled !== false || data.products.length !== 15 || new Set(data.products.map(p => p.id)).size !== 15) throw Error('Catalogue invalide ou statut affilié inattendu');
   const products = data.products;
   const partners = validateAffiliateConfig(JSON.parse(readFileSync(join(root,'affiliate-links.json'),'utf8')),products.map(p=>p.id));
+  if (partners.enabled) for (const id of partners.links.keys()) {
+    const model=products.find(p=>p.id===id);
+    if (model?.photoReview?.publicUsageApproved!==true) throw Error('Publication affiliée bloquée : droits commerciaux de la photographie à vérifier pour '+id);
+  }
   const amazonStatement = 'En tant que Partenaire d’Amazon, je suis rémunéré(e) pour les achats éligibles.';
   const e = value => String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   const u = path => new URL(path, site).href;
