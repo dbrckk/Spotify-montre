@@ -84,3 +84,17 @@
 @media(max-width:760px){.advisor-hero-layout{grid-template-columns:1fr;gap:0}.advisor-hero-layout>div:first-child{padding:66px 0 10px}.advisor-hero-frame{height:390px}.advisor-hero-frame img{width:min(80vw,370px);max-height:360px}.advisor-hero-caption{right:0;bottom:4px}.advisor-hero h1{font-size:clamp(57px,11vw,85px)}.advisor-section-top,.advisor-picks-heading{grid-template-columns:1fr;gap:12px}.advisor-picks-heading>div:last-child{justify-self:start}.advisor-results{grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.advisor-photo{height:240px}.advisor-knowledge-grid{grid-template-columns:1fr}.advisor-knowledge article{padding-bottom:12px}.advisor-custom,.advisor-picks,.advisor-knowledge{padding:68px 0}.advisor-explore{align-items:flex-start;flex-direction:column;gap:19px}}
 @media(max-width:560px){.advisor-ticker .wrap{gap:9px}.advisor-ticker span{font-size:9px}.advisor-options,.advisor-style{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.advisor-options label>span{min-height:108px;padding:18px 29px 14px 13px}.advisor-options input{top:17px;right:9px;width:16px;height:16px}.advisor-options label>span strong{font-size:17px}.advisor-hero-frame{height:345px}.advisor-hero h1{font-size:clamp(53px,11vw,69px)}.advisor-results{grid-template-columns:1fr}.advisor-photo{height:305px}.advisor-card h3{font-size:27px}.advisor-card-body{padding:24px}.advisor-match{min-height:0}.advisor-form-bottom .button{width:100%}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.advisor-options label>span{transition:none}}
+
+/* Move naturally from personalized recommendations to a source-backed comparison. */
+.advisor-compare-next{display:flex;align-items:center;flex-wrap:wrap;gap:12px 22px;margin:22px 0 0}
+.advisor-compare-next .button{min-height:48px;display:inline-flex;align-items:center;text-align:center;justify-content:center}
+.advisor-compare-next .button[hidden]{display:none}
+.advisor-compare-next p{font-size:13px;color:#647466;margin:0;line-height:1.65;max-width:430px}
+@media(max-width:560px){.advisor-compare-next{flex-direction:column;align-items:stretch}.advisor-compare-next .button{width:100%}}
+/* Fourth criterion: case size is documented, never inferred from wrist size. */
+.advisor-size{grid-template-columns:repeat(3,minmax(0,1fr))}
+.advisor-size-question .advisor-size-hint{font-size:13px;line-height:1.7;color:#617365;margin:18px 0 3px}
+.advisor-size-hint a{color:#23523a;font-weight:700;text-underline-offset:3px}
+.advisor-match .advisor-size-warning{font-size:12px;line-height:1.55;color:#704f23;background:#fff6e5;padding:8px 10px;border-left:2px solid #c49b58;margin:8px 0 0}
+@media(max-width:760px){.advisor-size{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.advisor-size{grid-template-columns:1fr}.advisor-size label>span{min-height:72px;padding-top:14px;padding-bottom:10px}.advisor-size .advisor-size-hint{font-size:12px}}

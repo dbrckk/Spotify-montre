@@ -34,6 +34,7 @@
    const matchLabel=entry.criteria===0?'POINT DE DÉPART':allMatched?'CORRESPOND À VOS CRITÈRES':entry.matched>0?'UNE AUTRE PISTE':'À DÉCOUVRIR';
    const matchText=entry.criteria===0?'Un modèle représentatif de sa gamme, sélectionné par la rédaction.':(entry.details.length?entry.details.join(' · '):'Un style différent, à explorer si vous souhaitez élargir vos critères.');
    match.append(node('span','advisor-match-label',matchLabel),node('p','',matchText));
+   if(entry.sizeNote)match.append(node('p','advisor-size-warning',entry.sizeNote));
    const actions=node('div','advisor-card-actions');
    const detail=node('a','primary','Découvrir cette montre ↗');detail.href='./montre.html?id='+encodeURIComponent(p.id);
    const official=node('a','secondary','Voir chez '+p.brand+' ↗');official.href=p.officialUrl;official.target='_blank';official.rel='noopener noreferrer nofollow';
@@ -45,16 +46,22 @@
  function updateAddress(c){
    try{
      const query=new URLSearchParams();
-     for(const key of ['tier','style','movement'])if(c[key]!=='all')query.set(key,c[key]);
+     for(const key of ['tier','style','movement','size'])if(c[key]!=='all')query.set(key,c[key]);
      const next=location.pathname+(query.size?'?'+query.toString():'')+location.hash;
      history.replaceState(null,'',next);
    }catch(_){}
  }
  function render(){
    const choices=read(),recommendations=engine.recommend(catalogue,choices,3);
-   const active=[choices.tier,choices.style,choices.movement].filter(x=>x!=='all').length;
+   const active=[choices.tier,choices.style,choices.movement,choices.size].filter(x=>x!=='all').length;
    const matches=recommendations.filter(x=>x.criteria>0&&x.matched===x.criteria).length;
    results.replaceChildren(...recommendations.map(card));
+   const compareLink=document.getElementById('advisorCompare');
+   if(compareLink){
+     const ids=recommendations.map(item=>item.product?.id).filter(id=>typeof id==='string'&&/^[a-z0-9-]{4,64}$/.test(id));
+     compareLink.hidden=ids.length<2;
+     if(ids.length>=2)compareLink.href='./affiliation.html?compare='+ids.map(encodeURIComponent).join(',')+'#montres';
+   }
    status.textContent=recommendations.length+' montre'+(recommendations.length>1?'s':'')+' à explorer';
    criteria.textContent=active?active+' préférence'+(active>1?'s':'')+' retenue'+(active>1?'s':''):'Sélection de départ';
    summary.textContent=active?matches+' modèle'+(matches>1?'s':'')+' sur '+recommendations.length+' répond'+(matches>1?'ent':'')+' à tous vos critères. Les autres sont des alternatives proches.':'Notre sélection de départ, issue de trois gammes différentes.';
@@ -67,7 +74,7 @@
    catalogue=data.products.filter(p=>typeof p.id==='string'&&typeof p.officialUrl==='string'&&p.officialUrl.startsWith('https://'));
    if(catalogue.length!==15)throw Error('Références catalogue incomplètes');
    const params=new URLSearchParams(location.search),initial=engine.choices(Object.fromEntries(params));
-   for(const key of ['tier','style','movement']){
+   for(const key of ['tier','style','movement','size']){
      const field=form.elements.namedItem(key);
      if(field)field.value=initial[key];
    }
