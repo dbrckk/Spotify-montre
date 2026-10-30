@@ -17,11 +17,11 @@
 <div class="advisor-ticker"><div class="wrap"><span>01 · VOTRE GAMME</span><span>02 · VOTRE STYLE</span><span>03 · VOTRE MOUVEMENT</span><span>3 SUGGESTIONS À DÉCOUVRIR</span></div></div>
 <section class="advisor-custom" id="personnaliser"><div class="wrap"><div class="advisor-section-top"><div><p class="overline kicker">Trois choix simples</p><h2>Affinez votre regard.</h2></div><p>Aucune inscription et aucun questionnaire transmis à un serveur. Vous pouvez modifier vos préférences à tout moment.</p></div>
 <form id="advisorForm" autocomplete="off">
-<fieldset class="advisor-question"><legend><span class="advisor-step">01</span> Quelle gamme vous correspond ?</legend><p>Ces gammes sont indicatives, pas des prix de vente garantis.</p><div class="advisor-options advisor-budget">
+<fieldset class="advisor-question"><legend><span class="advisor-step">01</span> Quelle gamme vous correspond ?</legend><p>Ces gammes sont éditoriales et ne représentent pas des fourchettes de prix vérifiées.</p><div class="advisor-options advisor-budget">
 <label><input type="radio" name="tier" value="all" checked><span><strong>Je découvre</strong><small>Toutes les gammes</small></span></label>
-<label><input type="radio" name="tier" value="essential"><span><strong>Essentielle</strong><small>Habituellement sous 120 €</small></span></label>
-<label><input type="radio" name="tier" value="signature"><span><strong>Signature</strong><small>Environ 150–400 €</small></span></label>
-<label><input type="radio" name="tier" value="prestige"><span><strong>Prestige</strong><small>Environ 700–1 000 €</small></span></label>
+<label><input type="radio" name="tier" value="essential"><span><strong>Essentielle</strong><small>Montres pour le quotidien</small></span></label>
+<label><input type="radio" name="tier" value="signature"><span><strong>Signature</strong><small>Créations de caractère</small></span></label>
+<label><input type="radio" name="tier" value="prestige"><span><strong>Prestige</strong><small>Mécaniques à explorer</small></span></label>
 </div></fieldset>
 <fieldset class="advisor-question"><legend><span class="advisor-step">02</span> Quel style vous attire ?</legend><p>Choisissez le style qui vous plaît le plus : une montre reste avant tout personnelle.</p><div class="advisor-options advisor-style">
 <label><input type="radio" name="style" value="all" checked><span><strong>Surprenez-moi</strong><small>Tout explorer</small></span></label>
@@ -37,12 +37,17 @@
 <label><input type="radio" name="movement" value="automatic"><span><strong>Automatique</strong><small>Mécanique traditionnelle</small></span></label>
 <label><input type="radio" name="movement" value="eco-drive"><span><strong>Solaire</strong><small>Eco-Drive à énergie lumineuse</small></span></label>
 </div></fieldset>
+<fieldset class="advisor-question advisor-size-question"><legend><span class="advisor-step">04</span> Quelle taille de boîtier préférez-vous ?</legend><p>Les diamètres proviennent des fiches fabricant. Pour les références sans mesure documentée, nous signalons l’incertitude au lieu d’inventer une taille.</p><div class="advisor-options advisor-size">
+<label><input type="radio" name="size" value="all" checked><span><strong>Peu importe</strong><small>Toutes les tailles, même non renseignées</small></span></label>
+<label><input type="radio" name="size" value="compact"><span><strong>Compact</strong><small>Jusqu’à 38 mm documentés</small></span></label>
+<label><input type="radio" name="size" value="medium"><span><strong>Intermédiaire</strong><small>38,1 à 40 mm documentés</small></span></label>
+</div><p class="advisor-size-hint">Le diamètre seul ne garantit pas l’ajustement. Vérifiez également l’épaisseur, la distance entre cornes et le bracelet avant d’acheter. <a href="./montres/taille-boitier-montre.html">Comprendre les dimensions ↗</a></p></fieldset>
 <div class="advisor-form-bottom"><button type="button" id="advisorReset" class="advisor-reset">Réinitialiser mes choix</button><a href="#recommandations" class="button">Voir mes suggestions <span aria-hidden="true">↓</span></a></div>
 </form>
 </div></section>
 <section class="advisor-picks" id="recommandations"><div class="wrap"><div class="advisor-picks-heading"><div><p class="overline kicker">Pour vous, parmi 15 références</p><h2>Trois pistes à explorer.</h2></div><div><span id="advisorCriteria" class="advisor-criteria">Sélection éditoriale</span><p id="advisorSummary" class="advisor-summary" aria-live="polite">Notre sélection de départ, dans trois gammes différentes.</p></div></div>
 <p id="advisorStatus" role="status" aria-live="polite">Chargement de vos suggestions…</p><div id="advisorResults" class="advisor-results"></div><p id="advisorError" class="advisor-error" hidden>Impossible de charger la sélection. <a href="./affiliation.html#montres">Voir directement les 15 montres.</a></p>
-<div class="advisor-explore"><div><strong>Vous souhaitez comparer davantage ?</strong><span>Les 15 références et leurs photographies restent consultables librement.</span></div><a href="./affiliation.html#montres">Explorer les 15 montres <span aria-hidden="true">↗</span></a></div>
+<div class="advisor-explore"><div><strong>Vous souhaitez comparer davantage ?</strong><span>Les 15 références et leurs illustrations éditoriales restent consultables librement.</span></div><a href="./affiliation.html#montres">Explorer les 15 montres <span aria-hidden="true">↗</span></a></div>
 </div></section>
 <section class="advisor-knowledge"><div class="wrap"><p class="overline kicker">Quelques repères</p><h2>Ce qui fait une belle montre.</h2><div class="advisor-knowledge-grid"><article><span>01</span><h3>La proportion</h3><p>Un diamètre de boîtier bien choisi peut changer l'équilibre au poignet. Vérifiez les dimensions exactes sur la fiche du fabricant.</p></article><article><span>02</span><h3>Le mouvement</h3><p>Quartz pour la simplicité, automatique pour la mécanique, Eco-Drive pour l'énergie lumineuse : chaque solution a son intérêt.</p></article><article><span>03</span><h3>Le style</h3><p>Un cadran lisible, un bracelet cohérent et une silhouette qui vous correspond comptent davantage qu'une étiquette de prix.</p></article></div></div></section>
 </main>
