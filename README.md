@@ -1,5 +1,14 @@
 # Atelier Montres — boutique de montres indépendante
 
+## Comparateur : 4 duels approfondis et 25 pages SEO (30 octobre 2026)
+
+Quatre comparaisons détaillées de références exactes (PRX quartz/automatique, Tsuyosa/PRX, Casio MTP-B145/MTP-1302, Orient Bambino/Hamilton Field Auto) sont désormais générées avec le site. Chaque page possède ses caractéristiques sourcées depuis le catalogue, des SVG originaux, des liens fabricants et, quand le modèle est confirmé, un accès Amazon.fr non rémunéré par défaut. Les pages sont liées depuis l'accueil et les fiches produits ; elles entrent au sitemap et aux contrôles Android/desktop.
+
+La **sécurité des correspondances ASIN** est renforcée : même avec un compte partenaire déclaré approuvé, un lien rémunéré vers une mauvaise référence fait désormais échouer la publication. Le compte Partenaires et les licences photographiques ne sont pas présumés approuvés.
+
+[Guide technique des comparatifs](docs/comparaisons-horlogeres.md).
+
+
 ## Publication des visuels sans licence constructeur — 30 octobre 2026
 
 **Correctif de conformité :** les quinze photographies constructeur du dépôt indiquent `publicUsageApproved:false`. Le générateur du site public les remplace donc par les **15 illustrations vectorielles originales** et retire les fichiers photographiques non autorisés du dossier public Render. Les visiteurs accèdent à la vraie photographie exacte via le lien du fabricant. Cette mesure couvre le catalogue, les fiches, les pages SEO, le conseiller et le comparateur.
