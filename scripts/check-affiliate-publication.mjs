@@ -21,6 +21,13 @@ try {
     'citizen-tsuyosa':{provider:'amazon.fr',asin:'B012345678',url:'https://www.amazon.fr/dp/B012345678?tag=example-21',verifiedAt:'2026-10-30',productMatchConfirmed:true,linkApproved:true}
   }};
   writeFileSync(join(target,'affiliate-links.json'),JSON.stringify(cfg));
+  let blocked=false;
+  try { build(); } catch { blocked=true; }
+  assert.equal(blocked,true,'Commercial activation must refuse unlicensed watch photos');
+  const feedPath=join(target,'selection-affiliation.json');
+  const feed=JSON.parse(readFileSync(feedPath,'utf8'));
+  feed.products.find(p=>p.id==='citizen-tsuyosa').photoReview.publicUsageApproved=true;
+  writeFileSync(feedPath,JSON.stringify(feed));
   build();
   html=readFileSync(join(target,'montres/citizen-tsuyosa.html'),'utf8');
   assert.match(html,/Voir ce modèle sur Amazon.fr · lien rémunéré/);
