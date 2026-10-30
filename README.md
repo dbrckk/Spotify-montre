@@ -2,18 +2,18 @@
 
 **Statut au 30 octobre 2026 : vitrine multimarque gratuite publiée, affiliation non activée, aucun paiement.**
 
-## Version actuelle — comparaison persistante et parcours Android vérifié (30 octobre 2026)
+## Version actuelle — V10 : interface mobile stabilisée (30 octobre 2026)
 
-**Boutique publique : https://neutral-shell-t3y4rs7.shipstatic.com/**
+**Boutique publique : https://pulsing-ghost-y8qb527.shipstatic.com/**
 
-- 15 photographies réelles WebP hébergées avec le site (6 Essentielle, 6 Signature, 3 Prestige).
-- La comparaison garde jusqu'à 3 références dans l'onglet même après une fiche produit et un rafraîchissement, sans cookies et sans suivi.
-- Les URL de comparaison partagée priment sur la sélection locale. Quand la sélection est vidée, l'URL est nettoyée pour éviter sa réapparition.
-- Le bouton « Comparer » sur les fiches conserve les modèles déjà choisis.
-- [Validation Android fonctionnelle sur code source](https://github.com/dbrckk/Spotify-montre/actions/runs/41016057161) et [validation du nouveau déploiement public](https://github.com/dbrckk/Spotify-montre/actions/runs/41016368177) : succès.
-- Le déploiement gratuit est enregistré sans date d'expiration. Les programmes partenaires et autorisations de diffusion des images restent à régulariser avant une exploitation commerciale.
+- 15 photographies WebP authentiques des références sélectionnées (6 Essentielle, 6 Signature, 3 Prestige), conservées dans la publication.
+- Comparaison de 2 à 3 montres persistante dans l'onglet, navigation vers une fiche et restauration après rafraîchissement.
+- Correctif CSS : le comparateur flottant ne masque plus la page avant sélection ni après effacement ; le panneau d'assistance reste fermé jusqu'à l'ouverture explicite.
+- [PR #2 fusionnée](https://github.com/dbrckk/Spotify-montre/pull/2), [tests Chromium Android réussis](https://github.com/dbrckk/Spotify-montre/actions/runs/41019092552) et [contrôles complémentaires réussis](https://github.com/dbrckk/Spotify-montre/actions/runs/41019092432).
+- Déploiement ShipStatic réussi : 45 fichiers, sans expiration configurée, avec la vitrine multimarque en page d'accueil. Les pages internes d'étude fournisseurs ne font pas partie de cette publication.
+- **Toujours en pré-lancement :** aucun suivi d'affiliation, prix marchand synchronisé, paiement ou stock actif. Les autorisations de réutilisation commerciale des photographies fabricant restent à régulariser.
 
-**Dépôt :** `site/affiliation.js`, `site/fiche.js`, `scripts/test-compare-persistence.mjs` et workflows mobiles.
+**Fichiers principaux :** site/affiliation.js, site/affiliation.css, site/features.css, scripts/test-compare-persistence.mjs.
 
 ## Historique — V9 galerie de photographies (27 octobre 2026)
 
