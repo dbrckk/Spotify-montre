@@ -159,13 +159,21 @@ import {validateAffiliateConfig} from './affiliate-policy.mjs';
   }
   writeFileSync(join(root,'robots.txt'),`User-agent: *\nAllow: /\nSitemap: ${u('sitemap.xml')}\n`);
   // Rendering the site to Render's /site publish directory must not expose
-  // downloaded manufacturer photos while their commercial rights are unknown.
-  // Source files remain in Git for research and can be restored in a private build.
+  // downloaded manufacturer photos or private image URLs while rights are unknown.
+  // The original research files remain in Git. This JSON is a deploy-only copy.
   for(const p of products){
     if(p.photoReview?.publicUsageApproved!==true){
       rmSync(join(root,'assets','watches',p.id+'.webp'),{force:true});
+      const research=p.photoReview||{};
+      p.photoReview={
+        publicUsageApproved:false,
+        licence:research.licence||'permission_required',
+        provider:research.provider||p.brand,
+        accuracy:research.accuracy||'exact'
+      };
     }
   }
+  writeFileSync(join(root,'selection-affiliation.json'),JSON.stringify(data,null,2)+'\n');
   // Internal photography review is research material, not a public product page.
   for(const name of ['revue-photo.html','revue-photo.js','revue-photo.css'])rmSync(join(root,name),{force:true});
   const manifest={siteUrl:homepage,productCount:products.length,paths:paths.map(u),affiliateActive:partners.enabled,affiliateCount:partners.links.size,checkoutActive:false,analyticsActive:Boolean(umamiId),analyticsProvider:umamiId?"umami":null,licensedImageCount:products.filter(p=>p.photoReview?.publicUsageApproved===true).length};
