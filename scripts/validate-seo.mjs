@@ -286,7 +286,7 @@ for(const p of popularFeed.products){
     assert.ok(detailHtml.includes('src="../'+approvedPopularPhotos.get(p.id).url+'"'),
       'Registered exact-model photograph must appear in the product page: '+p.id);
   }else{
-    assert.doesNotMatch(detailHtml,/<img\\b/i,'Non-registered photos must not be embedded: '+p.id);
+    assert.doesNotMatch(detailHtml,/<img\b/i,'Non-registered photos must not be embedded: '+p.id);
   }
   assert.doesNotMatch(detailHtml,/"offers"\s*:|"price"\s*:|"aggregateRating"\s*:/,'No false checkout offer, pricing or rating: '+p.id);
   const script=detailHtml.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
