@@ -34,13 +34,15 @@ try{
  const popular=page.locator('#modeles-populaires');
  assert.ok(await popular.isVisible(),'Popular sourced watches should be visible below the core catalogue');
  assert.equal(await popular.locator('article.am-pick-card').count(),8,'Eight source-backed homepage ideas should render, including the exact ASIN option');
- assert.equal(await popular.locator('a[data-amazon-search-id]').count(),7,
-   'Seven unverified homepage referrals must remain clearly labeled as searches');
- assert.equal(await popular.locator('a[data-amazon-product]').count(),1,
-   'Only the exact-match G-SHOCK is eligible for a direct Amazon referral');
+ assert.equal(await popular.locator('a[data-amazon-search-id]').count(),6,
+   'Six unverified homepage referrals must remain clearly labeled as searches');
+ assert.equal(await popular.locator('a[data-amazon-product]').count(),2,
+   'G-SHOCK and F-91W have documented Amazon.fr ASINs');
  assert.equal(await popular.locator('#pick-casio-gw-m5610u-1 a[data-amazon-product]').getAttribute('href'),
    'https://www.amazon.fr/dp/B09BCPP68Q?tag=drackk04-21',
    'Homepage direct link must match confirmed Amazon.fr ASIN and owner tag');
+ assert.equal(await popular.locator('#pick-casio-f91w-1 a[data-amazon-product]').getAttribute('href'),
+  'https://www.amazon.fr/dp/B000J34HN4?tag=drackk04-21','Featured Casio F-91W must link to documented ASIN');
  const popularSearch=popular.locator('a[data-amazon-search-id]').first();
  assert.ok((await popularSearch.getAttribute('href')).startsWith('https://www.amazon.fr/s?k='),
    'Do not manufacture an exact ASIN link for the new model');
@@ -54,8 +56,8 @@ try{
  await popularPage.goto(new URL('/montres/modeles-populaires.html',base).href,{waitUntil:'domcontentloaded'});
  assert.equal(await popularPage.locator('article.am-pick-card').count(),30,'All supplemental watch models on one source-backed page');
  assert.equal(await popularPage.locator('.am-picks-tier').count(),3,'All three editorial ranges are represented');
- assert.equal(await popularPage.locator('a[data-amazon-search-id]').count(),29,'Twenty-nine unverified variants must use labeled search results');
- assert.equal(await popularPage.locator('a[data-amazon-product]').count(),1,'Only one Amazon.fr listing has exact-model evidence');
+ assert.equal(await popularPage.locator('a[data-amazon-search-id]').count(),27,'Twenty-seven variants without documented ASINs must use labeled search results');
+ assert.equal(await popularPage.locator('a[data-amazon-product]').count(),3,'Three Amazon.fr models have documented ASINs');
  const confirmedGshock=popularPage.locator('#pick-casio-gw-m5610u-1 a[data-amazon-product]');
  assert.equal(await confirmedGshock.getAttribute('href'),'https://www.amazon.fr/dp/B09BCPP68Q?tag=drackk04-21');
  assert.equal(await confirmedGshock.getAttribute('data-amazon-placement'),'popular');
@@ -107,8 +109,8 @@ try{
    'JavaScript disabled must preserve all source-backed watch ideas');
  assert.equal(await noJs.locator('#am-pick-filters:visible').count(),0,
    'Non-functional controls must not be exposed without JavaScript');
- assert.equal(await noJs.locator('a[data-amazon-search-id]').count(),29);
- assert.equal(await noJs.locator('a[data-amazon-product]').count(),1);
+ assert.equal(await noJs.locator('a[data-amazon-search-id]').count(),27);
+ assert.equal(await noJs.locator('a[data-amazon-product]').count(),3);
  await noJs.close();
  console.log('PASS: 30 source-backed watches filtered by tier, style, movement and accented search, with no-JS fallback');
 
@@ -172,7 +174,7 @@ try{
  }));
  assert.ok(narrow.scroll<=narrow.client+2,'Supplemental watch landing must reflow at 320 CSS px');
  await popularPage.close();
- console.log('PASS: 30 SEO watch pages, one verified Amazon.fr ASIN, twenty-nine honest searches, exact sources and Android reflow');
+ console.log('PASS: 30 SEO watch pages, three documented Amazon.fr ASINs, twenty-seven honest searches, exact sources and Android reflow');
  const shopFirst=await page.evaluate(()=>{
    const ids=['gammes','montres','amEditorialGallery','histoire'];
    const positions=ids.map(id=>document.getElementById(id)?.getBoundingClientRect().top+window.scrollY);
