@@ -1,0 +1,7 @@
+# Local Search Console exports and reports (never publish proprietary query metrics)
+data/search-console/
+artifacts/search-console-local/
+
+# Python bytecode from offline analysis
+__pycache__/
+*.pyc
