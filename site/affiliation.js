@@ -50,7 +50,27 @@
  const diameterMm=p=>{const match=/^(\d{1,2})(?:[,.](\d+))?\s*mm$/i.exec((p.specs?.diameter||'').trim());return match?Number(match[1]+'.'+(match[2]||'0')):null};
  const matchesDiameter=p=>{const n=diameterMm(p);return diameter==='all'||(diameter==='unknown'&&n===null)||(diameter==='compact'&&n!==null&&n<=38)||(diameter==='medium'&&n!==null&&n>38&&n<=40)};
  const diameterLabels={compact:'≤ 38 mm',medium:'38,1–40 mm',unknown:'Diamètre à confirmer'};
- const word=p=>[p.brand,p.model,p.title,p.description,p.style,p.tier,p.movement,...(p.highlights||[])].join(' ').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+ // Use documented watch facts for multi-word queries, irrespective of
+ // order, accents or the French decimal separator. No remote search service.
+ const normalizeSearch=value=>String(value??'')
+   .normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()
+   .replace(/(\d)\s*[,\.]\s*(\d)/g,'$1.$2')
+   .replace(/(\d+(?:\.\d+)?)\s*(mm|bar)\b/g,'$1$2')
+   .replace(/[^a-z0-9.]+/g,' ').trim();
+ const searchIndex=p=>normalizeSearch([
+   p.brand,p.model,p.id,p.title,p.description,p.story,p.style,p.tier,p.movement,
+   p.specs?.movement,p.specs?.diameter,p.specs?.caseSize,
+   p.specs?.glass,p.specs?.waterResistance,...(p.highlights||[])
+ ].filter(Boolean).join(' '));
+ const matchesSearch=(p,raw)=>{
+   const q=normalizeSearch(raw);if(!q)return true;
+   // Model codes copied without their hyphens must still find the exact watch.
+   const compactModel=normalizeSearch(p.model).replace(/[^a-z0-9]/g,'');
+   const compactQuery=q.replace(/[^a-z0-9]/g,'');
+   if(compactQuery.length>=5&&compactModel.includes(compactQuery))return true;
+   const indexed=searchIndex(p);
+   return q.split(/\s+/).every(part=>indexed.includes(part));
+ };
  // No external image fallback: the signed-off same-origin WebP is the only
  // public photograph. Keep original vector fallback if the CDN is incomplete.
  const photoSources=p=>{
@@ -226,8 +246,7 @@
    }));
  }
  function render(){
-   const q=query.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
-   visible=data.filter(p=>(tier==='all'||(tier==='favourites'?saved.has(p.id):p.tier===tier))&&(movement==='all'||p.movement===movement)&&(brand==='all'||p.brand===brand)&&matchesDiameter(p)&&word(p).includes(q));
+   visible=data.filter(p=>(tier==='all'||(tier==='favourites'?saved.has(p.id):p.tier===tier))&&(movement==='all'||p.movement===movement)&&(brand==='all'||p.brand===brand)&&matchesDiameter(p)&&matchesSearch(p,query));
    if(order==='brand')visible=visible.slice().sort((a,b)=>(a.brand+' '+a.model).localeCompare(b.brand+' '+b.model,'fr'));
    if(order==='name')visible=visible.slice().sort((a,b)=>a.model.localeCompare(b.model,'fr'));
    if(order==='diameter-asc'||order==='diameter-desc')visible=visible.slice().sort((a,b)=>{const da=diameterMm(a),db=diameterMm(b);if(da===null)return db===null?0:1;if(db===null)return -1;return order==='diameter-asc'?da-db:db-da});
