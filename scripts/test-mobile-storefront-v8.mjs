@@ -327,7 +327,6 @@ await page.locator('#affGrid .aff-card input[type="checkbox"]').nth(0).check();
  await page.locator('#affCompareSelected .am-compare-selected-chip').first().waitFor({state:'visible',timeout:20000});
  assert.deepEqual(await page.evaluate(()=>JSON.parse(sessionStorage.getItem('atelier-montres-comparison-v1'))),afterInline,'Inline selection survives an Android page reload');
  await page.locator('#affCompareClear').click();
- await page.locator('#affCompareClear').click();
 
  const citizen=page.locator('#affGrid .aff-card',{hasText:'NJ0150-81X'});
  await citizen.locator('.aff-card-actions button').click();
