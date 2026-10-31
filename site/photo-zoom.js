@@ -8,7 +8,7 @@
     if(label!==undefined)n.textContent=label;
     return n;
   };
-  let items=[],index=0,loaded=false,expanded=false,initialTouch=null;
+  let items=[],index=0,loaded=false,expanded=false,initialTouch=null,assetPrefix='./';
   const dialog=el('dialog','am-photo-dialog');
   dialog.id='amPhotoDialog';
   dialog.setAttribute('aria-label','Visionneuse de photographies des montres');
@@ -39,7 +39,7 @@
     const t=p.photoReview||{};
     if(t.publicUsageApproved!==true)return null;
     // Do not load a research URL outside this site when the local photo fails.
-    return t.localUrl==='./assets/watches/'+p.id+'.webp'?t.localUrl:null;
+    return t.localUrl==='./assets/watches/'+p.id+'.webp'?assetPrefix+t.localUrl.slice(2):null;
   };
   const render=()=>{
     const p=items[index];
@@ -79,10 +79,12 @@
   dialog.addEventListener('close',()=>{photo.onload=null;photo.onerror=null;expanded=false;canvas.classList.remove('am-photo-expanded')});
   document.body.append(dialog);
   window.AtelierPhoto={
-    open(collection,id){
+    open(collection,id,{assetPrefix:requestedPrefix='./'}={}){
       if(!Array.isArray(collection)||!collection.length)return;
       items=collection.filter(p=>p&&typeof p.id==='string'&&typeof p.brand==='string'&&typeof p.model==='string');
       if(!items.length)return;
+      // Only known same-origin roots can be selected. Never accept a caller URL.
+      assetPrefix=requestedPrefix==='../'?'../':'./';
       index=Math.max(0,items.findIndex(p=>p.id===id));
       render();
       if(typeof dialog.showModal==='function'&&!dialog.open)dialog.showModal();
