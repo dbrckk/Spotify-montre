@@ -38,6 +38,14 @@ try{
  assert.ok(shopFirst.positions.every((x,i)=>Number.isFinite(x)&&(i===0||x>shopFirst.positions[i-1])),
    'Mobile home must place the catalog directly after tiers and before editorial content');
  assert.ok(shopFirst.firstCard<5000,'Mobile visitors should see real watches before excessive editorial scrolling: '+JSON.stringify(shopFirst));
+ const discovery=await page.locator('.am-discovery-grid').evaluate(el=>{
+   const style=getComputedStyle(el);
+   return {flow:style.gridAutoFlow,scrollWidth:el.scrollWidth,clientWidth:el.clientWidth};
+ });
+ assert.equal(discovery.flow,'column','Watch category shortcuts should occupy a single horizontal mobile rail');
+ assert.ok(discovery.scrollWidth>discovery.clientWidth,'Mobile readers can swipe to discover the other product categories');
+ assert.equal(await page.locator('.am-discovery-paths a.am-discovery-path').count(),3,'All three verified watch collections remain discoverable');
+
 
  // Gallery and detailed presentation must both remain functional on Android.
  const galleryButton=page.locator('#affViewGallery'),detailButton=page.locator('#affViewDetail');
