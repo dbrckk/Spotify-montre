@@ -187,7 +187,7 @@
       });
       const zoom=node('button','am-story-zoom','Agrandir ↗');
       zoom.type='button';
-      zoom.setAttribute('aria-label','Voir la photographie de '+p.brand+' '+p.model+' en grand');
+      zoom.setAttribute('aria-label','Agrandir la photographie de '+p.brand+' '+p.model);
       zoom.addEventListener('click',()=>openViewer(catalogue,p.id));
       media.append(image,zoom);
       const copy=node('div','am-story-copy');

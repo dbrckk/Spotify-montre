@@ -239,3 +239,19 @@ a,button,input,select,summary{touch-action:manipulation}
 .am-compare-mobile-diff dt{color:#3b503e}
 .am-compare-mobile-position{color:#465b48}
 .aff-card .am-card-footer a{display:inline-flex;align-items:center;min-height:44px;padding-block:10px;text-underline-offset:3px}
+
+/* Second axe pass: contrast corrections for headings, editorial gallery and details. */
+.am-editorial-head .overline{color:#614a29}
+.am-story-kicker{color:#604a2c}
+.am-editorial-number{color:#746044}
+.am-editorial-number span{color:#435b48}
+#partenaires .wrap>.overline{color:#604928}
+#advisorStatus{color:#425844}
+.advisor-card-brand{color:#614a2e}
+.advisor-compare-next p,.advisor-explore>div>span{color:#405744}
+.advisor-page .kicker.overline{color:#5c4327}
+.detail-disclosure,.detail-sub{color:#415944}
+.detail-specs p:not(.overline){color:#405845}
+.detail-evidence p{color:#364e3b}
+.detail-adjacent-link span{color:#425846}
+.detail-related-brand{color:#61492b}

@@ -42,3 +42,6 @@
 .brand-values span{color:#435b47}
 .brand-model-text small{color:#61492d}
 .brand-line-header .kicker{color:#604729}
+
+/* Second WCAG contrast pass: brand section headings on warm light panels. */
+.brand-line .kicker.overline,.brand-quality .kicker.overline,.brand-custom .kicker.overline,.brand-status .kicker.overline{color:#553d20}

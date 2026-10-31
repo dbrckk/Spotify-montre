@@ -17,3 +17,7 @@ Le premier audit Actions a examiné **40 URL / 85 écrans**, **zéro erreur de c
 Le fichier de vérification Search Console `google6d385495b6d15d5e.html` doit rester **octet pour octet intact** ; le scanner l'exclut explicitement des pages utilisateur.
 
 Les corrections visent les éléments signalés (étiquettes de liens, CTA, contrastes des légendes, noms ARIA, taille cliquable de liens, régions accessibles). Prochain passage strict obligatoire, sans prétention de certification.
+
+### État après premier lot de corrections
+
+[Second passage 41220692535](https://github.com/dbrckk/Spotify-montre/actions/runs/41220692535) : **39 URL / 83 écrans, zéro échec d'analyse, deux catégories restantes** (color-contrast et label-content-name-mismatch). Le nombre d'occurrences par écran et règle est passé de 79 à 20, et le nombre de sélecteurs en défaut remontés dans le rapport d'environ 640 à 115 ; les chiffres reflètent des violations automatiques, **pas un taux de conformité WCAG**.
