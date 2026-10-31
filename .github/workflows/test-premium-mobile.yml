@@ -5,6 +5,8 @@ on:
     paths:
       - 'scripts/test-mobile-storefront-v8.mjs'
       - 'scripts/test-compare-persistence.mjs'
+      - 'scripts/test-selection-share.mjs'
+      - 'site/selection-share.js'
       - 'site/selection-affiliation.json'
       - 'site/conseiller.html'
       - 'site/conseiller.css'
@@ -63,6 +65,7 @@ jobs:
           sleep 2
           WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-mobile-storefront-v8.mjs
           WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-compare-persistence.mjs
+          WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-selection-share.mjs
           WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-adviser-browser.mjs
           WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-watch-comparisons-browser.mjs
       - name: Preserve mobile and desktop screenshots

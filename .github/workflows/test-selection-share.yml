@@ -10,6 +10,9 @@ on:
       - 'scripts/test-selection-share.mjs'
       - '.github/workflows/test-selection-share.yml'
   workflow_dispatch:
+concurrency:
+  group: shared-selection-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
