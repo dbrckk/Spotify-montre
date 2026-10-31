@@ -41,9 +41,15 @@ async function checkKeyboardJourney(page,label){
   await page.keyboard.press('Enter');
   await compare.waitFor({state:'visible'});
   await assertModalFocus(page,'#affCompareDialog',label,'compare opened from keyboard');
-  for(let i=0;i<8;i++){
+  // More than one full cycle in both directions catches intermittent
+  // focus loss after Chromium moves past the last visible select or link.
+  for(let i=0;i<16;i++){
     await page.keyboard.press('Tab');
     await assertModalFocus(page,'#affCompareDialog',label,'modal trap Tab '+(i+1));
+  }
+  for(let i=0;i<12;i++){
+    await page.keyboard.press('Shift+Tab');
+    await assertModalFocus(page,'#affCompareDialog',label,'modal trap Shift+Tab '+(i+1));
   }
   const toggle=page.locator('#affCompareOnlyDiff');
   await toggle.focus();
