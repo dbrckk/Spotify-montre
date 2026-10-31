@@ -41,10 +41,14 @@ jobs:
           trap 'kill "$pid" 2>/dev/null || true' EXIT
           sleep 2
           A11Y_ENFORCE=1 WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/audit-accessibility.mjs
+          A11Y_ENFORCE=1 WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/audit-reflow.mjs
       - name: Preserve full WCAG violations report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: wcag-audit-report
-          path: artifacts/accessibility-wcag-report.json
+          path: |
+            artifacts/accessibility-wcag-report.json
+            artifacts/accessibility-reflow-report.json
+            artifacts/reflow/*.png
           retention-days: 14
