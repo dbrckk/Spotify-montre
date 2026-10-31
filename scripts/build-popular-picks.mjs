@@ -2,6 +2,7 @@ import {readFileSync,writeFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {buildPopularProductPages} from './build-popular-product-pages.mjs';
 import {loadVerifiedPopularLinks} from './popular-verified-affiliate.mjs';
+import {loadApprovedPopularPhotos} from './popular-photo-rights.mjs';
 
 // Curated discovery intentionally stays outside the 15-watch comparator until
 // individual Amazon ASINs and licensed exact-model images are validated.
@@ -49,6 +50,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     +(commercial?' data-amazon-'+(kind==='product'?'product':'search-id')+'="'+e(id)+'" data-amazon-placement="popular"':'')
     +'>'+e(txt)+'</a>';
   const verifiedLinks=loadVerifiedPopularLinks({root,picks,affiliates,amazonPartnerTag});
+  const approvedPhotos=loadApprovedPopularPhotos({root,picks});
   const affiliateLink=p=>{
     if(!affiliates.enabled)return '';
     const direct=verifiedLinks.get(p.id);
@@ -56,17 +58,19 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
       ?link(direct.url,'Voir le modèle exact sur Amazon.fr · lien rémunéré',true,p.id,'product')
       :link(amazonSearch(p),'Rechercher sur Amazon.fr · lien rémunéré',true,p.id,'search');
   };
-  const detailPaths=buildPopularProductPages({root,products:picks,coreProducts:existingProducts,affiliates,amazonPartnerTag,pageHead,page,e,u,link,amazonSearch,tierNames,affiliateLink,verifiedLinks});
+  const detailPaths=buildPopularProductPages({root,products:picks,coreProducts:existingProducts,affiliates,amazonPartnerTag,pageHead,page,e,u,link,amazonSearch,tierNames,affiliateLink,verifiedLinks,approvedPhotos});
   const movementKind=p=>p.movement.startsWith('Automatique')?'automatic':p.movement.startsWith('Quartz solaire')?'solar':'quartz';
   const card=(p,front=false)=>{
+    const photo=approvedPhotos.get(p.id);
     const claim=p.marketEvidence.kind==='editorial'?'Sélection éditoriale':p.marketEvidence.kind==='manufacturer_bestseller'?'Signal marque':'Signal distributeur';
     return '<article class="am-pick-card am-pick-'+e(p.style)+(verifiedLinks.has(p.id)?' am-pick-direct':'')+'" id="pick-'+e(p.id)+'"'
       +' data-pick-id="'+e(p.id)+'" data-pick-tier="'+e(p.tier)+'" data-pick-style="'+e(p.style)+'"'
       +' data-pick-movement="'+movementKind(p)+'" data-pick-search="'+e([p.brand,p.model,p.category,p.movement,p.lead].join(' '))+'">'
-      +'<div class="am-pick-visual" role="group" aria-label="Repère graphique non contractuel, sans photographie du modèle"><span class="am-pick-visual-top">'+e(p.category)+'</span>'
+      +'<div class="am-pick-visual" role="group" aria-label="'+(photo?'Photographie de la référence exacte avec droits déclarés':'Repère graphique non contractuel, sans photographie du modèle')+'"><span class="am-pick-visual-top">'+e(p.category)+'</span>'
+      +(photo?'<img class="am-pick-licensed-photo" loading="lazy" decoding="async" alt="Montre '+e(p.brand+' '+p.model)+'" src="'+(front?'./':'../')+e(photo.url)+'">':'')
       +'<span class="am-pick-visual-name">'+e(p.brand)+'</span><span class="am-pick-visual-ref">'+e(p.model)+'</span>'
-      +(p.brand==='SKMEI'?'<span class="am-budget-watch" aria-hidden="true"><span class="am-budget-dial"></span></span>':'')
-      +'<span class="am-pick-visual-caption">Repère graphique · photo exacte chez le vendeur ou la marque</span></div>'
+      +(!photo&&p.brand==='SKMEI'?'<span class="am-budget-watch" aria-hidden="true"><span class="am-budget-dial"></span></span>':'')
+      +'<span class="am-pick-visual-caption">'+(photo?'Photo autorisée · '+e(photo.rightsHolder):'Repère graphique · photo exacte chez le vendeur ou la marque')+'</span></div>'
       +'<div class="am-pick-content"><p class="am-pick-kicker"><span>'+e(tierNames[p.tier])+'</span><span>'+e(claim)+'</span></p>'
       +(verifiedLinks.has(p.id)?'<p class="am-pick-exact">Fiche de référence Amazon.fr identifiée · prix et stock à vérifier</p>':'')
       +'<h3><a class="am-pick-detail-link" href="'+(front?'./montres/':'./')+e(p.id)+'.html">'+e(p.brand+' '+p.model)+'</a></h3>'
