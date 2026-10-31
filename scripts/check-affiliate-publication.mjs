@@ -11,6 +11,15 @@ try {
   for(const name of ['selection-affiliation.json','selection-populaires.json','popular-photo-rights.json','affiliation.html','confidentialite.html','affiliate-links.json','comparaisons-montres.json','editorial-insights.json']){
     cpSync(join(repository,'site',name),join(target,name));
   }
+  // Keep source image files in the temporary integration build so the
+  // generated hero srcset does not vary between repeated publications.
+  for(const folder of ['watches','watch-responsive']){
+    const source=join(repository,'site','assets',folder);
+    if(existsSync(source)){
+      mkdirSync(join(target,'assets'),{recursive:true});
+      cpSync(source,join(target,'assets',folder),{recursive:true});
+    }
+  }
   const sourcePhotoDir=join(repository,'site','assets','watches-popular');
   if(existsSync(sourcePhotoDir)){
     const destPhotoDir=join(target,'assets','watches-popular');
