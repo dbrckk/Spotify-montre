@@ -306,7 +306,27 @@ await page.locator('#affGrid .aff-card input[type="checkbox"]').nth(0).check();
 
  assert.equal(await page.locator('.am-compare-mobile-card').count(),2,'Mobile comparison has a readable entry for each selected watch');
  assert.equal(await page.locator('.am-compare-mobile-photo').count(),2,'Mobile comparison photos must match both selected watches');
+ // Replace directly from the second mobile slide without leaving the
+ // comparison or losing the other selected model.
+ const beforeInline=await page.evaluate(()=>JSON.parse(sessionStorage.getItem('atelier-montres-comparison-v1')));
+ const slideSwap=page.locator('.am-compare-mobile-card').nth(1).locator('.am-compare-inline-swap select');
+ assert.ok(await slideSwap.isVisible(),'Mobile comparison shows a native accessible replacement selector');
+ assert.equal(await slideSwap.inputValue(),beforeInline[1]);
+ assert.equal(await slideSwap.locator('option[value="'+beforeInline[0]+'"]').isDisabled(),true,'Already-selected model cannot replace a second slot');
+ await slideSwap.selectOption('seiko-5');
+ const afterInline=await page.evaluate(()=>JSON.parse(sessionStorage.getItem('atelier-montres-comparison-v1')));
+ assert.deepEqual(afterInline,[beforeInline[0],'seiko-5'],'Inline replacement preserves the other slot and the chosen order');
+ assert.ok(await page.locator('#affCompareDialog').isVisible(),'Replacement keeps the comparison dialog open');
+ assert.equal(await page.locator('.am-compare-mobile-position').innerText(),'2 / 2','Active swipe card remains selected after replacement');
+ assert.equal(await page.locator('.am-compare-mobile-card').nth(1).locator('select').inputValue(),'seiko-5','Native picker displays the new model');
+ assert.match(await page.locator('.am-compare-table').innerText(),/42,5 mm/,'Comparison facts update to the replacement watch');
+ assert.equal(await page.locator('#affGrid .aff-card[data-watch-id="seiko-5"] .am-compare-check input').isChecked(),true,'Catalogue checkboxes sync to inline replacement');
+ await page.screenshot({path:'artifacts/mobile-compare-inline-replacement.png',fullPage:true});
  await page.locator('#affCompareClose').click();
+ await page.reload({waitUntil:'domcontentloaded'});
+ await page.locator('#affCompareSelected .am-compare-selected-chip').first().waitFor({state:'visible',timeout:20000});
+ assert.deepEqual(await page.evaluate(()=>JSON.parse(sessionStorage.getItem('atelier-montres-comparison-v1'))),afterInline,'Inline selection survives an Android page reload');
+ await page.locator('#affCompareClear').click();
  await page.locator('#affCompareClear').click();
 
  const citizen=page.locator('#affGrid .aff-card',{hasText:'NJ0150-81X'});
@@ -349,6 +369,18 @@ await page.locator('#affGrid .aff-card input[type="checkbox"]').nth(0).check();
  await desktop.locator('#amEditorialGrid .am-story-card').first().waitFor({state:'visible',timeout:20000});
  assert.equal(await desktop.locator('#amEditorialGrid .am-story-card').count(),3,'Desktop editorial photography layout');
  assert.equal(await desktop.locator('#heroVariants .am-hero-option').count(),4,'Desktop hero selection');
+ // Desktop also offers the replacement picker inside the comparison table.
+ await desktop.locator('#affGrid .aff-card .am-compare-check input').nth(0).check();
+ await desktop.locator('#affGrid .aff-card .am-compare-check input').nth(1).check();
+ await desktop.locator('#affCompareOpen').click();
+ await desktop.locator('#affCompareDialog').waitFor({state:'visible',timeout:10000});
+ const desktopSwap=desktop.locator('.am-compare-table .am-compare-inline-swap select').first();
+ assert.ok(await desktopSwap.isVisible(),'Desktop table allows inline model switching');
+ await desktopSwap.selectOption('seiko-sharp');
+ assert.equal(await desktop.locator('.am-compare-table .am-compare-inline-swap select').first().inputValue(),'seiko-sharp');
+ assert.match(await desktop.locator('.am-compare-table').innerText(),/39,3 mm/,'Desktop comparison facts update immediately');
+ assert.ok(await desktop.locator('#affCompareDialog').isVisible(),'Table stays open while replacing a watch');
+ await desktop.locator('#affCompareClose').click();
  const desktopHomeSize=await desktop.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
  assert.ok(desktopHomeSize.scroll<=desktopHomeSize.client+2,'Desktop editorial layout must not overflow');
  await desktop.screenshot({path:'artifacts/desktop-genuine-watch-lookbook.png',fullPage:true});
