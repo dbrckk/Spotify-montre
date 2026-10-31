@@ -1,6 +1,7 @@
 import {readFileSync,writeFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {buildPopularProductPages} from './build-popular-product-pages.mjs';
+import {loadVerifiedPopularLinks} from './popular-verified-affiliate.mjs';
 
 // Curated discovery intentionally stays outside the 15-watch comparator until
 // individual Amazon ASINs and licensed exact-model images are validated.
@@ -21,7 +22,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     }catch{return false}
   };
   if(source.version!==1||source.photoRights!=='not_cleared'
-    ||source.amazonProductAsins!=='not_verified_for_new_models'
+    ||source.amazonProductAsins!=='partly_verified_exact_listings'
     ||!/^(20)\d{2}-\d{2}-\d{2}$/.test(source.reviewedOn)
     ||!Array.isArray(picks)||picks.length!==13)throw Error('Supplemental product catalog invalid');
   for(const p of picks){
@@ -44,8 +45,18 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
   const amazonSearch=p=>'https://www.amazon.fr/s?k='
     +encodeURIComponent((p.brand+' '+p.model).slice(0,130))
     +'&tag='+encodeURIComponent(amazonPartnerTag);
-  const link=(href,txt,commercial=false,id='')=>'<a href="'+e(href)+'" target="_blank" rel="noopener noreferrer nofollow'+(commercial?' sponsored':'')+'"'+(commercial?' data-amazon-search-id="'+e(id)+'" data-amazon-placement="popular"':'')+'>'+e(txt)+'</a>';
-  const detailPaths=buildPopularProductPages({root,products:picks,coreProducts:existingProducts,affiliates,amazonPartnerTag,pageHead,page,e,u,link,amazonSearch,tierNames});
+  const link=(href,txt,commercial=false,id='',kind='search')=>'<a href="'+e(href)+'" target="_blank" rel="noopener noreferrer nofollow'+(commercial?' sponsored':'')+'"'
+    +(commercial?' data-amazon-'+(kind==='product'?'product':'search-id')+'="'+e(id)+'" data-amazon-placement="popular"':'')
+    +'>'+e(txt)+'</a>';
+  const verifiedLinks=loadVerifiedPopularLinks({root,picks,affiliates,amazonPartnerTag});
+  const affiliateLink=p=>{
+    if(!affiliates.enabled)return '';
+    const direct=verifiedLinks.get(p.id);
+    return direct
+      ?link(direct.url,'Voir le modèle exact sur Amazon.fr · lien rémunéré',true,p.id,'product')
+      :link(amazonSearch(p),'Rechercher sur Amazon.fr · lien rémunéré',true,p.id,'search');
+  };
+  const detailPaths=buildPopularProductPages({root,products:picks,coreProducts:existingProducts,affiliates,amazonPartnerTag,pageHead,page,e,u,link,amazonSearch,tierNames,affiliateLink,verifiedLinks});
   const card=(p,front=false)=>{
     const claim=p.marketEvidence.kind==='editorial'?'Sélection éditoriale':p.marketEvidence.kind==='manufacturer_bestseller'?'Signal marque':'Signal distributeur';
     return '<article class="am-pick-card am-pick-'+e(p.style)+'" id="pick-'+e(p.id)+'">'
@@ -58,17 +69,17 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
       +'<dl class="am-pick-specs"><div><dt>Mouvement</dt><dd>'+e(p.movement)+'</dd></div><div><dt>Boîtier</dt><dd>'+e(p.case)+'</dd></div><div><dt>Verre</dt><dd>'+e(p.glass)+'</dd></div><div><dt>Étanchéité</dt><dd>'+e(p.water)+'</dd></div></dl>'
       +(front?'':'<p class="am-pick-caution"><strong>Avant achat :</strong> '+e(p.caution)+'</p>')
       +'<div class="am-pick-actions">'
-      +(affiliates.enabled?link(amazonSearch(p),'Rechercher sur Amazon.fr · lien rémunéré',true,p.id):'')
+      +affiliateLink(p)
       +link(p.officialUrl,'Photos et fiche fabricant')
       +'</div><p class="am-pick-source">Pourquoi ici ? '+link(p.marketEvidence.url,p.marketEvidence.label)+'</p>'
-      +'<p class="am-pick-note">La recherche Amazon peut présenter des variantes ou d’autres produits. Vérifier la référence exacte, le vendeur et le prix avant de commander.</p>'
+      +'<p class="am-pick-note">'+(verifiedLinks.has(p.id)?'Lien vers une fiche Amazon.fr correspondant à la référence documentée. Vérifiez la variante, le vendeur, le prix et la disponibilité lors de la visite.':'La recherche Amazon peut présenter des variantes ou d’autres produits. Vérifier la référence exacte, le vendeur et le prix avant de commander.')+'</p>'
       +'</div></article>';
   };
   const featuredIds=['casio-ga-2100-1a1','casio-la-20wh-4a1','citizen-tsuyosa-37-blue','casio-edifice-efr-s108d','tissot-gentleman-auto','seiko-presage-srpe43'];
   const featured=featuredIds.map(id=>picks.find(p=>p.id===id));
   if(featured.some(p=>!p))throw Error('Featured model not in source catalog');
   const globalDisclaimer='Ces références complètent les 15 modèles du comparateur. Certaines figurent sur des pages de meilleures ventes de fabricants ou de distributeurs ; ce ne sont pas les meilleures ventes mesurées sur Amazon.fr. Aucun tarif, stock, note ou volume de ventes n’est déduit de ces sources. Les photographies des nouveautés restent chez les fabricants tant que leur réutilisation n’est pas autorisée.';
-  const affiliateNote=affiliates.enabled?'Les recherches Amazon proposées sont des liens rémunérés portant notre identifiant Partenaires. Leur présence ne confirme ni l’ASIN, ni la disponibilité, ni l’approbation définitive du compte.':'Aucun lien Amazon rémunéré n’est activé.';
+  const affiliateNote=affiliates.enabled?'Les liens Amazon portent notre identifiant Partenaires. Une fiche directe dispose d’une correspondance de référence documentée ; les autres liens mènent à une recherche. Aucun lien ne garantit la disponibilité, le tarif ou l’approbation définitive de notre compte.':'Aucun lien Amazon rémunéré n’est activé.';
   const teaser='<section class="am-picks" id="modeles-populaires" aria-labelledby="am-picks-title"><div class="wrap">'
     +'<div class="am-picks-heading"><p class="overline kicker">01 · MODÈLES COMPLÉMENTAIRES</p>'
     +'<h2 id="am-picks-title">Des références remarquées, au-delà des 15 montres comparées.</h2>'
@@ -91,11 +102,11 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     +'</nav></header>'+sections
     +'<aside class="am-picks-method"><h2>Comment ces montres sont-elles sélectionnées ?</h2>'
     +'<p>Chaque code de modèle et chaque caractéristique sont rapprochés de la fiche du fabricant. Les mentions « meilleures ventes » décrivent uniquement la liste citée, à la date du '+e(source.reviewedOn)+'. Elles ne constituent pas des données de ventes Amazon ni un palmarès national.</p>'
-    +'<p>Nous n’affichons pas de photographie d’un modèle sans autorisation de reproduction, ni de prix Amazon non synchronisé. Les liens de recherche Amazon.fr sont explicitement annoncés comme tels et peuvent mener à plusieurs variantes. Pour comparer directement des modèles aux photographies locales déjà documentées, <a href="../index.html#montres">revenir aux 15 montres du comparateur</a>.</p></aside></div>';
+    +'<p>Nous n’affichons pas de photographie d’un modèle sans autorisation de reproduction, ni de prix Amazon non synchronisé. Les recherches Amazon.fr sont explicitement annoncées comme telles et peuvent mener à plusieurs variantes. Seules les références contrôlées sur une fiche Amazon.fr disposent d’un lien direct. Pour comparer directement des modèles aux photographies locales déjà documentées, <a href="../index.html#montres">revenir aux 15 montres du comparateur</a>.</p></aside></div>';
   const graph={'@context':'https://schema.org','@graph':[
     {'@type':'CollectionPage',name:'13 modèles de montres complémentaires',url:u(path),inLanguage:'fr-FR',description:'Sélection éditoriale fondée sur des sources fabricants et des listes de meilleures ventes distinctes. Aucun classement Amazon revendiqué.'},
     {'@type':'ItemList',numberOfItems:picks.length,itemListElement:picks.map((p,i)=>({'@type':'ListItem',position:i+1,name:p.brand+' '+p.model,url:u('montres/'+p.id+'.html')}))}
   ]};
   writeFileSync(join(root,path),page(pageHead({title:'13 montres à découvrir : G-SHOCK, Citizen, Seiko, Tissot | Atelier Montres',description:'13 montres supplémentaires sélectionnées par catégorie et source : G-SHOCK, montres compactes, automatiques et modèles habillés, avec recherche Amazon clairement signalée.',path}),main,graph).replace('</head>','<link rel="stylesheet" href="../popular-picks.css"></head>'));
-  return {path,detailPaths,teaser,count:picks.length,featuredCount:featured.length,searchLinks:affiliates.enabled?picks.length:0};
+  return {path,detailPaths,teaser,count:picks.length,featuredCount:featured.length,searchLinks:affiliates.enabled?picks.length-verifiedLinks.size:0,directLinks:verifiedLinks.size};
 }
