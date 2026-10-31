@@ -200,7 +200,7 @@ assert.match(popularHtml,/<form class="am-pick-filters" id="am-pick-filters"[^>]
 assert.match(popularHtml,/<div id="am-picks-list">/,'Source-backed cards must be grouped for filtering');
 assert.match(popularHtml,/id="am-pick-filter-count"[^>]*aria-live="polite"/,'Accessible result count must update without reloading');
 assert.match(popularHtml,/id="am-pick-filter-empty"[^>]*hidden>/,'Empty-state must be available without showing it before filtering');
-assert.match(read('popular-filters.js'),/querySelectorAll\('\.am-pick-card\[data-watch-id\]'\)/,'Filters must operate on existing source-backed cards');
+assert.match(read('popular-filters.js'),/querySelectorAll\('\.am-pick-card\[data-pick-id\]'\)/,'Filters must operate on existing source-backed cards');
 assert.match(read('popular-picks.css'),/\.am-picks-page \.am-pick-card\[hidden\]/,'CSS must honor native hidden when filter is active');
 assert.doesNotMatch(home,/src="\.\.\/popular-filters\.js"/,'Homepage must not load collection-only interaction JavaScript');
 assert.ok(home.includes('id="pick-casio-gw-m5610u-1"'),'Verified Amazon G-SHOCK must be featured on homepage');
@@ -211,11 +211,11 @@ const existingIds=new Set(feed.products.map(p=>p.id));
 for(const p of popularFeed.products){
   assert.ok(!existingIds.has(p.id),'Supplemental reference must not duplicate comparables: '+p.id);
   assert.ok(popularHtml.includes('id="pick-'+p.id+'"'),'Missing popular model: '+p.id);
-  assert.ok(popularHtml.includes('data-watch-id="'+p.id+'"'),'Filterable watch must retain exact ID: '+p.id);
-  assert.ok(popularHtml.includes('data-tier="'+p.tier+'"'),'Filterable tier must match source: '+p.id);
-  assert.ok(popularHtml.includes('data-style="'+p.style+'"'),'Filterable style must match source: '+p.id);
+  assert.ok(popularHtml.includes('data-pick-id="'+p.id+'"'),'Filterable watch must retain exact ID: '+p.id);
+  assert.ok(popularHtml.includes('data-pick-tier="'+p.tier+'"'),'Filterable tier must match source: '+p.id);
+  assert.ok(popularHtml.includes('data-pick-style="'+p.style+'"'),'Filterable style must match source: '+p.id);
   const movementKind=p.movement.startsWith('Automatique')?'automatic':p.movement.startsWith('Quartz solaire')?'solar':'quartz';
-  assert.ok(popularHtml.includes('data-movement="'+movementKind+'"'),'Movement filter must derive from documented manufacturer specification: '+p.id);
+  assert.ok(popularHtml.includes('data-pick-movement="'+movementKind+'"'),'Movement filter must derive from documented manufacturer specification: '+p.id);
   assert.ok(popularHtml.includes('href="'+p.officialUrl+'"'),'Manufacturer page must be clickable: '+p.id);
   assert.ok(popularHtml.includes('href="'+p.marketEvidence.url+'"'),'Evidence must be linked: '+p.id);
   const detailPath='montres/'+p.id+'.html';
@@ -322,7 +322,7 @@ for(const product of feed.products){
   if(approvedPhoto){
     assert.ok(html.includes('class="watch-photo-zoom" href="../assets/watches/'+product.id+'.webp"'),
       'Exact photograph zoom must have a no-JS local link: '+product.id);
-    assert.ok(html.includes('data-watch-id="'+product.id+'"'),
+    assert.ok(html.includes('data-pick-id="'+product.id+'"'),
       'Zoom must identify the exact model: '+product.id);
     assert.match(html,/href="\.\.\/photo-zoom\.css"/,'Shared premium photographic viewer styles missing');
     assert.match(html,/src="\.\.\/photo-zoom\.js"/,'Shared photographic viewer script missing');
@@ -394,7 +394,7 @@ for(const product of feed.products){
 
   assert.ok(html.includes('montre.html?id='+encodeURIComponent(product.id)), 'Interactive product page must remain accessible');
   assert.equal(html.includes('cloud.umami.is/script.js'),analyticsConfigured,'SEO page Umami opt-in only');
-  if(analyticsConfigured)assert.match(html,/data-watch-id=/);
+  if(analyticsConfigured)assert.match(html,/data-pick-id=/);
   const amazonMatch=amazon.links[product.id];
   if(amazonMatch) {
     const selected=config.enabled&&config.links[product.id]?config.links[product.id].url:amazonMatch.url;
@@ -469,7 +469,7 @@ for(const c of comparisons.comparisons){
     if(p.photoReview?.publicUsageApproved===true){
       assert.ok(html.includes('src="../assets/watches/'+p.id+'.webp"'),'Approved photo in head-to-head comparison: '+p.id);
     }else {
-      assert.ok(html.includes('data-watch-id="'+p.id+'"'),'Original vector fallback for unapproved comparison image: '+p.id);
+      assert.ok(html.includes('data-pick-id="'+p.id+'"'),'Original vector fallback for unapproved comparison image: '+p.id);
       assert.ok(!html.includes('src="../assets/watches/'+p.id+'.webp"'),'Never publish unapproved comparison photo: '+p.id);
     }
   }
