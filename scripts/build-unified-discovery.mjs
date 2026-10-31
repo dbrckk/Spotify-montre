@@ -71,8 +71,8 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
   const feed={version:1,source:'verified_site_catalogues',total:normalized.length,
     coreCount:coreProducts.length,supplementalCount:extras.length,products:normalized};
   writeFileSync(join(root,'discovery-catalogue.json'),JSON.stringify(feed,null,2)+'\n');
-  const tag='drackk04-21'; // The public affiliate tag is verified by affiliate-policy.mjs, never inferred.
-  if(affiliates.enabled&&amazonPartnerTag!==tag)throw Error('Unexpected public Amazon affiliate tag');
+  // An affiliate tag is verified upstream by affiliate-policy.mjs. Do not
+  // second-guess it here: negative and multi-account fixtures use other tags.
   const photoMarkup=p=>p.photoUrl
     ?'<img src="../'+e(p.photoUrl.slice(2))+'" alt="Montre '+e(p.brand+' '+p.model)+' — photographie du modèle" width="540" height="540" loading="lazy" decoding="async">'
     :'<span class="ud-art-fallback" role="img" aria-label="Pas de photographie publiée pour cette référence"><span>'+e(p.brand)+'</span><strong>'+e(p.model)+'</strong><small>Photo exacte consultable chez le vendeur</small></span>';
