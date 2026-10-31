@@ -108,3 +108,30 @@
 .detail-return-link:hover{color:#122f22}
 .detail-return-link:focus-visible{outline:3px solid #bd9855;outline-offset:3px}
 @media(max-width:620px){.detail-return-link{margin-bottom:10px}}
+
+/* The interactive catalogue detail shares the same evidence-led editorial
+   perspective as its indexable product page, never fabricated test results. */
+.detail-decision{margin:clamp(30px,4vw,56px) 0 42px;padding:clamp(20px,3.4vw,35px);background:#f2efe8;border:1px solid #dcd4c6;border-radius:9px;color:#20392a;box-shadow:0 16px 46px #1537250b}
+.detail-decision[hidden]{display:none}
+.detail-decision-heading{max-width:780px;margin-bottom:21px}
+.detail-decision-heading .kicker{margin:0 0 10px;color:#614b29;font:750 12px/1.4 system-ui,sans-serif;letter-spacing:.09em}
+.detail-decision-heading h2{margin:0 0 12px;color:#1e3c2b;font:400 clamp(28px,3.5vw,42px)/1.17 Georgia,serif;letter-spacing:-.028em}
+.detail-decision-heading>p:last-child{margin:0;color:#425947;font:400 14px/1.75 system-ui,sans-serif;max-width:68ch}
+.detail-decision-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.detail-decision-card{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:10px;background:#fffefa;border:1px solid #dcd6ca;border-radius:6px;padding:20px}
+.detail-decision-index{font:750 12px/1.5 system-ui,sans-serif;letter-spacing:.1em;color:#71572e}
+.detail-decision-card h3{margin:0;color:#21432d;font:400 clamp(20px,2vw,25px)/1.25 Georgia,serif}
+.detail-decision-card p{margin:0;color:#364e3e;font:400 15px/1.75 system-ui,sans-serif;overflow-wrap:anywhere}
+.detail-decision-evidence{margin-top:16px;padding:18px 19px 14px;border-top:2px solid #bba675;background:#e8ebe2}
+.detail-decision-evidence>strong{display:block;color:#213d2b;font:700 14px/1.5 system-ui,sans-serif}
+.detail-decision-evidence dl{margin:13px 0 9px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,165px),1fr));gap:9px}
+.detail-decision-fact{min-width:0;padding:12px 13px;background:#fffdf8;border:1px solid #d0d7ca;border-radius:5px}
+.detail-decision-fact dt{margin:0 0 5px;color:#4a604f;font:600 12px/1.4 system-ui,sans-serif}
+.detail-decision-fact dd{margin:0;color:#213c2b;font:700 14px/1.55 system-ui,sans-serif;overflow-wrap:anywhere}
+.detail-decision-evidence a{display:inline-flex;align-items:center;min-height:44px;color:#24563b;font:700 13px/1.5 system-ui,sans-serif;text-decoration:underline;text-underline-offset:4px}
+.detail-decision-evidence a:focus-visible{outline:3px solid #b58b4b;outline-offset:3px}
+@media(max-width:800px){.detail-decision-grid{grid-template-columns:1fr;gap:9px}.detail-decision-card{padding:17px 18px;gap:8px}}
+@media(max-width:450px){.detail-decision{margin:26px 0 32px;padding:20px 14px}.detail-decision-heading h2{font-size:29px}.detail-decision-card{padding:16px}.detail-decision-evidence{padding:14px}}
+
+/* HTML hidden attribute must win over author display:inline-flex on fast links. */
+.detail-fast-nav #detailAdviceShortcut[hidden]{display:none}

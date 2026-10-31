@@ -239,6 +239,52 @@
    });
    document.querySelectorAll('.am-mobile-nav a').forEach(a=>a.addEventListener('click',()=>{const menu=a.closest('details');if(menu)menu.open=false}));
 
+   // Reuse the same reviewed, product-specific editorial evidence as the
+   // indexable SEO page. A missing/invalid auxiliary file must never stop the
+   // primary technical sheet, official links, favorites or photo viewer.
+   const adviceSection=$('detailEditorialAdvice');
+   if(adviceSection){
+     fetch('./editorial-insights.json',{cache:'no-store'})
+       .then(async response=>{
+         if(!response.ok)throw Error('Editorial data unavailable');
+         return response.json();
+       })
+       .then(data=>{
+         const insight=data?.version===1&&data.products&&typeof data.products==='object'
+           ?data.products[p.id]:null;
+         const copy=insight&&[insight.strength,insight.usage,insight.caution];
+         const allowed={diameter:'Diamètre',caseSize:'Dimensions L × l × H',movement:'Mouvement',glass:'Verre',waterResistance:'Étanchéité'};
+         if(!copy||copy.some(t=>typeof t!=='string'||t.length<45||t.length>1300)
+           ||!Array.isArray(insight.facts)||!insight.facts.length||insight.facts.length>5
+           ||new Set(insight.facts).size!==insight.facts.length
+           ||insight.facts.some(key=>!Object.hasOwn(allowed,key)||typeof p.specs?.[key]!=='string'||!p.specs[key])){
+           return;
+         }
+         const grid=$('detailAdviceGrid'),facts=$('detailAdviceFacts');
+         if(!grid||!facts)return;
+         const articles=[
+           ['01','Ce qui la distingue',insight.strength],
+           ['02','À qui elle peut parler',insight.usage],
+           ['03','Point à contrôler',insight.caution]
+         ].map(([order,title,body])=>{
+           const article=node('article','detail-decision-card');
+           const index=node('span','detail-decision-index',order);
+           index.setAttribute('aria-hidden','true');
+           article.append(index,node('h3','',title),node('p','',body));
+           return article;
+         });
+         const documented=insight.facts.map(key=>{
+           const line=node('div','detail-decision-fact');
+           line.append(node('dt','',allowed[key]),node('dd','',p.specs[key]));
+           return line;
+         });
+         grid.replaceChildren(...articles);
+         facts.replaceChildren(...documented);
+         adviceSection.hidden=false;
+         const shortcut=$('detailAdviceShortcut');
+         if(shortcut)shortcut.hidden=false;
+       }).catch(()=>{ /* Advisory content never blocks the verified product page. */ });
+   }
    status.hidden=true;shell.hidden=false;
  }).catch(fail);
 })();
