@@ -1,12 +1,12 @@
 {
   "version": 1,
   "models": 15,
-  "files": 94,
+  "files": 95,
   "parts": [
     {
       "file": "deploy-package-01.json",
       "count": 27,
-      "bytes": 704237
+      "bytes": 706489
     },
     {
       "file": "deploy-package-02.json",
@@ -25,8 +25,8 @@
     },
     {
       "file": "deploy-package-05.json",
-      "count": 42,
-      "bytes": 434506
+      "count": 43,
+      "bytes": 441480
     }
   ]
 }
