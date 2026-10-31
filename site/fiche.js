@@ -44,6 +44,46 @@
    };
    const jsonLd=node('script');jsonLd.type='application/ld+json';jsonLd.id='detailProductStructuredData';
    jsonLd.textContent=JSON.stringify(structured);document.head.append(jsonLd);
+   // Recover the browsing context from a bounded, allowlisted query payload.
+   // Never accept an arbitrary return URL: the destination is always our own
+   // catalogue, even when an attacker edits a link sent to someone else.
+   const rawContext=new URLSearchParams(location.search).get('from')||'';
+   const selectedContext=new URLSearchParams();
+   if(rawContext.length<=400){
+     const supplied=new URLSearchParams(rawContext);
+     const allowed={
+       tier:['essential','signature','prestige','favourites'],
+       brand:[...new Set(x.products.map(item=>item.brand))],
+       movement:['quartz','automatic','eco-drive'],
+       diameter:['compact','medium','unknown'],
+       sort:['brand','name','diameter-asc','diameter-desc']
+     };
+     for(const [name,values] of Object.entries(allowed)){
+       const requested=supplied.get(name);
+       if(requested&&supplied.getAll(name).length===1&&values.includes(requested))
+         selectedContext.set(name,requested);
+     }
+     const requestedSearch=supplied.get('q');
+     if(requestedSearch&&supplied.getAll('q').length===1)
+       selectedContext.set('q',requestedSearch.slice(0,100));
+   }
+   const hasContext=[...selectedContext.keys()].length>0;
+   const backUrl=new URL('./affiliation.html',location.href);
+   for(const [key,value] of selectedContext)backUrl.searchParams.set(key,value);
+   backUrl.hash='montres';
+   const backLink=$('detailBackToResults');
+   if(backLink){
+     backLink.href=backUrl.href;
+     backLink.textContent=hasContext?'← Retour à ma sélection':'← Retour au catalogue';
+   }
+   const collectionBreadcrumb=document.querySelector('.am-breadcrumb a[href="./affiliation.html#montres"]');
+   if(collectionBreadcrumb)collectionBreadcrumb.href=backUrl.href;
+   const crossProduct=id=>{
+     const url=new URL('./montre.html',location.href);
+     url.searchParams.set('id',id);
+     if(hasContext)url.searchParams.set('from',selectedContext.toString());
+     return url.pathname+url.search;
+   };
    $('detailCrumb').textContent=p.brand+' '+p.model;
    $('detailTier').textContent=({essential:'Collection Essentielle',signature:'Collection Signature',prestige:'Collection Prestige'})[p.tier]||'Collection';
    $('detailBrand').textContent=p.brand;
@@ -106,8 +146,8 @@
        if(Array.isArray(stored))selections=[...new Set(stored.filter(id=>typeof id==='string'&&x.products.some(t=>t.id===id&&safeOfficial(t.officialUrl))))].slice(0,3);
      }catch(_){}
      if(!selections.includes(p.id)&&selections.length<3)selections.push(p.id);
-     const url=new URL('./affiliation.html',location.href);
-     url.searchParams.set('compare',selections.join(','));url.hash='montres';compareLink.href=url.href;
+     const url=new URL(backUrl.href);
+     url.searchParams.set('compare',selections.join(','));compareLink.href=url.href;
      if(selections.length>1)compareLink.textContent='⇄ Reprendre la comparaison ('+selections.length+')';
    }
    $('detailOfficial').href=p.officialUrl;
@@ -140,7 +180,7 @@
    const index=all.findIndex(t=>t.id===p.id);
    const adjacent=$('detailAdjacent');
    if(adjacent&&index>=0){
-     const mk=(t,label)=>{const a=node('a','detail-adjacent-link');a.href='./montre.html?id='+encodeURIComponent(t.id);a.append(node('span','',label),node('strong','',t.brand+' '+t.model));return a};
+     const mk=(t,label)=>{const a=node('a','detail-adjacent-link');a.href=crossProduct(t.id);a.append(node('span','',label),node('strong','',t.brand+' '+t.model));return a};
      adjacent.replaceChildren();
      if(index>0)adjacent.append(mk(all[index-1],'← Modèle précédent'));
      if(index<all.length-1)adjacent.append(mk(all[index+1],'Modèle suivant →'));
@@ -150,7 +190,7 @@
      const score=q=>(q.tier===p.tier?6:0)+(q.brand===p.brand?4:0)+(q.movement===p.movement?3:0)+(q.style===p.style?1:0);
      const suggestions=all.filter(q=>q.id!==p.id).sort((a,b)=>score(b)-score(a)).slice(0,3);
      const cards=suggestions.map(q=>{
-       const a=node('a','detail-related-card');a.href='./montre.html?id='+encodeURIComponent(q.id);
+       const a=node('a','detail-related-card');a.href=crossProduct(q.id);
        const frame=node('span','detail-related-photo');const imageUrl=q.photoReview?.localUrl;
        if(q.photoReview?.publicUsageApproved===true&&imageUrl==='./assets/watches/'+q.id+'.webp'){
          const img=node('img');img.alt='Photographie de '+q.brand+' '+q.model;img.loading='lazy';img.decoding='async';
