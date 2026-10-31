@@ -221,3 +221,36 @@
  .watch-actions .primary{grid-column:auto}
  .watch-section-nav{margin-right:-14px;padding-right:14px}
 }
+
+/* Reserve the photographed watch stage before the responsive WebP arrives.
+   On mobile, a fluid square packshot previously expanded the photo flex
+   container after first paint and shifted the entire product introduction. */
+@media(max-width:800px){
+ .watch-product .watch-photo{
+   display:flex;
+   flex-direction:column;
+   box-sizing:border-box;
+   height:min(530px,calc(100vw - 20px));
+   min-height:0;
+ }
+ .watch-product .watch-photo img{
+   flex:1 1 auto;
+   min-height:0;
+   height:calc(100% - 46px);
+   max-height:calc(100% - 46px);
+   object-fit:contain;
+ }
+ .watch-product .watch-photo .watch-vector{
+   flex:1 1 auto;
+   min-height:0;
+   max-height:calc(100% - 46px);
+ }
+ .watch-product .watch-photo .watch-photo-caption{flex:0 0 auto}
+}
+@media(max-width:480px){
+ .watch-product .watch-photo{
+   height:clamp(315px,calc(100vw + 8px),390px);
+   min-height:0;
+ }
+ .watch-product .watch-photo img{height:calc(100% - 44px);max-height:calc(100% - 44px)}
+}
