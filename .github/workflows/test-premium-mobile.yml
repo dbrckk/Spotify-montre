@@ -9,6 +9,7 @@ on:
       - 'scripts/test-selection-share.mjs'
       - 'site/selection-share.js'
       - 'site/selection-affiliation.json'
+      - 'site/editorial-insights.json'
       - 'site/conseiller.html'
       - 'site/conseiller.css'
       - 'site/conseiller.js'
