@@ -1,0 +1,24 @@
+name: Validate Search Console opportunity analyzer
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/analyze-search-console.py'
+      - 'scripts/test-search-console-analysis.py'
+      - '.github/workflows/validate-search-console-analysis.yml'
+permissions:
+  contents: read
+jobs:
+  offline-import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check source syntax
+        run: python -m py_compile scripts/analyze-search-console.py scripts/test-search-console-analysis.py
+      - name: Verify real-format CSV and ZIP processing with synthetic fixtures
+        run: python scripts/test-search-console-analysis.py -v
