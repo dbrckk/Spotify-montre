@@ -110,6 +110,21 @@ for(const marker of ['AM_SEO_LINKS_START','AM_SEO_LINKS_END','AM_SEO_HEAD_START'
  assert.equal(home.split(marker).length-1,1,'Idempotent build marker: '+marker);
 }
 assert.equal((home.match(/rel="canonical"/g)||[]).length,1,'Homepage has exactly one canonical link');
+const browseOrder=[
+  ['gammes','<section id="gammes"'],
+  ['montres','<section id="montres"'],
+  ['photographic lookbook','<section class="am-editorial-gallery" id="amEditorialGallery"'],
+  ['SEO guides','<!-- AM_SEO_GUIDES_START -->'],
+  ['SEO categories','<!-- AM_SEO_CATEGORIES_START -->'],
+  ['SEO comparisons','<!-- AM_SEO_COMPARISONS_START -->']
+];
+const browsePositions=browseOrder.map(([name,marker])=>{
+  const index=home.indexOf(marker);
+  assert.ok(index>=0,'Homepage missing '+name);
+  return index;
+});
+assert.ok(browsePositions.every((x,i)=>i===0||x>browsePositions[i-1]),'The 15 real watches must appear before long guides and comparisons, with sections ordered once');
+
 for(const product of feed.products){
   const path='montres/'+product.id+'.html';
   const html=read(path);
