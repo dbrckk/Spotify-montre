@@ -54,7 +54,52 @@ try{
  const popularPageExtent=await popularPage.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
  assert.ok(popularPageExtent.scroll<=popularPageExtent.client+2,'Supplemental page must not overflow Android');
  await popularPage.screenshot({path:'artifacts/mobile-13-popular-watches.png',fullPage:true});
+ // High-intent landing pages: each supplemental model must have a distinct,
+ // indexable, source-backed product page and an honest Amazon search exit.
+ const supplemental=JSON.parse(readFileSync('site/selection-populaires.json','utf8')).products;
+ for(const watch of supplemental){
+   const response=await popularPage.goto(new URL('/montres/'+watch.id+'.html',base).href,{waitUntil:'domcontentloaded'});
+   assert.ok(response?.ok(),'Supplementary model product page reachable: '+watch.id);
+   const article=popularPage.locator('article.am-extra-product');
+   assert.equal(await article.getAttribute('data-popular-watch-id'),watch.id);
+   assert.ok((await popularPage.locator('h1').innerText()).includes(watch.model),
+     'Unique SEO title must retain exact manufacturer reference: '+watch.id);
+   assert.equal(await popularPage.locator('.am-extra-fact').count(),4,'Four factual product attributes: '+watch.id);
+   assert.equal(await popularPage.locator('.am-extra-editorial-grid>div').count(),2,
+     'Model-specific editorial rationale and caution: '+watch.id);
+   assert.equal(await popularPage.locator('.am-extra-related li').count(),3,
+     'Three live comparable models must have internal landing links: '+watch.id);
+   assert.equal(await popularPage.locator('img').count(),0,
+     'Unlicensed supplemental photo must not be published: '+watch.id);
+   assert.equal(await popularPage.locator('a[data-amazon-search-id]').count(),1,
+     'Affiliate search action must be distinct from a verified-ASIN product link: '+watch.id);
+   const commercial=popularPage.locator('a[data-amazon-search-id]');
+   assert.equal(await commercial.getAttribute('data-amazon-search-id'),watch.id);
+   assert.match(await commercial.getAttribute('rel'),/sponsored/);
+   const merchant=new URL(await commercial.getAttribute('href'));
+   assert.equal(merchant.origin,'https://www.amazon.fr');
+   assert.equal(merchant.pathname,'/s');
+   assert.equal(merchant.searchParams.get('tag'),'drackk04-21');
+   assert.ok(merchant.searchParams.get('k').includes(watch.model),
+     'Search must include exact manufacturer model: '+watch.id);
+   assert.equal(await popularPage.locator('.am-extra-actions a').last().getAttribute('href'),
+     watch.officialUrl,'Official photos link must be model-specific: '+watch.id);
+   const overflow=await popularPage.evaluate(()=>({
+     client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth
+   }));
+   assert.ok(overflow.scroll<=overflow.client+2,'Individual watch page must fit Android: '+watch.id);
+   if(watch.id==='citizen-tsuyosa-37-blue'||watch.id==='tissot-gentleman-auto'){
+     await popularPage.screenshot({path:'artifacts/mobile-extra-'+watch.id+'.png',fullPage:true});
+   }
+ }
+ await popularPage.setViewportSize({width:320,height:760});
+ await popularPage.goto(new URL('/montres/casio-ga-2100-1a1.html',base).href,{waitUntil:'domcontentloaded'});
+ const narrow=await popularPage.evaluate(()=>({
+   client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth
+ }));
+ assert.ok(narrow.scroll<=narrow.client+2,'Supplemental watch landing must reflow at 320 CSS px');
  await popularPage.close();
+ console.log('PASS: 13 model-specific SEO watch pages, sponsored search integrity, manufacturer photos, source facts and Android reflow');
  const shopFirst=await page.evaluate(()=>{
    const ids=['gammes','montres','amEditorialGallery','histoire'];
    const positions=ids.map(id=>document.getElementById(id)?.getBoundingClientRect().top+window.scrollY);
