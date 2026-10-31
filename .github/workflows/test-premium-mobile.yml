@@ -13,6 +13,7 @@ on:
       - 'scripts/test-adviser-browser.mjs'
       - 'site/affiliation.js'
       - 'site/affiliation.css'
+      - 'site/catalogue-view.css'
       - 'site/affiliation.html'
       - 'site/montre.html'
       - 'site/fiche.js'
