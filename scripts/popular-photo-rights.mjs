@@ -40,8 +40,18 @@ export function loadApprovedPopularPhotos({root,picks}){
       throw Error('Site owner brand attestation is incomplete or misrepresented: '+id);
     const model=picks.find(p=>p.id===id);
     if(typeof item.sourcePage!=='string'||item.sourcePage!==model.officialUrl||
-       typeof item.sourceImageUrl!=='string'||!item.sourceImageUrl.startsWith('https://'))
-       throw Error('Cannot match image to a trustworthy exact-model product page: '+id);
+       typeof item.sourceImageUrl!=='string')
+       throw Error('Cannot match image to the exact-model product page: '+id);
+    let photoHost, pageHost;
+    try{
+      const img=new URL(item.sourceImageUrl), page=new URL(model.officialUrl);
+      if(img.protocol!=='https:'||img.username||img.password||img.port||img.hash||
+         page.protocol!=='https:'||page.username||page.password||page.port)throw Error('unsafe URL');
+      photoHost=img.hostname.toLowerCase().replace(/^www\./,'');
+      pageHost=page.hostname.toLowerCase().replace(/^www\./,'');
+    }catch{throw Error('Unsafe photo source URL for '+id)}
+    if(photoHost!==pageHost&&!['cdn.shopify.com','cdn.shopifycdn.net','static.wixstatic.com','cdn11.bigcommerce.com'].includes(photoHost))
+      throw Error('Supplemental product photo came from a non-approved image source: '+id);
     if(item.file!=='assets/watches-popular/'+id+'.webp')
       throw Error('Only exact-model local WebP can be published: '+id);
     const target=join(root,item.file);
