@@ -4,6 +4,7 @@ import {validateAffiliateConfig} from './affiliate-policy.mjs';
 import {buildComparisonPages} from './build-comparisons.mjs';
 import {buildSearchCollections} from './build-search-collections.mjs';
 import {buildEditorialPolicy} from './build-editorial-policy.mjs';
+import {buildPopularPicks} from './build-popular-picks.mjs';
 import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
 
 (function buildSeo() {
@@ -87,6 +88,7 @@ import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
   const comparisons=buildComparisonPages({root,products,amazonLinks,partners,pageHead,page,e,u,amazonStatement});
   const collections=buildSearchCollections({root,products,amazonLinks,partners,pageHead,page,e,u});
   const editorialPolicy=buildEditorialPolicy({root,data,products,amazonLinks,partners,pageHead,page,e,u});
+  const popularPicks=buildPopularPicks({root,existingProducts:products,affiliates:partners,amazonPartnerTag:JSON.parse(readFileSync(join(root,'affiliate-links.json'),'utf8')).amazonPartnerTag,pageHead,page,e,u});
   for (const p of products) {
     if (!/^[a-z0-9-]{4,64}$/.test(p.id) || !/^https:\/\//.test(p.officialUrl)) throw Error('Référence ou lien fabricant invalide');
     const rel = 'montres/' + p.id + '.html';
@@ -234,6 +236,7 @@ import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
   // Publishing twice must not duplicate canonical tags, structured data or internal links.
   collection=collection.replace(/<!-- AM_SEO_LINKS_START -->[\s\S]*?<!-- AM_SEO_LINKS_END -->\s*/g,'');
   collection=collection.replace(/<!-- AM_SEO_GUIDES_START -->[\s\S]*?<!-- AM_SEO_GUIDES_END -->\s*/g,'');
+  collection=collection.replace(/<!-- AM_POPULAR_PICKS_START -->[\s\S]*?<!-- AM_POPULAR_PICKS_END -->\s*/g,'');
   collection=collection.replace(/<!-- AM_SEO_COMPARISONS_START -->[\s\S]*?<!-- AM_SEO_COMPARISONS_END -->\s*/g,'');
   collection=collection.replace(/<!-- AM_SEO_CATEGORIES_START -->[\s\S]*?<!-- AM_SEO_CATEGORIES_END -->\s*/g,'');
   collection=collection.replace(/<!-- AM_SEO_HEAD_START -->[\s\S]*?<!-- AM_SEO_HEAD_END -->/g,'');
@@ -246,6 +249,7 @@ import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
   if (!collection.includes('<section class="faq" id="faq"')) throw Error('Point insertion SEO absent');
   collection=collection.replace('<section class="faq" id="faq"','<!-- AM_EDITORIAL_POLICY_START -->'+editorialPolicy.teaser+'<!-- AM_EDITORIAL_POLICY_END -->\n<section class="faq" id="faq"');
   collection=collection.replace('<section class="faq" id="faq"', '<!-- AM_SEO_LINKS_START -->' + selection + '<!-- AM_SEO_LINKS_END -->\n<section class="faq" id="faq"');
+  collection=collection.replace('<section class="am-editorial-gallery" id="amEditorialGallery"', '<!-- AM_POPULAR_PICKS_START -->'+popularPicks.teaser+'<!-- AM_POPULAR_PICKS_END -->\n<section class="am-editorial-gallery" id="amEditorialGallery"');
   collection=collection.replace('<section class="am-editorial" id="histoire"', '<!-- AM_SEO_GUIDES_START -->'+guideCards+'<!-- AM_SEO_GUIDES_END -->\n<!-- AM_SEO_CATEGORIES_START -->'+collections.homeCards+'<!-- AM_SEO_CATEGORIES_END -->\n<!-- AM_SEO_COMPARISONS_START -->'+comparisons.comparisonCards+'<!-- AM_SEO_COMPARISONS_END -->\n<section class="am-editorial" id="histoire"');
   collection=collection.replace(/<title>[^<]+<\/title>/,'<title>Montres homme et femme : 15 modèles à comparer | Atelier Montres</title>');
   collection=collection.replace(/<meta name="description" content="[^"]*">/,'<meta name="description" content="Découvrez 15 montres Casio, Citizen, Seiko, Tissot et autres : modèles quartz, solaires et automatiques, photos des références exactes, caractéristiques documentées et guides pour bien choisir.">');
@@ -262,7 +266,7 @@ import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
   const firstPhotoResponsive=firstPhotoApproved?responsiveSrcset(root,firstPhoto,'./'):'';
   const photoPreload=firstPhotoSrc?'<link rel="preload" as="image" fetchpriority="high" href="'+e(firstPhotoSrc)+'"'+(firstPhotoResponsive?' imagesrcset="'+e(firstPhotoResponsive)+'" imagesizes="(max-width: 760px) 92vw, 520px"':'')+'>':'';
   const socialImage=firstPhotoUrl?'<meta property="og:image" content="'+e(firstPhotoUrl)+'"><meta property="og:image:alt" content="Citizen Tsuyosa NJ0150-81X — photographie de la montre au cadran vert"><meta name="twitter:image" content="'+e(firstPhotoUrl)+'">':'';
-  const headExtra=`${searchConsoleMeta}${photoPreload}<link rel="canonical" href="${e(homepage)}"><meta name="robots" content="index,follow,max-image-preview:large"><meta property="og:type" content="website"><meta property="og:locale" content="fr_FR"><meta property="og:site_name" content="Atelier Montres"><meta property="og:title" content="15 montres à comparer · Atelier Montres"><meta property="og:description" content="Sélection indépendante de 15 montres, fiches et guide d'achat."><meta property="og:url" content="${e(homepage)}">${socialImage}<meta name="twitter:card" content="${firstPhotoUrl?'summary_large_image':'summary'}"><link rel="stylesheet" href="./seo-guides.css">${umamiScripts("./")}<script type="application/ld+json">${schema({'@context':'https://schema.org','@graph':[{'@type':'WebSite',name:'Atelier Montres',url:homepage,inLanguage:'fr-FR'},{'@type':'ItemList',name:'15 montres à découvrir',numberOfItems:products.length,itemListElement:products.map((p,i)=>({'@type':'ListItem',position:i+1,name:p.brand+' '+p.model,url:u('montres/'+p.id+'.html')}))}]})}</script>`;
+  const headExtra=`${searchConsoleMeta}${photoPreload}<link rel="canonical" href="${e(homepage)}"><meta name="robots" content="index,follow,max-image-preview:large"><meta property="og:type" content="website"><meta property="og:locale" content="fr_FR"><meta property="og:site_name" content="Atelier Montres"><meta property="og:title" content="15 montres à comparer · Atelier Montres"><meta property="og:description" content="Sélection indépendante de 15 montres, fiches et guide d'achat."><meta property="og:url" content="${e(homepage)}">${socialImage}<meta name="twitter:card" content="${firstPhotoUrl?'summary_large_image':'summary'}"><link rel="stylesheet" href="./seo-guides.css"><link rel="stylesheet" href="./popular-picks.css">${umamiScripts("./")}<script type="application/ld+json">${schema({'@context':'https://schema.org','@graph':[{'@type':'WebSite',name:'Atelier Montres',url:homepage,inLanguage:'fr-FR'},{'@type':'ItemList',name:'15 montres à découvrir',numberOfItems:products.length,itemListElement:products.map((p,i)=>({'@type':'ListItem',position:i+1,name:p.brand+' '+p.model,url:u('montres/'+p.id+'.html')}))}]})}</script>`;
   collection=collection.replace('</head>','<!-- AM_SEO_HEAD_START -->'+headExtra+'<!-- AM_SEO_HEAD_END --></head>');
   if(firstPhotoSrc){
     const emptyHero='<div class="am-hero-watch" id="heroWatch" role="img" aria-label="Photographie de Citizen Tsuyosa NJ0150-81X"></div>';
@@ -304,7 +308,7 @@ import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
   }
   writeFileSync(join(root,'index.html'),collection);
   writeFileSync(join(root,'affiliation.html'),collection);
-  const paths=['','conseiller.html',editorialPolicy.path,guidePath,...editorialPaths,...collections.paths,...comparisons.comparisonPaths,...products.map(p=>'montres/'+p.id+'.html')];
+  const paths=['','conseiller.html',editorialPolicy.path,popularPicks.path,guidePath,...editorialPaths,...collections.paths,...comparisons.comparisonPaths,...products.map(p=>'montres/'+p.id+'.html')];
   const xml=`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${paths.map(path=>`  <url><loc>${e(u(path))}</loc></url>`).join('\n')}\n</urlset>\n`;
   writeFileSync(join(root,'sitemap.xml'),xml);
   if (partners.enabled) {
