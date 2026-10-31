@@ -215,16 +215,16 @@ for(const p of popularFeed.products){
   assert.equal((detailHtml.match(/class="am-extra-fact"/g)||[]).length,4,'Four useful watch facts per model: '+p.id);
   assert.equal((detailHtml.match(/class="am-extra-editorial-grid"/g)||[]).length,1,
     'One source-backed decision section per watch: '+p.id);
-  assert.doesNotMatch(detailHtml,/<img\\b/i,'Unlicensed new photos may not be embedded as if approved: '+p.id);
-  assert.doesNotMatch(detailHtml,/"offers"\\s*:|"price"\\s*:|"aggregateRating"\\s*:/,'No false checkout offer, pricing or rating: '+p.id);
-  const script=detailHtml.match(/<script type="application\\/ld\\+json">([\\s\\S]*?)<\\/script>/);
+  assert.doesNotMatch(detailHtml,/<img\b/i,'Unlicensed new photos may not be embedded as if approved: '+p.id);
+  assert.doesNotMatch(detailHtml,/"offers"\s*:|"price"\s*:|"aggregateRating"\s*:/,'No false checkout offer, pricing or rating: '+p.id);
+  const script=detailHtml.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
   assert.ok(script,'Product JSON-LD missing: '+p.id);
   const graph=JSON.parse(script[1])['@graph'];
   assert.deepEqual(graph.map(g=>g['@type']),['Product','BreadcrumbList']);
   assert.equal(graph[0].url,manifest.siteUrl+detailPath);
   assert.equal(graph[0].model,p.model);
   assert.equal(graph[0].additionalProperty.length,4);
-  const productReferral=detailHtml.match(/<a href="(https:\\/\\/www\\.amazon\\.fr\\/s\\?k=[^"]+)"[^>]*data-amazon-search-id="([^"]+)"[^>]*>/);
+  const productReferral=detailHtml.match(/<a href="(https:\/\/www\.amazon\.fr\/s\?k=[^"]+)"[^>]*data-amazon-search-id="([^"]+)"[^>]*>/);
   assert.equal(Boolean(productReferral),manifest.affiliateActive,'Only affiliate-enabled storefronts may create tagged search exits: '+p.id);
   if(productReferral){
     assert.equal(productReferral[2],p.id,'Affiliate tracking must identify exact merchant search context');
