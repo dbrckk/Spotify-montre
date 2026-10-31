@@ -61,8 +61,8 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
   const card=(p,front=false)=>{
     const claim=p.marketEvidence.kind==='editorial'?'Sélection éditoriale':p.marketEvidence.kind==='manufacturer_bestseller'?'Signal marque':'Signal distributeur';
     return '<article class="am-pick-card am-pick-'+e(p.style)+(verifiedLinks.has(p.id)?' am-pick-direct':'')+'" id="pick-'+e(p.id)+'"'
-      +' data-watch-id="'+e(p.id)+'" data-tier="'+e(p.tier)+'" data-style="'+e(p.style)+'"'
-      +' data-movement="'+movementKind(p)+'" data-search="'+e([p.brand,p.model,p.category,p.movement,p.lead].join(' '))+'">'
+      +' data-pick-id="'+e(p.id)+'" data-pick-tier="'+e(p.tier)+'" data-pick-style="'+e(p.style)+'"'
+      +' data-pick-movement="'+movementKind(p)+'" data-pick-search="'+e([p.brand,p.model,p.category,p.movement,p.lead].join(' '))+'">'
       +'<div class="am-pick-visual" role="group" aria-label="Repère graphique non contractuel, sans photographie du modèle"><span class="am-pick-visual-top">'+e(p.category)+'</span>'
       +'<span class="am-pick-visual-name">'+e(p.brand)+'</span><span class="am-pick-visual-ref">'+e(p.model)+'</span>'
       +'<span class="am-pick-visual-caption">Repère graphique · photo exacte chez le fabricant</span></div>'
