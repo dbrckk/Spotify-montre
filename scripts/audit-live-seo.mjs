@@ -4,7 +4,9 @@
  * Checks crawlability, canonical consistency, published inventory and images.
  * Does not claim that Google has indexed or ranked any page.
  */
-import {mkdirSync,writeFileSync,appendFileSync} from 'node:fs';
+import {mkdirSync,writeFileSync,appendFileSync,readFileSync} from 'node:fs';
+import {fileURLToPath} from 'node:url';
+import {resolve,dirname} from 'node:path';
 
 const base=new URL(process.env.SEO_AUDIT_BASE_URL||'https://atelier-montres-selection-fr.onrender.com/');
 if(base.protocol!=='https:'||base.pathname!=='/'||base.search||base.hash){
@@ -13,7 +15,11 @@ if(base.protocol!=='https:'||base.pathname!=='/'||base.search||base.hash){
 const issues=[],checked=[];
 const origin=base.origin;
 const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
-const report={checkedAt:new Date().toISOString(),site:base.href,pages:0,issues,checked};
+const repoRoot=resolve(dirname(fileURLToPath(import.meta.url)),'..');
+const popular=JSON.parse(readFileSync(resolve(repoRoot,'site/selection-populaires.json'),'utf8')).products;
+const verified=JSON.parse(readFileSync(resolve(repoRoot,'research/amazon-fr-popular-verified.json'),'utf8')).verifiedProducts;
+if(popular.length!==13||Object.keys(verified).length!==1)throw Error('Source catalog and Amazon direct-link registry changed: update audit assertions deliberately');
+const report={checkedAt:new Date().toISOString(),site:base.href,pages:0,issues,checked,commercialPages:0,commercialChecks:0};
 
 async function request(url){
   let error;
@@ -76,6 +82,30 @@ async function auditPage(url){
   if(!/<meta\b[^>]*\bname=["']description["'][^>]*\bcontent=["'][^"']{40,}/i.test(html)){
     issues.push(path+': missing substantial meta description');
   }
+  const model=popular.find(p=>path==='/montres/'+p.id+'.html');
+  if(model){
+    report.commercialPages++;
+    const expect=(condition,message)=>{report.commercialChecks++;if(!condition)issues.push(path+': '+message);};
+    expect(html.includes('data-popular-watch-id="'+model.id+'"'),'incorrect or missing product identity');
+    expect(html.includes('<h1>'+model.brand+' '+model.model+'</h1>'),'incorrect product H1');
+    expect(html.includes('href="'+model.officialUrl+'"'),'manufacturer URL absent');
+    expect(html.includes('href="'+model.marketEvidence.url+'"'),'research source absent');
+    expect((html.match(/class="am-extra-fact"/g)||[]).length===4,'expected four model-specific facts');
+    expect(html.includes('En tant que Partenaire Amazon'),'affiliate disclosure absent');
+    expect((html.match(/class="am-extra-related"/g)||[]).length===1,'internal comparison links absent');
+    const direct=verified[model.id];
+    if(direct){
+      expect(html.includes('https://www.amazon.fr/dp/'+direct.asin+'?tag=drackk04-21'),
+        'verified exact-model Amazon.fr destination missing');
+      expect(html.includes('data-amazon-product="'+model.id+'"'),'direct product attribution missing');
+      expect(!html.includes('data-amazon-search-id="'+model.id+'"'),'verified ASIN should not silently revert to a search');
+    }else{
+      expect(html.includes('data-amazon-search-id="'+model.id+'"'),'unverified model must use a labeled search');
+      expect(!html.includes('data-amazon-product="'+model.id+'"'),'unverified model must not claim an exact ASIN');
+      expect(html.includes('https://www.amazon.fr/s?k='),'Amazon.fr search destination missing');
+    }
+    expect(/rel="[^"]*sponsored/.test(html),'paid outbound link must be labeled sponsored');
+  }
 }
 async function audit(){
   const robots=await fetchText('robots.txt','text/plain');
@@ -116,7 +146,11 @@ async function audit(){
       }
     }catch(e){issues.push('seo-manifest.json: invalid JSON ('+e.message+')');}
   }
-  report.pages=urls.length;
+  for(const p of popular){
+    if(!urls.includes(new URL('montres/'+p.id+'.html',base).href))
+      issues.push('sitemap.xml: missing individual commercial landing page '+p.id);
+  }
+    report.pages=urls.length;
   const queue=urls.filter(url=>{
     try{return new URL(url).origin===origin;}catch{return false;}
   });
@@ -126,6 +160,8 @@ async function audit(){
       if(url)await auditPage(url);
     }
   }));
+  if(report.commercialPages!==popular.length)
+    issues.push('Commercial routes fetched: expected '+popular.length+', got '+report.commercialPages);
   // Check that Google can retrieve the HTML verification proof without relying
   // on environment variables or on a browser executing JavaScript.
   const verificationPath='google6d385495b6d15d5e.html';
@@ -161,7 +197,7 @@ mkdirSync('artifacts',{recursive:true});
 writeFileSync('artifacts/live-seo-audit.json',JSON.stringify(report,null,2)+'\n');
 const summary='### Atelier Montres — live SEO audit\n\n'
   +'- Pages in sitemap: '+report.pages+'\n'
-  +'- Pages fetched successfully: '+checked.length+'\n'
+  +'- Pages fetched successfully: '+checked.length+'\n'\n  +'- Commercial landing pages checked: '+report.commercialPages+' / '+popular.length+' ('+report.commercialChecks+' integrity assertions)\\n'
   +'- Issues: '+issues.length+'\n\n'
   +(issues.length?'#### Detected problems\n'+issues.map(x=>'- '+x).join('\n'):'All public technical SEO checks passed.')+'\n';
 if(process.env.GITHUB_STEP_SUMMARY)appendFileSync(process.env.GITHUB_STEP_SUMMARY,summary);
