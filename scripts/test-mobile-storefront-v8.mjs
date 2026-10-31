@@ -91,7 +91,7 @@ try{
  assert.equal(await popularPage.locator('#am-picks-list .am-pick-card:visible').count(),37,
    'Reset must restore all 37 products and not remove existing links');
  assert.equal(await popularPage.locator('.am-picks-tier:visible').count(),3);
- assert.equal(await popularPage.locator('#am-pick-filter-count').innerText(),'30 modèles sur 30');
+ assert.equal(await popularPage.locator('#am-pick-filter-count').innerText(),'37 modèles sur 37');
  await popularPage.locator('#am-filter-query').fill('Tsuyósa');
  assert.equal(await popularPage.locator('#am-picks-list .am-pick-card:visible').count(),1,
    'Accent-insensitive exact-model lookup should find Citizen Tsuyosa');
