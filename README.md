@@ -1,5 +1,11 @@
 # Atelier Montres — boutique de montres indépendante
 
+## Liens Amazon exacts et photographie sous licence — 31 octobre 2026
+
+**Trois ASIN complémentaires documentés** (G-SHOCK GW-M5610U-1, Casio F-91W-1YER et A168WG-9EF) remplacent les recherches correspondantes par des fiches Amazon.fr directes, avec contrôle strict des variantes. Les 27 autres montres complémentaires, dont les neuf SKMEI, conservent des recherches clairement signalées tant que leur référence française exacte n'est pas démontrée. Les sources historiques ne garantissent ni le prix ni le stock actuel.
+
+**Photos des modèles complémentaires :** le site accepte désormais les packshots locaux uniquement si une autorisation commerciale du titulaire est enregistrée, avec empreintes SHA-256 vérifiées au build. Aucun visuel vendeur non autorisé n'est mis en ligne. Une demande de licences SKMEI est prête avec les références et les conditions de publication, mais ne peut pas être envoyée sans service e-mail connecté. [Sources, demande à SKMEI et mécanisme de conformité](docs/droits-photos-et-liens-directs-2026-10-31.md).
+
 ## Collection accessible SKMEI — 31 octobre 2026
 
 Le catalogue éditorial passe à **45 références** : 15 montres comparées et **30 modèles complémentaires**, dont **9 SKMEI** à petit budget (digitales sport, rétro acier, chronographes, sport chic et petit boîtier féminin). Chaque nouveauté possède sa page indexable, ses faits et son lien source, pour un **sitemap de 60 URL** après construction. L’accueil met en avant quatre modèles SKMEI et une illustration CSS originale signalée non contractuelle, sans réutiliser de photographie vendeur non autorisée.
