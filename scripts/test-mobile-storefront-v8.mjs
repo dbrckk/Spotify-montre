@@ -52,6 +52,44 @@ try{
  const popularExtent=await page.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
  assert.ok(popularExtent.scroll<=popularExtent.client+2,'Popular cards must not overflow mobile');
  await page.screenshot({path:'artifacts/mobile-popular-watch-discovery.png',fullPage:true});
+
+ // The primary catalogue is now 52 models, not two disconnected discovery experiences.
+ const allWatches=await browser.newPage({viewport:{width:393,height:852},isMobile:true,hasTouch:true,locale:'fr-FR'});
+ const allUrl=new URL('/montres/toutes-les-montres.html?compare=skmei-2056,citizen-tsuyosa#comparer',base).href;
+ assert.ok((await allWatches.goto(allUrl,{waitUntil:'domcontentloaded'}))?.ok());
+ assert.equal(await allWatches.locator('article.ud-card').count(),52,'All 52 real models must exist as static HTML');
+ await allWatches.locator('#udFilters:visible').waitFor({timeout:20000});
+ assert.equal(await allWatches.locator('#udCompareTable table').count(),1,
+   'Advisor links must be able to compare mixed core and supplementary watches');
+ assert.equal(await allWatches.locator('#udCompareTable th[scope=col]').count(),3,
+   'A mixed two-model comparison must render a table with two real watches');
+ assert.equal(await allWatches.locator('.ud-select[aria-pressed=true]').count(),2);
+ const fullExtent=await allWatches.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
+ assert.ok(fullExtent.scroll<=fullExtent.client+2,'Unified 52-watch catalogue must not overflow Android');
+ await allWatches.locator('#udSearch').fill('SKMEI 2056');
+ assert.equal(await allWatches.locator('.ud-card:visible').count(),1,'Search must work across brand and model');
+ await allWatches.locator('#udFilters button[type=reset]').click();
+ assert.equal(await allWatches.locator('.ud-card:visible').count(),52,'Clearing filters must restore all 52');
+ await allWatches.locator('#udBrand').selectOption('SKMEI');
+ assert.equal(await allWatches.locator('.ud-card:visible').count(),10,'All ten SKMEI models must be discoverable together');
+ await allWatches.locator('#udBrand').selectOption('all');
+ await allWatches.locator('#udSize').selectOption('unknown');
+ assert.ok(await allWatches.locator('.ud-card:visible').count()>0,'Unknown dimensions must have an honest filter');
+ assert.ok(await allWatches.locator('.ud-card:visible').count()<52,'Unknown dimensions must be distinguished from known values');
+ await allWatches.close();
+ const allNoJs=await browser.newPage({viewport:{width:393,height:852},isMobile:true,hasTouch:true,javaScriptEnabled:false});
+ await allNoJs.goto(new URL('/montres/toutes-les-montres.html',base).href,{waitUntil:'domcontentloaded'});
+ assert.equal(await allNoJs.locator('.ud-card:visible').count(),52,'52 model links must remain usable without JS');
+ assert.equal(await allNoJs.locator('#udFilters:visible').count(),0,'No-JS filters must not be presented as functional');
+ await allNoJs.close();
+ const unifiedAdvisor=await browser.newPage({viewport:{width:393,height:852},isMobile:true,hasTouch:true});
+ await unifiedAdvisor.goto(new URL('/conseiller.html',base).href,{waitUntil:'domcontentloaded'});
+ await unifiedAdvisor.locator('.advisor-card').first().waitFor({state:'visible',timeout:15000});
+ assert.match(await unifiedAdvisor.locator('#advisorStatus').innerText(),/parmi 52/);
+ const link52=await unifiedAdvisor.locator('#advisorCompare').getAttribute('href');
+ assert.ok(link52?.includes('toutes-les-montres.html?compare='));
+ await unifiedAdvisor.close();
+
  const popularPage=await browser.newPage({viewport:{width:393,height:852},isMobile:true,hasTouch:true,locale:'fr-FR'});
  await popularPage.goto(new URL('/montres/modeles-populaires.html',base).href,{waitUntil:'domcontentloaded'});
  assert.equal(await popularPage.locator('article.am-pick-card').count(),37,'All supplemental watch models on one source-backed page');
