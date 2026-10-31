@@ -132,3 +132,6 @@
 .detail-decision-evidence a:focus-visible{outline:3px solid #b58b4b;outline-offset:3px}
 @media(max-width:800px){.detail-decision-grid{grid-template-columns:1fr;gap:9px}.detail-decision-card{padding:17px 18px;gap:8px}}
 @media(max-width:450px){.detail-decision{margin:26px 0 32px;padding:20px 14px}.detail-decision-heading h2{font-size:29px}.detail-decision-card{padding:16px}.detail-decision-evidence{padding:14px}}
+
+/* HTML hidden attribute must win over author display:inline-flex on fast links. */
+.detail-fast-nav #detailAdviceShortcut[hidden]{display:none}
