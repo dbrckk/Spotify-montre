@@ -209,7 +209,7 @@ assert.match(unifiedHtml,/id="udFilters"[^>]*hidden/,'Filter controls invisible 
 assert.match(unifiedHtml,/id="udCompareTable"/,'Comparison must be accessible');
 assert.ok(unifiedHtml.includes('src="../unified-discovery.js"'));
 assert.ok(unifiedHtml.includes('href="../unified-discovery.css"'));
-assert.match(home,/href="./montres/toutes-les-montres.html"/,'Homepage must link the full catalogue');
+assert.ok(home.includes('href="./montres/toutes-les-montres.html"'),'Homepage must link the full catalogue');
 assert.equal(unified.products.filter(p=>p.merchantKind==='search').length,manifest.popularAffiliateSearchLinks);
 assert.equal(unified.products.filter(p=>p.merchantKind==='direct').length,
   manifest.affiliateActive?manifest.affiliateCount+manifest.popularAffiliateDirectLinks:0);
@@ -217,7 +217,7 @@ for(const product of unified.products){
   assert.equal(product.detailUrl,'./montres/'+product.id+'.html');
   assert.ok(unifiedHtml.includes('id="modele-'+product.id+'"'),'Unified card missing: '+product.id);
   assert.equal(typeof product.officialUrl,'string');
-  if(product.photoUrl)assert.match(product.photoUrl,/^./assets/(?:watches|watches-popular)/[a-z0-9-]+.webp$/);
+  if(product.photoUrl)assert.ok(/^\.\/assets\/(?:watches|watches-popular)\/[a-z0-9-]+\.webp$/.test(product.photoUrl),'Only local, exact model WebP is eligible');
   if(product.kind==='supplemental' && product.diameterMm!==null)
     assert.match(product.caseText,/diam[eè]tre/i,'Do not infer diameter from a rectangular width');
 }
