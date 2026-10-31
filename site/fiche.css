@@ -102,3 +102,9 @@
 .detail-evidence a{display:inline-flex;align-items:center;min-height:44px;font:700 12px/1.5 system-ui,sans-serif;color:#28583c;text-underline-offset:4px}
 .detail-evidence a:focus-visible{outline:3px solid #c49f60;outline-offset:3px}
 @media(max-width:620px){.detail-evidence{padding:15px 16px;margin-top:17px}.detail-evidence p{font-size:11px}}
+
+/* Keep the shopper's last filtered view one tap away on Android. */
+.detail-return-link{display:inline-flex;align-items:center;min-height:44px;margin:0 0 13px;color:#28523a;text-decoration:underline;text-underline-offset:4px;font:700 12px/1.5 system-ui,sans-serif}
+.detail-return-link:hover{color:#122f22}
+.detail-return-link:focus-visible{outline:3px solid #bd9855;outline-offset:3px}
+@media(max-width:620px){.detail-return-link{margin-bottom:10px}}
