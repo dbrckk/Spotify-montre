@@ -87,3 +87,11 @@ Le propriétaire a confirmé la vérification de la propriété **Préfixe d'URL
 - Conseiller indexable : URL canonique stable, titre descriptif de l'outil en quatre critères, métadonnées de partage et balisage `WebPage` sans promesse de résultat enrichi.
 - Contrôles de non-régression : absence d'ancienne FAQ contradictoire, une seule URL canonique, génération SEO idempotente et JSON-LD cohérent avec l'URL publique.
 - Mesure suivante : rapport **Pages** et **Performances** dans Google Search Console pour les 27 URL autres que l'accueil, sans annonce de position ou de croissance non mesurée.
+
+
+## Product search pages — 31 October 2026
+
+- Titles now include exact brand/model, documented movement, and diameter when known. Descriptions cite recorded facts without inferring price or stock.
+- All 15 pages have model-specific purchase checks. Unknown diameter and water resistance remain explicitly unknown. Automatic, quartz, and solar advice reflect the actual movement.
+- Three links to related models now include the locally published manufacturer photograph declared authorized by the owner; these lower-page images are lazy-loaded with correct intrinsic sizes. The hero photo remains high priority with actual pixel dimensions.
+- Existing SEO validation now checks the claims and the photo treatments for every model. No measured ranking, CTR, INP, CLS, or LCP improvement is asserted without field or lab evidence.

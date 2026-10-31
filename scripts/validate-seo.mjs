@@ -83,6 +83,19 @@ for(const product of feed.products){
   assert.doesNotMatch(html,/"offers"\s*:|"price"\s*:|"availability"\s*:|"aggregateRating"\s*:/,'No unverified commercial schema');
   assert.ok(home.includes('./'+path),'Missing static crawlable home link: '+path);
   assert.match(html,/class="spec-matrix"/,'Model-to-model comparisons required');
+  const expectedMovement={quartz:'quartz',automatic:'automatique','eco-drive':'solaire'}[product.movement];
+  const expectedTitle=product.brand+' '+product.model+' : montre '+expectedMovement+(product.specs?.diameter?' '+product.specs.diameter:'')+' | Atelier Montres';
+  assert.ok(html.includes('<title>'+expectedTitle+'</title>'),'Search title contains exact model and sourced specs: '+product.id);
+  assert.match(html,/<section class="seo-buying-checks"/,'Practical checks before purchase must be rendered');
+  assert.ok(html.includes('code exact '+product.model),'Advice must use model-specific reference');
+  assert.ok(html.includes(product.specs?.diameter?'Diamètre documenté : '+product.specs.diameter:'Diamètre non renseigné'),'Diameter claims must only use confirmed facts');
+  assert.ok(html.includes(product.specs?.waterResistance?'Étanchéité indiquée : '+product.specs.waterResistance:'Étanchéité non renseignée'),'Water resistance claims must not be invented');
+  assert.equal((html.match(/class="seo-related-photo"/g)||[]).length,3,'Three photo comparison cards required');
+  assert.equal((html.match(/loading="lazy" decoding="async"/g)||[]).length,3,'Below-fold related images must be lazy-loaded');
+  if(product.photoReview?.publicUsageApproved===true){
+    assert.ok(html.includes('width="'+product.photoReview.localWidth+'" height="'+product.photoReview.localHeight+'" decoding="async" fetchpriority="high"'),'High priority hero uses real source dimensions');
+  }
+
   assert.ok(html.includes('montre.html?id='+encodeURIComponent(product.id)), 'Interactive product page must remain accessible');
   assert.equal(html.includes('cloud.umami.is/script.js'),analyticsConfigured,'SEO page Umami opt-in only');
   if(analyticsConfigured)assert.match(html,/data-watch-id=/);
