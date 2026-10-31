@@ -192,7 +192,7 @@ for(const name of ['revue-photo.html','revue-photo.js','revue-photo.css']){
 }
 assert.ok(existsSync(resolve(root,'seo-watch-art.js')),'SEO watch illustrations script is required');
 const sitemap=read('sitemap.xml');
-assert.equal((sitemap.match(/<loc>/g)||[]).length,28);
+assert.equal((sitemap.match(/<loc>/g)||[]).length,29);
 const comparisons=JSON.parse(read('comparaisons-montres.json'));
 assert.equal(comparisons.version,1);
 assert.equal(comparisons.comparisons.length,4);
