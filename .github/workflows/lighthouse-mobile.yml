@@ -23,14 +23,16 @@ jobs:
           node-version: '22'
       - name: Validate report script
         run: node --check scripts/report-lighthouse-mobile.mjs
-      - name: Lighthouse mobile — accueil et fiche produit
+      - name: Three independent mobile runs on homepage, one product page
         run: |
           mkdir -p artifacts
           CHROME="$(command -v google-chrome || command -v chromium || true)"
           test -n "$CHROME"
-          npx --yes lighthouse@12 "https://atelier-montres-selection-fr.onrender.com/" --chrome-path="$CHROME" --chrome-flags="--headless --no-sandbox" --only-categories=performance --form-factor=mobile --max-wait-for-load=45000 --output=json --output-path=artifacts/lighthouse-mobile-home.json --quiet
+          for n in 1 2 3; do
+            npx --yes lighthouse@12 "https://atelier-montres-selection-fr.onrender.com/" --chrome-path="$CHROME" --chrome-flags="--headless --no-sandbox" --only-categories=performance --form-factor=mobile --max-wait-for-load=45000 --output=json --output-path="artifacts/lighthouse-mobile-home-$n.json" --quiet
+          done
           npx --yes lighthouse@12 "https://atelier-montres-selection-fr.onrender.com/montres/casio-mtp-1302.html" --chrome-path="$CHROME" --chrome-flags="--headless --no-sandbox" --only-categories=performance --form-factor=mobile --max-wait-for-load=45000 --output=json --output-path=artifacts/lighthouse-mobile-product.json --quiet
-      - name: Build report
+      - name: Build median-based, inspectable report
         run: node scripts/report-lighthouse-mobile.mjs
       - name: Save Lighthouse results
         if: always()
