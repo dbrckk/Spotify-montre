@@ -78,15 +78,32 @@ def extract_files(path: Path) -> list[tuple[str, bytes]]:
     return items
 
 
-def number(value: str, percentage: bool = False) -> float:
+def number(value: str, percentage: bool = False, integer: bool = False) -> float:
     raw = str(value or "").strip().replace("\u00a0", "").replace("\u202f", "").replace(" ", "")
     if raw in {"", "-", "~"}:
         return 0.0
     if percentage and raw.endswith("%"):
-        raw = raw[:-1].replace(",", ".")
-        return float(raw) / 100
-    raw = raw.replace(",", ".")
-    return float(raw)
+        raw = raw[:-1]
+        percentage = True
+    if integer:
+        # GSC counts are whole numbers. Group separators in exports can be
+        # commas or dots; never misread "1,234" as 1.234 impressions.
+        if re.fullmatch(r"\d{1,3}(?:[.,]\d{3})+", raw):
+            raw = re.sub(r"[.,]", "", raw)
+        number_value = float(raw.replace(",", "."))
+        if not number_value.is_integer():
+            raise ValueError("Les clics et impressions doivent etre des entiers")
+        return number_value
+    if "," in raw and "." in raw:
+        # For decimals, use the rightmost punctuation mark as decimal separator.
+        if raw.rfind(",") > raw.rfind("."):
+            raw = raw.replace(".", "").replace(",", ".")
+        else:
+            raw = raw.replace(",", "")
+    else:
+        raw = raw.replace(",", ".")
+    result = float(raw)
+    return result / 100 if percentage else result
 
 
 def parse_table(name: str, content: bytes, site: str):
@@ -110,8 +127,8 @@ def parse_table(name: str, content: bytes, site: str):
     host = urlsplit(site).netloc.lower()
     for index, row in enumerate(reader, start=2):
         try:
-            clicks = number(row.get(clicks_key, "0"))
-            impressions = number(row.get(impr_key, "0"))
+            clicks = number(row.get(clicks_key, "0"), integer=True)
+            impressions = number(row.get(impr_key, "0"), integer=True)
             position = number(row.get(position_key, "0"))
         except (ValueError, TypeError):
             raise ValueError(f"{name}:{index} : nombre invalide")
