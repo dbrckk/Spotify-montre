@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "researchedOn": "2026-10-31",
+  "marketplace": "amazon.fr",
+  "publishable": false,
+  "status": "candidates_only_no_amazon_fr_detail_confirmation",
+  "explanation": "Les références ci-dessous sont des candidats de recoupement, non des ASIN confirmés sur Amazon.fr. Ne pas utiliser pour produire de lien /dp/ tant que titre, référence, variante et disponibilité du listing amazon.fr ne sont pas contrôlés sur la fiche publique ou via les outils du compte Amazon Partenaires.",
+  "candidates": [
+    {
+      "productId": "tissot-gentleman-auto",
+      "model": "T1274071104100",
+      "asinCandidate": "B07XTVQ3W7",
+      "status": "unverified_direct_amazon_fr",
+      "evidence": [
+        "https://www.vivre-riche.com/test-de-la-montre-automatique-tissot-gentleman-t127-407-11-041-00",
+        "https://www.preisgenau.de/1648823068-product"
+      ],
+      "note": "Des sources secondaires relient cet ASIN à la référence complète ; la fiche Amazon.fr elle-même était inaccessible lors du contrôle."
+    },
+    {
+      "productId": "casio-gw-m5610u-1",
+      "model": "GW-M5610U-1",
+      "asinCandidate": "B09BCPP68Q",
+      "status": "unverified_amazon_fr_marketplace",
+      "evidence": [
+        "https://cacciaofferte.it/offerte/moda-e-accessori/B09BCPP68Q",
+        "https://www.merchantwords.com/asin/us/B09BCPP68Q"
+      ],
+      "note": "ASIN relié à GW-M5610U-1ER sur un marché étranger ; aucune confirmation directe du même ASIN sur amazon.fr ni de l'édition vendue en France."
+    }
+  ]
+}
