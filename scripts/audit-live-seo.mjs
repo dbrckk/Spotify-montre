@@ -90,7 +90,10 @@ async function audit(){
   if(xml!==null){
     if(!/<urlset\b/.test(xml))issues.push('sitemap.xml: missing urlset root');
     urls=[...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>decodeXml(m[1].trim()));
-    if(urls.length<28)issues.push('sitemap.xml: expected at least 28 pages, found '+urls.length);
+    if(urls.length!==29)issues.push('sitemap.xml: expected exactly 29 documented pages, found '+urls.length);
+    if(!urls.includes(new URL('montres/methode-selection.html',base).href)){
+      issues.push('sitemap.xml: published selection methodology is missing');
+    }
     if(new Set(urls).size!==urls.length)issues.push('sitemap.xml: duplicated URLs');
     for(const url of urls){
       try{
