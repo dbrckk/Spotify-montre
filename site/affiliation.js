@@ -491,6 +491,19 @@
  });
  if($('affCompareClose'))$('affCompareClose').addEventListener('click',()=>dialog.close());
  if(dialog)dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.close()});
+ // A modal must never leave keyboard focus on the underlying document.
+ // Chrome can expose <body> as activeElement at the edge of a Tab cycle;
+ // cycle only controls that are actually rendered inside the dialog.
+ if(dialog)dialog.addEventListener('keydown',event=>{
+   if(event.key!=='Tab'||!dialog.open)return;
+   const controls=[...dialog.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')]
+     .filter(el=>el.getClientRects().length&&getComputedStyle(el).visibility!=='hidden'&&!el.closest('[inert]'));
+   if(!controls.length){event.preventDefault();dialog.focus();return;}
+   const current=controls.indexOf(document.activeElement);
+   const next=event.shiftKey?(current<=0?controls.length-1:current-1):(current+1)%controls.length;
+   event.preventDefault();
+   controls[next].focus();
+ });
  fetch('./selection-affiliation.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('data');return r.json()}).then(x=>{
   if(x?.version!==1||!Array.isArray(x.products)||x.products.length!==15||x.affiliateEnabled!==false)throw Error('invalid');
   data=x.products.filter(valid);if(data.length!==15)throw Error('incomplete catalogue');
