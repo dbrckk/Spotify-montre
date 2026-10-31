@@ -7,6 +7,11 @@ on:
       - scripts/sync-popular-watch-images.py
       - scripts/popular-photo-rights.mjs
       - .github/workflows/source-popular-watch-photos.yml
+  pull_request:
+    paths:
+      - scripts/sync-popular-watch-images.py
+      - scripts/popular-photo-rights.mjs
+      - .github/workflows/source-popular-watch-photos.yml
   workflow_dispatch:
 
 permissions:
@@ -54,6 +59,7 @@ jobs:
               raise SystemExit("No real packshot could be sourced: do not publish an empty batch as a success")
           PY
       - name: Commit reviewed images, provenance and refreshed deployment package
+        if: github.event_name != 'pull_request'
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
