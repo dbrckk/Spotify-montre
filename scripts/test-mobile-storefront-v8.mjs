@@ -312,7 +312,7 @@ await page.locator('#affGrid .aff-card input[type="checkbox"]').nth(0).check();
  const slideSwap=page.locator('.am-compare-mobile-card').nth(1).locator('.am-compare-inline-swap select');
  assert.ok(await slideSwap.isVisible(),'Mobile comparison shows a native accessible replacement selector');
  assert.equal(await slideSwap.inputValue(),beforeInline[1]);
- assert.equal(await slideSwap.locator('option[value="'+beforeInline[0]+'"]').isDisabled(),true,'Already-selected model cannot replace a second slot');
+ assert.equal(await slideSwap.locator('option[value="'+beforeInline[0]+'"]').evaluate(option=>option.disabled),true,'Native option must reject a watch already selected in another slot');
  await slideSwap.selectOption('seiko-5');
  const afterInline=await page.evaluate(()=>JSON.parse(sessionStorage.getItem('atelier-montres-comparison-v1')));
  assert.deepEqual(afterInline,[beforeInline[0],'seiko-5'],'Inline replacement preserves the other slot and the chosen order');
