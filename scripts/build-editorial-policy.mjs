@@ -12,6 +12,7 @@ export function buildEditorialPolicy({root,data,products,amazonLinks,partners,pa
   const brands=[...new Set(products.map(p=>p.brand))].sort((a,b)=>a.localeCompare(b,'fr'));
   const sourced=products.filter(p=>p.photoReview?.publicUsageApproved===true&&p.photoReview?.localUrl==='./assets/watches/'+p.id+'.webp').length;
   const diameters=products.filter(p=>Boolean(p.specs?.diameter)).length;
+  const verifiedModels=products.filter(p=>p.specReview?.sourceKind==='manufacturer_exact_reference'&&p.specReview?.sourceUrl===p.officialUrl&&Array.isArray(p.specReview?.verifiedFields)&&p.specReview.verifiedFields.length>0);
   const confirmedAmazon=[...amazonLinks.keys()].length;
   if(count!==15||!brands.length||confirmedAmazon>count||sourced>count||diameters>count)throw Error('Données de méthode éditoriale incohérentes');
   const title='Notre méthode : sélectionner et comparer 15 montres | Atelier Montres';
@@ -38,6 +39,8 @@ export function buildEditorialPolicy({root,data,products,amazonLinks,partners,pa
         '<p>Marques présentes dans cette sélection :</p><ul class="seo-method-brands">'+brandItems+'</ul>',
         '<h2>2. Nous n’inventons pas les données absentes</h2>',
         '<p>Les caractéristiques présentées proviennent des informations enregistrées pour la référence : type de mouvement, diamètre du boîtier, verre et étanchéité lorsque ces données sont disponibles. À défaut, les fiches affichent « À vérifier » ou « Non renseigné ». Une taille ou une étanchéité supposée ne devient pas un fait simplement parce qu’un modèle ressemble à un autre.</p>',
+        '<p>Nous avons recoupé les caractéristiques techniques de '+verifiedModels.length+' modèles directement avec les fiches officielles de leurs références exactes ; les contrôles datés figurent sur les pages concernées. Ce nombre ne s’applique ni à la totalité du catalogue, ni aux droits de reproduction des photos.</p>',
+        '<p>Pour un boîtier rectangulaire, les dimensions L × l × H ne sont pas un diamètre : elles sont distinguées dans nos fiches et exclues du filtre de diamètre. Si deux diamètres apparaissent sur un site fabricant sans distinction claire, nous ne choisissons pas arbitrairement l’un d’eux.</p>',
         '<p>La présence d’une mesure ne garantit pas le confort. L’épaisseur, la longueur entre cornes et le bracelet peuvent modifier le rendu au poignet. Le guide <a href="./taille-boitier-montre.html">choisir la taille de sa montre</a> explique les précautions utiles.</p>',
         '<h2>3. Les photos ne prouvent pas un essai en conditions réelles</h2>',
         '<p>'+sourced+' photographies locales correspondent à des modèles identifiés dans le catalogue et sont publiées sur la base d’une autorisation déclarée par le responsable du site. Cette déclaration ne constitue pas une vérification juridique indépendante des droits d’image. Nos pages ne présentent pas de mesures de précision réalisées au laboratoire, de résultats de tests de résistance, ni d’essais longue durée.</p>',
