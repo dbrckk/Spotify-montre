@@ -423,6 +423,7 @@ await page.locator('#affGrid .aff-card input[type="checkbox"]').nth(0).check();
  await unavailable.goto(new URL('/montre.html?id=citizen-tsuyosa',base).href,{waitUntil:'domcontentloaded'});
  await unavailable.locator('#detailShell').waitFor({state:'visible'});
  assert.equal(await unavailable.locator('#detailEditorialAdvice').isHidden(),true,'Unavailable supplementary feed remains hidden');
+ assert.equal(await unavailable.locator('#detailAdviceShortcut').isHidden(),true,'Unavailable editorial feed must not leave broken navigation visible');
  assert.match(await unavailable.locator('#detailTitle').innerText(),/NJ0150-81X/);
  assert.ok(await unavailable.locator('#detailOfficial').isVisible());
  await unavailable.close();
