@@ -49,7 +49,12 @@ try{
  await popularPage.goto(new URL('/montres/modeles-populaires.html',base).href,{waitUntil:'domcontentloaded'});
  assert.equal(await popularPage.locator('article.am-pick-card').count(),13,'All supplemental watch models on one source-backed page');
  assert.equal(await popularPage.locator('.am-picks-tier').count(),3,'All three editorial ranges are represented');
- assert.equal(await popularPage.locator('a[data-amazon-search-id]').count(),13,'Tracked Amazon search for each new model');
+ assert.equal(await popularPage.locator('a[data-amazon-search-id]').count(),12,'Twelve unverified variants must use labeled search results');
+ assert.equal(await popularPage.locator('a[data-amazon-product]').count(),1,'Only one Amazon.fr listing has exact-model evidence');
+ const confirmedGshock=popularPage.locator('#pick-casio-gw-m5610u-1 a[data-amazon-product]');
+ assert.equal(await confirmedGshock.getAttribute('href'),'https://www.amazon.fr/dp/B09BCPP68Q?tag=drackk04-21');
+ assert.equal(await confirmedGshock.getAttribute('data-amazon-placement'),'popular');
+ assert.match(await confirmedGshock.getAttribute('rel'),/sponsored/);
  assert.equal(await popularPage.locator('img').count(),0,'No unauthorized new product photography');
  const popularPageExtent=await popularPage.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
  assert.ok(popularPageExtent.scroll<=popularPageExtent.client+2,'Supplemental page must not overflow Android');
@@ -57,6 +62,7 @@ try{
  // High-intent landing pages: each supplemental model must have a distinct,
  // indexable, source-backed product page and an honest Amazon search exit.
  const supplemental=JSON.parse(readFileSync('site/selection-populaires.json','utf8')).products;
+ const verifiedPopular=JSON.parse(readFileSync('research/amazon-fr-popular-verified.json','utf8')).verifiedProducts;
  for(const watch of supplemental){
    const response=await popularPage.goto(new URL('/montres/'+watch.id+'.html',base).href,{waitUntil:'domcontentloaded'});
    assert.ok(response?.ok(),'Supplementary model product page reachable: '+watch.id);
@@ -71,17 +77,30 @@ try{
      'Three live comparable models must have internal landing links: '+watch.id);
    assert.equal(await popularPage.locator('img').count(),0,
      'Unlicensed supplemental photo must not be published: '+watch.id);
-   assert.equal(await popularPage.locator('a[data-amazon-search-id]').count(),1,
-     'Affiliate search action must be distinct from a verified-ASIN product link: '+watch.id);
-   const commercial=popularPage.locator('a[data-amazon-search-id]');
-   assert.equal(await commercial.getAttribute('data-amazon-search-id'),watch.id);
-   assert.match(await commercial.getAttribute('rel'),/sponsored/);
-   const merchant=new URL(await commercial.getAttribute('href'));
-   assert.equal(merchant.origin,'https://www.amazon.fr');
-   assert.equal(merchant.pathname,'/s');
-   assert.equal(merchant.searchParams.get('tag'),'drackk04-21');
+ assert.ok(verifiedPopular[watch.id]||watch.id!=='casio-gw-m5610u-1',
+   'The confirmed reference must exist in the verified Amazon registry');
+ const verified=verifiedPopular[watch.id];
+ const commercial=popularPage.locator(verified?'a[data-amazon-product]':'a[data-amazon-search-id]');
+ assert.equal(await commercial.count(),1,
+   'Paid destination must be exactly one product or search link: '+watch.id);
+ assert.equal(await commercial.getAttribute(verified?'data-amazon-product':'data-amazon-search-id'),watch.id);
+ assert.match(await commercial.getAttribute('rel'),/sponsored/);
+ const merchant=new URL(await commercial.getAttribute('href'));
+ assert.equal(merchant.origin,'https://www.amazon.fr');
+ assert.equal(merchant.searchParams.get('tag'),'drackk04-21');
+ if(verified){
+   assert.equal(merchant.pathname,'/dp/'+verified.asin,'Use only a source-verified exact ASIN: '+watch.id);
+   assert.equal(await popularPage.locator('a[data-amazon-search-id]').count(),0,
+     'Never mix a direct link and a search CTA for the same confirmed model: '+watch.id);
+   assert.match(await popularPage.locator('.am-extra-disclosure').innerText(),/Correspondance du code modèle vérifiée/,
+     'Exact-match evidence and price/stock limitations must be visible: '+watch.id);
+ }else{
+   assert.equal(merchant.pathname,'/s','Non-confirmed watches must remain search links: '+watch.id);
    assert.ok(merchant.searchParams.get('k').includes(watch.model),
-     'Search must include exact manufacturer model: '+watch.id);
+     'Search must include the manufacturer model reference: '+watch.id);
+   assert.equal(await popularPage.locator('a[data-amazon-product]').count(),0,
+     'Unverified watches must not publish direct ASINs: '+watch.id);
+ }
    assert.equal(await popularPage.locator('.am-extra-actions a').last().getAttribute('href'),
      watch.officialUrl,'Official photos link must be model-specific: '+watch.id);
    const overflow=await popularPage.evaluate(()=>({
@@ -99,7 +118,7 @@ try{
  }));
  assert.ok(narrow.scroll<=narrow.client+2,'Supplemental watch landing must reflow at 320 CSS px');
  await popularPage.close();
- console.log('PASS: 13 model-specific SEO watch pages, sponsored search integrity, manufacturer photos, source facts and Android reflow');
+ console.log('PASS: 13 SEO watch pages, one verified Amazon.fr ASIN, twelve honest searches, exact sources and Android reflow');
  const shopFirst=await page.evaluate(()=>{
    const ids=['gammes','montres','amEditorialGallery','histoire'];
    const positions=ids.map(id=>document.getElementById(id)?.getBoundingClientRect().top+window.scrollY);

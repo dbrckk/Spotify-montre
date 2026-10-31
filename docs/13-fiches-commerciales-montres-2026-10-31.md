@@ -10,7 +10,7 @@ Chaque fiche contient :
 2. Quatre informations techniques documentées : mouvement, boîtier, verre et étanchéité.
 3. Une analyse documentaire originale : intérêt, réserve avant achat et source de popularité lorsqu'elle existe.
 4. Le lien vers le fabricant où consulter les **vraies photographies** et les caractéristiques complètes.
-5. Une recherche Amazon.fr balisée **`tag=drackk04-21`**, clairement signalée comme lien rémunéré. Le code de modèle est inclus dans les termes de recherche, mais **l'ASIN et la variante ne sont pas encore certifiés**.
+5. Un lien Amazon.fr balisé **`tag=drackk04-21`** et signalé comme rémunéré : **une fiche produit directe** pour la G-SHOCK GW-M5610U-1ER (ASIN B09BCPP68Q confirmé sur une page Amazon.fr), et **douze recherches par code modèle** pour les références non recoupées. Un ASIN exact n'atteste ni prix, ni vendeur, ni stock.
 6. Trois pistes de comparaison déjà documentées parmi les 15 montres du catalogue existant, avec maillage vers leurs pages.
 7. Des repères concrets pour vérifier le vendeur, la variante, le prix, les retours et la garantie avant toute commande.
 
@@ -21,21 +21,21 @@ Le carrousel de six modèles en page d'accueil et les treize cartes de la collec
 - Le contenu provient de `site/selection-populaires.json`. La documentation comporte la source exacte de chaque modèle et le statut de son signal de popularité. Les sélections de Montre.com, Casio ou Citizen ne doivent pas être réinterprétées comme des statistiques nationales ou Amazon.
 - Les **13 liens produits ASIN précédemment vérifiés**, les photos du comparateur, ses fonctions et l'ID du compte ne changent pas.
 - Les nouveaux modèles n'utilisent **aucune photographie non autorisée**, avis client, tarif, inventaire ou note fictive ; les données structurées `Product` contiennent uniquement marque, référence et caractéristiques, sans `Offer`, `Review`, `AggregateRating` ou image non vérifiée.
-- `research/amazon-fr-popular-asin-candidates.json` conserve deux candidats **non publiables** (Tissot Gentleman, G-SHOCK GW-M5610U), identifiés par des sources secondaires. Un ASIN d'une boutique étrangère n'est pas une preuve d'une fiche Amazon.fr équivalente. Aucun lien `/dp/` nouveau n'est généré avant contrôle exact chez Amazon.fr.
+- `research/amazon-fr-popular-verified.json` documente la correspondance **GW-M5610U-1ER / B09BCPP68Q** sur la fiche Amazon.fr, dont l'instantané indexé avait environ deux mois. Le code fournisseur est rapproché de la version européenne suffixée `ER` et sa date de contrôle est explicite ; aucune disponibilité courante n'est alléguée. `research/amazon-fr-popular-asin-candidates.json` conserve le seul candidat **non publiable** Tissot Gentleman. Toute future promotion `/dp/` nécessite preuve exacte et validation fail-closed par `scripts/popular-verified-affiliate.mjs`.
 - Les liens affiliés sont disponibles pendant l'inscription, mais le statut d'approbation finale et la réalité des commissions doivent être mesurés sur Amazon Partenaires.
 - La présence de liens affiliés ne constitue pas un avis personnalisé, une recommandation de prix ou la garantie qu'un vendeur commercialise la variante recherchée.
 
 ## Tests obligatoires
 
 - `node scripts/build-seo.mjs && node scripts/build-seo.mjs` : construction reproductible/idempotente.
-- `node scripts/validate-seo.mjs` : 13 nouvelles URL canoniques, `Product` / `BreadcrumbList`, quatre caractéristiques, sources, non-publication des images, absence d'offres fictives, lien search + tag + disclosure.
+- `node scripts/validate-seo.mjs` : 13 nouvelles URL canoniques, `Product` / `BreadcrumbList`, quatre caractéristiques, sources, non-publication des images, absence d'offres fictives, 12 recherches + 1 ASIN vérifié + identifiant Partenaires + transparence.
 - `scripts/test-mobile-storefront-v8.mjs` : **13 routes** testées à 393 px avec contrôle de contenu, liens sortants, source fabricant, débordement, et réagencement à 320 px ; captures Citizen 37 mm et Tissot Gentleman.
 - Audit WCAG strict et Lighthouse mobile avant de déclarer une version publique stable.
 - `scripts/check-affiliate-publication.mjs` : les scénarios d'activation/désactivation des liens sont exécutés en environnement isolé.
 
 ## Suite commerciale prioritaire
 
-1. Confirmer les ASIN sur **amazon.fr** depuis les fiches publiques ou via les outils du compte Partenaires ; vérifier le modèle et la variante exacts. Ne jamais importer automatiquement un ASIN étranger.
+1. Confirmer les **douze ASIN encore non validés sur amazon.fr** depuis les fiches publiques ou via les outils du compte Partenaires ; vérifier code complet et variante exacte. Ne jamais importer automatiquement un ASIN étranger. Le G-SHOCK GW-M5610U-1ER est désormais le premier ASIN publié sur preuve Amazon.fr directe.
 2. Obtenir des autorisations explicites de réutilisation des photographies des nouvelles références, ou disposer d'images originales réellement représentatives de la montre.
 3. Mesurer le taux de clic sortant par modèle avec les rapports Amazon et, si configuré, les événements Umami anonymisés, puis réduire les étapes pour les meilleures références.
 4. Fournir les mentions légales réelles du responsable de site ; à ce stade il est interdit d'inventer identité ou justificatifs de licences.

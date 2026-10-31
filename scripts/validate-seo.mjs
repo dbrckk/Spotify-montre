@@ -10,7 +10,8 @@ const manifest=JSON.parse(read('seo-manifest.json'));
 assert.equal(manifest.productCount,15);
 assert.equal(manifest.popularAdditionalCount,13,'Thirteen researched models complement the 15 photo-backed core products');
 assert.equal(manifest.popularDetailCount,13,'Every supplemental model requires a dedicated factual landing page');
-assert.equal(manifest.popularAffiliateSearchLinks,manifest.affiliateActive?13:0,'Tagged search links only when affiliate programme is enabled');
+assert.equal(manifest.popularAffiliateDirectLinks,manifest.affiliateActive?1:0,'Only source-verified supplementary ASINs may become direct product links');
+assert.equal(manifest.popularAffiliateSearchLinks,manifest.affiliateActive?12:0,'All remaining supplemental products require labeled Amazon searches');
 const insightData=JSON.parse(read('editorial-insights.json'));
 assert.equal(insightData.version,1);
 assert.equal(Object.keys(insightData.products).length,15,'15 unique editorial briefs required');
@@ -170,8 +171,12 @@ for(const marker of ['AM_SEO_LINKS_START','AM_SEO_LINKS_END','AM_SEO_HEAD_START'
 }
 assert.equal((home.match(/rel="canonical"/g)||[]).length,1,'Homepage has exactly one canonical link');
 
-// Every supplemental model has exact manufacturer evidence and a link to
-// search results, NOT an invented verified Amazon ASIN or commercial offer.
+// Every supplemental model has manufacturer evidence. Only explicitly
+// source-confirmed Amazon.fr ASINs can become direct product links.
+const exactPopular=JSON.parse(readFileSync(resolve(root,'../research/amazon-fr-popular-verified.json'),'utf8'));
+const exactPopularLinks=exactPopular.verifiedProducts;
+assert.equal(Object.keys(exactPopularLinks).length,1,'ASIN promotion requires a source-verified registry entry');
+assert.equal(exactPopularLinks['casio-gw-m5610u-1'].asin,'B09BCPP68Q','Actual Amazon.fr G-SHOCK source code must be used');
 const popularFeed=JSON.parse(read('selection-populaires.json'));
 const popularPath='montres/modeles-populaires.html';
 const popularHtml=read(popularPath);
@@ -224,23 +229,40 @@ for(const p of popularFeed.products){
   assert.equal(graph[0].url,manifest.siteUrl+detailPath);
   assert.equal(graph[0].model,p.model);
   assert.equal(graph[0].additionalProperty.length,4);
-  const productReferral=detailHtml.match(/<a href="(https:\/\/www\.amazon\.fr\/s\?k=[^"]+)"[^>]*data-amazon-search-id="([^"]+)"[^>]*>/);
-  assert.equal(Boolean(productReferral),manifest.affiliateActive,'Only affiliate-enabled storefronts may create tagged search exits: '+p.id);
-  if(productReferral){
-    assert.equal(productReferral[2],p.id,'Affiliate tracking must identify exact merchant search context');
-    const merchant=new URL(productReferral[1].replace(/&amp;/g,'&'));
-    assert.equal(merchant.searchParams.get('tag'),'drackk04-21');
-    assert.ok(merchant.searchParams.get('k').includes(p.model),'Results should search the complete model reference');
-    assert.match(productReferral[0],/rel="noopener noreferrer nofollow sponsored"/,'Affiliate search must be disclosed');
+  const direct=exactPopularLinks[p.id];
+  const expectedMerchant=direct
+    ?'https://www.amazon.fr/dp/'+direct.asin+'?tag=drackk04-21'
+    :'https://www.amazon.fr/s?k='+encodeURIComponent((p.brand+' '+p.model).slice(0,130))+'&amp;tag=drackk04-21';
+  if(manifest.affiliateActive){
+    assert.ok(detailHtml.includes('href="'+expectedMerchant+'"'),'Exact merchant destination missing on individual watch page: '+p.id);
+    assert.ok(popularHtml.includes('href="'+expectedMerchant+'"'),'Merchant destination must match source-led collection: '+p.id);
+    assert.ok(detailHtml.includes('data-amazon-'+(direct?'product':'search-id')+'="'+p.id+'"'),
+      'Distinct product vs search tracking required: '+p.id);
+    assert.match(detailHtml,/rel="noopener noreferrer nofollow sponsored"/,'Paid merchant exit must be clearly marked: '+p.id);
+    if(direct){
+      assert.ok(detailHtml.includes('Correspondance du code modèle vérifiée'),'Direct link must document model evidence: '+p.id);
+      assert.ok(detailHtml.includes('prix, vendeur et disponibilité restent à contrôler'),'No unverified stock claim: '+p.id);
+      assert.ok(!detailHtml.includes('data-amazon-search-id="'+p.id+'"'),'Verified product must not masquer search results: '+p.id);
+    }else{
+      assert.ok(detailHtml.includes('Le lien ouvre des résultats de recherche'),'Search must warn about different variants: '+p.id);
+      assert.ok(!detailHtml.includes('data-amazon-product="'+p.id+'"'),'No invented exact ASIN: '+p.id);
+    }
+  }else{
+    assert.ok(!detailHtml.includes('data-amazon-search-id="'+p.id+'"')&&!detailHtml.includes('data-amazon-product="'+p.id+'"'),
+      'Inactive affiliate settings cannot publish paid links: '+p.id);
   }
 }
 assert.doesNotMatch(popularHtml,/<img\b/i,'Do not display copied manufacturer photographs without validated licences');
 assert.doesNotMatch(popularHtml,/"offers"\s*:|"aggregateRating"\s*:|"price"\s*:/,'No invented structured pricing or ratings');
-const trackedResults=popularHtml.match(/href="https:\/\/www\.amazon\.fr\/s\?k=[^"]+?&amp;tag=drackk04-21"/g)||[];
+const trackedResults=popularHtml.match(/data-amazon-search-id=/g)||[];
+const trackedDirect=popularHtml.match(/data-amazon-product=/g)||[];
 const sponsoring=popularHtml.match(/rel="noopener noreferrer nofollow sponsored"/g)||[];
-assert.equal(trackedResults.length,manifest.affiliateActive?13:0,'Every new Amazon link must be a disclosed tagged search, not an unverified product page');
-assert.equal(sponsoring.length,manifest.affiliateActive?13:0,'All new Amazon exits must carry rel=sponsored');
-assert.doesNotMatch(popularHtml,/amazon\.fr\/dp\/|amazon\.fr\/gp\/product\//,'Do not invent ASINs for new watches');
+assert.equal(trackedResults.length,manifest.popularAffiliateSearchLinks,'Only unverified models may have search links');
+assert.equal(trackedDirect.length,manifest.popularAffiliateDirectLinks,'Only source-confirmed models may have direct ASIN links');
+assert.equal(sponsoring.length,manifest.affiliateActive?13:0,'All paid links must carry sponsored relation');
+assert.equal((popularHtml.match(/amazon\.fr\/dp\/B09BCPP68Q/g)||[]).length,manifest.affiliateActive?1:0,
+  'Exactly one G-SHOCK ASIN is confirmed on the source-backed selection');
+assert.doesNotMatch(popularHtml,/amazon\.fr\/gp\/product\//,'No unverified direct product destinations');
 assert.match(popularHtml,/recherche Amazon/i,'Visitor must be warned that search results may contain different variants');
 
 const browseOrder=[
