@@ -7,7 +7,7 @@
   const form=document.getElementById('am-pick-filters');
   const grid=document.getElementById('am-picks-list');
   if(!form||!grid)return;
-  const cards=Array.from(grid.querySelectorAll('.am-pick-card[data-watch-id]'));
+  const cards=Array.from(grid.querySelectorAll('.am-pick-card[data-pick-id]'));
   const sections=Array.from(grid.querySelectorAll('.am-picks-tier'));
   const count=document.getElementById('am-pick-filter-count');
   const empty=document.getElementById('am-pick-filter-empty');
@@ -18,14 +18,14 @@
   if(!cards.length||!sections.length||!count||!empty||!query||!style||!movement||!tier)return;
   const normalize=value=>String(value||'').toLocaleLowerCase('fr-FR')
     .normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
-  const haystack=new Map(cards.map(card=>[card,normalize(card.dataset.search||card.textContent)]));
+  const haystack=new Map(cards.map(card=>[card,normalize(card.dataset.pickSearch||card.textContent)]));
   function apply(){
     const tokens=normalize(query.value).split(/\s+/).filter(Boolean);
     let shown=0;
     for(const card of cards){
-      const matches=(!style.value||card.dataset.style===style.value)
-        &&(!movement.value||card.dataset.movement===movement.value)
-        &&(!tier.value||card.dataset.tier===tier.value)
+      const matches=(!style.value||card.dataset.pickStyle===style.value)
+        &&(!movement.value||card.dataset.pickMovement===movement.value)
+        &&(!tier.value||card.dataset.pickTier===tier.value)
         &&tokens.every(token=>haystack.get(card).includes(token));
       card.hidden=!matches;
       if(matches)shown++;
