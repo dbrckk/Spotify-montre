@@ -8,6 +8,12 @@
  // mobile visitors get a photographic gallery, desktop gets editorial cards.
  const viewGallery=$('affViewGallery'),viewDetails=$('affViewDetail');
  const VIEW_KEY='atelier-montres-catalogue-view-v1';
+ // Account for the *actual* two-column mobile gallery instead of telling
+ // browsers each thumbnail takes 92vw (which wastes image transfer bytes).
+ // The expanded detail layout remains a full-width photo on narrow screens.
+ const imageSizesForView=mode=>mode==='gallery'
+   ?'(max-width: 350px) 92vw, (max-width: 760px) 46vw, (max-width: 980px) 31vw, 23vw'
+   :'(max-width: 680px) 92vw, (max-width: 1040px) 46vw, 31vw';
  if(viewGallery&&viewDetails){
    let initial=null;
    try{const stored=localStorage.getItem(VIEW_KEY);if(stored==='gallery'||stored==='detail')initial=stored;}catch(_){}
@@ -15,6 +21,11 @@
    const choose=mode=>{
      const selected=mode==='gallery'?'gallery':'detail';
      grid.dataset.view=selected;
+     // The image candidates must track the actual current CSS presentation.
+     // Updating sizes in place preserves favorite, comparison and focus state.
+     grid.querySelectorAll('img.aff-product-photo[srcset]').forEach(img=>{
+       img.sizes=imageSizesForView(selected);
+     });
      viewGallery.setAttribute('aria-pressed',String(selected==='gallery'));
      viewDetails.setAttribute('aria-pressed',String(selected==='detail'));
    };
@@ -78,6 +89,11 @@
        button.setAttribute('aria-label','Retirer '+p.brand+' '+p.model+' de la comparaison');
        if(p.photoReview?.publicUsageApproved===true&&p.photoReview?.localUrl==='./assets/watches/'+p.id+'.webp'){
          const img=make('img');img.src=p.photoReview.localUrl;img.alt='';img.width=40;img.height=40;img.decoding='async';
+         // A 40px comparison chip should not transfer a full-size watch photo.
+         const candidates=responsivePhotoSrcset(p);
+         if(candidates){img.srcset=candidates;img.sizes='40px';img.onerror=()=>{
+           img.removeAttribute('srcset');img.removeAttribute('sizes');img.onerror=null;img.src=p.photoReview.localUrl;
+         };}
          button.append(img);
        }
        button.append(make('span','am-compare-chip-name',p.brand+' '+p.model),make('span','am-compare-chip-remove','×'));
@@ -96,7 +112,7 @@
      const img=make('img','aff-product-photo');img.alt=p.brand+' '+p.model+' — photographie authentique';img.loading='lazy';img.decoding='async';img.referrerPolicy='no-referrer';
      if(Number.isInteger(photo?.localWidth)&&Number.isInteger(photo?.localHeight)){img.width=photo.localWidth;img.height=photo.localHeight;}
      const responsive=responsivePhotoSrcset(p);
-     if(responsive){img.srcset=responsive;img.sizes='(max-width: 620px) 92vw, (max-width: 940px) 46vw, 340px';}
+     if(responsive){img.srcset=responsive;img.sizes=imageSizesForView(grid.dataset.view);}
      let sourceIndex=0;img.onerror=()=>{
        // A missing derivative must not hide a real watch on an older deployment.
        if(img.srcset){img.removeAttribute('srcset');img.removeAttribute('sizes');img.src=sources[0];return;}
@@ -149,7 +165,14 @@
      const picture=make('span','am-recent-image');
      if(p.photoReview?.publicUsageApproved===true&&p.photoReview?.localUrl==='./assets/watches/'+p.id+'.webp'){
        const img=make('img');img.src=p.photoReview.localUrl;img.alt='';img.loading='lazy';img.decoding='async';img.width=120;img.height=120;
-       img.onerror=()=>{img.remove();picture.append(make('span','am-recent-photo-missing','Photo indisponible'))};
+       const candidates=responsivePhotoSrcset(p);
+       if(candidates){img.srcset=candidates;img.sizes='120px';}
+       img.onerror=()=>{
+         // Fallback to the same authorized local original if a CDN still
+         // serves an older snapshot without a derivative.
+         if(img.hasAttribute('srcset')){img.removeAttribute('srcset');img.removeAttribute('sizes');img.src=p.photoReview.localUrl;return;}
+         img.remove();picture.append(make('span','am-recent-photo-missing','Photo indisponible'));
+       };
        picture.append(img);
      }else picture.append(make('span','am-recent-photo-missing','Voir le modèle'));
      const label=make('span','am-recent-name');
