@@ -101,8 +101,8 @@ const styleMap={sport:'sport',retro:'retro',compact:'minimal',steel:'classic',dr
 const supplement=extra.map(p=>({
   id:p.id,kind:'supplemental',tier:p.tier,style:styleMap[p.style],
   movement:/automatique/i.test(p.movement)?'automatic':/solaire/i.test(p.movement)?'eco-drive':'quartz',
-  diameterMm:/diam[eè]tre\\s*(?:annonc[eé]\\s*)?(?:de\\s*)?(\\d{1,2}(?:[,.]\\d{1,2})?)\\s*mm/i.test(p.case)
-    ?Number(/diam[eè]tre\\s*(?:annonc[eé]\\s*)?(?:de\\s*)?(\\d{1,2}(?:[,.]\\d{1,2})?)\\s*mm/i.exec(p.case)[1].replace(',','.')):null
+  diameterMm:/diam[eè]tre\s*(?:annonc[eé]\s*)?(?:de\s*)?(\d{1,2}(?:[,.]\d{1,2})?)\s*mm/i.test(p.case)
+    ?Number(/diam[eè]tre\s*(?:annonc[eé]\s*)?(?:de\s*)?(\d{1,2}(?:[,.]\d{1,2})?)\s*mm/i.exec(p.case)[1].replace(',','.')):null
 }));
 const combined=[...products,...supplement];
 const sport=e.recommend(combined,{tier:'essential',style:'sport'},3);
@@ -110,6 +110,6 @@ assert.equal(sport.length,3);
 assert.ok(sport.some(x=>x.product.kind==='supplemental'),'SKMEI sport models should compete with the main collection');
 assert.equal(e.diameterMm(supplement.find(x=>x.id==='skmei-1251')),null,
  'Unknown circular diameter must not be inferred from vendor metadata');
-assert.match(read('site/conseiller.js'),/discovery-catalogue\\.json/,'Advisor must load common build output');
+assert.match(read('site/conseiller.js'),/discovery-catalogue\.json/,'Advisor must load common build output');
 assert.match(read('scripts/build-unified-discovery.mjs'),/loadApprovedPopularPhotos/,'Common feed must enforce exact-model photo permissions');
 console.log('Advisor: 52-model shared source, 15 legacy checks, 135 preference combinations and safe size handling — OK');
