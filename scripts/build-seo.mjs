@@ -251,8 +251,10 @@ import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
   if (!collection.includes('<section class="faq" id="faq"')) throw Error('Point insertion SEO absent');
   collection=collection.replace('<section class="faq" id="faq"','<!-- AM_EDITORIAL_POLICY_START -->'+editorialPolicy.teaser+'<!-- AM_EDITORIAL_POLICY_END -->\n<section class="faq" id="faq"');
   collection=collection.replace('<section class="faq" id="faq"', '<!-- AM_SEO_LINKS_START -->' + selection + '<!-- AM_SEO_LINKS_END -->\n<section class="faq" id="faq"');
+  // Repeated SEO builds must never duplicate the unified-catalogue CTA.
+  collection=collection.replace(/<!-- AM_UNIFIED_DISCOVERY_START -->[\s\S]*?<!-- AM_UNIFIED_DISCOVERY_END -->/g,'');
   collection=collection.replace('<section class="aff-advisor-teaser" aria-labelledby="advisorTeaserTitle">',
-    '<div class="wrap" style="padding-block:16px"><a class="button" href="./montres/toutes-les-montres.html">Explorer et comparer les 52 montres documentées →</a></div><section class="aff-advisor-teaser" aria-labelledby="advisorTeaserTitle">');
+    '<!-- AM_UNIFIED_DISCOVERY_START --><div class="wrap" style="padding-block:16px"><a class="button" href="./montres/toutes-les-montres.html">Explorer et comparer les 52 montres documentées →</a></div><!-- AM_UNIFIED_DISCOVERY_END --><section class="aff-advisor-teaser" aria-labelledby="advisorTeaserTitle">');
   collection=collection.replace('<section class="am-editorial-gallery" id="amEditorialGallery"', '<!-- AM_POPULAR_PICKS_START -->'+popularPicks.teaser+'<!-- AM_POPULAR_PICKS_END -->\n<section class="am-editorial-gallery" id="amEditorialGallery"');
   collection=collection.replace('<section class="am-editorial" id="histoire"', '<!-- AM_SEO_GUIDES_START -->'+guideCards+'<!-- AM_SEO_GUIDES_END -->\n<!-- AM_SEO_CATEGORIES_START -->'+collections.homeCards+'<!-- AM_SEO_CATEGORIES_END -->\n<!-- AM_SEO_COMPARISONS_START -->'+comparisons.comparisonCards+'<!-- AM_SEO_COMPARISONS_END -->\n<section class="am-editorial" id="histoire"');
   collection=collection.replace(/<title>[^<]+<\/title>/,'<title>52 montres homme et femme à découvrir | Atelier Montres</title>');
