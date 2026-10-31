@@ -322,7 +322,7 @@ for(const product of feed.products){
   if(approvedPhoto){
     assert.ok(html.includes('class="watch-photo-zoom" href="../assets/watches/'+product.id+'.webp"'),
       'Exact photograph zoom must have a no-JS local link: '+product.id);
-    assert.ok(html.includes('data-pick-id="'+product.id+'"'),
+    assert.ok(html.includes('data-watch-id="'+product.id+'"'),
       'Zoom must identify the exact model: '+product.id);
     assert.match(html,/href="\.\.\/photo-zoom\.css"/,'Shared premium photographic viewer styles missing');
     assert.match(html,/src="\.\.\/photo-zoom\.js"/,'Shared photographic viewer script missing');
@@ -394,7 +394,7 @@ for(const product of feed.products){
 
   assert.ok(html.includes('montre.html?id='+encodeURIComponent(product.id)), 'Interactive product page must remain accessible');
   assert.equal(html.includes('cloud.umami.is/script.js'),analyticsConfigured,'SEO page Umami opt-in only');
-  if(analyticsConfigured)assert.match(html,/data-pick-id=/);
+  if(analyticsConfigured)assert.match(html,/data-watch-id=/);
   const amazonMatch=amazon.links[product.id];
   if(amazonMatch) {
     const selected=config.enabled&&config.links[product.id]?config.links[product.id].url:amazonMatch.url;
@@ -469,7 +469,7 @@ for(const c of comparisons.comparisons){
     if(p.photoReview?.publicUsageApproved===true){
       assert.ok(html.includes('src="../assets/watches/'+p.id+'.webp"'),'Approved photo in head-to-head comparison: '+p.id);
     }else {
-      assert.ok(html.includes('data-pick-id="'+p.id+'"'),'Original vector fallback for unapproved comparison image: '+p.id);
+      assert.ok(html.includes('data-watch-id="'+p.id+'"'),'Original vector fallback for unapproved comparison image: '+p.id);
       assert.ok(!html.includes('src="../assets/watches/'+p.id+'.webp"'),'Never publish unapproved comparison photo: '+p.id);
     }
   }
