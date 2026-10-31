@@ -68,6 +68,9 @@ jobs:
             echo 'All registered product images already current.'
           else
             git commit -m 'assets: publish source-verified branded watch WebPs [skip ci]'
+            # SEO generation changes tracked HTML locally. Those derived files are
+            # intentionally not part of this commit; discard them before rebasing.
+            git restore --worktree .
             git fetch origin main
             git rebase -X theirs origin/main
             git push origin HEAD:main
