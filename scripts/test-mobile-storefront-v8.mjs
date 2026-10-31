@@ -116,6 +116,7 @@ try{
  await page.locator('#heroVariants button[data-watch-id="tissot-prx-quartz"]').click();
  await heroPhoto.waitFor({state:'visible',timeout:15000});
  assert.match(await heroPhoto.getAttribute('alt'),/Tissot PRX Quartz/,'Selected cover must show exact PRX photograph');
+ assert.match(await heroPhoto.getAttribute('srcset'),/watch-responsive\/tissot-prx-quartz-480\.webp/,'Switching featured watches must use local responsive WebP candidates');
  assert.equal(await page.locator('#heroVariants button[data-watch-id="tissot-prx-quartz"]').getAttribute('aria-pressed'),'true');
  assert.match(await page.locator('#heroEditorialLink').getAttribute('href'),/tissot-prx-quartz/,'Featured link must open matching product');
  await page.locator('#heroEditorialZoom').click();
@@ -131,6 +132,11 @@ try{
  await lookbook.waitFor({state:'visible',timeout:15000});
  const photoCards=page.locator('#amEditorialGrid .am-story-card');
  assert.equal(await photoCards.count(),3,'Three independently sourced real-watch editorial images');
+ const editorialImages=await page.locator('#amEditorialGrid .am-story-img').evaluateAll(imgs=>
+   imgs.map(img=>({srcset:img.getAttribute('srcset')||'',sizes:img.getAttribute('sizes')||''})));
+ assert.equal(editorialImages.length,3);
+ assert.ok(editorialImages.every(img=>img.srcset.includes('/assets/watch-responsive/')&&img.sizes.includes('82vw')),
+   'Mobile editorial cards must request responsive approved WebP photos at actual carousel width');
  for(const id of ['seiko-5','orient-bambino','tissot-prx-quartz']){
    assert.ok(await page.locator('#amEditorialGrid .am-story-card[data-watch-id="'+id+'"]').count(),'Source-backed gallery: '+id);
  }
