@@ -151,7 +151,7 @@
      if(selections.length>1)compareLink.textContent='⇄ Reprendre la comparaison ('+selections.length+')';
    }
    $('detailOfficial').href=p.officialUrl;
-   $('detailOfficial').setAttribute('aria-label','Voir '+p.model+' sur le site officiel '+p.brand);
+   $('detailOfficial').setAttribute('aria-label','Voir les photos et la fiche officielle de '+p.model+' chez '+p.brand);
    const q=encodeURIComponent((p.brand+' '+p.model).slice(0,90));
    $('detailAmazon').href='https://www.amazon.fr/s?k='+q;
    $('detailEbay').href='https://www.ebay.fr/sch/i.html?_nkw='+q;
