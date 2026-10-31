@@ -115,6 +115,10 @@
    return './montre.html?'+u.toString();
  };
  const compareTray=$('affCompareTray'),compareLabel=$('affCompareLabel'),compareSelected=$('affCompareSelected'),compareNotice=$('affCompareNotice'),compareOpen=$('affCompareOpen'),compareClear=$('affCompareClear'),dialog=$('affCompareDialog'),compareBody=$('affCompareBody');
+ const replacementDialog=$('affCompareReplaceDialog');
+ const replacementChoices=$('affReplaceChoices');
+ const replacementIncoming=$('affReplaceIncoming');
+ const replacementCancel=$('affReplaceCancel');
  let compareWarning='';
  function updateCompare(){
    compare=compare.filter(id=>data.some(p=>p.id===id)).slice(0,3);
@@ -130,7 +134,7 @@
    if(compareTray)compareTray.hidden=compare.length===0;
    if(compareLabel)compareLabel.textContent=compare.length+' montre'+(compare.length>1?'s':'')+' sélectionnée'+(compare.length>1?'s':'')+' · 3 maximum';
    if(compareOpen)compareOpen.disabled=compare.length<2;
-   if(compareNotice)compareNotice.textContent=compareWarning||(compare.length===1?'Sélectionnez une deuxième montre pour comparer.':'');
+   if(compareNotice)compareNotice.textContent=compareWarning||(compare.length===3?'3/3 · Cochez une autre montre pour remplacer un modèle.':compare.length===1?'Sélectionnez une deuxième montre pour comparer.':'');
    if(compareSelected){
      const chips=compare.map(id=>{
        const p=data.find(item=>item.id===id);
@@ -153,6 +157,54 @@
      compareSelected.replaceChildren(...chips);
    }
  }
+ function requestReplacement(incomingId){
+   const incoming=data.find(p=>p.id===incomingId);
+   if(!incoming||compare.includes(incomingId)||compare.length!==3)return;
+   if(!replacementDialog||!replacementChoices||!replacementIncoming||typeof replacementDialog.showModal!=='function'){
+     compareWarning='Limite atteinte : retirez une montre avant d’en ajouter une autre.';
+     updateCompare();return;
+   }
+   replacementIncoming.textContent=incoming.brand+' '+incoming.model;
+   const choices=compare.map((selectedId,position)=>{
+     const selected=data.find(p=>p.id===selectedId);
+     const choice=make('button','am-replace-choice');
+     choice.type='button';
+     choice.dataset.replaceId=selectedId;
+     choice.setAttribute('aria-label','Remplacer '+selected.brand+' '+selected.model+' par '+incoming.brand+' '+incoming.model);
+     if(selected.photoReview?.publicUsageApproved===true&&selected.photoReview.localUrl==='./assets/watches/'+selected.id+'.webp'){
+       const img=make('img');img.alt='';img.loading='lazy';img.decoding='async';img.width=52;img.height=52;
+       const variants=responsivePhotoSrcset(selected);
+       if(variants){img.srcset=variants;img.sizes='52px';}
+       img.onerror=()=>{
+         if(img.hasAttribute('srcset')){img.removeAttribute('srcset');img.removeAttribute('sizes');img.src=selected.photoReview.localUrl;return;}
+         img.remove();
+       };
+       img.src=selected.photoReview.localUrl;choice.append(img);
+     }
+     const label=make('span','am-replace-choice-text');
+     label.append(make('span','am-replace-choice-label','Remplacer la montre '+(position+1)),make('strong','',selected.brand+' '+selected.model));
+     choice.append(label,make('span','am-replace-choice-icon','↔'));
+     choice.addEventListener('click',()=>{
+       const slot=compare.indexOf(selectedId);
+       if(slot<0||compare.includes(incomingId))return;
+       // Replace exactly one slot; preserve the other two and session state.
+       compare[slot]=incomingId;compareWarning='';
+       replacementDialog.close();
+       render();
+       compareSelected?.querySelectorAll('.am-compare-selected-chip')[slot]?.focus();
+     });
+     return choice;
+   });
+   replacementChoices.replaceChildren(...choices);
+   compareWarning='';
+   updateCompare();
+   replacementDialog.showModal();
+   choices[0]?.focus();
+ }
+ if(replacementCancel)replacementCancel.addEventListener('click',()=>replacementDialog?.close());
+ if(replacementDialog)replacementDialog.addEventListener('click',event=>{
+   if(event.target===replacementDialog)replacementDialog.close();
+ });
  function card(p){
    const item=make('article','aff-card');item.dataset.watchId=p.id;
    const art=make('div','aff-illustration');art.dataset.tone=p.tone||'silver';
@@ -193,7 +245,7 @@
    const compareWrap=make('div','am-card-footer');
    const maker=make('a','','Photos officielles ↗');maker.href=p.officialUrl;maker.target='_blank';maker.rel='noopener noreferrer nofollow';maker.setAttribute('aria-label','Voir '+p.model+' chez '+p.brand);
    const select=make('label','am-compare-check');const cb=make('input');cb.type='checkbox';cb.checked=compare.includes(p.id);cb.setAttribute('aria-label','Comparer '+p.model);
-   cb.addEventListener('change',()=>{if(cb.checked&&!compare.includes(p.id)){if(compare.length>=3){cb.checked=false;compareWarning='Limite atteinte : retirez une montre avant d’en ajouter une autre.';updateCompare();return;}compare.push(p.id)}else compare=compare.filter(id=>id!==p.id);compareWarning='';updateCompare()});
+   cb.addEventListener('change',()=>{if(cb.checked&&!compare.includes(p.id)){if(compare.length>=3){cb.checked=false;requestReplacement(p.id);return;}compare.push(p.id)}else compare=compare.filter(id=>id!==p.id);compareWarning='';updateCompare()});
    select.append(cb,document.createTextNode(' Comparer'));compareWrap.append(maker,select);body.append(compareWrap);
    if(hasEditorialPages){
      const analysis=make('a','am-card-seo-link','Lire la fiche détaillée →');
