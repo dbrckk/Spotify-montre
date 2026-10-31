@@ -1,0 +1,56 @@
+/* Atelier Montres — source-backed discovery, no unauthorized product photos.
+   The artwork is deliberately typographic, never an exact-model rendering. */
+.am-picks{background:#f1f0e9;padding:clamp(54px,6vw,88px) 0;border-top:1px solid #dbddcf;border-bottom:1px solid #d5dacd}
+.am-picks-heading{max-width:920px;margin-bottom:26px}
+.am-picks-heading .overline{color:#846336}
+.am-picks-heading h2,.am-picks-intro h1{color:#203a2b;font:400 clamp(31px,4.8vw,54px)/1.16 Georgia,serif;letter-spacing:-.032em;margin:11px 0 16px}
+.am-picks-heading>p:last-child,.am-picks-intro>p{max-width:850px;color:#435949;font:400 16px/1.75 system-ui,sans-serif}
+.am-picks-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;align-items:stretch}
+.am-pick-card{min-width:0;display:flex;flex-direction:column;border:1px solid #d7d8ce;border-radius:8px;overflow:hidden;background:#fffdf9;box-shadow:0 15px 38px #203b2910;isolation:isolate}
+.am-pick-visual{--visual-bg:#173c32;--visual-light:#d9d6bc;--visual-ornament:#c3a978;position:relative;isolation:isolate;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:8px;overflow:hidden;aspect-ratio:1.35/1;min-height:175px;padding:22px;color:#fff;background:radial-gradient(ellipse at 76% 34%,#4c6551 0%,var(--visual-bg) 70%)}
+.am-pick-retro .am-pick-visual{--visual-bg:#354a52;--visual-light:#f2e5bc;--visual-ornament:#d0cfca}
+.am-pick-compact .am-pick-visual{--visual-bg:#674558;--visual-light:#f4dae0;--visual-ornament:#e2a6bd}
+.am-pick-dress .am-pick-visual{--visual-bg:#504838;--visual-light:#f8e9b6;--visual-ornament:#e4d4a7}
+.am-pick-steel .am-pick-visual{--visual-bg:#2d4555;--visual-light:#dce7f0;--visual-ornament:#b5d1d5}
+.am-pick-visual::before{content:'';position:absolute;top:16%;right:6%;width:145px;max-width:48%;aspect-ratio:1;border:9px solid var(--visual-ornament);border-radius:50%;opacity:.16;transform:rotate(-25deg);box-shadow:0 0 0 18px #ffffff20,0 0 0 31px #ffffff13;pointer-events:none;z-index:-1}
+.am-pick-visual-top{align-self:flex-start;border:1px solid #ffffff7a;border-radius:99px;padding:5px 10px;color:#fff7ed;font:750 11px/1.5 system-ui,sans-serif}
+.am-pick-visual-name{margin-top:auto;color:var(--visual-light);font:750 13px/1.35 system-ui,sans-serif;letter-spacing:.11em;text-transform:uppercase;overflow-wrap:anywhere}
+.am-pick-visual-ref{color:#fff;font:400 clamp(24px,2.4vw,34px)/1.17 Georgia,serif;letter-spacing:-.015em;overflow-wrap:anywhere}
+.am-pick-visual-caption{color:#ede9df;font:400 11px/1.5 system-ui,sans-serif;opacity:.9}
+.am-pick-content{padding:22px;display:flex;flex:1;flex-direction:column;align-items:stretch;gap:11px}
+.am-pick-kicker{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:7px;margin:0;color:#6b5536;font:750 11px/1.4 system-ui,sans-serif;text-transform:uppercase;letter-spacing:.035em}
+.am-pick-kicker span:last-child{background:#eff2ea;color:#355744;border-radius:3px;padding:5px 8px}
+.am-pick-content h3{color:#243f2d;font:400 clamp(22px,2.5vw,29px)/1.25 Georgia,serif;margin:0;overflow-wrap:anywhere}
+.am-pick-lead{font:400 14px/1.7 system-ui,sans-serif;color:#3f5645;margin:0}
+.am-pick-specs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:3px 0 0}
+.am-pick-specs div{min-width:0;border-top:1px solid #d8d9cf;padding-top:8px}
+.am-pick-specs dt{color:#627568;font:600 12px/1.45 system-ui,sans-serif;margin:0 0 4px}
+.am-pick-specs dd{margin:0;color:#223c2e;font:700 13px/1.5 system-ui,sans-serif;overflow-wrap:anywhere}
+.am-pick-caution{font:400 13px/1.65 system-ui,sans-serif;color:#526454;margin:0}
+.am-pick-actions{display:grid;gap:8px;margin-top:auto;padding-top:8px}
+.am-pick-actions a{display:flex;align-items:center;justify-content:center;min-width:0;min-height:47px;padding:11px 12px;border:1px solid #244b36;border-radius:4px;background:#234835;color:#fff;text-align:center;text-decoration:none;font:700 13px/1.45 system-ui,sans-serif;overflow-wrap:anywhere}
+.am-pick-actions a:hover{background:#38634d;color:#fff}
+.am-pick-actions a:last-child:not(:first-child){background:transparent;color:#264936;border-color:#b4c2b4}
+.am-pick-actions a:last-child:not(:first-child):hover{background:#edf2e9}
+.am-pick-actions a:focus-visible,.am-picks-more:focus-visible,.am-picks-tier-nav a:focus-visible,.am-pick-source a:focus-visible{outline:3px solid #b9852b;outline-offset:3px}
+.am-pick-source{color:#526557;font:400 12px/1.65 system-ui,sans-serif;margin:0}
+.am-pick-source a{color:#2d6144;text-decoration:underline;text-underline-offset:3px}
+.am-pick-note{color:#607264;font:400 12px/1.65 system-ui,sans-serif;margin:0}
+.am-picks-disclaimer{max-width:1100px;color:#56695a;font:400 13px/1.8 system-ui,sans-serif;margin:21px 0 15px}
+.am-picks-more{display:inline-flex;align-items:center;min-height:48px;padding:13px 19px;margin-top:7px;border:1px solid #244b35;border-radius:4px;color:#fff;background:#244b35;text-decoration:none;font:700 14px/1.45 system-ui,sans-serif}
+.am-picks-more:hover{background:#315d45;color:#fff}
+.am-picks-page{padding-block:30px 85px}
+.am-picks-intro{max-width:1020px;margin:25px 0 43px}
+.am-picks-intro h1{max-width:920px}
+.am-picks-intro>p{font-size:15px;line-height:1.75}
+.am-picks-tier-nav{display:flex;gap:11px;flex-wrap:wrap;margin-top:22px}
+.am-picks-tier-nav a{display:inline-flex;align-items:center;min-height:44px;padding:10px 17px;border:1px solid #b7c3b4;border-radius:4px;color:#234734;background:#eff2ea;font:700 14px/1.3 system-ui,sans-serif;text-decoration:none}
+.am-picks-tier{padding:25px 0 35px}
+.am-picks-tier h2{font:400 clamp(30px,4vw,43px)/1.2 Georgia,serif;color:#24412e;margin:0 0 20px}
+.am-picks-method{margin-top:35px;padding:25px 27px;border-left:4px solid #b49a65;background:#f0efe6;color:#455b49}
+.am-picks-method h2{font:400 30px/1.25 Georgia,serif;color:#203b2b;margin:0 0 13px}
+.am-picks-method p{font:400 14px/1.85 system-ui,sans-serif;max-width:95ch}
+.am-picks-method a{color:#235b3b}
+@media(max-width:1020px){.am-picks-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.am-picks-grid{grid-template-columns:1fr}.am-picks{padding:48px 0}.am-pick-visual{aspect-ratio:1.7/1;min-height:180px;padding:18px}.am-pick-content{padding:19px}.am-picks-heading h2{font-size:34px}.am-picks-intro h1{font-size:35px}.am-picks-page{padding-bottom:55px}.am-picks-method{padding:17px 18px}}
+@media(prefers-reduced-motion:reduce){.am-pick-card,.am-pick-actions a{transition:none}}
