@@ -1,4 +1,4 @@
-import {readFileSync,writeFileSync,mkdirSync,rmSync} from 'node:fs';
+import {readFileSync,writeFileSync,mkdirSync,rmSync,existsSync} from 'node:fs';
 import {join,resolve} from 'node:path';
 import {validateAffiliateConfig} from './affiliate-policy.mjs';
 import {buildComparisonPages} from './build-comparisons.mjs';
@@ -175,6 +175,9 @@ import {buildSearchCollections} from './build-search-collections.mjs';
   // social preview and WebPage semantics consistent with the deployed origin.
   // The delimited block makes repeated builds idempotent.
   const advisorFile=join(root,'conseiller.html');
+  // Some affiliate test fixtures intentionally ship only a minimal storefront.
+  // Enrich the adviser when present; full published-site validation requires it.
+  if(existsSync(advisorFile)) {
   let advisor=readFileSync(advisorFile,'utf8');
   advisor=advisor.replace(/<!-- AM_ADVISOR_SEO_START -->[\s\S]*?<!-- AM_ADVISOR_SEO_END -->/g,'');
   if(!advisor.includes('</head>')||!advisor.includes('<h1>')) throw Error('Conseiller : structure HTML introuvable');
@@ -197,6 +200,7 @@ import {buildSearchCollections} from './build-search-collections.mjs';
     })+'</script><!-- AM_ADVISOR_SEO_END -->';
   advisor=advisor.replace('</head>',advisorSeo+'</head>');
   writeFileSync(advisorFile,advisor);
+  }
   writeFileSync(join(root,'index.html'),collection);
   writeFileSync(join(root,'affiliation.html'),collection);
   const paths=['','conseiller.html',guidePath,...editorialPaths,...collections.paths,...comparisons.comparisonPaths,...products.map(p=>'montres/'+p.id+'.html')];
