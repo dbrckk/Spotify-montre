@@ -60,6 +60,25 @@ const advisorSchema=JSON.parse(advisorJson[1]);
 assert.equal(advisorSchema['@type'],'WebPage');
 assert.equal(advisorSchema.url,manifest.siteUrl+'conseiller.html');
 assert.equal(advisorSchema.isPartOf.url,manifest.siteUrl);
+
+// Legal transparency must be visible and accurate in every published entry point.
+const legal=read('informations-legales.html');
+const privacyDisclosure=read('confidentialite.html');
+assert.match(legal,/<h1>Informations légales et transparence<\/h1>/);
+assert.match(legal,/Informations d'identification incomplètes/,'Incomplete legal identity must not be presented as verified');
+assert.match(legal,/ne constitue pas des mentions légales complètes/);
+assert.match(privacyDisclosure,/Certains liens Amazon.fr peuvent être rémunérés/,'Privacy notice must reflect affiliate status');
+assert.doesNotMatch(privacyDisclosure,/Ces liens ne sont actuellement pas rémunérés/,'No obsolete non-affiliate claims');
+assert.match(privacyDisclosure,/stockage de session/,'Comparison persistence must be disclosed');
+assert.match(privacyDisclosure,/Informations légales/,'Legal page accessible from privacy notice');
+for(const path of ['index.html','affiliation.html','conseiller.html','marque.html','montre.html','selection.html','catalogue.html']){
+ const page=read(path);
+ assert.ok(page.includes('href="./informations-legales.html"'),path+' must link legal information');
+ assert.ok(page.includes('href="./confidentialite.html"'),path+' must link privacy');
+}
+assert.match(read('montres/citizen-tsuyosa.html'),/href="\.\.\/informations-legales\.html"/,'Generated product pages must link legal information');
+assert.match(read('montres/guide-choisir-montre.html'),/href="\.\.\/informations-legales\.html"/,'Generated guides must link legal information');
+
 assert.match(home,/<h1>/i);
 assert.ok(home.includes('Chaque lien rémunéré est identifié « lien rémunéré »'),'Commercial FAQ must describe actual affiliate status');
 assert.ok(!home.includes('Non, pas actuellement. Si nous rejoignons un programme'),'Commercial FAQ must not deny active partner links');
