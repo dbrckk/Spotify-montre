@@ -1,5 +1,13 @@
 # Atelier Montres — boutique de montres indépendante
 
+## Feuille de route active — 1er novembre 2026
+
+**Objectif :** faire d'Atelier Montres un **comparateur éditorial de montres francophone, fiable, premium et rentable par affiliation**, non une boutique vendant directement les produits.
+
+**État audité en production :** 52 modèles (15 principaux + 37 complémentaires), 70 URL de sitemap accessibles, 21 photos complémentaires publiées sur attestation du responsable du site, 9 créations IA SKMEI explicitement non contractuelles, 13 fiches Amazon.fr exactes en catalogue principal + 3 complémentaires documentées. L'affiliation Amazon est activée sur déclaration du propriétaire, **sans validation indépendante des commissions ni de l'acceptation finale**. Les mentions légales sont encore incomplètes.
+
+**[Audit intégral, objectif final et plan de réalisation priorisé](docs/AUDIT_OBJECTIF_FINAL_PLAN_2026-11-01.md)** : source de référence pour les améliorations suivantes. Les rubriques historiques ci-dessous décrivent des étapes précédentes et ne constituent pas l'état actuel du catalogue.
+
 ## Images IA éditoriales SKMEI — 1er novembre 2026
 
 Neuf créations IA originales, validées par l'éditeur, accompagnent désormais les **photos réelles** des montres SKMEI 1251, 1257, 2056, 2514, 9156, 9353, 1874, 2471 et 1220. Les visuels sont clairement qualifiés d'illustrations non contractuelles et hébergés sur le CDN Shopify du propriétaire ; les images produit réelles restent la référence en premier. [Provenance, intégration et limites](docs/skmei-illustrations-ia-2026-11-01.md).
