@@ -36,14 +36,38 @@ try{
  assert.equal(await galleryButton.getAttribute('aria-pressed'),'true');
  assert.equal(await page.locator('#affGrid .am-gallery-facts').count(),15,'Every gallery watch includes sourced movement and diameter facts');
  assert.equal(await page.locator('#affGrid').evaluate(node=>getComputedStyle(node).gridTemplateColumns.split(' ').length),2,'Photo gallery displays two responsive columns on mobile');
+ // Every manufacturer's real photo receives the same neutral stage. Optical
+ // style must not depend on the watch dial colour. Keep original pixels intact.
+ const galleryStages=await cards.evaluateAll(items=>items.map(card=>{
+   const stage=card.querySelector('.aff-illustration');
+   const picture=stage?.querySelector('img.aff-product-photo');
+   const model=card.querySelector('h3');
+   return {
+     background:stage?getComputedStyle(stage).backgroundImage:'',
+     stageWidth:stage?.getBoundingClientRect().width||0,
+     stageHeight:stage?.getBoundingClientRect().height||0,
+     modelMinHeight:model?parseFloat(getComputedStyle(model).minHeight):0,
+     picture:!!picture
+   };
+ }));
+ assert.equal(galleryStages.length,15,'All watch models must be present in the photo-first gallery');
+ assert.ok(galleryStages.every(item=>item.picture),'Every approved model retains its genuine source photo');
+ assert.equal(new Set(galleryStages.map(item=>item.background)).size,1,'Different dial colours must not change the neutral photo stage');
+ assert.ok(galleryStages.every(item=>item.stageWidth>100&&item.stageHeight>110),'Mobile photos must have a useful and consistent presentation area');
+ assert.ok(galleryStages.every(item=>item.modelMinHeight>20),'Model names must retain space for two lines');
+ const gallerySource=page.locator('#affGrid .aff-card[data-watch-id="casio-mtp-1302"] img.aff-product-photo');
+ assert.ok((await gallerySource.getAttribute('sizes'))?.includes('(max-width: 760px) 46vw'),'Two-column gallery must request half-viewport WebP images, not full-viewport bytes');
+
  await detailButton.click();
  assert.equal(await page.locator('#affGrid').getAttribute('data-view'),'detail');
  assert.equal(await page.locator('#affGrid').evaluate(node=>getComputedStyle(node).gridTemplateColumns.split(' ').length),1,'Detailed view remains one large card per row on Android');
+ assert.ok((await page.locator('#affGrid .aff-card[data-watch-id="casio-mtp-1302"] img.aff-product-photo').getAttribute('sizes'))?.includes('(max-width: 680px) 92vw'),'Full-width detailed card must advertise its actual image width');
  await page.reload({waitUntil:'domcontentloaded'});
  await page.locator('#affGrid .aff-card').first().waitFor({state:'visible'});
  assert.equal(await page.locator('#affGrid').getAttribute('data-view'),'detail','Saved viewing preference survives reload');
  await page.locator('#affViewGallery').click();
  assert.equal(await page.locator('#affGrid').getAttribute('data-view'),'gallery');
+ assert.ok((await page.locator('#affGrid .aff-card[data-watch-id="casio-mtp-1302"] img.aff-product-photo').getAttribute('sizes'))?.includes('(max-width: 760px) 46vw'),'Switching views must update existing responsive image sizes without remounting cards');
  await checkWidth('Mobile gallery and its controls');
  const chatLauncher=page.locator('#chatLauncher');
  const launcherBox=await chatLauncher.boundingBox();
