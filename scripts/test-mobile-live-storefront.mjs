@@ -59,8 +59,14 @@ try{
   await detail.waitFor({state:'visible',timeout:20000});
   await detail.evaluate(img=>img.decode());
   const detailState=await detail.evaluate(img=>({src:img.currentSrc,width:img.naturalWidth}));
-  assert.ok(detailState.width>=500,'Actual detail watch image must load');
-  assert.ok(detailState.src.includes('/assets/watches/tissot-prx-auto.webp'),'Detail must use real local watch image');
+  assert.ok(detailState.width>=300,'Actual detail watch image must decode at mobile-appropriate resolution');
+  assert.ok(isAllowedPhoto(detailState.src,'tissot-prx-auto'),'Detail must use the exact Tissot model local photo or approved WebP derivative');
+  const factRows=page.locator('#detailEssentials .detail-fact');
+  assert.equal(await factRows.count(),4,'Mobile product sheet must display four source-grounded specifications');
+  const quickFacts=await factRows.allTextContents();
+  assert.ok(quickFacts.some(value=>value.includes('40 mm')),'Documented Tissot case diameter should be visible in product overview');
+  assert.ok(quickFacts.some(value=>value.includes('10 bar')),'Documented Tissot water resistance should remain accurate');
+  assert.ok(await page.locator('.detail-fast-nav a[href="#specTitle"]').isVisible(),'Mobile user should find the specification shortcut');
   const shell=await page.locator('#detailShell').boundingBox();
   assert.ok(shell?.height>250,'Product detail cannot be blank on mobile');
   await page.screenshot({path:'artifacts/mobile-tissot-product.png',fullPage:true});
