@@ -4,6 +4,7 @@ import {resolve} from 'node:path';
 import {createHash} from 'node:crypto';
 import {responsiveSrcset} from './responsive-images.mjs';
 import {loadApprovedPopularPhotos} from './popular-photo-rights.mjs';
+import {loadPopularAiVisuals} from './popular-ai-visuals.mjs';
 const root=resolve(process.cwd(),'site');
 const read=p=>readFileSync(resolve(root,p),'utf8');
 const feed=JSON.parse(read('selection-affiliation.json'));
@@ -182,6 +183,7 @@ assert.equal(exactPopularLinks['casio-f91w-1'].asin,'B000J34HN4','Casio F-91W do
 assert.equal(exactPopularLinks['casio-a168wg-9'].asin,'B002LAS086','Casio vintage gold documented Amazon.fr ASIN');
 const popularFeed=JSON.parse(read('selection-populaires.json'));
 const approvedPopularPhotos=loadApprovedPopularPhotos({root,picks:popularFeed.products});
+const aiVisuals=loadPopularAiVisuals({root,picks:popularFeed.products});
 const popularPath='montres/modeles-populaires.html';
 const popularHtml=read(popularPath);
 const popularSitemap=read('sitemap.xml');
@@ -288,7 +290,17 @@ for(const p of popularFeed.products){
   }else{
     assert.doesNotMatch(detailHtml,/<img\b/i,'Non-registered photos must not be embedded: '+p.id);
   }
-  assert.doesNotMatch(detailHtml,/"offers"\s*:|"price"\s*:|"aggregateRating"\s*:/,'No false checkout offer, pricing or rating: '+p.id);
+  const ai=aiVisuals.get(p.id);
+  if(ai){
+    assert.ok(detailHtml.includes('id="vue-ia"'),'SKMEI visual must have a dedicated transparent editorial section: '+p.id);
+    assert.ok(detailHtml.includes('src="'+ai.url+'"'),'Source-owned AI artwork must appear on landing page: '+p.id);
+    assert.ok(popularHtml.includes('src="'+ai.url+'"'),'AI artwork must appear as secondary catalogue preview: '+p.id);
+    assert.match(detailHtml,/Interprétation IA · non contractuelle/,'AI art cannot appear as an official product photograph: '+p.id);
+    assert.match(detailHtml,/ne s’agit pas d’une photographie du produit/,'Buyer should know the art is illustrative: '+p.id);
+  }else{
+    assert.ok(!detailHtml.includes('class="am-ai-editorial"'),'No arbitrary AI renders for other watch models: '+p.id);
+  }
+  assert.doesNotMatch(detailHtml,/"offers"\\s*:|"price"\\s*:|"aggregateRating"\\s*:/,'No false checkout offer, pricing or rating: '+p.id);
   const script=detailHtml.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
   assert.ok(script,'Product JSON-LD missing: '+p.id);
   const graph=JSON.parse(script[1])['@graph'];
@@ -319,6 +331,7 @@ for(const p of popularFeed.products){
       'Inactive affiliate settings cannot publish paid links: '+p.id);
   }
 }
+assert.equal((popularHtml.match(/class="am-pick-ai-preview"/g)||[]).length,9,'Exactly nine SKMEI AI concepts must be labelled separately from manufacturer photos');
 assert.equal((popularHtml.match(/class="am-pick-licensed-photo"/g)||[]).length,approvedPopularPhotos.size,
   'Only registered photo assets may appear in supplemental catalogue');
 assert.doesNotMatch(popularHtml,/"offers"\s*:|"aggregateRating"\s*:|"price"\s*:/,'No invented structured pricing or ratings');
