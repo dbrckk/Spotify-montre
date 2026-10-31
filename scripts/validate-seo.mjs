@@ -199,6 +199,23 @@ for(const product of feed.products){
   assert.match(html,/class="watch watch-product"/,'Premium product layout required: '+product.id);
   assert.match(html,/class="photo watch-photo"/,'Photo stage must preserve the real product photo');
   assert.match(html,/class="watch-photo-caption"/,'Exact model photograph needs a source caption');
+  // Real-source zoom is a progressive enhancement on indexable pages:
+  // the exact local photo URL remains a working link without JavaScript.
+  const approvedPhoto=product.photoReview?.publicUsageApproved===true&&
+    product.photoReview?.localUrl==='./assets/watches/'+product.id+'.webp';
+  if(approvedPhoto){
+    assert.ok(html.includes('class="watch-photo-zoom" href="../assets/watches/'+product.id+'.webp"'),
+      'Exact photograph zoom must have a no-JS local link: '+product.id);
+    assert.ok(html.includes('data-watch-id="'+product.id+'"'),
+      'Zoom must identify the exact model: '+product.id);
+    assert.match(html,/href="\.\.\/photo-zoom\.css"/,'Shared premium photographic viewer styles missing');
+    assert.match(html,/src="\.\.\/photo-zoom\.js"/,'Shared photographic viewer script missing');
+    assert.match(html,/src="\.\.\/seo-product-photo\.js"/,'Indexable watch viewer bridge missing');
+  }else{
+    assert.doesNotMatch(html,/class="watch-photo-zoom"/,
+      'Unavailable or unapproved photographic source must not expose a zoom: '+product.id);
+  }
+
   assert.match(html,/class="watch-section-nav"/,'Quick in-page navigation must be present');
   for(const section of ['caracteristiques','comparatif','avant-achat','modeles-proches']){
     assert.ok(html.includes('href="#'+section+'"'),'Missing anchor link '+section+' for '+product.id);
