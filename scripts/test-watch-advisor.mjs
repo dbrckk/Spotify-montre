@@ -108,6 +108,15 @@ const combined=[...products,...supplement];
 const sport=e.recommend(combined,{tier:'essential',style:'sport'},3);
 assert.equal(sport.length,3);
 assert.ok(sport.some(x=>x.product.kind==='supplemental'),'SKMEI sport models should compete with the main collection');
+const normalisedCompact=e.recommend(combined,{size:'compact'},3);
+assert.equal(normalisedCompact.length,3,'Three recommendations must be available across normalized sources');
+assert.ok(normalisedCompact.every(entry=>entry.product&&typeof entry.product.id==='string'));
+const skmei1874=supplement.find(x=>x.id==='skmei-1874');
+assert.equal(e.diameterMm(skmei1874),31,'Verified round diameter for supplemental watch must be recognized');
+const withDocumentedRound=e.recommend([skmei1874],{size:'compact'},1);
+assert.equal(withDocumentedRound[0].matched,1,'Normalized watch diameter must count as a match');
+assert.ok(withDocumentedRound[0].details.some(x=>x.includes('31 mm')),
+  'Normalized watch diameter must be displayable without legacy specs');
 assert.equal(e.diameterMm(supplement.find(x=>x.id==='skmei-1251')),null,
  'Unknown circular diameter must not be inferred from vendor metadata');
 assert.match(read('site/conseiller.js'),/discovery-catalogue\.json/,'Advisor must load common build output');
