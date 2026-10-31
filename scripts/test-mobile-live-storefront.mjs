@@ -2,7 +2,17 @@ import assert from 'node:assert/strict';
 import {mkdirSync} from 'node:fs';
 import {chromium} from 'playwright';
 
-const base=process.env.WATCH_STOREFRONT_URL||'https://hyped-logic-88n9yg5.shipstatic.com';
+const base=process.env.WATCH_STOREFRONT_URL||'https://atelier-montres-selection-fr.onrender.com';
+const isAllowedPhoto=(url,id)=>{
+  try {
+    const resource=new URL(url),site=new URL(base);
+    return resource.origin===site.origin && (
+      resource.pathname==='/assets/watches/'+id+'.webp' ||
+      resource.pathname==='/assets/watch-responsive/'+id+'-480.webp' ||
+      resource.pathname==='/assets/watch-responsive/'+id+'-800.webp'
+    );
+  }catch{return false;}
+};
 const root=new URL(base);
 assert.equal(root.protocol,'https:');
 const browser=await chromium.launch({headless:true});
@@ -27,7 +37,7 @@ try{
   await hero.waitFor({state:'visible',timeout:25000});
   await hero.evaluate(img=>img.decode());
   const heroMeta=await hero.evaluate(img=>({naturalWidth:img.naturalWidth,currentSrc:img.currentSrc}));
-  assert.ok(heroMeta.naturalWidth>=300&&heroMeta.currentSrc.includes('/assets/watches/citizen-tsuyosa.webp'),'Hero must show real locally cached Citizen photo');
+  assert.ok(heroMeta.naturalWidth>=300&&isAllowedPhoto(heroMeta.currentSrc,'citizen-tsuyosa'),'Hero must show a genuine local Citizen photo');
   for(let i=0;i<15;i++){
     const card=cards.nth(i);
     await card.scrollIntoViewIfNeeded();
@@ -36,7 +46,8 @@ try{
     await img.evaluate(node=>node.decode());
     const state=await img.evaluate(node=>({src:node.currentSrc,width:node.naturalWidth,height:node.naturalHeight}));
     assert.ok(state.width>=240&&state.height>=240,'Card '+i+' image must decode and be high quality');
-    assert.ok(state.src.startsWith(base+'/assets/watches/'),'Card '+i+' must use same-origin locally cached photograph: '+state.src);
+    const model=await card.getAttribute('data-watch-id');
+    assert.ok(isAllowedPhoto(state.src,model),'Card '+i+' must use a genuine same-origin photograph: '+state.src);
   }
   await page.screenshot({path:'artifacts/mobile-collection.png',fullPage:true});
   console.log('PASS MOBILE COLLECTION: hero + 15 actual model photos from local same-origin WebP files');

@@ -1,4 +1,4 @@
-name: Verify published watch storefront on Android
+name: Verify production Render watch storefront on Android
 on:
   push:
     branches: [main]
@@ -27,9 +27,20 @@ jobs:
         run: |
           npm install --no-save --no-audit --no-fund playwright
           npx playwright install --with-deps chromium
+      - name: Confirm public Render storefront before browser checks
+        run: |
+          set -eu
+          for attempt in $(seq 1 15); do
+            if curl -fsSL --max-time 15 'https://atelier-montres-selection-fr.onrender.com/' | grep -q 'watch-responsive'; then
+              echo 'Published responsive storefront is reachable.'
+              break
+            fi
+            if [ "$attempt" -eq 15 ]; then exit 1; fi
+            sleep 6
+          done
       - name: Verify deployed website, 15 local photos, sharing and watch history
         env:
-          WATCH_STOREFRONT_URL: https://neutral-shell-t3y4rs7.shipstatic.com
+          WATCH_STOREFRONT_URL: https://atelier-montres-selection-fr.onrender.com
         run: |
           node scripts/test-mobile-live-storefront.mjs
           node scripts/test-mobile-storefront-v8.mjs
