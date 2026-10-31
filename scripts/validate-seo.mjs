@@ -87,7 +87,7 @@ assert.match(method,/« À vérifier » ou « Non renseigné »/,'Unknown specs 
 assert.match(method,/lien rémunéré/,'Commercial disclosure explained');
 assert.match(method,/références Amazon.fr identifiées/,'Amazon model counts are transparent');
 assert.match(method,/Sélection enregistrée le/,'Catalog selection date disclosed');
-assert.equal((method.match(/class="seo-method-products"/g)||[]).length,1);
+assert.equal((method.match(/<ul class="related seo-method-products">/g)||[]).length,1,"Exactly one list of the fifteen referenced models");
 for(const product of feed.products)assert.ok(method.includes('href="./'+product.id+'.html"'),'Method links exact product '+product.id);
 const methodJson=method.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
 assert.ok(methodJson,'Machine-readable method metadata required');
