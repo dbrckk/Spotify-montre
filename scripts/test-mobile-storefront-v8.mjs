@@ -29,6 +29,32 @@ try{
  const cards=page.locator('#affGrid .aff-card');
  await cards.first().waitFor({state:'visible',timeout:20000});
  assert.equal(await cards.count(),15,'The full genuine catalogue should render');
+ // The 13 additional popular/editorial models are a clearly separated
+ // commercial discovery path, not fake 15-card catalog entries.
+ const popular=page.locator('#modeles-populaires');
+ assert.ok(await popular.isVisible(),'Popular sourced watches should be visible below the core catalogue');
+ assert.equal(await popular.locator('article.am-pick-card').count(),6,'Six premium new-watch teasers should render');
+ assert.equal(await popular.locator('a[data-amazon-search-id]').count(),6,
+   'Featured Amazon referrals must be disclosed, search-based and attributable');
+ const popularSearch=popular.locator('a[data-amazon-search-id]').first();
+ assert.ok((await popularSearch.getAttribute('href')).startsWith('https://www.amazon.fr/s?k='),
+   'Do not manufacture an exact ASIN link for the new model');
+ assert.match(await popularSearch.getAttribute('rel'),/sponsored/,
+   'Popular Amazon search must disclose sponsorship');
+ await popular.scrollIntoViewIfNeeded();
+ const popularExtent=await page.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
+ assert.ok(popularExtent.scroll<=popularExtent.client+2,'Popular cards must not overflow mobile');
+ await page.screenshot({path:'artifacts/mobile-popular-watch-discovery.png',fullPage:true});
+ const popularPage=await browser.newPage({viewport:{width:393,height:852},isMobile:true,hasTouch:true,locale:'fr-FR'});
+ await popularPage.goto(new URL('/montres/modeles-populaires.html',base).href,{waitUntil:'domcontentloaded'});
+ assert.equal(await popularPage.locator('article.am-pick-card').count(),13,'All supplemental watch models on one source-backed page');
+ assert.equal(await popularPage.locator('.am-picks-tier').count(),3,'All three editorial ranges are represented');
+ assert.equal(await popularPage.locator('a[data-amazon-search-id]').count(),13,'Tracked Amazon search for each new model');
+ assert.equal(await popularPage.locator('img').count(),0,'No unauthorized new product photography');
+ const popularPageExtent=await popularPage.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
+ assert.ok(popularPageExtent.scroll<=popularPageExtent.client+2,'Supplemental page must not overflow Android');
+ await popularPage.screenshot({path:'artifacts/mobile-13-popular-watches.png',fullPage:true});
+ await popularPage.close();
  const shopFirst=await page.evaluate(()=>{
    const ids=['gammes','montres','amEditorialGallery','histoire'];
    const positions=ids.map(id=>document.getElementById(id)?.getBoundingClientRect().top+window.scrollY);
