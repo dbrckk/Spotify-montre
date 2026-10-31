@@ -1,0 +1,220 @@
+{
+  "version": 1,
+  "reviewedOn": "2026-10-31",
+  "total": 37,
+  "photos": [
+    {
+      "id": "skmei-1251",
+      "status": "created",
+      "source": "https://skmei-egy.com/en/products/skmei-1251-%D8%B3%D8%A7%D8%B9%D8%A9-%D8%B1%D8%AC%D8%A7%D9%84%D9%8A-%D8%AF%D9%8A%D8%AC%D9%8A%D8%AA%D8%A7%D9%84-%D8%A3%D9%86%D9%8A%D9%82%D8%A9",
+      "image": "https://skmei-egy.com/cdn/shop/files/skmei_1251_black_1.png?v=1772460834&width=1920",
+      "sha256": "5127f3e4b913754fdd115cfc10bddcba5b71451841e6e69d0324dc765ad83fdd"
+    },
+    {
+      "id": "skmei-1257",
+      "status": "created",
+      "source": "https://skmei-egy.com/en/products/skmei-1257-%D8%B3%D8%A7%D8%B9%D8%A9-%D8%B1%D9%8A%D8%A7%D8%B6%D9%8A%D8%A9-%D8%B9%D8%B5%D8%B1%D9%8A%D8%A9",
+      "image": "https://skmei-egy.com/cdn/shop/files/skmei_1257_black1.png?v=1772459929&width=1920",
+      "sha256": "2dd6df2ec63b747537049008b845a958dccc6e62a53c572ae244cd2ef7774b2d"
+    },
+    {
+      "id": "skmei-2056",
+      "status": "created",
+      "source": "https://www.shopskmei.com/product/skmei-2056-digital-sport-watch/",
+      "image": "https://www.shopskmei.com/wp-content/uploads/2026/09/cover-58.webp",
+      "sha256": "506e90aabe8fde23340d87c748efb7b408b1c99bb68b12211b28c6cb0293c6de"
+    },
+    {
+      "id": "skmei-2514",
+      "status": "created",
+      "source": "https://www.shopskmei.com/product/skmei-2514-retro-digital-steel-watch/",
+      "image": "https://www.shopskmei.com/wp-content/uploads/2026/10/skmei-2514-0.webp",
+      "sha256": "7a007da52fd077f091c3f214333ea8ba6e8c6988099bb984a504165bbdb16d62"
+    },
+    {
+      "id": "skmei-9156",
+      "status": "created",
+      "source": "https://www.shopskmei.com/product/skmei-9156-leather-chronograph-watch/",
+      "image": "https://www.shopskmei.com/wp-content/uploads/2026/09/cover-203.webp",
+      "sha256": "0fef182ac4b6d7f3cac89739b009fb50b0f30fae44e2482f2273d65ac7be1341"
+    },
+    {
+      "id": "skmei-9353",
+      "status": "created",
+      "source": "https://www.shopskmei.com/product/skmei-9353-classic-steel-quartz-watch/",
+      "image": "https://www.shopskmei.com/wp-content/uploads/2026/09/skmei-225-front-cover-20261027.webp",
+      "sha256": "2e5a893ec91939a4a1bff0ca41c5a5599cb882c3a2c3ed683c02528a8f72adc9"
+    },
+    {
+      "id": "skmei-1874",
+      "status": "created",
+      "source": "https://www.shopskmei.com/product/skmei-1874-minimalist-steel-bracelet-watch/",
+      "image": "https://www.shopskmei.com/wp-content/uploads/2026/09/cover-126.webp",
+      "sha256": "9489044d967b6d1429a9caebc3784a20b288c3b1b48a06adc2da0a2ea48ff8b2"
+    },
+    {
+      "id": "skmei-2471",
+      "status": "created",
+      "source": "https://www.shopskmei.com/product/skmei-2471-5-bar-analog-digital-sport-watch/",
+      "image": "https://www.shopskmei.com/wp-content/uploads/2026/09/Sf13c94aeff474e28a19a3998340a7faed.webp",
+      "sha256": "a1d226aeb0a7019d624985db3153e6731c197a64cc3b476731d555d3ad0cad85"
+    },
+    {
+      "id": "skmei-1220",
+      "status": "created",
+      "source": "https://www.shopskmei.com/product/skmei-1220-dual-time-digital-sport-watch/",
+      "image": "https://www.shopskmei.com/wp-content/uploads/2026/09/cover-79.webp",
+      "sha256": "c3736512effba6088f452c65859a46238923809e13d92feae313677e9f76db4f"
+    },
+    {
+      "id": "citizen-tsuyosa-37-blue",
+      "status": "created",
+      "source": "https://fr.citizenwatch.eu/fr/p/nj0200-50m/",
+      "image": "https://fr.citizenwatch.eu/media/thumbs/24/f9/4adc8004e8b25b689ca25d3d2e51615f43ab/1400x_crop=center;format=webp/managed/6d/8f/6d8fbf69e721d7bbb1be7bf334492f38/NJ0200-50M.png.thumb.webp",
+      "sha256": "26a5350fd1a64fb331a752702ee79fae9d77aec636a4afad5c383bbd03dd92d0"
+    },
+    {
+      "id": "seiko-5-srpk29",
+      "status": "created",
+      "source": "https://www.seikowatches.com/fr-fr/products/5sports/srpk29",
+      "image": "https://www.seikowatches.com/fr-fr/-/media/Images/Product--Image/All/Seiko/2023/03/30/11/57/SRPK29K1/SRPK29K1.png",
+      "sha256": "1efbd63af96e4e2d08b9afa451a7c0611124c4e7280a1f2ad3ea31445364ad2a"
+    },
+    {
+      "id": "seiko-presage-srpe43",
+      "status": "created",
+      "source": "https://www.seikowatches.com/fr-fr/products/presage/SRPE43J1",
+      "image": "https://www.seikowatches.com/fr-fr/-/media/Images/Product--Image/All/Seiko/2022/02/20/02/23/SRPE43J1/SRPE43J1.png",
+      "sha256": "de81b2b7e71f9ad03973a149cab7848132f6e27fe5d7a24c706f12690011f98a"
+    },
+    {
+      "id": "hamilton-jazzmaster-viewmatic",
+      "status": "created",
+      "source": "https://www.hamiltonwatch.com/fr-fr/h32515555-jazzmaster-day-date-auto.html",
+      "image": "https://www.hamiltonwatch.com/media/catalog/product/h/3/h32515555_detail_laidview_lowresweb.jpg",
+      "sha256": "1617e3215155692be9a6e8c23c2354aeee30cac55c3cffc5a766b0c0d8c081c7"
+    },
+    {
+      "id": "citizen-promaster-bn0150",
+      "status": "created",
+      "source": "https://citizenwatch.eu/en/p/bn0150-10e/",
+      "image": "https://citizenwatch.eu/media/thumbs/df/bd/bec19a5875464395cce1e42f26b48e9725c7/1400x_crop=center;format=webp/managed/75/72/7572658c2a35c487832e6301a6ed7c7e/BN0150-10E.png.thumb.webp",
+      "sha256": "7221474c0877acc8e1ca463e76178569250be8bd87dc24a1ed2cf81d64d2c572"
+    },
+    {
+      "id": "seiko-speedtimer-ssc813",
+      "status": "created",
+      "source": "https://www.seikowatches.com/fr-fr/products/prospex/ssc813",
+      "image": "https://www.seikowatches.com/fr-fr/-/media/Images/Common/Seiko/prospex/product_top/product-pc_top_SSC813P1.jpg",
+      "sha256": "128ee44f644e62e985f310d8bf5b03a64b6d47de558bfbac5712dcd7c8004cd9"
+    },
+    {
+      "id": "hamilton-ventura-h24411732",
+      "status": "created",
+      "source": "https://www.hamiltonwatch.com/fr-fr/h24411732-ventura-quartz.html",
+      "image": "https://www.hamiltonwatch.com/media/catalog/product/h/2/h24411732.png",
+      "sha256": "7948546fe0faccddfdd40001b14c58a0e5a56660061bf4434822f9fce634449a"
+    },
+    {
+      "id": "addiesdive-ad2030",
+      "status": "created",
+      "source": "https://www.addiesdivewatches.com/products/new-addiesdive-36mm-quartz-watch-vh31-movement-ad2030",
+      "image": "https://cdn.shopify.com/s/files/1/0524/2270/5317/files/5_74938b81-120e-4a7e-8126-9ee142b0ed2f.jpg?v=1757754664",
+      "sha256": "20c7568e9566062974e8780d9439ab8f212b77da07f284d9be949d4fe06148c6"
+    },
+    {
+      "id": "pagani-pd1701",
+      "status": "created",
+      "source": "https://www.paganidesignwatch.com/fr/pagani-design-pd-1701/",
+      "image": "https://cdn.shopify.com/s/files/1/0654/0361/7515/products/pagani-design-pd-1701-color-9_800x800_crop_center.jpg?v=1757582411",
+      "sha256": "af948659ce83c77a9772a40100a819d8cb0165df5a4bff7674c148beacd1cd29"
+    },
+    {
+      "id": "pagani-pd1751",
+      "status": "created",
+      "source": "https://www.paganidesignwatch.com/fr/pagani-design-pd-1751",
+      "image": "https://cdn.shopify.com/s/files/1/0654/0361/7515/products/pagani-design-watch-pd-1751-color-1_800x800_crop_center.jpg?v=1667718393",
+      "sha256": "0f02ee22aacadd0c769651b3b71640d6417eba7b2d5a3e67c8df12f096e812f2"
+    },
+    {
+      "id": "pagani-pd1776",
+      "status": "created",
+      "source": "https://www.paganidesignwatch.com/fr/pagani-design-pd-1776",
+      "image": "https://cdn.shopify.com/s/files/1/0654/0361/7515/files/pagani-design-watch-pd-1776-color-1_800x800_crop_center.jpg?v=1696680206",
+      "sha256": "a0be6069712a44d914a464de9360a41b7b278e94054cbeb6bdc8d8f942072224"
+    },
+    {
+      "id": "skmei-2256",
+      "status": "created",
+      "source": "https://www.shopskmei.com/product/skmei-2256-minimalist-steel-quartz-watch/",
+      "image": "https://www.shopskmei.com/wp-content/uploads/2026/09/cover-193.webp",
+      "sha256": "b5c3f17813aa71e6ee275272f8365a0f90bf87dfac9adec5ac6e71047714c73d"
+    }
+  ],
+  "missing": [
+    {
+      "id": "casio-ga-2100-1a1",
+      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/gshock/product.GA-2100-1A1/"
+    },
+    {
+      "id": "casio-a158wea-1",
+      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/casio/vintage/product.A158WEA-1/"
+    },
+    {
+      "id": "casio-la-20wh-4a1",
+      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/casio/product.LA-20WH-4A1/"
+    },
+    {
+      "id": "casio-ltp-1234pgl-7a",
+      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/casio/product.LTP-1234PGL-7A/"
+    },
+    {
+      "id": "casio-gw-m5610u-1",
+      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/gshock/product.GW-M5610U-1/"
+    },
+    {
+      "id": "casio-edifice-efr-s108d",
+      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/edifice/product.EFR-S108D-2AV/"
+    },
+    {
+      "id": "orient-bambino-38-cream",
+      "reason": "No trusted product image source found"
+    },
+    {
+      "id": "tissot-prx-35-blue",
+      "reason": "No trusted product image source found"
+    },
+    {
+      "id": "tissot-gentleman-auto",
+      "reason": "No trusted product image source found"
+    },
+    {
+      "id": "casio-f91w-1",
+      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/casio/product.F-91W-1/"
+    },
+    {
+      "id": "casio-a168wg-9",
+      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/casio/vintage/product.A168WG-9/"
+    },
+    {
+      "id": "casio-dw5600rl-1",
+      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/gshock/product.DW-5600RL-1/"
+    },
+    {
+      "id": "orient-mako40-black",
+      "reason": "No trusted product image source found"
+    },
+    {
+      "id": "tissot-le-locle-white",
+      "reason": "No trusted product image source found"
+    },
+    {
+      "id": "casio-ae1200wh-1av",
+      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/casio/product.AE-1200WH-1AV/"
+    },
+    {
+      "id": "curren-cur210",
+      "reason": "Page title/content does not confirm exact model"
+    }
+  ]
+}
