@@ -27,6 +27,8 @@ try{
         title:size('#affGrid .aff-card h3'),
         facts:size('#affGrid .am-gallery-facts span'),
         cta:size('#affGrid .aff-card-actions a'),
+        affiliateNote:size('#affGrid .am-affiliate-note'),
+        productLink:size('#affGrid .am-card-seo-link'),
         filter:size('#affTabs button'),
         filterHeight:bounds('#affTabs button'),
         searchHeight:bounds('#affSearch'),
@@ -36,7 +38,7 @@ try{
     });
     assert.ok(measured.linkInHead,'CSS absent at '+width);
     assert.ok(measured.scroll<=measured.client+2,'Horizontal overflow '+width+': '+JSON.stringify(measured));
-    assert.ok(measured.brand>=12&&measured.title>=18&&measured.facts>=12&&measured.cta>=12,'Unreadable product text '+width+': '+JSON.stringify(measured));
+    assert.ok(measured.brand>=13&&measured.title>=18&&measured.facts>=13&&measured.cta>=14&&measured.affiliateNote>=13&&measured.productLink>=13,'Unreadable product text '+width+': '+JSON.stringify(measured));
     assert.ok(measured.filter>=13&&measured.filterHeight>=44&&measured.searchHeight>=44,'Undersized touch control '+width+': '+JSON.stringify(measured));
     if(width>=360&&width<=430)assert.equal(measured.galleryColumns,2,'Keep two columns on phone '+width);
     assert.ok(measured.allPhotos>=10,'Real photos remain visible '+width);

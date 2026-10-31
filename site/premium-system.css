@@ -259,3 +259,35 @@ a,button,input,select,summary{touch-action:manipulation}
 /* Final WCAG contrast corrections: light section footnote and dark advisor knowledge section. */
 .aff-small{color:#435846}
 .advisor-knowledge .kicker.overline{color:#f1d1a2}
+
+
+/* Secondary information must remain readable in the real two-column Android
+   catalogue. Preserve the existing gallery layout and 44px touch targets. */
+.am-topline{font-size:12px;letter-spacing:.06em;line-height:1.6}
+.am-view-toolbar-title,.am-discovery-eyebrow,.am-discovery-path-index{font-size:13px}
+.aff-grid .aff-card-brand{font-size:13px}
+.aff-grid .am-spec-line,.aff-grid .aff-card-foot,
+.aff-grid .aff-chips span,.aff-grid .am-affiliate-note{font-size:13px}
+.aff-grid[data-view="gallery"] .aff-card-brand,
+.aff-grid[data-view="gallery"] .am-gallery-facts span,
+.aff-grid[data-view="gallery"] .am-card-footer a,
+.aff-grid[data-view="gallery"] .am-card-footer label,
+.aff-grid[data-view="gallery"] .am-card-seo-link,
+.aff-grid[data-view="gallery"] .am-affiliate-note{font-size:13px}
+.aff-grid[data-view="gallery"] .aff-card-actions>a:first-child,
+.aff-grid[data-view="gallery"] .aff-card-actions .am-affiliate-cta{
+  font-size:14px;line-height:1.4;overflow-wrap:anywhere
+}
+.am-compare-mobile-position{font-size:14px}
+.detail-brand,.detail-facts-caption,
+.detail-figure-label,.detail-visual-note,
+.watch-photo-caption{font-size:13px;line-height:1.55}
+.watch-facts-caption{font-size:13px!important}
+@media(max-width:760px){
+  .am-topline{font-size:11px}
+  .aff-grid[data-view="gallery"] .am-gallery-facts span{font-size:13px}
+  .aff-grid[data-view="gallery"] .aff-card-actions>a:first-child,
+  .aff-grid[data-view="gallery"] .aff-card-actions .am-affiliate-cta{font-size:14px}
+  .aff-grid[data-view="gallery"] .am-card-seo-link{font-size:13px}
+  .watch-photo-caption{font-size:13px}
+}
