@@ -95,7 +95,25 @@
    images.push(review.localUrl+version+' '+w+'w');
    return images.join(', ');
  };
- const detail=id=>'./montre.html?id='+encodeURIComponent(id);
+ // The product link carries only selected public filters. This lets a
+ // visitor go search -> watch -> same results without cookies or a backend.
+ // Product sharing itself remains canonical and omits this navigation state.
+ const catalogueContext=()=>{
+   const p=new URLSearchParams();
+   if(tier!=='all')p.set('tier',tier);
+   if(brand!=='all')p.set('brand',brand);
+   if(movement!=='all')p.set('movement',movement);
+   if(diameter!=='all')p.set('diameter',diameter);
+   if(query.trim())p.set('q',query.trim().slice(0,100));
+   if(order!=='editorial')p.set('sort',order);
+   return p.toString();
+ };
+ const detail=id=>{
+   const u=new URLSearchParams({id});
+   const state=catalogueContext();
+   if(state)u.set('from',state);
+   return './montre.html?'+u.toString();
+ };
  const compareTray=$('affCompareTray'),compareLabel=$('affCompareLabel'),compareSelected=$('affCompareSelected'),compareNotice=$('affCompareNotice'),compareOpen=$('affCompareOpen'),compareClear=$('affCompareClear'),dialog=$('affCompareDialog'),compareBody=$('affCompareBody');
  let compareWarning='';
  function updateCompare(){
