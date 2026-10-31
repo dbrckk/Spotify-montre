@@ -12,6 +12,8 @@ on:
       - 'site/conseiller-engine.js'
       - 'scripts/test-adviser-browser.mjs'
       - 'site/affiliation.js'
+      - 'site/editorial-photo.js'
+      - 'site/editorial-photo.css'
       - 'site/affiliation.css'
       - 'site/catalogue-view.css'
       - 'site/affiliation.html'
@@ -30,6 +32,9 @@ on:
   pull_request:
   workflow_dispatch:
 
+concurrency:
+  group: premium-mobile-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 
