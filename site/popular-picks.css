@@ -133,3 +133,22 @@
  .am-extra-local-nav{margin-right:-14px;padding-right:14px}
 }
 @media(prefers-reduced-motion:reduce){.am-extra-actions a{transition:none}}
+
+/* Client-side discovery is progressive: all cards remain visible without JS. */
+.am-pick-filters{margin:0 0 22px;padding:clamp(15px,2.6vw,26px);border:1px solid #c9d5c9;background:#f7f7f1;box-shadow:0 8px 27px #22412e0c;border-radius:7px}
+.am-pick-filter-fields{display:grid;grid-template-columns:minmax(190px,1.6fr) repeat(3,minmax(138px,1fr));gap:14px}
+.am-pick-filter-field{display:flex;flex-direction:column;gap:8px;min-width:0;color:#264a35;font:700 13px/1.45 system-ui,sans-serif}
+.am-pick-filter-field input,.am-pick-filter-field select{width:100%;min-width:0;min-height:48px;padding:11px 12px;background:#fff;color:#183b29;border:1px solid #aabcae;border-radius:4px;font:500 14px/1.5 system-ui,sans-serif}
+.am-pick-filter-field input::placeholder{color:#647365;opacity:1}
+.am-pick-filter-field input:hover,.am-pick-filter-field select:hover{border-color:#557e5e}
+.am-pick-filter-field input:focus-visible,.am-pick-filter-field select:focus-visible,.am-pick-filter-footer button:focus-visible{outline:3px solid #b9852b;outline-offset:3px}
+.am-pick-filter-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding-top:16px}
+.am-pick-filter-footer output{font:750 14px/1.5 system-ui,sans-serif;color:#224631}
+.am-pick-filter-footer button{min-height:44px;padding:9px 15px;background:#fff;border:1px solid #65856e;border-radius:4px;color:#225136;font:700 13px/1.5 system-ui,sans-serif;cursor:pointer}
+.am-pick-filter-footer button:hover{background:#eaf0e8}
+.am-pick-filter-empty{padding:24px;border:1px dashed #8ca58f;border-radius:5px;background:#f5f6ee;color:#244633;font:500 15px/1.7 system-ui,sans-serif}
+.am-pick-exact{align-self:flex-start;padding:9px 11px;margin:0;border-left:3px solid #4f7553;background:#eef2e9;color:#264d38;font:700 12px/1.55 system-ui,sans-serif}
+.am-pick-direct .am-pick-visual{border-bottom:3px solid #b89c61}
+.am-picks-page .am-pick-card[hidden],.am-picks-page .am-picks-tier[hidden],.am-picks-page .am-pick-filters[hidden],.am-picks-page .am-pick-filter-empty[hidden]{display:none!important}
+@media(max-width:1040px){.am-pick-filter-fields{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:570px){.am-pick-filter-fields{grid-template-columns:1fr;gap:11px}.am-pick-filters{padding:16px}.am-pick-filter-footer{align-items:stretch}.am-pick-filter-footer button{width:100%}}
