@@ -26,9 +26,13 @@ export function loadVerifiedPopularLinks({root,picks,affiliates,amazonPartnerTag
       throw Error('Unknown or malformed exact Amazon.fr model '+id);
     if(item.brand!==p.brand||item.canonicalModel!==p.model)
       throw Error('Exact Amazon.fr brand or manufacturer code mismatch: '+id);
-    // EU/FR Casio edition code ending ER maps to the same core catalogue model.
-    if(item.marketplaceModel!==p.model&&
-      !(p.brand.startsWith('Casio')&&item.marketplaceModel===p.model+'ER'))
+    // Strict, model-specific regional suffixes. Do not infer other variants.
+    const regionalEquivalents={
+      'casio-gw-m5610u-1':'GW-M5610U-1ER',
+      'casio-f91w-1':'F-91W-1YER',
+      'casio-a168wg-9':'A168WG-9EF'
+    };
+    if(item.marketplaceModel!==p.model&&item.marketplaceModel!==regionalEquivalents[id])
       throw Error('Unverified regional edition or variant: '+id);
     if(!/^[A-Z0-9]{10}$/.test(item.asin||'')||asins.has(item.asin))
       throw Error('Invalid or reused exact Amazon.fr ASIN: '+id);
