@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {mkdirSync} from 'node:fs';
+import {mkdirSync,readFileSync} from 'node:fs';
 import {chromium} from 'playwright';
 
 const base=process.env.WATCH_STOREFRONT_URL||'http://127.0.0.1:8765';
@@ -355,6 +355,12 @@ await page.locator('#affGrid .aff-card input[type="checkbox"]').nth(0).check();
  await cards.first().locator('.aff-card-actions a[href^="./montre.html?id="]').click();
  await page.locator('#detailShell').waitFor({state:'visible',timeout:20000});
  assert.match(await page.locator('#detailTitle').innerText(),/NJ0150-81X/);
+ await page.locator('#detailEditorialAdvice').waitFor({state:'visible',timeout:12000});
+ assert.equal(await page.locator('#detailAdviceGrid .detail-decision-card').count(),3,'Interactive Citizen detail must show 3 distinct source-backed editorial cards');
+ assert.equal(await page.locator('#detailAdviceFacts .detail-decision-fact').count(),3,'Citizen exact reference must show 3 documented evidence fields');
+ assert.ok(await page.locator('#detailAdviceShortcut').isVisible(),'The editorial section must be reachable from the fast navigation');
+ assert.match(await page.locator('#detailAdviceGrid').innerText(),/bracelet intégré/,'Citizen advice must retain model-specific wording');
+
  const productSchema=JSON.parse(await page.locator('#detailProductStructuredData').textContent());
  assert.equal(productSchema['@type'],'Product','Product details expose accurate structured data');
  assert.equal(productSchema.brand.name,'Citizen');
@@ -381,6 +387,54 @@ await page.locator('#affGrid .aff-card input[type="checkbox"]').nth(0).check();
  assert.ok(comparisonUrl.includes('compare=citizen-tsuyosa'),'Product link must carry the actual selected model');
 
  await page.screenshot({path:'artifacts/mobile-related-watch-detail.png',fullPage:true});
+ // Validate the actual 15-model editorial data end-to-end, not just a
+ // placeholder on the first product. Values must agree with the same JSON
+ // and the exact catalog specs used by indexable SEO watch pages.
+ const editorialSource=JSON.parse(readFileSync('site/editorial-insights.json','utf8'));
+ const watchSource=JSON.parse(readFileSync('site/selection-affiliation.json','utf8')).products;
+ assert.equal(Object.keys(editorialSource.products).length,15);
+ const labelByFact={diameter:'Diamètre',caseSize:'Dimensions L × l × H',movement:'Mouvement',glass:'Verre',waterResistance:'Étanchéité'};
+ const editorialPage=await browser.newPage({viewport:{width:393,height:852},isMobile:true,hasTouch:true,locale:'fr-FR'});
+ const editorialErrors=[];
+ editorialPage.on('pageerror',err=>editorialErrors.push(err.message));
+ for(const watch of watchSource){
+   const response=await editorialPage.goto(new URL('/montre.html?id='+encodeURIComponent(watch.id),base).href,{waitUntil:'domcontentloaded'});
+   assert.ok(response?.ok(),'Dynamic watch route reachable: '+watch.id);
+   await editorialPage.locator('#detailEditorialAdvice').waitFor({state:'visible',timeout:12000});
+   const insight=editorialSource.products[watch.id];
+   assert.ok(insight,'Must have a reviewed exact-model editorial brief: '+watch.id);
+   const cardTexts=await editorialPage.locator('#detailAdviceGrid .detail-decision-card p').allTextContents();
+   assert.deepEqual(cardTexts,[insight.strength,insight.usage,insight.caution],'Model-specific advice must match SEO editorial source: '+watch.id);
+   const factPairs=await editorialPage.locator('#detailAdviceFacts .detail-decision-fact').evaluateAll(nodes=>nodes.map(el=>[
+     el.querySelector('dt')?.textContent,el.querySelector('dd')?.textContent
+   ]));
+   assert.deepEqual(factPairs,insight.facts.map(key=>[labelByFact[key],watch.specs[key]]),
+     'All product evidence must come from the exact model specs: '+watch.id);
+   assert.equal(await editorialPage.locator('#detailAdviceShortcut').isVisible(),true,'The section must be navigable: '+watch.id);
+   const extent=await editorialPage.evaluate(()=>({scroll:document.documentElement.scrollWidth,client:document.documentElement.clientWidth}));
+   assert.ok(extent.scroll<=extent.client+2,'Editorial product layout has overflow: '+watch.id);
+ }
+ assert.deepEqual(editorialErrors,[],'15 watch editorial screens should have no runtime errors');
+ await editorialPage.close();
+ // Non-critical editorial feed failure must keep the primary technical
+ // product page, genuine photo, official link and comparison usable.
+ const unavailable=await browser.newPage({viewport:{width:393,height:852},isMobile:true,hasTouch:true});
+ await unavailable.route('**/editorial-insights.json',route=>route.fulfill({status:503,body:'Unavailable'}));
+ await unavailable.goto(new URL('/montre.html?id=citizen-tsuyosa',base).href,{waitUntil:'domcontentloaded'});
+ await unavailable.locator('#detailShell').waitFor({state:'visible'});
+ assert.equal(await unavailable.locator('#detailEditorialAdvice').isHidden(),true,'Unavailable supplementary feed remains hidden');
+ assert.match(await unavailable.locator('#detailTitle').innerText(),/NJ0150-81X/);
+ assert.ok(await unavailable.locator('#detailOfficial').isVisible());
+ await unavailable.close();
+ const zoomed=await browser.newPage({viewport:{width:320,height:640},isMobile:true,hasTouch:true});
+ await zoomed.goto(new URL('/montre.html?id=casio-mtp-b145',base).href,{waitUntil:'domcontentloaded'});
+ await zoomed.locator('#detailEditorialAdvice').waitFor({state:'visible'});
+ const zoomExtent=await zoomed.evaluate(()=>({scroll:document.documentElement.scrollWidth,client:document.documentElement.clientWidth}));
+ assert.ok(zoomExtent.scroll<=zoomExtent.client+2,'320px source-backed editorial cards must reflow');
+ await zoomed.screenshot({path:'artifacts/mobile-320-editorial-decision.png',fullPage:true});
+ await zoomed.close();
+ console.log('PASS: 15 dynamic product briefs, exact source-backed facts, failed-feed fallback and 320px editorial layout');
+
  console.log('PASS: responsive header, 15 owner-authorized source photos, filters, comparator, favorites and product navigation');
 
  const desktop=await browser.newPage({viewport:{width:1366,height:850},locale:'fr-FR'});
