@@ -416,6 +416,62 @@ await page.locator('#affGrid .aff-card input[type="checkbox"]').nth(0).check();
  }
  assert.deepEqual(editorialErrors,[],'15 watch editorial screens should have no runtime errors');
  await editorialPage.close();
+ // All indexable SEO pages must zoom the exact, approved watch photograph
+ // with the shared viewer, never inventing extra angles or losing focus.
+ const seoPhoto=await browser.newPage({viewport:{width:393,height:852},
+   isMobile:true,hasTouch:true,locale:'fr-FR'});
+ const photoErrors=[];
+ seoPhoto.on('pageerror',e=>photoErrors.push(e.message));
+ for(const watch of watchSource){
+   const response=await seoPhoto.goto(new URL('/montres/'+watch.id+'.html',base).href,
+     {waitUntil:'domcontentloaded'});
+   assert.ok(response?.ok(),'Indexable product route reachable: '+watch.id);
+   const trigger=seoPhoto.locator('.watch-photo-zoom');
+   const authorized=watch.photoReview?.publicUsageApproved===true&&
+     watch.photoReview?.localUrl==='./assets/watches/'+watch.id+'.webp';
+   if(!authorized){
+     assert.equal(await trigger.count(),0,'No zoom when photo permission is missing: '+watch.id);
+     continue;
+   }
+   assert.equal(await trigger.count(),1,'One genuine photo zoom link: '+watch.id);
+   assert.equal(await trigger.getAttribute('href'),'../assets/watches/'+watch.id+'.webp');
+   const bounds=await trigger.boundingBox();
+   assert.ok(bounds&&bounds.height>=44&&bounds.width>=44,'Touch zoom control: '+watch.id);
+   await trigger.click();
+   const dialog=seoPhoto.locator('#amPhotoDialog');
+   await dialog.waitFor({state:'visible'});
+   assert.equal(await dialog.locator('.am-photo-large').getAttribute('src'),
+     '../assets/watches/'+watch.id+'.webp','Exact model in viewer: '+watch.id);
+   await seoPhoto.waitForFunction(()=>{
+     const img=document.querySelector('#amPhotoDialog .am-photo-large');
+     return img?.complete&&img.naturalWidth>100&&!img.hidden;
+   },null,{timeout:15000});
+   assert.equal(await dialog.locator('.am-photo-official').getAttribute('href'),
+     watch.officialUrl,'Manufacturer link in viewer: '+watch.id);
+   assert.equal(await dialog.locator('.am-photo-prev').isDisabled(),true,'No fabricated angles');
+   assert.equal(await dialog.locator('.am-photo-next').isDisabled(),true,'No fabricated angles');
+   if(watch.id==='citizen-tsuyosa')
+     await seoPhoto.screenshot({path:'artifacts/mobile-seo-product-photo-zoom.png'});
+   await seoPhoto.keyboard.press('Escape');
+   await dialog.waitFor({state:'hidden'});
+   assert.ok(await trigger.evaluate(el=>document.activeElement===el),
+     'Escape restores keyboard focus: '+watch.id);
+   const measured=await seoPhoto.evaluate(()=>({
+     width:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth
+   }));
+   assert.ok(measured.scroll<=measured.width+2,'No layout overflow: '+watch.id);
+ }
+ assert.deepEqual(photoErrors,[],'No errors in 15 SEO photograph viewers');
+ await seoPhoto.close();
+ const noScript=await browser.newContext({javaScriptEnabled:false,viewport:{width:393,height:852}});
+ const noScriptPage=await noScript.newPage();
+ await noScriptPage.goto(new URL('/montres/citizen-tsuyosa.html',base).href);
+ const sourceLink=noScriptPage.locator('a.watch-photo-zoom');
+ assert.ok(await sourceLink.isVisible(),'No-JavaScript fallback link visible');
+ const sourceUrl=new URL(await sourceLink.getAttribute('href'),noScriptPage.url());
+ assert.ok((await noScriptPage.request.get(sourceUrl.href)).ok(),'Fallback WebP must be reachable');
+ await noScript.close();
+ console.log('PASS: 15 SEO watch photo lightboxes, exact images, Escape focus and no-JS fallback');
  // Non-critical editorial feed failure must keep the primary technical
  // product page, genuine photo, official link and comparison usable.
  const unavailable=await browser.newPage({viewport:{width:393,height:852},isMobile:true,hasTouch:true});
