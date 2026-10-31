@@ -53,7 +53,7 @@
    const movementName={quartz:'Quartz',automatic:'Automatique','eco-drive':'Solaire · Eco-Drive'};
    const essentialFacts=[
      ['Mouvement',p.specs?.movement||movementName[p.movement]||null],
-     p.specs?.diameter?['Diamètre',p.specs.diameter]:['Dimensions du boîtier',p.specs?.caseSize||null],
+     p.specs?.diameter?['Diamètre',p.specs.diameter]:p.specs?.caseSize?['Dimensions du boîtier',p.specs.caseSize]:['Diamètre',null],
      ['Verre',p.specs?.glass||null],
      ['Étanchéité',p.specs?.waterResistance||null]
    ];
