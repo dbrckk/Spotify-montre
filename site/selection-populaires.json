@@ -1,0 +1,269 @@
+{
+  "version": 1,
+  "reviewedOn": "2026-10-31",
+  "basis": "model_specific_manufacturer_and_retailer_editorial_evidence",
+  "photoRights": "not_cleared",
+  "amazonProductAsins": "not_verified_for_new_models",
+  "products": [
+    {
+      "id": "casio-ga-2100-1a1",
+      "brand": "Casio G-SHOCK",
+      "model": "GA-2100-1A1",
+      "tier": "essential",
+      "style": "sport",
+      "category": "Sport / G-SHOCK",
+      "movement": "Quartz ana-digi",
+      "case": "48,5 × 45,4 × 11,8 mm",
+      "glass": "Minéral",
+      "water": "20 bar",
+      "lead": "Boîtier octogonal noir et profil relativement fin : une G-SHOCK reconnaissable, pensée pour les usages actifs.",
+      "caution": "Le cadran noir sur noir peut être moins immédiatement lisible : examinez les images du fabricant.",
+      "officialUrl": "https://www.casio.com/fr/watches/gshock/product.GA-2100-1A1/",
+      "marketEvidence": {
+        "kind": "manufacturer_bestseller",
+        "label": "Top 3 des meilleures ventes signalé par G-SHOCK",
+        "url": "https://gshock.casio.com/fr/products/collection/iconicstyles/2100/lineup/"
+      }
+    },
+    {
+      "id": "casio-a158wea-1",
+      "brand": "Casio",
+      "model": "A158WEA-1",
+      "tier": "essential",
+      "style": "retro",
+      "category": "Rétro numérique",
+      "movement": "Quartz numérique",
+      "case": "36,8 × 33,2 × 8,5 mm",
+      "glass": "Résine",
+      "water": "Étanche, niveau non chiffré",
+      "lead": "Un classique digital compact et argenté, idéal pour un look rétro discret sans boîtier imposant.",
+      "caution": "Le verre en résine se raye différemment d’un verre minéral ou saphir.",
+      "officialUrl": "https://www.casio.com/fr/watches/casio/vintage/product.A158WEA-1/",
+      "marketEvidence": {
+        "kind": "retailer_bestseller",
+        "label": "Référence présente parmi les meilleures ventes Montre.com",
+        "url": "https://www.montre.com/meilleures-ventes/bestsellers-pour-hommes/"
+      }
+    },
+    {
+      "id": "casio-la-20wh-4a1",
+      "brand": "Casio",
+      "model": "LA-20WH-4A1",
+      "tier": "essential",
+      "style": "compact",
+      "category": "Compact / coloré",
+      "movement": "Quartz numérique",
+      "case": "34,5 × 30,4 × 8,6 mm",
+      "glass": "Résine",
+      "water": "Étanche, niveau non chiffré",
+      "lead": "Une petite numérique rose de 16 g au style ludique, avec éclairage et chronomètre.",
+      "caution": "Boîtier et verre en résine : vérifier le confort et la robustesse attendue.",
+      "officialUrl": "https://www.casio.com/fr/watches/casio/product.LA-20WH-4A1/",
+      "marketEvidence": {
+        "kind": "retailer_bestseller",
+        "label": "Référence présente dans la sélection meilleures ventes Montre.com",
+        "url": "https://www.montre.com/meilleures-ventes/"
+      }
+    },
+    {
+      "id": "casio-ltp-1234pgl-7a",
+      "brand": "Casio",
+      "model": "LTP-1234PGL-7A",
+      "tier": "essential",
+      "style": "dress",
+      "category": "Rectangulaire / habillée",
+      "movement": "Quartz analogique",
+      "case": "32 × 21 × 7,4 mm",
+      "glass": "Minéral",
+      "water": "Étanche, niveau non chiffré",
+      "lead": "Une petite montre rectangulaire dorée sur cuir, très différente d’un boîtier rond classique.",
+      "caution": "La largeur de 21 mm est une dimension rectangulaire, pas un diamètre.",
+      "officialUrl": "https://www.casio.com/fr/watches/casio/product.LTP-1234PGL-7A/",
+      "marketEvidence": {
+        "kind": "retailer_bestseller",
+        "label": "Version répertoriée parmi les meilleures ventes Montre.com",
+        "url": "https://www.montre.com/meilleures-ventes/"
+      }
+    },
+    {
+      "id": "casio-gw-m5610u-1",
+      "brand": "Casio G-SHOCK",
+      "model": "GW-M5610U-1",
+      "tier": "signature",
+      "style": "sport",
+      "category": "Solaire / robuste",
+      "movement": "Quartz solaire et radiopiloté",
+      "case": "46,7 × 43,2 × 12,7 mm",
+      "glass": "Minéral",
+      "water": "20 bar",
+      "lead": "La silhouette carrée historique G-SHOCK avec alimentation Tough Solar et synchronisation Multi-Band 6.",
+      "caution": "La synchronisation radio dépend des zones couvertes et des conditions de réception.",
+      "officialUrl": "https://www.casio.com/fr/watches/gshock/product.GW-M5610U-1/",
+      "marketEvidence": {
+        "kind": "retailer_bestseller",
+        "label": "Présente dans les meilleures ventes homme Montre.com",
+        "url": "https://www.montre.com/meilleures-ventes/bestsellers-pour-hommes/"
+      }
+    },
+    {
+      "id": "casio-edifice-efr-s108d",
+      "brand": "Casio Edifice",
+      "model": "EFR-S108D-2AV",
+      "tier": "signature",
+      "style": "steel",
+      "category": "Sport chic / saphir",
+      "movement": "Quartz analogique",
+      "case": "44,8 × 39,9 × 7,8 mm",
+      "glass": "Saphir antireflet",
+      "water": "10 bar",
+      "lead": "Un cadran bleu, une lunette anguleuse et un boîtier fin avec verre saphir pour une allure sport chic.",
+      "caution": "Le diamètre n’est pas déduit des trois dimensions du boîtier : vérifiez sa proportion sur votre poignet.",
+      "officialUrl": "https://www.casio.com/fr/watches/edifice/product.EFR-S108D-2AV/",
+      "marketEvidence": {
+        "kind": "retailer_bestseller",
+        "label": "Référence répertoriée dans les meilleures ventes homme Montre.com",
+        "url": "https://www.montre.com/meilleures-ventes/bestsellers-pour-hommes/"
+      }
+    },
+    {
+      "id": "citizen-tsuyosa-37-blue",
+      "brand": "Citizen",
+      "model": "Tsuyosa NJ0200-50M",
+      "tier": "signature",
+      "style": "steel",
+      "category": "Automatique / compact",
+      "movement": "Automatique calibre 8210",
+      "case": "Diamètre 37 mm",
+      "glass": "Saphir",
+      "water": "5 bar",
+      "lead": "La formule Tsuyosa en diamètre 37 mm, cadran bleu et bracelet acier intégré.",
+      "caution": "Vérifiez épaisseur et longueur corne à corne avant d’assimiler 37 mm à un confort garanti.",
+      "officialUrl": "https://fr.citizenwatch.eu/fr/p/nj0200-50m/",
+      "marketEvidence": {
+        "kind": "manufacturer_bestseller",
+        "label": "Citée dans les meilleures ventes Citizen",
+        "url": "https://fr.citizenwatch.eu/fr/meilleures-ventes/"
+      }
+    },
+    {
+      "id": "orient-bambino-38-cream",
+      "brand": "Orient",
+      "model": "Bambino 38 RA-AC0M04Y",
+      "tier": "signature",
+      "style": "dress",
+      "category": "Automatique / habillée",
+      "movement": "Automatique F6724",
+      "case": "Diamètre 38,4 mm",
+      "glass": "Minéral bombé",
+      "water": "30 m, selon notice",
+      "lead": "Une automatique habillée au cadran crème, aiguilles bleues et proportions classiques.",
+      "caution": "L’indication 30 m ne constitue pas une recommandation de plongée.",
+      "officialUrl": "https://www.orientwatch.fr/or/fr_FR/brands/orient/orient-bambino-38mm/p/RA-AC0M04Y",
+      "marketEvidence": {
+        "kind": "editorial",
+        "label": "Choix éditorial fondé sur la fiche Orient",
+        "url": "https://www.orientwatch.fr/or/fr_FR/brands/orient/orient-bambino-38mm/p/RA-AC0M04Y"
+      }
+    },
+    {
+      "id": "tissot-prx-35-blue",
+      "brand": "Tissot",
+      "model": "PRX 35 mm T1372101104100",
+      "tier": "signature",
+      "style": "steel",
+      "category": "Petit boîtier / suisse",
+      "movement": "Quartz suisse",
+      "case": "Diamètre 35 mm",
+      "glass": "Saphir",
+      "water": "10 bar",
+      "lead": "La ligne PRX à bracelet intégré dans un format plus compact que la 40 mm déjà présentée.",
+      "caution": "Un bracelet intégré a des proportions particulières ; vérifiez la longueur portée et le réglage.",
+      "officialUrl": "https://www.tissotwatches.com/fr-fr/T1372101104100.html",
+      "marketEvidence": {
+        "kind": "editorial",
+        "label": "Choix éditorial sur fiche Tissot",
+        "url": "https://www.tissotwatches.com/fr-fr/T1372101104100.html"
+      }
+    },
+    {
+      "id": "seiko-5-srpk29",
+      "brand": "Seiko",
+      "model": "5 Sports SRPK29",
+      "tier": "signature",
+      "style": "sport",
+      "category": "Automatique / sport compact",
+      "movement": "Automatique calibre 4R36",
+      "case": "Diamètre 38 mm",
+      "glass": "Hardlex",
+      "water": "10 bar",
+      "lead": "Une Seiko 5 Sports de 38 mm qui conserve l’esprit SKX dans une proportion plus contenue.",
+      "caution": "Le verre Hardlex n’est pas du saphir ; vérifier vos attentes de résistance aux rayures.",
+      "officialUrl": "https://www.seikowatches.com/fr-fr/products/5sports/srpk29",
+      "marketEvidence": {
+        "kind": "editorial",
+        "label": "Choix éditorial sur fiche Seiko",
+        "url": "https://www.seikowatches.com/fr-fr/products/5sports/srpk29"
+      }
+    },
+    {
+      "id": "seiko-presage-srpe43",
+      "brand": "Seiko",
+      "model": "Presage Cocktail Time SRPE43J1",
+      "tier": "prestige",
+      "style": "dress",
+      "category": "Automatique / cadran texturé",
+      "movement": "Automatique calibre 4R35",
+      "case": "Diamètre 38,5 mm",
+      "glass": "Hardlex bombé",
+      "water": "5 bar",
+      "lead": "Un cadran bleu profond texturé et une inspiration Cocktail Time pour une présence habillée.",
+      "caution": "Montre mécanique sur bracelet cuir ; contrôlez l’entretien et les conditions de port.",
+      "officialUrl": "https://www.seikowatches.com/fr-fr/products/presage/SRPE43J1",
+      "marketEvidence": {
+        "kind": "editorial",
+        "label": "Choix éditorial sur fiche Seiko",
+        "url": "https://www.seikowatches.com/fr-fr/products/presage/SRPE43J1"
+      }
+    },
+    {
+      "id": "tissot-gentleman-auto",
+      "brand": "Tissot",
+      "model": "Gentleman Powermatic 80 T1274071104100",
+      "tier": "prestige",
+      "style": "steel",
+      "category": "Automatique / suisse",
+      "movement": "Automatique Powermatic 80",
+      "case": "Diamètre 40 mm",
+      "glass": "Saphir antireflet",
+      "water": "10 bar",
+      "lead": "Une automatique suisse sobre, cadran bleu, fond transparent et réserve de marche annoncée jusqu’à 80 h.",
+      "caution": "Vérifiez masse, épaisseur et ajustement de l’acier avant tout achat.",
+      "officialUrl": "https://www.tissotwatches.com/fr-fr/T1274071104100.html",
+      "marketEvidence": {
+        "kind": "editorial",
+        "label": "Choix éditorial sur fiche Tissot",
+        "url": "https://www.tissotwatches.com/fr-fr/T1274071104100.html"
+      }
+    },
+    {
+      "id": "hamilton-jazzmaster-viewmatic",
+      "brand": "Hamilton",
+      "model": "Jazzmaster Viewmatic H32515555",
+      "tier": "prestige",
+      "style": "dress",
+      "category": "Automatique / cuir",
+      "movement": "Automatique calibre H-10",
+      "case": "Diamètre 40 mm",
+      "glass": "Saphir",
+      "water": "5 bar",
+      "lead": "Une Jazzmaster habillée sur cuir, cadran argenté et fond transparent pour voir le mouvement.",
+      "caution": "Un bracelet cuir ne convient pas à tous les usages humides ; vérifier les consignes du fabricant.",
+      "officialUrl": "https://www.hamiltonwatch.com/fr-fr/h32515555-jazzmaster-day-date-auto.html",
+      "marketEvidence": {
+        "kind": "editorial",
+        "label": "Choix éditorial sur fiche Hamilton",
+        "url": "https://www.hamiltonwatch.com/fr-fr/h32515555-jazzmaster-day-date-auto.html"
+      }
+    }
+  ]
+}
