@@ -49,7 +49,7 @@ try{
   for(const path of ['/montres/citizen-tsuyosa.html','/conseiller.html','/montre.html?id=citizen-tsuyosa']){
     const page=await browser.newPage({viewport:{width:393,height:852},isMobile:true,hasTouch:true});
     await page.goto(new URL(path,base).href,{waitUntil:'domcontentloaded'});
-    await page.waitForSelector('link[href$="premium-system.css"]');
+    await page.waitForSelector('link[href$="premium-system.css"]',{state:'attached'});
     const state=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,client:document.documentElement.clientWidth,loaded:[...document.styleSheets].some(sheet=>sheet.href?.includes('/premium-system.css'))}));
     assert.ok(state.loaded,'Shared stylesheet missing from '+path);
     assert.ok(state.scroll<=state.client+2,'Overflow on '+path);
