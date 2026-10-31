@@ -10,7 +10,7 @@ mkdirSync('artifacts',{recursive:true});
 const errors=[];
 const isPhoto=async wrap=>{
  await wrap.scrollIntoViewIfNeeded();
- const img=wrap.locator('img[src*="assets/watches/"]').first();
+ const img=wrap.locator('img[src*="assets/watches/"][src$=".webp"],img[src*="assets/watches-popular/"][src$=".webp"]').first();
  await img.waitFor({state:'visible',timeout:10000});
  await img.evaluate(async el=>{if(!el.complete)await new Promise(resolve=>{el.addEventListener('load',resolve,{once:true});el.addEventListener('error',resolve,{once:true})})});
  assert.ok(await img.evaluate(el=>el.naturalWidth>100),'Owner-authorized photo must load and decode');
@@ -38,8 +38,8 @@ try{
  const compareTab=await browser.newPage({viewport:{width:393,height:852},deviceScaleFactor:1,isMobile:true,hasTouch:true,locale:'fr-FR'});
  try{
    await compareTab.goto(new URL(deepLink,phone.url()).href,{waitUntil:'domcontentloaded',timeout:30000});
-   await compareTab.locator('#affCompareDialog').waitFor({state:'visible',timeout:20000});
-   assert.equal(await compareTab.locator('#affCompareSelected .am-compare-selected-chip').count(),3,'One-tap compare must preserve all 3 recommended models');
+   await compareTab.locator('#udCompareTable table').waitFor({state:'visible',timeout:20000});
+   assert.equal(await compareTab.locator('#udCompareTable th[scope=col]').count(),4,'One-tap compare must preserve all 3 recommended models in unified comparison');
  }finally{await compareTab.close()}
  assert.ok(await phone.locator('.am-mobile-nav>summary').isVisible(),'Mobile navigation must be visible');
  await phone.locator('.am-mobile-nav>summary').click();
@@ -55,7 +55,7 @@ try{
  assert.equal(await cards.count(),3);
  assert.match(await phone.locator('#advisorCriteria').innerText(),/3 préférences/i);
  const link=cards.first().locator('.advisor-card-actions .primary');
- assert.ok((await link.getAttribute('href')).startsWith('./montre.html?id='),'Every pick leads to exact product');
+ assert.match(await link.getAttribute('href'),/^\.\/montres\/[a-z0-9-]+\.html$/,'Every recommendation must lead to its source-backed SEO detail page');
  await phone.screenshot({path:'artifacts/mobile-watch-advisor.png',fullPage:true});
 
  await phone.locator('#advisorReset').click();
@@ -81,7 +81,13 @@ try{
  assert.equal(await phone.locator('input[name="tier"][value="prestige"]').isChecked(),true);
  assert.equal(await phone.locator('input[name="movement"][value="automatic"]').isChecked(),true);
  assert.equal(await phone.locator('input[name="size"][value="compact"]').isChecked(),true,'Deep link restores size preference');
- for(const card of await cards.all())await isPhoto(card.locator('.advisor-photo'));
+ for(const card of await cards.all()){
+   const media=card.locator('.advisor-photo');
+   const img=media.locator('img');
+   if(await img.count())await isPhoto(media);
+   else assert.ok(await media.locator('.advisor-fallback').isVisible(),
+     'Without a rights-cleared exact photo the advisor must say so explicitly');
+ }
  await noOverflow(phone,'Adviser URL filters');
  await phone.close();
 
