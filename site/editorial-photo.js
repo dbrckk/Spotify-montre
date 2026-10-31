@@ -32,6 +32,32 @@
     return t.localUrl+(typeof t.localSha256==='string'&&/^[a-f0-9]{64}$/i.test(t.localSha256)
       ?'?v='+t.localSha256.slice(0,12):'');
   };
+  // Match the catalogue's SHA-versioned, locally generated WebP derivatives.
+  // Never request a derivative for an unapproved or too-small original.
+  const responsive=(p)=>{
+    const t=p?.photoReview,w=t?.localWidth;
+    if(t?.publicUsageApproved!==true||t.localUrl!=='./assets/watches/'+p.id+'.webp'||
+       !Number.isInteger(w)||w<=480)return '';
+    const version=typeof t.localSha256==='string'&&/^[a-f0-9]{64}$/i.test(t.localSha256)
+      ?'?v='+t.localSha256.slice(0,12):'';
+    const variants=[480,800].filter(size=>size<w).map(size=>
+      './assets/watch-responsive/'+p.id+'-'+size+'.webp'+version+' '+size+'w');
+    return [...variants,t.localUrl+version+' '+w+'w'].join(', ');
+  };
+  const applyResponsive=(img,p,sizes)=>{
+    const set=responsive(p);
+    if(set){img.srcset=set;img.sizes=sizes;}
+    if(Number.isInteger(p.photoReview?.localWidth)&&Number.isInteger(p.photoReview?.localHeight)){
+      img.width=p.photoReview.localWidth;img.height=p.photoReview.localHeight;
+    }
+  };
+  const tryOriginal=(img,url,onFailure)=>{
+    if(img.hasAttribute('srcset')){
+      img.removeAttribute('srcset');img.removeAttribute('sizes');
+      img.src=url;return;
+    }
+    onFailure();
+  };
   const vector=(target,p)=>{
     target.replaceChildren();
     target.classList.remove('am-hero-real');
@@ -132,7 +158,8 @@
         img.decoding='async';img.loading='eager';
         img.referrerPolicy='no-referrer';if(i===0)img.fetchPriority='high';
         img.onload=()=>show(img);
-        img.onerror=fallback;
+        applyResponsive(img,p,'(max-width: 680px) 84vw, (max-width: 940px) 78vw, 520px');
+        img.onerror=()=>tryOriginal(img,url,fallback);
         stage.setAttribute('aria-busy','true');
         stage.replaceChildren(node('span','am-hero-loading','Chargement de la photographie…'));
         if(zoom)zoom.hidden=true;
@@ -152,9 +179,12 @@
       const media=node('div','am-story-media');
       const image=node('img','am-story-img');
       image.src=url;image.loading='lazy';image.decoding='async';
-      image.width=680;image.height=760;
+      applyResponsive(image,p,'(max-width: 680px) 82vw, (max-width: 940px) 46vw, 32vw');
       image.alt='Photographie de '+p.brand+' '+p.model+' — référence exacte';
-      image.onerror=()=>{image.remove();const fallback=node('div','am-story-photo-fallback','Photographie indisponible');media.prepend(fallback);zoom.hidden=true};
+      image.onerror=()=>tryOriginal(image,url,()=>{
+        image.remove();const fallback=node('div','am-story-photo-fallback','Photographie indisponible');
+        media.prepend(fallback);zoom.hidden=true;
+      });
       const zoom=node('button','am-story-zoom','Agrandir ↗');
       zoom.type='button';
       zoom.setAttribute('aria-label','Voir la photographie de '+p.brand+' '+p.model+' en grand');
