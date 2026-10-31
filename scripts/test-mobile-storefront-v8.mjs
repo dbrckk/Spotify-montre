@@ -218,7 +218,30 @@ try{
  await page.locator('#affMovement').selectOption('automatic');
  assert.equal(await cards.count(),7,'Seven mechanical automatic references in the original catalogue');
  await page.locator('#affMovement').selectOption('all');
- await page.locator('#affSearch').fill('ref-does-not-exist-987');
+ // Search only real catalogue facts: model references, sourced glass and
+ // resistance, accented French measurements and multiple combined terms.
+ const searchInput=page.locator('#affSearch');
+ assert.equal(await searchInput.getAttribute('aria-describedby'),'affSearchHint','Source-grounded search help must be accessible');
+ assert.ok(await page.locator('#affSearchHint').isVisible(),'Search help must render on Android');
+ await searchInput.fill('saphir 40 mm');
+ assert.deepEqual((await cards.evaluateAll(items=>items.map(x=>x.dataset.watchId))).sort(),
+   ['citizen-tsuyosa','tissot-prx-auto','tissot-prx-quartz'].sort(),
+   'Combined 40 mm sapphire query must match only documented watches');
+ await searchInput.fill('Seiko 42,5 Hardlex');
+ assert.equal(await cards.count(),1,'French decimal comma and verified Hardlex should combine');
+ assert.equal(await cards.first().getAttribute('data-watch-id'),'seiko-5');
+ await searchInput.fill('casio 20 bar');
+ assert.equal(await cards.count(),1,'Only the exact Casio diver reference claims 20 bar');
+ assert.equal(await cards.first().getAttribute('data-watch-id'),'casio-mdv107');
+ await searchInput.fill('T1374101104100');
+ assert.equal(await cards.count(),1,'Model code copied without punctuation identifies the exact Tissot PRX');
+ assert.equal(await cards.first().getAttribute('data-watch-id'),'tissot-prx-quartz');
+ await searchInput.fill('casio MTP-B145');
+ assert.equal(await cards.count(),1,'Partial hyphenated Casio code is searchable');
+ assert.equal(await cards.first().getAttribute('data-watch-id'),'casio-mtp-b145');
+ await searchInput.fill('Seiko 20bar');
+ assert.equal(await cards.count(),0,'Contradictory undocumented facts must never return a false match');
+ await searchInput.fill('ref-does-not-exist-987');
  assert.equal(await cards.count(),0,'An impossible search must show an empty state');
  assert.ok(await page.locator('#affReset').isVisible(),'No-results recovery control');
  await page.locator('#affReset').click();
