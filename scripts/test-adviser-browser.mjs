@@ -65,7 +65,7 @@ try{
  // Case-size preference can be used alone and shared as an URL without a server.
  await phone.locator('input[name="size"][value="compact"]').check();
  assert.match(new URL(phone.url()).search,/size=compact/,'Size preference is shareable');
- assert.match(await cards.first().locator('h3').innerText(),/MTP-B145D-2A2V/,'First compact result has documented 35 mm case');
+ assert.match(await cards.first().locator('h3').innerText(),/LTP-1302PD-7A1V/,'First compact result has documented round 30.2 mm case');
  assert.match(await phone.locator('#advisorCriteria').innerText(),/1 préférence/i);
  await noOverflow(phone,'Mobile case size preference');
  await phone.screenshot({path:'artifacts/mobile-watch-advisor-sizing.png',fullPage:true});
