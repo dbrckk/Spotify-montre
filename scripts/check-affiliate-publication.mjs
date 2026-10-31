@@ -125,8 +125,8 @@ try {
   const manifest=JSON.parse(readFileSync(join(target,'seo-manifest.json'),'utf8'));
   assert.equal(manifest.affiliateActive,true);
   assert.equal(manifest.affiliateCount,13,'Publish the 13 owner-tagged core product matches');
-  assert.equal(manifest.popularAffiliateDirectLinks,1,'One exact direct link in the supplementary selection');
-  assert.equal(manifest.popularAffiliateSearchLinks,29,'Remaining twenty-nine supplemental watches must stay labeled searches');
+  assert.equal(manifest.popularAffiliateDirectLinks,3,'Three documented direct link in the supplementary selection');
+  assert.equal(manifest.popularAffiliateSearchLinks,27,'Remaining twenty-seven supplemental watches must stay labeled searches');
   const directProduction=readFileSync(join(target,'montres/casio-gw-m5610u-1.html'),'utf8');
   assert.ok(directProduction.includes('href="https://www.amazon.fr/dp/B09BCPP68Q?tag=drackk04-21"'),
     'Publish only the independently source-confirmed G-SHOCK Amazon.fr direct match');
