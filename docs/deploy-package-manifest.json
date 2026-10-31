@@ -5,28 +5,33 @@
   "parts": [
     {
       "file": "deploy-package-01.json",
-      "count": 27,
-      "bytes": 718601
+      "count": 26,
+      "bytes": 696669
     },
     {
       "file": "deploy-package-02.json",
       "count": 15,
-      "bytes": 714802
+      "bytes": 552208
     },
     {
       "file": "deploy-package-03.json",
-      "count": 4,
-      "bytes": 652605
+      "count": 3,
+      "bytes": 520970
     },
     {
       "file": "deploy-package-04.json",
-      "count": 6,
-      "bytes": 687109
+      "count": 5,
+      "bytes": 647516
     },
     {
       "file": "deploy-package-05.json",
-      "count": 46,
-      "bytes": 510901
+      "count": 35,
+      "bytes": 715278
+    },
+    {
+      "file": "deploy-package-06.json",
+      "count": 14,
+      "bytes": 155371
     }
   ]
 }
