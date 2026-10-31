@@ -12,6 +12,11 @@ Date : 31 octobre 2026. Objectif : compléter le scan axe-core des pages du site
 - Ouvrir la visionneuse photo à `Entrée`, puis fermer à `Escape` et vérifier le retour du focus sur le bouton d'agrandissement.
 - Ouvrir la navigation mobile à `Entrée`, puis exécuter axe-core sur le menu effectivement ouvert.
 
+## Régression découverte puis corrigée
+Le premier parcours de cette nouvelle suite a révélé une sortie du focus vers le `body` après plusieurs Tab dans la fenêtre de comparaison sur desktop. La fenêtre contient désormais explicitement les déplacements Tab parmi les contrôles réellement visibles, dans les deux directions, sans les laisser dériver vers le document sous-jacent.
+
+Le scénario Android sélectionnant une quatrième montre a été adapté : la case doit immédiatement revenir à `non cochée` et ouvrir la fenêtre « Quelle montre remplacer ? ». Le test utilise un clic normal plutôt que `check()`, qui exigeait à tort que la case reste cochée.
+
 Chaque étape réussie est enregistrée dans `artifacts/accessibility-wcag-report.json` sous `interactionChecks`. Une échec est remonté comme scénario non résolu et bloque la publication avec `A11Y_ENFORCE=1`. L'audit exige au moins 25 vérifications explicites.
 
 ## Périmètre
