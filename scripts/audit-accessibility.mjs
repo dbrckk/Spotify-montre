@@ -73,7 +73,10 @@ async function checkKeyboardJourney(page,label){
   // Replacement dialog must leave the full selection intact on Escape.
   await boxes.nth(2).check();
   const currentSelection=await page.evaluate(()=>sessionStorage.getItem('atelier-montres-comparison-v1'));
-  await boxes.nth(3).check({force:true});
+  // With three occupied slots the fourth checkbox intentionally reverts
+  // to unchecked while the replacement modal opens: use click, not check().
+  await boxes.nth(3).click();
+  assert.equal(await boxes.nth(3).isChecked(),false,'Fourth watch must not be added without replacement');
   const replacement=page.locator('#affCompareReplaceDialog');
   await replacement.waitFor({state:'visible'});
   await assertModalFocus(page,'#affCompareReplaceDialog',label,'replacement focus initialized');
