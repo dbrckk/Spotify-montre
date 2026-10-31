@@ -51,7 +51,19 @@
  const matchesDiameter=p=>{const n=diameterMm(p);return diameter==='all'||(diameter==='unknown'&&n===null)||(diameter==='compact'&&n!==null&&n<=38)||(diameter==='medium'&&n!==null&&n>38&&n<=40)};
  const diameterLabels={compact:'≤ 38 mm',medium:'38,1–40 mm',unknown:'Diamètre à confirmer'};
  const word=p=>[p.brand,p.model,p.title,p.description,p.style,p.tier,p.movement,...(p.highlights||[])].join(' ').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
- const photoSources=p=>{const t=p?.photoReview,files=[];if(t?.publicUsageApproved!==true)return files;if(t?.localUrl==='./assets/watches/'+p.id+'.webp')files.push(t.localUrl+(typeof t.localSha256==='string'&&/^[a-f0-9]{64}$/.test(t.localSha256)?'?v='+t.localSha256.slice(0,12):''));if(typeof t?.url==='string'&&t.url.startsWith('https://'))files.push(t.url);return files;};
+ // No external image fallback: the signed-off same-origin WebP is the only
+ // public photograph. Keep original vector fallback if the CDN is incomplete.
+ const photoSources=p=>{
+   const t=p?.photoReview;
+   if(t?.publicUsageApproved!==true||t.localUrl!=='./assets/watches/'+p.id+'.webp')return [];
+   return [t.localUrl+(typeof t.localSha256==='string'&&/^[a-f0-9]{64}$/i.test(t.localSha256)?'?v='+t.localSha256.slice(0,12):'')];
+ };
+ const caseLabel=p=>{
+   if(p.specs?.diameter)return p.specs.diameter;
+   const raw=p.specs?.caseSize;
+   const match=typeof raw==='string'&&/^(?:\d{1,2}(?:[,.]\d+)?\s*×\s*)(\d{1,2}(?:[,.]\d+)?)\s*×\s*\d{1,2}(?:[,.]\d+)?\s*mm$/i.exec(raw.trim());
+   return match?'Largeur '+match[1]+' mm':'Diamètre à vérifier';
+ };
  const responsivePhotoSrcset=p=>{
    const review=p?.photoReview;
    if(review?.publicUsageApproved!==true||review.localUrl!=='./assets/watches/'+p.id+'.webp')return '';
@@ -127,7 +139,12 @@
    // dimensions absent from the verified manufacturer catalogue.
    const galleryFacts=make('div','am-gallery-facts');
    galleryFacts.append(make('span','',moves[p.movement]||'Mouvement à vérifier'));
-   galleryFacts.append(make('span','',p.specs?.diameter||'Diamètre à vérifier'));
+   const caseFact=make('span','',caseLabel(p));
+   if(!p.specs?.diameter&&p.specs?.caseSize){
+     caseFact.title='Dimensions du boîtier (L × l × H) : '+p.specs.caseSize;
+     caseFact.setAttribute('aria-label','Largeur documentée ; dimensions L × l × H : '+p.specs.caseSize);
+   }
+   galleryFacts.append(caseFact);
    body.append(galleryFacts);
    const chips=make('div','aff-chips');chips.append(make('span','',levels[p.tier]),make('span','',moves[p.movement]||'Horlogerie'));body.append(chips);
    const specs=make('div','am-spec-line');for(const h of (p.highlights||[]).slice(0,3))specs.append(make('span','',h));body.append(specs);
@@ -233,7 +250,7 @@
    return [
      ['Gamme',p=>levels[p.tier]],
      ['Mouvement',p=>p.specs?.movement||moves[p.movement]||'Non confirmé'],
-     ['Diamètre',p=>p.specs?.diameter||'À vérifier'],
+     ['Taille du boîtier',p=>p.specs?.diameter?'Diamètre '+p.specs.diameter:p.specs?.caseSize?'L × l × H '+p.specs.caseSize:'À vérifier'],
      ['Verre',p=>p.specs?.glass||'À vérifier'],
      ['Étanchéité',p=>p.specs?.waterResistance||'À vérifier']
    ].map(([label,get])=>{

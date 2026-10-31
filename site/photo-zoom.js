@@ -38,9 +38,8 @@
   const source=p=>{
     const t=p.photoReview||{};
     if(t.publicUsageApproved!==true)return null;
-    if(t.localUrl==='./assets/watches/'+p.id+'.webp')return t.localUrl;
-    if(typeof t.url==='string'&&t.url.startsWith('https://'))return t.url;
-    return null;
+    // Do not load a research URL outside this site when the local photo fails.
+    return t.localUrl==='./assets/watches/'+p.id+'.webp'?t.localUrl:null;
   };
   const render=()=>{
     const p=items[index];

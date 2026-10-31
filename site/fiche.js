@@ -68,7 +68,7 @@
    if(art){
      const sources=[];
      if(photo?.publicUsageApproved===true&&photo?.localUrl==='./assets/watches/'+p.id+'.webp')sources.push(photo.localUrl+(typeof photo.localSha256==='string'&&/^[a-f0-9]{64}$/.test(photo.localSha256)?'?v='+photo.localSha256.slice(0,12):''));
-     if(photo?.publicUsageApproved===true&&photo?.accuracy==='exact'&&typeof photo.url==='string'&&photo.url.startsWith('https://'))sources.push(photo.url);
+     // The local approved image is the only public source; never call a third-party host.
      const fallback=()=>{art.replaceChildren();art.classList.remove('am-real-photo-stage');window.AtelierWatch?.render(art,p);if(zoomButton)zoomButton.hidden=true;if(photoLabel)photoLabel.textContent='ILLUSTRATION ÉDITORIALE ORIGINALE';if(photoNote)photoNote.textContent='Illustration stylisée, non contractuelle. Voir la photo exacte chez le fabricant.'};
      if(sources.length){
        art.replaceChildren();art.classList.add('am-real-photo-stage');
@@ -84,11 +84,14 @@
          img.width=localWidth;img.height=Number(photo.localHeight);
        }
        img.fetchPriority='high';
-       let index=0;
+       // On an image error, retry the local original after an unavailable responsive variant.
        img.onload=()=>{if(zoomButton)zoomButton.hidden=false};
        img.onerror=()=>{
-         img.removeAttribute('srcset');img.removeAttribute('sizes');
-         index++;if(index<sources.length)img.src=sources[index];else fallback();
+         if(img.hasAttribute('srcset')){
+           img.removeAttribute('srcset');img.removeAttribute('sizes');
+           img.src=sources[0];return;
+         }
+         fallback();
        };
        art.append(img);img.src=sources[0];
        if(photoLabel)photoLabel.textContent='PHOTOGRAPHIE DU MODÈLE · '+(photo.provider||p.brand).toUpperCase();
