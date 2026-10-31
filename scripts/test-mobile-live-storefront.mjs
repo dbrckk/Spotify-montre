@@ -70,6 +70,27 @@ try{
   const shell=await page.locator('#detailShell').boundingBox();
   assert.ok(shell?.height>250,'Product detail cannot be blank on mobile');
   await page.screenshot({path:'artifacts/mobile-tissot-product.png',fullPage:true});
+  const editorial=await page.goto(new URL('/montres/citizen-tsuyosa.html',base).href,{waitUntil:'domcontentloaded',timeout:30000});
+  assert.ok(editorial?.ok(),'The canonical Citizen editorial product page should respond HTTP 2xx');
+  assert.equal(await page.locator('article.watch-product').count(),1,'Search-indexable product must use the premium editorial layout');
+  const staticImage=page.locator('article.watch-product .watch-photo img');
+  await staticImage.waitFor({state:'visible',timeout:20000});
+  await staticImage.evaluate(img=>img.decode());
+  const staticPhoto=await staticImage.evaluate(img=>({src:img.currentSrc,width:img.naturalWidth,height:img.naturalHeight}));
+  assert.ok(staticPhoto.width>=300&&staticPhoto.height>=300&&isAllowedPhoto(staticPhoto.src,'citizen-tsuyosa'),'Indexable product uses the source-approved local Citizen image');
+  const editorialFacts=page.locator('.watch-facts .watch-quickfact');
+  assert.equal(await editorialFacts.count(),4,'Indexable product must show exactly four sourced-or-unknown facts');
+  const editorialText=(await editorialFacts.allTextContents()).join(' ');
+  assert.match(editorialText,/40 mm/,'Citizen diameter must come from the catalog');
+  assert.match(editorialText,/Saphir/,'Citizen crystal must come from the catalog');
+  for(const target of ['caracteristiques','comparatif','avant-achat','modeles-proches']){
+    assert.equal(await page.locator('.watch-section-nav a[href="#'+target+'"]').count(),1,'Product navigation must link to '+target);
+    assert.equal(await page.locator('#'+target).count(),1,'Product destination must exist: '+target);
+  }
+  const horizontalOverflow=await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
+  assert.ok(horizontalOverflow<=2,'Product page must not overflow Android viewport horizontally (overflow '+horizontalOverflow+'px)');
+  await page.screenshot({path:'artifacts/mobile-citizen-editorial.png',fullPage:true});
+  console.log('PASS MOBILE EDITORIAL: source-approved Citizen photo, four sourced facts, valid anchors and no horizontal viewport overflow');
   assert.deepEqual(errors,[],'Uncaught browser errors on the storefront');
   console.log('PASS MOBILE DETAIL: Tissot PRX Powermatic 80 displayed, photo decoded, detail sheet visible');
 }finally{
