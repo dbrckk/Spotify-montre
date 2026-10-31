@@ -35,7 +35,7 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       '<div class="am-extra-fact"><dt>'+e(label)+'</dt><dd>'+e(value)+'</dd></div>').join('');
     const direct=verifiedLinks.get(p.id);
     const actions=affiliateLink(p)
-      +link(p.officialUrl,'Voir les vraies photos et la fiche constructeur');
+      +link(p.officialUrl,p.brand==='SKMEI'?'Voir les photos et la fiche vendeur':'Voir les vraies photos et la fiche constructeur');
     const source=link(p.marketEvidence.url,p.marketEvidence.label);
     const relatedItems=suggestions.map(q=>
       '<li><a href="./'+e(q.id)+'.html"><strong>'+e(q.brand+' '+q.model)+'</strong></a>'
@@ -48,7 +48,8 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       +'<div class="am-extra-art am-pick-'+e(p.style)+'" role="group" aria-label="Composition graphique non contractuelle, sans photographie de cette montre">'
       +'<span class="am-extra-art-kicker">'+e(p.category)+'</span><span class="am-extra-art-brand">'+e(p.brand)+'</span>'
       +'<span class="am-extra-art-model">'+e(p.model)+'</span>'
-      +'<span class="am-extra-art-label">Une référence à découvrir · photographie exacte chez le fabricant</span>'
+      +(p.brand==='SKMEI'?'<span class="am-budget-watch am-budget-watch-large" aria-hidden="true"><span class="am-budget-dial"></span></span>':'')
+      +'<span class="am-extra-art-label">Une référence à découvrir · photographie exacte chez le vendeur ou la marque</span>'
       +'</div>'
       +'<div class="am-extra-intro"><p class="am-extra-overline">'+e(tierNames[p.tier])+' / '+e(category)+'</p>'
       +'<h1>'+e(name)+'</h1><p class="am-extra-subtitle">'+e(p.lead)+'</p>'
@@ -70,14 +71,14 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       +'<div><span class="am-extra-index" aria-hidden="true">02</span><h3>Ce qu’il faut contrôler</h3><p>'+e(p.caution)+'</p></div></div></section>'
       +'<section id="sources" class="am-extra-provenance" aria-label="Origine des informations"><h2>Des informations vérifiables</h2>'
       +'<p>'+e(ranking)+'</p><p><strong>Pourquoi cette référence ?</strong> '+source+'</p>'
-      +'<p><strong>Caractéristiques et photos exactes :</strong> '+link(p.officialUrl,'Site officiel '+p.brand)+'</p>'
-      +'<p>Les photos sont consultables chez le fabricant : nous ne les republions pas sans autorisation. La mention de meilleures ventes, lorsqu’elle existe, n’atteste pas le classement de ce modèle sur Amazon.fr.</p></section>'
+      +'<p><strong>Caractéristiques et photos exactes :</strong> '+link(p.officialUrl,(p.brand==='SKMEI'?'Fiche du vendeur SKMEI':'Site officiel '+p.brand))+'</p>'
+      +'<p>Les photos sont consultables chez la marque ou le vendeur cité : nous ne les republions pas sans autorisation. La mention de meilleures ventes, lorsqu’elle existe, n’atteste pas le classement de ce modèle sur Amazon.fr.</p></section>'
       +'<section id="comparables" class="am-extra-related" aria-labelledby="am-extra-related-heading">'
       +'<h2 id="am-extra-related-heading">Trois autres montres à examiner</h2><p>Ces références de notre sélection principale disposent de fiches documentées et de photographies locales déclarées autorisées. Elles constituent des pistes de comparaison, non un classement.</p>'
       +'<ul>'+relatedItems+'</ul><a href="../index.html#montres">Comparer les 15 références principales</a></section>'
       +'<section id="verifications" class="am-extra-checks"><h2>Avant de commander</h2>'
       +'<ol><li>Confirmer le code '+e(p.model)+' et la couleur auprès du vendeur : une fiche de recherche peut afficher d’autres variantes.</li>'
-      +'<li>Vérifier les dimensions de la boîte, le réglage et les matériaux sur la documentation '+e(p.brand)+'.</li>'
+      +'<li>Vérifier les dimensions du boîtier, le réglage et les matériaux sur la fiche de référence de '+e(p.brand)+'.</li>'
       +'<li>Lire la garantie, les modalités de retour, le vendeur réel et le tarif final directement chez le commerçant.</li></ol>'
       +'<p>Aucun prix, disponibilité, livraison ou avis client n’est certifié par Atelier Montres pour ce modèle.</p></section>'
       +'<p class="am-extra-return"><a href="./modeles-populaires.html">← Revenir aux '+products.length+' montres complémentaires</a></p>'

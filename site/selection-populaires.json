@@ -6,6 +6,186 @@
   "amazonProductAsins": "partly_verified_exact_listings",
   "products": [
     {
+      "id": "skmei-1251",
+      "brand": "SKMEI",
+      "model": "1251",
+      "tier": "essential",
+      "style": "sport",
+      "category": "Sport digital / petit budget",
+      "movement": "Quartz numérique",
+      "case": "Dimensions non documentées",
+      "glass": "Verre non documenté",
+      "water": "50 m selon la fiche vendeur",
+      "lead": "Écran numérique à fort contraste, alarme, chronomètre et double fuseau : une silhouette sportive pour un budget serré.",
+      "caution": "La fiche vendeur ne précise pas les dimensions ni le verre. L’étanchéité indiquée doit être confirmée sur l’exemplaire livré.",
+      "officialUrl": "https://skmei-egy.com/en/products/skmei-1251-%D8%B3%D8%A7%D8%B9%D8%A9-%D8%B1%D8%AC%D8%A7%D9%84%D9%8A-%D8%AF%D9%8A%D8%AC%D9%8A%D8%AA%D8%A7%D9%84-%D8%A3%D9%86%D9%8A%D9%82%D8%A9",
+      "marketEvidence": {
+        "kind": "retailer_bestseller",
+        "label": "Référence présentée dans les meilleures ventes de SKMEI Egypt",
+        "url": "https://skmei-egy.com/en"
+      }
+    },
+    {
+      "id": "skmei-1257",
+      "brand": "SKMEI",
+      "model": "1257",
+      "tier": "essential",
+      "style": "sport",
+      "category": "Sport digital / mixte",
+      "movement": "Quartz numérique",
+      "case": "Dimensions non documentées",
+      "glass": "Verre non documenté",
+      "water": "50 m selon la fiche vendeur",
+      "lead": "Numérique noire, affichage lumineux, alarme et chronomètre : un design sportif polyvalent et facilement identifiable.",
+      "caution": "Dimensions et matériau du verre non documentés. La variante noire était indiquée épuisée chez le vendeur consulté.",
+      "officialUrl": "https://skmei-egy.com/en/products/skmei-1257-%D8%B3%D8%A7%D8%B9%D8%A9-%D8%B1%D9%8A%D8%A7%D8%B6%D9%8A%D8%A9-%D8%B9%D8%B5%D8%B1%D9%8A%D8%A9",
+      "marketEvidence": {
+        "kind": "retailer_bestseller",
+        "label": "Référence présentée dans les meilleures ventes de SKMEI Egypt",
+        "url": "https://skmei-egy.com/en"
+      }
+    },
+    {
+      "id": "skmei-2056",
+      "brand": "SKMEI",
+      "model": "2056",
+      "tier": "essential",
+      "style": "retro",
+      "category": "Rétro numérique / sport",
+      "movement": "Quartz numérique",
+      "case": "Boîtier résine 35 mm, épaisseur 9 mm",
+      "glass": "Résine",
+      "water": "5 bar annoncés",
+      "lead": "Une digitale compacte au boîtier rectangulaire, avec rétroéclairage LED, minuteur et double fuseau horaire.",
+      "caution": "Choisir la bonne couleur et vérifier les conditions de nage selon la notice : 5 bar n’équivaut pas à une montre de plongée.",
+      "officialUrl": "https://www.shopskmei.com/product/skmei-2056-digital-sport-watch/",
+      "marketEvidence": {
+        "kind": "editorial",
+        "label": "Choix petit budget, caractéristiques publiées chez le vendeur SKMEI",
+        "url": "https://www.shopskmei.com/product/skmei-2056-digital-sport-watch/"
+      }
+    },
+    {
+      "id": "skmei-2514",
+      "brand": "SKMEI",
+      "model": "2514",
+      "tier": "essential",
+      "style": "retro",
+      "category": "Rétro acier / digital",
+      "movement": "Quartz numérique",
+      "case": "35,2 × 37,7 × 9,3 mm",
+      "glass": "Verre, nature non précisée",
+      "water": "3 bar annoncés",
+      "lead": "Bracelet acier et affichage digital rectangulaire : une esthétique vintage métallique avec alarme et chronomètre.",
+      "caution": "Les 3 bar couvrent seulement les éclaboussures ; vérifier le tour de poignet et la variante colorée exacte.",
+      "officialUrl": "https://www.shopskmei.com/product/skmei-2514-retro-digital-steel-watch/",
+      "marketEvidence": {
+        "kind": "editorial",
+        "label": "Choix rétro parmi les références proposées sur SKMEI",
+        "url": "https://www.shopskmei.com/product/skmei-2514-retro-digital-steel-watch/"
+      }
+    },
+    {
+      "id": "skmei-9156",
+      "brand": "SKMEI",
+      "model": "9156",
+      "tier": "essential",
+      "style": "dress",
+      "category": "Chronographe / cuir",
+      "movement": "Quartz chronographe",
+      "case": "Diamètre 47 mm, épaisseur 12 mm",
+      "glass": "Minéral",
+      "water": "3 bar annoncés",
+      "lead": "Un chronographe à cadran contrasté et bracelet cuir, pensé pour donner une allure habillée à une tenue quotidienne.",
+      "caution": "Son boîtier de 47 mm est imposant ; ne pas immerger la montre malgré la couronne vissée annoncée.",
+      "officialUrl": "https://www.shopskmei.com/product/skmei-9156-leather-chronograph-watch/",
+      "marketEvidence": {
+        "kind": "editorial",
+        "label": "Choix habillé, fiche technique SKMEI 9156",
+        "url": "https://www.shopskmei.com/product/skmei-9156-leather-chronograph-watch/"
+      }
+    },
+    {
+      "id": "skmei-9353",
+      "brand": "SKMEI",
+      "model": "9353",
+      "tier": "essential",
+      "style": "steel",
+      "category": "Acier / jour-date",
+      "movement": "Quartz analogique",
+      "case": "Diamètre 42 mm, épaisseur 13 mm",
+      "glass": "Minéral",
+      "water": "3 bar annoncés",
+      "lead": "Lunette cannelée, cadran épuré et guichet jour-date : une présence sport chic sur bracelet acier.",
+      "caution": "Le boîtier est annoncé en alliage, pas en acier massif. Les 3 bar ne justifient ni baignade ni douche.",
+      "officialUrl": "https://www.shopskmei.com/product/skmei-9353-classic-steel-quartz-watch/",
+      "marketEvidence": {
+        "kind": "editorial",
+        "label": "Choix acier, fiche de référence SKMEI 9353",
+        "url": "https://www.shopskmei.com/product/skmei-9353-classic-steel-quartz-watch/"
+      }
+    },
+    {
+      "id": "skmei-1874",
+      "brand": "SKMEI",
+      "model": "1874",
+      "tier": "essential",
+      "style": "compact",
+      "category": "Femme / acier minimaliste",
+      "movement": "Quartz analogique",
+      "case": "Diamètre 31 mm, épaisseur 8 mm",
+      "glass": "Minéral",
+      "water": "3 bar annoncés",
+      "lead": "Petit cadran minimaliste et bracelet acier à mailles fines : une option élégante pour les poignets qui aiment la discrétion.",
+      "caution": "Vérifier la finition et le fermoir de la variante choisie ; les 3 bar ne conviennent pas à la nage.",
+      "officialUrl": "https://www.shopskmei.com/product/skmei-1874-minimalist-steel-bracelet-watch/",
+      "marketEvidence": {
+        "kind": "editorial",
+        "label": "Choix petit boîtier, fiche SKMEI 1874",
+        "url": "https://www.shopskmei.com/product/skmei-1874-minimalist-steel-bracelet-watch/"
+      }
+    },
+    {
+      "id": "skmei-2471",
+      "brand": "SKMEI",
+      "model": "2471",
+      "tier": "essential",
+      "style": "sport",
+      "category": "Ana-digi / sport octogonal",
+      "movement": "Quartz analogique et numérique",
+      "case": "Boîtier octogonal, épaisseur 13,7 mm",
+      "glass": "Minéral",
+      "water": "5 bar annoncés",
+      "lead": "Un boîtier octogonal marqué, aiguilles et écran digital rétroéclairé avec plusieurs fuseaux et alarme.",
+      "caution": "Les dimensions hors épaisseur ne sont pas détaillées sur la fiche consultée : contrôler le volume porté.",
+      "officialUrl": "https://www.shopskmei.com/product/skmei-2471-5-bar-analog-digital-sport-watch/",
+      "marketEvidence": {
+        "kind": "editorial",
+        "label": "Choix sport ana-digi, fiche SKMEI 2471",
+        "url": "https://www.shopskmei.com/product/skmei-2471-5-bar-analog-digital-sport-watch/"
+      }
+    },
+    {
+      "id": "skmei-1220",
+      "brand": "SKMEI",
+      "model": "1220",
+      "tier": "essential",
+      "style": "retro",
+      "category": "Rétro carré / double fuseau",
+      "movement": "Quartz analogique et numérique",
+      "case": "Boîtier carré 33 mm, épaisseur 11 mm",
+      "glass": "Minéral",
+      "water": "3 bar annoncés",
+      "lead": "Carré métallique et bracelet acier, combinant aiguilles et fenêtre digitale à double fuseau : une alternative rétro originale.",
+      "caution": "La mention 3 bar implique un usage prudent face à l’eau. Vérifier les options de couleur sur le produit réel.",
+      "officialUrl": "https://www.shopskmei.com/product/skmei-1220-dual-time-digital-sport-watch/",
+      "marketEvidence": {
+        "kind": "editorial",
+        "label": "Choix rétro ana-digi, fiche SKMEI 1220",
+        "url": "https://www.shopskmei.com/product/skmei-1220-dual-time-digital-sport-watch/"
+      }
+    },
+    {
       "id": "casio-ga-2100-1a1",
       "brand": "Casio G-SHOCK",
       "model": "GA-2100-1A1",
