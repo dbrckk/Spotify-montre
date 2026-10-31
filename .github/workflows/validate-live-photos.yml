@@ -30,6 +30,27 @@ jobs:
         run: |
           npm install --no-save --no-audit --no-fund playwright
           npx playwright install --with-deps chromium
+      - name: Wait for exact production product and catalogue assets
+        run: |
+          set -eu
+          base='https://atelier-montres-selection-fr.onrender.com'
+          for attempt in $(seq 1 30); do
+            ready=1
+            for file in affiliation.js fiche.js fiche.css seo-guides.css; do
+              if ! curl -fsSL --max-time 15 "$base/$file" -o "$RUNNER_TEMP/live-$file"; then
+                ready=0
+              elif ! cmp -s "site/$file" "$RUNNER_TEMP/live-$file"; then
+                ready=0
+              fi
+            done
+            if [ "$ready" -eq 1 ] && curl -fsSL --max-time 15 "$base/montres/citizen-tsuyosa.html" | grep -Fq 'class="watch-facts"'; then
+              echo "Published exact watch JS/CSS and factual product page are ready."
+              exit 0
+            fi
+            if [ "$attempt" -lt 30 ]; then sleep 5; fi
+          done
+          echo 'Published watch assets or product HTML did not reach the current commit.'
+          exit 1
       - name: Assert homepage and detail page show real same-domain images at Android viewport
         env:
           WATCH_STOREFRONT_URL: https://atelier-montres-selection-fr.onrender.com
