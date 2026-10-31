@@ -1,6 +1,11 @@
 name: Audit production SEO URLs
 on:
   workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/audit-live-seo.mjs'
+      - '.github/workflows/audit-live-seo.yml'
   push:
     branches: [main]
     paths:
