@@ -58,7 +58,7 @@ L'approbation finale d'Amazon n'est pas présumée ; les commissions ne sont pas
 
 ## Google Search Console — configuration propriétaire effectuée le 31 octobre 2026
 
-Le propriétaire a confirmé la vérification de la propriété **Préfixe d'URL** `https://atelier-montres-selection-fr.onrender.com/`, la soumission réussie du sitemap et l'indexation de la page d'accueil. Le fichier de vérification HTML `site/google6d385495b6d15d5e.html` a été publié sur Render. **Les 27 autres URL ne sont pas considérées indexées sans rapport Search Console** ; la propriété Google n'est pas reliée automatiquement au dépôt. Les étapes ci-dessous restent utiles en cas de migration ou de nouvelle vérification.
+Le propriétaire a confirmé la vérification de la propriété **Préfixe d'URL** `https://atelier-montres-selection-fr.onrender.com/`, la soumission réussie du sitemap et l'indexation de la page d'accueil. Le fichier de vérification HTML `site/google6d385495b6d15d5e.html` a été publié sur Render. **Les 28 autres URL ne sont pas considérées indexées sans rapport Search Console** ; la propriété Google n'est pas reliée automatiquement au dépôt. Les étapes ci-dessous restent utiles en cas de migration ou de nouvelle vérification.
 
 1. Ouvrir [Search Console](https://search.google.com/search-console/welcome) et ajouter une propriété **Préfixe d'URL** : `https://atelier-montres-selection-fr.onrender.com/`.
 2. Choisir la vérification via **balise HTML**. Copier uniquement la valeur du champ `content` de la balise `google-site-verification`. Ne pas transmettre de cookie Google ni de mot de passe.
@@ -111,3 +111,28 @@ Le propriétaire a confirmé la vérification de la propriété **Préfixe d'URL
 - Chaque page éditoriale lie la méthode par sa navigation et son pied de page ; l'accueil la met en avant et la propose au pied de page. Le sitemap comprend maintenant **29 URL indexables**.
 - Contrôles de non-régression : unicité canonique, balisage AboutPage, liens vers les 15 fiches, cohérence du sitemap, indépendance des faits et idempotence du bloc d'accueil.
 - But : apporter une aide réelle et transparente à l'achat, sans promettre de progression SEO tant que Search Console ne mesure pas les performances réelles.
+
+## Analyse de l'export Google Search Console — 31 octobre 2026
+
+Le propriétaire a vérifié la propriété Search Console et le sitemap est accessible, mais **aucun export de performances (requêtes/pages) n'a été récupéré par le dépôt**. Les positions, impressions, taux de clics et volumes de trafic du site ne doivent donc pas être inventés.
+
+### Procédure sans accès API ni abonnement
+
+1. Ouvrir [Google Search Console](https://search.google.com/search-console/) avec la propriété `https://atelier-montres-selection-fr.onrender.com/`.
+2. Dans **Performances → Résultats de recherche**, sélectionner **3 mois** (ou une période comparable), laisser le type **Web**, puis **Exporter → CSV**. Le fichier ZIP exporté comprend normalement `Queries.csv` et `Pages.csv` (les intitulés peuvent être français).
+3. Envoyer le ZIP dans la conversation pour une analyse assistée, **ou** l'analyser localement sans connexion Google :
+
+   `python3 scripts/analyze-search-console.py --input ~/Downloads/export.zip --period "3 mois"`
+
+   Les fichiers `artifacts/search-console-local/gsc-opportunities.md` et `.json` sont créés **localement**. La période inscrite est déclarative : ne pas l'indiquer si elle n'est pas connue.
+4. Évaluer les pages à partir des données observées, relire les extraits sur les recherches ayant des impressions suffisantes, puis corriger seulement les informations ou liens internes pertinents.
+
+**Sécurité des données :** le script Python standard ne fait aucune requête Internet et ne nécessite aucun jeton OAuth. Les exports et rapports dans `data/search-console/` ou `artifacts/search-console-local/` sont exclus du dépôt Git. Ne jamais publier les exports Google dans un dépôt public ni écrire ses identifiants dans GitHub Actions.
+
+**Précautions méthodologiques :**
+
+- Un export des onglets **Requêtes** et **Pages** n'établit pas une correspondance entre une requête individuelle et une page spécifique. L'analyseur traite donc ces tableaux séparément. Pour relier une requête à une page, filtrer cette requête dans Search Console puis consulter l'onglet Pages, ou utiliser explicitement un export à deux dimensions.
+- Les exports UI peuvent être limités à **1 000 lignes représentatives**, et certaines requêtes peuvent ne pas apparaître. Les sommes de deux dimensions différentes ne représentent pas nécessairement un total comparable.
+- L'algorithme n'émet des pistes que si une ligne a au moins 50 impressions, et des alertes CTR/maillage surtout à partir de 100 impressions. Ces seuils sont des **heuristiques de tri internes**, ni des seuils Google ni des garanties de gain.
+- Si l'export est vide, récent ou pauvre en impressions, **aucune optimisation de mot-clé ne doit être inférée**.
+- Les fichiers de tests utilisent exclusivement des exemples synthétiques et sont validés par le workflow `validate-search-console-analysis.yml`.
