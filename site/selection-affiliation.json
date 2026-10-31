@@ -626,14 +626,14 @@
       "specReview": {
         "verifiedOn": "2026-10-31",
         "sourceKind": "manufacturer_exact_reference",
-        "sourceUrl": "https://www.seikowatches.com/be-fr/products/5sports/srpd55",
+        "sourceUrl": "https://www.seikowatches.com/fr-fr/products/5sports/srpd55",
         "verifiedFields": [
           "diameter",
           "movement",
           "glass",
           "waterResistance"
         ],
-        "notes": "Fiche Seiko SRPD55 (bracelet acier), à ne pas confondre avec la variante SRPD55K2 en silicone."
+        "notes": "Fiche constructeur française SRPD55, boîtier et bracelet acier ; ne pas confondre avec SRPD55K2 en silicone."
       }
     },
     {
