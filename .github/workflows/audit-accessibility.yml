@@ -1,0 +1,50 @@
+name: WCAG accessibility audit — full storefront
+on:
+  pull_request:
+    paths:
+      - 'site/**'
+      - 'scripts/**'
+      - '.github/workflows/audit-accessibility.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'site/**'
+      - 'scripts/**'
+      - '.github/workflows/audit-accessibility.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: accessibility-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  axe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install open-source browser and accessibility engine
+        run: |
+          npm install --no-save --no-audit --no-fund playwright @axe-core/playwright
+          npx playwright install --with-deps chromium
+      - name: Build complete storefront
+        run: |
+          node scripts/build-seo.mjs
+          node scripts/validate-seo.mjs
+      - name: Audit all pages and important interactive states
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 --directory site >/tmp/atelier-accessibility-http.log 2>&1 &
+          pid=$!
+          trap 'kill "$pid" 2>/dev/null || true' EXIT
+          sleep 2
+          A11Y_ENFORCE=${A11Y_ENFORCE:-0} WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/audit-accessibility.mjs
+      - name: Preserve full WCAG violations report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wcag-audit-report
+          path: artifacts/accessibility-wcag-report.json
+          retention-days: 14
