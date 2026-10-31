@@ -25,7 +25,9 @@ try{
   assert.ok((await items.first().getAttribute('href')).includes('seiko-5'),'Most recent comes first');
   const thumbnail=items.first().locator('img');
   await thumbnail.evaluate(img=>img.decode());
-  assert.ok((await thumbnail.evaluate(img=>img.naturalWidth))>=240,'History shows genuine local watch image');
+  const historyPhoto=await thumbnail.evaluate(img=>({width:img.naturalWidth,src:img.currentSrc}));
+  assert.ok(historyPhoto.width>=100,'History thumbnail must decode for its actual 120px displayed size');
+  assert.ok(new URL(historyPhoto.src).origin===new URL(base).origin&&/\/assets\/(watches|watch-responsive)\/seiko-5(?:-480|-800)?\.webp/.test(historyPhoto.src),'Recent watches must use the authorized local photo or its responsive derivative');
   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>document.documentElement.clientWidth+2);
   assert.equal(overflow,false,'History rail does not introduce mobile horizontal overflow');
 
