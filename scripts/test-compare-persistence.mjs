@@ -44,6 +44,32 @@ try {
   assert.equal(await page.locator('#affCompareSelected .am-compare-selected-chip').count(),2,'Reload restores comparison');
   if(await page.locator('#affCompareDialog').isVisible())await page.locator('#affCompareClose').click();
 
+  // A shared comparison URL must also stay consistent when one of three
+  // candidates is deliberately replaced; never remove the other two.
+  await cards.nth(2).locator('.am-compare-check input').check();
+  const beforeReplacement=await page.evaluate(()=>JSON.parse(sessionStorage.getItem('atelier-montres-comparison-v1')));
+  assert.equal(beforeReplacement.length,3,'The comparison is full before adding a fourth watch');
+  const fourth=await cards.nth(3).getAttribute('data-watch-id');
+  await cards.nth(3).locator('.am-compare-check input').click();
+  const replacement=page.locator('#affCompareReplaceDialog');
+  await replacement.waitFor({state:'visible',timeout:10000});
+  assert.equal(await replacement.locator('.am-replace-choice').count(),3,'Exactly three possible slots to replace');
+  await page.keyboard.press('Escape');
+  assert.ok(!(await replacement.isVisible()),'Escape cancels the replacement');
+  assert.deepEqual(await page.evaluate(()=>JSON.parse(sessionStorage.getItem('atelier-montres-comparison-v1'))),beforeReplacement,'Escape cannot remove selected models');
+  await cards.nth(3).locator('.am-compare-check input').click();
+  await replacement.waitFor({state:'visible',timeout:10000});
+  await replacement.locator('.am-replace-choice').first().click();
+  const afterReplacement=await page.evaluate(()=>JSON.parse(sessionStorage.getItem('atelier-montres-comparison-v1')));
+  assert.deepEqual(afterReplacement,[fourth,...beforeReplacement.slice(1)],'The chosen slot is replaced, the two others are preserved');
+  assert.deepEqual(new URL(page.url()).searchParams.get('compare').split(','),afterReplacement,'Existing shared comparison URL reflects the newly chosen model');
+  assert.equal(await page.locator('#affCompareSelected .am-compare-selected-chip').count(),3,'Full comparison dock stays populated');
+  await page.reload({waitUntil:'domcontentloaded'});
+  await page.locator('#affCompareTray').waitFor({state:'visible',timeout:20000});
+  if(await page.locator('#affCompareDialog').isVisible())await page.locator('#affCompareClose').click();
+  assert.deepEqual(await page.evaluate(()=>JSON.parse(sessionStorage.getItem('atelier-montres-comparison-v1'))),afterReplacement,'Updated shared comparison survives a second reload');
+  assert.equal(await cards.nth(3).locator('.am-compare-check input').isChecked(),true,'Replacement checkbox stays synced after reload');
+
   await page.locator('#affCompareClear').click();
   assert.equal(await tray.evaluate(el=>getComputedStyle(el).display),'none','Clearing selection must hide the floating dock');
   assert.equal(new URL(page.url()).searchParams.has('compare'),false,'Clearing comparison also clears URL deep-link state');
