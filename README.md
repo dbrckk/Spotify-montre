@@ -1,5 +1,11 @@
 # Atelier Montres — boutique de montres indépendante
 
+## Collection accessible SKMEI — 31 octobre 2026
+
+Le catalogue éditorial passe à **45 références** : 15 montres comparées et **30 modèles complémentaires**, dont **9 SKMEI** à petit budget (digitales sport, rétro acier, chronographes, sport chic et petit boîtier féminin). Chaque nouveauté possède sa page indexable, ses faits et son lien source, pour un **sitemap de 60 URL** après construction. L’accueil met en avant quatre modèles SKMEI et une illustration CSS originale signalée non contractuelle, sans réutiliser de photographie vendeur non autorisée.
+
+Les **29 fiches complémentaires sans ASIN contrôlé** ouvrent une recherche Amazon.fr portant l’identifiant Partenaires confirmé ; une seule référence complémentaire dispose d’un ASIN direct vérifié. Les montres SKMEI ne sont ni déclarées meilleures ventes Amazon ni associées à un prix ou à une disponibilité inventés. L’approbation finale du programme et les revenus réels ne sont pas confirmés. [Fiches SKMEI, sources et contrôles](docs/selection-skmei-budget-2026-10-31.md).
+
 ## Catalogue enrichi de 36 montres — 31 octobre 2026
 
 Les 15 modèles photographiés du comparateur sont complétés de 21 fiches éditoriales sourcées (8 nouvelles références Casio, Citizen, Orient, Seiko, Tissot et Hamilton). Le générateur produit 51 URL dans le sitemap, sans faux avis, prix ou photographie non autorisée. Les 13 fiches Amazon précises du catalogue principal restent inchangées ; parmi les 21 complémentaires, 1 fiche Amazon exacte est documentée et les 20 autres sont des recherches signalées. L'approbation finale du programme Partenaires et les commissions restent à vérifier. [Sources et contrôles](docs/extension-catalogue-36-montres-2026-10-31.md).
