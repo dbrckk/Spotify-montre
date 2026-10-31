@@ -43,11 +43,11 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
   const amazonSearch=p=>'https://www.amazon.fr/s?k='
     +encodeURIComponent((p.brand+' '+p.model).slice(0,130))
     +'&tag='+encodeURIComponent(amazonPartnerTag);
-  const link=(href,txt,commercial=false)=>'<a href="'+e(href)+'" target="_blank" rel="noopener noreferrer nofollow'+(commercial?' sponsored':'')+'">'+e(txt)+'</a>';
+  const link=(href,txt,commercial=false,id='')=>'<a href="'+e(href)+'" target="_blank" rel="noopener noreferrer nofollow'+(commercial?' sponsored':'')+'"'+(commercial?' data-amazon-search-id="'+e(id)+'" data-amazon-placement="popular"':'')+'>'+e(txt)+'</a>';
   const card=(p,front=false)=>{
     const claim=p.marketEvidence.kind==='editorial'?'Sélection éditoriale':p.marketEvidence.kind==='manufacturer_bestseller'?'Signal marque':'Signal distributeur';
     return '<article class="am-pick-card am-pick-'+e(p.style)+'" id="pick-'+e(p.id)+'">'
-      +'<div class="am-pick-visual" aria-label="Présentation typographique, sans photographie du modèle"><span class="am-pick-visual-top">'+e(p.category)+'</span>'
+      +'<div class="am-pick-visual" role="group" aria-label="Repère graphique non contractuel, sans photographie du modèle"><span class="am-pick-visual-top">'+e(p.category)+'</span>'
       +'<span class="am-pick-visual-name">'+e(p.brand)+'</span><span class="am-pick-visual-ref">'+e(p.model)+'</span>'
       +'<span class="am-pick-visual-caption">Repère graphique · photo exacte chez le fabricant</span></div>'
       +'<div class="am-pick-content"><p class="am-pick-kicker"><span>'+e(tierNames[p.tier])+'</span><span>'+e(claim)+'</span></p>'
@@ -56,7 +56,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
       +'<dl class="am-pick-specs"><div><dt>Mouvement</dt><dd>'+e(p.movement)+'</dd></div><div><dt>Boîtier</dt><dd>'+e(p.case)+'</dd></div><div><dt>Verre</dt><dd>'+e(p.glass)+'</dd></div><div><dt>Étanchéité</dt><dd>'+e(p.water)+'</dd></div></dl>'
       +(front?'':'<p class="am-pick-caution"><strong>Avant achat :</strong> '+e(p.caution)+'</p>')
       +'<div class="am-pick-actions">'
-      +(affiliates.enabled?link(amazonSearch(p),'Rechercher sur Amazon.fr · lien rémunéré',true):'')
+      +(affiliates.enabled?link(amazonSearch(p),'Rechercher sur Amazon.fr · lien rémunéré',true,p.id):'')
       +link(p.officialUrl,'Photos et fiche fabricant')
       +'</div><p class="am-pick-source">Pourquoi ici ? '+link(p.marketEvidence.url,p.marketEvidence.label)+'</p>'
       +'<p class="am-pick-note">La recherche Amazon peut présenter des variantes ou d’autres produits. Vérifier la référence exacte, le vendeur et le prix avant de commander.</p>'
