@@ -8,7 +8,7 @@ const tmp=mkdtempSync(join(tmpdir(),'atelier-affiliate-integration-'));
 try {
   const target=join(tmp,'site');
   mkdirSync(target,{recursive:true});
-  for(const name of ['selection-affiliation.json','selection-populaires.json','popular-photo-rights.json','affiliation.html','confidentialite.html','affiliate-links.json','comparaisons-montres.json','editorial-insights.json']){
+  for(const name of ['selection-affiliation.json','selection-populaires.json','popular-photo-rights.json','popular-ai-visuals.json','affiliation.html','confidentialite.html','affiliate-links.json','comparaisons-montres.json','editorial-insights.json']){
     cpSync(join(repository,'site',name),join(target,name));
   }
   // Keep source image files in the temporary integration build so the

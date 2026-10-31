@@ -1,5 +1,9 @@
 # Atelier Montres — boutique de montres indépendante
 
+## Images IA éditoriales SKMEI — 1er novembre 2026
+
+Neuf créations IA originales, validées par l'éditeur, accompagnent désormais les **photos réelles** des montres SKMEI 1251, 1257, 2056, 2514, 9156, 9353, 1874, 2471 et 1220. Les visuels sont clairement qualifiés d'illustrations non contractuelles et hébergés sur le CDN Shopify du propriétaire ; les images produit réelles restent la référence en premier. [Provenance, intégration et limites](docs/skmei-illustrations-ia-2026-11-01.md).
+
 ## Liens Amazon exacts et photographie sous licence — 31 octobre 2026
 
 **Trois ASIN complémentaires documentés** (G-SHOCK GW-M5610U-1, Casio F-91W-1YER et A168WG-9EF) remplacent les recherches correspondantes par des fiches Amazon.fr directes, avec contrôle strict des variantes. Les 27 autres montres complémentaires, dont les neuf SKMEI, conservent des recherches clairement signalées tant que leur référence française exacte n'est pas démontrée. Les sources historiques ne garantissent ni le prix ni le stock actuel.
