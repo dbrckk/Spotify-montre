@@ -52,7 +52,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     +'>'+e(txt)+'</a>';
   const verifiedLinks=loadVerifiedPopularLinks({root,picks,affiliates,amazonPartnerTag});
   const approvedPhotos=loadApprovedPopularPhotos({root,picks});
-  const shopper=buildShopperSelections({root,coreProducts:existingProducts,picks,partners:affiliates,verifiedPopularLinks:verifiedLinks,amazonSearch,pageHead,page,e,u});
+  const shopper=buildShopperSelections({root,coreProducts:existingProducts,picks,partners:affiliates,verifiedPopularLinks:verifiedLinks,approvedPopularPhotos:approvedPhotos,amazonSearch,pageHead,page,e,u});
   const affiliateLink=p=>{
     if(!affiliates.enabled)return '';
     const direct=verifiedLinks.get(p.id);
@@ -68,11 +68,11 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     return '<article class="am-pick-card am-pick-'+e(p.style)+(verifiedLinks.has(p.id)?' am-pick-direct':'')+'" id="pick-'+e(p.id)+'"'
       +' data-pick-id="'+e(p.id)+'" data-pick-tier="'+e(p.tier)+'" data-pick-style="'+e(p.style)+'"'
       +' data-pick-movement="'+movementKind(p)+'" data-pick-search="'+e([p.brand,p.model,p.category,p.movement,p.lead].join(' '))+'">'
-      +'<div class="am-pick-visual" role="group" aria-label="'+(photo?'Photographie de la référence exacte avec droits déclarés':'Repère graphique non contractuel, sans photographie du modèle')+'"><span class="am-pick-visual-top">'+e(p.category)+'</span>'
+      +'<div class="am-pick-visual" role="group" aria-label="'+(photo?'Photographie de la référence exacte · autorisation déclarée':'Repère graphique non contractuel, sans photographie du modèle')+'"><span class="am-pick-visual-top">'+e(p.category)+'</span>'
       +(photo?'<img class="am-pick-licensed-photo" loading="lazy" decoding="async" alt="Montre '+e(p.brand+' '+p.model)+'" src="'+(front?'./':'../')+e(photo.url)+'">':'')
       +'<span class="am-pick-visual-name">'+e(p.brand)+'</span><span class="am-pick-visual-ref">'+e(p.model)+'</span>'
       +(!photo&&p.brand==='SKMEI'?'<span class="am-budget-watch" aria-hidden="true"><span class="am-budget-dial"></span></span>':'')
-      +'<span class="am-pick-visual-caption">'+(photo?'Photo autorisée · '+e(photo.rightsHolder):'Repère graphique · photo exacte chez le vendeur ou la marque')+'</span></div>'
+      +'<span class="am-pick-visual-caption">'+(photo?'Photo de marque · accord déclaré · '+e(photo.rightsHolder):'Repère graphique · photo exacte chez le vendeur ou la marque')+'</span></div>'
       +'<div class="am-pick-content"><p class="am-pick-kicker"><span>'+e(tierNames[p.tier])+'</span><span>'+e(claim)+'</span></p>'
       +(verifiedLinks.has(p.id)?'<p class="am-pick-exact">Fiche de référence Amazon.fr identifiée · prix et stock à vérifier</p>':'')
       +'<h3><a class="am-pick-detail-link" href="'+(front?'./montres/':'./')+e(p.id)+'.html">'+e(p.brand+' '+p.model)+'</a></h3>'
