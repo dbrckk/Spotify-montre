@@ -4,7 +4,7 @@
   "marketplace": "amazon.fr",
   "publishable": false,
   "status": "candidates_only_no_amazon_fr_detail_confirmation",
-  "explanation": "Les références ci-dessous sont des candidats de recoupement, non des ASIN confirmés sur Amazon.fr. Ne pas utiliser pour produire de lien /dp/ tant que titre, référence, variante et disponibilité du listing amazon.fr ne sont pas contrôlés sur la fiche publique ou via les outils du compte Amazon Partenaires.",
+  "explanation": "ASIN de la Tissot Gentleman encore candidat : le code exact est repris dans des sources secondaires, mais la fiche Amazon.fr exploitable n'a pas confirmé directement la variante. Le candidat G-SHOCK GW-M5610U-1ER a été promu uniquement après examen de la fiche Amazon.fr citant explicitement son ASIN et code modèle ; voir amazon-fr-popular-verified.json. Les prix et la disponibilité ne sont pas déduits de cette preuve.",
   "candidates": [
     {
       "productId": "tissot-gentleman-auto",
@@ -16,17 +16,6 @@
         "https://www.preisgenau.de/1648823068-product"
       ],
       "note": "Des sources secondaires relient cet ASIN à la référence complète ; la fiche Amazon.fr elle-même était inaccessible lors du contrôle."
-    },
-    {
-      "productId": "casio-gw-m5610u-1",
-      "model": "GW-M5610U-1",
-      "asinCandidate": "B09BCPP68Q",
-      "status": "unverified_amazon_fr_marketplace",
-      "evidence": [
-        "https://cacciaofferte.it/offerte/moda-e-accessori/B09BCPP68Q",
-        "https://www.merchantwords.com/asin/us/B09BCPP68Q"
-      ],
-      "note": "ASIN relié à GW-M5610U-1ER sur un marché étranger ; aucune confirmation directe du même ASIN sur amazon.fr ni de l'édition vendue en France."
     }
   ]
 }
