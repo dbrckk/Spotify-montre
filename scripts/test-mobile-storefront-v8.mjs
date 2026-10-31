@@ -29,6 +29,16 @@ try{
  const cards=page.locator('#affGrid .aff-card');
  await cards.first().waitFor({state:'visible',timeout:20000});
  assert.equal(await cards.count(),15,'The full genuine catalogue should render');
+ const shopFirst=await page.evaluate(()=>{
+   const ids=['gammes','montres','amEditorialGallery','histoire'];
+   const positions=ids.map(id=>document.getElementById(id)?.getBoundingClientRect().top+window.scrollY);
+   const firstCard=document.querySelector('#affGrid .aff-card')?.getBoundingClientRect().top+window.scrollY;
+   return {positions,firstCard};
+ });
+ assert.ok(shopFirst.positions.every((x,i)=>Number.isFinite(x)&&(i===0||x>shopFirst.positions[i-1])),
+   'Mobile home must place the catalog directly after tiers and before editorial content');
+ assert.ok(shopFirst.firstCard<5000,'Mobile visitors should see real watches before excessive editorial scrolling: '+JSON.stringify(shopFirst));
+
  // Gallery and detailed presentation must both remain functional on Android.
  const galleryButton=page.locator('#affViewGallery'),detailButton=page.locator('#affViewDetail');
  await galleryButton.waitFor({state:'visible'});
