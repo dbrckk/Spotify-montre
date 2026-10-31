@@ -124,8 +124,13 @@ for(const product of feed.products){
   }
   if(product.photoReview?.publicUsageApproved===true){
     const set=responsiveSrcset(root,product,'../');
-    assert.ok(set&&html.includes('srcset="'+set+'"'),'Published model must expose responsive local photo variants: '+product.id);
-    assert.ok(html.includes('sizes="(max-width: 760px) 92vw, 540px"'),'Responsive model image must declare realistic display sizes');
+    // Do not upscale the narrow 399px Swatch source just to force srcset.
+    if(product.photoReview.localWidth>480){
+      assert.ok(set&&html.includes('srcset="'+set+'"'),'Published model must expose responsive local photo variants: '+product.id);
+      assert.ok(html.includes('sizes="(max-width: 760px) 92vw, 540px"'),'Responsive model image must declare realistic display sizes');
+    }else{
+      assert.equal(set,'','A narrow original photo must not be artificially upscaled');
+    }
     const sourceBytes=statSync(resolve(root,'assets/watches/'+product.id+'.webp')).size;
     for(const width of [480,800].filter(w=>w<product.photoReview.localWidth)){
       const derived='assets/watch-responsive/'+product.id+'-'+width+'.webp';
