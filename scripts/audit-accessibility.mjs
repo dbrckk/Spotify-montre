@@ -19,7 +19,81 @@ const browser=await chromium.launch({headless:true});
 const entries=[];
 const violations=[];
 const unresolved=[];
+const interactionChecks=[];
+const record=(viewport,check)=>interactionChecks.push({viewport,check,passed:true});
 mkdirSync('artifacts',{recursive:true});
+async function assertModalFocus(page,selector,viewport,check){
+  const snapshot=await page.evaluate(selector=>{
+    const modal=document.querySelector(selector);
+    const active=document.activeElement;
+    return {open:modal?.open===true,inside:!!modal?.contains(active),active:active?.outerHTML.slice(0,170)};
+  },selector);
+  assert.ok(snapshot.open&&snapshot.inside,viewport+' '+check+' focus escaped modal: '+JSON.stringify(snapshot));
+  record(viewport,check);
+}
+async function checkKeyboardJourney(page,label){
+  const compare=page.locator('#affCompareDialog');
+  const compareTrigger=page.locator('#affCompareOpen');
+  const boxes=page.locator('#affGrid .am-compare-check input');
+  await boxes.nth(0).check();
+  await boxes.nth(1).check();
+  await compareTrigger.focus();
+  await page.keyboard.press('Enter');
+  await compare.waitFor({state:'visible'});
+  await assertModalFocus(page,'#affCompareDialog',label,'compare opened from keyboard');
+  for(let i=0;i<8;i++){
+    await page.keyboard.press('Tab');
+    await assertModalFocus(page,'#affCompareDialog',label,'modal trap Tab '+(i+1));
+  }
+  const toggle=page.locator('#affCompareOnlyDiff');
+  await toggle.focus();
+  await page.keyboard.press('Space');
+  assert.equal(await toggle.getAttribute('aria-pressed'),'true',label+' Space should toggle differences');
+  record(label,'differences keyboard Space');
+  await scan(page,label+' /#differences-only-keyboard');
+  await toggle.focus();
+  await page.keyboard.press('Space');
+  assert.equal(await toggle.getAttribute('aria-pressed'),'false');
+  if(label==='mobile'){
+    const track=page.locator('.am-compare-mobile-track');
+    await track.focus();
+    await page.keyboard.press('ArrowRight');
+    await page.waitForFunction(()=>document.querySelector('.am-compare-mobile-position')?.textContent?.trim()==='2 / 2');
+    record(label,'comparison carousel keyboard ArrowRight');
+    await track.focus();
+    await page.keyboard.press('ArrowLeft');
+    await page.waitForFunction(()=>document.querySelector('.am-compare-mobile-position')?.textContent?.trim()==='1 / 2');
+    record(label,'comparison carousel keyboard ArrowLeft');
+  }
+  await toggle.focus();
+  await page.keyboard.press('Escape');
+  await compare.waitFor({state:'hidden'});
+  assert.ok(await compareTrigger.evaluate(el=>document.activeElement===el),label+' Escape must return focus to comparison trigger');
+  record(label,'compare Escape and trigger focus return');
+  // Replacement dialog must leave the full selection intact on Escape.
+  await boxes.nth(2).check();
+  const currentSelection=await page.evaluate(()=>sessionStorage.getItem('atelier-montres-comparison-v1'));
+  await boxes.nth(3).check({force:true});
+  const replacement=page.locator('#affCompareReplaceDialog');
+  await replacement.waitFor({state:'visible'});
+  await assertModalFocus(page,'#affCompareReplaceDialog',label,'replacement focus initialized');
+  await page.keyboard.press('Escape');
+  await replacement.waitFor({state:'hidden'});
+  assert.equal(await page.evaluate(()=>sessionStorage.getItem('atelier-montres-comparison-v1')),currentSelection,label+' cancelling replacement must preserve selection');
+  record(label,'replacement Escape keeps all 3 models');
+  // Real photographic modal uses the same native keyboard semantics.
+  const enlarge=page.locator('#affGrid .aff-photo-expand').first();
+  await enlarge.scrollIntoViewIfNeeded();
+  await enlarge.focus();
+  await page.keyboard.press('Enter');
+  await page.locator('#amPhotoDialog').waitFor({state:'visible'});
+  await assertModalFocus(page,'#amPhotoDialog',label,'photo dialog keyboard open');
+  await page.keyboard.press('Escape');
+  await page.locator('#amPhotoDialog').waitFor({state:'hidden'});
+  assert.ok(await enlarge.evaluate(el=>document.activeElement===el),label+' photo Escape must restore focus');
+  record(label,'photo Escape and focus return');
+}
+
 async function scan(page,name){
   const result=await new AxeBuilder({page}).withTags(tags).analyze();
   const unique=result.violations.map(v=>({
@@ -52,19 +126,15 @@ try{
             const rect=el.getBoundingClientRect();return {focused:document.activeElement===el,width:rect.width,height:rect.height}
           });
           assert.ok(skip.focused&&skip.width>=100&&skip.height>=30,'Keyboard skip-link must be visibly accessible: '+JSON.stringify(skip));
-          // A native HTML dialog is not in the accessibility tree before opening.
-          const boxes=page.locator('#affGrid .am-compare-check input');
-          await boxes.nth(0).check();await boxes.nth(1).check();
-          await page.locator('#affCompareOpen').click();
-          await page.locator('#affCompareDialog').waitFor({state:'visible'});
-          await scan(page,viewport.label+' /#comparator-open');
-          await page.locator('#affCompareOnlyDiff').click();
-          await scan(page,viewport.label+' /#differences-only');
-          await page.locator('#affCompareClose').click();
+          // Audit modal content and real Tab / Enter / Escape journeys.
+          await checkKeyboardJourney(page,viewport.label);
           if(viewport.label==='mobile'){
             const menu=page.locator('details.am-mobile-nav').first();
-            await menu.locator('summary').click();
+            await menu.locator('summary').focus();
+            await page.keyboard.press('Enter');
+            assert.ok(await menu.evaluate(el=>el.open),'Mobile menu must open with Enter');
             await scan(page,viewport.label+' /#mobile-menu-open');
+            record(viewport.label,'mobile navigation opens with Enter');
           }
         }
       }catch(err){unresolved.push({page:viewport.label+' '+path,error:String(err).slice(0,300)})}
@@ -74,7 +144,7 @@ try{
 }finally{await browser.close()}
 const report={
   auditedAt:new Date().toISOString(),scans:entries.length,totalPages:paths.length,
-  violationInstances:violations.length,unresolved,violations,entries
+  violationInstances:violations.length,interactionChecks,unresolved,violations,entries
 };
 writeFileSync('artifacts/accessibility-wcag-report.json',JSON.stringify(report,null,2));
 const summary=new Map();
@@ -87,11 +157,12 @@ for(const v of violations){
 }
 console.log('WCAG automated audit:',JSON.stringify({
  paths:paths.length,scans:entries.length,violationTypes:summary.size,
- totalViolations:violations.length,unresolved:unresolved.length
+ totalViolations:violations.length,keyboardChecks:interactionChecks.length,unresolved:unresolved.length
 }));
 for(const [id,v] of [...summary].sort((a,b)=>b[1].count-a[1].count)){
  console.log('AXE',id,'elements='+v.count,'screens='+v.pages.size,JSON.stringify(v.samples));
 }
 for(const e of unresolved.slice(0,12))console.log('UNRESOLVED',JSON.stringify(e));
+if(strict&&interactionChecks.length<25)throw Error('Keyboard coverage incomplete: '+interactionChecks.length);
 if(strict&&violations.length)throw Error(violations.length+' WCAG rule/screen failures; inspect artifacts/accessibility-wcag-report.json');
 if(strict&&unresolved.length)throw Error(unresolved.length+' screens could not be audited');
