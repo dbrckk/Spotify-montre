@@ -52,7 +52,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     +'>'+e(txt)+'</a>';
   const verifiedLinks=loadVerifiedPopularLinks({root,picks,affiliates,amazonPartnerTag});
   const approvedPhotos=loadApprovedPopularPhotos({root,picks});
-  const shopper=buildShopperSelections({root,coreProducts:existingProducts,picks,partners:affiliates,verifiedPopularLinks:verifiedLinks,amazonSearch,pageHead,page,e,u});
+  const shopper=buildShopperSelections({root,coreProducts:existingProducts,picks,partners:affiliates,verifiedPopularLinks:verifiedLinks,approvedPopularPhotos:approvedPhotos,amazonSearch,pageHead,page,e,u});
   const affiliateLink=p=>{
     if(!affiliates.enabled)return '';
     const direct=verifiedLinks.get(p.id);
@@ -68,11 +68,11 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     return '<article class="am-pick-card am-pick-'+e(p.style)+(verifiedLinks.has(p.id)?' am-pick-direct':'')+'" id="pick-'+e(p.id)+'"'
       +' data-pick-id="'+e(p.id)+'" data-pick-tier="'+e(p.tier)+'" data-pick-style="'+e(p.style)+'"'
       +' data-pick-movement="'+movementKind(p)+'" data-pick-search="'+e([p.brand,p.model,p.category,p.movement,p.lead].join(' '))+'">'
-      +'<div class="am-pick-visual" role="group" aria-label="'+(photo?'Photographie de la référence exacte avec droits déclarés':'Repère graphique non contractuel, sans photographie du modèle')+'"><span class="am-pick-visual-top">'+e(p.category)+'</span>'
+      +'<div class="am-pick-visual" role="group" aria-label="'+(photo?'Photographie de la référence exacte · autorisation déclarée':'Repère graphique non contractuel, sans photographie du modèle')+'"><span class="am-pick-visual-top">'+e(p.category)+'</span>'
       +(photo?'<img class="am-pick-licensed-photo" loading="lazy" decoding="async" alt="Montre '+e(p.brand+' '+p.model)+'" src="'+(front?'./':'../')+e(photo.url)+'">':'')
       +'<span class="am-pick-visual-name">'+e(p.brand)+'</span><span class="am-pick-visual-ref">'+e(p.model)+'</span>'
       +(!photo&&p.brand==='SKMEI'?'<span class="am-budget-watch" aria-hidden="true"><span class="am-budget-dial"></span></span>':'')
-      +'<span class="am-pick-visual-caption">'+(photo?'Photo autorisée · '+e(photo.rightsHolder):'Repère graphique · photo exacte chez le vendeur ou la marque')+'</span></div>'
+      +'<span class="am-pick-visual-caption">'+(photo?'Photo de marque · accord déclaré · '+e(photo.rightsHolder):'Repère graphique · photo exacte chez le vendeur ou la marque')+'</span></div>'
       +'<div class="am-pick-content"><p class="am-pick-kicker"><span>'+e(tierNames[p.tier])+'</span><span>'+e(claim)+'</span></p>'
       +(verifiedLinks.has(p.id)?'<p class="am-pick-exact">Fiche de référence Amazon.fr identifiée · prix et stock à vérifier</p>':'')
       +'<h3><a class="am-pick-detail-link" href="'+(front?'./montres/':'./')+e(p.id)+'.html">'+e(p.brand+' '+p.model)+'</a></h3>'
@@ -89,7 +89,10 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
   const featuredIds=['casio-gw-m5610u-1','skmei-2056','skmei-2256','curren-cur210','pagani-pd1776','casio-f91w-1','addiesdive-ad2030','pagani-pd1701'];
   const featured=featuredIds.map(id=>picks.find(p=>p.id===id));
   if(featured.some(p=>!p))throw Error('Featured model not in source catalog');
-  const globalDisclaimer='Ces références complètent les 15 modèles du comparateur. Certaines figurent sur des pages de meilleures ventes de fabricants ou de distributeurs ; ce ne sont pas les meilleures ventes mesurées sur Amazon.fr. Aucun tarif, stock, note ou volume de ventes n’est déduit de ces sources. Les photographies des nouveautés restent chez les fabricants ou distributeurs tant que leur réutilisation n’est pas autorisée.';
+  const photoDisclaimer=approvedPhotos.size
+    ?approvedPhotos.size+' photographies de modèles supplémentaires sont publiées sur la base d’autorisations déclarées par l’éditeur, non vérifiées indépendamment. Les autres photos restent consultables sur les sites sources.'
+    :'Aucune photographie supplémentaire n’est publiée sans déclaration de droits de reproduction; les photos exactes restent sur les sites sources.';
+  const globalDisclaimer='Ces références complètent les 15 modèles du comparateur. Certaines figurent sur des pages de meilleures ventes de fabricants ou de distributeurs ; ce ne sont pas les meilleures ventes mesurées sur Amazon.fr. Aucun tarif, stock, note ou volume de ventes n’est déduit de ces sources. '+photoDisclaimer+'';
   const affiliateNote=affiliates.enabled?'Les liens Amazon portent notre identifiant Partenaires. Une fiche directe dispose d’une correspondance de référence documentée ; les autres liens mènent à une recherche. Aucun lien ne garantit la disponibilité, le tarif ou l’approbation définitive de notre compte.':'Aucun lien Amazon rémunéré n’est activé.';
   const teaser='<section class="am-picks" id="modeles-populaires" aria-labelledby="am-picks-title"><div class="wrap">'
     +'<div class="am-picks-heading"><p class="overline kicker">01 · MODÈLES COMPLÉMENTAIRES</p>'

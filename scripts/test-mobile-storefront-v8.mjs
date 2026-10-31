@@ -78,7 +78,10 @@ try{
  assert.equal(await confirmedGshock.getAttribute('href'),'https://www.amazon.fr/dp/B09BCPP68Q?tag=drackk04-21');
  assert.equal(await confirmedGshock.getAttribute('data-amazon-placement'),'popular');
  assert.match(await confirmedGshock.getAttribute('rel'),/sponsored/);
- assert.equal(await popularPage.locator('img').count(),0,'No unauthorized new product photography');
+ const approvedWatchPhotos=JSON.parse(readFileSync('site/popular-photo-rights.json','utf8')).photos;
+ const approvedPhotoCount=Object.keys(approvedWatchPhotos).length;
+ assert.equal(await popularPage.locator('img.am-pick-licensed-photo').count(),approvedPhotoCount,
+   'All and only registered branded images should render in the supplemental catalogue');
  const popularPageExtent=await popularPage.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
  assert.ok(popularPageExtent.scroll<=popularPageExtent.client+2,'Supplemental page must not overflow Android');
  await popularPage.screenshot({path:'artifacts/mobile-37-popular-watches.png',fullPage:true});
@@ -147,8 +150,15 @@ try{
      'Model-specific editorial rationale and caution: '+watch.id);
    assert.equal(await popularPage.locator('.am-extra-related li').count(),3,
      'Three live comparable models must have internal landing links: '+watch.id);
-   assert.equal(await popularPage.locator('img').count(),0,
-     'Unlicensed supplemental photo must not be published: '+watch.id);
+   const expectedImage=approvedWatchPhotos[watch.id];
+   assert.equal(await popularPage.locator('img.am-extra-licensed-photo').count(),expectedImage?1:0,
+     'Only registered exact-model imagery may be published: '+watch.id);
+   if(expectedImage){
+     const img=popularPage.locator('img.am-extra-licensed-photo');
+     assert.ok((await img.getAttribute('src')).includes('assets/watches-popular/'+watch.id+'.webp'));
+     assert.ok(await img.evaluate(el=>el.complete&&el.naturalWidth>300),
+       'Published manufacturer photo must decode correctly: '+watch.id);
+   }
  assert.ok(verifiedPopular[watch.id]||watch.id!=='casio-gw-m5610u-1',
    'The confirmed reference must exist in the verified Amazon registry');
  const verified=verifiedPopular[watch.id];

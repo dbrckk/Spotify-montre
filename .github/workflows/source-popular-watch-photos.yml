@@ -1,0 +1,83 @@
+name: Source genuine supplemental watch photographs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - scripts/sync-popular-watch-images.py
+      - scripts/popular-photo-rights.mjs
+      - .github/workflows/source-popular-watch-photos.yml
+  pull_request:
+    paths:
+      - scripts/sync-popular-watch-images.py
+      - scripts/popular-photo-rights.mjs
+      - .github/workflows/source-popular-watch-photos.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: source-popular-watch-photos
+  cancel-in-progress: false
+
+jobs:
+  source-product-photos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 26
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install only open-source media and HTTP packages
+        run: python -m pip install --disable-pip-version-check --quiet 'requests>=2.31,<3' 'beautifulsoup4>=4.12,<5' 'Pillow>=11,<13'
+      - name: Download and resize exact-model official product photos
+        run: python scripts/sync-popular-watch-images.py
+      - name: Validate photo registry, static SEO pages and affiliate links
+        run: |
+          node scripts/build-seo.mjs
+          node scripts/validate-seo.mjs
+          node scripts/check-affiliate-publication.mjs
+      - name: Assemble static deployment archive with all approved images
+        run: python scripts/build-shipstatic-bundle.py
+      - name: Audit produced photo count
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report=json.loads(Path('docs/popular-watch-photo-report.json').read_text())
+          amount=len(report['photos'])
+          print(f"Exact-model photos checked and stored: {amount}/37")
+          print(f"Unavailable or ambiguous: {len(report['missing'])}")
+          if amount == 0:
+              raise SystemExit("No real packshot could be sourced: do not publish an empty batch as a success")
+          PY
+      - name: Commit reviewed images, provenance and refreshed deployment package
+        if: github.event_name != 'pull_request'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A site/assets/watches-popular/ site/popular-photo-rights.json docs/popular-watch-photo-report.json docs/deploy-package-*.json
+          if git diff --cached --quiet; then
+            echo 'All registered product images already current.'
+          else
+            git commit -m 'assets: publish source-verified branded watch WebPs [skip ci]'
+            git fetch origin main
+            git rebase -X theirs origin/main
+            git push origin HEAD:main
+          fi
+      - name: Keep report available for manual visual quality control
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: popular-watch-source-report
+          path: |
+            docs/popular-watch-photo-report.json
+          if-no-files-found: ignore
+          retention-days: 14
