@@ -96,6 +96,21 @@ try{
   assert.ok(horizontalOverflow<=2,'Product page must not overflow Android viewport horizontally (overflow '+horizontalOverflow+'px)');
   await page.screenshot({path:'artifacts/mobile-citizen-editorial.png',fullPage:true});
   console.log('PASS MOBILE EDITORIAL: source-approved Citizen photo, four sourced facts, valid anchors and no horizontal viewport overflow');
+  const casioSpec=await page.goto(new URL('/montres/casio-mdv107.html',base).href,{waitUntil:'domcontentloaded',timeout:30000});
+  assert.ok(casioSpec?.ok(),'The canonical Casio MDV-107 page should load');
+  const casioFacts=(await page.locator('.watch-facts').textContent())||'';
+  assert.match(casioFacts,/Dimensions du boîtier[\s\S]*49,5 × 44,2 × 12,1 mm/,'The rectangular L × l × H case size is not a diameter');
+  assert.match(casioFacts,/20 bar/,'Exact Casio water resistance must come from its official technical sheet');
+  assert.match(await page.locator('.watch-evidence').innerText(),/Caractéristiques constructeur recoupées/,'Dated manufacturer evidence required');
+  assert.equal(await page.locator('.watch-evidence a').getAttribute('href'),'https://www.casio.com/fr/watches/casio/product.MDV-107-1A1V/');
+  const vintage=await page.goto(new URL('/montre.html?id=casio-a168wa',base).href,{waitUntil:'domcontentloaded',timeout:30000});
+  assert.ok(vintage?.ok(),'The live interactive Casio Vintage page should load');
+  await page.locator('#detailShell').waitFor({state:'visible',timeout:20000});
+  assert.match(await page.locator('#detailEssentials').innerText(),/Dimensions du boîtier[\s\S]*38,6 × 36,3 × 9,6 mm/,'A rectangular vintage case size is displayed as dimensions');
+  assert.match(await page.locator('#detailSpecList').innerText(),/Diamètre du boîtier[\s\S]*À confirmer/,'Unknown circular diameter must stay unknown');
+  assert.match(await page.locator('#detailEvidence').innerText(),/31 octobre 2026/,'Dated source provenance is visible on the interactive watch page');
+  await page.screenshot({path:'artifacts/mobile-casio-vintage-facts.png',fullPage:true});
+  console.log('PASS TECHNICAL PROVENANCE: Casio MDV-107 bar and case L × l × H, Casio A168 unknown diameter and dated official evidence');
   assert.deepEqual(errors,[],'Uncaught browser errors on the storefront');
   console.log('PASS MOBILE DETAIL: Tissot PRX Powermatic 80 displayed, photo decoded, detail sheet visible');
 }finally{
