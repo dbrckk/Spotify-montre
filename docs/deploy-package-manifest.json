@@ -6,7 +6,7 @@
     {
       "file": "deploy-package-01.json",
       "count": 27,
-      "bytes": 704170
+      "bytes": 704237
     },
     {
       "file": "deploy-package-02.json",
@@ -26,7 +26,7 @@
     {
       "file": "deploy-package-05.json",
       "count": 42,
-      "bytes": 432853
+      "bytes": 432920
     }
   ]
 }
