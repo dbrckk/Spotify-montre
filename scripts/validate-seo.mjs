@@ -231,7 +231,7 @@ for(const p of popularFeed.products){
   assert.ok(detailHtml.includes('href="'+p.officialUrl+'"'),'The correct manufacturer page must remain accessible: '+p.id);
   assert.ok(detailHtml.includes('href="'+p.marketEvidence.url+'"'),'Source for the bestseller claim or editorial choice missing: '+p.id);
   for(const fact of [p.model,p.movement,p.case,p.glass,p.water,p.caution]){
-    assert.ok(detailHtml.includes(fact.replace(/&/g,'&amp;').replace(/</g,'&lt;')),
+    assert.ok(detailHtml.includes(fact.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')),
       'Missing source-backed watch fact: '+p.id+' '+fact);
   }
   assert.equal((detailHtml.match(/class="am-extra-fact"/g)||[]).length,4,'Four useful watch facts per model: '+p.id);
