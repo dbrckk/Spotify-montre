@@ -300,7 +300,7 @@ for(const p of popularFeed.products){
   }else{
     assert.ok(!detailHtml.includes('class="am-ai-editorial"'),'No arbitrary AI renders for other watch models: '+p.id);
   }
-  assert.doesNotMatch(detailHtml,/"offers"\\s*:|"price"\\s*:|"aggregateRating"\\s*:/,'No false checkout offer, pricing or rating: '+p.id);
+  assert.doesNotMatch(detailHtml,/"offers"\s*:|"price"\s*:|"aggregateRating"\s*:/,'No false checkout offer, pricing or rating: '+p.id);
   const script=detailHtml.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
   assert.ok(script,'Product JSON-LD missing: '+p.id);
   const graph=JSON.parse(script[1])['@graph'];
