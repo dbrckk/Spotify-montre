@@ -2,10 +2,12 @@
 /* Deterministic editorial recommendation engine — no network, no tracking, no prices invented. */
 (function(scope){
  const tierNames={essential:'Essentielle',signature:'Signature',prestige:'Prestige'};
- const movementNames={quartz:'Quartz',automatic:'Automatique','eco-drive':'Solaire Eco-Drive'};
+ const movementNames={quartz:'Quartz',automatic:'Automatique','eco-drive':'Solaire'};
  const styleNames={sport:'Sport chic',classic:'Élégance classique',minimal:'Épuré',retro:'Vintage',statement:'Audacieux'};
  const sizeNames={compact:'Boîtier jusqu’à 38 mm',medium:'Boîtier de 38,1 à 40 mm'};
  const diameterMm=p=>{
+  // This value is set only for explicitly stated round-case diameters.
+  if(Object.hasOwn(p||{},'diameterMm'))return Number.isFinite(p.diameterMm)?p.diameterMm:null;
   const raw=p?.specs?.diameter;
   if(typeof raw!=='string')return null;
   const match=/^(\d{1,2})(?:[,.](\d{1,2}))?\s*mm$/i.exec(raw.trim());
