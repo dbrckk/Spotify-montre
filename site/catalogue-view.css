@@ -93,3 +93,99 @@
 .am-discovery-path:focus-visible{outline:3px solid #f0d39c;outline-offset:3px}
 @media(max-width:720px){.am-discovery-paths{margin:14px 0 20px;padding:19px 15px 17px}.am-discovery-grid{grid-template-columns:1fr;gap:8px}.am-discovery-path{min-height:0;gap:6px;padding:14px 15px}.am-discovery-path strong{font-size:19px}.am-discovery-path>span:nth-last-child(2){font-size:11px}.am-discovery-arrow{margin-top:3px}}
 @media(prefers-reduced-motion:reduce){.am-discovery-path{transition:none}.am-discovery-path:hover{transform:none}}
+
+/* 2026-10-31 photo art direction: an identical neutral watch stage for every
+   brand and dial colour. Individual data-tone rules must not tint packshots.
+   Background-only treatment: the authentic manufacturer pixels stay intact. */
+body[data-experience="affiliate"] .aff-grid .aff-illustration[data-tone]:has(.aff-product-photo){
+  background:radial-gradient(ellipse at 50% 35%,#fffefa 0%,#f3f3eb 50%,#e5eae1 100%)!important;
+}
+.aff-grid[data-view="gallery"] .aff-illustration:has(.aff-product-photo){
+  display:grid;
+  align-items:center;
+  justify-items:center;
+  position:relative;
+  padding:clamp(9px,1.5vw,18px)!important;
+}
+.aff-grid[data-view="gallery"] .aff-illustration:has(.aff-product-photo)::before{
+  display:block;
+  position:absolute;
+  inset:12px;
+  width:auto;
+  height:auto;
+  border:1px solid #fffefa;
+  border-radius:0;
+  opacity:.85;
+  pointer-events:none;
+}
+.aff-grid[data-view="gallery"] .aff-product-photo{
+  display:block;
+  object-fit:contain;
+  object-position:center;
+  max-width:100%;
+  max-height:100%;
+  filter:drop-shadow(0 11px 10px #1832251f);
+  transition:transform .24s ease;
+}
+.aff-grid[data-view="gallery"] .aff-card:hover .aff-product-photo{transform:scale(1.025)}
+.aff-grid[data-view="gallery"] .aff-card-brand{
+  color:#806b46;
+  font-weight:750;
+  min-height:1.6em;
+}
+.aff-grid[data-view="gallery"] .aff-card h3{
+  min-height:2.5em;
+  margin-bottom:11px;
+  color:#1e372a;
+  letter-spacing:-.022em;
+}
+.aff-grid[data-view="gallery"] .am-gallery-facts{
+  min-height:47px;
+  align-content:start;
+}
+.aff-grid[data-view="gallery"] .am-gallery-facts span{
+  background:#f4f3ee;
+  border-color:#e1e2d7;
+  color:#435c49;
+}
+.aff-grid[data-view="gallery"] .aff-card-actions{margin-top:auto}
+.aff-grid[data-view="gallery"] .aff-card-actions>a:first-child{
+  background:#1c392a;
+  color:#fff;
+  font-weight:700;
+  text-decoration:none;
+}
+.aff-grid[data-view="gallery"] .aff-card-actions>a:first-child:hover{background:#31583e}
+.aff-grid[data-view="gallery"] .am-card-footer .am-compare-check{min-height:44px}
+.aff-grid[data-view="gallery"] .am-card-seo-link{
+  display:flex;
+  align-items:center;
+  min-height:44px;
+  margin:3px 0 0;
+  text-decoration-thickness:1px;
+  text-underline-offset:3px;
+}
+.aff-grid[data-view="gallery"] .am-card-seo-link:focus-visible{
+  outline:3px solid #b78c51;
+  outline-offset:2px;
+}
+@media(max-width:620px){
+  .aff-grid[data-view="gallery"] .aff-illustration:has(.aff-product-photo){
+    padding:9px!important;
+  }
+  .aff-grid[data-view="gallery"] .aff-illustration:has(.aff-product-photo)::before{inset:7px}
+  .aff-grid[data-view="gallery"] .aff-card h3{min-height:2.45em}
+  .aff-grid[data-view="gallery"] .am-gallery-facts{min-height:51px}
+  .aff-grid[data-view="gallery"] .am-gallery-facts span{
+    font-size:10px;
+    padding:5px 6px;
+    line-height:1.3;
+  }
+  .aff-grid[data-view="gallery"] .aff-card-body{padding:13px 11px 14px}
+  .aff-grid[data-view="gallery"] .aff-card-actions>a:first-child{font-size:11px}
+  .aff-grid[data-view="gallery"] .am-card-seo-link{font-size:11px}
+}
+@media(prefers-reduced-motion:reduce){
+  .aff-grid[data-view="gallery"] .aff-product-photo{transition:none}
+  .aff-grid[data-view="gallery"] .aff-card:hover .aff-product-photo{transform:none}
+}
