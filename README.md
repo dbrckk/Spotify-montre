@@ -1,5 +1,9 @@
 # Atelier Montres — boutique de montres indépendante
 
+## Catalogue enrichi de 36 montres — 31 octobre 2026
+
+Les 15 modèles photographiés du comparateur sont complétés de 21 fiches éditoriales sourcées (8 nouvelles références Casio, Citizen, Orient, Seiko, Tissot et Hamilton). Le générateur produit 51 URL dans le sitemap, sans faux avis, prix ou photographie non autorisée. Les 13 fiches Amazon précises du catalogue principal restent inchangées ; parmi les 21 complémentaires, 1 fiche Amazon exacte est documentée et les 20 autres sont des recherches signalées. L'approbation finale du programme Partenaires et les commissions restent à vérifier. [Sources et contrôles](docs/extension-catalogue-36-montres-2026-10-31.md).
+
 ## Référencement SEO : 28 pages HTML indexables (30 octobre 2026)
 
 Trois collections utiles et autonomes complètent les 25 pages existantes : **[montres quartz](https://atelier-montres-selection-fr.onrender.com/montres/montres-quartz.html)** (7 modèles), **[montres Casio](https://atelier-montres-selection-fr.onrender.com/montres/montres-casio.html)** (5 modèles) et **[montres à petit boîtier](https://atelier-montres-selection-fr.onrender.com/montres/montres-petit-boitier.html)** (3 modèles de 38 mm ou moins). Les pages reposent sur les vraies références et les photos locales déclarées autorisées, avec des tableaux documentés, canoniques, maillage aller-retour et `CollectionPage` / `ItemList` / `BreadcrumbList` JSON-LD. Aucun prix, stock ou avis fictif.

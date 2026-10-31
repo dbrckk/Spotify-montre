@@ -264,6 +264,166 @@
         "label": "Choix éditorial sur fiche Hamilton",
         "url": "https://www.hamiltonwatch.com/fr-fr/h32515555-jazzmaster-day-date-auto.html"
       }
+    },
+    {
+      "id": "casio-f91w-1",
+      "brand": "Casio",
+      "model": "F-91W-1",
+      "tier": "essential",
+      "style": "retro",
+      "category": "Numérique / petit budget",
+      "movement": "Quartz numérique",
+      "case": "38,2 × 35,2 × 8,5 mm",
+      "glass": "Résine",
+      "water": "Étanche, niveau non chiffré",
+      "lead": "Une icône digitale noire et légère, avec chronomètre et alarme.",
+      "caution": "Le fabricant ne chiffre pas l'étanchéité en bars ; le verre en résine peut se rayer. Ne pas l'assimiler à une plongeuse.",
+      "officialUrl": "https://www.casio.com/fr/watches/casio/product.F-91W-1/",
+      "marketEvidence": {
+        "kind": "manufacturer_bestseller",
+        "label": "Casio indique « Meilleures ventes » sur la fiche modèle",
+        "url": "https://www.casio.com/fr/watches/casio/product.F-91W-1/"
+      }
+    },
+    {
+      "id": "casio-a168wg-9",
+      "brand": "Casio",
+      "model": "A168WG-9",
+      "tier": "essential",
+      "style": "retro",
+      "category": "Vintage / dorée",
+      "movement": "Quartz numérique",
+      "case": "38,6 × 36,3 × 9,6 mm",
+      "glass": "Résine",
+      "water": "Étanche, niveau non chiffré",
+      "lead": "Un digital vintage en finition dorée, avec bracelet réglable et rétroéclairage.",
+      "caution": "La référence fabricant A168WG-9 peut porter le suffixe régional EF chez certains vendeurs ; contrôler la variante.",
+      "officialUrl": "https://www.casio.com/fr/watches/casio/vintage/product.A168WG-9/",
+      "marketEvidence": {
+        "kind": "retailer_bestseller",
+        "label": "A168WG-9EF répertoriée dans les meilleures ventes homme Montre.com",
+        "url": "https://www.montre.com/meilleures-ventes/bestsellers-pour-hommes/"
+      }
+    },
+    {
+      "id": "casio-dw5600rl-1",
+      "brand": "Casio G-SHOCK",
+      "model": "DW-5600RL-1",
+      "tier": "essential",
+      "style": "sport",
+      "category": "G-SHOCK / carré robuste",
+      "movement": "Quartz numérique",
+      "case": "48,9 × 42,8 × 13,4 mm",
+      "glass": "Minéral",
+      "water": "20 bar",
+      "lead": "Une G-SHOCK carrée dans l'esprit des générations originales, résistante aux chocs.",
+      "caution": "Vérifiez l'encombrement total du boîtier et le code régional DW-5600RL-1ER si applicable.",
+      "officialUrl": "https://www.casio.com/fr/watches/gshock/product.DW-5600RL-1/",
+      "marketEvidence": {
+        "kind": "retailer_bestseller",
+        "label": "DW-5600RL-1ER répertoriée dans les meilleures ventes homme Montre.com",
+        "url": "https://www.montre.com/meilleures-ventes/bestsellers-pour-hommes/"
+      }
+    },
+    {
+      "id": "citizen-promaster-bn0150",
+      "brand": "Citizen",
+      "model": "Promaster BN0150-10E",
+      "tier": "signature",
+      "style": "sport",
+      "category": "Plongée / Eco-Drive",
+      "movement": "Quartz solaire Eco-Drive E168",
+      "case": "Diamètre 44 mm",
+      "glass": "Minéral",
+      "water": "20 bar",
+      "lead": "Une plongeuse solaire avec lunette tournante et bracelet noir en résine.",
+      "caution": "Un diamètre de 44 mm peut être imposant ; contrôle des joints et consignes de plongée indispensables.",
+      "officialUrl": "https://citizenwatch.eu/en/p/bn0150-10e/",
+      "marketEvidence": {
+        "kind": "editorial",
+        "label": "Choix éditorial sur la fiche Citizen Promaster",
+        "url": "https://citizenwatch.eu/en/p/bn0150-10e/"
+      }
+    },
+    {
+      "id": "orient-mako40-black",
+      "brand": "Orient",
+      "model": "Mako 40 RA-AC0Q01B",
+      "tier": "signature",
+      "style": "sport",
+      "category": "Plongée / automatique compacte",
+      "movement": "Automatique F6722",
+      "case": "Diamètre 39,9 mm",
+      "glass": "Saphir",
+      "water": "200 m annoncés",
+      "lead": "Une automatique noire de 39,9 mm au verre saphir et au style de plongeuse compacte.",
+      "caution": "La boutique Orient France affichait cette variante hors stock ; vérifier le vendeur et ne pas inférer une certification ISO.",
+      "officialUrl": "https://www.orientwatch.fr/or/fr_FR/brands/orient/orient-mako-40/p/RA-AC0Q01B",
+      "marketEvidence": {
+        "kind": "editorial",
+        "label": "Choix éditorial sur fiche fabricant Orient Mako 40",
+        "url": "https://www.orientwatch.fr/or/fr_FR/brands/orient/orient-mako-40/p/RA-AC0Q01B"
+      }
+    },
+    {
+      "id": "seiko-speedtimer-ssc813",
+      "brand": "Seiko",
+      "model": "Prospex Speedtimer SSC813",
+      "tier": "prestige",
+      "style": "sport",
+      "category": "Chronographe / solaire",
+      "movement": "Quartz solaire V192",
+      "case": "Diamètre 39 mm",
+      "glass": "Saphir bombé",
+      "water": "10 bar",
+      "lead": "Un chronographe solaire à cadran clair et compteurs contrastés, inspiré de l'histoire Seiko.",
+      "caution": "La disponibilité varie selon pays et marchand ; contrôler la référence SSC813 et la garantie.",
+      "officialUrl": "https://www.seikowatches.com/fr-fr/products/prospex/ssc813",
+      "marketEvidence": {
+        "kind": "editorial",
+        "label": "Choix éditorial sur fiche officielle Seiko Prospex",
+        "url": "https://www.seikowatches.com/fr-fr/products/prospex/ssc813"
+      }
+    },
+    {
+      "id": "tissot-le-locle-white",
+      "brand": "Tissot",
+      "model": "Le Locle T0064071103300",
+      "tier": "prestige",
+      "style": "dress",
+      "category": "Automatique suisse / classique",
+      "movement": "Automatique Powermatic 80",
+      "case": "Diamètre 39,3 mm",
+      "glass": "Saphir",
+      "water": "3 bar",
+      "lead": "Une automatique suisse au cadran blanc guilloché et au bracelet acier.",
+      "caution": "L'étanchéité 3 bar n'est pas adaptée à la plongée ; contrôler l'ajustement du bracelet.",
+      "officialUrl": "https://www.tissotwatches.com/fr-fr/T0064071103300.html",
+      "marketEvidence": {
+        "kind": "editorial",
+        "label": "Choix éditorial sur fiche Tissot Le Locle",
+        "url": "https://www.tissotwatches.com/fr-fr/T0064071103300.html"
+      }
+    },
+    {
+      "id": "hamilton-ventura-h24411732",
+      "brand": "Hamilton",
+      "model": "Ventura Quartz H24411732",
+      "tier": "prestige",
+      "style": "dress",
+      "category": "Design iconique / triangulaire",
+      "movement": "Quartz suisse 955.412",
+      "case": "32 × 50 mm",
+      "glass": "Minéral",
+      "water": "5 bar",
+      "lead": "Une silhouette triangulaire acier et cuir qui tranche avec les boîtiers ronds classiques.",
+      "caution": "Le boîtier asymétrique se compare mal à un diamètre rond : vérifier les 50 mm de longueur portée.",
+      "officialUrl": "https://www.hamiltonwatch.com/fr-fr/h24411732-ventura-quartz.html",
+      "marketEvidence": {
+        "kind": "editorial",
+        "label": "Choix éditorial sur fiche Hamilton Ventura",
+        "url": "https://www.hamiltonwatch.com/fr-fr/h24411732-ventura-quartz.html"
+      }
     }
   ]
 }

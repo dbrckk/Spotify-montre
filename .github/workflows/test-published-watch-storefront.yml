@@ -38,6 +38,8 @@ permissions:
   contents: read
 jobs:
   published-android:
+    # Production Render is still on main during PR review; check the live deployment only after merge or on manual dispatch.
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
@@ -85,6 +87,8 @@ jobs:
               elif ! grep -Fq 'id="am-picks-list"' "$RUNNER_TEMP/live-popular.html"; then
                 ready=0
               elif ! grep -Fq 'data-pick-id="casio-gw-m5610u-1"' "$RUNNER_TEMP/live-popular.html"; then
+                ready=0
+              elif ! grep -Fq 'data-pick-id="seiko-speedtimer-ssc813"' "$RUNNER_TEMP/live-popular.html"; then
                 ready=0
               fi
             fi
