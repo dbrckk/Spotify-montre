@@ -174,9 +174,10 @@ assert.equal((home.match(/rel="canonical"/g)||[]).length,1,'Homepage has exactly
 const popularFeed=JSON.parse(read('selection-populaires.json'));
 const popularPath='montres/modeles-populaires.html';
 const popularHtml=read(popularPath);
+const popularSitemap=read('sitemap.xml');
 assert.equal(popularFeed.products.length,13);
 assert.ok(manifest.paths.includes(manifest.siteUrl+popularPath),'Research-led selection must enter sitemap');
-assert.ok(sitemap.includes(manifest.siteUrl+popularPath),'Research-led collection must be crawlable');
+assert.ok(popularSitemap.includes(manifest.siteUrl+popularPath),'Research-led collection must be crawlable');
 assert.match(popularHtml,/rel="canonical"/,'Canonical for supplemental source-led page');
 assert.match(popularHtml,/aucun|Aucun/,'Supplemental section must disclose limitations');
 assert.equal((popularHtml.match(/<article class="am-pick-card /g)||[]).length,13,'One editorial card for each researched watch');
