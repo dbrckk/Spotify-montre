@@ -189,3 +189,38 @@ body[data-experience="affiliate"] .aff-grid .aff-illustration[data-tone]:has(.af
   .aff-grid[data-view="gallery"] .aff-product-photo{transition:none}
   .aff-grid[data-view="gallery"] .aff-card:hover .aff-product-photo{transform:none}
 }
+
+/* Browsing must not require scrolling through three tall marketing cards
+   before reaching a single real watch. On phones, show an accessible,
+   touch-scrollable discovery rail instead of a vertical three-card stack. */
+@media(max-width:720px){
+  .am-discovery-paths{padding:17px 15px 13px;margin:12px 0 17px}
+  .am-discovery-intro{margin-bottom:13px}
+  .am-discovery-intro strong{font-size:20px}
+  .am-discovery-intro p{font-size:11px;line-height:1.5}
+  .am-discovery-grid{
+    display:grid;
+    grid-template-columns:none;
+    grid-auto-flow:column;
+    grid-auto-columns:minmax(220px,78%);
+    gap:9px;
+    overflow-x:auto;
+    overscroll-behavior-x:contain;
+    scroll-snap-type:x mandatory;
+    scroll-padding-inline:3px;
+    padding:2px 3px 12px;
+    scrollbar-width:thin;
+    scrollbar-color:#c8ae7e #253e32;
+  }
+  .am-discovery-path{
+    min-height:140px;
+    scroll-snap-align:start;
+    padding:13px 14px;
+    gap:7px;
+  }
+  .am-discovery-path strong{font-size:19px}
+  .am-discovery-path>span:nth-last-child(2){font-size:11px;line-height:1.5}
+}
+@media(max-width:360px){
+  .am-discovery-grid{grid-auto-columns:minmax(215px,88%)}
+}
