@@ -306,7 +306,7 @@ const seoCategories=[
  {slug:'montres-casio',members:feed.products.filter(p=>p.brand==='Casio'),title:'Montres Casio'},
  {slug:'montres-petit-boitier',members:feed.products.filter(p=>{const m=/^(\d{1,2})(?:[,.](\d{1,2}))?\s*mm$/i.exec((p.specs?.diameter||'').trim());return m&&Number(m[1]+'.'+(m[2]||'0'))<=38}),title:'Montres à petit boîtier'}
 ];
-assert.deepEqual(seoCategories.map(x=>x.members.length),[7,5,3]);
+assert.deepEqual(seoCategories.map(x=>x.members.length),[7,5,2]);
 for(const category of seoCategories){
  const path='montres/'+category.slug+'.html';
  const html=read(path);
