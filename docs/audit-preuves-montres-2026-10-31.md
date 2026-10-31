@@ -7,7 +7,7 @@ Ce dossier distingue **deux validations indépendantes** :
 1. **Spécifications produit :** les pages constructeur de références exactes ont été consultées pour les champs enregistrés dans `specReview.verifiedFields`. Les autres spécifications du catalogue n'ont pas été à nouveau recoupées dans cette opération.
 2. **Droits photographiques :** le responsable du site a déclaré l'autorisation de publier les 15 images le 30 octobre 2026. **Aucun des 15 dossiers ne comporte une vérification indépendante de cette autorisation**, ni un document de licence ou de cession reproduit dans le dépôt. Le fait qu'une image provienne d'un fabricant ou d'un revendeur n'en autorise pas automatiquement la reproduction.
 
-**Bilan technique :** 15 références exactes ; 14 modèles avec vérifications datées des caractéristiques ; 10 diamètres numériques enregistrés. Les largeurs de montres rectangulaires sont distinctes de ces diamètres. **Bilan photo :** 15 autorisations déclarées par le propriétaire, **0 autorisation vérifiée indépendamment**.
+**Bilan technique :** 15 références exactes ; 15 modèles avec vérifications datées des caractéristiques ; 10 diamètres numériques enregistrés. Les largeurs de montres rectangulaires sont distinctes de ces diamètres. **Bilan photo :** 15 autorisations déclarées par le propriétaire, **0 autorisation vérifiée indépendamment**.
 
 ## Registre des sources et priorités
 
@@ -18,7 +18,7 @@ Ce dossier distingue **deux validations indépendantes** :
 | `casio-a168wa` | A168WA-1 | www.casio.com | Source fabricant : licence à documenter | [caseSize, glass](https://www.casio.com/fr/watches/casio/vintage/product.A168WA-1/) |
 | `casio-mdv107` | MDV-107-1A1V | www.casio.com | Source fabricant : licence à documenter | [caseSize, glass, waterResistance](https://www.casio.com/fr/watches/casio/product.MDV-107-1A1V/) |
 | `casio-ltp1302` | LTP-1302PD-7A1V | www.casio.com | Source fabricant : licence à documenter | [caseSize, glass, waterResistance](https://www.casio.com/fr/watches/casio/product.LTP-1302PD-7A1V/) |
-| `swatch-clearly` | Clearly Gent SO28K100-S06 | www.watchit.ca | Origine tierce : preuve spécifique requise | Non recoupé dans cette révision |
+| `swatch-clearly` | Clearly Gent SO28K100-S06 | www.watchit.ca | Origine tierce : preuve spécifique requise | [movement, waterResistance](https://www.swatch.com/fr-fr/clearly-gent-so28k100-s06/SO28K100-S06.html) |
 | `citizen-eco` | Eco-Drive AW0100-86EC | images.hbjo-online.com | Origine tierce : preuve spécifique requise | [diameter, movement, glass, waterResistance](https://fr.citizenwatch.eu/fr/p/aw0100-86ec/) |
 | `citizen-openheart` | NH9131-73L Open Heart | fr.citizenwatch.eu | Source fabricant : licence à documenter | [movement, glass, waterResistance](https://fr.citizenwatch.eu/fr/p/nh9131-73l/) |
 | `citizen-tsuyosa` | Tsuyosa NJ0150-81X | fr.citizenwatch.eu | Source fabricant : licence à documenter | [diameter, movement, glass, waterResistance](https://fr.citizenwatch.eu/fr/p/nj0150-81x/) |
@@ -38,7 +38,7 @@ Ce dossier distingue **deux validations indépendantes** :
 - **Seiko SRPD55** : calibre 4R36, **42,5 mm**, verre Hardlex et 10 bar. Cette fiche concerne la référence SRPD55, pas la variante de bracelet SRPD55K2.
 - **Seiko Presage SPB165** : calibre 6R35, **39,3 mm**, saphir antireflet et 10 bar ; lien vers la fiche Seiko du modèle exact.
 - **Autres modèles recoupés** : Casio MTP-1302 et LTP-1302 (L × l × H), Citizen Eco-Drive et Tsuyosa, Orient Bambino, Tissot PRX Quartz et automatique, Hamilton Khaki Field Auto. Les champs, sources et dates exactes sont enregistrés dans `specReview`.
-- **Swatch Clearly Gent** : les mesures techniques restent non vérifiées dans cette révision ; elles ne sont pas inventées.
+- **Swatch Clearly Gent SO28K100-S06** : la page officielle confirme le mouvement quartz et l’étanchéité 3 bar. Le diamètre et la nature exacte du verre restent non renseignés : aucune spécification d’un revendeur tiers n’est attribuée au fabricant sans preuve.
 
 ### Preuves photographiques à compléter
 
