@@ -1,5 +1,6 @@
 import {readFileSync,writeFileSync} from 'node:fs';
 import {join} from 'node:path';
+import {buildPopularProductPages} from './build-popular-product-pages.mjs';
 
 // Curated discovery intentionally stays outside the 15-watch comparator until
 // individual Amazon ASINs and licensed exact-model images are validated.
@@ -44,6 +45,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     +encodeURIComponent((p.brand+' '+p.model).slice(0,130))
     +'&tag='+encodeURIComponent(amazonPartnerTag);
   const link=(href,txt,commercial=false,id='')=>'<a href="'+e(href)+'" target="_blank" rel="noopener noreferrer nofollow'+(commercial?' sponsored':'')+'"'+(commercial?' data-amazon-search-id="'+e(id)+'" data-amazon-placement="popular"':'')+'>'+e(txt)+'</a>';
+  const detailPaths=buildPopularProductPages({root,products:picks,coreProducts:existingProducts,affiliates,amazonPartnerTag,pageHead,page,e,u,link,amazonSearch,tierNames});
   const card=(p,front=false)=>{
     const claim=p.marketEvidence.kind==='editorial'?'Sélection éditoriale':p.marketEvidence.kind==='manufacturer_bestseller'?'Signal marque':'Signal distributeur';
     return '<article class="am-pick-card am-pick-'+e(p.style)+'" id="pick-'+e(p.id)+'">'
@@ -51,7 +53,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
       +'<span class="am-pick-visual-name">'+e(p.brand)+'</span><span class="am-pick-visual-ref">'+e(p.model)+'</span>'
       +'<span class="am-pick-visual-caption">Repère graphique · photo exacte chez le fabricant</span></div>'
       +'<div class="am-pick-content"><p class="am-pick-kicker"><span>'+e(tierNames[p.tier])+'</span><span>'+e(claim)+'</span></p>'
-      +'<h3>'+e(p.brand+' '+p.model)+'</h3>'
+      +'<h3><a class="am-pick-detail-link" href="'+(front?'./montres/':'./')+e(p.id)+'.html">'+e(p.brand+' '+p.model)+'</a></h3>'
       +'<p class="am-pick-lead">'+e(p.lead)+'</p>'
       +'<dl class="am-pick-specs"><div><dt>Mouvement</dt><dd>'+e(p.movement)+'</dd></div><div><dt>Boîtier</dt><dd>'+e(p.case)+'</dd></div><div><dt>Verre</dt><dd>'+e(p.glass)+'</dd></div><div><dt>Étanchéité</dt><dd>'+e(p.water)+'</dd></div></dl>'
       +(front?'':'<p class="am-pick-caution"><strong>Avant achat :</strong> '+e(p.caution)+'</p>')
@@ -92,8 +94,8 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     +'<p>Nous n’affichons pas de photographie d’un modèle sans autorisation de reproduction, ni de prix Amazon non synchronisé. Les liens de recherche Amazon.fr sont explicitement annoncés comme tels et peuvent mener à plusieurs variantes. Pour comparer directement des modèles aux photographies locales déjà documentées, <a href="../index.html#montres">revenir aux 15 montres du comparateur</a>.</p></aside></div>';
   const graph={'@context':'https://schema.org','@graph':[
     {'@type':'CollectionPage',name:'13 modèles de montres complémentaires',url:u(path),inLanguage:'fr-FR',description:'Sélection éditoriale fondée sur des sources fabricants et des listes de meilleures ventes distinctes. Aucun classement Amazon revendiqué.'},
-    {'@type':'ItemList',numberOfItems:picks.length,itemListElement:picks.map((p,i)=>({'@type':'ListItem',position:i+1,name:p.brand+' '+p.model,url:p.officialUrl}))}
+    {'@type':'ItemList',numberOfItems:picks.length,itemListElement:picks.map((p,i)=>({'@type':'ListItem',position:i+1,name:p.brand+' '+p.model,url:u('montres/'+p.id+'.html')}))}
   ]};
   writeFileSync(join(root,path),page(pageHead({title:'13 montres à découvrir : G-SHOCK, Citizen, Seiko, Tissot | Atelier Montres',description:'13 montres supplémentaires sélectionnées par catégorie et source : G-SHOCK, montres compactes, automatiques et modèles habillés, avec recherche Amazon clairement signalée.',path}),main,graph).replace('</head>','<link rel="stylesheet" href="../popular-picks.css"></head>'));
-  return {path,teaser,count:picks.length,featuredCount:featured.length,searchLinks:affiliates.enabled?picks.length:0};
+  return {path,detailPaths,teaser,count:picks.length,featuredCount:featured.length,searchLinks:affiliates.enabled?picks.length:0};
 }
