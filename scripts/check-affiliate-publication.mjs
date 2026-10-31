@@ -16,10 +16,25 @@ try {
   writeFileSync(join(target,'affiliate-links.json'),JSON.stringify({version:1,enabled:false,approved:false,amazonPartnerTag:null,links:{}}));
   mkdirSync(join(tmp,'research'),{recursive:true});
   cpSync(join(repository,'research','amazon-fr-exact-products.json'),join(tmp,'research','amazon-fr-exact-products.json'));
+  cpSync(join(repository,'research','amazon-fr-popular-verified.json'),join(tmp,'research','amazon-fr-popular-verified.json'));
+  const verifiedPopularPath=join(tmp,'research','amazon-fr-popular-verified.json');
+  const verifiedPopularOriginal=readFileSync(verifiedPopularPath,'utf8');
   const build=(extraEnv={})=>execFileSync(process.execPath,[join(repository,'scripts/build-seo.mjs')],{
     cwd:tmp,env:{...process.env,PUBLIC_SITE_URL:'https://atelier-montres-selection-fr.onrender.com/',UMAMI_WEBSITE_ID:'',...extraEnv},encoding:'utf8',timeout:15000
   });
   build({GOOGLE_SITE_VERIFICATION:'Valid_Example_Token_123456'});
+  const disabledWatch=readFileSync(join(target,'montres','casio-gw-m5610u-1.html'),'utf8');
+  assert.ok(!disabledWatch.includes('data-amazon-product="casio-gw-m5610u-1"'),
+    'Affiliate-disabled mode must not display the G-SHOCK direct product CTA');
+  // Fail-closed: even an otherwise authorized Amazon tag cannot publish a
+  // tampered registry entry or a different ASIN for this watch model.
+  const forgedPopular=JSON.parse(verifiedPopularOriginal);
+  forgedPopular.verifiedProducts['casio-gw-m5610u-1'].asin='B0FAKE1234';
+  writeFileSync(verifiedPopularPath,JSON.stringify(forgedPopular));
+  let incorrectAsinRejected=false;
+  try{build()}catch{incorrectAsinRejected=true}
+  assert.equal(incorrectAsinRejected,true,'Evidence URL/ASIN mismatch must refuse a forged direct-link entry');
+  writeFileSync(verifiedPopularPath,verifiedPopularOriginal);
   assert.match(readFileSync(join(target,'index.html'),'utf8'),/<meta name="google-site-verification" content="Valid_Example_Token_123456">/);
   let tokenBlocked=false;
   try { build({GOOGLE_SITE_VERIFICATION:'\"><script>alert(1)</script>'}); } catch { tokenBlocked=true; }
@@ -69,6 +84,11 @@ try {
   cfg.links['citizen-tsuyosa'].url='https://www.amazon.fr/dp/B0BG7VD5YL?tag=example-21';
   writeFileSync(join(target,'affiliate-links.json'),JSON.stringify(cfg));
   build();
+  const directExample=readFileSync(join(target,'montres/casio-gw-m5610u-1.html'),'utf8');
+  assert.ok(directExample.includes('https://www.amazon.fr/dp/B09BCPP68Q?tag=example-21'),
+    'The verified Amazon.fr ASIN should inherit the active account tag without hardcoding');
+  assert.match(directExample,/data-amazon-product="casio-gw-m5610u-1"/,
+    'Direct supplementary referral must be distinguished from a search event');
   html=readFileSync(join(target,'montres/citizen-tsuyosa.html'),'utf8');
   assert.match(html,/Voir ce modèle sur Amazon.fr · lien rémunéré/);
   assert.match(html,/rel="noopener noreferrer nofollow sponsored"/);
@@ -104,7 +124,14 @@ try {
   build();
   const manifest=JSON.parse(readFileSync(join(target,'seo-manifest.json'),'utf8'));
   assert.equal(manifest.affiliateActive,true);
-  assert.equal(manifest.affiliateCount,13,'Publish the 13 owner-tagged product matches');
+  assert.equal(manifest.affiliateCount,13,'Publish the 13 owner-tagged core product matches');
+  assert.equal(manifest.popularAffiliateDirectLinks,1,'One exact direct link in the supplementary selection');
+  assert.equal(manifest.popularAffiliateSearchLinks,12,'Remaining twelve supplemental watches must stay labeled searches');
+  const directProduction=readFileSync(join(target,'montres/casio-gw-m5610u-1.html'),'utf8');
+  assert.ok(directProduction.includes('href="https://www.amazon.fr/dp/B09BCPP68Q?tag=drackk04-21"'),
+    'Publish only the independently source-confirmed G-SHOCK Amazon.fr direct match');
+  assert.ok(!directProduction.includes('data-amazon-search-id="casio-gw-m5610u-1"'),
+    'An exact product match must not be mislabeled as an unverified search');
   const realResearch=JSON.parse(readFileSync(join(repository,'research','amazon-fr-exact-products.json'),'utf8'));
   const publicHome=readFileSync(join(target,'index.html'),'utf8');
   assert.match(publicHome,/En tant que Partenaire Amazon/,'The homepage must disclose paid links');
