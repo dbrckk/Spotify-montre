@@ -53,7 +53,7 @@
    const movementName={quartz:'Quartz',automatic:'Automatique','eco-drive':'Solaire · Eco-Drive'};
    const essentialFacts=[
      ['Mouvement',p.specs?.movement||movementName[p.movement]||null],
-     ['Diamètre',p.specs?.diameter||null],
+     p.specs?.diameter?['Diamètre',p.specs.diameter]:['Dimensions du boîtier',p.specs?.caseSize||null],
      ['Verre',p.specs?.glass||null],
      ['Étanchéité',p.specs?.waterResistance||null]
    ];
@@ -112,9 +112,24 @@
    const q=encodeURIComponent((p.brand+' '+p.model).slice(0,90));
    $('detailAmazon').href='https://www.amazon.fr/s?k='+q;
    $('detailEbay').href='https://www.ebay.fr/sch/i.html?_nkw='+q;
-   const rows=[['Référence',p.model],['Maison',p.brand],['Type de mouvement',p.specs?.movement||'À confirmer sur la fiche fabricant'],['Diamètre du boîtier',p.specs?.diameter||'À confirmer'],['Verre',p.specs?.glass||'À confirmer'],['Étanchéité',p.specs?.waterResistance||'À confirmer'],['Stock marchand','Non synchronisé'],['Prix actuel','Voir le fabricant']];
+   const rows=[['Référence',p.model],['Maison',p.brand],['Type de mouvement',p.specs?.movement||'À confirmer sur la fiche fabricant'],['Diamètre du boîtier',p.specs?.diameter||'À confirmer'],...(p.specs?.caseSize?[['Dimensions L × l × H',p.specs.caseSize]]:[]),['Verre',p.specs?.glass||'À confirmer'],['Étanchéité',p.specs?.waterResistance||'À confirmer'],['Stock marchand','Non synchronisé'],['Prix actuel','Voir le fabricant']];
    const list=$('detailSpecList');
    list.replaceChildren(...rows.map(([label,val])=>{const line=node('div');line.append(node('dt','',label),node('dd','',val));return line}));
+    const evidence=$('detailEvidence');
+    if(evidence){
+      const review=p.specReview;
+      const audited=review?.sourceKind==='manufacturer_exact_reference'&&review?.sourceUrl===p.officialUrl
+        &&/^\d{4}-\d{2}-\d{2}$/.test(review.verifiedOn)
+        &&Array.isArray(review.verifiedFields)&&review.verifiedFields.length>0&&safeOfficial(review.sourceUrl);
+      evidence.replaceChildren();
+      const title=node('strong','',audited?'Source vérifiée pour cette référence':'Source et données à confirmer');
+      const note=node('p','',audited
+        ?'Caractéristiques recoupées avec la fiche officielle le '+new Intl.DateTimeFormat('fr-FR',{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(review.verifiedOn+'T12:00:00Z'))+'. Cette vérification ne concerne pas les droits de reproduction des photos.'
+        :'Les caractéristiques non documentées sont à confirmer sur le site du fabricant.');
+      const a=node('a','',audited?'Consulter la source fabricant ↗':'Vérifier la fiche fabricant ↗');
+      a.href=audited?review.sourceUrl:p.officialUrl;a.target='_blank';a.rel='noopener noreferrer nofollow';
+      evidence.append(title,note,a);
+    }
 
    // Local-first discovery: never present prices, inventory or affiliate commissions we cannot verify.
    const all=x.products.filter(t=>t&&typeof t.id==='string'&&typeof t.model==='string'&&safeOfficial(t.officialUrl));
