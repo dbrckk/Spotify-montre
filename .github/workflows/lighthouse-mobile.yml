@@ -14,6 +14,9 @@ on:
       - 'site/affiliation.js'
   schedule:
     - cron: '31 6 * * 1'
+concurrency:
+  group: lighthouse-mobile-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
