@@ -1,5 +1,6 @@
 import {writeFileSync} from 'node:fs';
 import {join} from 'node:path';
+import {responsiveAttrs} from './responsive-images.mjs';
 
 /**
  * Three evidence-led, crawlable search-intent collections.
@@ -81,7 +82,7 @@ export function buildSearchCollections({root,products,amazonLinks,partners,pageH
     for(const p of list){const current=byProduct.get(p.id)||[];current.push({path:rel,label:g.audience});byProduct.set(p.id,current)}
     const visual=list.map(p=>{
       const allowed=sourcesFor(p);
-      const photo=allowed?'<img src="../assets/watches/'+e(p.id)+'.webp" alt="'+e(p.brand+' '+p.model)+' — photographie de la référence" width="380" height="380" loading="lazy" decoding="async">':
+      const photo=allowed?'<img src="../assets/watches/'+e(p.id)+'.webp"'+responsiveAttrs(root,p,{prefix:'../',sizes:'(max-width: 720px) 92vw, (max-width: 940px) 45vw, 330px',escape:e})+' alt="'+e(p.brand+' '+p.model)+' — photographie de la référence" width="380" height="380" loading="lazy" decoding="async">':
         '<div class="seo-collection-missing">Photo disponible auprès du fabricant</div>';
       const affiliate=partners.links.get(p.id),amazon=amazonLinks.get(p.id);
       const outbound=affiliate

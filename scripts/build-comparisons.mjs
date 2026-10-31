@@ -1,5 +1,6 @@
 import {readFileSync,writeFileSync} from 'node:fs';
 import {join} from 'node:path';
+import {responsiveAttrs} from './responsive-images.mjs';
 
 /**
  * Four hand-curated, source-led comparisons. Every factual value comes from
@@ -30,7 +31,7 @@ export function buildComparisonPages({root,products,amazonLinks,partners,pageHea
   const authorizedPhoto=p=>p.photoReview?.publicUsageApproved===true&&
     p.photoReview.localUrl==='./assets/watches/'+p.id+'.webp';
   const art=p=>authorizedPhoto(p)
-    ? '<img class="headtohead-photo" src="../assets/watches/'+e(p.id)+'.webp" alt="Photographie de '+e(display(p))+'" width="900" height="900" loading="lazy" decoding="async">'
+    ? '<img class="headtohead-photo" src="../assets/watches/'+e(p.id)+'.webp"'+responsiveAttrs(root,p,{prefix:'../',sizes:'(max-width: 780px) 92vw, 440px',escape:e})+' alt="Photographie de '+e(display(p))+'" width="900" height="900" loading="lazy" decoding="async">'
     : '<div class="watch-vector" data-watch-id="'+e(p.id)+'" data-brand="'+e(p.brand)+'" data-model="'+e(p.model)+'" data-tone="'+e(p.tone||'silver')+'" role="img" aria-label="Illustration éditoriale du style '+e(display(p))+'"></div>';
   for(const pair of source.comparisons){
     if(!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(pair?.slug||'')||pair.slug.length>90||slugs.has(pair.slug))

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {readFileSync,statSync,existsSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {createHash} from 'node:crypto';
+import {responsiveSrcset} from './responsive-images.mjs';
 const root=resolve(process.cwd(),'site');
 const read=p=>readFileSync(resolve(root,p),'utf8');
 const feed=JSON.parse(read('selection-affiliation.json'));
@@ -45,6 +46,7 @@ for(const name of ['citizen-tsuyosa','tissot-prx-quartz','orient-bambino','casio
  }
 }
 assert.match(read('editorial-photo.js'),/assets\/watch-thumbs\/.*item\.id/,'Featured picker must request smaller local thumbnails');
+assert.match(read('affiliation.js'),/assets\/watch-responsive\/.*p\.id/,'Dynamic catalogue must prefer responsive photos');
 const home=read('index.html');
 const advisor=read('conseiller.html');
 assert.ok(advisor.includes('<link rel="canonical" href="'+manifest.siteUrl+'conseiller.html">'),'Advisor needs one canonical public URL');
@@ -75,7 +77,8 @@ const first=feed.products.find(p=>p.id==='citizen-tsuyosa');
 assert.equal(first.photoReview.publicUsageApproved,true);
 const heroPhoto='./assets/watches/'+first.id+'.webp?v='+first.photoReview.localSha256.slice(0,12);
 assert.ok(home.includes('src="'+heroPhoto+'"'),'HTML hero must use exact locally versioned image');
-assert.ok(home.includes('<link rel="preload" as="image" fetchpriority="high" href="'+heroPhoto+'">'),'Matching LCP preload must be present');
+assert.ok(home.includes('<link rel="preload" as="image" fetchpriority="high" href="'+heroPhoto+'" imagesrcset="'),'Matching responsive LCP preload must be present');
+assert.ok(home.includes('imagesizes="(max-width: 760px) 92vw, 520px"'),'Preloaded LCP must match image sizes');
 assert.ok(home.includes('<meta property="og:image" content="'+manifest.siteUrl+'assets/watches/'+first.id+'.webp">'),'Social sharing must use the real published photograph');
 assert.ok(home.includes('<meta name="twitter:card" content="summary_large_image">'),'Large social image requested');
 for(const marker of ['AM_SEO_LINKS_START','AM_SEO_LINKS_END','AM_SEO_HEAD_START','AM_SEO_HEAD_END','AM_SEO_GUIDES_START','AM_SEO_GUIDES_END','AM_SEO_CATEGORIES_START','AM_SEO_CATEGORIES_END','AM_SEO_COMPARISONS_START','AM_SEO_COMPARISONS_END']){
@@ -120,6 +123,15 @@ for(const product of feed.products){
     assert.ok(html.includes('data-amazon-product="'+product.id+'"'),'SEO click event needs exact watch id');
   }
   if(product.photoReview?.publicUsageApproved===true){
+    const set=responsiveSrcset(root,product,'../');
+    assert.ok(set&&html.includes('srcset="'+set+'"'),'Published model must expose responsive local photo variants: '+product.id);
+    assert.ok(html.includes('sizes="(max-width: 760px) 92vw, 540px"'),'Responsive model image must declare realistic display sizes');
+    const sourceBytes=statSync(resolve(root,'assets/watches/'+product.id+'.webp')).size;
+    for(const width of [480,800].filter(w=>w<product.photoReview.localWidth)){
+      const derived='assets/watch-responsive/'+product.id+'-'+width+'.webp';
+      assert.ok(existsSync(resolve(root,derived)),'Missing responsive photo: '+derived);
+      assert.ok(statSync(resolve(root,derived)).size<sourceBytes,'Responsive image must actually be smaller: '+derived);
+    }
     const photoPath='assets/watches/'+product.id+'.webp';
     assert.equal(product.photoReview.permissionDeclaration,'site_owner_explicit_confirmation_2026-10-30','Declared authorization provenance must be explicit');
     assert.equal(product.photoReview.permissionIndependentlyVerified,false,'Never invent third-party proof');

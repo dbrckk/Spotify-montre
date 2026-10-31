@@ -95,3 +95,11 @@ Le propriétaire a confirmé la vérification de la propriété **Préfixe d'URL
 - All 15 pages have model-specific purchase checks. Unknown diameter and water resistance remain explicitly unknown. Automatic, quartz, and solar advice reflect the actual movement.
 - Three links to related models now include the locally published manufacturer photograph declared authorized by the owner; these lower-page images are lazy-loaded with correct intrinsic sizes. The hero photo remains high priority with actual pixel dimensions.
 - Existing SEO validation now checks the claims and the photo treatments for every model. No measured ranking, CTR, INP, CLS, or LCP improvement is asserted without field or lab evidence.
+
+## Performance des photos produits — 31 octobre 2026
+
+- Une génération de dérivés WebP 480 px et 800 px à partir des 15 photographies publiées est ajoutée dans GitHub Actions, avec vérification SHA-256 des originaux et absence d’agrandissement artificiel ; 26 fichiers dérivés (certaines photos sources font moins de 800 px).
+- Les fichiers originaux restent inchangés et disponibles pour le zoom. Les fichiers dérivés ne sont sélectionnés que dans les fiches SEO, collections, comparatifs et cartes du catalogue. Les images non déclarées autorisées ne reçoivent aucun dérivé.
+- Les images affichées possèdent désormais `srcset` et `sizes` ; un repli vers l’original reste disponible sur le catalogue dynamique, notamment sur les anciens snapshots.
+- L’accueil applique le même choix adaptatif à son image LCP et au préchargement pour éviter de télécharger deux résolutions différentes.
+- À comparer avec les audits Lighthouse préexistants : accueil (médiane 98/100, LCP ~1,67 s) et fiche Casio (100/100, LCP ~1,53 s). Les gains éventuels doivent être confirmés par un nouvel audit, sans promettre une amélioration de classement SEO.
