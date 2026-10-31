@@ -8,6 +8,10 @@ on:
       - 'scripts/report-lighthouse-mobile.mjs'
       - 'site/editorial-photo.js'
       - 'site/assets/watch-thumbs/**'
+      - 'site/assets/watch-responsive/**'
+      - 'scripts/build-seo.mjs'
+      - 'scripts/responsive-images.mjs'
+      - 'site/affiliation.js'
   schedule:
     - cron: '31 6 * * 1'
 permissions:
