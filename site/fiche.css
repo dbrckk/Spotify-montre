@@ -94,3 +94,11 @@
  .detail-specs dl>div{gap:12px}
 }
 @media(prefers-reduced-motion:reduce){.detail-fast-nav a{scroll-behavior:auto}}
+
+/* Visible provenance for the product's technical facts (not a copyright grant). */
+.detail-evidence{margin:23px 0 0;padding:17px 19px;border:1px solid #d7dcca;background:#f1f4ed;color:#274532}
+.detail-evidence strong{display:block;color:#1c3928;font:700 12px/1.5 system-ui,sans-serif;letter-spacing:.025em}
+.detail-evidence p{margin:7px 0 9px;color:#4d6252;font:12px/1.7 system-ui,sans-serif}
+.detail-evidence a{display:inline-flex;align-items:center;min-height:44px;font:700 12px/1.5 system-ui,sans-serif;color:#28583c;text-underline-offset:4px}
+.detail-evidence a:focus-visible{outline:3px solid #c49f60;outline-offset:3px}
+@media(max-width:620px){.detail-evidence{padding:15px 16px;margin-top:17px}.detail-evidence p{font-size:11px}}
