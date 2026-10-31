@@ -23,6 +23,8 @@ on:
       - 'site/fiche.css'
       - 'site/seo-guides.css'
       - 'site/popular-picks.css'
+      - 'site/shopper-selections.css'
+      - 'scripts/build-shopper-selections.mjs'
       - 'site/popular-filters.js'
       - 'scripts/build-popular-picks.mjs'
       - 'scripts/build-seo.mjs'
@@ -60,7 +62,7 @@ jobs:
           # CDN build never produces a false failure or false success.
           for attempt in $(seq 1 30); do
             ready=1
-            for file in affiliation.js selection-share.js affiliate-ui.js catalogue-view.css premium-system.css fiche.js fiche.css seo-guides.css editorial-photo.js editorial-photo.css popular-filters.js popular-picks.css; do
+            for file in affiliation.js selection-share.js affiliate-ui.js catalogue-view.css premium-system.css fiche.js fiche.css seo-guides.css editorial-photo.js editorial-photo.css popular-filters.js popular-picks.css shopper-selections.css; do
               if ! curl -fsSL --max-time 15 "$base/$file" -o "$RUNNER_TEMP/live-$file"; then
                 ready=0
               elif ! cmp -s "site/$file" "$RUNNER_TEMP/live-$file"; then
@@ -92,13 +94,26 @@ jobs:
                 ready=0
               fi
             fi
+            # Also gate the three new purchase-intent SEO pages; validating
+            # only the legacy catalogue would accept a stale CDN deployment.
             if [ "$ready" -eq 1 ]; then
-              echo "Render serves current JS/CSS and the filterable 13-watch collection (attempt $attempt)."
+              for slug in montres-femme-accessibles montres-homme-style-accessible montres-automatiques-selection; do
+                if ! curl -fsSL --max-time 15 "$base/montres/$slug.html" -o "$RUNNER_TEMP/live-$slug.html"; then
+                  ready=0
+                elif ! grep -Fq 'class="am-shopper-grid"' "$RUNNER_TEMP/live-$slug.html"; then
+                  ready=0
+                elif [ "$(grep -Fc 'class="am-shopper-card"' "$RUNNER_TEMP/live-$slug.html")" -ne 6 ]; then
+                  ready=0
+                fi
+              done
+            fi
+            if [ "$ready" -eq 1 ]; then
+              echo "Render serves current JS/CSS and three new shopper collections (attempt $attempt)."
               exit 0
             fi
             if [ "$attempt" -lt 30 ]; then sleep 5; fi
           done
-          echo 'Render CDN still serves stale or incomplete JS/CSS or the former 13-watch collection after retries.'
+          echo 'Render CDN still serves stale or incomplete JS/CSS or the new shopper collections are not published after retries.'
           exit 1
       - name: Verify deployed website, 15 local photos, sharing and watch history
         env:

@@ -55,6 +55,22 @@ try{
  const popularPage=await browser.newPage({viewport:{width:393,height:852},isMobile:true,hasTouch:true,locale:'fr-FR'});
  await popularPage.goto(new URL('/montres/modeles-populaires.html',base).href,{waitUntil:'domcontentloaded'});
  assert.equal(await popularPage.locator('article.am-pick-card').count(),37,'All supplemental watch models on one source-backed page');
+
+ // Each SEO selection must work on Android without a filter, script or shop account.
+ for (const slug of ['montres-femme-accessibles','montres-homme-style-accessible','montres-automatiques-selection']) {
+   const curated=await browser.newPage({viewport:{width:393,height:852},isMobile:true,hasTouch:true,locale:'fr-FR'});
+   const response=await curated.goto(new URL('/montres/'+slug+'.html',base).href,{waitUntil:'domcontentloaded'});
+   assert.ok(response?.ok(),'Curated SEO landing page must load '+slug);
+   assert.equal(await curated.locator('article.am-shopper-card').count(),6,'Six traceable watch options '+slug);
+   assert.equal(await curated.locator('.am-shopper-nav a').count(),3,'All three categories must be linked '+slug);
+   assert.equal(await curated.locator('.am-shopper-card h2 a').count(),6,'Every title must link its model facts '+slug);
+   assert.equal(await curated.locator('a.am-shopper-action').count(),6,'Every watch needs a real merchant or manufacturer exit '+slug);
+   const dimensions=await curated.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
+   assert.ok(dimensions.scroll<=dimensions.client+2,'Curated cards must not overflow Android '+slug);
+   await curated.screenshot({path:'artifacts/android-selection-'+slug+'.png',fullPage:true});
+   await curated.close();
+ }
+
  assert.equal(await popularPage.locator('.am-picks-tier').count(),3,'All three editorial ranges are represented');
  assert.equal(await popularPage.locator('a[data-amazon-search-id]').count(),34,'Thirty-four variants without documented ASINs must use labeled search results');
  assert.equal(await popularPage.locator('a[data-amazon-product]').count(),3,'Three Amazon.fr models have documented ASINs');

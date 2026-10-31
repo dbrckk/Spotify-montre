@@ -18,6 +18,9 @@ try {
   cpSync(join(repository,'research','amazon-fr-exact-products.json'),join(tmp,'research','amazon-fr-exact-products.json'));
   cpSync(join(repository,'research','amazon-fr-popular-verified.json'),join(tmp,'research','amazon-fr-popular-verified.json'));
   const verifiedPopularPath=join(tmp,'research','amazon-fr-popular-verified.json');
+  const build=(extraEnv={})=>execFileSync(process.execPath,[join(repository,'scripts/build-seo.mjs')],{
+    cwd:tmp,env:{...process.env,PUBLIC_SITE_URL:'https://atelier-montres-selection-fr.onrender.com/',UMAMI_WEBSITE_ID:'',...extraEnv},encoding:'utf8',timeout:15000
+  });
   // Rights clearance cannot be invented by setting a boolean or by
   // smuggling a downloaded product photo into the public directory.
   const rightsPath=join(target,'popular-photo-rights.json');
@@ -30,9 +33,6 @@ try {
   writeFileSync(rightsPath,rightsOriginal);
 
   const verifiedPopularOriginal=readFileSync(verifiedPopularPath,'utf8');
-  const build=(extraEnv={})=>execFileSync(process.execPath,[join(repository,'scripts/build-seo.mjs')],{
-    cwd:tmp,env:{...process.env,PUBLIC_SITE_URL:'https://atelier-montres-selection-fr.onrender.com/',UMAMI_WEBSITE_ID:'',...extraEnv},encoding:'utf8',timeout:15000
-  });
   build({GOOGLE_SITE_VERIFICATION:'Valid_Example_Token_123456'});
   const disabledWatch=readFileSync(join(target,'montres','casio-gw-m5610u-1.html'),'utf8');
   assert.ok(!disabledWatch.includes('data-amazon-product="casio-gw-m5610u-1"'),

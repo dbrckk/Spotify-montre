@@ -3,6 +3,7 @@ import {join} from 'node:path';
 import {buildPopularProductPages} from './build-popular-product-pages.mjs';
 import {loadVerifiedPopularLinks} from './popular-verified-affiliate.mjs';
 import {loadApprovedPopularPhotos} from './popular-photo-rights.mjs';
+import {buildShopperSelections} from './build-shopper-selections.mjs';
 
 // Curated discovery intentionally stays outside the 15-watch comparator until
 // individual Amazon ASINs and licensed exact-model images are validated.
@@ -51,6 +52,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     +'>'+e(txt)+'</a>';
   const verifiedLinks=loadVerifiedPopularLinks({root,picks,affiliates,amazonPartnerTag});
   const approvedPhotos=loadApprovedPopularPhotos({root,picks});
+  const shopper=buildShopperSelections({root,coreProducts:existingProducts,picks,partners:affiliates,verifiedPopularLinks:verifiedLinks,amazonSearch,pageHead,page,e,u});
   const affiliateLink=p=>{
     if(!affiliates.enabled)return '';
     const direct=verifiedLinks.get(p.id);
@@ -93,7 +95,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     +'<div class="am-picks-heading"><p class="overline kicker">01 · MODÈLES COMPLÉMENTAIRES</p>'
     +'<h2 id="am-picks-title">Des références remarquées, au-delà des 15 montres comparées.</h2>'
     +'<p>SKMEI, Curren et ADDIESDIVE à petit budget, Casio et Pagani Design : huit pistes pour explorer nos '+picks.length+' montres documentées, dont une G-SHOCK avec fiche Amazon.fr correspondant à la référence identifiée. Aucun prix ni stock annoncé.</p>'
-    +'</div><div class="am-picks-grid">'+featured.map(p=>card(p,true)).join('')+'</div>'
+    +'</div>'+shopper.navHome+'<div class="am-picks-grid">'+featured.map(p=>card(p,true)).join('')+'</div>'
     +'<p class="am-picks-disclaimer">'+e(globalDisclaimer)+' '+e(affiliateNote)+'</p>'
     +'<a class="am-picks-more" href="./montres/modeles-populaires.html">Voir les '+picks.length+' modèles supplémentaires, par gamme →</a>'
     +'</div></section>';
@@ -117,7 +119,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     +'<p>'+e(globalDisclaimer)+'</p><p>'+e(affiliateNote)+'</p>'
     +'<nav class="am-picks-tier-nav" aria-label="Choisir une gamme"><a href="#pick-skmei-2056">SKMEI · petit budget</a>'
     +tiers.map(t=>'<a href="#gamme-'+e(t)+'">'+e(tierNames[t])+'</a>').join('')
-    +'</nav></header>'+filters+'<div id="am-picks-list">'+sections+'</div>'+emptyMessage
+    +'</nav>'+shopper.navPopular+'</header>'+filters+'<div id="am-picks-list">'+sections+'</div>'+emptyMessage
     +'<aside class="am-picks-method"><h2>Comment ces montres sont-elles sélectionnées ?</h2>'
     +'<p>Chaque code de modèle et caractéristique sont rapprochés de la fiche de la marque ou du distributeur cité. Les mentions « meilleures ventes » décrivent uniquement la liste citée, à la date du '+e(source.reviewedOn)+'. Elles ne constituent pas des données de ventes Amazon ni un palmarès national.</p>'
     +'<p>Nous n’affichons pas de photographie d’un modèle sans autorisation de reproduction, ni de prix Amazon non synchronisé. Les recherches Amazon.fr sont explicitement annoncées comme telles et peuvent mener à plusieurs variantes. Seules les références contrôlées sur une fiche Amazon.fr disposent d’un lien direct. Pour comparer directement des modèles aux photographies locales déjà documentées, <a href="../index.html#montres">revenir aux 15 montres du comparateur</a>.</p></aside></div>';
@@ -126,5 +128,5 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     {'@type':'ItemList',numberOfItems:picks.length,itemListElement:picks.map((p,i)=>({'@type':'ListItem',position:i+1,name:p.brand+' '+p.model,url:u('montres/'+p.id+'.html')}))}
   ]};
   writeFileSync(join(root,path),page(pageHead({title:picks.length+' montres à découvrir : SKMEI, Casio, ADDIESDIVE, Pagani | Atelier Montres',description:picks.length+' montres sourcées, dont SKMEI accessibles : rétro, sport, acier, quartz et automatiques. Recherches Amazon signalées.',path}),main,graph).replace('</head>','<link rel="stylesheet" href="../popular-picks.css"><script defer src="../popular-filters.js"></script></head>'));
-  return {path,detailPaths,teaser,count:picks.length,featuredCount:featured.length,searchLinks:affiliates.enabled?picks.length-verifiedLinks.size:0,directLinks:verifiedLinks.size};
+  return {path,detailPaths,shopperPaths:shopper.paths,teaser,count:picks.length,featuredCount:featured.length,searchLinks:affiliates.enabled?picks.length-verifiedLinks.size:0,directLinks:verifiedLinks.size};
 }

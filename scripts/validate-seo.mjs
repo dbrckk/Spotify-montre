@@ -64,7 +64,7 @@ for(const [id,entry] of Object.entries(amazon.links)){
  assert.ok(!entry.url.includes('?tag='),'Unapproved affiliate tracking cannot be published');
 }
 
-assert.equal(manifest.paths.length,67);
+assert.equal(manifest.paths.length,70);
 assert.ok(manifest.paths.every(url=>url.startsWith(manifest.siteUrl)));
 // Ensure small, local, original-source thumbnails are shipped with the site.
 for(const name of ['citizen-tsuyosa','tissot-prx-quartz','orient-bambino','casio-mtp-b145']){
@@ -210,6 +210,46 @@ assert.ok(home.includes('https://www.amazon.fr/dp/B09BCPP68Q?tag=drackk04-21'),'
 assert.equal((home.match(/data-amazon-product="casio-gw-m5610u-1"/g)||[]).length,1,'Only one direct Amazon supplemental CTA should be featured');
 assert.equal((home.match(/data-amazon-search-id=/g)||[]).length,6,'Six other homepage features retain clearly labeled Amazon search links');
 assert.equal((home.match(/data-amazon-product="casio-f91w-1"/g)||[]).length,1,'F-91W featured exact-model Amazon referral');
+
+const shopperCollections=[
+  {slug:'montres-femme-accessibles',ids:['casio-ltp1302','skmei-1874','casio-la-20wh-4a1','casio-ltp-1234pgl-7a','curren-cur210','pagani-pd1776']},
+  {slug:'montres-homme-style-accessible',ids:['casio-mtp-1302','casio-a168wa','casio-mdv107','skmei-2256','addiesdive-ad2030','pagani-pd1701']},
+  {slug:'montres-automatiques-selection',ids:['orient-bambino','citizen-tsuyosa','seiko-5','orient-bambino-38-cream','citizen-tsuyosa-37-blue','pagani-pd1751']}
+];
+const shopperProducts=new Map([...feed.products,...popularFeed.products].map(p=>[p.id,p]));
+for(const selection of shopperCollections){
+  const path='montres/'+selection.slug+'.html';
+  const html=read(path);
+  assert.ok(manifest.paths.includes(manifest.siteUrl+path),'Shopper collection not in sitemap: '+path);
+  assert.ok(popularSitemap.includes(manifest.siteUrl+path),'Shopper collection missing XML location: '+path);
+  assert.ok(html.includes('<link rel="canonical" href="'+manifest.siteUrl+path+'">'),'Shopper canonical missing');
+  assert.match(html,/class="am-shopper-grid"/,'Accessible product grid must be visible without JavaScript');
+  assert.match(html,/href="\.\.\/shopper-selections\.css"/,'Stylesheet must be included');
+  assert.equal((html.match(/class="am-shopper-card"/g)||[]).length,selection.ids.length,'Only selected products in shopper collection');
+  assert.equal((html.match(/class="am-shopper-art am-shopper-real-photo"/g)||[]).length,
+    selection.ids.filter(id=>feed.products.some(p=>p.id===id&&p.photoReview?.publicUsageApproved===true)).length,
+    'Only previously declared licensed core photos may be used');
+  const graph=JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1])['@graph'];
+  assert.equal(graph[0]['@type'],'CollectionPage');
+  assert.equal(graph[0].url,manifest.siteUrl+path);
+  assert.deepEqual(graph[1].itemListElement.map(x=>x.url),selection.ids.map(id=>manifest.siteUrl+'montres/'+id+'.html'));
+  for(const id of selection.ids){
+    const p=shopperProducts.get(id);
+    assert.ok(p,'Unknown watch in curated collection: '+id);
+    assert.ok(html.includes('data-shopper-watch="'+id+'"'),'Shopper card ID missing: '+id);
+    assert.ok(html.includes(p.brand.replace(/&/g,'&amp;')),'Model brand missing from shopper page: '+id);
+    assert.ok(html.includes('href="../montres/'+id+'.html"'),'Internal fact-checking link missing: '+id);
+    if(!feed.products.some(x=>x.id===id)){
+      assert.ok(html.includes('data-amazon-'+(exactPopularLinks[id]?'product':'search-id')+'="'+id+'"'),
+        'Popular shopper affiliate path incorrectly classified: '+id);
+    }
+  }
+  assert.doesNotMatch(html,/"offers"\s*:|"aggregateRating"\s*:/,'Shopper page must not invent offers or ratings');
+  assert.ok(html.includes('En tant que Partenaire Amazon')===manifest.affiliateActive,'Explicit commission disclosure required when Amazon links are active');
+  assert.ok(html.includes('Les photographies locales des modèles principaux'),'Source-rights disclosure is required');
+  assert.ok(home.includes('href="./montres/'+selection.slug+'.html"'),'Homepage must link shopper collection');
+  assert.ok(popularHtml.includes('href="./'+selection.slug+'.html"'),'Supplemental index must link shopper collection');
+}
 const existingIds=new Set(feed.products.map(p=>p.id));
 for(const p of popularFeed.products){
   assert.ok(!existingIds.has(p.id),'Supplemental reference must not duplicate comparables: '+p.id);
@@ -450,7 +490,7 @@ for(const name of ['revue-photo.html','revue-photo.js','revue-photo.css']){
 }
 assert.ok(existsSync(resolve(root,'seo-watch-art.js')),'SEO watch illustrations script is required');
 const sitemap=read('sitemap.xml');
-assert.equal((sitemap.match(/<loc>/g)||[]).length,67);
+assert.equal((sitemap.match(/<loc>/g)||[]).length,70);
 const comparisons=JSON.parse(read('comparaisons-montres.json'));
 assert.equal(comparisons.version,1);
 assert.equal(comparisons.comparisons.length,4);
@@ -570,4 +610,4 @@ assert.equal(privacy.includes('Les visites et clics vers Amazon sont mesurés av
 assert.ok(privacy.includes('chez Render'),'Privacy notice must identify actual host');
 const guide=read('montres/guide-choisir-montre.html');
 assert.match(guide,/<h1>Comment choisir une montre/);
-console.log('SEO validation OK: 15 model pages, 3 categories, 4 guides, 4 comparisons, transparent editorial method, 13 Amazon links, 67 sitemap URLs, 37 individual source-backed product pages and genuine hero LCP preload');
+console.log('SEO validation OK: 15 model pages, 3 categories, 4 guides, 4 comparisons, transparent editorial method, 13 Amazon links, 70 sitemap URLs, 37 individual source-backed product pages and genuine hero LCP preload');

@@ -1,0 +1,45 @@
+/* Atelier Montres — source-backed commercial collection discovery. */
+.am-shopper-page{padding:24px 0 84px}
+.am-shopper-heading{margin:32px 0 28px;max-width:1020px}
+.am-shopper-heading h1{font:400 clamp(32px,4.3vw,58px)/1.12 Georgia,serif;letter-spacing:-.035em;color:#1e3e30;margin:12px 0 18px}
+.am-shopper-heading .lead{max-width:76ch;font:400 clamp(15px,1.55vw,18px)/1.8 system-ui,sans-serif;color:#455a4c}
+.am-shopper-method-note{max-width:80ch;color:#536659;font:400 14px/1.8 system-ui,sans-serif}
+.am-shopper-nav{display:flex;align-items:stretch;gap:10px;flex-wrap:wrap;margin:24px 0 9px}
+.am-shopper-nav a{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:11px 16px;border:1px solid #b9c9b7;border-radius:999px;background:#eff3ea;color:#244b36;text-decoration:none;font:700 14px/1.4 system-ui,sans-serif}
+.am-shopper-nav a:hover{background:#dfe8da}
+.am-shopper-nav-home{margin:22px 0 25px}
+.am-shopper-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.am-shopper-card{display:flex;flex-direction:column;overflow:hidden;min-width:0;border:1px solid #d5ded3;background:#fffefa;border-radius:8px;box-shadow:0 14px 32px #0c281a12}
+.am-shopper-art{position:relative;display:flex;justify-content:center;align-items:center;flex-direction:column;gap:10px;aspect-ratio:4/3;min-height:170px;padding:22px;background:radial-gradient(circle at 70% 15%,#667f7c 0%,#264b49 54%,#173c34 100%);color:#f8f3e6;text-align:center;overflow:hidden}
+.am-shopper-card:nth-child(3n+2) .am-shopper-art:not(.am-shopper-real-photo){background:radial-gradient(circle at 70% 15%,#78716a 0%,#49483c 55%,#2b362f 100%)}
+.am-shopper-card:nth-child(3n) .am-shopper-art:not(.am-shopper-real-photo){background:radial-gradient(circle at 70% 15%,#a49080 0%,#5c4b52 52%,#373747 100%)}
+.am-shopper-art:not(.am-shopper-real-photo)::before{content:'';position:absolute;width:43%;aspect-ratio:1;border:1px solid #ffffff70;border-radius:50%;box-shadow:0 0 0 15px #ffffff14,0 0 0 28px #ffffff09;transform:rotate(-17deg)}
+.am-shopper-art-brand{position:relative;text-transform:uppercase;letter-spacing:.18em;font:700 12px/1.3 system-ui,sans-serif}
+.am-shopper-art strong{position:relative;max-width:90%;overflow-wrap:anywhere;font:400 clamp(20px,3vw,31px)/1.2 Georgia,serif}
+.am-shopper-art-note{position:relative;font:400 11px/1.45 system-ui,sans-serif;max-width:26ch;opacity:.92}
+.am-shopper-real-photo{background:#f1f2ec}
+.am-shopper-real-photo img{width:100%;height:100%;max-width:280px;max-height:250px;object-fit:contain}
+.am-shopper-card-body{display:flex;flex:1;flex-direction:column;gap:12px;padding:22px}
+.am-shopper-card-label{text-transform:uppercase;letter-spacing:.12em;font:700 11px/1.3 system-ui,sans-serif;color:#69786c;margin:0}
+.am-shopper-card h2{font:400 clamp(22px,2.5vw,28px)/1.28 Georgia,serif;margin:0;color:#203e2d;overflow-wrap:anywhere}
+.am-shopper-card h2 a{color:inherit;text-decoration:none}
+.am-shopper-card h2 a:hover{text-decoration:underline;text-underline-offset:4px}
+.am-shopper-card-body ul{list-style:disc;margin:0;padding-left:19px;font:400 14px/1.65 system-ui,sans-serif;color:#3d5846}
+.am-shopper-card-body li+li{margin-top:5px}
+.am-shopper-actions{display:grid;gap:9px;margin-top:auto;padding-top:12px}
+.am-shopper-actions a{display:flex;align-items:center;justify-content:center;min-height:46px;text-align:center;text-decoration:none;border-radius:5px;padding:10px 12px;font:700 13px/1.5 system-ui,sans-serif}
+.am-shopper-action{background:#264d39;color:#fff;border:1px solid #264d39}
+.am-shopper-action:hover{background:#36654c;color:#fff}
+.am-shopper-detail{background:#edf2e9;color:#274a39;border:1px solid #b9cbb8}
+.am-shopper-detail:hover{background:#dfe9dc}
+.am-shopper-disclosure{color:#677769;font:400 12px/1.6 system-ui,sans-serif;margin:0}
+.am-shopper-guide{margin:45px 0 18px;border-top:1px solid #cbd6c9;padding:28px 0 8px}
+.am-shopper-guide h2{font:400 clamp(27px,3.5vw,38px)/1.2 Georgia,serif;color:#254534;margin:0 0 19px}
+.am-shopper-guide ol{max-width:82ch;padding-left:24px;color:#435848;font:400 15px/1.8 system-ui,sans-serif}
+.am-shopper-guide li+li{margin-top:10px}
+.am-shopper-endnote{background:#f1f0e8;border-left:3px solid #a98c58;padding:21px 25px;color:#495c4c;font:400 14px/1.8 system-ui,sans-serif}
+.am-shopper-endnote a{color:#245a3a;font-weight:700}
+.am-shopper-nav a:focus-visible,.am-shopper-card a:focus-visible,.am-shopper-endnote a:focus-visible{outline:3px solid #af802f;outline-offset:3px}
+@media(max-width:950px){.am-shopper-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.am-shopper-grid{grid-template-columns:minmax(0,1fr);gap:16px}.am-shopper-heading{margin-top:22px}.am-shopper-art{min-height:220px}.am-shopper-card-body{padding:19px}.am-shopper-nav{gap:8px}.am-shopper-nav a{flex:1 1 auto;min-width:100px}.am-shopper-page{padding-bottom:55px}}
+@media(prefers-reduced-motion:reduce){.am-shopper-nav a,.am-shopper-card a{transition:none}}

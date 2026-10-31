@@ -204,3 +204,10 @@
  .am-pick-licensed-photo{width:43%;right:4%;top:10%;height:69%}
  .am-extra-licensed-photo{width:43%;right:5%;top:9%;height:65%}
 }
+
+/* Intent navigation shared by the homepage and the full sourced catalogue. */
+.am-shopper-nav{display:flex;align-items:stretch;gap:10px;flex-wrap:wrap;margin:20px 0 27px}
+.am-shopper-nav a{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:10px 16px;border:1px solid #b9c9b7;border-radius:999px;background:#eff3ea;color:#244b36;text-decoration:none;font:700 14px/1.45 system-ui,sans-serif}
+.am-shopper-nav a:hover{background:#dfe8da}
+.am-shopper-nav a:focus-visible{outline:3px solid #af802f;outline-offset:3px}
+@media(max-width:620px){.am-shopper-nav{gap:8px}.am-shopper-nav a{flex:1 1 auto;min-width:100px}}
