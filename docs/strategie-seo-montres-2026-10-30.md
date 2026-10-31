@@ -56,9 +56,9 @@ L'identifiant de suivi `drackk04-21`, confirmé par le propriétaire, est inchan
 
 L'approbation finale d'Amazon n'est pas présumée ; les commissions ne sont pas une métrique SEO.
 
-## Google Search Console — action de connexion manquante
+## Google Search Console — configuration propriétaire effectuée le 31 octobre 2026
 
-L'accès au compte Google Search Console **n'est pas relié au dépôt**. Les fichiers `sitemap.xml` et `robots.txt` sont publiés automatiquement ; la possession de la propriété et la transmission du sitemap demandent une action autorisée par le propriétaire.
+Le propriétaire a confirmé la vérification de la propriété **Préfixe d'URL** `https://atelier-montres-selection-fr.onrender.com/`, la soumission réussie du sitemap et l'indexation de la page d'accueil. Le fichier de vérification HTML `site/google6d385495b6d15d5e.html` a été publié sur Render. **Les 27 autres URL ne sont pas considérées indexées sans rapport Search Console** ; la propriété Google n'est pas reliée automatiquement au dépôt. Les étapes ci-dessous restent utiles en cas de migration ou de nouvelle vérification.
 
 1. Ouvrir [Search Console](https://search.google.com/search-console/welcome) et ajouter une propriété **Préfixe d'URL** : `https://atelier-montres-selection-fr.onrender.com/`.
 2. Choisir la vérification via **balise HTML**. Copier uniquement la valeur du champ `content` de la balise `google-site-verification`. Ne pas transmettre de cookie Google ni de mot de passe.
@@ -80,3 +80,10 @@ L'accès au compte Google Search Console **n'est pas relié au dépôt**. Les fi
 `npm test` / `npm run lint` couvrent la syntaxe du nouveau générateur. `node scripts/build-seo.mjs && node scripts/build-seo.mjs` doit produire deux fois exactement 28 URL sans dupliquer les blocs et les balises canoniques.
 
 `node scripts/validate-seo.mjs` vérifie les trois catégories : identité des 7/5/3 références, maillage aller-retour, `CollectionPage`, vrais fichiers photo et contrôle des droits, préchargement de la couverture, disclosure Amazon, absence de données commerciales inventées et nombre exact d'URL.
+
+## Améliorations techniques après confirmation de l'indexation — 31 octobre 2026
+
+- FAQ de la page principale : harmonisation avec les liens Amazon rémunérés réels et le statut d'approbation finale non confirmé.
+- Conseiller indexable : URL canonique stable, titre descriptif de l'outil en quatre critères, métadonnées de partage et balisage `WebPage` sans promesse de résultat enrichi.
+- Contrôles de non-régression : absence d'ancienne FAQ contradictoire, une seule URL canonique, génération SEO idempotente et JSON-LD cohérent avec l'URL publique.
+- Mesure suivante : rapport **Pages** et **Performances** dans Google Search Console pour les 27 URL autres que l'accueil, sans annonce de position ou de croissance non mesurée.

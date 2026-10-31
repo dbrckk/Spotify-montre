@@ -171,6 +171,32 @@ import {buildSearchCollections} from './build-search-collections.mjs';
     // On the second SEO build, preserve exactly the first injected image.
     // A developer build must be safe when repeated against the same directory.
   }
+  // The advisor is an indexable, useful decision aid. Keep its canonical URL,
+  // social preview and WebPage semantics consistent with the deployed origin.
+  // The delimited block makes repeated builds idempotent.
+  const advisorFile=join(root,'conseiller.html');
+  let advisor=readFileSync(advisorFile,'utf8');
+  advisor=advisor.replace(/<!-- AM_ADVISOR_SEO_START -->[\s\S]*?<!-- AM_ADVISOR_SEO_END -->/g,'');
+  if(!advisor.includes('</head>')||!advisor.includes('<h1>')) throw Error('Conseiller : structure HTML introuvable');
+  const advisorTitle='Trouver sa montre : conseiller en 4 critères | Atelier Montres';
+  const advisorDescription='Conseiller gratuit pour trouver sa montre parmi 15 modèles réels : comparez style, mouvement, gamme et diamètre, sans prix ni disponibilité inventés.';
+  advisor=advisor.replace(/<title>[^<]+<\/title>/,'<title>'+e(advisorTitle)+'</title>');
+  const advisorSeo='<!-- AM_ADVISOR_SEO_START -->'
+    +'<link rel="canonical" href="'+e(u('conseiller.html'))+'">'
+    +'<meta property="og:type" content="website">'
+    +'<meta property="og:locale" content="fr_FR">'
+    +'<meta property="og:site_name" content="Atelier Montres">'
+    +'<meta property="og:title" content="'+e(advisorTitle)+'">'
+    +'<meta property="og:description" content="'+e(advisorDescription)+'">'
+    +'<meta property="og:url" content="'+e(u('conseiller.html'))+'">'
+    +'<meta name="twitter:card" content="summary">'
+    +'<script type="application/ld+json">'+schema({
+      '@context':'https://schema.org','@type':'WebPage',name:advisorTitle,
+      description:advisorDescription,url:u('conseiller.html'),inLanguage:'fr-FR',
+      isPartOf:{'@type':'WebSite',name:'Atelier Montres',url:homepage}
+    })+'</script><!-- AM_ADVISOR_SEO_END -->';
+  advisor=advisor.replace('</head>',advisorSeo+'</head>');
+  writeFileSync(advisorFile,advisor);
   writeFileSync(join(root,'index.html'),collection);
   writeFileSync(join(root,'affiliation.html'),collection);
   const paths=['','conseiller.html',guidePath,...editorialPaths,...collections.paths,...comparisons.comparisonPaths,...products.map(p=>'montres/'+p.id+'.html')];
