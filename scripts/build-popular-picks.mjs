@@ -3,6 +3,7 @@ import {join} from 'node:path';
 import {buildPopularProductPages} from './build-popular-product-pages.mjs';
 import {loadVerifiedPopularLinks} from './popular-verified-affiliate.mjs';
 import {loadApprovedPopularPhotos} from './popular-photo-rights.mjs';
+import {loadPopularAiVisuals} from './popular-ai-visuals.mjs';
 import {buildShopperSelections} from './build-shopper-selections.mjs';
 
 // Curated discovery intentionally stays outside the 15-watch comparator until
@@ -52,6 +53,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     +'>'+e(txt)+'</a>';
   const verifiedLinks=loadVerifiedPopularLinks({root,picks,affiliates,amazonPartnerTag});
   const approvedPhotos=loadApprovedPopularPhotos({root,picks});
+  const aiVisuals=loadPopularAiVisuals({root,picks});
   const shopper=buildShopperSelections({root,coreProducts:existingProducts,picks,partners:affiliates,verifiedPopularLinks:verifiedLinks,approvedPopularPhotos:approvedPhotos,amazonSearch,pageHead,page,e,u});
   const affiliateLink=p=>{
     if(!affiliates.enabled)return '';
@@ -60,10 +62,11 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
       ?link(direct.url,'Voir le modèle exact sur Amazon.fr · lien rémunéré',true,p.id,'product')
       :link(amazonSearch(p),'Rechercher sur Amazon.fr · lien rémunéré',true,p.id,'search');
   };
-  const detailPaths=buildPopularProductPages({root,products:picks,coreProducts:existingProducts,affiliates,amazonPartnerTag,pageHead,page,e,u,link,amazonSearch,tierNames,affiliateLink,verifiedLinks,approvedPhotos});
+  const detailPaths=buildPopularProductPages({root,products:picks,coreProducts:existingProducts,affiliates,amazonPartnerTag,pageHead,page,e,u,link,amazonSearch,tierNames,affiliateLink,verifiedLinks,approvedPhotos,aiVisuals});
   const movementKind=p=>p.movement.startsWith('Automatique')?'automatic':p.movement.startsWith('Quartz solaire')?'solar':'quartz';
   const card=(p,front=false)=>{
     const photo=approvedPhotos.get(p.id);
+    const ai=aiVisuals.get(p.id);
     const claim=p.marketEvidence.kind==='editorial'?'Sélection éditoriale':p.marketEvidence.kind==='manufacturer_bestseller'?'Signal marque':'Signal distributeur';
     return '<article class="am-pick-card am-pick-'+e(p.style)+(verifiedLinks.has(p.id)?' am-pick-direct':'')+'" id="pick-'+e(p.id)+'"'
       +' data-pick-id="'+e(p.id)+'" data-pick-tier="'+e(p.tier)+'" data-pick-style="'+e(p.style)+'"'
@@ -76,6 +79,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
       +'<div class="am-pick-content"><p class="am-pick-kicker"><span>'+e(tierNames[p.tier])+'</span><span>'+e(claim)+'</span></p>'
       +(verifiedLinks.has(p.id)?'<p class="am-pick-exact">Fiche de référence Amazon.fr identifiée · prix et stock à vérifier</p>':'')
       +'<h3><a class="am-pick-detail-link" href="'+(front?'./montres/':'./')+e(p.id)+'.html">'+e(p.brand+' '+p.model)+'</a></h3>'
+      +(ai?'<figure class="am-pick-ai-preview"><img loading="lazy" decoding="async" width="768" height="768" src="'+e(ai.url)+'" alt="Interprétation artistique générée par IA de la montre '+e(p.brand+' '+p.model)+' ; visuel non contractuel"><figcaption><strong>Création IA</strong> · interprétation non contractuelle. La photo produit réelle figure au-dessus.</figcaption></figure>':'')
       +'<p class="am-pick-lead">'+e(p.lead)+'</p>'
       +'<dl class="am-pick-specs"><div><dt>Mouvement</dt><dd>'+e(p.movement)+'</dd></div><div><dt>Boîtier</dt><dd>'+e(p.case)+'</dd></div><div><dt>Verre</dt><dd>'+e(p.glass)+'</dd></div><div><dt>Étanchéité</dt><dd>'+e(p.water)+'</dd></div></dl>'
       +(front?'':'<p class="am-pick-caution"><strong>Avant achat :</strong> '+e(p.caution)+'</p>')
