@@ -117,7 +117,8 @@ try{
  const supplemental=JSON.parse(readFileSync('site/selection-populaires.json','utf8')).products;
  const verifiedPopular=JSON.parse(readFileSync('research/amazon-fr-popular-verified.json','utf8')).verifiedProducts;
  for(const watch of supplemental){
-   const response=await popularPage.goto(new URL('/montres/'+watch.id+'.html',base).href,{waitUntil:'domcontentloaded'});
+   const response=await popularPage.goto(new URL('/montres/'+watch.id+'.html',base).href,{waitUntil:'load'});
+   await popularPage.evaluate(()=>document.fonts?.ready); // Measure after external CSS/fonts settle on Render CDN.
    assert.ok(response?.ok(),'Supplementary model product page reachable: '+watch.id);
    const article=popularPage.locator('article.am-extra-product');
    assert.equal(await article.getAttribute('data-popular-watch-id'),watch.id);
@@ -159,7 +160,7 @@ try{
    const overflow=await popularPage.evaluate(()=>({
      client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth
    }));
-   assert.ok(overflow.scroll<=overflow.client+2,'Individual watch page must fit Android: '+watch.id);
+   assert.ok(overflow.scroll<=overflow.client+2,'Individual watch page must fit Android: '+watch.id+' '+JSON.stringify(overflow));
    if(watch.id==='citizen-tsuyosa-37-blue'||watch.id==='tissot-gentleman-auto'){
      await popularPage.screenshot({path:'artifacts/mobile-extra-'+watch.id+'.png',fullPage:true});
    }

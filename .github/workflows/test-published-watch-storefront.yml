@@ -22,7 +22,14 @@ on:
       - 'site/fiche.js'
       - 'site/fiche.css'
       - 'site/seo-guides.css'
+      - 'site/popular-picks.css'
+      - 'site/popular-filters.js'
+      - 'scripts/build-popular-picks.mjs'
       - 'scripts/build-seo.mjs'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/test-published-watch-storefront.yml'
   workflow_dispatch:
 concurrency:
   group: production-android-${{ github.ref }}
@@ -42,7 +49,7 @@ jobs:
         run: |
           npm install --no-save --no-audit --no-fund playwright
           npx playwright install --with-deps chromium
-      - name: Wait for exact audited JS and CSS to reach Render CDN
+      - name: Wait for exact catalog JS, CSS and filterable SEO collection to reach Render
         run: |
           set -eu
           base='https://atelier-montres-selection-fr.onrender.com'
@@ -51,7 +58,7 @@ jobs:
           # CDN build never produces a false failure or false success.
           for attempt in $(seq 1 30); do
             ready=1
-            for file in affiliation.js selection-share.js affiliate-ui.js catalogue-view.css premium-system.css fiche.js fiche.css seo-guides.css editorial-photo.js editorial-photo.css; do
+            for file in affiliation.js selection-share.js affiliate-ui.js catalogue-view.css premium-system.css fiche.js fiche.css seo-guides.css editorial-photo.js editorial-photo.css popular-filters.js popular-picks.css; do
               if ! curl -fsSL --max-time 15 "$base/$file" -o "$RUNNER_TEMP/live-$file"; then
                 ready=0
               elif ! cmp -s "site/$file" "$RUNNER_TEMP/live-$file"; then
@@ -67,13 +74,27 @@ jobs:
                 ready=0
               fi
             fi
+            # An old CDN version may serve a valid homepage and the 15 existing
+            # photos while still serving the PREVIOUS 13-watch collection.
+            # Gate the actual new HTML before launching the Android browser.
             if [ "$ready" -eq 1 ]; then
-              echo "Render serves the current JS, CSS and indexed product layout (attempt $attempt)."
+              if ! curl -fsSL --max-time 15 "$base/montres/modeles-populaires.html" -o "$RUNNER_TEMP/live-popular.html"; then
+                ready=0
+              elif ! grep -Fq 'id="am-pick-filters"' "$RUNNER_TEMP/live-popular.html"; then
+                ready=0
+              elif ! grep -Fq 'id="am-picks-list"' "$RUNNER_TEMP/live-popular.html"; then
+                ready=0
+              elif ! grep -Fq 'data-pick-id="casio-gw-m5610u-1"' "$RUNNER_TEMP/live-popular.html"; then
+                ready=0
+              fi
+            fi
+            if [ "$ready" -eq 1 ]; then
+              echo "Render serves current JS/CSS and the filterable 13-watch collection (attempt $attempt)."
               exit 0
             fi
             if [ "$attempt" -lt 30 ]; then sleep 5; fi
           done
-          echo 'Render CDN still serves stale or incomplete JS/CSS after retries.'
+          echo 'Render CDN still serves stale or incomplete JS/CSS or the former 13-watch collection after retries.'
           exit 1
       - name: Verify deployed website, 15 local photos, sharing and watch history
         env:
