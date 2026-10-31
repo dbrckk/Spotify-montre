@@ -47,6 +47,15 @@ class SearchConsoleExportTests(unittest.TestCase):
             self.assertEqual(table["rows"][0]["impressions"], 300)
             self.assertEqual(gsc.prioritize(table)[0]["opportunity"], "Contenu / maillage")
 
+    def test_localized_thousands_separators_do_not_corrupt_metrics(self):
+        self.assertEqual(gsc.number("1,234", integer=True), 1234)
+        self.assertEqual(gsc.number("1.234", integer=True), 1234)
+        self.assertEqual(gsc.number("1 234", integer=True), 1234)
+        self.assertEqual(gsc.number("7,5"), 7.5)
+        self.assertAlmostEqual(gsc.number("2,75%", percentage=True), 0.0275)
+        with self.assertRaisesRegex(ValueError, "entiers"):
+            gsc.number("1,5", integer=True)
+
     def test_zip_export_and_no_data_fabrication(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
