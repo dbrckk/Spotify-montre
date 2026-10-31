@@ -39,7 +39,17 @@
   form.hidden=false;
   form.addEventListener('input',apply);
   form.addEventListener('change',apply);
-  form.addEventListener('reset',()=>queueMicrotask(apply));
+  form.addEventListener('reset',event=>{
+    // Explicitly clear controls before recalculating visible cards. Depending
+    // on browser scheduling, a microtask can run before native form reset
+    // defaults have been applied and leave an empty screen.
+    event.preventDefault();
+    query.value='';
+    style.value='';
+    movement.value='';
+    tier.value='';
+    apply();
+  });
   // Existing tier anchor links must always navigate to a visible section,
   // even after the shopper has narrowed the results to another tier.
   document.querySelectorAll('.am-picks-tier-nav a[href^="#gamme-"]').forEach(anchor=>{
