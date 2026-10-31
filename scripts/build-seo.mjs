@@ -308,7 +308,7 @@ import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
   }
   writeFileSync(join(root,'index.html'),collection);
   writeFileSync(join(root,'affiliation.html'),collection);
-  const paths=['','conseiller.html',editorialPolicy.path,popularPicks.path,guidePath,...editorialPaths,...collections.paths,...comparisons.comparisonPaths,...products.map(p=>'montres/'+p.id+'.html')];
+  const paths=['','conseiller.html',editorialPolicy.path,popularPicks.path,...popularPicks.detailPaths,guidePath,...editorialPaths,...collections.paths,...comparisons.comparisonPaths,...products.map(p=>'montres/'+p.id+'.html')];
   const xml=`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${paths.map(path=>`  <url><loc>${e(u(path))}</loc></url>`).join('\n')}\n</urlset>\n`;
   writeFileSync(join(root,'sitemap.xml'),xml);
   if (partners.enabled) {
@@ -344,7 +344,7 @@ import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
   writeFileSync(join(root,'selection-affiliation.json'),JSON.stringify(data,null,2)+'\n');
   // Internal photography review is research material, not a public product page.
   for(const name of ['revue-photo.html','revue-photo.js','revue-photo.css'])rmSync(join(root,name),{force:true});
-  const manifest={siteUrl:homepage,productCount:products.length,popularAdditionalCount:popularPicks.count,popularAffiliateSearchLinks:popularPicks.searchLinks,paths:paths.map(u),affiliateActive:partners.enabled,affiliateCount:partners.links.size,checkoutActive:false,comparisonCount:comparisons.comparisonPaths.length,categoryCount:collections.paths.length,analyticsActive:Boolean(umamiId),analyticsProvider:umamiId?"umami":null,licensedImageCount:products.filter(p=>p.photoReview?.publicUsageApproved===true).length,photoPermissionEvidenceStatus:'owner_declared_not_independently_verified'};
+  const manifest={siteUrl:homepage,productCount:products.length,popularAdditionalCount:popularPicks.count,popularDetailCount:popularPicks.detailPaths.length,popularAffiliateSearchLinks:popularPicks.searchLinks,paths:paths.map(u),affiliateActive:partners.enabled,affiliateCount:partners.links.size,checkoutActive:false,comparisonCount:comparisons.comparisonPaths.length,categoryCount:collections.paths.length,analyticsActive:Boolean(umamiId),analyticsProvider:umamiId?"umami":null,licensedImageCount:products.filter(p=>p.photoReview?.publicUsageApproved===true).length,photoPermissionEvidenceStatus:'owner_declared_not_independently_verified'};
   writeFileSync(join(root,'seo-manifest.json'),JSON.stringify(manifest,null,2)+'\n');
   console.log('SEO build: '+products.length+' montres + '+(editorialPaths.length+1)+' guides + '+comparisons.comparisonPaths.length+' comparaisons + '+collections.paths.length+' collections + méthode de sélection, '+paths.length+' URLs sur '+homepage);
 })();
