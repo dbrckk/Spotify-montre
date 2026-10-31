@@ -48,6 +48,14 @@ for(const name of ['citizen-tsuyosa','tissot-prx-quartz','orient-bambino','casio
 assert.match(read('editorial-photo.js'),/assets\/watch-thumbs\/.*item\.id/,'Featured picker must request smaller local thumbnails');
 assert.match(read('affiliation.js'),/assets\/watch-responsive\/.*p\.id/,'Dynamic catalogue must prefer responsive photos');
 const home=read('index.html');
+const premiumCss=read('premium-system.css');
+assert.match(premiumCss,/--am-p-paper:/,'Premium color tokens must ship');
+assert.match(premiumCss,/prefers-reduced-motion:reduce/,'Motion preferences must be respected');
+for(const page of ['index.html','conseiller.html','montre.html']){
+  assert.match(read(page),/<link rel="stylesheet" href="\.\/premium-system\.css">/,'Missing shared design system '+page);
+}
+assert.match(read('montres/citizen-tsuyosa.html'),/<link rel="stylesheet" href="\.\.\/premium-system\.css">/,'SEO product page must share the design system');
+
 const advisor=read('conseiller.html');
 assert.ok(advisor.includes('<link rel="canonical" href="'+manifest.siteUrl+'conseiller.html">'),'Advisor needs one canonical public URL');
 assert.equal((advisor.match(/rel="canonical"/g)||[]).length,1,'Advisor must not duplicate canonical tags after repeated builds');
