@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "marketplace": "amazon.fr",
+  "standard": "amazon_fr_exact_model_listing_title_and_ASIN",
+  "verifiedProducts": {
+    "casio-gw-m5610u-1": {
+      "brand": "Casio G-SHOCK",
+      "canonicalModel": "GW-M5610U-1",
+      "marketplaceModel": "GW-M5610U-1ER",
+      "asin": "B09BCPP68Q",
+      "verifiedAt": "2026-10-31",
+      "evidenceUrl": "https://www.amazon.fr/Casio-GW-M5610U-1ER-num%C3%A9rique/dp/B09BCPP68Q",
+      "evidenceListingTitle": "Casio Bracelet en résine Noire radiocommandé G-Shock Multi Band 6 GW-M5610U-1ER",
+      "evidenceType": "amazon_fr_product_page",
+      "evidenceNote": "Fiche Amazon.fr consultable dans un instantané public indexé, vérifiée par rapprochement titre / code modèle / ASIN le 31 octobre 2026. L'instantané avait environ deux mois et ne prouve ni le prix actuel, ni le stock, ni la qualité du vendeur."
+    }
+  }
+}
