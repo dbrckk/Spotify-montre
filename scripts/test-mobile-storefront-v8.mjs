@@ -63,7 +63,7 @@ try{
    const article=popularPage.locator('article.am-extra-product');
    assert.equal(await article.getAttribute('data-popular-watch-id'),watch.id);
    assert.ok((await popularPage.locator('h1').innerText()).includes(watch.model),
-     'Unique SEO title must retain exact manufacturer's reference: '+watch.id);
+     'Unique SEO title must retain exact manufacturer reference: '+watch.id);
    assert.equal(await popularPage.locator('.am-extra-fact').count(),4,'Four factual product attributes: '+watch.id);
    assert.equal(await popularPage.locator('.am-extra-editorial-grid>div').count(),2,
      'Model-specific editorial rationale and caution: '+watch.id);
