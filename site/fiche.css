@@ -43,3 +43,54 @@
 
 /* Factual reasons for recommendations, no invented stock or prices. */
 .detail-related-why{display:inline-flex;align-self:flex-start;border:1px solid #cfcdbd;border-radius:100px;padding:6px 10px;margin:0 8px 18px;background:#f0f2eb;color:#526e58;font:650 10px/1.4 system-ui,sans-serif}
+
+/* Premium product storytelling on the primary, interactive watch pages.
+   Four source-grounded facts, visible unknowns and responsive real photographs. */
+.detail-facts-section{margin:23px 0 17px;padding:20px 22px 15px;background:#f2eee5;border:1px solid #ddd3c2;box-shadow:0 6px 23px #1c372009}
+.detail-facts-caption{margin:0 0 14px;color:#887044;font:750 10px/1.4 system-ui,sans-serif;letter-spacing:.16em}
+.detail-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 16px;margin:0}
+.detail-fact{min-width:0;border-top:1px solid #ddd6c8;padding:12px 0 13px}
+.detail-fact dt{margin-bottom:4px;color:#657165;font:600 11px/1.45 system-ui,sans-serif}
+.detail-fact dd{margin:0;color:#193b2a;font:700 13px/1.55 system-ui,sans-serif;overflow-wrap:anywhere}
+.detail-fact dd.detail-fact-unverified{font-weight:550;color:#78766c}
+.detail-fast-nav{display:flex;flex-wrap:wrap;gap:11px 20px;margin:4px 0 19px}
+.detail-fast-nav a{display:inline-flex;align-items:center;min-height:44px;gap:6px;color:#2b5841;font:700 12px/1.45 system-ui,sans-serif;text-underline-offset:4px}
+.detail-fast-nav a:hover{color:#0b3121}
+.detail-fast-nav a:focus-visible{outline:3px solid #b18d4d;outline-offset:3px}
+.detail-visual{background:radial-gradient(ellipse at 50% 34%,#fdfcf8 3%,#eef0e8 58%,#e0e9df 100%);border:1px solid #dbe1d5;box-shadow:0 20px 60px #14332113;isolation:isolate}
+.detail-visual::before{content:'';position:absolute;inset:17px;border:1px solid #ffffff8c;pointer-events:none}
+.detail-artwork{filter:none;z-index:1}
+.detail-artwork .am-real-product-photo{filter:drop-shadow(0 19px 14px #15372524);mix-blend-mode:multiply}
+.detail-figure-label{z-index:1;background:#fbfaf1d9;border:1px solid #e1ddcb;letter-spacing:.14em}
+.detail-visual-note{z-index:1}
+.detail-info{min-width:0}
+.detail-info .detail-editorial{font-size:clamp(19px,2.5vw,27px);line-height:1.35}
+.detail-info .detail-story{font-size:15px;line-height:1.8}
+.detail-highlights{margin:15px 0 14px}
+.detail-commerce{margin:16px 0 15px;padding:15px 18px}
+.detail-cta{min-height:52px}
+.detail-shops a{display:inline-flex;align-items:center;min-height:44px}
+.detail-specs dd{overflow-wrap:anywhere}
+.detail-specs:target,.detail-related:target{scroll-margin-top:20px}
+@media(max-width:970px){.detail-visual{min-height:370px}.detail-artwork{height:330px}}
+@media(max-width:620px){
+ .detail-layout{padding-top:3px}
+ .am-breadcrumb{min-height:54px;gap:9px;font-size:11px}
+ .detail-product{gap:21px}
+ .detail-visual{min-height:320px;padding:18px 12px 13px}
+ .detail-visual::before{inset:9px}
+ .detail-artwork{height:min(76vw,330px);width:min(100%,400px)}
+ .detail-visual-note{margin-top:7px;font-size:10px}
+ .detail-brand{font-size:11px;margin-bottom:9px}
+ .detail-info h1{font-size:clamp(32px,9vw,43px);line-height:1.12;overflow-wrap:anywhere}
+ .detail-info .detail-story{font-size:14px;line-height:1.7}
+ .detail-facts-section{padding:15px 16px 11px;margin:18px 0 15px}
+ .detail-facts{gap:0 12px}
+ .detail-fact{padding:10px 0 11px}
+ .detail-fact dd{font-size:12px}
+ .detail-highlights{gap:6px}
+ .detail-highlights span{padding:7px 9px;font-size:11px}
+ .detail-fast-nav{gap:7px 17px}
+ .detail-specs dl>div{gap:12px}
+}
+@media(prefers-reduced-motion:reduce){.detail-fast-nav a{scroll-behavior:auto}}
