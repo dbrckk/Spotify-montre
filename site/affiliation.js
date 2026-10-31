@@ -4,6 +4,28 @@
  const grid=$('affGrid'),tabs=$('affTabs'),search=$('affSearch'),count=$('affResultCount'),savedCount=$('affSavedCount'),empty=$('affEmpty'),sort=$('affSort'),movementSelect=$('affMovement'),brandSelect=$('affBrand'),diameterSelect=$('affDiameter'),reset=$('affReset');
  if(!grid||!tabs||!search||!count||!savedCount||!empty)return;
  const levels={essential:'Essentielle',signature:'Signature',prestige:'Prestige'},moves={quartz:'Quartz',automatic:'Automatique','eco-drive':'Solaire'};
+ // Preserve a reader's choice across navigation and sessions; first-time
+ // mobile visitors get a photographic gallery, desktop gets editorial cards.
+ const viewGallery=$('affViewGallery'),viewDetails=$('affViewDetail');
+ const VIEW_KEY='atelier-montres-catalogue-view-v1';
+ if(viewGallery&&viewDetails){
+   let initial=null;
+   try{const stored=localStorage.getItem(VIEW_KEY);if(stored==='gallery'||stored==='detail')initial=stored;}catch(_){}
+   if(!initial)initial=window.matchMedia?.('(max-width: 620px)').matches?'gallery':'detail';
+   const choose=mode=>{
+     const selected=mode==='gallery'?'gallery':'detail';
+     grid.dataset.view=selected;
+     viewGallery.setAttribute('aria-pressed',String(selected==='gallery'));
+     viewDetails.setAttribute('aria-pressed',String(selected==='detail'));
+   };
+   choose(initial);
+   for(const [button,mode] of [[viewGallery,'gallery'],[viewDetails,'detail']]){
+     button.addEventListener('click',()=>{
+       choose(mode);
+       try{localStorage.setItem(VIEW_KEY,mode);}catch(_){}
+     });
+   }
+ }
  const approvedHosts=['casio.com','swatch.com','citizenwatch.eu','orientwatch.fr','seikowatches.com','tissotwatches.com','hamiltonwatch.com'];
  let data=[],tier='all',query='',order='editorial',movement='all',brand='all',diameter='all',visible=[],saved=new Set(),compare=[];
  const KEY='atelier-montres-multibrand-favorites-v1';
@@ -85,6 +107,12 @@
    }else vector();
    const body=make('div','aff-card-body');
    body.append(make('p','aff-card-brand',p.brand.toUpperCase()),make('h3','',p.model),make('p','am-card-title',p.title||''),make('p','aff-card-desc',p.story||p.description));
+   // Distinct short facts for narrow photo-first gallery cards. Do not guess
+   // dimensions absent from the verified manufacturer catalogue.
+   const galleryFacts=make('div','am-gallery-facts');
+   galleryFacts.append(make('span','',moves[p.movement]||'Mouvement à vérifier'));
+   galleryFacts.append(make('span','',p.specs?.diameter||'Diamètre à vérifier'));
+   body.append(galleryFacts);
    const chips=make('div','aff-chips');chips.append(make('span','',levels[p.tier]),make('span','',moves[p.movement]||'Horlogerie'));body.append(chips);
    const specs=make('div','am-spec-line');for(const h of (p.highlights||[]).slice(0,3))specs.append(make('span','',h));body.append(specs);
    const actions=make('div','aff-card-actions');const link=make('a','','Découvrir la montre ↗');link.href=detail(p.id);

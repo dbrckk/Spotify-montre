@@ -29,6 +29,23 @@ try{
  const cards=page.locator('#affGrid .aff-card');
  await cards.first().waitFor({state:'visible',timeout:20000});
  assert.equal(await cards.count(),15,'The full genuine catalogue should render');
+ // Gallery and detailed presentation must both remain functional on Android.
+ const galleryButton=page.locator('#affViewGallery'),detailButton=page.locator('#affViewDetail');
+ await galleryButton.waitFor({state:'visible'});
+ assert.equal(await page.locator('#affGrid').getAttribute('data-view'),'gallery','First-time mobile visitor sees the visual gallery');
+ assert.equal(await galleryButton.getAttribute('aria-pressed'),'true');
+ assert.equal(await page.locator('#affGrid .am-gallery-facts').count(),15,'Every gallery watch includes sourced movement and diameter facts');
+ assert.equal(await page.locator('#affGrid').evaluate(node=>getComputedStyle(node).gridTemplateColumns.split(' ').length),2,'Photo gallery displays two responsive columns on mobile');
+ await detailButton.click();
+ assert.equal(await page.locator('#affGrid').getAttribute('data-view'),'detail');
+ assert.equal(await page.locator('#affGrid').evaluate(node=>getComputedStyle(node).gridTemplateColumns.split(' ').length),1,'Detailed view remains one large card per row on Android');
+ await page.reload({waitUntil:'domcontentloaded'});
+ await page.locator('#affGrid .aff-card').first().waitFor({state:'visible'});
+ assert.equal(await page.locator('#affGrid').getAttribute('data-view'),'detail','Saved viewing preference survives reload');
+ await page.locator('#affViewGallery').click();
+ assert.equal(await page.locator('#affGrid').getAttribute('data-view'),'gallery');
+ await checkWidth('Mobile gallery and its controls');
+
  // The real browser must publish all 13 tagged Amazon.fr destinations, but
  // never manufacture the two ASINs absent from the source catalogue.
  const ctas=page.locator('#affGrid .am-affiliate-cta');

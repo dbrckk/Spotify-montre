@@ -1,0 +1,57 @@
+/* Atelier Montres — photo-first product gallery, built around existing verified models.
+   All actions, affiliate disclosures, image zoom and comparisons remain usable. */
+.am-view-toolbar{display:flex;gap:12px;align-items:center;justify-content:flex-end;flex-wrap:wrap;margin:3px 0 20px;padding:12px 0 4px;border-bottom:1px solid #e6ded2;color:#405649}
+.am-view-toolbar-title{font:700 11px/1.4 system-ui,sans-serif;letter-spacing:.09em;text-transform:uppercase;margin-right:auto;color:#7b806e}
+.am-view-options{display:inline-flex;gap:3px;padding:4px;border:1px solid #d7cabb;background:#eee8dd}
+.am-view-options button{display:inline-flex;gap:7px;align-items:center;justify-content:center;cursor:pointer;background:transparent;border:1px solid transparent;min-height:44px;padding:9px 15px;color:#344f3d;font:650 12px/1.35 system-ui,sans-serif}
+.am-view-options button[aria-pressed="true"]{background:#1c3b2a;color:#fff;border-color:#1c3b2a;box-shadow:0 3px 10px #1b332720}
+.am-view-options button:focus-visible{outline:3px solid #bd9155;outline-offset:3px}
+.am-view-options button:hover:not([aria-pressed="true"]){background:#e4dacb}
+.am-view-symbol{font-size:18px;line-height:1;min-width:17px;text-align:center}
+.am-view-explainer{width:100%;text-align:right;font:11px/1.5 system-ui,sans-serif;color:#667566;margin-top:-4px}
+.am-gallery-facts{display:none}
+/* View modes change layout only; card data and links always remain in the DOM. */
+.aff-grid[data-view="gallery"]{grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;align-items:stretch}
+.aff-grid[data-view="gallery"] .aff-card{min-width:0;border-color:#e7dfd2;background:#fffefa;box-shadow:0 10px 32px #20362b0b;transition:border-color .2s ease,box-shadow .2s ease}
+.aff-grid[data-view="gallery"] .aff-card:hover{border-color:#b9a27d;box-shadow:0 16px 38px #20362b15}
+.aff-grid[data-view="gallery"] .aff-illustration{height:auto;aspect-ratio:1/1;min-height:0;padding:12px!important;overflow:hidden}
+.aff-grid[data-view="gallery"] .aff-product-photo{width:100%;height:100%;max-height:100%;object-fit:contain;filter:drop-shadow(0 8px 7px #26362618)}
+.aff-grid[data-view="gallery"] .aff-art-label{display:none}
+.aff-grid[data-view="gallery"] .aff-card-body{padding:15px 15px 18px;gap:0;min-width:0}
+.aff-grid[data-view="gallery"] .aff-card-brand{margin:0 0 6px;font-size:9px;line-height:1.45}
+.aff-grid[data-view="gallery"] .aff-card h3{min-height:0;margin:0 0 11px;font:400 clamp(16px,1.7vw,21px)/1.2 Georgia,serif;letter-spacing:-.015em;overflow-wrap:anywhere}
+.aff-grid[data-view="gallery"] .aff-card-desc,.aff-grid[data-view="gallery"] .am-card-title,.aff-grid[data-view="gallery"] .aff-chips,.aff-grid[data-view="gallery"] .am-spec-line{display:none}
+.aff-grid[data-view="gallery"] .am-gallery-facts{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:15px}
+.aff-grid[data-view="gallery"] .am-gallery-facts span{display:inline-block;padding:6px 8px;background:#f2f1eb;color:#4b6553;border:1px solid #e2dfd5;font:650 10px/1.2 system-ui,sans-serif;overflow-wrap:anywhere}
+.aff-grid[data-view="gallery"] .aff-card-actions{display:grid;grid-template-columns:minmax(0,1fr) 45px;align-items:stretch;gap:7px;margin-top:auto}
+.aff-grid[data-view="gallery"] .aff-card-actions>a:first-child{font-size:11px;min-width:0;padding:9px 6px;min-height:44px}
+.aff-grid[data-view="gallery"] .aff-card-actions button{min-width:44px;min-height:44px}
+.aff-grid[data-view="gallery"] .aff-card-actions .am-affiliate-cta{grid-column:1/-1;margin-top:0;min-height:44px;padding:10px 6px;font-size:10px;white-space:normal}
+.aff-grid[data-view="gallery"] .am-card-footer{gap:9px;align-items:flex-start;padding-top:10px}
+.aff-grid[data-view="gallery"] .am-card-footer a,.aff-grid[data-view="gallery"] .am-card-footer label{font-size:11px;line-height:1.4}
+.aff-grid[data-view="gallery"] .am-card-footer input{min-width:17px;min-height:17px;accent-color:#1c3b2a}
+.aff-grid[data-view="gallery"] .am-card-footer .am-compare-check{display:inline-flex;align-items:center;gap:5px;min-height:38px;cursor:pointer}
+.aff-grid[data-view="gallery"] .am-affiliate-note{font-size:10px;line-height:1.5;margin:8px 0;overflow-wrap:anywhere}
+.aff-grid[data-view="gallery"] .aff-card-foot{font-size:10px;margin-top:9px}
+.aff-grid[data-view="gallery"] .am-card-seo-link{display:block;font-size:11px;line-height:1.5;margin:10px 0}
+@media(max-width:980px){.aff-grid[data-view="gallery"]{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:760px){.aff-grid[data-view="gallery"]{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){
+ .am-view-toolbar{justify-content:space-between;gap:9px;margin-bottom:15px}
+ .am-view-explainer{display:none}
+ .am-view-toolbar-title{font-size:10px}
+ .am-view-options button{font-size:11px;padding:9px 10px}
+ .aff-grid[data-view="gallery"]{gap:10px}
+ .aff-grid[data-view="gallery"] .aff-illustration{padding:7px!important;aspect-ratio:1/1.08}
+ .aff-grid[data-view="gallery"] .aff-card-body{padding:12px 10px 14px}
+ .aff-grid[data-view="gallery"] .aff-card h3{font-size:clamp(15px,4.2vw,19px);line-height:1.22;margin-bottom:8px}
+ .aff-grid[data-view="gallery"] .am-gallery-facts{gap:4px;margin-bottom:10px}
+ .aff-grid[data-view="gallery"] .am-gallery-facts span{font-size:9px;padding:5px 6px}
+ .aff-grid[data-view="gallery"] .aff-card-actions{grid-template-columns:minmax(0,1fr) 44px;gap:5px}
+ .aff-grid[data-view="gallery"] .aff-card-actions>a:first-child{font-size:10px;letter-spacing:0;line-height:1.3}
+ .aff-grid[data-view="gallery"] .aff-card-actions .am-affiliate-cta{font-size:10px}
+ .aff-grid[data-view="gallery"] .am-card-footer{display:flex;align-items:flex-start;flex-direction:column;gap:1px}
+ .aff-grid[data-view="gallery"] .am-card-seo-link{font-size:10px;line-height:1.4}
+}
+@media(max-width:350px){.aff-grid[data-view="gallery"]{grid-template-columns:1fr}.aff-grid[data-view="gallery"] .aff-illustration{aspect-ratio:4/3}}
+@media(prefers-reduced-motion:reduce){.aff-grid[data-view="gallery"] .aff-card{transition:none}}
