@@ -82,7 +82,7 @@ export function buildShopperSelections({root,coreProducts,picks,partners,verifie
       ?'Correspondance de référence Amazon documentée. Prix, vendeur et stock à confirmer.'
       :commercial?'Recherche Amazon : d’autres modèles peuvent apparaître. Contrôler le code exact avant achat.':'Lien non rémunéré vers la fiche de référence.';
     return '<article class="am-shopper-card" data-shopper-watch="'+e(id)+'">'
-      +'<div class="am-shopper-art'+(photo?' am-shopper-real-photo':'')+'" aria-label="'+(photo?'Photographie locale du modèle exact, droits déclarés':'Repère graphique, non contractuel')+'">'+stage+'</div>'
+      +'<div class="am-shopper-art'+(photo?' am-shopper-real-photo':'')+'" role="group" aria-label="'+(photo?'Photographie locale du modèle exact, droits déclarés':'Repère graphique, non contractuel')+'">'+stage+'</div>'
       +'<div class="am-shopper-card-body"><p class="am-shopper-card-label">'+(core?'Collection photographiée':'Sélection complémentaire')+'</p>'
       +'<h2><a href="'+link+'">'+e(name)+'</a></h2><ul>'+factList+'</ul>'
       +'<div class="am-shopper-actions">'+action+'<a class="am-shopper-detail" href="'+link+'">Voir les caractéristiques et sources</a></div>'
