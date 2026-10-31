@@ -102,8 +102,8 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     +'<label class="am-pick-filter-field" for="am-filter-style"><span>Style</span><select id="am-filter-style" name="style"><option value="">Tous les styles</option><option value="sport">Sport / robuste</option><option value="steel">Acier / sport chic</option><option value="dress">Habillée</option><option value="retro">Rétro</option><option value="compact">Compacte / colorée</option></select></label>'
     +'<label class="am-pick-filter-field" for="am-filter-movement"><span>Mouvement</span><select id="am-filter-movement" name="mouvement"><option value="">Tous les mouvements</option><option value="automatic">Automatique</option><option value="quartz">Quartz</option><option value="solar">Solaire</option></select></label>'
     +'</div><div class="am-pick-filter-footer"><output id="am-pick-filter-count" for="am-filter-query am-filter-tier am-filter-style am-filter-movement" aria-live="polite" aria-atomic="true">13 modèles sur 13</output>'
-    +'<button type="reset">Effacer les filtres</button></div></form>'
-    +'<p id="am-pick-filter-empty" class="am-pick-filter-empty" role="status" hidden>Aucun modèle ne correspond à ces critères. Effacez un filtre ou essayez une autre référence.</p>';
+    +'<button type="reset">Effacer les filtres</button></div></form>';
+  const emptyMessage='<p id="am-pick-filter-empty" class="am-pick-filter-empty" role="status" hidden>Aucun modèle ne correspond à ces critères. Effacez un filtre ou essayez une autre référence.</p>';
   const path='montres/modeles-populaires.html';
   const main='<div class="wrap am-picks-page"><nav class="crumb" aria-label="Fil d’Ariane"><a href="../index.html">Collection</a> / Modèles complémentaires</nav>'
     +'<header class="am-picks-intro"><p class="eyebrow">Tendances documentées · '+e(source.reviewedOn)+'</p>'
@@ -112,8 +112,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     +'<p>'+e(globalDisclaimer)+'</p><p>'+e(affiliateNote)+'</p>'
     +'<nav class="am-picks-tier-nav" aria-label="Choisir une gamme">'
     +tiers.map(t=>'<a href="#gamme-'+e(t)+'">'+e(tierNames[t])+'</a>').join('')
-    +'</nav></header>'+filters.replace('<p id="am-pick-filter-empty" class="am-pick-filter-empty" role="status" hidden>Aucun modèle ne correspond à ces critères. Effacez un filtre ou essayez une autre référence.</p>','')+'<div id="am-picks-list">'+sections+'</div>'
-    +'<p id="am-pick-filter-empty" class="am-pick-filter-empty" role="status" hidden>Aucun modèle ne correspond à ces critères. Effacez un filtre ou essayez une autre référence.</p>'
+    +'</nav></header>'+filters+'<div id="am-picks-list">'+sections+'</div>'+emptyMessage
     +'<aside class="am-picks-method"><h2>Comment ces montres sont-elles sélectionnées ?</h2>'
     +'<p>Chaque code de modèle et chaque caractéristique sont rapprochés de la fiche du fabricant. Les mentions « meilleures ventes » décrivent uniquement la liste citée, à la date du '+e(source.reviewedOn)+'. Elles ne constituent pas des données de ventes Amazon ni un palmarès national.</p>'
     +'<p>Nous n’affichons pas de photographie d’un modèle sans autorisation de reproduction, ni de prix Amazon non synchronisé. Les recherches Amazon.fr sont explicitement annoncées comme telles et peuvent mener à plusieurs variantes. Seules les références contrôlées sur une fiche Amazon.fr disposent d’un lien direct. Pour comparer directement des modèles aux photographies locales déjà documentées, <a href="../index.html#montres">revenir aux 15 montres du comparateur</a>.</p></aside></div>';
