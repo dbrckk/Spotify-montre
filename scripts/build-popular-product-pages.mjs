@@ -4,7 +4,7 @@ import {join} from 'node:path';
 // Conversion-friendly product landing pages without unlicensed watch images,
 // invented Amazon ASINs, or unverifiable prices. The existing 15 core models
 // continue to own the photo-backed interactive comparison experience.
-export function buildPopularProductPages({root,products,coreProducts,affiliates,pageHead,page,e,u,link,amazonSearch,tierNames}){
+export function buildPopularProductPages({root,products,coreProducts,affiliates,pageHead,page,e,u,link,tierNames,affiliateLink,verifiedLinks}){
   const byId=new Map(coreProducts.map(p=>[p.id,p]));
   const related={
     sport:['casio-mdv107','seiko-5','hamilton-khaki'],
@@ -33,9 +33,8 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
     if(suggestions.length!==3||suggestions.some(x=>!x))throw Error('Missing source-backed core comparison for '+p.id);
     const facts=keyFacts.map(([label,value])=>
       '<div class="am-extra-fact"><dt>'+e(label)+'</dt><dd>'+e(value)+'</dd></div>').join('');
-    const actions=(affiliates.enabled
-      ?link(amazonSearch(p),'Rechercher '+p.model+' sur Amazon.fr · lien rémunéré',true,p.id)
-      :'')
+    const direct=verifiedLinks.get(p.id);
+    const actions=affiliateLink(p)
       +link(p.officialUrl,'Voir les vraies photos et la fiche constructeur');
     const source=link(p.marketEvidence.url,p.marketEvidence.label);
     const relatedItems=suggestions.map(q=>
@@ -57,7 +56,9 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       +'<p class="am-extra-approval">À vérifier auprès du vendeur : référence exacte, variante, prix, disponibilité, garantie et conditions de retour. Nous ne vendons pas directement ce produit.</p>'
       +'<div class="am-extra-actions">'+actions+'</div>'
       +(affiliates.enabled
-        ?'<p class="am-extra-disclosure">Lien rémunéré Amazon.fr : une commission peut nous être versée pour un achat éligible. La recherche peut proposer une autre référence, ce n’est pas une fiche Amazon vérifiée. En tant que Partenaire Amazon, je réalise un bénéfice sur les achats remplissant les conditions requises.</p>'
+        ?'<p class="am-extra-disclosure">Lien rémunéré Amazon.fr : une commission peut nous être versée pour un achat éligible. '
+          +(direct?'Correspondance du code modèle vérifiée le '+e(direct.verifiedAt)+' sur une fiche Amazon.fr ; prix, vendeur et disponibilité restent à contrôler lors de la visite.':'Le lien ouvre des résultats de recherche pouvant inclure d’autres références ou variantes.')
+          +' En tant que Partenaire Amazon, je réalise un bénéfice sur les achats remplissant les conditions requises.</p>'
         :'<p class="am-extra-disclosure">Aucun lien rémunéré actif pour ce modèle.</p>')
       +'</div></div>'
       +'<nav class="am-extra-local-nav" aria-label="Rubriques de cette montre"><a href="#essentiel">Notre regard</a><a href="#sources">Sources</a><a href="#comparables">Autres modèles</a><a href="#verifications">Avant achat</a></nav>'
