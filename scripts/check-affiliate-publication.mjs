@@ -8,7 +8,7 @@ const tmp=mkdtempSync(join(tmpdir(),'atelier-affiliate-integration-'));
 try {
   const target=join(tmp,'site');
   mkdirSync(target,{recursive:true});
-  for(const name of ['selection-affiliation.json','selection-populaires.json','affiliation.html','confidentialite.html','affiliate-links.json','comparaisons-montres.json','editorial-insights.json']){
+  for(const name of ['selection-affiliation.json','selection-populaires.json','popular-photo-rights.json','affiliation.html','confidentialite.html','affiliate-links.json','comparaisons-montres.json','editorial-insights.json']){
     cpSync(join(repository,'site',name),join(target,name));
   }
   // Test a disabled fixture before reviewing the real owner-tagged 13-link site.
@@ -18,6 +18,17 @@ try {
   cpSync(join(repository,'research','amazon-fr-exact-products.json'),join(tmp,'research','amazon-fr-exact-products.json'));
   cpSync(join(repository,'research','amazon-fr-popular-verified.json'),join(tmp,'research','amazon-fr-popular-verified.json'));
   const verifiedPopularPath=join(tmp,'research','amazon-fr-popular-verified.json');
+  // Rights clearance cannot be invented by setting a boolean or by
+  // smuggling a downloaded product photo into the public directory.
+  const rightsPath=join(target,'popular-photo-rights.json');
+  const rightsOriginal=readFileSync(rightsPath,'utf8');
+  writeFileSync(rightsPath,JSON.stringify({version:1,policy:'commercial_rights_holder_license_required',
+    photos:{'skmei-2056':{rightsBasis:'unverified_vendor_photo',file:'assets/watches-popular/skmei-2056.webp'}}}));
+  let unlicensedBlocked=false;
+  try{build()}catch{unlicensedBlocked=true}
+  assert.equal(unlicensedBlocked,true,'Unlicensed retailer photo must never be published');
+  writeFileSync(rightsPath,rightsOriginal);
+
   const verifiedPopularOriginal=readFileSync(verifiedPopularPath,'utf8');
   const build=(extraEnv={})=>execFileSync(process.execPath,[join(repository,'scripts/build-seo.mjs')],{
     cwd:tmp,env:{...process.env,PUBLIC_SITE_URL:'https://atelier-montres-selection-fr.onrender.com/',UMAMI_WEBSITE_ID:'',...extraEnv},encoding:'utf8',timeout:15000
@@ -125,8 +136,8 @@ try {
   const manifest=JSON.parse(readFileSync(join(target,'seo-manifest.json'),'utf8'));
   assert.equal(manifest.affiliateActive,true);
   assert.equal(manifest.affiliateCount,13,'Publish the 13 owner-tagged core product matches');
-  assert.equal(manifest.popularAffiliateDirectLinks,1,'One exact direct link in the supplementary selection');
-  assert.equal(manifest.popularAffiliateSearchLinks,29,'Remaining twenty-nine supplemental watches must stay labeled searches');
+  assert.equal(manifest.popularAffiliateDirectLinks,3,'Three documented direct link in the supplementary selection');
+  assert.equal(manifest.popularAffiliateSearchLinks,27,'Remaining twenty-seven supplemental watches must stay labeled searches');
   const directProduction=readFileSync(join(target,'montres/casio-gw-m5610u-1.html'),'utf8');
   assert.ok(directProduction.includes('href="https://www.amazon.fr/dp/B09BCPP68Q?tag=drackk04-21"'),
     'Publish only the independently source-confirmed G-SHOCK Amazon.fr direct match');
