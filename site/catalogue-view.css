@@ -32,7 +32,7 @@
 .aff-grid[data-view="gallery"] .am-card-footer input{min-width:17px;min-height:17px;accent-color:#1c3b2a}
 .aff-grid[data-view="gallery"] .am-card-footer .am-compare-check{display:inline-flex;align-items:center;gap:5px;min-height:38px;cursor:pointer}
 .aff-grid[data-view="gallery"] .am-affiliate-note{font-size:10px;line-height:1.5;margin:8px 0;overflow-wrap:anywhere}
-.aff-grid[data-view="gallery"] .aff-card-foot{font-size:10px;margin-top:9px}
+.aff-grid[data-view="gallery"] .aff-card-foot{display:none}
 .aff-grid[data-view="gallery"] .am-card-seo-link{display:block;font-size:11px;line-height:1.5;margin:10px 0}
 @media(max-width:980px){.aff-grid[data-view="gallery"]{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:760px){.aff-grid[data-view="gallery"]{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -55,3 +55,9 @@
 }
 @media(max-width:350px){.aff-grid[data-view="gallery"]{grid-template-columns:1fr}.aff-grid[data-view="gallery"] .aff-illustration{aspect-ratio:4/3}}
 @media(prefers-reduced-motion:reduce){.aff-grid[data-view="gallery"] .aff-card{transition:none}}
+
+/* Commercial integrity: the official Amazon Associates declaration remains
+   fully visible above the catalogue; every commissionable exit is still
+   individually identified in its button and its concise explanatory note. */
+.aff-disclosure .am-affiliate-global-disclosure{margin-top:10px;font-weight:600;line-height:1.65}
+.aff-grid[data-view="gallery"] .am-affiliate-note{margin-bottom:3px}

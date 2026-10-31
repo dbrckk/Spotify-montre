@@ -79,12 +79,24 @@
           'Fiche Amazon vérifiée · lien non rémunéré';
         const note=document.createElement('small');note.className='am-affiliate-note';
         note.textContent=compensated?
-          statement+'. Le paiement et les retours se font chez Amazon ou le vendeur indiqué.':
+          'Lien rémunéré · Une commission peut nous être versée. Achat et retours chez le marchand indiqué.':
           'Prix et disponibilité à vérifier sur Amazon.fr. Aucun paiement n’est encaissé ici.';
         actions.after(note);
       }
     }
     if(home) {
+      // The Amazon Associates statement belongs once in the prominent
+      // catalogue transparency section. A per-card disclosure still labels
+      // every commissionable link clearly without duplicating a paragraph.
+      if(paid.size){
+        const disclosure=document.querySelector('.aff-disclosure');
+        if(disclosure&&!disclosure.textContent.includes(statement)){
+          const line=document.createElement('p');
+          line.className='am-affiliate-global-disclosure';
+          line.textContent=statement+'. Les achats et retours s’effectuent chez Amazon ou le marchand indiqué.';
+          disclosure.append(line);
+        }
+      }
       hydrateGrid();
       new MutationObserver(hydrateGrid).observe(home,{childList:true});
     }

@@ -125,7 +125,7 @@
    cb.addEventListener('change',()=>{if(cb.checked&&!compare.includes(p.id)){if(compare.length>=3){cb.checked=false;compareWarning='Limite atteinte : retirez une montre avant d’en ajouter une autre.';updateCompare();return;}compare.push(p.id)}else compare=compare.filter(id=>id!==p.id);compareWarning='';updateCompare()});
    select.append(cb,document.createTextNode(' Comparer'));compareWrap.append(maker,select);body.append(compareWrap);
    if(hasEditorialPages){
-     const analysis=make('a','am-card-seo-link','Comparer les caractéristiques détaillées →');
+     const analysis=make('a','am-card-seo-link','Lire la fiche détaillée →');
      analysis.href='./montres/'+encodeURIComponent(p.id)+'.html';
      body.append(analysis);
    }

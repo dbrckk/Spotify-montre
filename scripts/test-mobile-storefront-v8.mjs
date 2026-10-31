@@ -59,6 +59,10 @@ try{
    assert.equal(await page.locator('#affGrid .aff-card[data-watch-id="'+id+'"] .am-affiliate-cta').count(),0,'No fabricated paid product for '+id);
  }
  assert.match(await page.locator('.aff-disclosure').innerText(),/En tant que Partenaire Amazon/);
+ const paidCardNote=page.locator('#affGrid .aff-card[data-watch-id="citizen-tsuyosa"] .am-affiliate-note');
+ assert.match(await paidCardNote.innerText(),/Lien rémunéré/,'The gallery must preserve an explicit compensation disclosure on each paid card');
+ assert.ok((await paidCardNote.innerText()).length<150,'Global statement is not repeated in every narrow mobile card');
+ assert.equal(await page.locator('.aff-disclosure').locator('text=En tant que Partenaire Amazon').count(),1,'The global required Amazon disclosure appears exactly once');
  assert.equal(await ctas.evaluateAll(nodes=>nodes.every(a=>a.href.startsWith('https://www.amazon.fr/dp/')&&new URL(a.href).searchParams.get('tag')==='drackk04-21')),true,'Every outbound paid link must use the owner-confirmed ID');
 
  // Premium real-photography editorial journey (actual catalogue, no mock assets).
