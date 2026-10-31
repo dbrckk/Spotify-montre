@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {readFileSync,writeFileSync,mkdirSync,cpSync,rmSync,mkdtempSync} from 'node:fs';
+import {readFileSync,writeFileSync,mkdirSync,cpSync,rmSync,mkdtempSync,existsSync} from 'node:fs';
 import {resolve,join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {execFileSync} from 'node:child_process';
@@ -10,6 +10,12 @@ try {
   mkdirSync(target,{recursive:true});
   for(const name of ['selection-affiliation.json','selection-populaires.json','popular-photo-rights.json','affiliation.html','confidentialite.html','affiliate-links.json','comparaisons-montres.json','editorial-insights.json']){
     cpSync(join(repository,'site',name),join(target,name));
+  }
+  const sourcePhotoDir=join(repository,'site','assets','watches-popular');
+  if(existsSync(sourcePhotoDir)){
+    const destPhotoDir=join(target,'assets','watches-popular');
+    mkdirSync(join(target,'assets'),{recursive:true});
+    cpSync(sourcePhotoDir,destPhotoDir,{recursive:true});
   }
   // Test a disabled fixture before reviewing the real owner-tagged 13-link site.
   const enabledSourceConfig=JSON.parse(readFileSync(join(repository,'site','affiliate-links.json'),'utf8'));
