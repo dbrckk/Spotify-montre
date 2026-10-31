@@ -38,6 +38,8 @@ permissions:
   contents: read
 jobs:
   published-android:
+    # Production Render is still on main during PR review; check the live deployment only after merge or on manual dispatch.
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
