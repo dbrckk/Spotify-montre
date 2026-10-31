@@ -73,9 +73,14 @@ try{
   const editorial=await page.goto(new URL('/montres/citizen-tsuyosa.html',base).href,{waitUntil:'domcontentloaded',timeout:30000});
   assert.ok(editorial?.ok(),'The canonical Citizen editorial product page should respond HTTP 2xx');
   assert.equal(await page.locator('article.watch-product').count(),1,'Search-indexable product must use the premium editorial layout');
+  const sourcePhotoStage=page.locator('article.watch-product .watch-photo');
+  const reservedHeight=await sourcePhotoStage.evaluate(el=>el.getBoundingClientRect().height);
+  assert.ok(reservedHeight>=340&&reservedHeight<=410,'Canonical watch photo must reserve stable room before image decode: '+reservedHeight);
   const staticImage=page.locator('article.watch-product .watch-photo img');
   await staticImage.waitFor({state:'visible',timeout:20000});
   await staticImage.evaluate(img=>img.decode());
+  const loadedHeight=await sourcePhotoStage.evaluate(el=>el.getBoundingClientRect().height);
+  assert.ok(Math.abs(loadedHeight-reservedHeight)<2,'Photo decoding must not move the editorial product introduction');
   const staticPhoto=await staticImage.evaluate(img=>({src:img.currentSrc,width:img.naturalWidth,height:img.naturalHeight}));
   assert.ok(staticPhoto.width>=300&&staticPhoto.height>=300&&isAllowedPhoto(staticPhoto.src,'citizen-tsuyosa'),'Indexable product uses the source-approved local Citizen image');
   const editorialFacts=page.locator('.watch-facts .watch-quickfact');
