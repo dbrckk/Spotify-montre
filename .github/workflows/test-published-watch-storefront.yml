@@ -17,6 +17,7 @@ on:
       - 'site/selection-affiliation.json'
       - 'site/affiliation.html'
       - 'site/catalogue-view.css'
+      - 'site/premium-system.css'
       - 'site/affiliate-ui.js'
       - 'site/fiche.js'
       - 'site/fiche.css'
@@ -50,7 +51,7 @@ jobs:
           # CDN build never produces a false failure or false success.
           for attempt in $(seq 1 30); do
             ready=1
-            for file in affiliation.js selection-share.js affiliate-ui.js catalogue-view.css fiche.js fiche.css seo-guides.css editorial-photo.js editorial-photo.css; do
+            for file in affiliation.js selection-share.js affiliate-ui.js catalogue-view.css premium-system.css fiche.js fiche.css seo-guides.css editorial-photo.js editorial-photo.css; do
               if ! curl -fsSL --max-time 15 "$base/$file" -o "$RUNNER_TEMP/live-$file"; then
                 ready=0
               elif ! cmp -s "site/$file" "$RUNNER_TEMP/live-$file"; then

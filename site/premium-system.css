@@ -1,0 +1,205 @@
+/* Atelier Montres: premium readability and touch design, 2026-10-31.
+   One lightweight, local stylesheet shared across catalogue, advisor and watch pages.
+   Preserves exact manufacturer photos and all existing application interactions. */
+:root{
+  --am-p-paper:#faf8f3;
+  --am-p-card:#fffdf9;
+  --am-p-deep:#183a2a;
+  --am-p-text:#20392a;
+  --am-p-muted:#4d6353;
+  --am-p-brass:#a98955;
+  --am-p-border:#dcd5c8;
+  --am-p-focus:#b37b25;
+  --am-p-radius:8px;
+  --am-p-shadow:0 14px 34px rgba(18,48,32,.085);
+}
+html{scroll-padding-top:92px}
+body{font-size:16px}
+a,button,input,select,summary{touch-action:manipulation}
+:where(a,button,input,select,summary,[tabindex]):focus-visible{
+  outline:3px solid var(--am-p-focus);
+  outline-offset:3px;
+}
+.am-topline{font-size:11px;letter-spacing:.11em}
+.am-header .navigation a{font-size:13px;letter-spacing:.065em}
+.am-mobile-nav>summary{font-size:13px}
+.am-mobile-links a{font-size:14px;letter-spacing:.035em}
+.aff-selection{background:var(--am-p-paper)}
+.aff-heading>p,.aff-heading p,.aff-disclosure p{
+  color:var(--am-p-muted);
+  line-height:1.75;
+}
+.aff-disclosure{border-left:3px solid var(--am-p-brass);background:#f0ede5}
+.aff-disclosure strong{color:var(--am-p-text);font-size:14px}
+.aff-disclosure p{font-size:14px}
+.aff-tools{row-gap:15px}
+.aff-tabs button{
+  min-height:44px;
+  padding:10px 14px;
+  font-size:13px;
+  line-height:1.35;
+  border-radius:4px;
+}
+.aff-tabs button[aria-pressed="true"]{background:var(--am-p-deep);color:#fff}
+.am-sort-wrap{font-size:13px;color:var(--am-p-text);font-weight:650}
+.am-sort-wrap select{
+  min-height:46px;
+  font-size:14px;
+  color:var(--am-p-text);
+  background-color:var(--am-p-card);
+  border-color:var(--am-p-border);
+  border-radius:4px;
+}
+.aff-query input{
+  min-height:48px;
+  font-size:16px;
+  border-radius:4px;
+  border-color:var(--am-p-border);
+}
+.aff-query .am-search-hint,.am-size-note{font-size:13px;line-height:1.65;color:var(--am-p-muted)}
+.am-view-toolbar-title{font-size:12px;color:var(--am-p-muted)}
+.am-view-options{border-radius:6px}
+.am-view-options button{font-size:13px;border-radius:3px}
+.am-view-explainer{font-size:13px;color:var(--am-p-muted)}
+.aff-grid .aff-card{
+  border:1px solid var(--am-p-border);
+  border-radius:var(--am-p-radius);
+  overflow:hidden;
+  background:var(--am-p-card);
+  box-shadow:var(--am-p-shadow);
+}
+.aff-grid .aff-illustration{background:linear-gradient(145deg,#fafaf6,#eef1e9)!important}
+.aff-grid .aff-card-brand{
+  color:#745e3c;
+  font-size:12px;
+  line-height:1.45;
+  letter-spacing:.075em;
+}
+.aff-grid .aff-card h3{color:var(--am-p-text);line-height:1.22}
+.aff-grid .aff-card-desc{font-size:14px;color:var(--am-p-muted)}
+.aff-grid .am-spec-line,.aff-grid .aff-card-foot{font-size:12px;color:var(--am-p-muted)}
+.aff-grid .am-card-title{font-size:14px;color:var(--am-p-text)}
+.aff-grid .aff-chips span{font-size:12px}
+.aff-grid .aff-card-actions a{font-size:13px;line-height:1.4;border-radius:4px}
+.aff-grid .aff-card-actions button{min-width:44px;min-height:44px}
+.aff-grid .am-card-footer a,.aff-grid .am-card-footer label{font-size:13px;line-height:1.45}
+.aff-grid .am-affiliate-note{font-size:12px;line-height:1.6;color:var(--am-p-muted)}
+.aff-grid[data-view="gallery"] .aff-card-brand{font-size:12px}
+.aff-grid[data-view="gallery"] .aff-card h3{
+  font-size:clamp(18px,1.9vw,24px);
+  line-height:1.25;
+  letter-spacing:-.015em;
+}
+.aff-grid[data-view="gallery"] .am-gallery-facts span{
+  font-size:12px;
+  line-height:1.35;
+  border-radius:4px;
+  padding:6px 8px;
+  color:#35503b;
+  background:#f0f2eb;
+}
+.aff-grid[data-view="gallery"] .aff-card-actions>a:first-child,
+.aff-grid[data-view="gallery"] .aff-card-actions .am-affiliate-cta{
+  font-size:12px;
+  line-height:1.4;
+  overflow-wrap:anywhere;
+}
+.aff-grid[data-view="gallery"] .am-card-footer a,
+.aff-grid[data-view="gallery"] .am-card-footer label,
+.aff-grid[data-view="gallery"] .am-card-seo-link{font-size:12px;line-height:1.5}
+.aff-grid[data-view="gallery"] .am-affiliate-note{font-size:12px;line-height:1.5}
+.am-discovery-intro p{font-size:14px}
+.am-discovery-eyebrow{font-size:12px}
+.am-discovery-path-index{font-size:12px}
+.am-discovery-path>span:nth-last-child(2){font-size:13px}
+.am-discovery-arrow{font-size:13px}
+.am-compare-tray{border-radius:var(--am-p-radius);box-shadow:0 18px 45px #152f2752}
+.am-compare-tray span,.am-compare-tray button{font-size:13px;line-height:1.45}
+.am-dialog-note,.am-data-note,.am-compare-diff-note{font-size:13px;line-height:1.65}
+.am-compare-table th,.am-compare-table td{font-size:14px;line-height:1.55}
+.am-compare-mobile-specs dt,.am-compare-mobile-specs dd,
+.am-compare-mobile-hint,.am-compare-mobile-nav button{font-size:13px}
+.am-compare-mobile-position{font-size:12px}
+/* Interactive watch detail. */
+.am-breadcrumb{font-size:13px}
+.detail-brand,.detail-facts-caption{font-size:12px}
+.detail-story,.detail-info .detail-story{font-size:16px;line-height:1.75;color:var(--am-p-muted)}
+.detail-figure-label,.detail-visual-note{font-size:12px;line-height:1.5}
+.detail-fact dt,.detail-facts dt{font-size:13px}
+.detail-fact dd,.detail-facts dd{font-size:14px;line-height:1.5}
+.detail-highlights span{font-size:13px;line-height:1.5}
+.detail-quick-actions button{font-size:13px;border-radius:4px}
+.detail-evidence strong{font-size:14px}
+.detail-evidence p,.detail-evidence a{font-size:13px;line-height:1.6}
+.detail-related-heading>p,.detail-related-card,
+.detail-adjacent-link strong{font-size:14px}
+.detail-adjacent-link span,.detail-return-link{font-size:13px}
+.detail-commerce p,.detail-shops a{font-size:14px}
+/* Recommendation cards and form controls. */
+.advisor-ticker span{font-size:12px;letter-spacing:.075em}
+.advisor-question>p,.advisor-section-top>p{font-size:15px}
+.advisor-options label>span small{font-size:13px;line-height:1.55;color:var(--am-p-muted)}
+.advisor-reset,.advisor-summary,.advisor-explore span{font-size:14px}
+.advisor-criteria,.advisor-match-label,.advisor-card-brand,
+.advisor-rank{font-size:12px}
+.advisor-card{border-radius:var(--am-p-radius);box-shadow:var(--am-p-shadow)}
+.advisor-card-description{font-size:15px;line-height:1.7;color:var(--am-p-muted)}
+.advisor-match p,.advisor-compare-next p{font-size:14px;line-height:1.65}
+.advisor-card-actions a{font-size:14px;line-height:1.45}
+.advisor-knowledge article p{font-size:15px}
+/* Search-indexable, independent static product and comparison pages. */
+.top .nav nav a{font-size:14px}
+.watch-product .intro .lead{font-size:16px}
+.watch-photo-caption{font-size:12px;line-height:1.5}
+.watch-facts-caption{font-size:12px!important}
+.watch-quickfact dt{font-size:13px}
+.watch-quickfact dd{font-size:15px}
+.watch-product .tags span,.watch-product .disclosure{font-size:13px}
+.watch-actions .primary,.watch-actions .secondary{font-size:14px}
+.watch-section-nav a{font-size:13px}
+.watch-evidence strong{font-size:14px}
+.watch-evidence p,.watch-evidence a{font-size:13px!important;line-height:1.6}
+@media(max-width:760px){
+  .am-topline{font-size:10px}
+  .am-mobile-nav>summary{font-size:13px}
+  .aff-selection{padding-block:58px 76px}
+  .aff-heading>p,.aff-heading p{font-size:14px}
+  .aff-tools{gap:12px}
+  .aff-tabs{display:flex;flex-wrap:nowrap;max-width:100%;overflow-x:auto;
+    overscroll-behavior-x:contain;scroll-snap-type:x proximity;padding:4px 2px 10px}
+  .aff-tabs button{flex:none;scroll-snap-align:start;min-height:44px;font-size:13px}
+  .am-sort-wrap{min-width:0}
+  .am-sort-wrap select{font-size:14px;min-width:0}
+  .aff-query{min-width:0}
+  .am-view-toolbar-title{font-size:12px}
+  .am-view-options button{font-size:13px}
+  .aff-grid[data-view="gallery"]{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .aff-grid[data-view="gallery"] .aff-card-body{padding:15px 12px 17px}
+  .aff-grid[data-view="gallery"] .aff-card h3{font-size:clamp(18px,4.45vw,21px)}
+  .aff-grid[data-view="gallery"] .am-gallery-facts{min-height:0;gap:5px;margin-bottom:12px}
+  .aff-grid[data-view="gallery"] .am-gallery-facts span{font-size:12px;padding:6px 7px}
+  .aff-grid[data-view="gallery"] .aff-card-actions>a:first-child{font-size:12px}
+  .aff-grid[data-view="gallery"] .aff-card-actions .am-affiliate-cta{font-size:12px}
+  .aff-grid[data-view="gallery"] .am-card-seo-link{font-size:12px}
+  .am-discovery-intro p{font-size:13px}
+  .am-discovery-path>span:nth-last-child(2){font-size:13px}
+  .am-compare-mobile-specs dt,.am-compare-mobile-specs dd{font-size:14px}
+  .detail-info .detail-story{font-size:16px}
+  .detail-fact dd{font-size:14px}
+  .detail-evidence p{font-size:13px}
+  .advisor-options label>span small{font-size:13px}
+  .advisor-match p{font-size:14px}
+  .watch-photo-caption{font-size:12px}
+  .watch-product .intro .lead{font-size:16px}
+  .watch-quickfact dd{font-size:14px}
+}
+@media(max-width:350px){
+  .aff-grid[data-view="gallery"]{grid-template-columns:1fr}
+}
+@media(hover:hover) and (prefers-reduced-motion:no-preference){
+  .aff-grid .aff-card:hover,.advisor-card:hover{box-shadow:0 18px 40px #16372820}
+}
+@media(prefers-reduced-motion:reduce){
+  .aff-grid .aff-card,.aff-grid .aff-product-photo,
+  .am-discovery-path,.advisor-options label>span{transition:none!important;transform:none!important}
+}
