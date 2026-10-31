@@ -1,0 +1,154 @@
+{
+  "version": 1,
+  "method": "Synthèses éditoriales documentaires, sans essais physiques, prix ni stocks supposés.",
+  "products": {
+    "casio-mtp-1302": {
+      "strength": "Le cadran turquoise donne une touche vive à une silhouette analogique classique. Le diamètre rond de 38,5 mm est documenté.",
+      "usage": "À examiner si vous voulez une montre analogique colorée plutôt qu'un affichage numérique ou un cadran minimaliste.",
+      "caution": "La couleur peut varier selon l'éclairage. Vérifiez la longueur entre cornes et le bracelet avant de juger le confort avec le seul diamètre.",
+      "facts": [
+        "diameter",
+        "movement",
+        "glass"
+      ]
+    },
+    "casio-mtp-b145": {
+      "strength": "Le boîtier de 40 × 35 × 7,4 mm adopte une silhouette rectangulaire rétro. La valeur 35 mm est une largeur, pas un diamètre.",
+      "usage": "Une piste si vous aimez les lignes géométriques et un cadran épuré, avec la simplicité d'un mouvement quartz.",
+      "caution": "Ne comparez pas les 35 mm de largeur à un diamètre rond de 35 mm. Vérifiez l'encombrement au poignet et le bracelet.",
+      "facts": [
+        "caseSize",
+        "movement",
+        "glass"
+      ]
+    },
+    "casio-a168wa": {
+      "strength": "L'afficheur numérique et le bracelet métallique rappellent le langage vintage. Les dimensions L × l × H du boîtier sont documentées.",
+      "usage": "À considérer si vous cherchez une lecture numérique et une esthétique rétro plutôt qu'une montre à aiguilles.",
+      "caution": "Le verre indiqué est en résine. Aucune valeur d'étanchéité en bar n'est documentée ici : vérifiez les usages autorisés.",
+      "facts": [
+        "caseSize",
+        "glass"
+      ]
+    },
+    "casio-mdv107": {
+      "strength": "Les dimensions 49,5 × 44,2 × 12,1 mm et l'indication 20 bar caractérisent une montre d'allure plongeuse.",
+      "usage": "À explorer si vous appréciez les index lisibles et une esthétique de plongée, avec un mouvement quartz.",
+      "caution": "Les 44,2 mm correspondent à une largeur et non à un diamètre confirmé. L'indice 20 bar ne remplace pas la notice.",
+      "facts": [
+        "caseSize",
+        "glass",
+        "waterResistance"
+      ]
+    },
+    "casio-ltp1302": {
+      "strength": "Le cadran clair et le diamètre documenté de 30,2 mm composent une proposition discrète, avec les dimensions complètes du boîtier.",
+      "usage": "Une piste pour une montre analogique de petit format et un fonctionnement à quartz.",
+      "caution": "Un petit diamètre ne garantit pas un bon ajustement. Vérifiez longueur de bracelet, forme des cornes et porté réel.",
+      "facts": [
+        "diameter",
+        "caseSize",
+        "movement"
+      ]
+    },
+    "swatch-clearly": {
+      "strength": "Le boîtier transparent et les touches de couleur privilégient une expression graphique plutôt que des codes horlogers traditionnels.",
+      "usage": "À regarder si la transparence est votre critère principal et que vous préférez le fonctionnement quartz.",
+      "caution": "Le diamètre et le type de verre ne figurent pas dans nos données vérifiées. Vérifiez l'usage de l'indice 3 bar.",
+      "facts": [
+        "movement",
+        "waterResistance"
+      ]
+    },
+    "citizen-eco": {
+      "strength": "Le mouvement Citizen Eco-Drive J800 fonctionne avec l'énergie lumineuse, dans une montre de 40 mm au cadran noir.",
+      "usage": "À envisager si vous recherchez la recharge par la lumière, sous réserve de respecter les indications du fabricant.",
+      "caution": "Le verre est décrit comme cristal et l'étanchéité comme 3 bar. Vérifiez les conditions de recharge et d'exposition à l'eau.",
+      "facts": [
+        "diameter",
+        "movement",
+        "waterResistance"
+      ]
+    },
+    "citizen-openheart": {
+      "strength": "Une ouverture du cadran laisse voir une partie du mouvement automatique Citizen calibre 8229, avec un cadran bleu.",
+      "usage": "Une piste si la mécanique visible est plus importante pour vous que la sobriété d'un cadran fermé.",
+      "caution": "Aucun diamètre confirmé n'a été retenu. Vérifiez dimensions, réserve de marche et confort avant achat.",
+      "facts": [
+        "movement",
+        "glass",
+        "waterResistance"
+      ]
+    },
+    "citizen-tsuyosa": {
+      "strength": "Le cadran vert et le bracelet intégré forment un dessin sport chic. Les données publiées indiquent 40 mm et un verre saphir.",
+      "usage": "À considérer si vous aimez les cadrans colorés, le bracelet intégré et les mouvements automatiques.",
+      "caution": "La forme du bracelet intégré influence la sensation au poignet. Vérifiez les dimensions complémentaires et l'entretien du calibre 8210.",
+      "facts": [
+        "diameter",
+        "movement",
+        "glass"
+      ]
+    },
+    "orient-bambino": {
+      "strength": "Le diamètre documenté de 38,4 mm, le cadran bleu et le verre minéral bombé participent à son identité habillée.",
+      "usage": "À examiner si vous privilégiez une présentation classique, avec bracelet cuir et mouvement mécanique automatique.",
+      "caution": "Le verre bombé peut modifier la perception de l'épaisseur. Vérifiez hauteur, cornes et usages compatibles avec 30 m.",
+      "facts": [
+        "diameter",
+        "movement",
+        "glass"
+      ]
+    },
+    "seiko-5": {
+      "strength": "La SRPD55 associe le calibre automatique 4R36, un diamètre de 42,5 mm et un verre Hardlex dans un dessin sportif.",
+      "usage": "À explorer si vous aimez les montres automatiques à présence visuelle marquée et l'esthétique sportive.",
+      "caution": "Le diamètre seul ne suffit pas à anticiper le confort. Vérifiez épaisseur, cornes et conditions d'usage dans l'eau.",
+      "facts": [
+        "diameter",
+        "movement",
+        "glass"
+      ]
+    },
+    "tissot-prx-quartz": {
+      "strength": "La PRX quartz associe 40 mm, bracelet intégré et verre saphir dans une silhouette inspirée des années 1970.",
+      "usage": "Une piste si vous appréciez la ligne PRX et préférez un mouvement quartz plutôt qu'un mouvement mécanique.",
+      "caution": "Comparez avec la PRX Powermatic 80 : mécanisme, entretien et sensation au poignet ne se déduisent pas du dessin proche.",
+      "facts": [
+        "diameter",
+        "movement",
+        "waterResistance"
+      ]
+    },
+    "tissot-prx-auto": {
+      "strength": "Le cadran bleu texturé et le mouvement automatique Powermatic 80 distinguent cette PRX de la version quartz.",
+      "usage": "À envisager pour la silhouette PRX avec un mouvement automatique et son entretien particulier.",
+      "caution": "Les 40 mm et le verre saphir ne renseignent pas le porté complet. Confirmez la réserve de marche sur la fiche fabricant.",
+      "facts": [
+        "diameter",
+        "movement",
+        "glass"
+      ]
+    },
+    "hamilton-khaki": {
+      "strength": "La Khaki Field Auto H70455133 reprend les codes d'un cadran de terrain, avec un diamètre de 38 mm et du saphir.",
+      "usage": "À considérer si la lisibilité visuelle d'une field watch et le mouvement automatique vous intéressent.",
+      "caution": "Il ne s'agit pas d'un essai pratique de lisibilité. Contrôlez le bracelet, l'autonomie et la référence exacte chez Hamilton.",
+      "facts": [
+        "diameter",
+        "movement",
+        "glass"
+      ]
+    },
+    "seiko-sharp": {
+      "strength": "Le cadran géométrique de la Presage Sharp Edged offre un relief discret ; le boîtier de 39,3 mm et le calibre 6R35 sont documentés.",
+      "usage": "À explorer si vous souhaitez un cadran texturé dans un registre habillé, avec un mouvement automatique.",
+      "caution": "La texture apparaît différemment selon l'éclairage. Vérifiez le porté et les conditions de garantie du fabricant.",
+      "facts": [
+        "diameter",
+        "movement",
+        "glass"
+      ]
+    }
+  }
+}

@@ -8,6 +8,35 @@ const read=p=>readFileSync(resolve(root,p),'utf8');
 const feed=JSON.parse(read('selection-affiliation.json'));
 const manifest=JSON.parse(read('seo-manifest.json'));
 assert.equal(manifest.productCount,15);
+const insightData=JSON.parse(read('editorial-insights.json'));
+assert.equal(insightData.version,1);
+assert.equal(Object.keys(insightData.products).length,15,'15 unique editorial briefs required');
+const editorialTexts=new Set();
+for(const p of feed.products){
+ const insight=insightData.products[p.id];
+ assert.ok(insight,'No editorial copy for '+p.id);
+ const pageHtml=read('montres/'+p.id+'.html');
+ assert.equal((pageHtml.match(/class="watch-decision-grid"/g)||[]).length,1,'One decision grid per product '+p.id);
+ assert.match(pageHtml,/href="#avis-editorial"/,'Editorial anchor missing '+p.id);
+ assert.match(pageHtml,/sans prétendre avoir essayé ce modèle/,'No fabricated hands-on claim '+p.id);
+ for(const key of ['strength','usage','caution']){
+   assert.ok(typeof insight[key]==='string'&&insight[key].length>=45,'Invalid editorial copy '+p.id+'/'+key);
+   assert.ok(!editorialTexts.has(insight[key]),'Duplicated product advice '+p.id+'/'+key);
+   editorialTexts.add(insight[key]);
+   const escaped=insight[key].replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+   assert.ok(pageHtml.includes(escaped),'Generated advice differs from catalogue '+p.id+'/'+key);
+ }
+ for(const fact of insight.facts){
+   assert.ok(typeof p.specs?.[fact]==='string'&&p.specs[fact].trim(),'Unverified fact '+p.id+'/'+fact);
+   assert.ok(pageHtml.includes(p.specs[fact].replace(/&/g,'&amp;')),'Product fact not shown '+p.id+'/'+fact);
+ }
+}
+const casioPair=read('montres/comparer-casio-mtp-b145-vs-mtp-1302.html');
+assert.ok(casioPair.includes('35 mm de largeur'),'Casio rectangle width must be explained');
+assert.ok(casioPair.includes('38,5 mm de diamètre'),'Casio round diameter must be distinguished');
+assert.ok(!casioPair.includes('boîtier plus compact de 35 mm'),'Old misleading 35mm diameter language persists');
+assert.match(read('seo-guides.css'),/\.watch-decision-grid/,'Editorial cards styling missing');
+
 assert.equal(manifest.comparisonCount,4,'Four evidence-based pairs must be indexable');
 assert.equal(manifest.categoryCount,3,'Three distinct editorial search-intent collections are required');
 const config=JSON.parse(read('affiliate-links.json'));
