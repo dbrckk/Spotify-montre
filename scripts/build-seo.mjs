@@ -272,7 +272,14 @@ import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
     const emptyHero='<div class="am-hero-watch" id="heroWatch" role="img" aria-label="Photographie de Citizen Tsuyosa NJ0150-81X"></div>';
     const heroWithPhoto='<div class="am-hero-watch" id="heroWatch" role="img" aria-label="Photographie de Citizen Tsuyosa NJ0150-81X"><img class="am-hero-real-photo" src="'+e(firstPhotoSrc)+'"'+responsiveAttrs(root,firstPhoto,{prefix:'./',sizes:'(max-width: 760px) 92vw, 520px',escape:e})+' alt="Citizen Tsuyosa NJ0150-81X — montre automatique au cadran vert" width="520" height="520" decoding="async" fetchpriority="high"></div>';
     if(collection.includes(emptyHero))collection=collection.replace(emptyHero,heroWithPhoto);
-    else if(!collection.includes(heroWithPhoto))throw Error('Public hero photo insertion point missing or unexpectedly modified');
+    else if(!collection.includes(heroWithPhoto)){
+      // Existing generated HTML may contain an older responsive srcset when
+      // assets are refreshed or a minimal test fixture omits derivatives.
+      // Regenerate only the exact expected Citizen cover, never arbitrary HTML.
+      const previous=/\<div class="am-hero-watch" id="heroWatch" role="img" aria-label="Photographie de Citizen Tsuyosa NJ0150-81X"\>\<img class="am-hero-real-photo"[^>]*\>\<\/div\>/;
+      if(!previous.test(collection))throw Error('Public hero photo insertion point missing or unexpectedly modified');
+      collection=collection.replace(previous,heroWithPhoto);
+    }
     // On the second SEO build, preserve exactly the first injected image.
     // A developer build must be safe when repeated against the same directory.
   }
