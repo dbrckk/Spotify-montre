@@ -15,6 +15,9 @@ const extras=readdirSync(root).filter(n=>n.endsWith('.html')&&!/^google[a-f0-9]+
 const paths=[...new Set([...indexable,...extras,'/montre.html?id=citizen-tsuyosa'])].sort();
 const report={method:'320 CSS-pixel reflow ≈ 400% page zoom of a 1280 CSS-pixel desktop viewport',
   measuredAt:new Date().toISOString(),pages:[],interactions:[],failures:[]};
+// WCAG 1.4.4: independently exercise 200% text-only enlargement at the
+// normal 1280px layout. This is distinct from the 320px / 400% page reflow.
+const textScale={method:'200% text-only enlargement at 1280 CSS px (font-size 200%)',pages:[],failures:[]};
 const screenshots='artifacts/reflow';
 mkdirSync(screenshots,{recursive:true});
 const browser=await chromium.launch({headless:true});
@@ -137,13 +140,51 @@ try{
   await screenshot(page,'photo-dialog-320');
   await page.locator('.am-photo-close').click();
   await context.close();
+
+  const textContext=await browser.newContext({viewport:{width:1280,height:800},
+    locale:'fr-FR',reducedMotion:'reduce'});
+  const textPage=await textContext.newPage();
+  textPage.setDefaultTimeout(18000);
+  await textPage.addInitScript(()=>{
+    const style=document.createElement('style');
+    style.textContent='html{font-size:200%!important}';
+    const apply=()=>{if(!style.isConnected)document.head?.append(style)};
+    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',apply,{once:true});
+    else apply();
+  });
+  for(const path of paths){
+    try{
+      await navigation(textPage,path);
+      const metrics=await textPage.evaluate(()=>{
+        const root=document.documentElement;
+        const offenders=[];
+        const width=root.clientWidth;
+        if(root.scrollWidth>width+2){
+          for(const el of document.querySelectorAll('body *')){
+            if(offenders.length>=8)break;
+            const css=getComputedStyle(el),r=el.getBoundingClientRect();
+            if(css.display!=='none'&&css.visibility!=='hidden'&&r.width>0&&r.right>width+3&&r.left<width+10)
+              offenders.push({tag:el.tagName.toLowerCase(),id:el.id,cls:String(el.className).slice(0,90),right:Math.round(r.right)});
+          }
+        }
+        return {width,scrollWidth:root.scrollWidth,overflow:root.scrollWidth-width,rootFont:getComputedStyle(root).fontSize,offenders};
+      });
+      textScale.pages.push({path,...metrics});
+      if(metrics.overflow>2)textScale.failures.push({path,reason:'horizontal overflow with 200% text-only scale',...metrics});
+      if(path==='/')await textPage.screenshot({path:screenshots+'/text-200pct-home.png',fullPage:true});
+    }catch(err){textScale.failures.push({path,reason:String(err).slice(0,380)})}
+  }
+  await textContext.close();
 }finally{
   await browser.close();
+  report.textOnly200Percent=textScale;
   writeFileSync('artifacts/accessibility-reflow-report.json',JSON.stringify(report,null,2));
 }
 const failed=report.failures;
 console.log('Reflow accessibility audit:',JSON.stringify({
   uniqueRoutes:paths.length,measurements:report.pages.length,controlChecks:report.interactions.length,
-  failures:failed.length}));
+  failures:failed.length,textOnlyPages:textScale.pages.length,textOnlyFailures:textScale.failures.length}));
 for(const failure of failed.slice(0,30))console.error('REFLOW',JSON.stringify(failure).slice(0,1050));
+for(const failure of textScale.failures.slice(0,20))console.error('TEXT200',JSON.stringify(failure).slice(0,1050));
+if(strict&&textScale.failures.length)throw Error(textScale.failures.length+' 200% text-only failures; inspect artifacts/accessibility-reflow-report.json');
 if(strict&&failed.length)throw Error(failed.length+' zoom/reflow failures; inspect artifacts/accessibility-reflow-report.json');
