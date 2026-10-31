@@ -199,13 +199,14 @@ def main() -> int:
         pid, source = p["id"], p["officialUrl"]
         original = rights["photos"].get(pid)
         file = DEST / (pid + ".webp")
-        if original and file.is_file():
+        if original:
+            if not file.is_file():
+                raise ValueError("Registered photo missing; refusing silent replacement: " + pid)
             digest = hashlib.sha256(file.read_bytes()).hexdigest()
             if digest == original.get("imageSha256"):
                 report["photos"].append({"id": pid, "status": "preserved", "source": original["sourcePage"]})
                 print("PRESERVED", pid, flush=True)
                 continue
-            # A mismatched or missing registered asset must never be silently replaced.
             raise ValueError("Existing registered image hash mismatch: " + pid)
         errors = []
         try:
