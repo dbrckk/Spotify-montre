@@ -91,22 +91,25 @@ assert.match(css,/@media\(max-width:560px\)/);
 assert.match(read('site/affiliation.html'),/href="\.\/conseiller\.html"/);
 assert.match(read('site/montre.html'),/href="\.\/conseiller\.html"/);
 
-const normalized=read('site/discovery-catalogue.json');
-const universal=JSON.parse(normalized);
-assert.equal(universal.total,52);
-assert.equal(universal.products.length,52);
-assert.equal(universal.coreCount,15);
-assert.equal(universal.supplementalCount,37);
-assert.equal(new Set(universal.products.map(p=>p.id)).size,52);
-const all52=e.recommend(universal.products,{},52);
-assert.equal(all52.length,15,'The recommendation engine intentionally caps results at 15; three picks are shown');
-const cheap52=e.recommend(universal.products,{tier:'essential',style:'sport'},3);
-assert.equal(cheap52.length,3);
-assert.ok(cheap52.some(x=>x.product.kind==='supplemental'),'The 37 additional models must participate in matching');
-const rec=e.recommend(universal.products,{tier:'all',movement:'automatic',style:'all',size:'all'},3);
-assert.ok(rec.every(x=>x.product.movement==='automatic'),'Known movement must remain comparable across both feeds');
-const sq=universal.products.find(x=>x.id==='skmei-1251');
-assert.equal(e.diameterMm(sq),null,'Unknown case diameter cannot be inferred from a seller claim');
-assert.ok(universal.products.some(x=>x.id==='skmei-2056'&&x.photoUrl?.endsWith('/skmei-2056.webp')));
-
+// Test against the two REAL, committed source catalogues. The generated
+// 52-watch JSON is validated separately after the SEO build; npm test also
+// runs before that build in the storefront workflow.
+const extra=JSON.parse(read('site/selection-populaires.json')).products;
+assert.equal(extra.length,37);
+assert.equal(new Set([...products,...extra].map(p=>p.id)).size,52);
+const styleMap={sport:'sport',retro:'retro',compact:'minimal',steel:'classic',dress:'classic'};
+const supplement=extra.map(p=>({
+  id:p.id,kind:'supplemental',tier:p.tier,style:styleMap[p.style],
+  movement:/automatique/i.test(p.movement)?'automatic':/solaire/i.test(p.movement)?'eco-drive':'quartz',
+  diameterMm:/diam[eè]tre\\s*(?:annonc[eé]\\s*)?(?:de\\s*)?(\\d{1,2}(?:[,.]\\d{1,2})?)\\s*mm/i.test(p.case)
+    ?Number(/diam[eè]tre\\s*(?:annonc[eé]\\s*)?(?:de\\s*)?(\\d{1,2}(?:[,.]\\d{1,2})?)\\s*mm/i.exec(p.case)[1].replace(',','.')):null
+}));
+const combined=[...products,...supplement];
+const sport=e.recommend(combined,{tier:'essential',style:'sport'},3);
+assert.equal(sport.length,3);
+assert.ok(sport.some(x=>x.product.kind==='supplemental'),'SKMEI sport models should compete with the main collection');
+assert.equal(e.diameterMm(supplement.find(x=>x.id==='skmei-1251')),null,
+ 'Unknown circular diameter must not be inferred from vendor metadata');
+assert.match(read('site/conseiller.js'),/discovery-catalogue\\.json/,'Advisor must load common build output');
+assert.match(read('scripts/build-unified-discovery.mjs'),/loadApprovedPopularPhotos/,'Common feed must enforce exact-model photo permissions');
 console.log('Advisor: 52-model shared source, 15 legacy checks, 135 preference combinations and safe size handling — OK');
