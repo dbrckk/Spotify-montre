@@ -4,7 +4,7 @@ import {join} from 'node:path';
 // Conversion-friendly product landing pages without unlicensed watch images,
 // invented Amazon ASINs, or unverifiable prices. The existing 15 core models
 // continue to own the photo-backed interactive comparison experience.
-export function buildPopularProductPages({root,products,coreProducts,affiliates,pageHead,page,e,u,link,tierNames,affiliateLink,verifiedLinks}){
+export function buildPopularProductPages({root,products,coreProducts,affiliates,pageHead,page,e,u,link,tierNames,affiliateLink,verifiedLinks,approvedPhotos}){
   const byId=new Map(coreProducts.map(p=>[p.id,p]));
   const related={
     sport:['casio-mdv107','seiko-5','hamilton-khaki'],
@@ -16,6 +16,7 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
   const paths=[];
   for(const p of products){
     const name=p.brand+' '+p.model;
+    const photo=approvedPhotos.get(p.id);
     const path='montres/'+p.id+'.html';
     const keyFacts=[
       ['Mouvement',p.movement],
@@ -45,11 +46,12 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       +'<nav class="crumb" aria-label="Fil d’Ariane"><a href="../index.html">Collection</a> / <a href="./modeles-populaires.html">'+products.length+' modèles complémentaires</a> / '+e(name)+'</nav>'
       +'<article class="am-extra-product" data-popular-watch-id="'+e(p.id)+'">'
       +'<div class="am-extra-hero">'
-      +'<div class="am-extra-art am-pick-'+e(p.style)+'" role="group" aria-label="Composition graphique non contractuelle, sans photographie de cette montre">'
+      +'<div class="am-extra-art am-pick-'+e(p.style)+'" role="group" aria-label="'+(photo?'Photo du modèle exact, droits de publication déclarés':'Composition graphique non contractuelle, sans photographie de cette montre')+'">'
+      +(photo?'<img class="am-extra-licensed-photo" src="../'+e(photo.url)+'" alt="Montre '+e(name)+'" decoding="async" loading="eager">':'')
       +'<span class="am-extra-art-kicker">'+e(p.category)+'</span><span class="am-extra-art-brand">'+e(p.brand)+'</span>'
       +'<span class="am-extra-art-model">'+e(p.model)+'</span>'
-      +(p.brand==='SKMEI'?'<span class="am-budget-watch am-budget-watch-large" aria-hidden="true"><span class="am-budget-dial"></span></span>':'')
-      +'<span class="am-extra-art-label">Une référence à découvrir · photographie exacte chez le vendeur ou la marque</span>'
+      +(!photo&&p.brand==='SKMEI'?'<span class="am-budget-watch am-budget-watch-large" aria-hidden="true"><span class="am-budget-dial"></span></span>':'')
+      +'<span class="am-extra-art-label">'+(photo?'Photographie autorisée · '+e(photo.rightsHolder):'Une référence à découvrir · photographie exacte chez le vendeur ou la marque')+'</span>'
       +'</div>'
       +'<div class="am-extra-intro"><p class="am-extra-overline">'+e(tierNames[p.tier])+' / '+e(category)+'</p>'
       +'<h1>'+e(name)+'</h1><p class="am-extra-subtitle">'+e(p.lead)+'</p>'
@@ -72,7 +74,7 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       +'<section id="sources" class="am-extra-provenance" aria-label="Origine des informations"><h2>Des informations vérifiables</h2>'
       +'<p>'+e(ranking)+'</p><p><strong>Pourquoi cette référence ?</strong> '+source+'</p>'
       +'<p><strong>Caractéristiques et photos exactes :</strong> '+link(p.officialUrl,(p.brand==='SKMEI'?'Fiche du vendeur SKMEI':'Site officiel '+p.brand))+'</p>'
-      +'<p>Les photos sont consultables chez la marque ou le vendeur cité : nous ne les republions pas sans autorisation. La mention de meilleures ventes, lorsqu’elle existe, n’atteste pas le classement de ce modèle sur Amazon.fr.</p></section>'
+      +'<p>'+(photo?'La photo du modèle bénéficie d’une déclaration de droits de publication documentée dans le registre interne.':'Les photos sont consultables chez la marque ou le vendeur cité : nous ne les republions pas sans autorisation.')+' La mention de meilleures ventes, lorsqu’elle existe, n’atteste pas le classement de ce modèle sur Amazon.fr.</p></section>'
       +'<section id="comparables" class="am-extra-related" aria-labelledby="am-extra-related-heading">'
       +'<h2 id="am-extra-related-heading">Trois autres montres à examiner</h2><p>Ces références de notre sélection principale disposent de fiches documentées et de photographies locales déclarées autorisées. Elles constituent des pistes de comparaison, non un classement.</p>'
       +'<ul>'+relatedItems+'</ul><a href="../index.html#montres">Comparer les 15 références principales</a></section>'
