@@ -50,6 +50,20 @@
    $('detailTitle').textContent=p.model;
    $('detailEditorial').textContent=p.title||'Notre sélection';
    $('detailStory').textContent=p.story||p.description;
+   const movementName={quartz:'Quartz',automatic:'Automatique','eco-drive':'Solaire · Eco-Drive'};
+   const essentialFacts=[
+     ['Mouvement',p.specs?.movement||movementName[p.movement]||null],
+     ['Diamètre',p.specs?.diameter||null],
+     ['Verre',p.specs?.glass||null],
+     ['Étanchéité',p.specs?.waterResistance||null]
+   ];
+   const essentials=$('detailEssentials');
+   if(essentials)essentials.replaceChildren(...essentialFacts.map(([label,value])=>{
+     const line=node('div','detail-fact');
+     const term=node('dt','',label),definition=node('dd',value?'':'detail-fact-unverified',value||'Non documenté');
+     line.append(term,definition);return line;
+   }));
+
    const art=$('detailArtwork'),photo=p.photoReview,photoLabel=$('detailPhotoLabel'),photoNote=$('detailPhotoNote'),zoomButton=$('detailPhotoZoom');
    if(art){
      const sources=[];
@@ -59,7 +73,23 @@
      if(sources.length){
        art.replaceChildren();art.classList.add('am-real-photo-stage');
        const img=node('img','am-real-product-photo');img.alt=p.brand+' '+p.model+' — photographie du modèle réel';img.loading='eager';img.decoding='async';img.referrerPolicy='no-referrer';
-       let index=0;img.onload=()=>{if(zoomButton)zoomButton.hidden=false};img.onerror=()=>{index++;if(index<sources.length)img.src=sources[index];else fallback()};
+       const localWidth=Number(photo.localWidth);
+       const localVersion=typeof photo.localSha256==='string'&&/^[a-f0-9]{64}$/.test(photo.localSha256)?'?v='+photo.localSha256.slice(0,12):'';
+       if(Number.isInteger(localWidth)&&localWidth>480){
+         const variants=[480,800].filter(w=>w<localWidth).map(w=>'./assets/watch-responsive/'+p.id+'-'+w+'.webp'+localVersion+' '+w+'w');
+         img.srcset=[...variants,photo.localUrl+localVersion+' '+localWidth+'w'].join(', ');
+         img.sizes='(max-width:620px) 300px, (max-width:970px) 340px, 470px';
+       }
+       if(Number.isInteger(localWidth)&&localWidth>0&&Number.isInteger(Number(photo.localHeight))&&Number(photo.localHeight)>0){
+         img.width=localWidth;img.height=Number(photo.localHeight);
+       }
+       img.fetchPriority='high';
+       let index=0;
+       img.onload=()=>{if(zoomButton)zoomButton.hidden=false};
+       img.onerror=()=>{
+         img.removeAttribute('srcset');img.removeAttribute('sizes');
+         index++;if(index<sources.length)img.src=sources[index];else fallback();
+       };
        art.append(img);img.src=sources[0];
        if(photoLabel)photoLabel.textContent='PHOTOGRAPHIE DU MODÈLE · '+(photo.provider||p.brand).toUpperCase();
        if(photoNote)photoNote.textContent='Modèle original de '+p.brand+' · Référence '+p.model;
@@ -106,7 +136,22 @@
        const frame=node('span','detail-related-photo');const imageUrl=q.photoReview?.localUrl;
        if(q.photoReview?.publicUsageApproved===true&&imageUrl==='./assets/watches/'+q.id+'.webp'){
          const img=node('img');img.alt='Photographie de '+q.brand+' '+q.model;img.loading='lazy';img.decoding='async';
-         img.width=320;img.height=320;img.onerror=()=>{img.remove();frame.append(node('span','detail-related-empty','Voir la fiche officielle'))};img.src=imageUrl;
+         img.width=Number.isInteger(q.photoReview.localWidth)?q.photoReview.localWidth:320;
+         img.height=Number.isInteger(q.photoReview.localHeight)?q.photoReview.localHeight:320;
+         const width=q.photoReview.localWidth;
+         const version=typeof q.photoReview.localSha256==='string'&&/^[a-f0-9]{64}$/.test(q.photoReview.localSha256)?'?v='+q.photoReview.localSha256.slice(0,12):'';
+         if(Number.isInteger(width)&&width>480){
+           const variants=[480,800].filter(w=>w<width).map(w=>'./assets/watch-responsive/'+q.id+'-'+w+'.webp'+version+' '+w+'w');
+           img.srcset=[...variants,imageUrl+version+' '+width+'w'].join(', ');
+           img.sizes='(max-width:470px) 86vw, (max-width:760px) 46vw, 320px';
+         }
+         img.onerror=()=>{
+           if(img.hasAttribute('srcset')){
+             img.removeAttribute('srcset');img.removeAttribute('sizes');img.src=imageUrl;return;
+           }
+           img.remove();frame.append(node('span','detail-related-empty','Voir la fiche officielle'));
+         };
+         img.src=imageUrl+version;
          frame.append(img);
        }else{window.AtelierWatch?.render(frame,q);frame.append(node('span','detail-related-empty','Illustration éditoriale'))}
        const reason=q.brand===p.brand?'Même maison horlogère':q.movement===p.movement?'Même type de mouvement':q.tier===p.tier?'Même gamme':'Autre style à explorer';
