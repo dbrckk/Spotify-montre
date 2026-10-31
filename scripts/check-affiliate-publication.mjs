@@ -8,7 +8,7 @@ const tmp=mkdtempSync(join(tmpdir(),'atelier-affiliate-integration-'));
 try {
   const target=join(tmp,'site');
   mkdirSync(target,{recursive:true});
-  for(const name of ['selection-affiliation.json','affiliation.html','confidentialite.html','affiliate-links.json','comparaisons-montres.json','editorial-insights.json']){
+  for(const name of ['selection-affiliation.json','selection-populaires.json','affiliation.html','confidentialite.html','affiliate-links.json','comparaisons-montres.json','editorial-insights.json']){
     cpSync(join(repository,'site',name),join(target,name));
   }
   // Test a disabled fixture before reviewing the real owner-tagged 13-link site.
