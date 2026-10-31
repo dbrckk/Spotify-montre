@@ -195,11 +195,11 @@ try{
  assert.equal(await cards.count(),15,'Removing a single brand filter returns to all 15 models');
  // A factual size filter must include measured watches only and keep unknowns explicit.
  await page.locator('#affDiameter').selectOption('compact');
- assert.equal(await cards.count(),3,'Three documented cases have diameter at most 38 mm');
+ assert.equal(await cards.count(),2,'Two circular watches have documented diameter at most 38 mm');
  await page.locator('#affDiameter').selectOption('medium');
  assert.equal(await cards.count(),7,'Seven documented cases have diameter above 38 and at most 40 mm');
  await page.locator('#affDiameter').selectOption('unknown');
- assert.equal(await cards.count(),4,'Four catalogue references still have no explicit diameter, including rectangular watches with L × l × H only');
+ assert.equal(await cards.count(),5,'Five catalogue references have no manufacturer-defined circular diameter, including rectangular cases');
  assert.ok(await page.locator('#affActiveFilters .am-filter-chip').count()>=1);
  await page.locator('#affActiveFilters .am-filter-chip',{hasText:'Diamètre à confirmer'}).click();
  assert.equal(await cards.count(),15,'Clearing diameter chip restores the catalogue');
