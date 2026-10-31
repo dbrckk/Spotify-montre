@@ -12,7 +12,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
   const known=new Set(existingProducts.map(p=>p.id));
   const tiers=['essential','signature','prestige'];
   const tierNames={essential:'Essentielle',signature:'Signature',prestige:'Prestige'};
-  const permittedHosts=['casio.com','citizenwatch.eu','orientwatch.fr','tissotwatches.com','seikowatches.com','hamiltonwatch.com'];
+  const permittedHosts=['casio.com','citizenwatch.eu','orientwatch.fr','tissotwatches.com','seikowatches.com','hamiltonwatch.com','shopskmei.com','skmei-egy.com'];
   const evidenceHosts=['montre.com',...permittedHosts];
   const validHost=(url,hosts)=>{
     try{
@@ -65,7 +65,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
       +' data-pick-movement="'+movementKind(p)+'" data-pick-search="'+e([p.brand,p.model,p.category,p.movement,p.lead].join(' '))+'">'
       +'<div class="am-pick-visual" role="group" aria-label="Repère graphique non contractuel, sans photographie du modèle"><span class="am-pick-visual-top">'+e(p.category)+'</span>'
       +'<span class="am-pick-visual-name">'+e(p.brand)+'</span><span class="am-pick-visual-ref">'+e(p.model)+'</span>'
-      +'<span class="am-pick-visual-caption">Repère graphique · photo exacte chez le fabricant</span></div>'
+      +'<span class="am-pick-visual-caption">Repère graphique · photo exacte chez le vendeur ou la marque</span></div>'
       +'<div class="am-pick-content"><p class="am-pick-kicker"><span>'+e(tierNames[p.tier])+'</span><span>'+e(claim)+'</span></p>'
       +(verifiedLinks.has(p.id)?'<p class="am-pick-exact">Fiche de référence Amazon.fr identifiée · prix et stock à vérifier</p>':'')
       +'<h3><a class="am-pick-detail-link" href="'+(front?'./montres/':'./')+e(p.id)+'.html">'+e(p.brand+' '+p.model)+'</a></h3>'
@@ -74,20 +74,20 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
       +(front?'':'<p class="am-pick-caution"><strong>Avant achat :</strong> '+e(p.caution)+'</p>')
       +'<div class="am-pick-actions">'
       +affiliateLink(p)
-      +link(p.officialUrl,'Photos et fiche fabricant')
+      +link(p.officialUrl,p.brand==='SKMEI'?'Photos et fiche vendeur':'Photos et fiche fabricant')
       +'</div><p class="am-pick-source">Pourquoi ici ? '+link(p.marketEvidence.url,p.marketEvidence.label)+'</p>'
       +'<p class="am-pick-note">'+(verifiedLinks.has(p.id)?'Lien vers une fiche Amazon.fr correspondant à la référence documentée. Vérifiez la variante, le vendeur, le prix et la disponibilité lors de la visite.':'La recherche Amazon peut présenter des variantes ou d’autres produits. Vérifier la référence exacte, le vendeur et le prix avant de commander.')+'</p>'
       +'</div></article>';
   };
-  const featuredIds=['casio-gw-m5610u-1','casio-f91w-1','casio-a168wg-9','citizen-tsuyosa-37-blue','casio-la-20wh-4a1','orient-mako40-black','seiko-speedtimer-ssc813','tissot-le-locle-white'];
+  const featuredIds=['casio-gw-m5610u-1','skmei-2056','skmei-2514','skmei-1874','skmei-9156','casio-f91w-1','citizen-tsuyosa-37-blue','seiko-speedtimer-ssc813'];
   const featured=featuredIds.map(id=>picks.find(p=>p.id===id));
   if(featured.some(p=>!p))throw Error('Featured model not in source catalog');
-  const globalDisclaimer='Ces références complètent les 15 modèles du comparateur. Certaines figurent sur des pages de meilleures ventes de fabricants ou de distributeurs ; ce ne sont pas les meilleures ventes mesurées sur Amazon.fr. Aucun tarif, stock, note ou volume de ventes n’est déduit de ces sources. Les photographies des nouveautés restent chez les fabricants tant que leur réutilisation n’est pas autorisée.';
+  const globalDisclaimer='Ces références complètent les 15 modèles du comparateur. Certaines figurent sur des pages de meilleures ventes de fabricants ou de distributeurs ; ce ne sont pas les meilleures ventes mesurées sur Amazon.fr. Aucun tarif, stock, note ou volume de ventes n’est déduit de ces sources. Les photographies des nouveautés restent chez les fabricants ou distributeurs tant que leur réutilisation n’est pas autorisée.';
   const affiliateNote=affiliates.enabled?'Les liens Amazon portent notre identifiant Partenaires. Une fiche directe dispose d’une correspondance de référence documentée ; les autres liens mènent à une recherche. Aucun lien ne garantit la disponibilité, le tarif ou l’approbation définitive de notre compte.':'Aucun lien Amazon rémunéré n’est activé.';
   const teaser='<section class="am-picks" id="modeles-populaires" aria-labelledby="am-picks-title"><div class="wrap">'
     +'<div class="am-picks-heading"><p class="overline kicker">01 · MODÈLES COMPLÉMENTAIRES</p>'
     +'<h2 id="am-picks-title">Des références remarquées, au-delà des 15 montres comparées.</h2>'
-    +'<p>G-SHOCK, modèles compacts, automatiques et signatures horlogères : huit pistes pour explorer nos '+picks.length+' montres documentées, dont une G-SHOCK avec lien Amazon.fr vers la référence identifiée. Aucun prix ni stock annoncé.</p>'
+    +'<p>SKMEI à petit budget, Casio, Citizen et signatures horlogères : huit pistes pour explorer nos '+picks.length+' montres documentées, dont une G-SHOCK avec fiche Amazon.fr correspondant à la référence identifiée. Aucun prix ni stock annoncé.</p>'
     +'</div><div class="am-picks-grid">'+featured.map(p=>card(p,true)).join('')+'</div>'
     +'<p class="am-picks-disclaimer">'+e(globalDisclaimer)+' '+e(affiliateNote)+'</p>'
     +'<a class="am-picks-more" href="./montres/modeles-populaires.html">Voir les '+picks.length+' modèles supplémentaires, par gamme →</a>'
@@ -110,16 +110,16 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     +'<h1>'+picks.length+' montres supplémentaires : modèles repérés et choix de style.</h1>'
     +'<p class="lead">Des références identifiées dans des listes de meilleures ventes propres à certains vendeurs ou marques, ainsi que des alternatives choisies pour leur design. Notre sélection est éditoriale, pas un classement des ventes françaises ou Amazon.</p>'
     +'<p>'+e(globalDisclaimer)+'</p><p>'+e(affiliateNote)+'</p>'
-    +'<nav class="am-picks-tier-nav" aria-label="Choisir une gamme">'
+    +'<nav class="am-picks-tier-nav" aria-label="Choisir une gamme"><a href="#pick-skmei-2056">SKMEI · petit budget</a>'
     +tiers.map(t=>'<a href="#gamme-'+e(t)+'">'+e(tierNames[t])+'</a>').join('')
     +'</nav></header>'+filters+'<div id="am-picks-list">'+sections+'</div>'+emptyMessage
     +'<aside class="am-picks-method"><h2>Comment ces montres sont-elles sélectionnées ?</h2>'
-    +'<p>Chaque code de modèle et chaque caractéristique sont rapprochés de la fiche du fabricant. Les mentions « meilleures ventes » décrivent uniquement la liste citée, à la date du '+e(source.reviewedOn)+'. Elles ne constituent pas des données de ventes Amazon ni un palmarès national.</p>'
+    +'<p>Chaque code de modèle et caractéristique sont rapprochés de la fiche de la marque ou du distributeur cité. Les mentions « meilleures ventes » décrivent uniquement la liste citée, à la date du '+e(source.reviewedOn)+'. Elles ne constituent pas des données de ventes Amazon ni un palmarès national.</p>'
     +'<p>Nous n’affichons pas de photographie d’un modèle sans autorisation de reproduction, ni de prix Amazon non synchronisé. Les recherches Amazon.fr sont explicitement annoncées comme telles et peuvent mener à plusieurs variantes. Seules les références contrôlées sur une fiche Amazon.fr disposent d’un lien direct. Pour comparer directement des modèles aux photographies locales déjà documentées, <a href="../index.html#montres">revenir aux 15 montres du comparateur</a>.</p></aside></div>';
   const graph={'@context':'https://schema.org','@graph':[
     {'@type':'CollectionPage',name:picks.length+' modèles de montres complémentaires',url:u(path),inLanguage:'fr-FR',description:'Sélection éditoriale fondée sur des sources fabricants et des listes de meilleures ventes distinctes. Aucun classement Amazon revendiqué.'},
     {'@type':'ItemList',numberOfItems:picks.length,itemListElement:picks.map((p,i)=>({'@type':'ListItem',position:i+1,name:p.brand+' '+p.model,url:u('montres/'+p.id+'.html')}))}
   ]};
-  writeFileSync(join(root,path),page(pageHead({title:picks.length+' montres à découvrir : Casio, Citizen, Seiko, Tissot | Atelier Montres',description:picks.length+' montres sourcées : rétro, plongeuses, sport, solaire et automatiques. Liens Amazon clairement distingués.',path}),main,graph).replace('</head>','<link rel="stylesheet" href="../popular-picks.css"><script defer src="../popular-filters.js"></script></head>'));
+  writeFileSync(join(root,path),page(pageHead({title:picks.length+' montres à découvrir : SKMEI, Casio, Citizen, Seiko | Atelier Montres',description:picks.length+' montres sourcées, dont SKMEI accessibles : rétro, sport, acier, quartz et automatiques. Recherches Amazon signalées.',path}),main,graph).replace('</head>','<link rel="stylesheet" href="../popular-picks.css"><script defer src="../popular-filters.js"></script></head>'));
   return {path,detailPaths,teaser,count:picks.length,featuredCount:featured.length,searchLinks:affiliates.enabled?picks.length-verifiedLinks.size:0,directLinks:verifiedLinks.size};
 }
