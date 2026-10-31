@@ -39,7 +39,7 @@ export function loadVerifiedPopularLinks({root,picks,affiliates,amazonPartnerTag
     if(item.evidenceType!=='amazon_fr_product_page'
       ||typeof item.evidenceListingTitle!=='string'
       ||!item.evidenceListingTitle.toLowerCase().includes(item.marketplaceModel.toLowerCase())
-      ||!item.evidenceListingTitle.toLowerCase().includes('casio')&&!item.evidenceListingTitle.toLowerCase().includes(p.brand.toLowerCase()))
+      ||!item.evidenceListingTitle.toLowerCase().includes(p.brand.split(' ')[0].toLowerCase()))
       throw Error('Exact Amazon.fr product title and model not substantiated: '+id);
     if(typeof item.evidenceNote!=='string'||item.evidenceNote.length<80)
       throw Error('Evidence limitations must be documented: '+id);
