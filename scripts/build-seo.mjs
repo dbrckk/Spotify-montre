@@ -3,6 +3,7 @@ import {join,resolve} from 'node:path';
 import {validateAffiliateConfig} from './affiliate-policy.mjs';
 import {buildComparisonPages} from './build-comparisons.mjs';
 import {buildSearchCollections} from './build-search-collections.mjs';
+import {buildEditorialPolicy} from './build-editorial-policy.mjs';
 import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
 
 (function buildSeo() {
@@ -61,8 +62,8 @@ import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
   const u = path => new URL(path, site).href;
   const schema = obj => JSON.stringify(obj).replace(/</g, '\\u003c');
   const pageHead = ({ title, description, path, type = 'article', image, illustration = false }) => `<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#1b2925"><meta name="robots" content="index,follow,max-image-preview:large"><title>${e(title)}</title><meta name="description" content="${e(description)}"><link rel="canonical" href="${e(u(path))}"><meta property="og:type" content="${e(type)}"><meta property="og:locale" content="fr_FR"><meta property="og:site_name" content="Atelier Montres"><meta property="og:title" content="${e(title)}"><meta property="og:description" content="${e(description)}"><meta property="og:url" content="${e(u(path))}">${image ? `<meta property="og:image" content="${e(image)}">` : ''}<meta name="twitter:card" content="summary_large_image"><link rel="icon" href="../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="../seo-guides.css">${illustration ? '<script defer src="../watch-illustrations.js"></script><script defer src="../seo-watch-art.js"></script>' : ""}${umamiScripts("../")}`;
-  const header = `<a class="skip" href="#contenu">Aller au contenu</a><header class="top"><div class="wrap nav"><a class="logo" href="../index.html">✦ Atelier Montres</a><nav aria-label="Navigation principale"><a href="../index.html#montres">Les 15 montres</a><a href="../conseiller.html">Trouver ma montre</a><a href="./guide-choisir-montre.html">Guide d'achat</a><a href="./quartz-ou-automatique.html">Comparer les mouvements</a></nav></div></header>`;
-  const footer = `<footer><div class="wrap"><strong>Atelier Montres</strong><p>Sélection éditoriale indépendante. Aucun achat ni paiement ne s'effectue sur ce site actuellement. ${partners.enabled ? 'Certains liens Amazon.fr sont rémunérés (mention « lien rémunéré » à proximité). '+amazonStatement : 'Les liens vers les fabricants ne sont pas rémunérés.'}</p><p><a href="../confidentialite.html">Vie privée</a> · <a href="../index.html#montres">Comparer les montres</a></p></div></footer>`;
+  const header = `<a class="skip" href="#contenu">Aller au contenu</a><header class="top"><div class="wrap nav"><a class="logo" href="../index.html">✦ Atelier Montres</a><nav aria-label="Navigation principale"><a href="../index.html#montres">Les 15 montres</a><a href="../conseiller.html">Trouver ma montre</a><a href="./guide-choisir-montre.html">Guide d'achat</a><a href="./quartz-ou-automatique.html">Comparer les mouvements</a><a href="./methode-selection.html">Notre méthode</a></nav></div></header>`;
+  const footer = `<footer><div class="wrap"><strong>Atelier Montres</strong><p>Sélection éditoriale indépendante. Aucun achat ni paiement ne s'effectue sur ce site actuellement. ${partners.enabled ? 'Certains liens Amazon.fr sont rémunérés (mention « lien rémunéré » à proximité). '+amazonStatement : 'Les liens vers les fabricants ne sont pas rémunérés.'}</p><p><a href="../confidentialite.html">Vie privée</a> · <a href="./methode-selection.html">Notre méthode</a> · <a href="../index.html#montres">Comparer les montres</a></p></div></footer>`;
   const page = (head, main, structured) => `<!doctype html><html lang="fr"><head>${head}<script type="application/ld+json">${schema(structured)}</script></head><body>${header}<main id="contenu">${main}</main>${footer}</body></html>\n`;
   const allLinks = () => products.map(p => `<li><a href="./montres/${e(p.id)}.html">${e(p.brand)} ${e(p.model)}</a><small>${e(p.description)}</small></li>`).join('');
   const movement = { quartz: 'quartz', automatic: 'automatique', 'eco-drive': 'solaire' };
@@ -70,6 +71,7 @@ import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
   mkdirSync(join(root, 'montres'), { recursive: true });
   const comparisons=buildComparisonPages({root,products,amazonLinks,partners,pageHead,page,e,u,amazonStatement});
   const collections=buildSearchCollections({root,products,amazonLinks,partners,pageHead,page,e,u});
+  const editorialPolicy=buildEditorialPolicy({root,data,products,amazonLinks,partners,pageHead,page,e,u});
   for (const p of products) {
     if (!/^[a-z0-9-]{4,64}$/.test(p.id) || !/^https:\/\//.test(p.officialUrl)) throw Error('Référence ou lien fabricant invalide');
     const rel = 'montres/' + p.id + '.html';
@@ -172,12 +174,14 @@ import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
   collection=collection.replace(/<!-- AM_SEO_COMPARISONS_START -->[\s\S]*?<!-- AM_SEO_COMPARISONS_END -->\s*/g,'');
   collection=collection.replace(/<!-- AM_SEO_CATEGORIES_START -->[\s\S]*?<!-- AM_SEO_CATEGORIES_END -->\s*/g,'');
   collection=collection.replace(/<!-- AM_SEO_HEAD_START -->[\s\S]*?<!-- AM_SEO_HEAD_END -->/g,'');
+  collection=collection.replace(/<!-- AM_EDITORIAL_POLICY_START -->[\s\S]*?<!-- AM_EDITORIAL_POLICY_END -->\s*/g,'');
   if (partners.enabled) {
     collection=collection.replace(/<div class="aff-disclosure">[\s\S]*?<\/div>/,'<div class="aff-disclosure"><strong>Transparence commerciale</strong><p>Certains modèles proposent un lien Amazon.fr clairement indiqué « lien rémunéré ». Les autres liens fabricants restent non rémunérés. Le paiement et les retours sont gérés par le vendeur externe. '+e(amazonStatement)+'</p></div>');
     collection=collection.replace('Liens actuellement non affiliés.','Liens Amazon rémunérés signalés au niveau des modèles concernés.');
     collection=collection.replace('Liens actuellement non rémunérés','Liens Amazon rémunérés signalés');
   }
   if (!collection.includes('<section class="faq" id="faq"')) throw Error('Point insertion SEO absent');
+  collection=collection.replace('<section class="faq" id="faq"','<!-- AM_EDITORIAL_POLICY_START -->'+editorialPolicy.teaser+'<!-- AM_EDITORIAL_POLICY_END -->\n<section class="faq" id="faq"');
   collection=collection.replace('<section class="faq" id="faq"', '<!-- AM_SEO_LINKS_START -->' + selection + '<!-- AM_SEO_LINKS_END -->\n<section class="faq" id="faq"');
   collection=collection.replace('<section id="gammes"', '<!-- AM_SEO_GUIDES_START -->'+guideCards+'<!-- AM_SEO_GUIDES_END -->\n<!-- AM_SEO_CATEGORIES_START -->'+collections.homeCards+'<!-- AM_SEO_CATEGORIES_END -->\n<!-- AM_SEO_COMPARISONS_START -->'+comparisons.comparisonCards+'<!-- AM_SEO_COMPARISONS_END -->\n<section id="gammes"');
   collection=collection.replace(/<title>[^<]+<\/title>/,'<title>Montres homme et femme : 15 modèles à comparer | Atelier Montres</title>');
@@ -237,7 +241,7 @@ import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
   }
   writeFileSync(join(root,'index.html'),collection);
   writeFileSync(join(root,'affiliation.html'),collection);
-  const paths=['','conseiller.html',guidePath,...editorialPaths,...collections.paths,...comparisons.comparisonPaths,...products.map(p=>'montres/'+p.id+'.html')];
+  const paths=['','conseiller.html',editorialPolicy.path,guidePath,...editorialPaths,...collections.paths,...comparisons.comparisonPaths,...products.map(p=>'montres/'+p.id+'.html')];
   const xml=`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${paths.map(path=>`  <url><loc>${e(u(path))}</loc></url>`).join('\n')}\n</urlset>\n`;
   writeFileSync(join(root,'sitemap.xml'),xml);
   if (partners.enabled) {
@@ -275,5 +279,5 @@ import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
   for(const name of ['revue-photo.html','revue-photo.js','revue-photo.css'])rmSync(join(root,name),{force:true});
   const manifest={siteUrl:homepage,productCount:products.length,paths:paths.map(u),affiliateActive:partners.enabled,affiliateCount:partners.links.size,checkoutActive:false,comparisonCount:comparisons.comparisonPaths.length,categoryCount:collections.paths.length,analyticsActive:Boolean(umamiId),analyticsProvider:umamiId?"umami":null,licensedImageCount:products.filter(p=>p.photoReview?.publicUsageApproved===true).length,photoPermissionEvidenceStatus:'owner_declared_not_independently_verified'};
   writeFileSync(join(root,'seo-manifest.json'),JSON.stringify(manifest,null,2)+'\n');
-  console.log('SEO build: '+products.length+' montres + '+(editorialPaths.length+1)+' guides + '+comparisons.comparisonPaths.length+' comparaisons + '+collections.paths.length+' collections, '+paths.length+' URLs sur '+homepage);
+  console.log('SEO build: '+products.length+' montres + '+(editorialPaths.length+1)+' guides + '+comparisons.comparisonPaths.length+' comparaisons + '+collections.paths.length+' collections + méthode de sélection, '+paths.length+' URLs sur '+homepage);
 })();
