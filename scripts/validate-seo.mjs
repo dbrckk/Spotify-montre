@@ -10,8 +10,8 @@ const manifest=JSON.parse(read('seo-manifest.json'));
 assert.equal(manifest.productCount,15);
 assert.equal(manifest.popularAdditionalCount,30,'Thirty researched models complement the 15 photo-backed core products');
 assert.equal(manifest.popularDetailCount,30,'Every supplemental model requires a dedicated factual landing page');
-assert.equal(manifest.popularAffiliateDirectLinks,manifest.affiliateActive?1:0,'Only source-verified supplementary ASINs may become direct product links');
-assert.equal(manifest.popularAffiliateSearchLinks,manifest.affiliateActive?29:0,'All remaining supplemental products require labeled Amazon searches');
+assert.equal(manifest.popularAffiliateDirectLinks,manifest.affiliateActive?3:0,'Only source-verified supplementary ASINs may become direct product links');
+assert.equal(manifest.popularAffiliateSearchLinks,manifest.affiliateActive?27:0,'All remaining supplemental products require labeled Amazon searches');
 const insightData=JSON.parse(read('editorial-insights.json'));
 assert.equal(insightData.version,1);
 assert.equal(Object.keys(insightData.products).length,15,'15 unique editorial briefs required');
@@ -175,8 +175,10 @@ assert.equal((home.match(/rel="canonical"/g)||[]).length,1,'Homepage has exactly
 // source-confirmed Amazon.fr ASINs can become direct product links.
 const exactPopular=JSON.parse(readFileSync(resolve(root,'../research/amazon-fr-popular-verified.json'),'utf8'));
 const exactPopularLinks=exactPopular.verifiedProducts;
-assert.equal(Object.keys(exactPopularLinks).length,1,'ASIN promotion requires a source-verified registry entry');
+assert.equal(Object.keys(exactPopularLinks).length,3,'ASIN promotion requires a source-verified registry entry');
 assert.equal(exactPopularLinks['casio-gw-m5610u-1'].asin,'B09BCPP68Q','Actual Amazon.fr G-SHOCK source code must be used');
+assert.equal(exactPopularLinks['casio-f91w-1'].asin,'B000J34HN4','Casio F-91W documented Amazon.fr ASIN');
+assert.equal(exactPopularLinks['casio-a168wg-9'].asin,'B002LAS086','Casio vintage gold documented Amazon.fr ASIN');
 const popularFeed=JSON.parse(read('selection-populaires.json'));
 const popularPath='montres/modeles-populaires.html';
 const popularHtml=read(popularPath);
@@ -204,9 +206,10 @@ assert.match(read('popular-filters.js'),/querySelectorAll\('\.am-pick-card\[data
 assert.match(read('popular-picks.css'),/\.am-picks-page \.am-pick-card\[hidden\]/,'CSS must honor native hidden when filter is active');
 assert.doesNotMatch(home,/src="\.\.\/popular-filters\.js"/,'Homepage must not load collection-only interaction JavaScript');
 assert.ok(home.includes('id="pick-casio-gw-m5610u-1"'),'Verified Amazon G-SHOCK must be featured on homepage');
-assert.ok(home.includes('https://www.amazon.fr/dp/B09BCPP68Q?tag=drackk04-21'),'Home feature must link to the only source-verified supplemental ASIN');
+assert.ok(home.includes('https://www.amazon.fr/dp/B09BCPP68Q?tag=drackk04-21'),'Home feature must link to the verified G-SHOCK ASIN');
 assert.equal((home.match(/data-amazon-product="casio-gw-m5610u-1"/g)||[]).length,1,'Only one direct Amazon supplemental CTA should be featured');
-assert.equal((home.match(/data-amazon-search-id=/g)||[]).length,7,'Other seven homepage features retain clearly labeled Amazon search links');
+assert.equal((home.match(/data-amazon-search-id=/g)||[]).length,6,'Six other homepage features retain clearly labeled Amazon search links');
+assert.equal((home.match(/data-amazon-product="casio-f91w-1"/g)||[]).length,1,'F-91W featured exact-model Amazon referral');
 const existingIds=new Set(feed.products.map(p=>p.id));
 for(const p of popularFeed.products){
   assert.ok(!existingIds.has(p.id),'Supplemental reference must not duplicate comparables: '+p.id);
