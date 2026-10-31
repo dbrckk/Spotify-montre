@@ -604,6 +604,146 @@
         "label": "Choix éditorial sur fiche Hamilton Ventura",
         "url": "https://www.hamiltonwatch.com/fr-fr/h24411732-ventura-quartz.html"
       }
+    },
+    {
+      "id": "casio-ae1200wh-1av",
+      "brand": "Casio",
+      "model": "AE-1200WH-1AV",
+      "tier": "essential",
+      "style": "retro",
+      "category": "Heure mondiale / numérique rétro",
+      "movement": "Quartz numérique",
+      "case": "Boîtier résine 45 × 42,1 × 12,5 mm",
+      "glass": "Résine",
+      "water": "10 bar annoncés",
+      "lead": "Affichage heure mondiale avec carte, cinq alarmes et autonomie annoncée de dix ans : une digitale pratique au look rétro.",
+      "caution": "Les 42,1 mm sont la largeur du boîtier. Vérifier la variante AE-1200WH-1AV et ne pas confondre avec l’AE-1200WH-1CV.",
+      "officialUrl": "https://www.casio.com/fr/watches/casio/product.AE-1200WH-1AV/",
+      "marketEvidence": {
+        "kind": "editorial",
+        "label": "Choix éditorial et fiche constructeur Casio AE-1200WH-1AV",
+        "url": "https://www.casio.com/fr/watches/casio/product.AE-1200WH-1AV/"
+      }
+    },
+    {
+      "id": "addiesdive-ad2030",
+      "brand": "ADDIESDIVE",
+      "model": "AD2030",
+      "tier": "essential",
+      "style": "steel",
+      "category": "Cadran texturé / acier compact",
+      "movement": "Quartz VH31/VH60 selon la variante",
+      "case": "Boîtier acier 316L de 36 mm, épaisseur 12 mm",
+      "glass": "Minéral bombé selon le vendeur",
+      "water": "10 bar annoncés",
+      "lead": "Petit boîtier acier 36 mm, cadran sable ou coloré et seconde fluide : une silhouette soignée pour un budget accessible.",
+      "caution": "Choisir précisément la couleur et la variante de mouvement; le verre est annoncé minéral et non saphir. Vérifier la livraison France.",
+      "officialUrl": "https://www.addiesdivewatches.com/products/new-addiesdive-36mm-quartz-watch-vh31-movement-ad2030",
+      "marketEvidence": {
+        "kind": "editorial",
+        "label": "Référence AD2030 documentée sur la fiche de la marque ADDIESDIVE",
+        "url": "https://www.addiesdivewatches.com/products/new-addiesdive-36mm-quartz-watch-vh31-movement-ad2030"
+      }
+    },
+    {
+      "id": "pagani-pd1701",
+      "brand": "Pagani Design",
+      "model": "PD-1701",
+      "tier": "signature",
+      "style": "steel",
+      "category": "Chronographe / acier et saphir",
+      "movement": "Quartz chronographe VK63",
+      "case": "Boîtier annoncé 40 mm",
+      "glass": "Saphir selon la fiche vendeur",
+      "water": "100 m annoncés",
+      "lead": "Chronographe à trois compteurs, bracelet acier et verre saphir annoncé : un style sportif travaillé et accessible.",
+      "caution": "Plusieurs générations et bracelets existent; vérifier PD-1701, le calibre et la variante précise avant commande. Ne pas confondre hommage et modèle original.",
+      "officialUrl": "https://www.paganidesignwatch.com/fr/pagani-design-pd-1701/",
+      "marketEvidence": {
+        "kind": "retailer_bestseller",
+        "label": "PD-1701 présentée parmi les chronographes les plus vendus sur la boutique Pagani Design",
+        "url": "https://www.paganidesignwatch.com/fr/"
+      }
+    },
+    {
+      "id": "pagani-pd1751",
+      "brand": "Pagani Design",
+      "model": "PD-1751",
+      "tier": "signature",
+      "style": "dress",
+      "category": "Automatique / acier 36 mm",
+      "movement": "Automatique japonais NH35 annoncé",
+      "case": "Boîtier annoncé 36 mm",
+      "glass": "Saphir avec traitement antireflet annoncé",
+      "water": "200 m annoncés",
+      "lead": "Une automatique compacte de 36 mm au cadran sobre, avec calibre NH35 et verre saphir annoncés par le vendeur.",
+      "caution": "Vérifier le calibre et la résistance à l’eau sur la variante reçue; les chiffres de la boutique ne constituent pas des tests indépendants.",
+      "officialUrl": "https://www.paganidesignwatch.com/fr/pagani-design-pd-1751",
+      "marketEvidence": {
+        "kind": "retailer_bestseller",
+        "label": "PD-1751 présentée parmi les montres hommage populaires sur la boutique Pagani Design",
+        "url": "https://www.paganidesignwatch.com/fr/"
+      }
+    },
+    {
+      "id": "pagani-pd1776",
+      "brand": "Pagani Design",
+      "model": "PD-1776",
+      "tier": "essential",
+      "style": "compact",
+      "category": "Femme / cadran bijou 32 mm",
+      "movement": "Quartz VH65 annoncé",
+      "case": "Boîtier annoncé 32 mm",
+      "glass": "Saphir annoncé",
+      "water": "100 m annoncés",
+      "lead": "Cadran coloré façon bijou, silhouette compacte de 32 mm et acier brillant : une option féminine au style affirmé.",
+      "caution": "La fiche comporte plusieurs couleurs et finitions; vérifier la version expédiée, la taille réelle au poignet et les conditions de garantie.",
+      "officialUrl": "https://www.paganidesignwatch.com/fr/pagani-design-pd-1776",
+      "marketEvidence": {
+        "kind": "retailer_bestseller",
+        "label": "PD-1776 présentée dans la sélection de quartz populaires de Pagani Design",
+        "url": "https://www.paganidesignwatch.com/fr/"
+      }
+    },
+    {
+      "id": "curren-cur210",
+      "brand": "Curren",
+      "model": "CUR210 Blanche Heart",
+      "tier": "essential",
+      "style": "dress",
+      "category": "Femme / cuir et cadran cœur",
+      "movement": "Quartz analogique",
+      "case": "Cadran annoncé 3,3 cm, boîtier non détaillé",
+      "glass": "Verre non documenté",
+      "water": "Étanchéité non documentée",
+      "lead": "Une montre féminine en cuir, cadran décoré d’un cœur et choix de couleurs variées : un look habillé à petit budget.",
+      "caution": "Ne pas interpréter les 3,3 cm du cadran comme un diamètre de boîtier certifié. Vérifier la résistance à l’eau non publiée.",
+      "officialUrl": "https://www.currenwatches.com/products/curren-womens-blanche-heart-watch-dial-3-3cm-cur210",
+      "marketEvidence": {
+        "kind": "retailer_bestseller",
+        "label": "CUR210 annoncée Best Seller dans la sélection femmes de Curren Watches",
+        "url": "https://www.currenwatches.com/pages/women-watches"
+      }
+    },
+    {
+      "id": "skmei-2256",
+      "brand": "SKMEI",
+      "model": "2256",
+      "tier": "essential",
+      "style": "steel",
+      "category": "Acier minimaliste / petit budget",
+      "movement": "Quartz analogique",
+      "case": "Boîtier acier annoncé 42 mm, épaisseur 12 mm",
+      "glass": "Minéral annoncé",
+      "water": "3 bar annoncés",
+      "lead": "Bracelet acier, cadran épuré et guichet date dans un boîtier de 42 mm : une montre élégante et accessible.",
+      "caution": "3 bar sont adaptés aux éclaboussures mais pas à la natation. Vérifier la couleur, le bracelet et l’authenticité chez le vendeur.",
+      "officialUrl": "https://www.shopskmei.com/product/skmei-2256-minimalist-steel-quartz-watch/",
+      "marketEvidence": {
+        "kind": "retailer_bestseller",
+        "label": "SKMEI 2256 figure dans les modèles populaires affichés par la boutique SKMEI",
+        "url": "https://www.shopskmei.com/"
+      }
     }
   ]
 }

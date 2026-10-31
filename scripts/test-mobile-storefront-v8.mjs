@@ -29,7 +29,7 @@ try{
  const cards=page.locator('#affGrid .aff-card');
  await cards.first().waitFor({state:'visible',timeout:20000});
  assert.equal(await cards.count(),15,'The full genuine catalogue should render');
- // The 30 additional popular/editorial models are a clearly separated
+ // The 37 additional popular/editorial models are a clearly separated
  // commercial discovery path, not fake 15-card catalog entries.
  const popular=page.locator('#modeles-populaires');
  assert.ok(await popular.isVisible(),'Popular sourced watches should be visible below the core catalogue');
@@ -54,9 +54,9 @@ try{
  await page.screenshot({path:'artifacts/mobile-popular-watch-discovery.png',fullPage:true});
  const popularPage=await browser.newPage({viewport:{width:393,height:852},isMobile:true,hasTouch:true,locale:'fr-FR'});
  await popularPage.goto(new URL('/montres/modeles-populaires.html',base).href,{waitUntil:'domcontentloaded'});
- assert.equal(await popularPage.locator('article.am-pick-card').count(),30,'All supplemental watch models on one source-backed page');
+ assert.equal(await popularPage.locator('article.am-pick-card').count(),37,'All supplemental watch models on one source-backed page');
  assert.equal(await popularPage.locator('.am-picks-tier').count(),3,'All three editorial ranges are represented');
- assert.equal(await popularPage.locator('a[data-amazon-search-id]').count(),27,'Twenty-seven variants without documented ASINs must use labeled search results');
+ assert.equal(await popularPage.locator('a[data-amazon-search-id]').count(),34,'Thirty-four variants without documented ASINs must use labeled search results');
  assert.equal(await popularPage.locator('a[data-amazon-product]').count(),3,'Three Amazon.fr models have documented ASINs');
  const confirmedGshock=popularPage.locator('#pick-casio-gw-m5610u-1 a[data-amazon-product]');
  assert.equal(await confirmedGshock.getAttribute('href'),'https://www.amazon.fr/dp/B09BCPP68Q?tag=drackk04-21');
@@ -65,12 +65,12 @@ try{
  assert.equal(await popularPage.locator('img').count(),0,'No unauthorized new product photography');
  const popularPageExtent=await popularPage.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
  assert.ok(popularPageExtent.scroll<=popularPageExtent.client+2,'Supplemental page must not overflow Android');
- await popularPage.screenshot({path:'artifacts/mobile-30-popular-watches.png',fullPage:true});
+ await popularPage.screenshot({path:'artifacts/mobile-37-popular-watches.png',fullPage:true});
  // Accessible progressive enhancement: filters must be functional on Android,
  // preserve one exact Amazon destination and never hide source content without JS.
  const filterForm=popularPage.locator('#am-pick-filters');
  assert.ok(await filterForm.isVisible(),'Source-backed collection filters should activate when JavaScript runs');
- assert.equal(await popularPage.locator('#am-pick-filter-count').innerText(),'30 modèles sur 30');
+ assert.equal(await popularPage.locator('#am-pick-filter-count').innerText(),'37 modèles sur 37');
  await popularPage.locator('#am-filter-style').selectOption('sport');
  assert.equal(await popularPage.locator('#am-picks-list .am-pick-card:visible').count(),10,
    'Sport style includes documented G-SHOCKs, Seiko 5, Citizen, Orient and Speedtimer');
@@ -86,18 +86,18 @@ try{
  assert.equal(await popularPage.locator('#am-picks-list .am-pick-card:visible').count(),0,
    'Impossible search must not show unrelated watches');
  assert.ok(await popularPage.locator('#am-pick-filter-empty').isVisible(),'Accessible empty state must be displayed');
- assert.match(await popularPage.locator('#am-pick-filter-count').innerText(),/^0 modèle sur 30$/);
+ assert.match(await popularPage.locator('#am-pick-filter-count').innerText(),/^0 modèle sur 37$/);
  await filterForm.locator('button[type=reset]').click();
- assert.equal(await popularPage.locator('#am-picks-list .am-pick-card:visible').count(),30,
-   'Reset must restore all 30 products and not remove existing links');
+ assert.equal(await popularPage.locator('#am-picks-list .am-pick-card:visible').count(),37,
+   'Reset must restore all 37 products and not remove existing links');
  assert.equal(await popularPage.locator('.am-picks-tier:visible').count(),3);
- assert.equal(await popularPage.locator('#am-pick-filter-count').innerText(),'30 modèles sur 30');
+ assert.equal(await popularPage.locator('#am-pick-filter-count').innerText(),'37 modèles sur 37');
  await popularPage.locator('#am-filter-query').fill('Tsuyósa');
  assert.equal(await popularPage.locator('#am-picks-list .am-pick-card:visible').count(),1,
    'Accent-insensitive exact-model lookup should find Citizen Tsuyosa');
  assert.ok(await popularPage.locator('#pick-citizen-tsuyosa-37-blue').isVisible());
  await popularPage.locator('.am-picks-tier-nav a[href="#gamme-prestige"]').click();
- assert.equal(await popularPage.locator('#am-picks-list .am-pick-card:visible').count(),30,
+ assert.equal(await popularPage.locator('#am-picks-list .am-pick-card:visible').count(),37,
    'Existing collection tier anchor links must reset filters instead of pointing to hidden categories');
  await popularPage.screenshot({path:'artifacts/mobile-filterable-popular-watches.png',fullPage:true});
  const noJs=await browser.newPage({viewport:{width:393,height:852},isMobile:true,hasTouch:true,
@@ -105,14 +105,14 @@ try{
  const fallbackResponse=await noJs.goto(new URL('/montres/modeles-populaires.html',base).href,
    {waitUntil:'domcontentloaded'});
  assert.ok(fallbackResponse?.ok(),'Progressive-enhancement fallback should load without JavaScript');
- assert.equal(await noJs.locator('.am-pick-card:visible').count(),30,
+ assert.equal(await noJs.locator('.am-pick-card:visible').count(),37,
    'JavaScript disabled must preserve all source-backed watch ideas');
  assert.equal(await noJs.locator('#am-pick-filters:visible').count(),0,
    'Non-functional controls must not be exposed without JavaScript');
- assert.equal(await noJs.locator('a[data-amazon-search-id]').count(),27);
+ assert.equal(await noJs.locator('a[data-amazon-search-id]').count(),34);
  assert.equal(await noJs.locator('a[data-amazon-product]').count(),3);
  await noJs.close();
- console.log('PASS: 30 source-backed watches filtered by tier, style, movement and accented search, with no-JS fallback');
+ console.log('PASS: 37 source-backed watches filtered by tier, style, movement and accented search, with no-JS fallback');
 
  // High-intent landing pages: each supplemental model must have a distinct,
  // indexable, source-backed product page and an honest Amazon search exit.
@@ -174,7 +174,7 @@ try{
  }));
  assert.ok(narrow.scroll<=narrow.client+2,'Supplemental watch landing must reflow at 320 CSS px');
  await popularPage.close();
- console.log('PASS: 30 SEO watch pages, three documented Amazon.fr ASINs, twenty-seven honest searches, exact sources and Android reflow');
+ console.log('PASS: 37 SEO watch pages, three documented Amazon.fr ASINs, thirty-four honest searches, exact sources and Android reflow');
  const shopFirst=await page.evaluate(()=>{
    const ids=['gammes','montres','amEditorialGallery','histoire'];
    const positions=ids.map(id=>document.getElementById(id)?.getBoundingClientRect().top+window.scrollY);

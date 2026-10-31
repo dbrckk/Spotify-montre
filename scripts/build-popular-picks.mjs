@@ -13,7 +13,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
   const known=new Set(existingProducts.map(p=>p.id));
   const tiers=['essential','signature','prestige'];
   const tierNames={essential:'Essentielle',signature:'Signature',prestige:'Prestige'};
-  const permittedHosts=['casio.com','citizenwatch.eu','orientwatch.fr','tissotwatches.com','seikowatches.com','hamiltonwatch.com','shopskmei.com','skmei-egy.com'];
+  const permittedHosts=['casio.com','citizenwatch.eu','orientwatch.fr','tissotwatches.com','seikowatches.com','hamiltonwatch.com','shopskmei.com','skmei-egy.com','addiesdivewatches.com','paganidesignwatch.com','currenwatches.com'];
   const evidenceHosts=['montre.com',...permittedHosts];
   const validHost=(url,hosts)=>{
     try{
@@ -84,7 +84,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
       +'<p class="am-pick-note">'+(verifiedLinks.has(p.id)?'Lien vers une fiche Amazon.fr correspondant à la référence documentée. Vérifiez la variante, le vendeur, le prix et la disponibilité lors de la visite.':'La recherche Amazon peut présenter des variantes ou d’autres produits. Vérifier la référence exacte, le vendeur et le prix avant de commander.')+'</p>'
       +'</div></article>';
   };
-  const featuredIds=['casio-gw-m5610u-1','skmei-2056','skmei-2514','skmei-1874','skmei-9156','casio-f91w-1','citizen-tsuyosa-37-blue','seiko-speedtimer-ssc813'];
+  const featuredIds=['casio-gw-m5610u-1','skmei-2056','skmei-2256','curren-cur210','pagani-pd1776','casio-f91w-1','addiesdive-ad2030','pagani-pd1701'];
   const featured=featuredIds.map(id=>picks.find(p=>p.id===id));
   if(featured.some(p=>!p))throw Error('Featured model not in source catalog');
   const globalDisclaimer='Ces références complètent les 15 modèles du comparateur. Certaines figurent sur des pages de meilleures ventes de fabricants ou de distributeurs ; ce ne sont pas les meilleures ventes mesurées sur Amazon.fr. Aucun tarif, stock, note ou volume de ventes n’est déduit de ces sources. Les photographies des nouveautés restent chez les fabricants ou distributeurs tant que leur réutilisation n’est pas autorisée.';
@@ -92,7 +92,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
   const teaser='<section class="am-picks" id="modeles-populaires" aria-labelledby="am-picks-title"><div class="wrap">'
     +'<div class="am-picks-heading"><p class="overline kicker">01 · MODÈLES COMPLÉMENTAIRES</p>'
     +'<h2 id="am-picks-title">Des références remarquées, au-delà des 15 montres comparées.</h2>'
-    +'<p>SKMEI à petit budget, Casio, Citizen et signatures horlogères : huit pistes pour explorer nos '+picks.length+' montres documentées, dont une G-SHOCK avec fiche Amazon.fr correspondant à la référence identifiée. Aucun prix ni stock annoncé.</p>'
+    +'<p>SKMEI, Curren et ADDIESDIVE à petit budget, Casio et Pagani Design : huit pistes pour explorer nos '+picks.length+' montres documentées, dont une G-SHOCK avec fiche Amazon.fr correspondant à la référence identifiée. Aucun prix ni stock annoncé.</p>'
     +'</div><div class="am-picks-grid">'+featured.map(p=>card(p,true)).join('')+'</div>'
     +'<p class="am-picks-disclaimer">'+e(globalDisclaimer)+' '+e(affiliateNote)+'</p>'
     +'<a class="am-picks-more" href="./montres/modeles-populaires.html">Voir les '+picks.length+' modèles supplémentaires, par gamme →</a>'
@@ -125,6 +125,6 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     {'@type':'CollectionPage',name:picks.length+' modèles de montres complémentaires',url:u(path),inLanguage:'fr-FR',description:'Sélection éditoriale fondée sur des sources fabricants et des listes de meilleures ventes distinctes. Aucun classement Amazon revendiqué.'},
     {'@type':'ItemList',numberOfItems:picks.length,itemListElement:picks.map((p,i)=>({'@type':'ListItem',position:i+1,name:p.brand+' '+p.model,url:u('montres/'+p.id+'.html')}))}
   ]};
-  writeFileSync(join(root,path),page(pageHead({title:picks.length+' montres à découvrir : SKMEI, Casio, Citizen, Seiko | Atelier Montres',description:picks.length+' montres sourcées, dont SKMEI accessibles : rétro, sport, acier, quartz et automatiques. Recherches Amazon signalées.',path}),main,graph).replace('</head>','<link rel="stylesheet" href="../popular-picks.css"><script defer src="../popular-filters.js"></script></head>'));
+  writeFileSync(join(root,path),page(pageHead({title:picks.length+' montres à découvrir : SKMEI, Casio, ADDIESDIVE, Pagani | Atelier Montres',description:picks.length+' montres sourcées, dont SKMEI accessibles : rétro, sport, acier, quartz et automatiques. Recherches Amazon signalées.',path}),main,graph).replace('</head>','<link rel="stylesheet" href="../popular-picks.css"><script defer src="../popular-filters.js"></script></head>'));
   return {path,detailPaths,teaser,count:picks.length,featuredCount:featured.length,searchLinks:affiliates.enabled?picks.length-verifiedLinks.size:0,directLinks:verifiedLinks.size};
 }
