@@ -74,6 +74,16 @@ try{
   assert.ok(editorial?.ok(),'The canonical Citizen editorial product page should respond HTTP 2xx');
   assert.equal(await page.locator('article.watch-product').count(),1,'Search-indexable product must use the premium editorial layout');
   const sourcePhotoStage=page.locator('article.watch-product .watch-photo');
+  // On a cold CDN/browser navigation, DOMContentLoaded can precede the
+  // final stylesheet paint. Measure photo reservation only once our actual
+  // mobile product CSS has been applied (before awaiting photo decoding).
+  await page.waitForFunction(()=>{
+    const stage=document.querySelector('article.watch-product .watch-photo');
+    if(!stage)return false;
+    const box=stage.getBoundingClientRect();
+    const css=getComputedStyle(stage);
+    return css.display==='flex'&&box.height>=340&&box.height<=410&&css.boxSizing==='border-box';
+  },null,{timeout:20000});
   const reservedHeight=await sourcePhotoStage.evaluate(el=>el.getBoundingClientRect().height);
   assert.ok(reservedHeight>=340&&reservedHeight<=410,'Canonical watch photo must reserve stable room before image decode: '+reservedHeight);
   const staticImage=page.locator('article.watch-product .watch-photo img');
