@@ -46,7 +46,7 @@ def host_allowed(url: str, page_url: str) -> bool:
         if "amazon." in host or "aliexpress." in host:
             return False
         # Exact product-source domain, www/non-www variants, or known image CDNs.
-        if host.lstrip("www.") == page_host.lstrip("www."):
+        if host.removeprefix("www.") == page_host.removeprefix("www."):
             return True
         if host in SAFE_CDN:
             return True
