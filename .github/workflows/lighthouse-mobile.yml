@@ -1,0 +1,40 @@
+name: Lighthouse mobile — production
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/lighthouse-mobile.yml'
+      - 'scripts/report-lighthouse-mobile.mjs'
+  schedule:
+    - cron: '31 6 * * 1'
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate report script
+        run: node --check scripts/report-lighthouse-mobile.mjs
+      - name: Lighthouse mobile — accueil et fiche produit
+        run: |
+          mkdir -p artifacts
+          CHROME="$(command -v google-chrome || command -v chromium || true)"
+          test -n "$CHROME"
+          npx --yes lighthouse@12 "https://atelier-montres-selection-fr.onrender.com/" --chrome-path="$CHROME" --chrome-flags="--headless --no-sandbox" --only-categories=performance --form-factor=mobile --max-wait-for-load=45000 --output=json --output-path=artifacts/lighthouse-mobile-home.json --quiet
+          npx --yes lighthouse@12 "https://atelier-montres-selection-fr.onrender.com/montres/casio-mtp-1302.html" --chrome-path="$CHROME" --chrome-flags="--headless --no-sandbox" --only-categories=performance --form-factor=mobile --max-wait-for-load=45000 --output=json --output-path=artifacts/lighthouse-mobile-product.json --quiet
+      - name: Build report
+        run: node scripts/report-lighthouse-mobile.mjs
+      - name: Save Lighthouse results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-mobile-reports
+          path: artifacts/lighthouse-*.json
+          retention-days: 14
+          if-no-files-found: ignore
