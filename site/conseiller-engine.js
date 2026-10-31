@@ -30,8 +30,15 @@
   if(c.size!=='all'){
    const n=diameterMm(p);
    if(n===null){total-=2;sizeNote='Diamètre non renseigné : à vérifier chez le fabricant.'}
-   else if(isSizeMatch(n,c.size)){total+=8;exact++;details.push('Diamètre '+p.specs.diameter)}
-   else{total-=3;sizeNote='Diamètre '+p.specs.diameter+' : différent de votre préférence de taille.'}
+   else{
+    // Normalized supplementary models keep their verified diameter in
+    // diameterMm; legacy models still expose specs.diameter. Never assume
+    // the legacy specs object exists on a supplementary reference.
+    const label=typeof p.specs?.diameter==='string'&&p.specs.diameter.trim()
+      ?p.specs.diameter:String(n).replace('.',',')+' mm';
+    if(isSizeMatch(n,c.size)){total+=8;exact++;details.push('Diamètre '+label)}
+    else{total-=3;sizeNote='Diamètre '+label+' : différent de votre préférence de taille.'}
+   }
   }
   const selected=Number(c.tier!=='all')+Number(c.style!=='all')+Number(c.movement!=='all')+Number(c.size!=='all');
   return {product:p,score:total,matched:exact,criteria:selected,details,index,sizeNote};
