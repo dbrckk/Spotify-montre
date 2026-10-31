@@ -1,0 +1,41 @@
+name: Build verified responsive watch WebP assets
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/build-responsive-watch-photos.py'
+      - '.github/workflows/build-responsive-watch-photos.yml'
+permissions:
+  contents: write
+concurrency:
+  group: responsive-watch-photos
+  cancel-in-progress: false
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install local image optimizer
+        run: python -m pip install --disable-pip-version-check 'Pillow>=11,<13'
+      - name: Verify source digests and generate responsive local WebPs
+        run: python scripts/build-responsive-watch-photos.py
+      - name: Commit verified derivatives
+        run: |
+          git add site/assets/watch-responsive/
+          if git diff --cached --quiet; then
+            echo 'Responsive WebPs already up to date'
+          else
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git commit -m 'assets: add reproducible 480 and 800px watch WebPs [skip ci]'
+            git fetch origin main
+            git rebase -X theirs origin/main
+            git push origin HEAD:main
+          fi
