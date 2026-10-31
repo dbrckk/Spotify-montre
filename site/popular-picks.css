@@ -98,7 +98,7 @@
 .am-extra-editorial h2,.am-extra-provenance h2,.am-extra-related h2,.am-extra-checks h2{font:400 clamp(27px,3.6vw,41px)/1.2 Georgia,serif;letter-spacing:-.023em;color:#1c3b2b;margin:0 0 17px}
 .am-extra-editorial-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
 .am-extra-editorial-grid>div{padding:22px 24px;border:1px solid #d6dacd;background:#f7f7f1}
-.am-extra-index{display:block;font:400 35px/1.2 Georgia,serif;color:#ad8b58;margin-bottom:10px}
+.am-extra-index{display:block;font:400 35px/1.2 Georgia,serif;color:#80603b;margin-bottom:10px}
 .am-extra-editorial-grid h3{font:400 24px/1.2 Georgia,serif;color:#1d4131;margin:0 0 12px}
 .am-extra-editorial-grid p,.am-extra-provenance p,.am-extra-related>p,.am-extra-checks li,.am-extra-checks p{max-width:90ch;color:#435d4d;font:400 15px/1.8 system-ui,sans-serif}
 .am-extra-provenance{padding:24px 28px;background:#f2f1e8;border-left:4px solid #bba075}
