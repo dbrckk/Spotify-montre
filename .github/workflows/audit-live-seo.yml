@@ -1,0 +1,35 @@
+name: Audit production SEO URLs
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/audit-live-seo.mjs'
+      - '.github/workflows/audit-live-seo.yml'
+  schedule:
+    - cron: '17 5 * * *'
+permissions:
+  contents: read
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check script syntax
+        run: node --check scripts/audit-live-seo.mjs
+      - name: Audit sitemap, canonical URLs and crawlability in production
+        env:
+          SEO_AUDIT_BASE_URL: https://atelier-montres-selection-fr.onrender.com/
+        run: node scripts/audit-live-seo.mjs
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-seo-audit
+          path: artifacts/live-seo-audit.json
+          retention-days: 14
+          if-no-files-found: warn
