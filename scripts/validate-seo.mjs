@@ -207,8 +207,8 @@ assert.equal((unifiedHtml.match(/class="ud-select"/g)||[]).length,52,
   'Each watch must have an opt-in local comparison button');
 assert.match(unifiedHtml,/id="udFilters"[^>]*hidden/,'Filter controls invisible before JS initialization');
 assert.match(unifiedHtml,/id="udCompareTable"/,'Comparison must be accessible');
-assert.match(unifiedHtml,/src="../unified-discovery.js"/);
-assert.match(unifiedHtml,/href="../unified-discovery.css"/);
+assert.ok(unifiedHtml.includes('src="../unified-discovery.js"'));
+assert.ok(unifiedHtml.includes('href="../unified-discovery.css"'));
 assert.match(home,/href="./montres/toutes-les-montres.html"/,'Homepage must link the full catalogue');
 assert.equal(unified.products.filter(p=>p.merchantKind==='search').length,manifest.popularAffiliateSearchLinks);
 assert.equal(unified.products.filter(p=>p.merchantKind==='direct').length,
