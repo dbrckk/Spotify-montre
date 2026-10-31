@@ -220,3 +220,8 @@ html{scroll-padding-top:95px}
 dialog.am-dialog[open]{display:block!important;box-sizing:border-box}
 #affCompareDialog #affCompareBody{display:block;box-sizing:border-box;width:auto;min-width:0;max-width:100%;float:none}
 #affCompareDialog .am-compare-diff-note{display:block;width:auto;min-width:0;max-width:100%;overflow-wrap:break-word}
+
+/* Technical-criteria search: short guidance without adding another control row. */
+.aff-query .am-search-hint{display:block;flex-basis:100%;font:500 11px/1.6 system-ui,sans-serif;color:#66736a;max-width:325px}
+.aff-query input{max-width:100%}
+@media(max-width:680px){.aff-query .am-search-hint{max-width:none;font-size:11px}}
