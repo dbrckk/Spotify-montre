@@ -47,7 +47,7 @@ const selections=[
 ];
 const escapeAttributes=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 
-export function buildShopperSelections({root,coreProducts,picks,partners,verifiedPopularLinks,amazonSearch,pageHead,page,e,u}){
+export function buildShopperSelections({root,coreProducts,picks,partners,verifiedPopularLinks,approvedPopularPhotos,amazonSearch,pageHead,page,e,u}){
   const all=new Map();
   coreProducts.forEach(p=>all.set(p.id,{product:p,core:true}));
   picks.forEach(p=>{
@@ -60,15 +60,17 @@ export function buildShopperSelections({root,coreProducts,picks,partners,verifie
     if(!match)throw Error('Missing shopper collection watch '+id);
     const {product:p,core}=match;
     const name=p.brand+' '+p.model;
-    const photo=core && p.photoReview?.publicUsageApproved===true
-      &&p.photoReview?.localUrl==='./assets/watches/'+p.id+'.webp';
+    const photo=core
+      ?(p.photoReview?.publicUsageApproved===true && p.photoReview?.localUrl==='./assets/watches/'+p.id+'.webp'
+        ?'../assets/watches/'+p.id+'.webp':null)
+      :(approvedPopularPhotos.get(id)?'../'+approvedPopularPhotos.get(id).url:null);
     const facts=core
       ?[p.description,p.specs?.movement||p.movement,p.specs?.diameter||p.specs?.caseSize||'Dimensions non documentées']
       :[p.category,p.movement,p.case];
     const link='../montres/'+e(p.id)+'.html';
     const factList=facts.filter(Boolean).map(x=>'<li>'+e(x)+'</li>').join('');
     const stage=photo
-      ?'<img src="../assets/watches/'+e(p.id)+'.webp" loading="lazy" decoding="async" alt="Montre '+e(name)+'">'
+      ?'<img src="'+e(photo)+'" loading="lazy" decoding="async" alt="Montre '+e(name)+'">'
       :'<span class="am-shopper-art-brand">'+e(p.brand)+'</span><strong>'+e(p.model)+'</strong><span class="am-shopper-art-note">Repère graphique · photo exacte chez le fabricant ou vendeur</span>';
     const paidCore=core?coreLinks.get(p.id):null;
     const paidPopular=!core?verifiedPopularLinks.get(p.id):null;
@@ -107,7 +109,7 @@ export function buildShopperSelections({root,coreProducts,picks,partners,verifie
       +'<div class="am-shopper-grid">'+items+'</div>'
       +'<section class="am-shopper-guide"><h2>'+e(selected.adviceTitle)+'</h2><ol>'+advice+'</ol></section>'
       +'<aside class="am-shopper-endnote"><p>'+e(affiliateNote)+'</p>'
-      +'<p>Les photographies locales des modèles principaux sont publiées selon une autorisation déclarée par l’éditeur, non contrôlée indépendamment. Les nouveaux modèles sans autorisation sont représentés par un repère graphique : leurs véritables photos figurent sur les fiches de référence.</p>'
+      +'<p>Les photographies locales sont publiées sur la base d’autorisations déclarées par l’éditeur, non vérifiées indépendamment. Pour les références sans photo enregistrée, un repère graphique est conservé; leurs véritables photos figurent sur les fiches de référence.</p>'
       +'<a href="./modeles-populaires.html">Parcourir les 37 modèles complémentaires</a></aside></div>';
     const schema={'@context':'https://schema.org','@graph':[
       {'@type':'CollectionPage',name:selected.title,url:u(path),description:selected.description,inLanguage:'fr-FR'},
