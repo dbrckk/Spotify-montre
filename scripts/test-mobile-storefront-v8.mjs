@@ -45,6 +45,15 @@ try{
  await page.locator('#affViewGallery').click();
  assert.equal(await page.locator('#affGrid').getAttribute('data-view'),'gallery');
  await checkWidth('Mobile gallery and its controls');
+ const chatLauncher=page.locator('#chatLauncher');
+ const launcherBox=await chatLauncher.boundingBox();
+ assert.ok(launcherBox&&launcherBox.width<=60&&launcherBox.height<=60,'Compact assistant button must not cover large parts of mobile product photos');
+ assert.match(await chatLauncher.getAttribute('aria-label'),/assistant/i,'Icon-only help control must preserve an accessible name');
+ await chatLauncher.click();
+ assert.ok(await page.locator('#chatPanel').isVisible(),'Assistant still opens from compact mobile button');
+ await page.locator('#chatClose').click();
+ assert.ok(!(await page.locator('#chatPanel').isVisible()),'Mobile assistant can be closed');
+
 
  // The real browser must publish all 13 tagged Amazon.fr destinations, but
  // never manufacture the two ASINs absent from the source catalogue.

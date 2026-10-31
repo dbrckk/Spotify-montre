@@ -61,3 +61,18 @@
    individually identified in its button and its concise explanatory note. */
 .aff-disclosure .am-affiliate-global-disclosure{margin-top:10px;font-weight:600;line-height:1.65}
 .aff-grid[data-view="gallery"] .am-affiliate-note{margin-bottom:3px}
+
+/* The floating help launcher must not cover an entire 180px watch card.
+   Keep the full chat accessible by its existing aria-label and dialog. */
+@media(max-width:620px){
+ body[data-experience="affiliate"] .chat-launcher{
+   width:54px;height:54px;min-width:54px;min-height:54px;
+   right:12px;bottom:max(12px,env(safe-area-inset-bottom));
+   padding:0;display:flex;align-items:center;justify-content:center;
+   border-radius:50%;font-size:0;gap:0;box-shadow:0 7px 22px #071c1580
+ }
+ body[data-experience="affiliate"] .chat-launcher svg{width:24px;height:24px}
+ body[data-experience="affiliate"]:has(#affCompareTray:not([hidden])) .chat-launcher{
+   display:none
+ }
+}
