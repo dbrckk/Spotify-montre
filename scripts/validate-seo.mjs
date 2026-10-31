@@ -63,14 +63,14 @@ assert.equal(advisorSchema.isPartOf.url,manifest.siteUrl);
 
 // Legal transparency must be visible and accurate in every published entry point.
 const legal=read('informations-legales.html');
-const privacy=read('confidentialite.html');
+const privacyDisclosure=read('confidentialite.html');
 assert.match(legal,/<h1>Informations légales et transparence<\/h1>/);
 assert.match(legal,/Informations d'identification incomplètes/,'Incomplete legal identity must not be presented as verified');
 assert.match(legal,/ne constitue pas des mentions légales complètes/);
-assert.match(privacy,/Certains liens Amazon.fr peuvent être rémunérés/,'Privacy notice must reflect affiliate status');
-assert.doesNotMatch(privacy,/Ces liens ne sont actuellement pas rémunérés/,'No obsolete non-affiliate claims');
-assert.match(privacy,/stockage de session/,'Comparison persistence must be disclosed');
-assert.match(privacy,/Informations légales/,'Legal page accessible from privacy notice');
+assert.match(privacyDisclosure,/Certains liens Amazon.fr peuvent être rémunérés/,'Privacy notice must reflect affiliate status');
+assert.doesNotMatch(privacyDisclosure,/Ces liens ne sont actuellement pas rémunérés/,'No obsolete non-affiliate claims');
+assert.match(privacyDisclosure,/stockage de session/,'Comparison persistence must be disclosed');
+assert.match(privacyDisclosure,/Informations légales/,'Legal page accessible from privacy notice');
 for(const path of ['index.html','affiliation.html','conseiller.html','marque.html','montre.html','selection.html','catalogue.html']){
  const page=read(path);
  assert.ok(page.includes('href="./informations-legales.html"'),path+' must link legal information');
