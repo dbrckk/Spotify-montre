@@ -4,11 +4,12 @@
   const ready = () => {
     const brand = document.getElementById('affBrand');
     const movement = document.getElementById('affMovement');
+    const diameter = document.getElementById('affDiameter');
     const sort = document.getElementById('affSort');
     const search = document.getElementById('affSearch');
     const tabs = document.getElementById('affTabs');
     const anchor = document.getElementById('affActiveFilters');
-    if (!brand || !movement || !sort || !search || !tabs || !anchor) return;
+    if (!brand || !movement || !diameter || !sort || !search || !tabs || !anchor) return;
 
     const wrap = document.createElement('div');
     wrap.className = 'am-share-selection';
@@ -28,6 +29,7 @@
       if (tier !== 'all') url.searchParams.set('tier', tier);
       if (brand.value !== 'all') url.searchParams.set('brand', brand.value);
       if (movement.value !== 'all') url.searchParams.set('movement', movement.value);
+      if (diameter.value !== 'all') url.searchParams.set('diameter', diameter.value);
       if (search.value.trim()) url.searchParams.set('q', search.value.trim().slice(0, 100));
       if (sort.value !== 'editorial') url.searchParams.set('sort', sort.value);
       url.hash = 'montres';
@@ -71,13 +73,18 @@
         movement.value = requestedMovement;
         movement.dispatchEvent(new Event('change', {bubbles:true}));
       }
+      const requestedDiameter = params.get('diameter');
+      if (['compact','medium','unknown'].includes(requestedDiameter)) {
+        diameter.value = requestedDiameter;
+        diameter.dispatchEvent(new Event('change', {bubbles:true}));
+      }
       const q = params.get('q');
       if (q) {
         search.value = q.slice(0,100);
         search.dispatchEvent(new Event('input', {bubbles:true}));
       }
       const order = params.get('sort');
-      if (['brand','name'].includes(order)) {
+      if (['brand','name','diameter-asc','diameter-desc'].includes(order)) {
         sort.value = order;
         sort.dispatchEvent(new Event('change', {bubbles:true}));
       }
