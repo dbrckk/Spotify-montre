@@ -353,17 +353,48 @@
    if(sources.length){let pos=0;img.onerror=()=>{pos++;if(pos<sources.length)img.src=sources[pos];else img.remove()};img.src=sources[0]}
    return sources.length?img:null;
  }
- function showComparison(){
+ function showComparison(focusSlot=null){
    if(!dialog||!compareBody||compare.length<2)return;
+   // Inline native selects let shoppers swap a model while reading the
+   // comparison. No nested modal and no need to scroll back to its card.
+   const swapControl=(product,slot)=>{
+     const label=make('label','am-compare-inline-swap');
+     label.append(make('span','','Changer cette montre'));
+     const input=make('select');
+     input.dataset.compareSlot=String(slot);
+     input.setAttribute('aria-label','Remplacer '+product.brand+' '+product.model+' dans la comparaison');
+     for(const candidate of data){
+       const option=make('option','',candidate.brand+' '+candidate.model);
+       option.value=candidate.id;
+       // Other occupied slots cannot be silently duplicated.
+       option.disabled=compare.some((id,index)=>index!==slot&&id===candidate.id);
+       input.append(option);
+     }
+     input.value=product.id;
+     input.addEventListener('change',()=>{
+       const candidate=input.value;
+       if(!data.some(p=>p.id===candidate)||compare.some((id,index)=>index!==slot&&id===candidate)){
+         input.value=compare[slot];return;
+       }
+       if(compare[slot]===candidate)return;
+       compare[slot]=candidate;compareWarning='';
+       // Reconcile the tray, URL and all 15 checkbox states before showing
+       // the new factual comparison; its sibling selections are untouched.
+       render();
+       showComparison(slot);
+     });
+     label.append(input);
+     return label;
+   };
    const selected=compare.map(id=>data.find(p=>p.id===id)).filter(Boolean);
    if(selected.length<2)return;
    const rows=comparisonRows(selected);
    const table=make('table','am-compare-table'),head=make('thead'),tr=make('tr');
    tr.append(make('th','am-compare-criterion','Critère'));
-   for(const p of selected){
+   for(const [slot,p] of selected.entries()){
      const th=make('th','am-compare-head');
      const image=compareImage(p,'am-compare-thumb');if(image)th.append(image);
-     th.append(make('span','am-compare-name',p.brand+' '+p.model));tr.append(th);
+     th.append(make('span','am-compare-name',p.brand+' '+p.model),swapControl(p,slot));tr.append(th);
    }
    head.append(tr);table.append(head);
    const tbody=make('tbody');
@@ -383,7 +414,7 @@
      const header=make('div','am-compare-mobile-product');
      header.append(make('span','am-compare-mobile-counter',(index+1)+' / '+selected.length));
      const photo=compareImage(p,'am-compare-mobile-photo');if(photo)header.append(photo);
-     header.append(make('h3','',p.brand+' '+p.model));card.append(header);
+     header.append(make('h3','',p.brand+' '+p.model));card.append(header,swapControl(p,index));
      const dl=make('dl','am-compare-mobile-specs');
      for(const item of rows){
        const line=make('div',item.different?'am-compare-mobile-diff':'');
@@ -412,8 +443,20 @@
    nav.append(prev,position,next);mobile.append(guide,track,nav);
    compareBody.replaceChildren(make('p','am-compare-diff-note','Les caractéristiques différentes sont mises en évidence. Aucune donnée de prix ou de stock n’est estimée.'),table,mobile);
    if(typeof dialog.showModal==='function'&&!dialog.open)dialog.showModal();
+   if(Number.isInteger(focusSlot)&&focusSlot>=0&&focusSlot<selected.length){
+     const isMobile=window.matchMedia('(max-width:700px)').matches;
+     const activeSelect=(isMobile?mobile:table).querySelector('select[data-compare-slot="'+focusSlot+'"]');
+     if(isMobile){
+       // DOM replacement resets the swipe rail: restore the active card and
+       // its previous/next button state without an animated jump.
+       track.scrollLeft=slides[focusSlot].offsetLeft-slides[0].offsetLeft;
+       position.textContent=(focusSlot+1)+' / '+slides.length;
+       prev.disabled=focusSlot===0;next.disabled=focusSlot===slides.length-1;
+     }
+     activeSelect?.focus({preventScroll:true});
+   }
  }
- if(compareOpen)compareOpen.addEventListener('click',showComparison);
+ if(compareOpen)compareOpen.addEventListener('click',()=>showComparison());
  if(compareClear)compareClear.addEventListener('click',()=>{compare=[];compareWarning='';render()});
  if($('affCompareShare'))$('affCompareShare').addEventListener('click',async()=>{
    if(compare.length<2)return;
