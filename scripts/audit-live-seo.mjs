@@ -90,7 +90,7 @@ async function audit(){
   if(xml!==null){
     if(!/<urlset\b/.test(xml))issues.push('sitemap.xml: missing urlset root');
     urls=[...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>decodeXml(m[1].trim()));
-    if(urls.length!==29)issues.push('sitemap.xml: expected exactly 29 documented pages, found '+urls.length);
+    if(urls.length!==43)issues.push('sitemap.xml: expected exactly 43 documented pages (15 core + 13 supplemental + editorial routes), found '+urls.length);
     if(!urls.includes(new URL('montres/methode-selection.html',base).href)){
       issues.push('sitemap.xml: published selection methodology is missing');
     }
