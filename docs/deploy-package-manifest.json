@@ -1,27 +1,32 @@
 {
   "version": 1,
   "models": 15,
-  "files": 68,
+  "files": 94,
   "parts": [
     {
       "file": "deploy-package-01.json",
-      "count": 17,
-      "bytes": 719242
+      "count": 27,
+      "bytes": 704170
     },
     {
       "file": "deploy-package-02.json",
-      "count": 5,
-      "bytes": 657976
+      "count": 15,
+      "bytes": 714802
     },
     {
       "file": "deploy-package-03.json",
-      "count": 18,
-      "bytes": 715938
+      "count": 4,
+      "bytes": 652605
     },
     {
       "file": "deploy-package-04.json",
-      "count": 28,
-      "bytes": 221446
+      "count": 6,
+      "bytes": 687109
+    },
+    {
+      "file": "deploy-package-05.json",
+      "count": 42,
+      "bytes": 432853
     }
   ]
 }
