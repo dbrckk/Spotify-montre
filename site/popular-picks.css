@@ -191,3 +191,16 @@
 @media(prefers-reduced-motion:no-preference){
   .am-pick-card:hover .am-budget-watch{transform:rotate(-13deg) translateY(-4px);transition:transform .35s ease}
 }
+
+
+/* Show the exact-model photograph only after the commercial-rights registry
+   approves the particular WebP. Without such a record the original decorative
+   compositions and transparent source links remain in place. */
+.am-pick-licensed-photo{position:absolute;top:8%;right:6%;width:47%;height:73%;object-fit:contain;z-index:0;filter:drop-shadow(0 14px 12px #11251f65)}
+.am-extra-licensed-photo{position:absolute;top:10%;right:11%;width:54%;height:62%;object-fit:contain;z-index:0;filter:drop-shadow(0 21px 18px #13231e66)}
+.am-pick-visual:has(.am-pick-licensed-photo) .am-pick-visual-name,
+.am-pick-visual:has(.am-pick-licensed-photo) .am-pick-visual-ref{max-width:54%;overflow-wrap:anywhere}
+@media(max-width:650px){
+ .am-pick-licensed-photo{width:43%;right:4%;top:10%;height:69%}
+ .am-extra-licensed-photo{width:43%;right:5%;top:9%;height:65%}
+}
