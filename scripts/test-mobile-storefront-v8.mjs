@@ -82,6 +82,18 @@ try{
  const approvedPhotoCount=Object.keys(approvedWatchPhotos).length;
  assert.equal(await popularPage.locator('img.am-pick-licensed-photo').count(),approvedPhotoCount,
    'All and only registered branded images should render in the supplemental catalogue');
+ const visualResearch=JSON.parse(readFileSync('site/popular-ai-visuals.json','utf8')).visuals;
+ assert.equal(await popularPage.locator('figure.am-pick-ai-preview').count(),9,
+   'Nine SKMEI original AI concepts must appear in catalogue as secondary visuals');
+ for(const [id,art] of Object.entries(visualResearch)){
+   const card=popularPage.locator('#pick-'+id);
+   const ai=card.locator('figure.am-pick-ai-preview img');
+   assert.equal(await ai.getAttribute('src'),art.url,'AI visual must match the exact id: '+id);
+   assert.match(await ai.getAttribute('alt'),/IA.*non contractuel/i,
+     'AI-created images must never look like an official product photo: '+id);
+   assert.equal(await card.locator('img.am-pick-licensed-photo').count(),1,
+     'Original watch photograph remains primary above the AI concept: '+id);
+ }
  const popularPageExtent=await popularPage.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
  assert.ok(popularPageExtent.scroll<=popularPageExtent.client+2,'Supplemental page must not overflow Android');
  await popularPage.screenshot({path:'artifacts/mobile-37-popular-watches.png',fullPage:true});
@@ -153,6 +165,15 @@ try{
    const expectedImage=approvedWatchPhotos[watch.id];
    assert.equal(await popularPage.locator('img.am-extra-licensed-photo').count(),expectedImage?1:0,
      'Only registered exact-model imagery may be published: '+watch.id);
+   const aiArt=visualResearch[watch.id];
+   assert.equal(await popularPage.locator('section.am-ai-editorial').count(),aiArt?1:0,
+     'AI design section is shown only for the nine recorded SKMEI watches: '+watch.id);
+   if(aiArt){
+     const img=popularPage.locator('.am-ai-editorial-media img');
+     assert.equal(await img.getAttribute('src'),aiArt.url,'Product page shows the approved original AI asset: '+watch.id);
+     assert.match(await img.getAttribute('alt'),/IA.*non contractuel/i);
+     assert.match(await popularPage.locator('.am-ai-editorial-copy').innerText(),/ne s’agit pas d’une photographie du produit/);
+   }
    if(expectedImage){
      const img=popularPage.locator('img.am-extra-licensed-photo');
      assert.ok((await img.getAttribute('src')).includes('assets/watches-popular/'+watch.id+'.webp'));
