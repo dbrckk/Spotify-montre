@@ -49,27 +49,27 @@ export function buildSearchCollections({root,products,amazonLinks,partners,pageH
       <h2>Casio vintage : numérique rétro ou cadran classique ?</h2>
       <p>La Casio A168WA-1 reprend une esthétique digitale rétro, alors que la MTP-B145D-2A2V associe une silhouette compacte à un cadran analogique. Ces deux références peuvent intéresser quelqu’un qui recherche une montre Casio vintage, mais elles diffèrent par leur affichage et leur dessin. Vérifiez le code exact de la variante avant achat.</p>
       <h2>Comparer les dimensions documentées</h2>
-      <p>Notre catalogue confirme 35 mm pour la MTP-B145D-2A2V, 38,5 mm pour la MTP-1302PD-2A2V et 30,2 mm pour la LTP-1302PD-7A1V. Les dimensions de l’A168WA-1 et de la MDV-107-1A1V ne sont pas enregistrées ici et doivent être vérifiées sur leur fiche fabricant. L’épaisseur et l’entre-cornes comptent autant que le diamètre pour le confort.</p>
+      <p>Notre catalogue distingue les dimensions complètes de la Casio MTP-B145D-2A2V (40 × 35 × 7,4 mm), les mesures de la Casio A168WA-1 (38,6 × 36,3 × 9,6 mm), et le boîtier MDV-107-1A1V (49,5 × 44,2 × 12,1 mm). La largeur d’un boîtier rectangulaire n’est pas un diamètre. Les références rondes MTP-1302PD-2A2V et LTP-1302PD-7A1V ont respectivement des diamètres documentés de 38,5 et 30,2 mm. Le porté dépend également de l’épaisseur, des cornes et du bracelet.</p>
       <h2>Comment vérifier la bonne référence Casio ?</h2>
       <p>Comparez systématiquement le code complet du modèle, notamment le suffixe de variante, avant un achat chez un vendeur tiers. Un cadran ressemblant ne suffit pas à identifier une montre. Les liens ci-dessous renvoient à nos fiches détaillées et aux pages fabricant exactes. Notre sélection n’est pas une boutique Casio officielle.</p>`,
       expected:5
     },
     {
       slug:'montres-petit-boitier',
-      heading:'Montres à petit boîtier : trois modèles de 38 mm ou moins',
-      title:'Montre petit boîtier : 30,2, 35 et 38 mm | Atelier Montres',
-      description:'Trois montres à petit boîtier : Casio 30,2 mm, Casio 35 mm, Hamilton 38 mm. Comparez mouvements, verres et proportions documentées.',
+      heading:'Montres à petit boîtier : deux références de 38 mm ou moins',
+      title:'Montres à petit boîtier : 30,2 et 38 mm | Atelier Montres',
+      description:'Deux montres à petit boîtier : Casio LTP-1302 30,2 mm et Hamilton Khaki Field Auto 38 mm. Comparaison de tailles et références exactes.',
       audience:'Sélection de boîtiers compacts',
-      subhead:'Trois diamètres renseignés, sans déduire la taille du poignet',
-      intro:'Un diamètre contenu peut être une piste pour rechercher une montre discrète, mais il ne permet pas à lui seul de garantir le confort. Cette sélection reprend uniquement les trois références de 38 mm ou moins dont la mesure figure dans notre catalogue.',
+      subhead:'Deux diamètres documentés, sans déduire la taille du poignet',
+      intro:'Un diamètre contenu peut être une piste pour rechercher une montre discrète, sans garantir le confort. Cette sélection réunit les deux montres de 38 mm ou moins dont le diamètre rond est documenté. La Casio rectangulaire MTP-B145 possède une largeur de 35 mm, pas un diamètre connu.',
       predicate:p=>{const d=diameter(p);return d!==null&&d<=38},
-      narrative:`<h2>Trois diamètres exacts à comparer</h2>
-      <p>La Casio LTP-1302PD-7A1V mesure 30,2 mm, la Casio MTP-B145D-2A2V 35 mm et la Hamilton Khaki Field Auto H70455133 38 mm selon les données documentées dans notre sélection. Le tableau ci-dessous sépare la taille des autres caractéristiques, qui ne découlent jamais automatiquement du diamètre.</p>
+      narrative:`<h2>Deux diamètres ronds documentés</h2>
+      <p>La Casio LTP-1302PD-7A1V affiche un diamètre de 30,2 mm et la Hamilton Khaki Field Auto H70455133 un diamètre de 38 mm. La Casio MTP-B145D-2A2V possède une largeur de 35 mm dans un boîtier rectangulaire de 40 × 35 × 7,4 mm ; elle ne fait pas partie de ce classement par diamètre. Le tableau sépare les tailles des autres caractéristiques.</p>
       <h2>La montre compacte n’est pas réservée à un genre</h2>
       <p>Un boîtier de taille réduite peut convenir à différents poignets et styles. La forme des cornes, leur longueur, l’épaisseur, le poids et le bracelet changent la perception d’une montre. Nous ne faisons pas de correspondance automatique entre 35 mm et un tour de poignet particulier. Un essayage ou les mesures complètes du fabricant sont préférables.</p>
       <h2>Quartz compact ou mécanique compacte ?</h2>
-      <p>Les deux Casio de ce groupe sont à quartz ; la Hamilton Khaki Field Auto est une automatique. Le choix dépend aussi de votre usage et de votre intérêt pour l’entretien mécanique. Pour comprendre le rôle du diamètre et des autres mesures : <a href="./taille-boitier-montre.html">guide des tailles de montres</a>.</p>`,
-      expected:3
+      <p>La Casio LTP-1302 de ce groupe est à quartz ; la Hamilton Khaki Field Auto est une automatique. Le choix dépend aussi de votre usage et de l’entretien mécanique. Pour comprendre le rôle du diamètre et des autres mesures : <a href="./taille-boitier-montre.html">guide des tailles de montres</a>.</p>`,
+      expected:2
     }
   ];
   const paths=[],byProduct=new Map();
