@@ -8,6 +8,8 @@ const read=p=>readFileSync(resolve(root,p),'utf8');
 const feed=JSON.parse(read('selection-affiliation.json'));
 const manifest=JSON.parse(read('seo-manifest.json'));
 assert.equal(manifest.productCount,15);
+assert.equal(manifest.popularAdditionalCount,13,'Thirteen researched models complement the 15 photo-backed core products');
+assert.equal(manifest.popularAffiliateSearchLinks,manifest.affiliateActive?13:0,'Tagged search links only when affiliate programme is enabled');
 const insightData=JSON.parse(read('editorial-insights.json'));
 assert.equal(insightData.version,1);
 assert.equal(Object.keys(insightData.products).length,15,'15 unique editorial briefs required');
@@ -60,7 +62,7 @@ for(const [id,entry] of Object.entries(amazon.links)){
  assert.ok(!entry.url.includes('?tag='),'Unapproved affiliate tracking cannot be published');
 }
 
-assert.equal(manifest.paths.length,29);
+assert.equal(manifest.paths.length,30);
 assert.ok(manifest.paths.every(url=>url.startsWith(manifest.siteUrl)));
 // Ensure small, local, original-source thumbnails are shipped with the site.
 for(const name of ['citizen-tsuyosa','tissot-prx-quartz','orient-bambino','casio-mtp-b145']){
@@ -166,6 +168,41 @@ for(const marker of ['AM_SEO_LINKS_START','AM_SEO_LINKS_END','AM_SEO_HEAD_START'
  assert.equal(home.split(marker).length-1,1,'Idempotent build marker: '+marker);
 }
 assert.equal((home.match(/rel="canonical"/g)||[]).length,1,'Homepage has exactly one canonical link');
+
+// Every supplemental model has exact manufacturer evidence and a link to
+// search results, NOT an invented verified Amazon ASIN or commercial offer.
+const popularFeed=JSON.parse(read('selection-populaires.json'));
+const popularPath='montres/modeles-populaires.html';
+const popularHtml=read(popularPath);
+assert.equal(popularFeed.products.length,13);
+assert.ok(manifest.paths.includes(manifest.siteUrl+popularPath),'Research-led selection must enter sitemap');
+assert.ok(sitemap.includes(manifest.siteUrl+popularPath),'Research-led collection must be crawlable');
+assert.match(popularHtml,/rel="canonical"/,'Canonical for supplemental source-led page');
+assert.match(popularHtml,/aucun|Aucun/,'Supplemental section must disclose limitations');
+assert.equal((popularHtml.match(/<article class="am-pick-card /g)||[]).length,13,'One editorial card for each researched watch');
+assert.equal((home.match(/<article class="am-pick-card /g)||[]).length,6,'Homepage features exactly six additional watch models');
+assert.equal((popularHtml.match(/<section class="am-picks-tier"/g)||[]).length,3,'All three ranges visibly represented');
+assert.equal(home.split('AM_POPULAR_PICKS_START').length-1,1,'Popular section must be idempotent');
+assert.equal(home.split('AM_POPULAR_PICKS_END').length-1,1,'Popular section closing marker must be idempotent');
+assert.match(home,/href="\.\/montres\/modeles-populaires\.html"/,'Homepage must link the complete sourced selection');
+assert.match(home,/href="\.\/popular-picks\.css"/,'Homepage must load the premium commercial selection styles');
+assert.match(popularHtml,/href="\.\.\/popular-picks\.css"/,'Full selection must use the same premium design');
+const existingIds=new Set(feed.products.map(p=>p.id));
+for(const p of popularFeed.products){
+  assert.ok(!existingIds.has(p.id),'Supplemental reference must not duplicate comparables: '+p.id);
+  assert.ok(popularHtml.includes('id="pick-'+p.id+'"'),'Missing popular model: '+p.id);
+  assert.ok(popularHtml.includes('href="'+p.officialUrl+'"'),'Manufacturer page must be clickable: '+p.id);
+  assert.ok(popularHtml.includes('href="'+p.marketEvidence.url+'"'),'Evidence must be linked: '+p.id);
+}
+assert.doesNotMatch(popularHtml,/<img\b/i,'Do not display copied manufacturer photographs without validated licences');
+assert.doesNotMatch(popularHtml,/"offers"\s*:|"aggregateRating"\s*:|"price"\s*:/,'No invented structured pricing or ratings');
+const trackedResults=popularHtml.match(/href="https:\/\/www\.amazon\.fr\/s\?k=[^"]+?&amp;tag=drackk04-21"/g)||[];
+const sponsoring=popularHtml.match(/rel="noopener noreferrer nofollow sponsored"/g)||[];
+assert.equal(trackedResults.length,manifest.affiliateActive?13:0,'Every new Amazon link must be a disclosed tagged search, not an unverified product page');
+assert.equal(sponsoring.length,manifest.affiliateActive?13:0,'All new Amazon exits must carry rel=sponsored');
+assert.doesNotMatch(popularHtml,/amazon\.fr\/dp\/|amazon\.fr\/gp\/product\//,'Do not invent ASINs for new watches');
+assert.match(popularHtml,/recherche Amazon/i,'Visitor must be warned that search results may contain different variants');
+
 const browseOrder=[
   ['gammes','<section id="gammes"'],
   ['montres','<section id="montres"'],
@@ -331,7 +368,7 @@ for(const name of ['revue-photo.html','revue-photo.js','revue-photo.css']){
 }
 assert.ok(existsSync(resolve(root,'seo-watch-art.js')),'SEO watch illustrations script is required');
 const sitemap=read('sitemap.xml');
-assert.equal((sitemap.match(/<loc>/g)||[]).length,29);
+assert.equal((sitemap.match(/<loc>/g)||[]).length,30);
 const comparisons=JSON.parse(read('comparaisons-montres.json'));
 assert.equal(comparisons.version,1);
 assert.equal(comparisons.comparisons.length,4);
@@ -451,4 +488,4 @@ assert.equal(privacy.includes('Les visites et clics vers Amazon sont mesurés av
 assert.ok(privacy.includes('chez Render'),'Privacy notice must identify actual host');
 const guide=read('montres/guide-choisir-montre.html');
 assert.match(guide,/<h1>Comment choisir une montre/);
-console.log('SEO validation OK: 15 model pages, 3 categories, 4 guides, 4 comparisons, transparent editorial method, 13 Amazon links, 29 sitemap URLs and genuine hero LCP preload');
+console.log('SEO validation OK: 15 model pages, 3 categories, 4 guides, 4 comparisons, transparent editorial method, 13 Amazon links, 30 sitemap URLs, 13 additional source-backed watches and genuine hero LCP preload');
