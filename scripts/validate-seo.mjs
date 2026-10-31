@@ -151,18 +151,45 @@ for(const product of feed.products){
   const facts=html.match(/<section class="watch-facts"[^>]*>[\s\S]*?<dl>([\s\S]*?)<\/dl><\/section>/);
   assert.ok(facts,'Source-grounded summary must exist on every product page: '+product.id);
   assert.equal((facts[1].match(/class="watch-quickfact"/g)||[]).length,4,'Exactly four verified-or-unknown facts: '+product.id);
-  for(const [label,documented] of [['Mouvement',product.specs?.movement],['Diamètre',product.specs?.diameter],['Verre',product.specs?.glass],['Étanchéité',product.specs?.waterResistance]]){
+  const sizeFact=product.specs?.diameter?['Diamètre',product.specs.diameter]
+    :product.specs?.caseSize?['Dimensions du boîtier',product.specs.caseSize]:['Diamètre',null];
+  for(const [label,documented] of [['Mouvement',product.specs?.movement],sizeFact,['Verre',product.specs?.glass],['Étanchéité',product.specs?.waterResistance]]){
     assert.ok(facts[1].includes('<dt>'+label+'</dt>'),'Missing quick-fact label '+label+' on '+product.id);
     if(label!=='Mouvement')assert.ok(facts[1].includes(documented||'Non documenté'),'Quick-fact must not invent '+label+' on '+product.id);
   }
   assert.match(html,/class="watch-actions"/,'Accessible purchase/compare actions remain grouped');
+  // Product facts need model-specific, inspectable manufacturer provenance.
+  const review=product.specReview;
+  assert.match(html,/class="watch-evidence"/,'Every SEO product page must expose source evidence or a missing-proof disclaimer');
+  if(review){
+    assert.equal(review.sourceKind,'manufacturer_exact_reference');
+    assert.equal(review.sourceUrl,product.officialUrl,'A technical check must link to the manufacturer's exact published model');
+    assert.match(review.verifiedOn,/^2026-\d{2}-\d{2}$/);
+    assert.ok(Array.isArray(review.verifiedFields)&&review.verifiedFields.length>=1,'Audited fields required');
+    const knownFields=new Set(['movement','diameter','caseSize','glass','waterResistance']);
+    for(const field of review.verifiedFields){
+      assert.ok(knownFields.has(field),'Unexpected verified field: '+field);
+      assert.ok(product.specs?.[field],'Verification cannot cite an absent value: '+product.id+' / '+field);
+    }
+    assert.ok(html.includes('Caractéristiques constructeur recoupées le'),'Latest source review must be clearly dated: '+product.id);
+    assert.ok(html.includes('la licence des photographies ne sont pas couvertes'),'Technical evidence must not be mistaken for a photo license');
+    assert.ok(html.includes(review.sourceUrl),'Manufacturer evidence link missing: '+product.id);
+  }else{
+    assert.ok(html.includes('Caractéristiques à confirmer sur la source officielle'),'Unaudited models must not claim a new manufacturer check');
+  }
+  if(product.specs?.caseSize){
+    assert.ok(!product.specs?.diameter,'Rectangular case L × l × H is not a diameter');
+    assert.ok(html.includes('Il ne s’agit pas d’un diamètre'),'Buyer guidance must explain rectangular watch dimensions');
+    assert.ok(html.includes(product.specs.caseSize),'Official L × l × H size must be visible');
+  }
+
 
   const expectedMovement={quartz:'quartz',automatic:'automatique','eco-drive':'solaire'}[product.movement];
   const expectedTitle=product.brand+' '+product.model+' : montre '+expectedMovement+(product.specs?.diameter?' '+product.specs.diameter:'')+' | Atelier Montres';
   assert.ok(html.includes('<title>'+expectedTitle+'</title>'),'Search title contains exact model and sourced specs: '+product.id);
   assert.match(html,/<section class="seo-buying-checks"/,'Practical checks before purchase must be rendered');
   assert.ok(html.includes('code exact '+product.model),'Advice must use model-specific reference');
-  assert.ok(html.includes(product.specs?.diameter?'Diamètre documenté : '+product.specs.diameter:'Diamètre non renseigné'),'Diameter claims must only use confirmed facts');
+  assert.ok(html.includes(product.specs?.diameter?'Diamètre documenté : '+product.specs.diameter:product.specs?.caseSize?'Dimensions L × l × H indiquées : '+product.specs.caseSize:'Diamètre non renseigné'),'Documented case size must not be confused with a measured diameter');
   assert.ok(html.includes(product.specs?.waterResistance?'Étanchéité indiquée : '+product.specs.waterResistance:'Étanchéité non renseignée'),'Water resistance claims must not be invented');
   assert.equal((html.match(/class="seo-related-photo"/g)||[]).length,3,'Three photo comparison cards required');
   assert.equal((html.match(/loading="lazy" decoding="async"/g)||[]).length,3,'Below-fold related images must be lazy-loaded');
