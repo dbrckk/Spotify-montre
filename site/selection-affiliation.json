@@ -54,11 +54,12 @@
         "diameter": "38,5 mm",
         "movement": "Quartz",
         "glass": "Minéral",
-        "waterResistance": "5 bar"
+        "waterResistance": "5 bar",
+        "caseSize": "44,2 × 38,5 × 9,2 mm"
       },
       "imageMode": "manufacturer_product_photo",
       "imageLicenseStatus": "official_photos_not_licensed",
-      "updatedAt": "2026-10-26",
+      "updatedAt": "2026-10-31",
       "photoReview": {
         "url": "https://www.casio.com/content/dam/casio/product-info/locales/my/en/timepiece/product/watch/M/MT/MTP/mtp-1302pd-2a2v/assets/MTP-1302PD-2A2V.png",
         "source": "https://www.casio.com/my/watches/casio/product.MTP-1302PD-2A2V/",
@@ -76,6 +77,17 @@
         "originalFetchedFrom": "https://www.casio.com/content/dam/casio/product-info/locales/my/en/timepiece/product/watch/M/MT/MTP/mtp-1302pd-2a2v/assets/MTP-1302PD-2A2V.png",
         "permissionDeclaration": "site_owner_explicit_confirmation_2026-10-30",
         "permissionIndependentlyVerified": false
+      },
+      "specReview": {
+        "verifiedOn": "2026-10-31",
+        "sourceKind": "manufacturer_exact_reference",
+        "sourceUrl": "https://www.casio.com/fr/watches/casio/product.MTP-1302PD-2A2V/",
+        "verifiedFields": [
+          "caseSize",
+          "glass",
+          "waterResistance"
+        ],
+        "notes": "Casio mesure L × l × H ; les 38,5 mm sont la largeur du boîtier rond, déjà mentionnée dans le catalogue."
       }
     },
     {
@@ -98,19 +110,20 @@
       "title": "Rétro années 80",
       "highlights": [
         "Quartz",
-        "35 mm",
-        "Boîtier acier"
+        "35 mm de largeur",
+        "Boîtier acier",
+        "5 bar"
       ],
       "story": "Une silhouette rectangulaire aux lignes franches, inspirée des années 1980.",
       "specs": {
-        "diameter": "35 mm",
         "movement": "Quartz",
         "glass": "Minéral",
-        "waterResistance": "5 bar"
+        "waterResistance": "5 bar",
+        "caseSize": "40 × 35 × 7,4 mm"
       },
       "imageMode": "manufacturer_product_photo",
       "imageLicenseStatus": "official_photos_not_licensed",
-      "updatedAt": "2026-10-26",
+      "updatedAt": "2026-10-31",
       "photoReview": {
         "url": "https://www.casio.com/content/dam/casio/product-info/locales/fr/fr/timepiece/product/watch/M/MT/MTP/mtp-b145d-2a2v/assets/MTP-B145D-2A2V.png",
         "source": "https://www.casio.com/fr/watches/casio/product.MTP-B145D-2A2V/",
@@ -128,6 +141,17 @@
         "originalFetchedFrom": "https://www.casio.com/content/dam/casio/product-info/locales/fr/fr/timepiece/product/watch/M/MT/MTP/mtp-b145d-2a2v/assets/MTP-B145D-2A2V.png",
         "permissionDeclaration": "site_owner_explicit_confirmation_2026-10-30",
         "permissionIndependentlyVerified": false
+      },
+      "specReview": {
+        "verifiedOn": "2026-10-31",
+        "sourceKind": "manufacturer_exact_reference",
+        "sourceUrl": "https://www.casio.com/fr/watches/casio/product.MTP-B145D-2A2V/",
+        "verifiedFields": [
+          "caseSize",
+          "glass",
+          "waterResistance"
+        ],
+        "notes": "Boîtier rectangulaire 40 × 35 × 7,4 mm : la valeur 35 mm est une largeur, non un diamètre vérifié, et ne doit plus servir au filtre de diamètre."
       }
     },
     {
@@ -282,11 +306,12 @@
         "diameter": "30,2 mm",
         "movement": "Quartz",
         "glass": "Minéral",
-        "waterResistance": "5 bar"
+        "waterResistance": "5 bar",
+        "caseSize": "34,5 × 30,2 × 8,7 mm"
       },
       "imageMode": "manufacturer_product_photo",
       "imageLicenseStatus": "official_photos_not_licensed",
-      "updatedAt": "2026-10-26",
+      "updatedAt": "2026-10-31",
       "photoReview": {
         "url": "https://www.casio.com/content/dam/casio/product-info/locales/fr/fr/timepiece/product/watch/L/LT/LTP/LTP-1302PD-7A1V/assets/LTP-1302PD-7A1V_1.png",
         "source": "https://www.casio.com/fr/watches/casio/product.LTP-1302PD-7A1V/",
@@ -304,6 +329,17 @@
         "originalFetchedFrom": "https://www.casio.com/content/dam/casio/product-info/locales/fr/fr/timepiece/product/watch/L/LT/LTP/LTP-1302PD-7A1V/assets/LTP-1302PD-7A1V_1.png",
         "permissionDeclaration": "site_owner_explicit_confirmation_2026-10-30",
         "permissionIndependentlyVerified": false
+      },
+      "specReview": {
+        "verifiedOn": "2026-10-31",
+        "sourceKind": "manufacturer_exact_reference",
+        "sourceUrl": "https://www.casio.com/fr/watches/casio/product.LTP-1302PD-7A1V/",
+        "verifiedFields": [
+          "caseSize",
+          "glass",
+          "waterResistance"
+        ],
+        "notes": "Casio donne L × l × H et non un diamètre explicite ; les 30,2 mm sont la largeur de ce petit boîtier rond."
       }
     },
     {
@@ -384,7 +420,7 @@
       },
       "imageMode": "manufacturer_product_photo",
       "imageLicenseStatus": "official_photos_not_licensed",
-      "updatedAt": "2026-10-26",
+      "updatedAt": "2026-10-31",
       "photoReview": {
         "url": "https://images.hbjo-online.com/webp/images/all/AW0100-86EC_Zoom.jpg",
         "source": "https://www.emileleon.fr/en/p/citizen-eco-drive-aw0100-86ec-watch-f241",
@@ -402,6 +438,18 @@
         "originalFetchedFrom": "https://images.hbjo-online.com/webp/images/all/AW0100-86EC_Zoom.jpg",
         "permissionDeclaration": "site_owner_explicit_confirmation_2026-10-30",
         "permissionIndependentlyVerified": false
+      },
+      "specReview": {
+        "verifiedOn": "2026-10-31",
+        "sourceKind": "manufacturer_exact_reference",
+        "sourceUrl": "https://fr.citizenwatch.eu/fr/p/aw0100-86ec/",
+        "verifiedFields": [
+          "diameter",
+          "movement",
+          "glass",
+          "waterResistance"
+        ],
+        "notes": "Fiche Citizen AW0100-86EC, mouvement Eco-Drive calibre J800, boîtier rond 40 mm, verre cristal, 3 bar."
       }
     },
     {
@@ -499,7 +547,7 @@
       },
       "imageMode": "manufacturer_product_photo",
       "imageLicenseStatus": "official_photos_not_licensed",
-      "updatedAt": "2026-10-26",
+      "updatedAt": "2026-10-31",
       "photoReview": {
         "url": "https://fr.citizenwatch.eu/media/thumbs/e1/be/3ca11f51f389400616f15404f1f80ece8dc3/1400x_crop=center;format=webp/managed/98/29/9829a4aca83a5df2747e95c666cd293a/NJ0150-81X.png.thumb.webp",
         "source": "https://fr.citizenwatch.eu/fr/p/nj0150-81x/",
@@ -517,6 +565,18 @@
         "originalFetchedFrom": "https://fr.citizenwatch.eu/media/thumbs/e1/be/3ca11f51f389400616f15404f1f80ece8dc3/1400x_crop=center;format=webp/managed/98/29/9829a4aca83a5df2747e95c666cd293a/NJ0150-81X.png.thumb.webp",
         "permissionDeclaration": "site_owner_explicit_confirmation_2026-10-30",
         "permissionIndependentlyVerified": false
+      },
+      "specReview": {
+        "verifiedOn": "2026-10-31",
+        "sourceKind": "manufacturer_exact_reference",
+        "sourceUrl": "https://fr.citizenwatch.eu/fr/p/nj0150-81x/",
+        "verifiedFields": [
+          "diameter",
+          "movement",
+          "glass",
+          "waterResistance"
+        ],
+        "notes": "Fiche Citizen NJ0150-81X, calibre 8210, boîtier 40 mm, saphir et étanchéité 5 bar."
       }
     },
     {
@@ -547,11 +607,11 @@
         "diameter": "38,4 mm",
         "movement": "Orient F6724 automatique",
         "glass": "Minéral bombé",
-        "waterResistance": "3 bar"
+        "waterResistance": "30 m"
       },
       "imageMode": "manufacturer_product_photo",
       "imageLicenseStatus": "official_photos_not_licensed",
-      "updatedAt": "2026-10-26",
+      "updatedAt": "2026-10-31",
       "photoReview": {
         "url": "https://i8.amplience.net/i/epsonemear/RA-AC0M12L-580x580?$OC02-md-img1$&sm=c",
         "source": "https://www.orientwatch.fr/or/fr_FR/brands/orient/orient-bambino-38mm/p/RA-AC0M12L",
@@ -569,6 +629,18 @@
         "originalFetchedFrom": "https://i8.amplience.net/i/epsonemear/RA-AC0M12L-580x580?$OC02-md-img1$&sm=c",
         "permissionDeclaration": "site_owner_explicit_confirmation_2026-10-30",
         "permissionIndependentlyVerified": false
+      },
+      "specReview": {
+        "verifiedOn": "2026-10-31",
+        "sourceKind": "manufacturer_exact_reference",
+        "sourceUrl": "https://www.orientwatch.fr/or/fr_FR/brands/orient/orient-bambino-38mm/p/RA-AC0M12L",
+        "verifiedFields": [
+          "diameter",
+          "movement",
+          "glass",
+          "waterResistance"
+        ],
+        "notes": "Le fabricant indique « Width 38.4mm » pour le boîtier rond, calibre F6724, cristal minéral et « 30m » ; conserve la valeur d’étanchéité telle qu’écrite."
       }
     },
     {
@@ -668,7 +740,7 @@
       },
       "imageMode": "manufacturer_product_photo",
       "imageLicenseStatus": "official_photos_not_licensed",
-      "updatedAt": "2026-10-26",
+      "updatedAt": "2026-10-31",
       "photoReview": {
         "url": "https://www.tissotwatches.com/on/demandware.static/-/Sites-Tissot-Catalogue/default/dw9b840963/product-pictures/739cc440-025b-42e8-a5f9-ae33b31479b2_T137-410-11-041-00_shadow.png",
         "source": "https://www.tissotwatches.com/fr-fr/T1374101104100.html",
@@ -686,6 +758,18 @@
         "originalFetchedFrom": "https://www.tissotwatches.com/on/demandware.static/-/Sites-Tissot-Catalogue/default/dw9b840963/product-pictures/739cc440-025b-42e8-a5f9-ae33b31479b2_T137-410-11-041-00_shadow.png",
         "permissionDeclaration": "site_owner_explicit_confirmation_2026-10-30",
         "permissionIndependentlyVerified": false
+      },
+      "specReview": {
+        "verifiedOn": "2026-10-31",
+        "sourceKind": "manufacturer_exact_reference",
+        "sourceUrl": "https://www.tissotwatches.com/fr-fr/T1374101104100.html",
+        "verifiedFields": [
+          "diameter",
+          "movement",
+          "glass",
+          "waterResistance"
+        ],
+        "notes": "Référence exacte T1374101104100, montre suisse quartz 40 mm, saphir et 10 bar."
       }
     },
     {
@@ -721,7 +805,7 @@
       },
       "imageMode": "manufacturer_product_photo",
       "imageLicenseStatus": "official_photos_not_licensed",
-      "updatedAt": "2026-10-26",
+      "updatedAt": "2026-10-31",
       "photoReview": {
         "url": "https://www.tissotwatches.com/on/demandware.static/-/Sites-Tissot-Catalogue/default/dw95c4331d/product-pictures/63f42767-a9f5-4cdd-b952-8ea7b82b7e0c_T137-407-11-041-00_shadow.png",
         "source": "https://www.tissotwatches.com/fr-fr/T1374071104100.html",
@@ -739,6 +823,18 @@
         "originalFetchedFrom": "https://www.tissotwatches.com/on/demandware.static/-/Sites-Tissot-Catalogue/default/dw95c4331d/product-pictures/63f42767-a9f5-4cdd-b952-8ea7b82b7e0c_T137-407-11-041-00_shadow.png",
         "permissionDeclaration": "site_owner_explicit_confirmation_2026-10-30",
         "permissionIndependentlyVerified": false
+      },
+      "specReview": {
+        "verifiedOn": "2026-10-31",
+        "sourceKind": "manufacturer_exact_reference",
+        "sourceUrl": "https://www.tissotwatches.com/fr-fr/T1374071104100.html",
+        "verifiedFields": [
+          "diameter",
+          "movement",
+          "glass",
+          "waterResistance"
+        ],
+        "notes": "Référence exacte T1374071104100, Powermatic 80, boîtier 40 mm, verre saphir antireflet et 10 bar."
       }
     },
     {
@@ -774,7 +870,7 @@
       },
       "imageMode": "manufacturer_product_photo",
       "imageLicenseStatus": "official_photos_not_licensed",
-      "updatedAt": "2026-10-26",
+      "updatedAt": "2026-10-31",
       "photoReview": {
         "url": "https://www.hamiltonwatch.com/media/catalog/product/cache/6517c62f5899ad6aa0ba23ceb3eeff97/h/7/h70455133.png",
         "source": "https://www.hamiltonwatch.com/fr-fr/h70455133-khaki-field-auto.html",
@@ -792,6 +888,18 @@
         "originalFetchedFrom": "https://www.lepage.fr/71698-zoom_default/watch-hamilton-khaki-field-automatic-black-dial-steel-bracelet-38-mm.jpg",
         "permissionDeclaration": "site_owner_explicit_confirmation_2026-10-30",
         "permissionIndependentlyVerified": false
+      },
+      "specReview": {
+        "verifiedOn": "2026-10-31",
+        "sourceKind": "manufacturer_exact_reference",
+        "sourceUrl": "https://www.hamiltonwatch.com/fr-fr/h70455133-khaki-field-auto.html",
+        "verifiedFields": [
+          "diameter",
+          "movement",
+          "glass",
+          "waterResistance"
+        ],
+        "notes": "Référence exacte H70455133, calibre H-10 automatique, 38 mm, saphir et 10 bar."
       }
     },
     {
