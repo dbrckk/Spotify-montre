@@ -266,3 +266,17 @@ dialog.am-dialog[open]{display:block!important;box-sizing:border-box}
  .am-replace-choice img{width:46px;height:46px}
 }
 @media(prefers-reduced-motion:reduce){.am-replace-choice{transition:none}}
+
+/* Replace any one watch directly in the head-to-head viewer, without leaving
+   the dialogue or losing the other two slots. Native select stays accessible
+   to touch, keyboard and Android's picker. */
+.am-compare-inline-swap{display:flex;flex-direction:column;align-items:stretch;gap:7px;margin:13px 0 4px;max-width:100%;min-width:0;text-align:left}
+.am-compare-inline-swap>span{color:#60705f;font:700 10px/1.4 system-ui,sans-serif;letter-spacing:.025em}
+.am-compare-inline-swap select{display:block;box-sizing:border-box;width:100%;min-width:0;max-width:100%;height:48px;min-height:44px;border:1px solid #abbca6;border-radius:4px;background:#f5f5ed;color:#224030;font:650 12px/1.35 system-ui,sans-serif;padding:10px 27px 10px 11px;text-overflow:ellipsis;cursor:pointer}
+.am-compare-inline-swap select:hover{border-color:#55735b;background:#edf3e9}
+.am-compare-inline-swap select:focus-visible{outline:3px solid #b79b62;outline-offset:2px}
+.am-compare-table th.am-compare-head{min-width:170px;max-width:240px}
+.am-compare-table .am-compare-inline-swap{max-width:215px}
+.am-compare-mobile .am-compare-inline-swap{margin:14px 0 12px}
+.am-compare-mobile .am-compare-inline-swap>span{font-size:11px}
+@media(max-width:700px){.am-compare-mobile .am-compare-inline-swap select{height:50px;font-size:13px}}
