@@ -255,3 +255,7 @@ a,button,input,select,summary{touch-action:manipulation}
 .detail-evidence p{color:#364e3b}
 .detail-adjacent-link span{color:#425846}
 .detail-related-brand{color:#61492b}
+
+/* Final WCAG contrast corrections: light section footnote and dark advisor knowledge section. */
+.aff-small{color:#435846}
+.advisor-knowledge .kicker.overline{color:#f1d1a2}

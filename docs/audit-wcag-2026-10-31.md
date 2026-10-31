@@ -21,3 +21,7 @@ Les corrections visent les éléments signalés (étiquettes de liens, CTA, cont
 ### État après premier lot de corrections
 
 [Second passage 41220692535](https://github.com/dbrckk/Spotify-montre/actions/runs/41220692535) : **39 URL / 83 écrans, zéro échec d'analyse, deux catégories restantes** (color-contrast et label-content-name-mismatch). Le nombre d'occurrences par écran et règle est passé de 79 à 20, et le nombre de sélecteurs en défaut remontés dans le rapport d'environ 640 à 115 ; les chiffres reflètent des violations automatiques, **pas un taux de conformité WCAG**.
+
+### Dernier resserrement
+
+[Passage 41220951876](https://github.com/dbrckk/Spotify-montre/actions/runs/41220951876) : **39 URL / 83 états**, neuf occurrences de contraste restent sur deux styles : une mention secondaire claire du catalogue et un intitulé placé sur le **fond vert sombre** de la rubrique de conseils du conseiller. Les couleurs sont corrigées séparément ; la CI passe désormais en **mode bloquant** (`A11Y_ENFORCE=1`) et refusera toute violation détectable ou URL non auditée.
