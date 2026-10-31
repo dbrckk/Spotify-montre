@@ -42,7 +42,7 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       +'<span>'+e(q.description||q.title||'Consulter ses caractéristiques')+'</span></li>'
     ).join('');
     const main='<div class="wrap am-extra-page">'
-      +'<nav class="crumb" aria-label="Fil d’Ariane"><a href="../index.html">Collection</a> / <a href="./modeles-populaires.html">13 modèles complémentaires</a> / '+e(name)+'</nav>'
+      +'<nav class="crumb" aria-label="Fil d’Ariane"><a href="../index.html">Collection</a> / <a href="./modeles-populaires.html">'+products.length+' modèles complémentaires</a> / '+e(name)+'</nav>'
       +'<article class="am-extra-product" data-popular-watch-id="'+e(p.id)+'">'
       +'<div class="am-extra-hero">'
       +'<div class="am-extra-art am-pick-'+e(p.style)+'" role="group" aria-label="Composition graphique non contractuelle, sans photographie de cette montre">'
@@ -80,7 +80,7 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       +'<li>Vérifier les dimensions de la boîte, le réglage et les matériaux sur la documentation '+e(p.brand)+'.</li>'
       +'<li>Lire la garantie, les modalités de retour, le vendeur réel et le tarif final directement chez le commerçant.</li></ol>'
       +'<p>Aucun prix, disponibilité, livraison ou avis client n’est certifié par Atelier Montres pour ce modèle.</p></section>'
-      +'<p class="am-extra-return"><a href="./modeles-populaires.html">← Revenir aux 13 montres complémentaires</a></p>'
+      +'<p class="am-extra-return"><a href="./modeles-populaires.html">← Revenir aux '+products.length+' montres complémentaires</a></p>'
       +'</article></div>';
     const graph={
       '@context':'https://schema.org','@graph':[

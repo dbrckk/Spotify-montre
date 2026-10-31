@@ -86,6 +86,8 @@ jobs:
                 ready=0
               elif ! grep -Fq 'data-pick-id="casio-gw-m5610u-1"' "$RUNNER_TEMP/live-popular.html"; then
                 ready=0
+              elif ! grep -Fq 'data-pick-id="seiko-speedtimer-ssc813"' "$RUNNER_TEMP/live-popular.html"; then
+                ready=0
               fi
             fi
             if [ "$ready" -eq 1 ]; then
