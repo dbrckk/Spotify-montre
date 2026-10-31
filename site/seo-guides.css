@@ -254,3 +254,12 @@
  }
  .watch-product .watch-photo img{height:calc(100% - 44px);max-height:calc(100% - 44px)}
 }
+
+/* Public editorial evidence: verified specifications are distinct from the
+   separate, owner-declared (not independently verified) photo permissions. */
+.watch-evidence{margin:24px 0;padding:17px 20px;border:1px solid #ced8c9;background:#eff4ec;max-width:800px}
+.watch-evidence strong{display:block;color:#193c27;font:700 13px/1.5 system-ui,sans-serif}
+.watch-evidence p{margin:7px 0!important;color:#506558;font:12px/1.75 system-ui,sans-serif}
+.watch-evidence a{display:inline-flex;align-items:center;min-height:44px;color:#1e5938;font:700 12px/1.5 system-ui,sans-serif;text-underline-offset:4px}
+.watch-evidence a:focus-visible{outline:3px solid #c29e68;outline-offset:3px}
+@media(max-width:600px){.watch-evidence{padding:14px 16px;margin:18px 0}}
