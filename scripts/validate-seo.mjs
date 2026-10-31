@@ -124,6 +124,24 @@ for(const product of feed.products){
   assert.doesNotMatch(html,/"offers"\s*:|"price"\s*:|"availability"\s*:|"aggregateRating"\s*:/,'No unverified commercial schema');
   assert.ok(home.includes('./'+path),'Missing static crawlable home link: '+path);
   assert.match(html,/class="spec-matrix"/,'Model-to-model comparisons required');
+  // Production detail layout remains factual, navigable and useful on mobile.
+  assert.match(html,/class="watch watch-product"/,'Premium product layout required: '+product.id);
+  assert.match(html,/class="photo watch-photo"/,'Photo stage must preserve the real product photo');
+  assert.match(html,/class="watch-photo-caption"/,'Exact model photograph needs a source caption');
+  assert.match(html,/class="watch-section-nav"/,'Quick in-page navigation must be present');
+  for(const section of ['caracteristiques','comparatif','avant-achat','modeles-proches']){
+    assert.ok(html.includes('href="#'+section+'"'),'Missing anchor link '+section+' for '+product.id);
+    assert.ok(html.includes('id="'+section+'"'),'Missing heading target '+section+' for '+product.id);
+  }
+  const facts=html.match(/<section class="watch-facts"[^>]*>[\s\S]*?<dl>([\s\S]*?)<\/dl><\/section>/);
+  assert.ok(facts,'Source-grounded summary must exist on every product page: '+product.id);
+  assert.equal((facts[1].match(/class="watch-quickfact"/g)||[]).length,4,'Exactly four verified-or-unknown facts: '+product.id);
+  for(const [label,documented] of [['Mouvement',product.specs?.movement],['Diamètre',product.specs?.diameter],['Verre',product.specs?.glass],['Étanchéité',product.specs?.waterResistance]]){
+    assert.ok(facts[1].includes('<dt>'+label+'</dt>'),'Missing quick-fact label '+label+' on '+product.id);
+    if(label!=='Mouvement')assert.ok(facts[1].includes(documented||'Non documenté'),'Quick-fact must not invent '+label+' on '+product.id);
+  }
+  assert.match(html,/class="watch-actions"/,'Accessible purchase/compare actions remain grouped');
+
   const expectedMovement={quartz:'quartz',automatic:'automatique','eco-drive':'solaire'}[product.movement];
   const expectedTitle=product.brand+' '+product.model+' : montre '+expectedMovement+(product.specs?.diameter?' '+product.specs.diameter:'')+' | Atelier Montres';
   assert.ok(html.includes('<title>'+expectedTitle+'</title>'),'Search title contains exact model and sourced specs: '+product.id);
