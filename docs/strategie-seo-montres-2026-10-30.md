@@ -103,3 +103,11 @@ Le propriétaire a confirmé la vérification de la propriété **Préfixe d'URL
 - Les images affichées possèdent désormais `srcset` et `sizes` ; un repli vers l’original reste disponible sur le catalogue dynamique, notamment sur les anciens snapshots.
 - L’accueil applique le même choix adaptatif à son image LCP et au préchargement pour éviter de télécharger deux résolutions différentes.
 - À comparer avec les audits Lighthouse préexistants : accueil (médiane 98/100, LCP ~1,67 s) et fiche Casio (100/100, LCP ~1,53 s). Les gains éventuels doivent être confirmés par un nouvel audit, sans promettre une amélioration de classement SEO.
+
+## Transparence éditoriale et confiance — 31 octobre 2026
+
+- La page de méthode de sélection est publiée à `montres/methode-selection.html`, générée depuis les données réellement vérifiables du catalogue et la configuration des liens Amazon.
+- Aucun essai physique, diplôme personnel, prix, stock ou droit photo indépendant non démontré n'est revendiqué. Les critères documentés, les informations manquantes et les conditions commerciales à vérifier sont explicités.
+- Chaque page éditoriale lie la méthode par sa navigation et son pied de page ; l'accueil la met en avant et la propose au pied de page. Le sitemap comprend maintenant **29 URL indexables**.
+- Contrôles de non-régression : unicité canonique, balisage AboutPage, liens vers les 15 fiches, cohérence du sitemap, indépendance des faits et idempotence du bloc d'accueil.
+- But : apporter une aide réelle et transparente à l'achat, sans promettre de progression SEO tant que Search Console ne mesure pas les performances réelles.

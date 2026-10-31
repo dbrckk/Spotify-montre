@@ -31,7 +31,7 @@ for(const [id,entry] of Object.entries(amazon.links)){
  assert.ok(!entry.url.includes('?tag='),'Unapproved affiliate tracking cannot be published');
 }
 
-assert.equal(manifest.paths.length,28);
+assert.equal(manifest.paths.length,29);
 assert.ok(manifest.paths.every(url=>url.startsWith(manifest.siteUrl)));
 // Ensure small, local, original-source thumbnails are shipped with the site.
 for(const name of ['citizen-tsuyosa','tissot-prx-quartz','orient-bambino','casio-mtp-b145']){
@@ -72,6 +72,31 @@ assert.match(home,/Les 15 montres, modèle par modèle/);
 assert.match(home,/Avant de choisir sa montre/);
 assert.match(home,/id="comparaisons"/,'Homepage must promote head-to-head comparison pages');
 assert.match(home,/id="seo-collections-title"/,'Homepage must link to explanatory indexable watch collections');
+assert.ok(home.includes('./montres/methode-selection.html'),'Homepage must link to transparent selection methodology');
+assert.equal((home.match(/AM_EDITORIAL_POLICY_START/g)||[]).length,1,'Editorial teaser generated exactly once');
+const methodPath='montres/methode-selection.html';
+const method=read(methodPath);
+assert.ok(manifest.paths.includes(manifest.siteUrl+methodPath),'Method must be in sitemap manifest');
+assert.ok(read('sitemap.xml').includes(manifest.siteUrl+methodPath),'Method must be in sitemap');
+assert.ok(method.includes('<link rel="canonical" href="'+manifest.siteUrl+methodPath+'">'),'Method page must have canonical URL');
+assert.equal((method.match(/rel="canonical"/g)||[]).length,1,'Method must have a single canonical');
+assert.match(method,/<h1>Comment nous sélectionnons les montres<\/h1>/);
+assert.match(method,/ne prétendons pas avoir testé physiquement les montres/,'No unsupported first-hand testing claims');
+assert.match(method,/vérification juridique indépendante/,'Photo authorization is not independently established');
+assert.match(method,/« À vérifier » ou « Non renseigné »/,'Unknown specs must remain unknown');
+assert.match(method,/lien rémunéré/,'Commercial disclosure explained');
+assert.match(method,/références Amazon.fr identifiées/,'Amazon model counts are transparent');
+assert.match(method,/Sélection enregistrée le/,'Catalog selection date disclosed');
+assert.equal((method.match(/class="seo-method-products"/g)||[]).length,1);
+for(const product of feed.products)assert.ok(method.includes('href="./'+product.id+'.html"'),'Method links exact product '+product.id);
+const methodJson=method.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
+assert.ok(methodJson,'Machine-readable method metadata required');
+const methodGraph=JSON.parse(methodJson[1]);
+assert.deepEqual(methodGraph['@graph'].map(x=>x['@type']),['AboutPage','BreadcrumbList']);
+assert.equal(methodGraph['@graph'][0].url,manifest.siteUrl+methodPath);
+assert.ok(read('montres/guide-choisir-montre.html').includes('./methode-selection.html'),'Method linked from guide navigation');
+assert.ok(read('montres/montres-casio.html').includes('./methode-selection.html'),'Method linked from collection navigation');
+
 assert.match(home,/id="heroWatch"[^>]*><img class="am-hero-real-photo"/,'First genuine watch must render in initial HTML for early LCP');
 const first=feed.products.find(p=>p.id==='citizen-tsuyosa');
 assert.equal(first.photoReview.publicUsageApproved,true);
@@ -287,4 +312,4 @@ assert.equal(privacy.includes('Les visites et clics vers Amazon sont mesurés av
 assert.ok(privacy.includes('chez Render'),'Privacy notice must identify actual host');
 const guide=read('montres/guide-choisir-montre.html');
 assert.match(guide,/<h1>Comment choisir une montre/);
-console.log('SEO validation OK: 15 model pages, 3 real search-intent categories, 4 guides, 4 comparisons, 13 exact Amazon links, 28 sitemap URLs and genuine hero LCP preload');
+console.log('SEO validation OK: 15 model pages, 3 categories, 4 guides, 4 comparisons, transparent editorial method, 13 Amazon links, 29 sitemap URLs and genuine hero LCP preload');

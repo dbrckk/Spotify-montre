@@ -150,3 +150,24 @@
 .seo-related-products a:hover strong{text-decoration:underline}
 @media(max-width:780px){.seo-related-products{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:460px){.seo-related-products{grid-template-columns:1fr}.seo-related-photo{max-height:260px}}
+
+
+/* Editorial method: transparent evidence and useful navigation. */
+.seo-method-teaser{padding:65px 0;background:#192f27;color:#f7f2e8;border-top:1px solid #a79775}
+.seo-method-teaser .eyebrow{color:#d9b980}
+.seo-method-teaser h2{font:400 clamp(31px,4vw,46px)/1.15 Georgia,serif;max-width:760px;margin:16px 0}
+.seo-method-teaser p:not(.eyebrow){max-width:740px;line-height:1.85;color:#e1e1d7}
+.seo-method-teaser a{display:inline-flex;align-items:center;min-height:48px;color:#ffe3a7;font-weight:700;text-underline-offset:5px}
+.seo-method{padding-bottom:22px}
+.seo-method>.lead{max-width:880px}
+.seo-method-credit{color:#5e6a5e;font-size:13px;line-height:1.8}
+.seo-method-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:30px 0 14px}
+.seo-method-stats>div{display:flex;flex-direction:column;gap:7px;border:1px solid #dfd7c8;background:#fffdfa;padding:21px}
+.seo-method-stats strong{font:400 clamp(30px,4vw,45px)/1 Georgia,serif;color:#1b4832}
+.seo-method-stats span{font-size:12px;line-height:1.45;color:#627163}
+.seo-method .content{padding-top:0}
+.seo-method-brands{display:flex;flex-wrap:wrap;list-style:none;gap:9px;padding:0;margin:16px 0}
+.seo-method-brands li{padding:6px 11px;background:#eae7dd;border:1px solid #ded4c1;font-size:13px}
+.seo-method-steps{padding-left:24px;display:grid;gap:12px;line-height:1.7;color:#425c4a}
+.seo-method-products li{font-size:14px}
+@media(max-width:720px){.seo-method-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.seo-method-teaser{padding:46px 0}.seo-method-stats>div{padding:16px}}
