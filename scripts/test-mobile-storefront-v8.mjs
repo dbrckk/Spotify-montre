@@ -69,6 +69,7 @@ try{
  await allWatches.locator('#udSearch').fill('SKMEI 2056');
  assert.equal(await allWatches.locator('.ud-card:visible').count(),1,'Search must work across brand and model');
  await allWatches.locator('#udFilters button[type=reset]').click();
+ await allWatches.waitForFunction(()=>document.querySelectorAll('.ud-card:not([hidden])').length===52);
  assert.equal(await allWatches.locator('.ud-card:visible').count(),52,'Clearing filters must restore all 52');
  await allWatches.locator('#udBrand').selectOption('SKMEI');
  assert.equal(await allWatches.locator('.ud-card:visible').count(),10,'All ten SKMEI models must be discoverable together');
