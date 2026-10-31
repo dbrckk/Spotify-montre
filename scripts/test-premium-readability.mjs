@@ -11,7 +11,7 @@ try{
     const page=await browser.newPage({viewport:{width,height:852},deviceScaleFactor:1,isMobile:width<768,hasTouch:width<768,locale:'fr-FR'});
     const errors=[];
     page.on('pageerror',e=>errors.push(e.message));
-    await page.goto(new URL('/',base),{waitUntil:'domcontentloaded'});
+    await page.goto(new URL('/',base).href,{waitUntil:'domcontentloaded'});
     await page.waitForSelector('#affGrid .aff-card',{timeout:25000});
     await page.locator('#affViewGallery').click();
     await page.waitForFunction(()=>document.querySelector('#affGrid')?.dataset.view==='gallery');
@@ -48,7 +48,7 @@ try{
   }
   for(const path of ['/montres/citizen-tsuyosa.html','/conseiller.html','/montre.html?id=citizen-tsuyosa']){
     const page=await browser.newPage({viewport:{width:393,height:852},isMobile:true,hasTouch:true});
-    await page.goto(new URL(path,base),{waitUntil:'domcontentloaded'});
+    await page.goto(new URL(path,base).href,{waitUntil:'domcontentloaded'});
     await page.waitForSelector('link[href$="premium-system.css"]');
     const state=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,client:document.documentElement.clientWidth,loaded:[...document.styleSheets].some(sheet=>sheet.href?.includes('/premium-system.css'))}));
     assert.ok(state.loaded,'Shared stylesheet missing from '+path);
