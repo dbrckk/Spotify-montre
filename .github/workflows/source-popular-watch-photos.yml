@@ -39,6 +39,8 @@ jobs:
           node scripts/build-seo.mjs
           node scripts/validate-seo.mjs
           node scripts/check-affiliate-publication.mjs
+      - name: Assemble static deployment archive with all approved images
+        run: python scripts/build-shipstatic-bundle.py
       - name: Audit produced photo count
         run: |
           python - <<'PY'
@@ -51,11 +53,11 @@ jobs:
           if amount == 0:
               raise SystemExit("No real packshot could be sourced: do not publish an empty batch as a success")
           PY
-      - name: Commit only reviewed images, rights metadata and source report
+      - name: Commit reviewed images, provenance and refreshed deployment package
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add site/assets/watches-popular/ site/popular-photo-rights.json docs/popular-watch-photo-report.json
+          git add -A site/assets/watches-popular/ site/popular-photo-rights.json docs/popular-watch-photo-report.json docs/deploy-package-*.json
           if git diff --cached --quiet; then
             echo 'All registered product images already current.'
           else
