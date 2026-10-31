@@ -111,6 +111,44 @@ try{
   assert.match(await page.locator('#detailEvidence').innerText(),/31 octobre 2026/,'Dated source provenance is visible on the interactive watch page');
   await page.screenshot({path:'artifacts/mobile-casio-vintage-facts.png',fullPage:true});
   console.log('PASS TECHNICAL PROVENANCE: Casio MDV-107 bar and case L × l × H, Casio A168 unknown diameter and dated official evidence');
+  // Abort every local photo derivative of an exact model and verify the
+  // fallback stays a same-origin, original SVG — never a third-party hotlink.
+  const blocked=await browser.newPage({viewport:{width:393,height:852},deviceScaleFactor:1,isMobile:true,hasTouch:true,locale:'fr-FR'});
+  const foreignImages=[];
+  blocked.on('request',request=>{
+    if(request.resourceType()==='image'&&new URL(request.url()).origin!==new URL(base).origin)
+      foreignImages.push(request.url());
+  });
+  await blocked.route(/\/assets\/(?:watches\/casio-mdv107\.webp|watch-responsive\/casio-mdv107-\d+\.webp)(?:\?|$)/,
+    route=>route.abort('failed'));
+  await blocked.goto(new URL('/affiliation.html',base).href,{waitUntil:'domcontentloaded',timeout:30000});
+  const brokenCard=blocked.locator('#affGrid .aff-card[data-watch-id="casio-mdv107"]');
+  await brokenCard.waitFor({state:'visible',timeout:20000});
+  await brokenCard.scrollIntoViewIfNeeded();
+  await blocked.waitForFunction(()=>{
+    const x=document.querySelector('#affGrid .aff-card[data-watch-id="casio-mdv107"] .aff-art-label');
+    return x?.textContent.includes('ILLUSTRATION ORIGINALE');
+  },{timeout:15000});
+  assert.equal(await brokenCard.locator('img.aff-product-photo').count(),0,'Missing local product photo must render the original vector');
+  await blocked.goto(new URL('/montre.html?id=casio-mdv107',base).href,{waitUntil:'domcontentloaded',timeout:30000});
+  await blocked.locator('#detailShell').waitFor({state:'visible',timeout:20000});
+  await blocked.waitForFunction(()=>document.querySelector('#detailPhotoLabel')?.textContent.includes('ILLUSTRATION ÉDITORIALE ORIGINALE'),{timeout:15000});
+  assert.ok(await blocked.locator('#detailPhotoZoom').isHidden(),'Unavailable real photo must not offer a broken zoom');
+  // The zoom receives a deliberately untrusted research URL with no
+  // approved local file and must never use the third-party host.
+  await blocked.evaluate(()=>{
+    window.AtelierPhoto.open([{
+      id:'missing-remote-test',brand:'Test',model:'Photographie absente',
+      officialUrl:'https://www.casio.com/',
+      photoReview:{publicUsageApproved:true,url:'https://untrusted.invalid/external.jpg'}
+    }],'missing-remote-test');
+  });
+  await blocked.locator('#amPhotoDialog').waitFor({state:'visible',timeout:5000});
+  assert.equal(await blocked.locator('#amPhotoDialog img.am-photo-large').getAttribute('src'),null,
+    'A remote-only research image cannot be requested in full-screen zoom');
+  assert.deepEqual(foreignImages,[],'Missing local watch photos must not trigger any external image requests');
+  await blocked.close();
+  console.log('PASS LOCAL PHOTO FALLBACK: gallery, product sheet and zoom never hotlink unreviewed images');
   assert.deepEqual(errors,[],'Uncaught browser errors on the storefront');
   console.log('PASS MOBILE DETAIL: Tissot PRX Powermatic 80 displayed, photo decoded, detail sheet visible');
 }finally{

@@ -52,7 +52,12 @@ try{
  await galleryButton.waitFor({state:'visible'});
  assert.equal(await page.locator('#affGrid').getAttribute('data-view'),'gallery','First-time mobile visitor sees the visual gallery');
  assert.equal(await galleryButton.getAttribute('aria-pressed'),'true');
- assert.equal(await page.locator('#affGrid .am-gallery-facts').count(),15,'Every gallery watch includes sourced movement and diameter facts');
+ assert.equal(await page.locator('#affGrid .am-gallery-facts').count(),15,'Every gallery watch shows factual movement and case dimensions');
+ for(const [id,width,dimensions] of [['casio-mtp-b145','35','40 × 35 × 7,4 mm'],['casio-a168wa','36,3','38,6 × 36,3 × 9,6 mm'],['casio-mdv107','44,2','49,5 × 44,2 × 12,1 mm']]){
+   const fact=page.locator('#affGrid .aff-card[data-watch-id="'+id+'"] .am-gallery-facts span').last();
+   assert.equal(await fact.innerText(),'Largeur '+width+' mm','A rectangular width must not be called a diameter: '+id);
+   assert.ok((await fact.getAttribute('aria-label')).includes(dimensions),'Full L × l × H accessible to screen readers: '+id);
+ }
  assert.equal(await page.locator('#affGrid').evaluate(node=>getComputedStyle(node).gridTemplateColumns.split(' ').length),2,'Photo gallery displays two responsive columns on mobile');
  // Every manufacturer's real photo receives the same neutral stage. Optical
  // style must not depend on the watch dial colour. Keep original pixels intact.
@@ -245,6 +250,9 @@ await page.locator('#affGrid .aff-card input[type="checkbox"]').nth(0).check();
  if(!(await note.isVisible())){console.error('COMPARISON NOTE DEBUG',await note.evaluateAll(nodes=>nodes.map(n=>[n,n.parentElement,n.parentElement?.parentElement].map(e=>e&&({tag:e.tagName,class:e.className,rect:e.getBoundingClientRect().toJSON(),display:getComputedStyle(e).display,width:getComputedStyle(e).width,flex:getComputedStyle(e).flex,overflow:getComputedStyle(e).overflow})))));await page.screenshot({path:'artifacts/mobile-compare-debug.png',fullPage:true})}
  assert.ok(await note.isVisible(),'Explain factual differences');
  assert.equal(await page.locator('.am-compare-mobile-card').count(),2,'Comparison must create two readable mobile swipe cards');
+ const sizes=page.locator('.am-compare-table tbody tr',{hasText:'Taille du boîtier'});
+ assert.equal(await sizes.count(),1,'One comparison row must distinguish circular diameter and rectangular case size');
+ assert.match(await sizes.innerText(),/L × l × H 40 × 35 × 7,4 mm/,'Casio MTP-B145 35 mm width is not a circular diameter');
  assert.ok(await page.locator('.am-compare-mobile-track').isVisible(),'Touch carousel must appear on mobile');
  await page.locator('.am-compare-mobile-nav button').last().click();
  await page.waitForFunction(()=>document.querySelector('.am-compare-mobile-position')?.textContent==='2 / 2',{timeout:5000});
