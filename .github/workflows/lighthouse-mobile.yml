@@ -34,6 +34,27 @@ jobs:
           node-version: '22'
       - name: Validate report script
         run: node --check scripts/report-lighthouse-mobile.mjs
+      - name: Wait for published CSS and gallery code to match this commit
+        run: |
+          set -eu
+          base='https://atelier-montres-selection-fr.onrender.com'
+          for attempt in $(seq 1 30); do
+            ready=1
+            for file in seo-guides.css catalogue-view.css editorial-photo.js; do
+              if ! curl -fsSL --max-time 15 "$base/$file" -o "$RUNNER_TEMP/lh-$file"; then
+                ready=0
+              elif ! cmp -s "site/$file" "$RUNNER_TEMP/lh-$file"; then
+                ready=0
+              fi
+            done
+            if [ "$ready" -eq 1 ]; then
+              echo "Lighthouse will measure the exact latest CSS and editorial JS."
+              exit 0
+            fi
+            if [ "$attempt" -lt 30 ]; then sleep 5; fi
+          done
+          echo "Render has not published the source assets for this Lighthouse run."
+          exit 1
       - name: Three independent mobile runs on homepage, one product page
         run: |
           mkdir -p artifacts
