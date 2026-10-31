@@ -9,7 +9,7 @@ import {chromium} from 'playwright';
 const site=resolve('site');
 const manifest=JSON.parse(readFileSync(resolve(site,'seo-manifest.json'),'utf8'));
 const generated=manifest.paths.map(url=>new URL(url).pathname);
-const extras=readdirSync(site).filter(name=>name.endsWith('.html')).map(name=>'/'+name);
+const extras=readdirSync(site).filter(name=>name.endsWith('.html')&&!/^google[a-f0-9]+\.html$/i.test(name)).map(name=>'/'+name);
 const paths=[...new Set([...generated,...extras,'/montre.html?id=citizen-tsuyosa'])].sort();
 const tags=['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa'];
 const origin=new URL(process.env.WATCH_STOREFRONT_URL||'http://127.0.0.1:8765');
@@ -46,6 +46,12 @@ try{
         if(path.includes('montre.html?id='))await page.locator('#detailShell').waitFor({state:'visible'});
         await scan(page,viewport.label+' '+path);
         if(path==='/'){
+          // The very first keyboard stop should become visibly focused.
+          await page.keyboard.press('Tab');
+          const skip=await page.locator('a.sr-only[href="#contenu"]').first().evaluate(el=>{
+            const rect=el.getBoundingClientRect();return {focused:document.activeElement===el,width:rect.width,height:rect.height}
+          });
+          assert.ok(skip.focused&&skip.width>=100&&skip.height>=30,'Keyboard skip-link must be visibly accessible: '+JSON.stringify(skip));
           // A native HTML dialog is not in the accessibility tree before opening.
           const boxes=page.locator('#affGrid .am-compare-check input');
           await boxes.nth(0).check();await boxes.nth(1).check();

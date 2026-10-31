@@ -84,7 +84,7 @@
         const b=node('button','am-hero-option');
         b.type='button';
         b.dataset.watchId=item.id;
-        b.setAttribute('aria-label','Afficher la photographie de '+item.product.brand+' '+item.product.model);
+        b.setAttribute('aria-label','Sélectionner '+item.name+' : photographie de '+item.product.brand+' '+item.product.model);
         b.setAttribute('aria-pressed','false');
         const pic=node('span','am-hero-option-photo');
         const url=local(item.product);
@@ -141,7 +141,7 @@
           stage.removeAttribute('aria-busy');
           if(stage.firstElementChild!==img)stage.replaceChildren(img);
           if(provenance)provenance.textContent='Photographie du modèle exact · '+(p.id==='orient-bambino'?'vue du fond du boîtier':(p.photoReview.provider||p.brand));
-          if(zoom){zoom.hidden=false;zoom.setAttribute('aria-label','Agrandir '+p.brand+' '+p.model);zoom.onclick=()=>openViewer(catalogue,p.id);}
+          if(zoom){zoom.hidden=false;zoom.setAttribute('aria-label','Agrandir la photo de '+p.brand+' '+p.model);zoom.onclick=()=>openViewer(catalogue,p.id);}
         };
         // Render injects the genuine Citizen photo directly into static HTML,
         // before JavaScript loads. Reuse it without blanking an already-visible

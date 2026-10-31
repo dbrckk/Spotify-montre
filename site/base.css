@@ -77,3 +77,6 @@ h2{font:400 clamp(34px,4.3vw,60px)/1.14 Georgia,"Times New Roman",serif;letter-s
 @media(max-width:600px){.wrap{width:calc(100% - 38px)}.header-inner{height:auto;min-height:78px;align-items:flex-start;flex-wrap:wrap;padding:19px 0;gap:14px}.brand{font-size:24px}.navigation{width:100%;gap:23px;flex-wrap:wrap}.navigation a{font-size:10px}.tag{font-size:9px}.hero-copy{padding:66px 0 8px}.hero h1{font-size:clamp(49px,12.5vw,74px)}.hero-lead{font-size:15px}.hero-art{height:320px}.watch{transform:scale(.58) rotate(-17deg)}.orbit{width:300px;height:300px}.art-label{right:0;bottom:8px;font-size:9px}.intro,.collection,.steps,.outro{padding:70px 0}.empty-state{padding:45px 19px}.empty-state h3{font-size:27px}.steps h2{margin-bottom:26px}.footer-inner{flex-direction:column}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.button{transition:none}.button:hover{transform:none}}
 
+
+/* Accessibility: kicker labels remain readable on ivory editorial backgrounds. */
+.kicker{color:#70522f}

@@ -217,3 +217,25 @@ a,button,input,select,summary{touch-action:manipulation}
 .am-dialog .am-compare-inline-swap select{font-size:14px}
 .am-dialog .am-compare-mobile-hint,.am-dialog .am-dialog-note{font-size:13px;line-height:1.6}
 @media(max-width:700px){.am-dialog .am-compare-insights{padding:12px 14px}.am-compare-insights p{flex:1 1 100%;font-size:13px}.am-compare-insights button{width:100%;font-size:13px}.am-dialog .am-compare-body{max-height:calc(95dvh - 278px)}.am-dialog .am-compare-dialog-actions #affCompareShare{font-size:13px}}
+
+/* axe-core WCAG 2.2 A/AA follow-up — stronger contrast across genuine products. */
+.aff-tier-grid span{color:#624922}
+.aff-tier-grid small{color:#445d48}
+#affResultCount{color:#435a48}
+.seo-collection-maker{color:#60482b}
+.watch-facts-caption{color:#604a2c!important}
+.watch-quickfact dt{color:#465b48}
+.watch-quickfact .watch-fact-unknown{color:#485a49}
+.watch-decision-heading .eyebrow{color:#5e4927}
+.advisor-step{color:#60492b;border-color:#937346}
+#advisorSummary,.advisor-summary{color:#445a47}
+#detailTier{color:#614d2e}
+#detailBrand{color:#415a45}
+.detail-facts-caption{color:#5e482d}
+.detail-fact dt{color:#465b48}
+.detail-fact dd.detail-fact-unverified{color:#4b5d4a}
+.am-compare-mobile-counter{color:#604a2c}
+.am-compare-mobile-specs dt{color:#455b47}
+.am-compare-mobile-diff dt{color:#3b503e}
+.am-compare-mobile-position{color:#465b48}
+.aff-card .am-card-footer a{display:inline-flex;align-items:center;min-height:44px;padding-block:10px;text-underline-offset:3px}
