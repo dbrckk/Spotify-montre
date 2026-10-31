@@ -10,6 +10,9 @@ on:
       - 'scripts/test-recently-viewed.mjs'
       - 'scripts/test-compare-persistence.mjs'
       - 'site/affiliation.js'
+      - 'site/editorial-photo.js'
+      - 'site/editorial-photo.css'
+      - 'site/selection-affiliation.json'
       - 'site/affiliation.html'
       - 'site/catalogue-view.css'
       - 'site/affiliate-ui.js'
@@ -18,6 +21,9 @@ on:
       - 'site/seo-guides.css'
       - 'scripts/build-seo.mjs'
   workflow_dispatch:
+concurrency:
+  group: production-android-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
@@ -42,7 +48,7 @@ jobs:
           # CDN build never produces a false failure or false success.
           for attempt in $(seq 1 30); do
             ready=1
-            for file in affiliation.js affiliate-ui.js catalogue-view.css fiche.js fiche.css seo-guides.css; do
+            for file in affiliation.js affiliate-ui.js catalogue-view.css fiche.js fiche.css seo-guides.css editorial-photo.js editorial-photo.css; do
               if ! curl -fsSL --max-time 15 "$base/$file" -o "$RUNNER_TEMP/live-$file"; then
                 ready=0
               elif ! cmp -s "site/$file" "$RUNNER_TEMP/live-$file"; then
@@ -70,11 +76,11 @@ jobs:
         env:
           WATCH_STOREFRONT_URL: https://atelier-montres-selection-fr.onrender.com
         run: |
-          node scripts/test-mobile-live-storefront.mjs
-          node scripts/test-mobile-storefront-v8.mjs
-          node scripts/test-selection-share.mjs
-          node scripts/test-recently-viewed.mjs
-          node scripts/test-compare-persistence.mjs
+          timeout 180s node scripts/test-mobile-live-storefront.mjs
+          timeout 180s node scripts/test-mobile-storefront-v8.mjs
+          timeout 120s node scripts/test-selection-share.mjs
+          timeout 120s node scripts/test-recently-viewed.mjs
+          timeout 120s node scripts/test-compare-persistence.mjs
       - name: Save real deployment screenshots
         if: always()
         uses: actions/upload-artifact@v4
