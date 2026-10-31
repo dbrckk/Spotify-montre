@@ -27,7 +27,7 @@ const compact=e.recommend(products,{size:'compact'},15);
 assert.deepEqual(Array.from(ids(compact.slice(0,3))),['casio-mtp-b145','casio-ltp1302','hamilton-khaki']);
 assert.ok(compact.slice(0,3).every(x=>x.matched===1&&x.criteria===1&&x.sizeNote===''));
 const medium=e.recommend(products,{size:'medium'},15);
-assert.equal(medium.filter(x=>x.matched===1).length,6,'Exactly six catalogued models have 38.1–40 mm diameters');
+assert.equal(medium.filter(x=>x.matched===1).length,7,'Seven manufacturer-documented models have 38.1–40 mm diameters');
 assert.ok(medium.slice(0,6).every(x=>x.matched===1&&x.criteria===1));
 const unmeasured=compact.find(x=>x.product.id==='casio-a168wa');
 assert.equal(unmeasured.matched,0,'Missing measurement is not an exact match');
