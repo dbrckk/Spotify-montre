@@ -362,13 +362,14 @@
       "title": "Transparence pop",
       "highlights": [
         "Quartz",
-        "Polymère biosourcé",
+        "3 bar",
+        "Boîtier biosourcé",
         "Transparent"
       ],
       "story": "Un jeu de transparence et d’aiguilles colorées, léger et graphique.",
       "imageMode": "manufacturer_product_photo",
       "imageLicenseStatus": "official_photos_not_licensed",
-      "updatedAt": "2026-10-26",
+      "updatedAt": "2026-10-31",
       "photoReview": {
         "url": "https://static.swatch.com/images/product/SO28K100-S06/sa200/SO28K100-S06_sa200_er005.png",
         "source": "https://www.swatch.com/fr-fr/clearly-gent-so28k100-s06/SO28K100-S06.html",
@@ -386,6 +387,20 @@
         "originalFetchedFrom": "https://www.watchit.ca/cdn/shop/files/SO28K100-S06.jpg?v=1773681796",
         "permissionDeclaration": "site_owner_explicit_confirmation_2026-10-30",
         "permissionIndependentlyVerified": false
+      },
+      "specs": {
+        "movement": "Quartz",
+        "waterResistance": "3 bar"
+      },
+      "specReview": {
+        "verifiedOn": "2026-10-31",
+        "sourceKind": "manufacturer_exact_reference",
+        "sourceUrl": "https://www.swatch.com/fr-fr/clearly-gent-so28k100-s06/SO28K100-S06.html",
+        "verifiedFields": [
+          "movement",
+          "waterResistance"
+        ],
+        "notes": "Le fabricant Swatch confirme Quartz et 3 bar pour SO28K100-S06. Le site de référence consulté ne fournit pas un diamètre exploitable et le verre n’est pas confirmé : ces champs restent volontairement non renseignés."
       }
     },
     {
