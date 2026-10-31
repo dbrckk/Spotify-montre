@@ -48,6 +48,7 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       +'<div class="am-extra-art am-pick-'+e(p.style)+'" role="group" aria-label="Composition graphique non contractuelle, sans photographie de cette montre">'
       +'<span class="am-extra-art-kicker">'+e(p.category)+'</span><span class="am-extra-art-brand">'+e(p.brand)+'</span>'
       +'<span class="am-extra-art-model">'+e(p.model)+'</span>'
+      +(p.brand==='SKMEI'?'<span class="am-budget-watch am-budget-watch-large" aria-hidden="true"><span class="am-budget-dial"></span></span>':'')
       +'<span class="am-extra-art-label">Une référence à découvrir · photographie exacte chez le vendeur ou la marque</span>'
       +'</div>'
       +'<div class="am-extra-intro"><p class="am-extra-overline">'+e(tierNames[p.tier])+' / '+e(category)+'</p>'
