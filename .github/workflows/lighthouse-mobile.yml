@@ -6,6 +6,8 @@ on:
     paths:
       - '.github/workflows/lighthouse-mobile.yml'
       - 'scripts/report-lighthouse-mobile.mjs'
+      - 'site/editorial-photo.js'
+      - 'site/assets/watch-thumbs/**'
   schedule:
     - cron: '31 6 * * 1'
 permissions:

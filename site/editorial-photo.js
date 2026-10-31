@@ -63,10 +63,19 @@
         const pic=node('span','am-hero-option-photo');
         const url=local(item.product);
         if(url){
-          const img=node('img');img.src=url;img.alt='';img.width=65;img.height=65;
+          // The 200px local WebP is a faithful downscale of the same watch.
+          // The original high-resolution photograph is still used in the hero,
+          // product page and full-screen photo viewer.
+          const thumbnail='./assets/watch-thumbs/'+item.id+'.webp';
+          const img=node('img');img.alt='';img.width=65;img.height=65;
           img.loading='eager';img.decoding='async';
-          img.onerror=()=>{img.remove();pic.append(node('span','am-hero-option-fallback',item.name.slice(0,2).toUpperCase()))};
-          pic.append(img);
+          let triedOriginal=false;
+          img.onerror=()=>{
+            if(!triedOriginal){triedOriginal=true;img.src=url;return;}
+            img.remove();
+            pic.append(node('span','am-hero-option-fallback',item.name.slice(0,2).toUpperCase()));
+          };
+          pic.append(img);img.src=thumbnail;
         } else pic.append(node('span','am-hero-option-fallback',item.name.slice(0,2).toUpperCase()));
         b.append(pic,node('span','am-hero-option-name',item.name));
         b.addEventListener('click',()=>select(i));

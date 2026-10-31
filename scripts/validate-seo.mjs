@@ -32,6 +32,19 @@ for(const [id,entry] of Object.entries(amazon.links)){
 
 assert.equal(manifest.paths.length,28);
 assert.ok(manifest.paths.every(url=>url.startsWith(manifest.siteUrl)));
+// Ensure small, local, original-source thumbnails are shipped with the site.
+for(const name of ['citizen-tsuyosa','tissot-prx-quartz','orient-bambino','casio-mtp-b145']){
+ const full=resolve(root,'assets/watches/'+name+'.webp');
+ const thumbnail=resolve(root,'assets/watch-thumbs/'+name+'.webp');
+ // Minimal affiliate fixtures need not ship gallery assets; the actual
+ // deployable package always contains the original and its thumbnail.
+ if(existsSync(full)){
+   assert.ok(existsSync(thumbnail),'Missing real image thumbnail: '+name);
+   const thumbSize=statSync(thumbnail).size;
+   assert.ok(thumbSize>500&&thumbSize<statSync(full).size,'Thumbnail must be a smaller image: '+name);
+ }
+}
+assert.match(read('editorial-photo.js'),/assets\/watch-thumbs\/.*item\.id/,'Featured picker must request smaller local thumbnails');
 const home=read('index.html');
 const advisor=read('conseiller.html');
 assert.ok(advisor.includes('<link rel="canonical" href="'+manifest.siteUrl+'conseiller.html">'),'Advisor needs one canonical public URL');
