@@ -115,11 +115,13 @@
    return './montre.html?'+u.toString();
  };
  const compareTray=$('affCompareTray'),compareLabel=$('affCompareLabel'),compareSelected=$('affCompareSelected'),compareNotice=$('affCompareNotice'),compareOpen=$('affCompareOpen'),compareClear=$('affCompareClear'),dialog=$('affCompareDialog'),compareBody=$('affCompareBody');
+ const comparisonDiffButton=$('affCompareOnlyDiff'),comparisonSummary=$('affCompareSummary');
  const replacementDialog=$('affCompareReplaceDialog');
  const replacementChoices=$('affReplaceChoices');
  const replacementIncoming=$('affReplaceIncoming');
  const replacementCancel=$('affReplaceCancel');
  let compareWarning='';
+ let differencesOnly=false;
  function updateCompare(){
    compare=compare.filter(id=>data.some(p=>p.id===id)).slice(0,3);
    // Keep the short-list within this tab across detail pages and reloads.
@@ -389,26 +391,36 @@
    const selected=compare.map(id=>data.find(p=>p.id===id)).filter(Boolean);
    if(selected.length<2)return;
    const rows=comparisonRows(selected);
+   const differing=rows.filter(item=>item.different).length;
+   if(differing===0)differencesOnly=false;
+   const shownRows=differencesOnly?rows.filter(item=>item.different):rows;
+   if(comparisonSummary)comparisonSummary.textContent=differing+' critère'+(differing>1?'s':'')+' différent'+(differing>1?'s':'')+' sur '+rows.length
+     +(differencesOnly?' · Affichage des différences uniquement.':' · Différences mises en évidence.');
+   if(comparisonDiffButton){
+     comparisonDiffButton.disabled=differing===0;
+     comparisonDiffButton.setAttribute('aria-pressed',String(differencesOnly));
+   }
    const table=make('table','am-compare-table'),head=make('thead'),tr=make('tr');
-   tr.append(make('th','am-compare-criterion','Critère'));
+   table.append(make('caption','sr-only','Caractéristiques des '+selected.length+' montres comparées'));
+   const corner=make('th','am-compare-criterion','Critère');corner.scope='col';tr.append(corner);
    for(const [slot,p] of selected.entries()){
-     const th=make('th','am-compare-head');
+     const th=make('th','am-compare-head');th.scope='col';
      const image=compareImage(p,'am-compare-thumb');if(image)th.append(image);
      th.append(make('span','am-compare-name',p.brand+' '+p.model),swapControl(p,slot));tr.append(th);
    }
    head.append(tr);table.append(head);
    const tbody=make('tbody');
-   for(const item of rows){
-     const row=make('tr');row.append(make('th','am-compare-criterion',item.label));
+   for(const item of shownRows){
+     const row=make('tr');const criterion=make('th','am-compare-criterion',item.label);criterion.scope='row';row.append(criterion);
      item.values.forEach(value=>row.append(make('td',item.different?'am-compare-different':'',value)));
      tbody.append(row);
    }
-   const row=make('tr');row.append(make('th','am-compare-criterion','Fiche'));
+   const row=make('tr');const criterion=make('th','am-compare-criterion','Fiche');criterion.scope='row';row.append(criterion);
    for(const p of selected){const td=make('td'),a=make('a','','Découvrir ↗');a.href=detail(p.id);td.append(a);row.append(td)}
    tbody.append(row);table.append(tbody);
    const mobile=make('div','am-compare-mobile');
-   const guide=make('p','am-compare-mobile-hint','Faites glisser pour consulter chaque montre.');
-   const track=make('div','am-compare-mobile-track');track.tabIndex=0;track.setAttribute('role','region');track.setAttribute('aria-label','Comparatif des montres, balayage horizontal');
+   const guide=make('p','am-compare-mobile-hint','Faites glisser ou utilisez les touches fléchées pour consulter chaque montre.');guide.id='affCompareSwipeHint';
+   const track=make('div','am-compare-mobile-track');track.tabIndex=0;track.setAttribute('role','region');track.setAttribute('aria-label','Comparatif des montres, balayage horizontal');track.setAttribute('aria-describedby',guide.id);
    const slides=selected.map((p,index)=>{
      const card=make('article','am-compare-mobile-card');
      const header=make('div','am-compare-mobile-product');
@@ -416,7 +428,7 @@
      const photo=compareImage(p,'am-compare-mobile-photo');if(photo)header.append(photo);
      header.append(make('h3','',p.brand+' '+p.model));card.append(header,swapControl(p,index));
      const dl=make('dl','am-compare-mobile-specs');
-     for(const item of rows){
+     for(const item of shownRows){
        const line=make('div',item.different?'am-compare-mobile-diff':'');
        line.append(make('dt','',item.label),make('dd','',item.values[index]));dl.append(line);
      }
@@ -427,14 +439,20 @@
    track.append(...slides);
    const nav=make('div','am-compare-mobile-nav');
    const prev=make('button','','← Précédente'),next=make('button','','Suivante →'),position=make('span','am-compare-mobile-position','1 / '+slides.length);
-   prev.type='button';next.type='button';prev.disabled=true;
+   prev.type='button';next.type='button';prev.disabled=true;position.setAttribute('aria-live','polite');
    const select=i=>{
      const n=Math.min(slides.length-1,Math.max(0,i));
-     track.scrollTo({left:slides[n].offsetLeft-slides[0].offsetLeft,behavior:'smooth'});
+     track.scrollTo({left:slides[n].offsetLeft-slides[0].offsetLeft,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
      position.textContent=(n+1)+' / '+slides.length;prev.disabled=n===0;next.disabled=n===slides.length-1;
    };
    prev.addEventListener('click',()=>select(Math.max(0,Math.round(track.scrollLeft/Math.max(1,slides[1]?.offsetLeft-slides[0].offsetLeft))-1)));
    next.addEventListener('click',()=>select(Math.min(slides.length-1,Math.round(track.scrollLeft/Math.max(1,slides[1]?.offsetLeft-slides[0].offsetLeft))+1)));
+   track.addEventListener('keydown',event=>{
+     if(event.key!=='ArrowRight'&&event.key!=='ArrowLeft')return;
+     event.preventDefault();
+     const step=slides[1]?.offsetLeft-slides[0].offsetLeft||track.clientWidth;
+     select(Math.round(track.scrollLeft/Math.max(1,step))+(event.key==='ArrowRight'?1:-1));
+   });
    track.addEventListener('scroll',()=>{
      const step=slides[1]?.offsetLeft-slides[0].offsetLeft||track.clientWidth;
      const i=Math.min(slides.length-1,Math.max(0,Math.round(track.scrollLeft/Math.max(1,step))));
@@ -456,6 +474,9 @@
      activeSelect?.focus({preventScroll:true});
    }
  }
+ if(comparisonDiffButton)comparisonDiffButton.addEventListener('click',()=>{
+   differencesOnly=!differencesOnly;showComparison();comparisonDiffButton.focus({preventScroll:true});
+ });
  if(compareOpen)compareOpen.addEventListener('click',()=>showComparison());
  if(compareClear)compareClear.addEventListener('click',()=>{compare=[];compareWarning='';render()});
  if($('affCompareShare'))$('affCompareShare').addEventListener('click',async()=>{
