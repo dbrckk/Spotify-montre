@@ -163,7 +163,7 @@ for(const product of feed.products){
   assert.match(html,/class="watch-evidence"/,'Every SEO product page must expose source evidence or a missing-proof disclaimer');
   if(review){
     assert.equal(review.sourceKind,'manufacturer_exact_reference');
-    assert.equal(review.sourceUrl,product.officialUrl,'A technical check must link to the manufacturer's exact published model');
+    assert.equal(review.sourceUrl,product.officialUrl,'Technical proof must link to the exact manufacturer product page');
     assert.match(review.verifiedOn,/^2026-\d{2}-\d{2}$/);
     assert.ok(Array.isArray(review.verifiedFields)&&review.verifiedFields.length>=1,'Audited fields required');
     const knownFields=new Set(['movement','diameter','caseSize','glass','waterResistance']);
