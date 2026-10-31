@@ -156,7 +156,7 @@
       "story": "Le charme rétro d’un afficheur digital et d’un bracelet métallique.",
       "imageMode": "manufacturer_product_photo",
       "imageLicenseStatus": "official_photos_not_licensed",
-      "updatedAt": "2026-10-26",
+      "updatedAt": "2026-10-31",
       "photoReview": {
         "url": "https://www.casio.com/content/dam/casio/product-info/locales/europe/en-gb/timepiece/product/watch/A/A1/A16/A168WA-1/assets/A168WA-1_01.jpg.transform/zoom-sp/image.jpg",
         "source": "https://www.casio.com/europe/watches/casio/product.A168WA-1/",
@@ -174,6 +174,20 @@
         "originalFetchedFrom": "https://www.casio.com/content/dam/casio/product-info/locales/europe/en-gb/timepiece/product/watch/A/A1/A16/A168WA-1/assets/A168WA-1_01.jpg.transform/zoom-sp/image.jpg",
         "permissionDeclaration": "site_owner_explicit_confirmation_2026-10-30",
         "permissionIndependentlyVerified": false
+      },
+      "specs": {
+        "caseSize": "38,6 × 36,3 × 9,6 mm",
+        "glass": "Résine"
+      },
+      "specReview": {
+        "verifiedOn": "2026-10-31",
+        "sourceKind": "manufacturer_exact_reference",
+        "sourceUrl": "https://www.casio.com/fr/watches/casio/vintage/product.A168WA-1/",
+        "verifiedFields": [
+          "caseSize",
+          "glass"
+        ],
+        "notes": "Mesures L × l × H du boîtier rectangulaire : la largeur 36,3 mm n’est pas un diamètre. Casio indique une étanchéité sans valeur en bar, donc l’indice reste non renseigné."
       }
     },
     {
@@ -196,13 +210,14 @@
       "title": "Plongeuse urbaine",
       "highlights": [
         "Quartz",
-        "Noir",
-        "Lunette sportive"
+        "20 bar",
+        "Verre minéral",
+        "Lunette rotative"
       ],
       "story": "Une montre de plongée d’inspiration utilitaire, assumée et lisible.",
       "imageMode": "manufacturer_product_photo",
       "imageLicenseStatus": "official_photos_not_licensed",
-      "updatedAt": "2026-10-26",
+      "updatedAt": "2026-10-31",
       "photoReview": {
         "url": "https://www.casio.com/content/dam/casio/product-info/locales/fr/fr/timepiece/product/watch/M/md/mdv/mdv-107-1a1v/local-assets/MDV-107-1A1V_2000x2000.png.transform/main-visual-sp/image.png",
         "source": "https://www.casio.com/fr/watches/casio/product.MDV-107-1A1V/",
@@ -220,6 +235,22 @@
         "originalFetchedFrom": "https://www.casio.com/content/dam/casio/product-info/locales/fr/fr/timepiece/product/watch/M/md/mdv/mdv-107-1a1v/local-assets/MDV-107-1A1V_2000x2000.png.transform/main-visual-sp/image.png",
         "permissionDeclaration": "site_owner_explicit_confirmation_2026-10-30",
         "permissionIndependentlyVerified": false
+      },
+      "specs": {
+        "caseSize": "49,5 × 44,2 × 12,1 mm",
+        "glass": "Minéral",
+        "waterResistance": "20 bar"
+      },
+      "specReview": {
+        "verifiedOn": "2026-10-31",
+        "sourceKind": "manufacturer_exact_reference",
+        "sourceUrl": "https://www.casio.com/fr/watches/casio/product.MDV-107-1A1V/",
+        "verifiedFields": [
+          "caseSize",
+          "glass",
+          "waterResistance"
+        ],
+        "notes": "Casio publie L × l × H et non un diamètre. La largeur 44,2 mm ne doit pas servir au filtre « diamètre »."
       }
     },
     {
@@ -392,14 +423,15 @@
       "availability": "not_verified",
       "title": "Le mécanisme visible",
       "highlights": [
-        "Automatique",
+        "Automatique calibre 8229",
         "Cadran bleu",
-        "Cœur ouvert"
+        "Cœur ouvert",
+        "5 bar"
       ],
       "story": "L’horlogerie mécanique se révèle à travers une ouverture du cadran.",
       "imageMode": "manufacturer_product_photo",
       "imageLicenseStatus": "official_photos_not_licensed",
-      "updatedAt": "2026-10-26",
+      "updatedAt": "2026-10-31",
       "photoReview": {
         "url": "https://fr.citizenwatch.eu/media/thumbs/71/4f/2920007adbbc7de476e6085fb5be66bbd21a/1400x_crop=center;format=webp/managed/9e/f9/9ef9c3e5a6b0fec9a76c584f63dd5016/NH9131-73L-1.png.thumb.webp",
         "source": "https://fr.citizenwatch.eu/fr/p/nh9131-73l/",
@@ -417,6 +449,22 @@
         "originalFetchedFrom": "https://fr.citizenwatch.eu/media/thumbs/71/4f/2920007adbbc7de476e6085fb5be66bbd21a/1400x_crop=center;format=webp/managed/9e/f9/9ef9c3e5a6b0fec9a76c584f63dd5016/NH9131-73L-1.png.thumb.webp",
         "permissionDeclaration": "site_owner_explicit_confirmation_2026-10-30",
         "permissionIndependentlyVerified": false
+      },
+      "specs": {
+        "movement": "Automatique calibre 8229",
+        "glass": "Cristal",
+        "waterResistance": "5 bar"
+      },
+      "specReview": {
+        "verifiedOn": "2026-10-31",
+        "sourceKind": "manufacturer_exact_reference",
+        "sourceUrl": "https://fr.citizenwatch.eu/fr/p/nh9131-73l/",
+        "verifiedFields": [
+          "movement",
+          "glass",
+          "waterResistance"
+        ],
+        "notes": "La page Citizen mentionne 40 mm dans le texte et « 38mm, 40mm » dans ses caractéristiques : aucune valeur unique n’est imputée au champ diamètre."
       }
     },
     {
@@ -542,14 +590,15 @@
       "availability": "not_verified",
       "title": "Sport mécanique",
       "highlights": [
-        "Automatique",
-        "Sport",
-        "Acier"
+        "Automatique 4R36",
+        "42,5 mm",
+        "Hardlex",
+        "10 bar"
       ],
       "story": "Une automatique sportive, robuste dans son expression, facile à porter.",
       "imageMode": "manufacturer_product_photo",
       "imageLicenseStatus": "official_photos_not_licensed",
-      "updatedAt": "2026-10-26",
+      "updatedAt": "2026-10-31",
       "photoReview": {
         "url": "https://www.seikowatches.com/fr-fr/-/media/Images/Product--Image/All/Seiko/2022/02/20/02/14/SRPD55K1/SRPD55K1.png?mh=1200&mw=1200",
         "source": "https://www.seikowatches.com/fr-fr/products/5sports/srpd55",
@@ -567,6 +616,24 @@
         "originalFetchedFrom": "https://www.seikowatches.com/fr-fr/-/media/Images/Product--Image/All/Seiko/2022/02/20/02/14/SRPD55K1/SRPD55K1.png?mh=1200&mw=1200",
         "permissionDeclaration": "site_owner_explicit_confirmation_2026-10-30",
         "permissionIndependentlyVerified": false
+      },
+      "specs": {
+        "diameter": "42,5 mm",
+        "movement": "Automatique calibre 4R36",
+        "glass": "Hardlex",
+        "waterResistance": "10 bar"
+      },
+      "specReview": {
+        "verifiedOn": "2026-10-31",
+        "sourceKind": "manufacturer_exact_reference",
+        "sourceUrl": "https://www.seikowatches.com/be-fr/products/5sports/srpd55",
+        "verifiedFields": [
+          "diameter",
+          "movement",
+          "glass",
+          "waterResistance"
+        ],
+        "notes": "Fiche Seiko SRPD55 (bracelet acier), à ne pas confondre avec la variante SRPD55K2 en silicone."
       }
     },
     {
@@ -736,7 +803,7 @@
       "movement": "automatic",
       "style": "classic",
       "tone": "ivory",
-      "officialUrl": "https://www.seikowatches.com/fr-fr/products/presage/lineup",
+      "officialUrl": "https://www.seikowatches.com/uk-en/products/presage/spb165j1",
       "priceReference": 990,
       "priceSource": "official_brand",
       "priceDisplay": false,
@@ -746,14 +813,15 @@
       "availability": "not_verified",
       "title": "Texture japonaise",
       "highlights": [
-        "Automatique",
-        "Cadran texturé",
-        "Acier"
+        "Automatique 6R35",
+        "39,3 mm",
+        "Saphir antireflet",
+        "10 bar"
       ],
       "story": "Un motif géométrique inspiré de l’artisanat japonais, élégant sans ostentation.",
       "imageMode": "manufacturer_product_photo",
       "imageLicenseStatus": "official_photos_not_licensed",
-      "updatedAt": "2026-10-26",
+      "updatedAt": "2026-10-31",
       "photoReview": {
         "url": "https://www.seikowatches.com/fr-fr/-/media/Images/Product--Image/All/Seiko/2022/02/20/00/52/SPB165J1/SPB165J1.png?mh=1200&mw=1200",
         "source": "https://www.seikowatches.com/fr-fr/products/presage/lineup",
@@ -771,6 +839,24 @@
         "originalFetchedFrom": "https://www.seikowatches.com/fr-fr/-/media/Images/Product--Image/All/Seiko/2022/02/20/00/52/SPB165J1/SPB165J1.png?mh=1200&mw=1200",
         "permissionDeclaration": "site_owner_explicit_confirmation_2026-10-30",
         "permissionIndependentlyVerified": false
+      },
+      "specs": {
+        "diameter": "39,3 mm",
+        "movement": "Automatique calibre 6R35",
+        "glass": "Saphir antireflet",
+        "waterResistance": "10 bar"
+      },
+      "specReview": {
+        "verifiedOn": "2026-10-31",
+        "sourceKind": "manufacturer_exact_reference",
+        "sourceUrl": "https://www.seikowatches.com/uk-en/products/presage/spb165j1",
+        "verifiedFields": [
+          "diameter",
+          "movement",
+          "glass",
+          "waterResistance"
+        ],
+        "notes": "Fiche Seiko de la référence exacte SPB165J1 (UK), préférable à une page de gamme qui ne spécifie pas le modèle."
       }
     }
   ],
