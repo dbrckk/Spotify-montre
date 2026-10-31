@@ -3,6 +3,7 @@ import {readFileSync,statSync,existsSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {createHash} from 'node:crypto';
 import {responsiveSrcset} from './responsive-images.mjs';
+import {loadApprovedPopularPhotos} from './popular-photo-rights.mjs';
 const root=resolve(process.cwd(),'site');
 const read=p=>readFileSync(resolve(root,p),'utf8');
 const feed=JSON.parse(read('selection-affiliation.json'));
@@ -180,6 +181,7 @@ assert.equal(exactPopularLinks['casio-gw-m5610u-1'].asin,'B09BCPP68Q','Actual Am
 assert.equal(exactPopularLinks['casio-f91w-1'].asin,'B000J34HN4','Casio F-91W documented Amazon.fr ASIN');
 assert.equal(exactPopularLinks['casio-a168wg-9'].asin,'B002LAS086','Casio vintage gold documented Amazon.fr ASIN');
 const popularFeed=JSON.parse(read('selection-populaires.json'));
+const approvedPopularPhotos=loadApprovedPopularPhotos({root,picks:popularFeed.products});
 const popularPath='montres/modeles-populaires.html';
 const popularHtml=read(popularPath);
 const popularSitemap=read('sitemap.xml');
@@ -227,8 +229,8 @@ for(const selection of shopperCollections){
   assert.match(html,/href="\.\.\/shopper-selections\.css"/,'Stylesheet must be included');
   assert.equal((html.match(/class="am-shopper-card"/g)||[]).length,selection.ids.length,'Only selected products in shopper collection');
   assert.equal((html.match(/class="am-shopper-art am-shopper-real-photo"/g)||[]).length,
-    selection.ids.filter(id=>feed.products.some(p=>p.id===id&&p.photoReview?.publicUsageApproved===true)).length,
-    'Only previously declared licensed core photos may be used');
+    selection.ids.filter(id=>approvedPopularPhotos.has(id)||feed.products.some(p=>p.id===id&&p.photoReview?.publicUsageApproved===true)).length,
+    'Only locally registered and checksum-verified model photos may be used');
   const graph=JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1])['@graph'];
   assert.equal(graph[0]['@type'],'CollectionPage');
   assert.equal(graph[0].url,manifest.siteUrl+path);
@@ -246,7 +248,7 @@ for(const selection of shopperCollections){
   }
   assert.doesNotMatch(html,/"offers"\s*:|"aggregateRating"\s*:/,'Shopper page must not invent offers or ratings');
   assert.ok(html.includes('En tant que Partenaire Amazon')===manifest.affiliateActive,'Explicit commission disclosure required when Amazon links are active');
-  assert.ok(html.includes('Les photographies locales des modèles principaux'),'Source-rights disclosure is required');
+  assert.ok(html.includes('Les photographies locales sont publiées sur la base d’autorisations déclarées'),'Source-rights disclosure is required');
   assert.ok(home.includes('href="./montres/'+selection.slug+'.html"'),'Homepage must link shopper collection');
   assert.ok(popularHtml.includes('href="./'+selection.slug+'.html"'),'Supplemental index must link shopper collection');
 }
@@ -280,7 +282,12 @@ for(const p of popularFeed.products){
   assert.equal((detailHtml.match(/class="am-extra-fact"/g)||[]).length,4,'Four useful watch facts per model: '+p.id);
   assert.equal((detailHtml.match(/class="am-extra-editorial-grid"/g)||[]).length,1,
     'One source-backed decision section per watch: '+p.id);
-  assert.doesNotMatch(detailHtml,/<img\b/i,'Unlicensed new photos may not be embedded as if approved: '+p.id);
+  if(approvedPopularPhotos.has(p.id)){
+    assert.ok(detailHtml.includes('src="../'+approvedPopularPhotos.get(p.id).url+'"'),
+      'Registered exact-model photograph must appear in the product page: '+p.id);
+  }else{
+    assert.doesNotMatch(detailHtml,/<img\\b/i,'Non-registered photos must not be embedded: '+p.id);
+  }
   assert.doesNotMatch(detailHtml,/"offers"\s*:|"price"\s*:|"aggregateRating"\s*:/,'No false checkout offer, pricing or rating: '+p.id);
   const script=detailHtml.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
   assert.ok(script,'Product JSON-LD missing: '+p.id);
@@ -312,7 +319,8 @@ for(const p of popularFeed.products){
       'Inactive affiliate settings cannot publish paid links: '+p.id);
   }
 }
-assert.doesNotMatch(popularHtml,/<img\b/i,'Do not display copied manufacturer photographs without validated licences');
+assert.equal((popularHtml.match(/class="am-pick-licensed-photo"/g)||[]).length,approvedPopularPhotos.size,
+  'Only registered photo assets may appear in supplemental catalogue');
 assert.doesNotMatch(popularHtml,/"offers"\s*:|"aggregateRating"\s*:|"price"\s*:/,'No invented structured pricing or ratings');
 const trackedResults=popularHtml.match(/data-amazon-search-id=/g)||[];
 const trackedDirect=popularHtml.match(/data-amazon-product=/g)||[];
