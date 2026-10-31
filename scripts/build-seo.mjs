@@ -91,7 +91,7 @@ import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
     // specifications must remain explicitly unknown, never inferred.
     const quickFacts=[
       ['Mouvement',p.specs?.movement||({quartz:'Quartz',automatic:'Automatique','eco-drive':'Solaire · Eco-Drive'}[p.movement]||null)],
-      p.specs?.diameter?['Diamètre',p.specs.diameter]:['Dimensions du boîtier',p.specs?.caseSize||null],
+      p.specs?.diameter?['Diamètre',p.specs.diameter]:p.specs?.caseSize?['Dimensions du boîtier',p.specs.caseSize]:['Diamètre',null],
       ['Verre',p.specs?.glass||null],
       ['Étanchéité',p.specs?.waterResistance||null]
     ].map(([label,value])=>'<div class="watch-quickfact"><dt>'+e(label)+'</dt><dd'+(!value?' class="watch-fact-unknown"':'')+'>'+e(value||'Non documenté')+'</dd></div>').join('');
