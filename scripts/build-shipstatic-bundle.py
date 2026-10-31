@@ -58,6 +58,23 @@ def assemble():
         assert data[:4]==b'RIFF' and data[8:12]==b'WEBP', 'Not actual WebP: '+id
         assert hashlib.sha256(data).hexdigest()==photo['localSha256'], 'Photo changed unexpectedly: '+id
     assert len([a for a in assets if a['path'].startswith('assets/watches/')])==len(products)
+    # Pack the 37 source-backed accessories only after the checksummed registry
+    # has been populated. No external images or unregistered files are allowed.
+    popular=json.loads((SITE/'selection-populaires.json').read_text(encoding='utf-8'))
+    rights=json.loads((SITE/'popular-photo-rights.json').read_text(encoding='utf-8'))
+    allowed=set(p['id'] for p in popular['products'])
+    assert len(allowed)==37, 'Expected 37 unique supplemental models'
+    cached=set()
+    for photo_id,record in rights['photos'].items():
+        assert photo_id in allowed, 'Unknown supplemental watch photo'
+        imagepath='assets/watches-popular/'+photo_id+'.webp'
+        assert record['file']==imagepath, 'Unmatched supplemental photo path'
+        imagebytes=(SITE/imagepath).read_bytes()
+        assert imagebytes[:4]==b'RIFF' and imagebytes[8:12]==b'WEBP', 'Non-WebP supplemental photo'
+        assert hashlib.sha256(imagebytes).hexdigest()==record['imageSha256'], 'Supplemental photo checksum mismatch'
+        cached.add(imagepath)
+    assert {a['path'] for a in assets if a['path'].startswith('assets/watches-popular/')}==cached, 'Unregistered public watch photo detected'
+
     DOCS.mkdir(parents=True,exist_ok=True)
     chunks=[]
     part=[]
@@ -68,7 +85,7 @@ def assemble():
         part.append(a)
     if part:
         chunks.append(part)
-    manifest={'version':1,'models':len(products),'files':len(assets),'parts':[]}
+    manifest={'version':1,'models':len(products),'totalModels':len(products)+len(allowed),'supplementalPhotos':len(cached),'files':len(assets),'parts':[]}
     for i,part in enumerate(chunks,1):
         name='deploy-package-%02d.json'%i
         content=compact({'version':1,'files':part})+'\n'
@@ -76,6 +93,9 @@ def assemble():
         path.write_text(content,encoding='utf-8')
         assert path.stat().st_size<900000, 'GitHub Contents API file limit'
         manifest['parts'].append({'file':name,'count':len(part),'bytes':path.stat().st_size})
+    for stale in DOCS.glob('deploy-package-*.json'):
+        if stale.name not in {p['file'] for p in manifest['parts']} and stale.name!='deploy-package-manifest.json':
+            stale.unlink()
     (DOCS/'deploy-package-manifest.json').write_text(json.dumps(manifest,indent=2)+'\n',encoding='utf-8')
     print('Publishable deployment:',len(products),'verified genuine watch photos,',len(assets),'static files in',len(chunks),'GitHub-safe JSON parts')
     for chunk in manifest['parts']:
