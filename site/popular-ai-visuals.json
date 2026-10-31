@@ -1,0 +1,115 @@
+{
+  "version": 1,
+  "createdOn": "2026-11-01",
+  "policy": "editorial_only_keep_real_exact_model_packshots_primary",
+  "visuals": {
+    "skmei-1220": {
+      "brand": "SKMEI",
+      "model": "1220",
+      "kind": "ai_generated_editorial_visual_not_exact_product_photo",
+      "url": "https://cdn.shopify.com/s/files/1/1053/8378/8892/files/atelier-skmei-1220-concept-ai.webp?v=1793488810",
+      "originalFileSha256": "045312ad47cb3eba6f3be22744a77c401c99d65cd8e8c444b785282fd6475c78",
+      "width": 768,
+      "height": 768,
+      "publishedAs": "illustration_ia_non_contractuelle",
+      "source": "original_assistant_image_generation_2026-10-31",
+      "approval": "site_owner_explicitly_requested_generated_images_2026-11-01"
+    },
+    "skmei-1251": {
+      "brand": "SKMEI",
+      "model": "1251",
+      "kind": "ai_generated_editorial_visual_not_exact_product_photo",
+      "url": "https://cdn.shopify.com/s/files/1/1053/8378/8892/files/atelier-skmei-1251-concept-ai.webp?v=1793488768",
+      "originalFileSha256": "b50c10dd87478a79e927af8c9a6afada29a7b67c4d999330f383a99f987ec79f",
+      "width": 768,
+      "height": 768,
+      "publishedAs": "illustration_ia_non_contractuelle",
+      "source": "original_assistant_image_generation_2026-10-31",
+      "approval": "site_owner_explicitly_requested_generated_images_2026-11-01"
+    },
+    "skmei-1257": {
+      "brand": "SKMEI",
+      "model": "1257",
+      "kind": "ai_generated_editorial_visual_not_exact_product_photo",
+      "url": "https://cdn.shopify.com/s/files/1/1053/8378/8892/files/atelier-skmei-1257-concept-ai.webp?v=1793488774",
+      "originalFileSha256": "0ffef6f02eee4df2d5aff0e846274eee51121c83debefe7b085b187793b290bd",
+      "width": 768,
+      "height": 768,
+      "publishedAs": "illustration_ia_non_contractuelle",
+      "source": "original_assistant_image_generation_2026-10-31",
+      "approval": "site_owner_explicitly_requested_generated_images_2026-11-01"
+    },
+    "skmei-1874": {
+      "brand": "SKMEI",
+      "model": "1874",
+      "kind": "ai_generated_editorial_visual_not_exact_product_photo",
+      "url": "https://cdn.shopify.com/s/files/1/1053/8378/8892/files/atelier-skmei-1874-concept-ai.webp?v=1793488798",
+      "originalFileSha256": "af3bcc1db2e9fad2ef3741650c2075632bb98a1d7b50e6e2d14692fcf6f27da7",
+      "width": 768,
+      "height": 768,
+      "publishedAs": "illustration_ia_non_contractuelle",
+      "source": "original_assistant_image_generation_2026-10-31",
+      "approval": "site_owner_explicitly_requested_generated_images_2026-11-01"
+    },
+    "skmei-2056": {
+      "brand": "SKMEI",
+      "model": "2056",
+      "kind": "ai_generated_editorial_visual_not_exact_product_photo",
+      "url": "https://cdn.shopify.com/s/files/1/1053/8378/8892/files/atelier-skmei-2056-concept-ai.webp?v=1793488758",
+      "originalFileSha256": "6b47861614597f0612935a4a5b82bb846a01f1c6c7e89384a48c2e77884af727",
+      "width": 768,
+      "height": 768,
+      "publishedAs": "illustration_ia_non_contractuelle",
+      "source": "original_assistant_image_generation_2026-10-31",
+      "approval": "site_owner_explicitly_requested_generated_images_2026-11-01"
+    },
+    "skmei-2471": {
+      "brand": "SKMEI",
+      "model": "2471",
+      "kind": "ai_generated_editorial_visual_not_exact_product_photo",
+      "url": "https://cdn.shopify.com/s/files/1/1053/8378/8892/files/atelier-skmei-2471-concept-ai.webp?v=1793488804",
+      "originalFileSha256": "71e1ae503cb49d7b8a2693c020f4ff9a29b61493519b8aec423d45c1e43bf672",
+      "width": 768,
+      "height": 768,
+      "publishedAs": "illustration_ia_non_contractuelle",
+      "source": "original_assistant_image_generation_2026-10-31",
+      "approval": "site_owner_explicitly_requested_generated_images_2026-11-01"
+    },
+    "skmei-2514": {
+      "brand": "SKMEI",
+      "model": "2514",
+      "kind": "ai_generated_editorial_visual_not_exact_product_photo",
+      "url": "https://cdn.shopify.com/s/files/1/1053/8378/8892/files/atelier-skmei-2514-concept-ai.webp?v=1793488780",
+      "originalFileSha256": "c0f6f81a00b46fd1daff33800b0ef0b78df801ade07d52a11064774c7a51a83c",
+      "width": 768,
+      "height": 768,
+      "publishedAs": "illustration_ia_non_contractuelle",
+      "source": "original_assistant_image_generation_2026-10-31",
+      "approval": "site_owner_explicitly_requested_generated_images_2026-11-01"
+    },
+    "skmei-9156": {
+      "brand": "SKMEI",
+      "model": "9156",
+      "kind": "ai_generated_editorial_visual_not_exact_product_photo",
+      "url": "https://cdn.shopify.com/s/files/1/1053/8378/8892/files/atelier-skmei-9156-concept-ai.webp?v=1793488786",
+      "originalFileSha256": "051fd7e96c0acb0936feadfe598f876d47eb4f74f1940d607e0b493a6e2b2614",
+      "width": 768,
+      "height": 768,
+      "publishedAs": "illustration_ia_non_contractuelle",
+      "source": "original_assistant_image_generation_2026-10-31",
+      "approval": "site_owner_explicitly_requested_generated_images_2026-11-01"
+    },
+    "skmei-9353": {
+      "brand": "SKMEI",
+      "model": "9353",
+      "kind": "ai_generated_editorial_visual_not_exact_product_photo",
+      "url": "https://cdn.shopify.com/s/files/1/1053/8378/8892/files/atelier-skmei-9353-concept-ai.webp?v=1793488792",
+      "originalFileSha256": "7d45a709597ec6b7df65216254bf28fefc14b4517e37f2bf517bd0081f0642b3",
+      "width": 768,
+      "height": 768,
+      "publishedAs": "illustration_ia_non_contractuelle",
+      "source": "original_assistant_image_generation_2026-10-31",
+      "approval": "site_owner_explicitly_requested_generated_images_2026-11-01"
+    }
+  }
+}
