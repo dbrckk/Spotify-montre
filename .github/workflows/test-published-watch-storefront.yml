@@ -14,6 +14,9 @@ on:
       - 'site/catalogue-view.css'
       - 'site/affiliate-ui.js'
       - 'site/fiche.js'
+      - 'site/fiche.css'
+      - 'site/seo-guides.css'
+      - 'scripts/build-seo.mjs'
   workflow_dispatch:
 permissions:
   contents: read
@@ -39,7 +42,7 @@ jobs:
           # CDN build never produces a false failure or false success.
           for attempt in $(seq 1 30); do
             ready=1
-            for file in affiliation.js affiliate-ui.js catalogue-view.css; do
+            for file in affiliation.js affiliate-ui.js catalogue-view.css fiche.js fiche.css seo-guides.css; do
               if ! curl -fsSL --max-time 15 "$base/$file" -o "$RUNNER_TEMP/live-$file"; then
                 ready=0
               elif ! cmp -s "site/$file" "$RUNNER_TEMP/live-$file"; then
@@ -47,7 +50,16 @@ jobs:
               fi
             done
             if [ "$ready" -eq 1 ]; then
-              echo "Render serves the exact current JS and CSS (attempt $attempt)."
+              # The indexed Citizen page is created by the SEO generator, and
+              # can lag the already-deployed CSS during a rolling deployment.
+              if ! curl -fsSL --max-time 15 "$base/montres/citizen-tsuyosa.html" -o "$RUNNER_TEMP/live-citizen.html"; then
+                ready=0
+              elif ! grep -Fq 'class="watch-facts"' "$RUNNER_TEMP/live-citizen.html"; then
+                ready=0
+              fi
+            fi
+            if [ "$ready" -eq 1 ]; then
+              echo "Render serves the current JS, CSS and indexed product layout (attempt $attempt)."
               exit 0
             fi
             if [ "$attempt" -lt 30 ]; then sleep 5; fi
