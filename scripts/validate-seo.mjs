@@ -178,9 +178,15 @@ for(const product of feed.products){
     assert.ok(html.includes('Caractéristiques à confirmer sur la source officielle'),'Unaudited models must not claim a new manufacturer check');
   }
   if(product.specs?.caseSize){
-    assert.ok(!product.specs?.diameter,'Rectangular case L × l × H is not a diameter');
-    assert.ok(html.includes('Il ne s’agit pas d’un diamètre'),'Buyer guidance must explain rectangular watch dimensions');
-    assert.ok(html.includes(product.specs.caseSize),'Official L × l × H size must be visible');
+    assert.ok(html.includes(product.specs.caseSize),'Official L × l × H case size must be visible');
+    // A round watch can have BOTH a diameter and overall dimensions;
+    // only ambiguous/rectangular watches omit the circular diameter.
+    if(!product.specs.diameter){
+      assert.ok(html.includes('Il ne s’agit pas d’un diamètre'),'Buyer guidance must explain rectangular watch dimensions');
+      assert.ok(html.includes('<dt>Dimensions du boîtier</dt>'),'Unknown diameter replaced with truthful L × l × H');
+    }else{
+      assert.ok(html.includes('<dt>Diamètre</dt>'),'Round watch retains its separately documented diameter');
+    }
   }
 
 
