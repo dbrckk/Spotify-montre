@@ -126,6 +126,25 @@ async function audit(){
       if(url)await auditPage(url);
     }
   }));
+  // Check that Google can retrieve the HTML verification proof without relying
+  // on environment variables or on a browser executing JavaScript.
+  const verificationPath='google6d385495b6d15d5e.html';
+  const verification=await fetchText(verificationPath,'text/html');
+  if(verification!==null &&
+      verification.trim()!=='google-site-verification: google6d385495b6d15d5e.html'){
+    issues.push(verificationPath+': verification body does not match the Google Search Console token');
+  }
+  // Verify that the largest published images have smaller responsive variants.
+  for(const filename of ['citizen-tsuyosa-480.webp','casio-mtp-1302-480.webp']){
+    const asset='assets/watch-responsive/'+filename;
+    try{
+      const response=await request(new URL(asset,base));
+      if(!response.ok||!(response.headers.get('content-type')||'').includes('image/webp')){
+        issues.push(asset+': missing optimized WebP in production (HTTP '+response.status+')');
+      }
+      await response.body?.cancel();
+    }catch(error){issues.push(asset+': '+error.message);}
+  }
   // A same-origin real photo is a production asset, not a stock-image substitute.
   const imagePath='assets/watches/citizen-tsuyosa.webp';
   try{
