@@ -117,6 +117,22 @@ try{
   assert.equal(await phone.locator('#udGrid.ud-view-large').count(),0);
   assert.equal(new URL(phone.url()).searchParams.has('view'),false);
   assert.equal(await phone.locator('#udViewCompact').getAttribute('aria-pressed'),'true');
+  const counted={};
+  for(const kind of ['direct','search','official']){
+    counted[kind]=await phone.locator('.ud-card[data-merchant="'+kind+'"]').count();
+    assert.ok(counted[kind]>0,'Each destination type must be represented by source data');
+    await phone.locator('#udMerchant').selectOption(kind);
+    assert.equal(await phone.locator('.ud-card:visible').count(),counted[kind],
+      'Merchant filter must show only '+kind+' source-documented destinations');
+    assert.equal(new URL(phone.url()).searchParams.get('merchant'),kind,
+      'Merchant filter must be shareable in a stable URL');
+    assert.equal(await phone.locator('.ud-card[data-merchant="'+kind+'"]:visible').count(),counted[kind]);
+  }
+  assert.equal(Object.values(counted).reduce((a,b)=>a+b,0),52,
+    'Every model must have exactly one honest merchant destination category');
+  await phone.locator('#udMerchant').selectOption('all');
+  assert.equal(await phone.locator('.ud-card:visible').count(),52);
+  assert.equal(new URL(phone.url()).searchParams.has('merchant'),false);
   await phone.close();
 
   const linked=await browser.newPage({viewport:{width:393,height:852},isMobile:true,hasTouch:true});
