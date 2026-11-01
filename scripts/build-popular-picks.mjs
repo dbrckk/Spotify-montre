@@ -77,7 +77,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
       +(!photo&&p.brand==='SKMEI'?'<span class="am-budget-watch" aria-hidden="true"><span class="am-budget-dial"></span></span>':'')
       +'<span class="am-pick-visual-caption">'+(photo?'Photo de marque · accord déclaré · '+e(photo.rightsHolder):'Repère graphique · photo exacte chez le vendeur ou la marque')+'</span></div>'
       +'<div class="am-pick-content"><p class="am-pick-kicker"><span>'+e(tierNames[p.tier])+'</span><span>'+e(claim)+'</span></p>'
-      +(verifiedLinks.has(p.id)?'<p class="am-pick-exact">Fiche de référence Amazon.fr identifiée · prix et stock à vérifier</p>':'')
+      +(verifiedLinks.has(p.id)?'<p class="am-pick-exact">Fiche de référence Amazon.fr identifiée · prix et stock à vérifier'+(verifiedLinks.get(p.id)?.marketplaceVariant?' · Variante : '+e(verifiedLinks.get(p.id).marketplaceVariant):'')+'</p>':'')
       +'<h3><a class="am-pick-detail-link" href="'+(front?'./montres/':'./')+e(p.id)+'.html">'+e(p.brand+' '+p.model)+'</a></h3>'
       +(ai?'<figure class="am-pick-ai-preview"><img loading="lazy" decoding="async" width="768" height="768" src="'+e(ai.url)+'" alt="Interprétation artistique générée par IA de la montre '+e(p.brand+' '+p.model)+' ; visuel non contractuel"><figcaption><strong>Création IA</strong> · interprétation non contractuelle. La photo produit réelle figure au-dessus.</figcaption></figure>':'')
       +'<p class="am-pick-lead">'+e(p.lead)+'</p>'
