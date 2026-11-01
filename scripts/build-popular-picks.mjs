@@ -90,7 +90,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
       +'<p class="am-pick-note">'+(verifiedLinks.has(p.id)?'Lien vers une fiche Amazon.fr correspondant à la référence documentée. Vérifiez la variante, le vendeur, le prix et la disponibilité lors de la visite.':'La recherche Amazon peut présenter des variantes ou d’autres produits. Vérifier la référence exacte, le vendeur et le prix avant de commander.')+'</p>'
       +'</div></article>';
   };
-  const featuredIds=['casio-gw-m5610u-1','skmei-2056','skmei-2256','curren-cur210','pagani-pd1776','casio-f91w-1','addiesdive-ad2030','pagani-pd1701'];
+  const featuredIds=['casio-gw-m5610u-1','skmei-2056','skmei-2256','casio-ga-2100-1a1','pagani-pd1776','casio-f91w-1','addiesdive-ad2030','pagani-pd1701'];
   const featured=featuredIds.map(id=>picks.find(p=>p.id===id));
   if(featured.some(p=>!p))throw Error('Featured model not in source catalog');
   const photoDisclaimer=approvedPhotos.size
