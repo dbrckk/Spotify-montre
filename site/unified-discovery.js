@@ -6,8 +6,10 @@
   const compareStatus=$('udCompareStatus'),compareClear=$('udCompareClear'),compareTable=$('udCompareTable');
   const tray=$('udCompareTray'),trayItems=$('udTrayItems'),trayCount=$('udTrayCount'),
     trayOpen=$('udTrayOpen'),trayClear=$('udTrayClear'),catalogue=document.querySelector('.ud-page');
+  const viewTools=$('udViewTools'),viewCompact=$('udViewCompact'),viewLarge=$('udViewLarge');
   if(!root||!form||!status||!empty||!compareStatus||!compareClear||!compareTable
-    ||!tray||!trayItems||!trayCount||!trayOpen||!trayClear||!catalogue)return;
+    ||!tray||!trayItems||!trayCount||!trayOpen||!trayClear||!catalogue
+    ||!viewTools||!viewCompact||!viewLarge)return;
   const cards=[...root.querySelectorAll('article.ud-card[data-id]')];
   const node=(tag,text,cls)=>{
     const el=document.createElement(tag);
@@ -18,8 +20,8 @@
   const normalized=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'')
     .toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
   const controls={q:$('udSearch'),brand:$('udBrand'),style:$('udStyle'),
-    movement:$('udMovement'),tier:$('udTier'),size:$('udSize')};
-  let watches=new Map(),selected=[];
+    movement:$('udMovement'),tier:$('udTier'),size:$('udSize'),visual:$('udVisual')};
+  let watches=new Map(),selected=[],view='grid';
   const validId=x=>typeof x==='string'&&/^[a-z0-9-]{4,64}$/.test(x);
   const matchSize=(p,value)=>{
     if(value==='all')return true;
@@ -45,13 +47,14 @@
       if(value&&(name==='q'||value!=='all'))query.set(name,value.slice(0,100));
     }
     if(selected.length)query.set('compare',selected.join(','));
+    if(view==='large')query.set('view','large');
     const next=location.pathname+(query.size?'?'+query.toString():'')+location.hash;
     history.replaceState(null,'',next);
   };
   const render=()=>{
     const q=normalized(controls.q.value),brand=controls.brand.value,
       style=controls.style.value,movement=controls.movement.value,
-      tier=controls.tier.value,size=controls.size.value;
+      tier=controls.tier.value,size=controls.size.value,visual=controls.visual.value;
     const tokens=q.split(' ').filter(Boolean);
     let visible=0;
     for(const card of cards){
@@ -62,6 +65,8 @@
         &&(movement==='all'||p.movement===movement)
         &&(tier==='all'||p.tier===tier)
         &&matchSize(p,size)
+        &&(visual==='all'||(visual==='photo'&&Boolean(p.photoUrl))
+          ||(visual==='no-photo'&&!p.photoUrl))
         &&tokens.every(term=>normalized([p.brand,p.model,p.description,p.lead,p.caseText,p.glass,p.water].join(' ')).includes(term));
       card.hidden=!ok;
       if(ok)visible++;
@@ -70,6 +75,15 @@
     empty.hidden=visible!==0;
     persist();
   };
+  const changeView=mode=>{
+    view=mode==='large'?'large':'grid';
+    root.classList.toggle('ud-view-large',view==='large');
+    viewCompact.setAttribute('aria-pressed',String(view==='grid'));
+    viewLarge.setAttribute('aria-pressed',String(view==='large'));
+    persist();
+  };
+  viewCompact.addEventListener('click',()=>changeView('grid'));
+  viewLarge.addEventListener('click',()=>changeView('large'));
   const link=(label,url)=>{
     const a=node('a',label);a.href=url;return a;
   };
@@ -139,6 +153,17 @@
     persist();
   };
   root.addEventListener('click',event=>{
+    const zoom=event.target.closest('button.ud-zoom[data-zoom-id]');
+    if(zoom){
+      const id=zoom.dataset.zoomId,p=watches.get(id);
+      if(!p?.photoUrl||!window.AtelierPhoto?.open)return;
+      const photos=[...watches.values()].filter(q=>q.photoUrl
+        &&q.photoUrl==='./assets/'+(q.kind==='core'?'watches':'watches-popular')+'/'+q.id+'.webp')
+        .map(q=>({id:q.id,brand:q.brand,model:q.model,officialUrl:q.officialUrl,
+          photoReview:{publicUsageApproved:true,localUrl:q.photoUrl}}));
+      window.AtelierPhoto.open(photos,id,{assetPrefix:'../'});
+      return;
+    }
     const btn=event.target.closest('button.ud-select[data-compare-id]');
     if(!btn)return;
     const id=btn.dataset.compareId;
@@ -174,7 +199,13 @@
     if(watches.size!==52||cards.length!==52||cards.some(c=>!watches.has(c.dataset.id)))
       throw Error('Les fiches visibles ne correspondent pas aux références documentées');
     form.hidden=false;
-    for(const card of cards)card.querySelector('button.ud-select')?.removeAttribute('hidden');
+    viewTools.hidden=false;
+    for(const card of cards){
+      card.querySelector('button.ud-select')?.removeAttribute('hidden');
+      if(window.AtelierPhoto?.open)
+        card.querySelector('button.ud-zoom')?.removeAttribute('hidden');
+    }
+    changeView(params.get('view')==='large'?'large':'grid');
     const initial=params.get('compare')?.split(',').filter(validId)||[];
     selected=[...new Set(initial)].filter(x=>watches.has(x)).slice(0,3);
     render();renderCompare();
