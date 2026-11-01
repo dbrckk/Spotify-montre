@@ -472,10 +472,11 @@ for(const p of popularFeed.products){
     'Each detail must provide a buyer-visible source-backed comparison near CTAs and alternatives: '+p.id);
   assert.equal(detailHtml.split('href="'+compareHref+'"').length-1,2,
     'Comparison deep link must preserve the exact selected model plus two documented alternatives: '+p.id);
-  assert.ok(detailHtml.includes('href="../photo-zoom.css"')&&
-    detailHtml.includes('src="../photo-zoom.js"')&&
-    detailHtml.includes('src="../extra-product-viewer.js"'),
-    'Every supplemental product page must progressively enhance source-backed photos: '+p.id);
+  const hasViewer=detailHtml.includes('src="../extra-product-viewer.js"');
+  assert.equal(hasViewer,approvedPopularPhotos.has(p.id),
+    'Only image-backed pages may load the optional local-photo modal: '+p.id);
+  assert.equal(detailHtml.includes('src="../photo-zoom.js"'),hasViewer);
+  assert.equal(detailHtml.includes('href="../photo-zoom.css"'),hasViewer);
   assert.equal(new Set(recommendations.map(m=>m[1])).size,3,'Never recommend the same watch twice: '+p.id);
   assert.ok(!recommendations.some(m=>m[1]===p.id),'Do not self-recommend: '+p.id);
   for(const [,id,reason] of recommendations){
