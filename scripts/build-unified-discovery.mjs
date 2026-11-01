@@ -104,11 +104,49 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
       +'<button type="button" class="ud-select" data-compare-id="'+e(p.id)+'" aria-pressed="false" hidden>Ajouter à la comparaison</button>'
       +'</div></article>';
   };
+  // Explicit editorial choices, not a sales ranking. Both the six real photos
+  // and all merchant exits come from the same validated 52-model registry.
+  const featureIds=['skmei-2056','skmei-2514','addiesdive-ad2030',
+    'pagani-pd1701','casio-mtp-1302','citizen-tsuyosa'];
+  const featured=featureIds.map(id=>normalized.find(p=>p.id===id));
+  if(featured.some(p=>!p||!p.photoUrl||!p.detailUrl||!p.officialUrl))
+    throw Error('Editorial showroom must contain six documented, photographed references');
+  if(featured.filter(p=>p.merchantKind==='direct').length<3)
+    throw Error('Editorial showroom requires at least three identified merchant listings');
+  const featureCard=p=>{
+    const direct=p.merchantKind==='direct';
+    const target=direct?p.merchantUrl:p.officialUrl;
+    const rel=direct?'noopener noreferrer nofollow sponsored':'noopener noreferrer nofollow';
+    const tracking=direct?'data-amazon-product="'+e(p.id)+'" data-amazon-placement="popular"'
+      :'data-merchant-official-id="'+e(p.id)+'" data-merchant-placement="popular"';
+    const kind=direct?'Fiche marchande identifiée':'Fiche du fabricant';
+    const exit=direct?'Consulter sur Amazon.fr · lien rémunéré':'Voir chez la marque · lien non rémunéré';
+    const detail=p.detailUrl.replace('./montres/','./');
+    const visual='../'+p.photoUrl.slice(2);
+    return '<article class="ud-feature-card" data-feature-id="'+e(p.id)+'">'
+      +'<a class="ud-feature-photo" href="'+e(detail)+'" aria-label="Découvrir '+e(p.brand+' '+p.model)+'">'
+      +'<img src="'+e(visual)+'" width="540" height="540" loading="lazy" decoding="async" alt="Photographie du modèle '+e(p.brand+' '+p.model)+'"></a>'
+      +'<div class="ud-feature-info"><span class="ud-feature-type">'+e(styleLabels[p.style])+' · '+e(tierLabels[p.tier])+'</span>'
+      +'<h3><a href="'+e(detail)+'">'+e(p.brand+' '+p.model)+'</a></h3>'
+      +'<p class="ud-feature-lead">'+e(p.lead)+'</p>'
+      +'<span class="ud-feature-proof">'+e(kind)+'</span>'
+      +'<div class="ud-feature-actions"><a class="ud-feature-detail" href="'+e(detail)+'">Voir les détails</a>'
+      +'<a class="ud-feature-exit" href="'+e(target)+'" rel="'+rel+'" target="_blank" '+tracking+'>'+e(exit)+'</a></div>'
+      +'</div></article>';
+  };
+  const showroom='<section class="ud-showroom" aria-labelledby="udSpotlightTitle">'
+    +'<div class="ud-showroom-heading"><div><span class="ud-showroom-kicker">La sélection de l’atelier</span>'
+    +'<h2 id="udSpotlightTitle">Six pièces à découvrir en premier.</h2></div>'
+    +'<p>Rétro digital, cadran travaillé ou chronographe : six références choisies pour leur style et leurs caractéristiques documentées, sans classement de ventes inventé.</p></div>'
+    +'<div class="ud-feature-grid">'+featured.map(featureCard).join('')+'</div>'
+    +'<p class="ud-showroom-note">Les photographies correspondent aux modèles présentés, selon les déclarations de droits de l’éditeur. Une fiche marchande identifiée ne garantit ni le stock ni la variante disponible. Les liens rémunérés sont signalés ; aucun paiement n’est encaissé sur ce site.</p>'
+    +'</section>';
   const path='montres/toutes-les-montres.html';
   const main='<div class="wrap ud-page"><nav class="crumb" aria-label="Fil d’Ariane"><a href="../index.html">Accueil</a> / Les 52 montres</nav>'
     +'<header class="ud-heading"><span class="eyebrow">Un seul catalogue · 52 références réelles</span>'
     +'<h1>52 montres à découvrir et comparer.</h1><p>Des digitales SKMEI accessibles aux belles mécaniques. Explorez toutes nos références documentées, sans prix inventé ni classement commercial fictif.</p>'
     +'<p class="ud-disclosure">Atelier Montres est un guide indépendant : aucun achat ni paiement ici. Certains liens Amazon sont rémunérés ; une recherche Amazon ne garantit pas le modèle exact. Vérifiez toujours le vendeur, la variante et le tarif avant de commander.</p></header>'
+    +showroom
     +'<form id="udFilters" class="ud-filters" role="search" aria-label="Affiner les 52 montres" hidden>'
     +'<label>Recherche<input id="udSearch" type="search" maxlength="100" placeholder="Marque, modèle, caractéristiques…"></label>'
     +'<label>Marque<select id="udBrand"><option value="all">Toutes les marques</option>'
