@@ -147,7 +147,7 @@ try{
    const response=await curated.goto(new URL('/montres/'+slug+'.html',base).href,{waitUntil:'domcontentloaded'});
    assert.ok(response?.ok(),'Curated SEO landing page must load '+slug);
    assert.equal(await curated.locator('article.am-shopper-card').count(),6,'Six traceable watch options '+slug);
-   assert.equal(await curated.locator('.am-shopper-nav a').count(),3,'All three categories must be linked '+slug);
+   assert.equal(await curated.locator('.am-shopper-nav a').count(),6,'Three existing selections and three new source-backed search intents must be linked '+slug);
    assert.equal(await curated.locator('.am-shopper-card h2 a').count(),6,'Every title must link its model facts '+slug);
    assert.equal(await curated.locator('a.am-shopper-action').count(),6,'Every watch needs a real merchant or manufacturer exit '+slug);
    const dimensions=await curated.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
