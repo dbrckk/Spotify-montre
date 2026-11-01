@@ -133,7 +133,7 @@ jobs:
               elif ! grep -Fq 'id="udMerchant"' "$RUNNER_TEMP/live-unified.html"; then
                 ready=0
                 reason="$reason [missing: merchant confidence filter]"
-              elif [ "$(grep -Fc 'class="ud-card"' "$RUNNER_TEMP/live-unified.html")" -ne 52 ]; then
+              elif [ "$(grep -Ec '<article class="ud-card" id="modele-' "$RUNNER_TEMP/live-unified.html")" -ne 52 ]; then
                 ready=0
                 reason="$reason [wrong card count: unified 52-watch catalog]"
               fi
