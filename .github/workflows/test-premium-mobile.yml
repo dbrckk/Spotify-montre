@@ -40,6 +40,9 @@ on:
       - 'site/extra-product-viewer.js'
       - 'scripts/build-popular-product-pages.mjs'
       - 'site/popular-picks.css'
+      - 'scripts/build-shopper-selections.mjs'
+      - 'site/shopper-selections.css'
+      - 'scripts/test-intent-collections-browser.mjs'
       - 'site/photo-zoom.js'
       - 'site/photo-zoom.css'
       - '.github/workflows/test-premium-mobile.yml'
@@ -81,6 +84,7 @@ jobs:
           WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-adviser-browser.mjs
           WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-watch-comparisons-browser.mjs
           WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-unified-compare-tray.mjs
+          WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-intent-collections-browser.mjs
           WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-premium-readability.mjs
       - name: Preserve mobile and desktop screenshots
         if: always()

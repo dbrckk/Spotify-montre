@@ -43,8 +43,68 @@ const selections=[
       'Ne pas déduire une qualité de mouvement d’une photographie : le verre, l’étanchéité et la garantie doivent être documentés séparément.'
     ],
     ids:['orient-bambino','citizen-tsuyosa','seiko-5','orient-bambino-38-cream','citizen-tsuyosa-37-blue','pagani-pd1751']
+  },
+  {
+    slug:'montres-skmei',label:'Montres SKMEI',kind:'skmei',
+    title:'Montres SKMEI : 10 modèles numériques, acier et chronographe',
+    description:'Comparez 10 montres SKMEI documentées : 2056, 2256, 2514 et autres modèles numériques, analogiques et hybrides. Photos de modèles, boîtiers et limites à vérifier.',
+    headline:'Montres SKMEI : dix références, trois approches du design.',
+    intro:'La sélection SKMEI de notre catalogue rassemble dix références exactes : quatre montres numériques, deux hybrides analogiques-numériques, trois analogiques et un chronographe. L’objectif est de comparer leur présentation et les spécifications annoncées sans prétendre disposer de mesures de ventes ni d’un essai au poignet.',
+    adviceTitle:'Comparer les montres SKMEI avant l’achat',
+    advice:[
+      'Numérique ou hybride : vérifier l’affichage, les boutons, le rétroéclairage et les fonctions sur la fiche officielle de la variante retenue.',
+      'La SKMEI 2056 est annoncée avec un boîtier résine de 35 mm ; la 2514 utilise un format rectangulaire mesuré 35,2 × 37,7 × 9,3 mm. Ces mesures ne sont pas nécessairement des diamètres ronds comparables.',
+      'Une recherche Amazon.fr n’est pas une offre exacte. Lire le code de modèle, la variante, le prix final et les conditions de retour directement chez le marchand.'
+    ],
+    insights:[
+      ['Numérique rétro','Les références 1251, 1257, 2056 et 2514 se distinguent par leur affichage numérique et leur silhouette. Le choix est d’abord une question de boîtier et de lisibilité recherchée, sans classement de durabilité.'],
+      ['Mixte et chronographe','Les 1220 et 2471 combinent aiguilles et affichage numérique ; la 9156 est décrite comme un chronographe quartz. Une ressemblance esthétique ne signifie pas que les fonctions ou matériaux soient identiques.'],
+      ['Provenance des photos et des offres','Les photographies publiées sont fondées sur les autorisations déclarées par le propriétaire du site, non vérifiées indépendamment. Une variante ou la disponibilité sur Amazon.fr n’est pas garantie par nos liens de recherche.']
+    ],
+    compareIds:['skmei-2056','skmei-2256','skmei-9156'],
+    ids:['skmei-1251','skmei-1257','skmei-2056','skmei-2514','skmei-9156','skmei-9353','skmei-1874','skmei-2471','skmei-1220','skmei-2256']
+  },
+  {
+    slug:'montres-pagani-design',label:'Pagani Design',kind:'pagani',
+    title:'Montres Pagani Design : 3 modèles PD1701, PD1751 et PD1776',
+    description:'Trois Pagani Design à comparer : PD1701 chronographe quartz VK63, PD1751 automatique NH35 annoncé et PD1776 quartz VH65 annoncé, avec dimensions et sources.',
+    headline:'Pagani Design : trois montres, trois mouvements annoncés.',
+    intro:'Le catalogue comporte trois montres Pagani Design : la PD1701 au style chronographe sportif, la PD1751 automatique compacte et la PD1776 aux proportions plus petites. Les calibres, le saphir et les dimensions mentionnés dans les fiches sont ceux annoncés par les vendeurs ; ils ne constituent pas des essais ni des certifications indépendantes.',
+    adviceTitle:'Quelle Pagani Design regarder en premier ?',
+    advice:[
+      'La PD1701 présente un chronographe quartz VK63 annoncé et un boîtier de 40 mm annoncé ; vérifier la référence exacte et les variantes sur le site vendeur.',
+      'La PD1751 est décrite avec un mouvement automatique NH35 annoncé et un format de 36 mm annoncé : vérifier la réserve de marche, la hauteur et la garantie.',
+      'La PD1776 présente un mouvement quartz VH65 et un boîtier annoncé de 32 mm. Le choix dépend surtout du format et du style recherché ; les données vendeur doivent être recontrôlées.'
+    ],
+    insights:[
+      ['Chronographe quartz PD1701','Le chronographe et les trois compteurs constituent son signe distinctif. Vérifier les fonctions du calibre VK63, le type de verre et la variante réellement proposée chez le marchand.'],
+      ['Automatique PD1751','Cette référence met en avant un mouvement NH35 annoncé. Un mouvement automatique nécessite une approche différente de l’entretien ; les données du vendeur font foi pour la référence exacte.'],
+      ['Format compact PD1776','Le cadran coloré et le format annoncé de 32 mm distinguent cette montre. Ce modèle n’est pas interchangeable avec la PD1701 ou la PD1751 malgré la marque commune.']
+    ],
+    compareIds:['pagani-pd1701','pagani-pd1751','pagani-pd1776'],
+    ids:['pagani-pd1701','pagani-pd1751','pagani-pd1776']
+  },
+  {
+    slug:'montres-numeriques',label:'Montres numériques',kind:'digital',
+    title:'Montres numériques : 12 Casio et SKMEI, digitales et hybrides',
+    description:'Comparez 12 montres numériques et analogiques-numériques Casio et SKMEI : types d’affichage, fonctions annoncées, boîtiers et fiches produit documentées.',
+    headline:'Montres numériques : douze références digitales et hybrides.',
+    intro:'Douze montres de notre catalogue proposent un affichage numérique, seul ou accompagné d’aiguilles. Cette sélection regroupe des références SKMEI, Casio et Casio G-SHOCK : elle ne confond pas une montre intégralement digitale avec un modèle hybride analogique-numérique.',
+    adviceTitle:'Digital, analogique-numérique : comment départager les modèles ?',
+    advice:[
+      'Commencer par le type d’affichage : les modèles SKMEI 1220 et 2471 sont hybrides, alors que les Casio F-91W, A158WEA et A168WG sont décrites comme numériques.',
+      'Lire les fonctions annoncées sur la fiche du fabricant : alarme, chronomètre, rétroéclairage et double fuseau ne sont pas acquis pour toutes les montres numériques.',
+      'Contrôler l’étanchéité, les dimensions et le bracelet de la variante exacte avant tout achat. Aucun classement de ventes, de fiabilité ou de prix n’est supposé.'
+    ],
+    insights:[
+      ['Les numériques classiques','Casio F-91W, A158WEA, A168WG et les modèles SKMEI numériques privilégient un affichage par chiffres. Les tailles et les finitions varient entre les références documentées.'],
+      ['Le format hybride','Les SKMEI 1220 et 2471 associent aiguilles et écran numérique. Les comparer uniquement à des digitales classiques serait insuffisant : ergonomie et boîtier doivent aussi être considérés.'],
+      ['Des usages différents','Une montre numérique rétro et une montre sportive Casio G-SHOCK peuvent répondre à des attentes différentes. La catégorie est fondée sur l’affichage, pas sur une résistance aux chocs garantie pour tous les modèles.']
+    ],
+    compareIds:['skmei-2056','casio-f91w-1','skmei-2471'],
+    ids:['skmei-1251','skmei-1257','skmei-2056','skmei-2514','skmei-2471','skmei-1220','casio-a158wea-1','casio-la-20wh-4a1','casio-f91w-1','casio-a168wg-9','casio-dw5600rl-1','casio-ae1200wh-1av']
   }
-];
+ ];
 const escapeAttributes=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 
 export function buildShopperSelections({root,coreProducts,picks,partners,verifiedPopularLinks,approvedPopularPhotos,amazonSearch,pageHead,page,e,u}){
@@ -94,10 +154,48 @@ export function buildShopperSelections({root,coreProducts,picks,partners,verifie
     +selections.map(s=>'<a href="./'+e(s.slug)+'.html">'+e(s.label)+'</a>').join('')+'</nav>';
   const paths=[];
   for(const selected of selections){
-    if(selected.ids.length<4||new Set(selected.ids).size!==selected.ids.length)throw Error('Invalid curated selection '+selected.slug);
+    const min=selected.kind==='pagani'?3:4;
+    if(selected.ids.length<min||new Set(selected.ids).size!==selected.ids.length)
+      throw Error('Invalid curated selection '+selected.slug);
+    if(selected.kind){
+      const expected=[...all.values()].map(x=>x.product)
+        .filter(p=>selected.kind==='skmei'?p.brand==='SKMEI'
+          :selected.kind==='pagani'?p.brand==='Pagani Design'
+          :selected.kind==='digital'?/numérique|digital/i.test(p.movement):false)
+        .map(p=>p.id).sort();
+      if(expected.length!==selected.ids.length||
+        expected.some((id,i)=>id!==[...selected.ids].sort()[i]))
+        throw Error('Brand/display collection out of sync with verified source catalogue: '+selected.slug);
+    }
     const path='montres/'+selected.slug+'.html';
     const items=selected.ids.map(card).join('');
     const advice=selected.advice.map(t=>'<li>'+e(t)+'</li>').join('');
+    const special=Boolean(selected.kind);
+    const compareIds=selected.compareIds||[];
+    if(special&&(compareIds.length!==3||new Set(compareIds).size!==3||
+        compareIds.some(id=>!selected.ids.includes(id))))
+      throw Error('Invalid source-backed three-way comparison in '+selected.slug);
+    const compareHref='./toutes-les-montres.html?compare='+compareIds.join(',')+'#comparer';
+    const compareCta=special?'<a class="am-shopper-compare" href="'+e(compareHref)+
+      '" data-shopper-compare="'+e(selected.slug)+'">Comparer ces trois références dans le tableau complet</a>':'';
+    const insightHtml=special
+      ?'<section class="am-shopper-insights" aria-label="Conseils spécifiques à cette sélection"><h2>Comprendre les différences entre ces références</h2><div class="am-shopper-insight-grid">'+
+         selected.insights.map(([title,text])=>'<article><h3>'+e(title)+'</h3><p>'+e(text)+'</p></article>').join('')+
+         '</div></section>':'';
+    const factualHtml=special?'<section class="am-shopper-matrix" id="am-shopper-matrix" aria-labelledby="am-shopper-matrix-title"><h2 id="am-shopper-matrix-title">Caractéristiques documentées des '+selected.ids.length+' modèles</h2>'+
+      '<p>Cette comparaison reprend les descriptions fabricant ou vendeur citées dans les fiches. Les données non renseignées ne sont pas estimées.</p>'+
+      '<div class="comparison-scroll" role="region" tabindex="0" aria-label="Tableau comparatif des références"><table class="spec-matrix">'+
+      '<caption>'+e(selected.label)+' : caractéristiques selon les sources du catalogue</caption><thead><tr>'+
+      '<th scope="col">Modèle</th><th scope="col">Mouvement annoncé</th><th scope="col">Boîtier</th><th scope="col">Verre</th><th scope="col">Étanchéité</th></tr></thead><tbody>'+
+      selected.ids.map(id=>{
+        const item=all.get(id),p=item.product;
+        const movement=item.core?(p.specs?.movement||p.movement):p.movement;
+        const size=item.core?(p.specs?.diameter||p.specs?.caseSize):p.case;
+        const glass=item.core?p.specs?.glass:p.glass;
+        const water=item.core?p.specs?.waterResistance:p.water;
+        return '<tr data-matrix-watch="'+e(id)+'"><th scope="row"><a href="./'+e(id)+'.html">'+e(p.brand+' '+p.model)+'</a></th>'+
+          [movement,size,glass,water].map(v=>'<td>'+e(v||'Non documenté')+'</td>').join('')+'</tr>';
+      }).join('')+'</tbody></table></div>'+compareCta+'</section>':'';
     const affiliateNote=partners.enabled?
       'Certains liens Amazon.fr sont rémunérés. Un lien direct indique une correspondance de référence documentée; un lien de recherche peut afficher des variantes. En tant que Partenaire Amazon, je réalise un bénéfice sur les achats remplissant les conditions requises.':
       'Aucun lien rémunéré n’est actif dans cette sélection.';
@@ -106,7 +204,9 @@ export function buildShopperSelections({root,coreProducts,picks,partners,verifie
       +'<h1>'+e(selected.headline)+'</h1><p class="lead">'+e(selected.intro)+'</p>'
       +'<p class="am-shopper-method-note">Les modèles sont choisis pour leurs usages et leur esthétique, et non pour des ventes Amazon prétendument mesurées. Aucun prix, disponibilité ou avis n’est inventé.</p>'
       +nav+'</header>'
+      +(special?'<div class="am-shopper-intent-nav"><a href="#am-shopper-matrix">Voir le tableau des '+selected.ids.length+' références</a>'+compareCta+'</div>':'')
       +'<div class="am-shopper-grid">'+items+'</div>'
+      +factualHtml+insightHtml
       +'<section class="am-shopper-guide"><h2>'+e(selected.adviceTitle)+'</h2><ol>'+advice+'</ol></section>'
       +'<aside class="am-shopper-endnote"><p>'+e(affiliateNote)+'</p>'
       +'<p>Les photographies locales sont publiées sur la base d’autorisations déclarées par l’éditeur, non vérifiées indépendamment. Pour les références sans photo enregistrée, un repère graphique est conservé; leurs véritables photos figurent sur les fiches de référence.</p>'
