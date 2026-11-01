@@ -54,6 +54,20 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       ?'Ce modèle est proposé comme une alternative de style, et non comme une meilleure vente mesurée.'
       :'Le signal de popularité provient uniquement de la source citée. Il ne s’agit pas d’un classement Amazon.fr ni d’un volume de ventes nationales.';
     const suggestions=relatedWatches(p);
+    // Use only the four explicitly sourced factual fields; do not infer
+    // numeric specifications, quality scores, stock, price or popularity.
+    const comparison=[p,...suggestions];
+    const comparisonRows=[
+      ['Mouvement','movement'],['Boîtier','case'],['Verre','glass'],['Étanchéité','water']
+    ];
+    const comparisonTable='<div class="am-extra-factual-scroll" role="region" tabindex="0" aria-label="Tableau comparatif des quatre références">'
+      +'<table class="am-extra-factual-table"><caption>Caractéristiques documentées des quatre références</caption>'
+      +'<thead><tr><th scope="col">Caractéristique</th>'
+      +comparison.map(q=>'<th scope="col"><a href="./'+e(q.id)+'.html">'+e(q.brand+' '+q.model)+'</a>'+(q.id===p.id?'<small>Modèle consulté</small>':'')+'</th>').join('')
+      +'</tr></thead><tbody>'
+      +comparisonRows.map(([label,key])=>'<tr><th scope="row">'+e(label)+'</th>'
+        +comparison.map(q=>'<td>'+e(q[key])+'</td>').join('')+'</tr>').join('')
+      +'</tbody></table></div>';
     // All three IDs are drawn from this exact source-backed catalog.
     // Comparison remains available without JavaScript from a regular link.
     const compareIds=[p.id,...suggestions.slice(0,2).map(q=>q.id)];
@@ -126,7 +140,7 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       +'<p>'+(photo?'L’éditeur déclare disposer de l’autorisation commerciale de la marque. Cette autorisation n’a pas été vérifiée indépendamment.':'Les photos sont consultables chez la marque ou le vendeur cité : nous ne les republions pas sans autorisation.')+' La mention de meilleures ventes, lorsqu’elle existe, n’atteste pas le classement de ce modèle sur Amazon.fr.</p></section>'
       +'<section id="comparables" class="am-extra-related" aria-labelledby="am-extra-related-heading">'
       +'<h2 id="am-extra-related-heading">Trois montres dans le même esprit</h2><p>Suggestions établies à partir de la marque, du style et du mouvement indiqués dans nos fiches. Elles ne constituent ni des essais comparatifs ni un classement de qualité ; seules les photos déclarées autorisées sont affichées.</p>'
-      +'<ul>'+relatedItems+'</ul><div class="am-extra-related-cta"><a class="am-extra-compare-cta" href="'+e(compareUrl)+'" data-compare-source="'+e(p.id)+'">Comparer ces références à cette montre</a>'
+      +'<ul>'+relatedItems+'</ul>'+comparisonTable+'<div class="am-extra-related-cta"><a class="am-extra-compare-cta" href="'+e(compareUrl)+'" data-compare-source="'+e(p.id)+'">Comparer ces références à cette montre</a>'
       +'<a href="./toutes-les-montres.html">Comparer les 52 montres</a></div></section>'
       +'<section id="verifications" class="am-extra-checks"><h2>Avant de commander</h2>'
       +'<ol><li>Confirmer le code '+e(p.model)+' et la couleur auprès du vendeur : une fiche de recherche peut afficher d’autres variantes.</li>'
@@ -152,7 +166,7 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       description,path,type:'product'}),main,graph)
       .replace('</head>','<link rel="stylesheet" href="../popular-picks.css">'
         +(photo?'<link rel="stylesheet" href="../photo-zoom.css"><script defer src="../photo-zoom.js"></script><script defer src="../extra-product-viewer.js"></script>':'')
-        +'</head>');
+        +'<link rel="stylesheet" href="../extra-factual-comparison.css"></head>');
     writeFileSync(join(root,path),html);
     paths.push(path);
   }
