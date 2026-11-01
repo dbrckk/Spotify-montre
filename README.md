@@ -4,13 +4,13 @@
 
 L'accueil propose désormais un accès au [catalogue complet de 52 montres](https://atelier-montres-selection-fr.onrender.com/montres/toutes-les-montres.html), qui réunit **15 modèles historiquement comparés + 37 compléments**, avec filtres mobiles, recherche et comparaison transversale de deux à trois références. Le conseiller lit la même source générée et peut proposer n'importe quelle montre du catalogue. Les 70 pages historiques sont conservées : **71 URL** en sitemap. Photos réelles uniquement lorsqu'une publication déclarée est contrôlée ; aucune image IA non contractuelle ne remplace la photographie d'une référence exacte dans cette expérience. [Architecture, limites et critères d'acceptation](docs/catalogue-unifie-52-2026-11-01.md).
 
-## Feuille de route active — 1er novembre 2026
+## Feuille de route active — stratégie systémique validée au 1er novembre 2026
 
-**Objectif :** faire d'Atelier Montres un **comparateur éditorial de montres francophone, fiable, premium et rentable par affiliation**, non une boutique vendant directement les produits.
+**Objectif :** faire d'Atelier Montres un **guide d'achat francophone rentable et fiable**, d'abord par l'affiliation, puis éventuellement par une **vente directe sélective** de 2–3 références qualifiées, automatisable seulement lorsque fournisseur, coûts, paiement, obligations légales et SAV sont démontrés. Pas de caisse ou paiement fictif sur la vitrine actuelle.
 
-**État audité en production :** 52 modèles (15 principaux + 37 complémentaires), 70 URL de sitemap accessibles, 21 photos complémentaires publiées sur attestation du responsable du site, 9 créations IA SKMEI explicitement non contractuelles, 13 fiches Amazon.fr exactes en catalogue principal + 3 complémentaires documentées. L'affiliation Amazon est activée sur déclaration du propriétaire, **sans validation indépendante des commissions ni de l'acceptation finale**. Les mentions légales sont encore incomplètes.
+**État audité dans le dépôt :** 52 modèles (15 principaux + 37 complémentaires), **13 correspondances Amazon.fr principales et 7 complémentaires**, avec **30 recherches Amazon** clairement distinguées de fiches exactes ; 21 photographies complémentaires sur déclaration de droits, 9 créations IA SKMEI secondaires. `site/affiliate-links.json` est activé, mais l'approbation finale Amazon et les commissions ne sont **pas vérifiées indépendamment**. Les mentions légales demeurent incomplètes. Aucun backend de commandes ou fournisseur prêt à vendre n'existe actuellement.
 
-**[Audit intégral, objectif final et plan de réalisation priorisé](docs/AUDIT_OBJECTIF_FINAL_PLAN_2026-11-01.md)** : source de référence pour les améliorations suivantes. Les rubriques historiques ci-dessous décrivent des étapes précédentes et ne constituent pas l'état actuel du catalogue.
+**[Plan directeur systémique : rentabilité, SEO, fournisseurs, droits, architecture et gates de paiement](docs/strategie-systemique-rentabilite-2026-11-01.md)** — **source de référence active** pour les prochains « go / continue ». Il prime sur l'ancien [audit éditorial historique](docs/AUDIT_OBJECTIF_FINAL_PLAN_2026-11-01.md) quand les chiffres de liens, capacités et objectifs commerciaux ont changé. Les autres rubriques historiques ci-dessous conservent les étapes déjà réalisées mais **ne décrivent pas toutes l'état actuel**.
 
 ## Images IA éditoriales SKMEI — 1er novembre 2026
 
