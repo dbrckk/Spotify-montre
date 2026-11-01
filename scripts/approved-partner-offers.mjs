@@ -1,5 +1,6 @@
 import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
+import {loadAliExpressSkmeiResearch} from './aliexpress-skmei-research.mjs';
 
 const programIds=Object.freeze({'aliexpress-fr':26009,addiesdive:94513});
 const allowedKeys=new Set(['awinmid','awinaffid','ued','clickref','campaign']);
@@ -37,6 +38,7 @@ export function loadApprovedPartnerOffers({root,picks}){
   }
   const offers=Object.entries(data.offers);
   const known=new Map(picks.map(p=>[p.id,p]));
+  const skmeiResearch=loadAliExpressSkmeiResearch({root,picks});
   if(known.size!==37||offers.length>37)throw Error('Invalid partner programme catalog coverage');
   if(!data.enabled){
     if(data.publisherId!==null||data.publisherApproved||offers.length
@@ -74,9 +76,18 @@ export function loadApprovedPartnerOffers({root,picks}){
       throw Error('Awin deep-link destination must be clean of campaign tracking: '+id);
     if(program==='addiesdive'&&destination.href!==watch.officialUrl)
       throw Error('ADDIESDIVE destination must equal catalogued exact model URL: '+id);
-    if(program==='aliexpress-fr'&&!(destination.hostname==='www.aliexpress.com'
-      &&/^\/item\/\d{11,16}\.html$/.test(destination.pathname)))
-      throw Error('AliExpress FR destination must be a specific item URL, not a search/category: '+id);
+    if(program==='aliexpress-fr'){
+      if(destination.hostname!=='www.aliexpress.com'
+        ||!/^\/item\/\d{11,16}\.html$/.test(destination.pathname))
+        throw Error('AliExpress FR destination must be a specific item URL, not a search/category: '+id);
+      const itemId=destination.pathname.split('/').at(-1).slice(0,-5);
+      const reviewed=skmeiResearch.get(id)?.candidates.get(itemId);
+      if(reviewed?.status!=='merchant_reviewed_exact_variant_fr'
+        ||reviewed.productUrl!==destination.href
+        ||reviewed.review?.variant!==offer.variant
+        ||Date.parse(offer.verifiedAt)<Date.parse(reviewed.review.checkedOn))
+        throw Error('Unreviewed AliExpress item, exact variant or France delivery evidence: '+id);
+    }
 
     const link=safeHttps(offer.trackingUrl);
     if(link.hostname!=='www.awin1.com'||link.pathname!=='/cread.php'

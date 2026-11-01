@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "reviewedOn": "2026-11-01",
+  "marketplace": "aliexpress.com",
+  "policy": "research_only_until_variant_fr_shipping_and_awin_approval_verified",
+  "products": {
+    "skmei-2056": {
+      "brand": "SKMEI",
+      "model": "2056",
+      "candidates": [
+        {
+          "itemId": "1005007793914474",
+          "sourceUrl": "https://fr.pricearchive.org/aliexpress.com/item/1005007793914474",
+          "sourceObservedOn": "2026-09-11",
+          "listingTitle": "SKMEI digital 2056 / 1123, plusieurs variantes dans le titre tiers",
+          "status": "third_party_index_only",
+          "review": null
+        },
+        {
+          "itemId": "1005008144767722",
+          "sourceUrl": "https://fr.pricearchive.org/aliexpress.com/item/1005008144767722",
+          "sourceObservedOn": "2026-09-11",
+          "listingTitle": "SKMEI 2056, avec mention du 1412 sur la fiche du comparateur",
+          "status": "third_party_index_only",
+          "review": null
+        }
+      ]
+    },
+    "skmei-2256": {
+      "brand": "SKMEI",
+      "model": "2256",
+      "candidates": []
+    },
+    "skmei-2514": {
+      "brand": "SKMEI",
+      "model": "2514",
+      "candidates": [
+        {
+          "itemId": "1005010347756069",
+          "sourceUrl": "https://ms.pricearchive.org/aliexpress.com/item/1005010347756069",
+          "sourceObservedOn": "2026-09-14",
+          "listingTitle": "SKMEI 2514 small square electronic digital sports fashion watch",
+          "status": "third_party_index_only",
+          "review": null
+        },
+        {
+          "itemId": "1005010503818361",
+          "sourceUrl": "https://pt.pricearchive.org/aliexpress.com/item/1005010503818361",
+          "sourceObservedOn": "2026-09-20",
+          "listingTitle": "SKMEI 2514 chronograph alarm retro digital wristwatch",
+          "status": "third_party_index_only",
+          "review": null
+        }
+      ]
+    }
+  }
+}

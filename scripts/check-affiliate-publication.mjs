@@ -33,6 +33,7 @@ try {
   cpSync(join(repository,'research','amazon-fr-exact-products.json'),join(tmp,'research','amazon-fr-exact-products.json'));
   cpSync(join(repository,'research','amazon-fr-popular-verified.json'),join(tmp,'research','amazon-fr-popular-verified.json'));
   cpSync(join(repository,'research','partner-affiliate-offers.json'),join(tmp,'research','partner-affiliate-offers.json'));
+  cpSync(join(repository,'research','aliexpress-skmei-candidates.json'),join(tmp,'research','aliexpress-skmei-candidates.json'));
   const verifiedPopularPath=join(tmp,'research','amazon-fr-popular-verified.json');
   const build=(extraEnv={})=>execFileSync(process.execPath,[join(repository,'scripts/build-seo.mjs')],{
     cwd:tmp,env:{...process.env,PUBLIC_SITE_URL:'https://atelier-montres-selection-fr.onrender.com/',UMAMI_WEBSITE_ID:'',...extraEnv},encoding:'utf8',timeout:15000
@@ -214,7 +215,19 @@ try {
   // represented as real approved production links. Test the complete
   // build/product/shortlist route only after all fail-closed production checks.
   const partnerResearchPath=join(tmp,'research','partner-affiliate-offers.json');
-  const fakeDestination='https://www.aliexpress.com/item/1005000000000.html';
+  const fixtureReviewDate=new Date().toISOString().slice(0,10);
+  const fakeDestination='https://www.aliexpress.com/item/1005007793914474.html';
+  const fakeVariant='SKMEI 2056 example testing-only exact black variant';
+  const isolatedResearchPath=join(tmp,'research','aliexpress-skmei-candidates.json');
+  const isolatedResearch=JSON.parse(readFileSync(isolatedResearchPath,'utf8'));
+  const fixtureCandidate=isolatedResearch.products['skmei-2056'].candidates[0];
+  fixtureCandidate.status='merchant_reviewed_exact_variant_fr';
+  fixtureCandidate.review={checkedOn:fixtureReviewDate,modelConfirmed:'2056',
+    variant:fakeVariant,sellerName:'TEST-ONLY simulated merchant',
+    franceShippingConfirmed:true,franceCheckoutConfirmed:true,
+    awinEligibilityConfirmed:true,merchantProductUrl:fakeDestination,
+    evidenceNote:'ISOLATED AUTOMATED TEST ONLY: hypothetical verification of a specific selected product and French shipping; not an actual buyer offer.'};
+  writeFileSync(isolatedResearchPath,JSON.stringify(isolatedResearch));
   const fakeLink=new URL('https://www.awin1.com/cread.php');
   fakeLink.searchParams.set('awinmid','26009');
   fakeLink.searchParams.set('awinaffid','314159');
@@ -224,8 +237,8 @@ try {
     programs:{'aliexpress-fr':{advertiserId:26009,joined:true},
       addiesdive:{advertiserId:94513,joined:false}},
     offers:{'skmei-2056':{program:'aliexpress-fr',destinationUrl:fakeDestination,
-      trackingUrl:fakeLink.href,variant:'SKMEI 2056 example testing-only variant',
-      verifiedAt:'2026-11-01',issuedInPublisherAccount:true,modelAndVariantConfirmed:true}}
+      trackingUrl:fakeLink.href,variant:fakeVariant,
+      verifiedAt:fixtureReviewDate,issuedInPublisherAccount:true,modelAndVariantConfirmed:true}}
   }));
   build();
   const partnerHtml=readFileSync(join(target,'montres/skmei-2056.html'),'utf8');
