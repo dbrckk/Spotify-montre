@@ -39,3 +39,28 @@ La vérification du domaine est faite à l'aide d'une liste fermée d'hôtes de 
 ## Aucun accès externe n'a été utilisé pour créer des comptes
 
 Ni une adhésion Awin, ni un accord Pagani, ni un taux de commission contractuel ne peuvent être présumés depuis un site public. Cette recherche ne génère aucun revenu à elle seule. L'activation d'une nouvelle régie exige l'accès au compte officiel et les liens produits délivrés pour l'éditeur.
+
+
+## Intégration technique Awin ajoutée le 1er novembre 2026
+
+La base technique a désormais un **registre privé au build** : `research/partner-affiliate-offers.json` et un validateur `scripts/approved-partner-offers.mjs`. Le site Render est toujours statique ; ce fichier de recherche n'est pas publié automatiquement comme catalogue public et **aucun nouveau programme n'est activé**. Aucune adhésion ou rémunération supplémentaire n'a été réalisée.
+
+La commande `npm run partner:status` indique les adhésions *déclarées dans le dépôt*, le nombre de liens acceptés par le validateur, et les étapes restantes. Une version publiée avec un registre désactivé refuse les identifiants éditeurs, inscriptions et offres résiduels. Les données sources d'exécution et les tests de sécurité interdisent les URL de redirection trompeuses.
+
+### Opérations minimales depuis un navigateur Android
+
+1. Ouvrir [Awin — AliExpress FR (26009)](https://ui.awin.com/merchant-profile/26009) et [Awin — ADDIESDIVE (94513)](https://ui.awin.com/merchant-profile/94513). Créer un compte éditeur si nécessaire, faire valider **notre domaine** et demander la participation aux deux programmes. **Une fiche annonceur publique n'implique pas que notre compte est accepté.**
+2. Dans Awin, après acceptation, aller à **Boîte à outils → Générateur de liens (LinkBuilder)**. Pour un produit éligible, sélectionner le programme effectivement rejoint, utiliser l'URL **complète et exacte du produit**, puis générer et copier **le lien de notre compte**. Source officielle : https://success.awin.com/articles/fr/Knowledge/How-can-I-use-Link-Builder-to-create-Deep-Links .
+3. Vérifier dans la fiche vendeur la référence, **la variante**, l'expédition vers la France et les conditions de la campagne. Noter la date, l'intitulé exact de la variante et le statut approuvé du programme. Ne pas présumer que tous les articles AliExpress sont rémunérables.
+4. Modifier par PR le fichier `research/partner-affiliate-offers.json` : `publisherId` réel, `publisherApproved:true` après validation, `programs[programme].joined:true` seulement après accord, `enabled:true`, puis une entrée `offers[id]` avec `program`, `destinationUrl`, `trackingUrl`, `variant`, `verifiedAt`, `issuedInPublisherAccount:true`, `modelAndVariantConfirmed:true`. Les valeurs reflètent des **preuves obtenues**, jamais des hypothèses. Ne jamais publier mot de passe, token API, relevé de paiement ou données personnelles.
+5. Lancer `npm test`, `node scripts/build-seo.mjs` et `node scripts/validate-seo.mjs`. Seul un lien Awin HTTPS `www.awin1.com/cread.php` portant les paramètres `awinmid`, `awinaffid` et `ued` cohérents est pris en charge actuellement. Les exemples Awin de ce format sont documentés sur https://success.awin.com/articles/en_US/Knowledge/What-does-an-affiliate-link-look-like . Un lien raccourci ou un autre format doit être **ajouté explicitement et audité** avant sa publication.
+
+### Comportement exact du site une fois les accords obtenus
+
+- **Pour une SKMEI sans ASIN Amazon exact** : la fiche, la carte catalogue et la sélection de dix montres peuvent proposer un lien profond AliExpress Awin vers **un item précis**, et non vers une recherche AliExpress générique.
+- **Pour ADDIESDIVE AD2030** : le lien Amazon exact conserve la priorité ; le lien Awin officiellement généré peut apparaître comme alternative clairement rémunérée, sans supposer qu'il procure une meilleure commission.
+- **Pour Pagani Design** : la candidature officielle reste séparée de l'intégration Awin. Le fabricant indique de joindre `marketing@paganidesignofficial.com` et impose une autorisation **écrite** pour son logo et ses images. Un contrat direct ne se transforme pas automatiquement en URL Awin.
+- **Mesures Umami** : si et seulement si activées, les clics Awin portent le nom agrégé `awin:[code-modèle]:popular`, distinct des clics Amazon et des visites d'un fabricant. Aucun suivi de ventes n'est déduit de ces événements ; seuls les rapports de l'annonceur confirment les conversions.
+- Le contrôle CI vérifie les hôtes, les paramètres, le programme, l'identifiant éditeur, l'URL de destination, l'absence de double redirection trompeuse et le mode sans affiliation. Les tests d'intégration utilisent uniquement une **copie temporaire** et ne déploient pas de faux lien.
+
+**État actuel au 1er novembre 2026 : `enabled:false`, `publisherApproved:false`, deux programmes `joined:false`, zéro offre Awin publiée.** Amazon reste tel quel, et tous les liens vendeur existants restent utilisables.
