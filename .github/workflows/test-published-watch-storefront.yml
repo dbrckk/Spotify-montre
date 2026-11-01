@@ -27,6 +27,7 @@ on:
       - 'site/fiche.css'
       - 'site/seo-guides.css'
       - 'site/popular-picks.css'
+      - 'site/extra-factual-comparison.css'
       - 'site/shopper-selections.css'
       - 'scripts/build-shopper-selections.mjs'
       - 'site/popular-filters.js'
@@ -67,7 +68,7 @@ jobs:
           for attempt in $(seq 1 42); do
             ready=1
             reason=''
-            for file in affiliation.js selection-share.js affiliate-ui.js catalogue-view.css premium-system.css fiche.js fiche.css seo-guides.css editorial-photo.js editorial-photo.css popular-filters.js popular-picks.css shopper-selections.css unified-discovery.js unified-discovery.css; do
+            for file in affiliation.js selection-share.js affiliate-ui.js catalogue-view.css premium-system.css fiche.js fiche.css seo-guides.css editorial-photo.js editorial-photo.css popular-filters.js popular-picks.css extra-factual-comparison.css shopper-selections.css unified-discovery.js unified-discovery.css; do
               if ! curl -fsSL --max-time 15 "$base/$file" -o "$RUNNER_TEMP/live-$file"; then
                 ready=0
                 reason="$reason [missing asset: $file]"
