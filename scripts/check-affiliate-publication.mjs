@@ -32,6 +32,7 @@ try {
   mkdirSync(join(tmp,'research'),{recursive:true});
   cpSync(join(repository,'research','amazon-fr-exact-products.json'),join(tmp,'research','amazon-fr-exact-products.json'));
   cpSync(join(repository,'research','amazon-fr-popular-verified.json'),join(tmp,'research','amazon-fr-popular-verified.json'));
+  cpSync(join(repository,'research','partner-affiliate-offers.json'),join(tmp,'research','partner-affiliate-offers.json'));
   const verifiedPopularPath=join(tmp,'research','amazon-fr-popular-verified.json');
   const build=(extraEnv={})=>execFileSync(process.execPath,[join(repository,'scripts/build-seo.mjs')],{
     cwd:tmp,env:{...process.env,PUBLIC_SITE_URL:'https://atelier-montres-selection-fr.onrender.com/',UMAMI_WEBSITE_ID:'',...extraEnv},encoding:'utf8',timeout:15000
@@ -51,6 +52,8 @@ try {
   build({GOOGLE_SITE_VERIFICATION:'Valid_Example_Token_123456'});
   const disabledShortlist=readFileSync(join(target,'montres/modeles-populaires.html'),'utf8');
   const disabledFocus=(disabledShortlist.split('<section id="selection-10-montres"')[1]||'').split('</section>')[0];
+  assert.equal((disabledShortlist.match(/data-partner-offer-id=/g)||[]).length,0,
+    'No Awin paid link may leak into the production-disabled affiliate fixture');
   assert.equal((disabledFocus.match(/data-amazon-product=/g)||[]).length,0,
     'No Amazon paid CTA may survive on the priority collection when affiliation is disabled');
   assert.equal((disabledFocus.match(/data-merchant-official-id=/g)||[]).length,10,
@@ -166,6 +169,7 @@ try {
   assert.equal(manifest.affiliateCount,13,'Publish the 13 owner-tagged core product matches');
   assert.equal(manifest.popularAffiliateDirectLinks,7,'Seven documented direct links in supplementary selection');
   assert.equal(manifest.popularAffiliateSearchLinks,30,'Remaining thirty supplemental watches must stay labeled searches');
+  assert.equal(manifest.popularPartnerAffiliateLinks,0,'No unapproved Awin partner URL is published');
   const directProduction=readFileSync(join(target,'montres/casio-gw-m5610u-1.html'),'utf8');
   assert.ok(directProduction.includes('href="https://www.amazon.fr/dp/B09BCPP68Q?tag=drackk04-21"'),
     'Publish only the independently source-confirmed G-SHOCK Amazon.fr direct match');
