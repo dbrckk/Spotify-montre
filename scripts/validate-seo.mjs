@@ -266,8 +266,8 @@ assert.ok(popularSitemap.includes(manifest.siteUrl+popularPath),'Research-led co
 assert.match(popularHtml,/rel="canonical"/,'Canonical for supplemental source-led page');
 assert.match(popularHtml,/aucun|Aucun/,'Supplemental section must disclose limitations');
 assert.equal((popularHtml.match(/<article class="am-pick-card /g)||[]).length,37,'One editorial card for each researched watch');
-assert.equal((popularHtml.match(/data-merchant-official-id=/g)||[]).length,37,
-  'Every supplemental card must expose one unmodified official vendor exit for opt-in analytics');
+assert.equal((popularHtml.match(/data-merchant-official-id=/g)||[]).length,42,
+  'Every supplemental card and five model-specific shortlist seller options must expose privacy-minimal vendor intent');
 // Commercial shortlist: an explicitly editorial priority list, not sales data.
 // The existing 52 catalogue entries and Amazon paid CTA counts must stay intact.
 assert.equal(commercialShortlist.length,10,'Ten documented watches selected for commercial qualification');
@@ -291,7 +291,21 @@ for(const item of commercialShortlist){
   assert.ok(p,'Shortlist model must originate from the 37-watch catalogue');
   const html=popularHtml.match(new RegExp('<li class="am-focus-item" data-focus-id="'+item.id+'"[\\s\\S]*?<\\/li>'))?.[0];
   assert.ok(html,'Shortlist card missing: '+item.id);
-  assert.ok(html.includes('href="./'+item.id+'.html"'),'Only a real detail page is linked: '+item.id);
+  assert.ok(html.includes('href="./'+item.id+'.html"'),'The genuine model detail page must be linked: '+item.id);
+  const sellerLink=exactPopularLinks[item.id];
+  const expectedAction=sellerLink?
+    'https://www.amazon.fr/dp/'+sellerLink.asin+'?tag=drackk04-21':p.officialUrl;
+  assert.ok(html.includes('href="'+expectedAction+'"'),
+    'Shortlist must open only the exact documented Amazon model or actual supplier source: '+item.id);
+  assert.ok(html.includes('data-'+(sellerLink?'amazon-product':'merchant-official-id')+'="'+item.id+'"'),
+    'Shortlist must track exact Amazon referrals and non-paid vendor clicks separately: '+item.id);
+  assert.ok(html.includes(sellerLink?'lien rémunéré':'lien non rémunéré'),
+    'Buyers must be told whether shortlist merchant exits are paid: '+item.id);
+  if(sellerLink?.marketplaceVariant)
+    assert.ok(html.includes(sellerLink.marketplaceVariant.replace(/&/g,'&amp;')),
+      'Shortlist direct Amazon CTA needs variant disclosure: '+item.id);
+  if(sellerLink)assert.ok(html.includes('rel="noopener noreferrer nofollow sponsored"'),
+    'Shortlist paid product exits require sponsored relationship: '+item.id);
   assert.ok(html.includes(item.caution),'Editorial caveat must be visible: '+item.id);
   assert.ok(html.includes(exactPopularLinks[item.id]?
     'Fiche Amazon.fr correspondant au code modèle':'Recherche Amazon.fr uniquement'),
@@ -483,10 +497,17 @@ const trackedResults=popularHtml.match(/data-amazon-search-id=/g)||[];
 const trackedDirect=popularHtml.match(/data-amazon-product=/g)||[];
 const sponsoring=popularHtml.match(/rel="noopener noreferrer nofollow sponsored"/g)||[];
 assert.equal(trackedResults.length,manifest.popularAffiliateSearchLinks,'Only unverified models may have search links');
-assert.equal(trackedDirect.length,manifest.popularAffiliateDirectLinks,'Only source-confirmed models may have direct ASIN links');
-assert.equal(sponsoring.length,manifest.affiliateActive?37:0,'All paid links must carry sponsored relation');
-assert.equal((popularHtml.match(/amazon\.fr\/dp\/B09BCPP68Q/g)||[]).length,manifest.affiliateActive?1:0,
-  'Exactly one G-SHOCK ASIN is confirmed on the source-backed selection');
+assert.equal(trackedDirect.length,manifest.popularAffiliateDirectLinks+(manifest.affiliateActive?5:0),
+  'Five source-confirmed shortlist merchant actions augment 7 original cards, without pretending to verify new ASINs');
+assert.equal(sponsoring.length,manifest.affiliateActive?42:0,'All 37 catalogue and five shortlist paid actions must carry sponsored relation');
+assert.equal((popularHtml.match(/amazon\.fr\/dp\/B09BCPP68Q/g)||[]).length,manifest.affiliateActive?2:0,
+  'The same G-SHOCK ASIN appears in one standard card and one shortlist action, never a new unverified ASIN');
+for(const [id,url] of [['pagani-pd1701','https://paganidesign.com/fr/products/pagani-design-1701'],['pagani-pd1776','https://paganidesign.com/products/pd-1776']]){
+  const sourceProduct=popularFeed.products.find(p=>p.id===id);
+  assert.equal(sourceProduct.officialUrl,url,'Pagani exact manufacturer-distributor model source must not regress: '+id);
+  assert.ok(read('montres/'+id+'.html').includes('href="'+url+'"'),
+    'Pagani direct product source must remain available on the individual model page');
+}
 assert.doesNotMatch(popularHtml,/amazon\.fr\/gp\/product\//,'No unverified direct product destinations');
 assert.match(popularHtml,/recherche Amazon/i,'Visitor must be warned that search results may contain different variants');
 
