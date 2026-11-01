@@ -4,7 +4,7 @@ import {join} from 'node:path';
 // Conversion-friendly product landing pages without unlicensed watch images,
 // invented Amazon ASINs, or unverifiable prices. The existing 15 core models
 // continue to own the photo-backed interactive comparison experience.
-export function buildPopularProductPages({root,products,coreProducts,affiliates,pageHead,page,e,u,link,tierNames,affiliateLink,verifiedLinks,approvedPhotos,aiVisuals}){
+export function buildPopularProductPages({root,products,coreProducts,affiliates,pageHead,page,e,u,link,tierNames,affiliateLink,partnerLink,verifiedLinks,approvedPhotos,aiVisuals}){
   // Recommendations are real, distinct watches from the same 37-model
   // source catalogue, not the old static 15-watch lists. Keep the merchant
   // verification registry separate: similarity does not imply product testing.
@@ -58,6 +58,7 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       '<div class="am-extra-fact"><dt>'+e(label)+'</dt><dd>'+e(value)+'</dd></div>').join('');
     const direct=verifiedLinks.get(p.id);
     const actions=affiliateLink(p)
+      +partnerLink(p)
       +link(p.officialUrl,p.brand==='SKMEI'?'Voir les photos et la fiche vendeur':'Voir les vraies photos et la fiche constructeur',false,p.id,'official');
     const source=link(p.marketEvidence.url,p.marketEvidence.label);
     const relatedItems=suggestions.map(q=>{
