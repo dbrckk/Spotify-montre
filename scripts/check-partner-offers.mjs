@@ -11,6 +11,7 @@ const root=join(tmp,'site');
 const research=join(tmp,'research');
 mkdirSync(root);mkdirSync(research);
 const path=join(research,'partner-affiliate-offers.json');
+const fixtureToday=new Date().toISOString().slice(0,10);
 cpSync(join(sourceRoot,'research/partner-affiliate-offers.json'),path);
 const candidatePath=join(research,'aliexpress-skmei-candidates.json');
 cpSync(join(sourceRoot,'research/aliexpress-skmei-candidates.json'),candidatePath);
@@ -21,6 +22,23 @@ const rejects=(v,reason)=>{set(v);assert.throws(load,undefined,reason)};
 try{
   assert.equal(load().size,0,'No live Awin promotions without accepted membership and valid publisher link');
   const empty=read();
+  const candidatesRaw=readFileSync(candidatePath,'utf8');
+  const tampered=JSON.parse(candidatesRaw);
+  tampered.products['skmei-2056'].candidates[0].sourceUrl=
+    'https://fr.pricearchive.org/aliexpress.com/item/1005000000000';
+  writeFileSync(candidatePath,JSON.stringify(tampered));
+  assert.throws(load,/citation must identify/,
+    'Reject third-party source that does not match AliExpress item ID');
+  writeFileSync(candidatePath,candidatesRaw);
+  const duplicated=JSON.parse(candidatesRaw);
+  duplicated.products['skmei-2514'].candidates[0].itemId=
+    duplicated.products['skmei-2056'].candidates[0].itemId;
+  duplicated.products['skmei-2514'].candidates[0].sourceUrl=
+    duplicated.products['skmei-2056'].candidates[0].sourceUrl;
+  writeFileSync(candidatePath,JSON.stringify(duplicated));
+  assert.throws(load,/Untraceable AliExpress/,
+    'No AliExpress item can be silently assigned to two different watch models');
+  writeFileSync(candidatePath,candidatesRaw);
   rejects({...empty,enabled:true},'Reject missing publisher approval');
   rejects({...empty,offers:{'skmei-2056':{}}},'Reject staged offers in disabled registry');
   rejects({...empty,publisherId:9999},'Reject active publisher identity in disabled registry');
@@ -39,7 +57,7 @@ try{
     offers:{'addiesdive-ad2030':{program:'addiesdive',destinationUrl:ad.officialUrl,
       trackingUrl:track(94513,ad.officialUrl),
       variant:'AD2030 36 mm, fiche originale, modèle précis à comparer',
-      verifiedAt:'2026-11-01',issuedInPublisherAccount:true,modelAndVariantConfirmed:true}}};
+      verifiedAt:fixtureToday,issuedInPublisherAccount:true,modelAndVariantConfirmed:true}}};
   set(approved);
   const eligible=load();
   assert.equal(eligible.size,1);
@@ -78,7 +96,7 @@ try{
     offers:{'skmei-2056':{program:'aliexpress-fr',destinationUrl:url,
       trackingUrl:track(26009,url,{clickref:'skmei2056'}),
       variant:reviewedVariant,
-      verifiedAt:'2026-11-01',issuedInPublisherAccount:true,modelAndVariantConfirmed:true}}};
+      verifiedAt:fixtureToday,issuedInPublisherAccount:true,modelAndVariantConfirmed:true}}};
   // Even a publisher-issued link for a plausible item is NOT enough if the
   // primary merchant, selected variant and delivery to France are unchecked.
   set(skmei);
@@ -88,7 +106,7 @@ try{
   const originalCandidate=sourceEvidence.products['skmei-2056'].candidates[0];
   originalCandidate.status='merchant_reviewed_exact_variant_fr';
   originalCandidate.review={
-    checkedOn:'2026-11-01',modelConfirmed:'2056',variant:reviewedVariant,
+    checkedOn:fixtureToday,modelConfirmed:'2056',variant:reviewedVariant,
     sellerName:'TEST ONLY simulated seller',franceShippingConfirmed:true,
     franceCheckoutConfirmed:true,awinEligibilityConfirmed:true,
     merchantProductUrl:url,
