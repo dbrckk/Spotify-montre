@@ -148,3 +148,51 @@
  .ud-grid.ud-view-large .ud-actions a,.ud-grid.ud-view-large .ud-select{font-size:12px;min-height:46px}
 }
 @media(prefers-reduced-motion:reduce){.ud-media-verified .ud-photo img,.ud-card{transition:none!important;transform:none!important}}
+
+
+/* Source-backed editorial showroom: a real, photograph-led route to six
+   documented models, with explicit distinction between retail and brand exits. */
+.ud-showroom{margin:0 0 40px;padding:27px 25px 24px;border:1px solid #cbbd9b;border-radius:8px;background:linear-gradient(145deg,#faf6e9 0%,#f3f2e9 45%,#e7ebe2 100%);box-shadow:0 16px 44px #203c2b0e}
+.ud-showroom-heading{display:flex;align-items:end;justify-content:space-between;gap:24px;margin:0 0 22px}
+.ud-showroom-heading>div{flex:1 1 auto}
+.ud-showroom-kicker{display:block;color:#825c2e;font:800 11px/1.5 system-ui,sans-serif;text-transform:uppercase;letter-spacing:.16em}
+.ud-showroom-heading h2{margin:7px 0 0;color:#203d2c;font:400 clamp(28px,3.6vw,49px)/1.12 Georgia,serif;letter-spacing:-.035em}
+.ud-showroom-heading>p{flex:0 1 345px;color:#4d5d4d;margin:0;font:400 13px/1.65 system-ui,sans-serif}
+.ud-feature-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.ud-feature-card{display:flex;flex-direction:column;min-width:0;background:#fffefa;border:1px solid #d8dbcf;border-radius:6px;overflow:hidden;box-shadow:0 7px 25px #203d2b0e}
+.ud-feature-photo{display:grid;place-items:center;height:240px;padding:14px;background:radial-gradient(ellipse at 50% 42%,#fff 0%,#eceee7 85%)}
+.ud-feature-photo img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 12px 12px #203d2c2b);transition:transform .25s ease}
+.ud-feature-photo:hover img{transform:scale(1.045)}
+.ud-feature-info{display:flex;flex-direction:column;gap:9px;flex:1;padding:18px}
+.ud-feature-type{font:750 10px/1.4 system-ui,sans-serif;text-transform:uppercase;letter-spacing:.1em;color:#8b622f}
+.ud-feature-card h3{color:#1d3e2c;font:400 25px/1.2 Georgia,serif;margin:0}
+.ud-feature-card h3 a{color:inherit;text-decoration:none}
+.ud-feature-card h3 a:hover{text-decoration:underline}
+.ud-feature-lead{font:400 12px/1.6 system-ui,sans-serif;color:#4a6151;margin:0;flex:1}
+.ud-feature-proof{align-self:flex-start;background:#edf3e9;color:#284e36;border:1px solid #cadac9;border-radius:3px;padding:5px 8px;font:750 10px/1.3 system-ui,sans-serif}
+.ud-feature-actions{display:grid;grid-template-columns:minmax(0,1fr);gap:7px;margin-top:3px}
+.ud-feature-actions a{min-height:44px;display:grid;place-items:center;border-radius:4px;text-align:center;text-decoration:none;padding:10px 7px;font:750 12px/1.4 system-ui,sans-serif}
+.ud-feature-detail{background:#254b36;color:#fff!important}
+.ud-feature-exit{background:#f0f3eb;border:1px solid #b3c2b1;color:#254a33!important}
+.ud-showroom-note{margin:17px 0 0;color:#566657;font:400 11px/1.65 system-ui,sans-serif}
+.ud-showroom a:focus-visible{outline:3px solid #b88c43;outline-offset:3px}
+@media(max-width:1100px){
+  .ud-showroom-heading{align-items:start;flex-direction:column;gap:10px}
+  .ud-showroom-heading>p{flex:auto;max-width:650px}
+  .ud-feature-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:660px){
+  .ud-showroom{padding:17px 12px;margin-bottom:28px}
+  .ud-feature-grid{grid-template-columns:minmax(0,1fr);gap:10px}
+  .ud-feature-card{display:grid;grid-template-columns:minmax(0,37%) minmax(0,1fr)}
+  .ud-feature-photo{height:100%;min-height:210px;padding:7px}
+  .ud-feature-info{padding:11px;gap:7px}
+  .ud-feature-card h3{font-size:20px}
+  .ud-feature-lead{font-size:11px}
+  .ud-feature-actions a{font-size:11px}
+}
+@media(max-width:365px){
+  .ud-feature-card{grid-template-columns:minmax(0,1fr)}
+  .ud-feature-photo{height:220px;min-height:0}
+}
+@media(prefers-reduced-motion:reduce){.ud-feature-photo img{transition:none!important}}
