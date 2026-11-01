@@ -29,7 +29,7 @@ Elle rend visible et actionnable un portefeuille d'essai raisonnable : plusieurs
 
 1. Exactitude du code modèle et de la variante proposée au marchand (100 % cible pour toute fiche dite « directe »).
 2. Photos de modèle exact autorisées et inspectables ; jamais de concept IA présenté comme photo de produit.
-3. Type de sortie explicite : fiche modèle correspondant au code, ou recherche à vérifier, sans bouton « acheter » qui suggérerait un encaissement par Atelier Montres.
+3. Type de sortie explicite : fiche Amazon.fr correspondant au code **ou fiche vendeur portant le modèle exact**, avec mention rémunérée ou non rémunérée. La recherche Amazon générique reste sur la fiche détaillée, sans bouton « acheter ici » qui suggérerait un encaissement par Atelier Montres.
 4. Intérêt mesuré uniquement si l'outil de statistiques est activé légalement : vues de fiche, clics internes, clics Amazon et vendeurs distincts ; **ne pas transformer un clic en vente**.
 5. Rapport Amazon.fr ou Awin uniquement après existence d'un contrat d'affiliation effectivement actif et accès au vrai rapport de commissions.
 
@@ -43,6 +43,16 @@ Elle rend visible et actionnable un portefeuille d'essai raisonnable : plusieurs
 
 ## Critères de publication et sécurité
 
-Le build doit refuser les IDs absents ou dupliqués, exiger dix fiches distinctes et la couverture documentaire prévue, conserver les 37 fiches du catalogue complémentaire et les 52 du comparateur, afficher les incertitudes et assurer l'accès mobile sans JavaScript. Les nouvelles cartes du Top 10 renvoient **uniquement** aux fiches internes du site : elles ne créent pas dix nouveaux liens rémunérés susceptibles de fausser les comptages d'affiliation ou d'attribution.
+Le build doit refuser les IDs absents ou dupliqués, exiger dix fiches distinctes et la couverture documentaire prévue, conserver les 37 fiches du catalogue complémentaire et les 52 du comparateur, afficher les incertitudes et assurer l'accès mobile sans JavaScript. Chaque carte du Top 10 conserve le lien documentaire interne et affiche **une sortie marchande directe supplémentaire** : cinq liens Amazon.fr déjà documentés (même ASIN et identifiant affilié, pas de nouvelles références supposées), cinq fiches vendeur au modèle exact non rémunérées. Le tracking compte les clics d'emplacement `popular` mais ne prouve jamais des ventes ; ce deuxième emplacement augmente volontairement le nombre de CTAs visibles, sans compter de nouveaux modèles.
 
 Validation : `npm test`, `node scripts/build-seo.mjs`, `node scripts/validate-seo.mjs`, puis parcours Chromium mobile `scripts/test-mobile-storefront-v8.mjs` et tests de déploiement GitHub Actions. Les droits des photos reposent sur la déclaration de l'éditeur ; ils ne sont pas indépendamment attestés dans le dépôt.
+
+## Itération « parcours marchand direct » — 1er novembre 2026
+
+- **Pagani PD-1701** : lien documentaire désormais vers la [fiche produit spécifique du distributeur qui se présente comme officiel](https://paganidesign.com/fr/products/pagani-design-1701), avec sélecteur couleur et bracelet. La page évoque parfois le mouvement VK63 **ou Miyota 0S20** selon variante. Ne pas promettre VK63 sur toutes les couleurs, ni le stock ou la livraison.
+- **Pagani PD-1776** : accès vers la [fiche produit spécifique PD-1776](https://paganidesign.com/products/pd-1776), comprenant choix de couleurs. Cette page présentait « Sold out » sur une variante consultée ; ne pas afficher « en stock » sur notre site. Le fournisseur y déclare un transport droits/taxes inclus ; cette déclaration n'a pas été vérifiée par un achat France.
+- **SKMEI 2056** : deux anciennes références de catalogue AliExpress repérées chez [PriceArchive](https://fr.pricearchive.org/aliexpress.com/item/1005007793914474) et [PriceArchive autre vendeur](https://fr.pricearchive.org/aliexpress.com/item/1005008144767722), mais les instantanés datent de septembre 2026, incluent des variantes 1123/1412 et **ne prouvent ni la disponibilité, ni le produit exact, ni l'expédition France, ni un droit de commission**. Aucun de ces liens n'est présenté comme un achat vérifié ni monétisé.
+- **SKMEI 2256, 2514, 1874** : les fiches du vendeur SKMEI déjà documentées sont conservées, avec message **non rémunéré**, sans affirmation de stock, de prix ou de droits de douane. Les recherches Amazon restent possibles sur les fiches détaillées.
+- **ADDIESDIVE AD2030, Pagani PD-1701 et les trois Casio** : raccourcis Amazon.fr vers les cinq ASIN déjà contrôlés, avec la mention `rel=sponsored` et des précisions de variantes dans le cas AD2030 et PD-1701. Le lien fournisseur distinct reste accessible sur la fiche détaillée.
+
+**Aucune affiliation Pagani/AliExpress, aucun revenu marchand, aucune disponibilité France ni prix de vente final n'a été validé par cette itération.** La vente directe et le dropshipping restent désactivés jusqu'aux gates du plan directeur.
