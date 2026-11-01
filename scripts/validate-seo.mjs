@@ -466,6 +466,16 @@ for(const p of popularFeed.products){
   assert.ok(detailHtml.includes('Comparer les 52 montres'),'Related models must link to full comparison: '+p.id);
   const recommendations=[...detailHtml.matchAll(/<li data-related-id="([a-z0-9-]+)" data-related-reason="([^"]+)"/g)];
   assert.equal(recommendations.length,3,'Three contextual model alternatives required: '+p.id);
+  const compareHref='./toutes-les-montres.html?compare='+
+    [p.id,...recommendations.slice(0,2).map(x=>x[1])].join(',')+'#comparer';
+  assert.equal((detailHtml.match(new RegExp('data-compare-source="'+p.id+'"','g'))||[]).length,2,
+    'Each detail must provide a buyer-visible source-backed comparison near CTAs and alternatives: '+p.id);
+  assert.equal(detailHtml.split('href="'+compareHref+'"').length-1,2,
+    'Comparison deep link must preserve the exact selected model plus two documented alternatives: '+p.id);
+  assert.ok(detailHtml.includes('href="../photo-zoom.css"')&&
+    detailHtml.includes('src="../photo-zoom.js"')&&
+    detailHtml.includes('src="../extra-product-viewer.js"'),
+    'Every supplemental product page must progressively enhance source-backed photos: '+p.id);
   assert.equal(new Set(recommendations.map(m=>m[1])).size,3,'Never recommend the same watch twice: '+p.id);
   assert.ok(!recommendations.some(m=>m[1]===p.id),'Do not self-recommend: '+p.id);
   for(const [,id,reason] of recommendations){
@@ -494,10 +504,15 @@ for(const p of popularFeed.products){
   assert.equal((detailHtml.match(/class="am-extra-editorial-grid"/g)||[]).length,1,
     'One source-backed decision section per watch: '+p.id);
   if(approvedPopularPhotos.has(p.id)){
+    assert.match(detailHtml,/class="am-extra-art[^"]*am-extra-art-with-photo"/,
+      'Registered model photograph must receive the photo-led premium stage: '+p.id);
+    assert.ok(detailHtml.includes('data-extra-zoom-id="'+p.id+'"'),
+      'Only licensed by owner-declaration exact product photos receive a photo zoom button: '+p.id);
     assert.ok(detailHtml.includes('src="../'+approvedPopularPhotos.get(p.id).url+'"'),
       'Registered exact-model photograph must appear in the product page: '+p.id);
   }else{
     assert.ok(!detailHtml.includes('class="am-extra-licensed-photo"'),'An unapproved hero photo must never be embedded: '+p.id);
+    assert.ok(!detailHtml.includes('data-extra-zoom-id='),'Unphotographed watch must never show a fake product zoom: '+p.id);
   }
   const ai=aiVisuals.get(p.id);
   if(ai){
