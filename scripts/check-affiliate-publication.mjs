@@ -49,6 +49,12 @@ try {
 
   const verifiedPopularOriginal=readFileSync(verifiedPopularPath,'utf8');
   build({GOOGLE_SITE_VERIFICATION:'Valid_Example_Token_123456'});
+  const disabledShortlist=readFileSync(join(target,'montres/modeles-populaires.html'),'utf8');
+  const disabledFocus=disabledShortlist.match(/<section id="selection-10-montres"[\\s\\S]*?<\\/section>/)?.[0]||'';
+  assert.equal((disabledFocus.match(/data-amazon-product=/g)||[]).length,0,
+    'No Amazon paid CTA may survive on the priority collection when affiliation is disabled');
+  assert.equal((disabledFocus.match(/data-merchant-official-id=/g)||[]).length,10,
+    'Affiliate-disabled priority list must keep only real seller-documentation links');
   const disabledWatch=readFileSync(join(target,'montres','casio-gw-m5610u-1.html'),'utf8');
   assert.ok(!disabledWatch.includes('data-amazon-product="casio-gw-m5610u-1"'),
     'Affiliate-disabled mode must not display the G-SHOCK direct product CTA');
