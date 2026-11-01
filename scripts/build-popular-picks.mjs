@@ -101,7 +101,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
   const teaser='<section class="am-picks" id="modeles-populaires" aria-labelledby="am-picks-title"><div class="wrap">'
     +'<div class="am-picks-heading"><p class="overline kicker">01 · MODÈLES COMPLÉMENTAIRES</p>'
     +'<h2 id="am-picks-title">Des références remarquées, au-delà des 15 montres comparées.</h2>'
-    +'<p>SKMEI, Curren et ADDIESDIVE à petit budget, Casio et Pagani Design : huit pistes pour explorer nos '+picks.length+' montres documentées, dont une G-SHOCK avec fiche Amazon.fr correspondant à la référence identifiée. Aucun prix ni stock annoncé.</p>'
+    +'<p>SKMEI, Curren et ADDIESDIVE à petit budget, Casio et Pagani Design : huit pistes pour explorer nos '+picks.length+' montres documentées, dont des Casio, ADDIESDIVE et Pagani Design avec fiche Amazon.fr correspondant à la référence documentée (variante à vérifier). Aucun prix ni stock annoncé.</p>'
     +'</div>'+shopper.navHome+'<div class="am-picks-grid">'+featured.map(p=>card(p,true)).join('')+'</div>'
     +'<p class="am-picks-disclaimer">'+e(globalDisclaimer)+' '+e(affiliateNote)+'</p>'
     +'<a class="am-picks-more" href="./montres/modeles-populaires.html">Voir les '+picks.length+' modèles supplémentaires, par gamme →</a>'
