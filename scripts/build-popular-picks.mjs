@@ -105,7 +105,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     +'<div class="am-picks-heading"><p class="overline kicker">01 · MODÈLES COMPLÉMENTAIRES</p>'
     +'<h2 id="am-picks-title">Des références remarquées, au-delà des 15 montres comparées.</h2>'
     +'<p>SKMEI, Curren et ADDIESDIVE à petit budget, Casio et Pagani Design : huit pistes pour explorer nos '+picks.length+' montres documentées, dont des Casio, ADDIESDIVE et Pagani Design avec fiche Amazon.fr correspondant à la référence documentée (variante à vérifier). Aucun prix ni stock annoncé.</p>'
-    +'</div>'+shopper.navHome+'<p class="am-focus-promo">Dix références aux styles distincts, avec une explication de l'intérêt et des limites de chaque fiche : <a href="./montres/modeles-populaires.html#selection-10-montres">Consulter notre sélection éditoriale de 10 montres</a>. Aucun classement de ventes revendiqué.</p><div class="am-picks-grid">'+featured.map(p=>card(p,true)).join('')+'</div>'
+    +'</div>'+shopper.navHome+'<p class="am-focus-promo">Dix références aux styles distincts, avec une explication de l’intérêt et des limites de chaque fiche : <a href="./montres/modeles-populaires.html#selection-10-montres">Consulter notre sélection éditoriale de 10 montres</a>. Aucun classement de ventes revendiqué.</p><div class="am-picks-grid">'+featured.map(p=>card(p,true)).join('')+'</div>'
     +'<p class="am-picks-disclaimer">'+e(globalDisclaimer)+' '+e(affiliateNote)+'</p>'
     +'<a class="am-picks-more" href="./montres/modeles-populaires.html">Voir les '+picks.length+' modèles supplémentaires, par gamme →</a>'
     +'</div></section>';
