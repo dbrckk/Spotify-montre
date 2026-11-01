@@ -69,7 +69,7 @@ for(const value of ['essential','signature','prestige','sport','classic','minima
 assert.match(html,/id="advisorHeroArt"/);
 assert.match(html,/name="size"/);
 assert.match(html,/id="advisorCompare"/,'Shortlist requires a one-tap compare action');
-assert.match(ui,/ids\.map\(encodeURIComponent\)\.join\(','\)/,'All recommended IDs must reach the compare deep link');
+assert.match(ui,/modeles-populaires\.html/,'All recommendations must link to a live catalogue route');
 assert.ok(html.includes('04</span> Quelle taille de boîtier'));
 assert.ok(!html.includes('Habituellement sous 120 €'),'Unverified shop prices may not be used as purchase guidance');
 assert.match(ui,/entry\.sizeNote/);
@@ -80,6 +80,9 @@ assert.match(html,/src="\.\/conseiller-engine\.js" defer/);
 assert.match(html,/src="\.\/conseiller\.js" defer/);
 assert.match(html,/Sans inscription/);
 assert.match(ui,/encodeURIComponent\(p\.id\)/);
+assert.match(ui,/supplemental\.products\.length!==37/);
+assert.match(ui,/catalogue\.length!==52/);
+assert.match(ui,/new Set\(catalogue\.map\(p=>p\.id\)\)\.size!==52/);
 assert.match(ui,/photoReview/);
 assert.match(ui,/localUrl/);
 assert.match(ui,/publicUsageApproved===true/);
