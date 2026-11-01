@@ -16,7 +16,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
   const known=new Set(existingProducts.map(p=>p.id));
   const tiers=['essential','signature','prestige'];
   const tierNames={essential:'Essentielle',signature:'Signature',prestige:'Prestige'};
-  const permittedHosts=['casio.com','citizenwatch.eu','orientwatch.fr','tissotwatches.com','seikowatches.com','hamiltonwatch.com','shopskmei.com','skmei-egy.com','addiesdivewatches.com','paganidesignwatch.com','currenwatches.com'];
+  const permittedHosts=['casio.com','citizenwatch.eu','orientwatch.fr','tissotwatches.com','seikowatches.com','hamiltonwatch.com','shopskmei.com','skmei-egy.com','addiesdivewatches.com','paganidesignwatch.com','paganidesign.com','currenwatches.com'];
   const evidenceHosts=['montre.com',...permittedHosts];
   const validHost=(url,hosts)=>{
     try{
@@ -57,7 +57,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
   const approvedPhotos=loadApprovedPopularPhotos({root,picks});
   const aiVisuals=loadPopularAiVisuals({root,picks});
   const shopper=buildShopperSelections({root,coreProducts:existingProducts,picks,partners:affiliates,verifiedPopularLinks:verifiedLinks,approvedPopularPhotos:approvedPhotos,amazonSearch,pageHead,page,e,u});
-  const commercialFocus=buildCommercialShortlist({picks,verifiedLinks,approvedPhotos,affiliatesEnabled:affiliates.enabled,e});
+  const commercialFocus=buildCommercialShortlist({picks,verifiedLinks,approvedPhotos,affiliatesEnabled:affiliates.enabled,link,e});
   const affiliateLink=p=>{
     if(!affiliates.enabled)return '';
     const direct=verifiedLinks.get(p.id);

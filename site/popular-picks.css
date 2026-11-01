@@ -282,3 +282,14 @@
 .am-focus-endnote a{color:#21593a;text-underline-offset:4px}
 @media(max-width:860px){.am-focus-list{grid-template-columns:1fr}}
 @media(max-width:450px){.am-focus-item{gap:10px;padding:11px}.am-focus-visual{flex-basis:28%;min-height:100px}.am-focus-body h3{font-size:23px}.am-focus-detail{align-self:stretch;justify-content:center;text-align:center}.am-focus-text-placeholder{font-size:11px;padding:7px}}
+
+
+/* Two distinct actions: product research stays on-site, the merchant exit
+   opens the real verified model listing or the explicitly unpaid vendor page. */
+.am-focus-actions{display:flex;flex-direction:column;gap:8px;margin-top:auto}
+.am-focus-actions .am-focus-detail{margin-top:0;align-self:stretch;justify-content:center;text-align:center;background:#fffefa;color:#245038;border:1px solid #7d9c87}
+.am-focus-actions .am-focus-detail:hover{background:#e8f1e8;color:#173d28}
+.am-focus-merchant a{display:flex;align-items:center;justify-content:center;min-height:46px;padding:11px 12px;background:#245038;border:1px solid #245038;border-radius:4px;color:#fff;text-align:center;text-decoration:none;font:750 13px/1.4 system-ui,sans-serif;overflow-wrap:anywhere}
+.am-focus-merchant a:hover{background:#34694b;color:#fff}
+.am-focus-merchant a:focus-visible{outline:3px solid #b9852b;outline-offset:3px}
+.am-focus-variant{border-left:3px solid #ba9d67;padding:6px 10px;background:#f5f0e5}

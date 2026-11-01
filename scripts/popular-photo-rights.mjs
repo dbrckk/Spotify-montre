@@ -39,12 +39,30 @@ export function loadApprovedPopularPhotos({root,picks}){
         ||item.permissionIndependentlyVerified!==false))
       throw Error('Site owner brand attestation is incomplete or misrepresented: '+id);
     const model=picks.find(p=>p.id===id);
-    if(typeof item.sourcePage!=='string'||item.sourcePage!==model.officialUrl||
-       typeof item.sourceImageUrl!=='string')
-       throw Error('Cannot match image to the exact-model product page: '+id);
+    // A merchant destination can improve without changing where a legally
+    // published image was originally sourced. Never falsify photo provenance
+    // to match the latest seller URL. Only the two inspected exact-model
+    // Pagani migrations may retain their historical documented photo source.
+    const migratedProductSources={
+      'pagani-pd1701':{
+        former:'https://www.paganidesignwatch.com/fr/pagani-design-pd-1701/',
+        current:'https://paganidesign.com/fr/products/pagani-design-1701'
+      },
+      'pagani-pd1776':{
+        former:'https://www.paganidesignwatch.com/fr/pagani-design-pd-1776',
+        current:'https://paganidesign.com/products/pd-1776'
+      }
+    };
+    const migrated=migratedProductSources[id];
+    const unchanged=item.sourcePage===model.officialUrl;
+    const supportedMigration=migrated&&item.sourcePage===migrated.former&&
+      model.officialUrl===migrated.current;
+    if(typeof item.sourcePage!=='string'||typeof item.sourceImageUrl!=='string'||
+       (!unchanged&&!supportedMigration))
+      throw Error('Cannot match image to the exact-model product page: '+id);
     let photoHost, pageHost;
     try{
-      const img=new URL(item.sourceImageUrl), page=new URL(model.officialUrl);
+      const img=new URL(item.sourceImageUrl), page=new URL(item.sourcePage);
       if(img.protocol!=='https:'||img.username||img.password||img.port||img.hash||
          page.protocol!=='https:'||page.username||page.password||page.port)throw Error('unsafe URL');
       photoHost=img.hostname.toLowerCase().replace(/^www\./,'');
