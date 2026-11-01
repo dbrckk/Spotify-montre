@@ -3,17 +3,17 @@
   "models": 15,
   "totalModels": 52,
   "supplementalPhotos": 21,
-  "files": 128,
+  "files": 202,
   "parts": [
     {
       "file": "deploy-package-01.json",
       "count": 26,
-      "bytes": 699697
+      "bytes": 713777
     },
     {
       "file": "deploy-package-02.json",
-      "count": 15,
-      "bytes": 552208
+      "count": 16,
+      "bytes": 577464
     },
     {
       "file": "deploy-package-03.json",
@@ -42,13 +42,18 @@
     },
     {
       "file": "deploy-package-08.json",
-      "count": 40,
-      "bytes": 698066
+      "count": 36,
+      "bytes": 716523
     },
     {
       "file": "deploy-package-09.json",
-      "count": 19,
-      "bytes": 242809
+      "count": 47,
+      "bytes": 717546
+    },
+    {
+      "file": "deploy-package-10.json",
+      "count": 49,
+      "bytes": 700283
     }
   ]
 }
