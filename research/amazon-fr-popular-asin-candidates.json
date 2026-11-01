@@ -1,10 +1,10 @@
 {
   "version": 1,
-  "researchedOn": "2026-10-31",
+  "researchedOn": "2026-11-01",
   "marketplace": "amazon.fr",
   "publishable": false,
   "status": "candidates_only_no_amazon_fr_detail_confirmation",
-  "explanation": "ASIN de la Tissot Gentleman encore candidat : le code exact est repris dans des sources secondaires, mais la fiche Amazon.fr exploitable n'a pas confirmé directement la variante. Le candidat G-SHOCK GW-M5610U-1ER a été promu uniquement après examen de la fiche Amazon.fr citant explicitement son ASIN et code modèle ; voir amazon-fr-popular-verified.json. Les prix et la disponibilité ne sont pas déduits de cette preuve.",
+  "explanation": "Candidats documentaires non publiables : la Tissot Gentleman n'a pas de fiche Amazon.fr vérifiée dans les sources accessibles. La SKMEI 2056 a une fiche Amazon.fr réelle, mais la variante blanche SKM-2056F01 y est affichée comme indisponible au contrôle du 1er novembre 2026. Un ASIN confirmé pour une variante épuisée ne doit pas remplacer une recherche Amazon potentiellement achetable. La disponibilité future n'est pas garantie.",
   "candidates": [
     {
       "productId": "tissot-gentleman-auto",
@@ -16,6 +16,20 @@
         "https://www.preisgenau.de/1648823068-product"
       ],
       "note": "Des sources secondaires relient cet ASIN à la référence complète ; la fiche Amazon.fr elle-même était inaccessible lors du contrôle."
+    },
+    {
+      "productId": "skmei-2056",
+      "model": "2056",
+      "asinCandidate": "B0C7W5NNX2",
+      "status": "verified_model_but_unavailable_on_amazon_fr_do_not_publish",
+      "marketplaceModel": "SKM-2056F01",
+      "variant": "Blanc transparent",
+      "verifiedOn": "2026-11-01",
+      "evidence": [
+        "https://www.amazon.fr/dp/B0C7W5NNX2",
+        "https://device.report/skmei/skm-2056f01"
+      ],
+      "note": "Le titre Amazon.fr décrit une SKMEI transparente blanche, et la section Product details confirme le modèle SKM-2056F01, la référence 2056M et l'ASIN B0C7W5NNX2. L'offre affichait « Currently unavailable ». Le site doit conserver un lien de recherche clairement étiqueté pour SKMEI 2056 jusqu'à la vérification d'une offre Amazon.fr réellement achetable pour une variante exacte."
     }
   ]
 }
