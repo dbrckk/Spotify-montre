@@ -90,6 +90,9 @@
 .am-extra-actions a:hover{filter:brightness(1.12)}
 .am-extra-actions a:focus-visible{outline:3px solid #bd8e42;outline-offset:3px}
 .am-extra-disclosure{color:#435b4b;font:400 12px/1.7 system-ui,sans-serif;margin:12px 0 0}
+.am-extra-merchant-variant{display:block;margin-top:6px;padding-top:8px;border-top:1px solid #b8cfb6;font:500 12px/1.6 system-ui,sans-serif;color:#284b3a;overflow-wrap:anywhere}
+.am-extra-merchant-variant strong{font-weight:750}
+
 .am-extra-local-nav{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x proximity;padding:20px 2px 26px}
 .am-extra-local-nav a{flex:0 0 auto;display:inline-flex;align-items:center;min-height:44px;padding:10px 15px;background:#eee9dd;border:1px solid #cfc4ad;color:#284c36;text-decoration:none;font:700 13px/1.4 system-ui,sans-serif;scroll-snap-align:start}
 .am-extra-local-nav a:focus-visible{outline:3px solid #b9852b;outline-offset:2px}
