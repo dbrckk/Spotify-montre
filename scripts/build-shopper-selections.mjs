@@ -154,10 +154,48 @@ export function buildShopperSelections({root,coreProducts,picks,partners,verifie
     +selections.map(s=>'<a href="./'+e(s.slug)+'.html">'+e(s.label)+'</a>').join('')+'</nav>';
   const paths=[];
   for(const selected of selections){
-    if(selected.ids.length<4||new Set(selected.ids).size!==selected.ids.length)throw Error('Invalid curated selection '+selected.slug);
+    const min=selected.kind==='pagani'?3:4;
+    if(selected.ids.length<min||new Set(selected.ids).size!==selected.ids.length)
+      throw Error('Invalid curated selection '+selected.slug);
+    if(selected.kind){
+      const expected=[...all.values()].map(x=>x.product)
+        .filter(p=>selected.kind==='skmei'?p.brand==='SKMEI'
+          :selected.kind==='pagani'?p.brand==='Pagani Design'
+          :selected.kind==='digital'?/numérique|digital/i.test(p.movement):false)
+        .map(p=>p.id).sort();
+      if(expected.length!==selected.ids.length||
+        expected.some((id,i)=>id!==[...selected.ids].sort()[i]))
+        throw Error('Brand/display collection out of sync with verified source catalogue: '+selected.slug);
+    }
     const path='montres/'+selected.slug+'.html';
     const items=selected.ids.map(card).join('');
     const advice=selected.advice.map(t=>'<li>'+e(t)+'</li>').join('');
+    const special=Boolean(selected.kind);
+    const compareIds=selected.compareIds||[];
+    if(special&&(compareIds.length!==3||new Set(compareIds).size!==3||
+        compareIds.some(id=>!selected.ids.includes(id))))
+      throw Error('Invalid source-backed three-way comparison in '+selected.slug);
+    const compareHref='./toutes-les-montres.html?compare='+compareIds.join(',')+'#comparer';
+    const compareCta=special?'<a class="am-shopper-compare" href="'+e(compareHref)+
+      '" data-shopper-compare="'+e(selected.slug)+'">Comparer ces trois références dans le tableau complet</a>':'';
+    const insightHtml=special
+      ?'<section class="am-shopper-insights" aria-label="Conseils spécifiques à cette sélection"><h2>Comprendre les différences entre ces références</h2><div class="am-shopper-insight-grid">'+
+         selected.insights.map(([title,text])=>'<article><h3>'+e(title)+'</h3><p>'+e(text)+'</p></article>').join('')+
+         '</div></section>':'';
+    const factualHtml=special?'<section class="am-shopper-matrix" id="am-shopper-matrix" aria-labelledby="am-shopper-matrix-title"><h2 id="am-shopper-matrix-title">Caractéristiques documentées des '+selected.ids.length+' modèles</h2>'+
+      '<p>Cette comparaison reprend les descriptions fabricant ou vendeur citées dans les fiches. Les données non renseignées ne sont pas estimées.</p>'+
+      '<div class="comparison-scroll" role="region" tabindex="0" aria-label="Tableau comparatif des références"><table class="spec-matrix">'+
+      '<caption>'+e(selected.label)+' : caractéristiques selon les sources du catalogue</caption><thead><tr>'+
+      '<th scope="col">Modèle</th><th scope="col">Mouvement annoncé</th><th scope="col">Boîtier</th><th scope="col">Verre</th><th scope="col">Étanchéité</th></tr></thead><tbody>'+
+      selected.ids.map(id=>{
+        const item=all.get(id),p=item.product;
+        const movement=item.core?(p.specs?.movement||p.movement):p.movement;
+        const size=item.core?(p.specs?.diameter||p.specs?.caseSize):p.case;
+        const glass=item.core?p.specs?.glass:p.glass;
+        const water=item.core?p.specs?.waterResistance:p.water;
+        return '<tr data-matrix-watch="'+e(id)+'"><th scope="row"><a href="./'+e(id)+'.html">'+e(p.brand+' '+p.model)+'</a></th>'+
+          [movement,size,glass,water].map(v=>'<td>'+e(v||'Non documenté')+'</td>').join('')+'</tr>';
+      }).join('')+'</tbody></table></div>'+compareCta+'</section>':'';
     const affiliateNote=partners.enabled?
       'Certains liens Amazon.fr sont rémunérés. Un lien direct indique une correspondance de référence documentée; un lien de recherche peut afficher des variantes. En tant que Partenaire Amazon, je réalise un bénéfice sur les achats remplissant les conditions requises.':
       'Aucun lien rémunéré n’est actif dans cette sélection.';
@@ -166,7 +204,9 @@ export function buildShopperSelections({root,coreProducts,picks,partners,verifie
       +'<h1>'+e(selected.headline)+'</h1><p class="lead">'+e(selected.intro)+'</p>'
       +'<p class="am-shopper-method-note">Les modèles sont choisis pour leurs usages et leur esthétique, et non pour des ventes Amazon prétendument mesurées. Aucun prix, disponibilité ou avis n’est inventé.</p>'
       +nav+'</header>'
+      +(special?'<div class="am-shopper-intent-nav"><a href="#am-shopper-matrix">Voir le tableau des '+selected.ids.length+' références</a>'+compareCta+'</div>':'')
       +'<div class="am-shopper-grid">'+items+'</div>'
+      +factualHtml+insightHtml
       +'<section class="am-shopper-guide"><h2>'+e(selected.adviceTitle)+'</h2><ol>'+advice+'</ol></section>'
       +'<aside class="am-shopper-endnote"><p>'+e(affiliateNote)+'</p>'
       +'<p>Les photographies locales sont publiées sur la base d’autorisations déclarées par l’éditeur, non vérifiées indépendamment. Pour les références sans photo enregistrée, un repère graphique est conservé; leurs véritables photos figurent sur les fiches de référence.</p>'
