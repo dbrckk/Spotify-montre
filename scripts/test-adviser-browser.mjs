@@ -43,7 +43,7 @@ try{
  }finally{await compareTab.close()}
  assert.ok(await phone.locator('.am-mobile-nav>summary').isVisible(),'Mobile navigation must be visible');
  await phone.locator('.am-mobile-nav>summary').click();
- assert.ok(await phone.locator('.am-mobile-links a[href="./affiliation.html#montres"]').isVisible(),'Navigation can reach full collection');
+ assert.ok(await phone.locator('.am-mobile-links a[href="./montres/toutes-les-montres.html"]').isVisible(),'Navigation can reach full collection');
  await phone.locator('.am-mobile-nav>summary').click();
 
  await phone.locator('input[name="tier"][value="essential"]').check();
