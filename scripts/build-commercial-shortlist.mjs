@@ -71,7 +71,7 @@ export function buildCommercialShortlist({picks,verifiedLinks,partnerOffers,part
       +'<p class="am-focus-status">'+e(status)+'</p>'
       +variantNotice
       +'<div class="am-focus-actions"><a class="am-focus-detail" href="./'+e(item.id)+'.html">Voir les caractéristiques et les sources</a>'
-      +'<div class="am-focus-merchant">'+merchantAction+'</div>'+alternativePartner+'</div>
+      +'<div class="am-focus-merchant">'+merchantAction+'</div>'+alternativePartner+'</div>'
       +'</div></li>';
   });
   const directCount=commercialShortlist.filter(p=>verifiedLinks.has(p.id)).length;
