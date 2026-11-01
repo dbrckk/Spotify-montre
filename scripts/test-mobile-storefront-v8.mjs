@@ -355,6 +355,15 @@ try{
      await popularPage.screenshot({path:'artifacts/mobile-extra-'+watch.id+'.png',fullPage:true});
    }
  }
+ // One-tap comparison from an actual SKMEI detail must navigate to the same
+ // fact-backed 52-watch matrix and preselect exactly three real references.
+ await popularPage.goto(new URL('/montres/skmei-2056.html',base).href,{waitUntil:'domcontentloaded'});
+ await popularPage.locator('article.am-extra-product a.am-extra-compare-cta').first().click();
+ await popularPage.locator('#udCompareTable table').waitFor({state:'visible',timeout:20000});
+ assert.equal(await popularPage.locator('#udCompareTable th[scope=col]').count(),4,
+   'Watch detail CTA must truly open a source-backed three-model comparison');
+ assert.ok(new URL(popularPage.url()).searchParams.get('compare')?.startsWith('skmei-2056,'),
+   'Original SKMEI model must be the first reference in comparison');
  await popularPage.setViewportSize({width:320,height:760});
  await popularPage.goto(new URL('/montres/casio-ga-2100-1a1.html',base).href,{waitUntil:'domcontentloaded'});
  const narrow=await popularPage.evaluate(()=>({
