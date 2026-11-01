@@ -1,5 +1,5 @@
 'use strict';
-/* Fully local UI: the recommendation logic reads only the public 15-watch catalogue. */
+/* Fully local UI: combine the two documented public watch catalogues. */
 (() => {
  const engine=globalThis.AtelierAdvisorEngine;
  const form=document.getElementById('advisorForm'),results=document.getElementById('advisorResults'),status=document.getElementById('advisorStatus');
@@ -14,6 +14,7 @@
    const t=p.photoReview||{};
    const urls=[];
    if(t.publicUsageApproved===true&&t.localUrl==='./assets/watches/'+p.id+'.webp')urls.push(t.localUrl);
+   if(p.advisorPhotoUrl&&/^\.\/assets\/watches-popular\/[a-z0-9-]+\.webp$/.test(p.advisorPhotoUrl))urls.push(p.advisorPhotoUrl);
    if(t.publicUsageApproved===true&&typeof t.url==='string'&&t.url.startsWith('https://'))urls.push(t.url);
    img.alt='Photographie réelle de '+p.brand+' '+p.model;
    img.width=540;img.height=540;img.loading='lazy';img.decoding='async';img.referrerPolicy='no-referrer';
@@ -28,7 +29,7 @@
    const item=node('article','advisor-card'),body=node('div','advisor-card-body');
    const title=node('h3','',p.model);
    const brand=node('p','advisor-card-brand',p.brand.toUpperCase());
-   const story=node('p','advisor-card-description',p.story||p.description);
+   const story=node('p','advisor-card-description',p.story||p.description||p.lead||p.category||'Caractéristiques à consulter sur la fiche du modèle.');
    const match=node('div','advisor-match');
    const allMatched=entry.criteria>0&&entry.matched===entry.criteria;
    const matchLabel=entry.criteria===0?'POINT DE DÉPART':allMatched?'CORRESPOND À VOS CRITÈRES':entry.matched>0?'UNE AUTRE PISTE':'À DÉCOUVRIR';
@@ -36,7 +37,7 @@
    match.append(node('span','advisor-match-label',matchLabel),node('p','',matchText));
    if(entry.sizeNote)match.append(node('p','advisor-size-warning',entry.sizeNote));
    const actions=node('div','advisor-card-actions');
-   const detail=node('a','primary','Découvrir cette montre ↗');detail.href='./montre.html?id='+encodeURIComponent(p.id);
+   const detail=node('a','primary','Découvrir cette montre ↗');detail.href='./montres/'+encodeURIComponent(p.id)+'.html';
    const official=node('a','secondary','Voir chez '+p.brand+' ↗');official.href=p.officialUrl;official.target='_blank';official.rel='noopener noreferrer nofollow';
    actions.append(detail,official);
    body.append(brand,title,story,match,actions);
@@ -60,7 +61,7 @@
    if(compareLink){
      const ids=recommendations.map(item=>item.product?.id).filter(id=>typeof id==='string'&&/^[a-z0-9-]{4,64}$/.test(id));
      compareLink.hidden=ids.length<2;
-     if(ids.length>=2)compareLink.href='./affiliation.html?compare='+ids.map(encodeURIComponent).join(',')+'#montres';
+     if(ids.length>=2)compareLink.href='./montres/modeles-populaires.html';
    }
    status.textContent=recommendations.length+' montre'+(recommendations.length>1?'s':'')+' à explorer';
    criteria.textContent=active?active+' préférence'+(active>1?'s':'')+' retenue'+(active>1?'s':''):'Sélection de départ';
@@ -69,10 +70,19 @@
  }
  form.addEventListener('change',()=>{if(catalogue.length)render()});
  reset.addEventListener('click',()=>{form.reset();if(catalogue.length)render();form.querySelector('input[name="tier"]')?.focus()});
- fetch('./selection-affiliation.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('Catalogue indisponible');return r.json()}).then(data=>{
+ Promise.all(['./selection-affiliation.json','./selection-populaires.json','./popular-photo-rights.json'].map(url=>fetch(url,{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('Catalogue indisponible');return r.json()}))).then(([data,supplemental,photos])=>{
    if(data?.version!==1||data.affiliateEnabled!==false||!Array.isArray(data.products)||data.products.length!==15)throw Error('Catalogue invalide');
-   catalogue=data.products.filter(p=>typeof p.id==='string'&&typeof p.officialUrl==='string'&&p.officialUrl.startsWith('https://'));
-   if(catalogue.length!==15)throw Error('Références catalogue incomplètes');
+   if(supplemental?.version!==1||!Array.isArray(supplemental.products)||supplemental.products.length!==37||photos?.version!==1)throw Error('Catalogue complémentaire invalide');
+   const movement=value=>/automatique/i.test(value)?'automatic':/solaire|eco.drive/i.test(value)?'eco-drive':'quartz';
+   const mapped=supplemental.products.map(p=>({
+     ...p,movement:movement(p.movement),
+     description:p.lead||p.category,
+     specs:{diameter:/^\\d{1,2}(?:[,.]\\d{1,2})?\\s*mm$/.test(p.case||'')?p.case:null},
+     advisorPhotoUrl:photos.photos?.[p.id]?.file?'./'+photos.photos[p.id].file:null,
+     advisorSupplemental:true
+   }));
+   catalogue=data.products.concat(mapped).filter(p=>typeof p.id==='string'&&typeof p.officialUrl==='string'&&p.officialUrl.startsWith('https://'));
+   if(catalogue.length!==52||new Set(catalogue.map(p=>p.id)).size!==52)throw Error('Références catalogue incomplètes');
    const params=new URLSearchParams(location.search),initial=engine.choices(Object.fromEntries(params));
    for(const key of ['tier','style','movement','size']){
      const field=form.elements.namedItem(key);
