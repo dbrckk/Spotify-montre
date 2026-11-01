@@ -13,7 +13,7 @@
   dialog.id='amPhotoDialog';
   dialog.setAttribute('aria-label','Visionneuse de photographies des montres');
   const top=el('div','am-photo-top'),meta=el('div','am-photo-meta');
-  const kicker=el('p','am-photo-kicker','LA COLLECTION · PHOTO AUTHENTIQUE');
+  const kicker=el('p','am-photo-kicker','PHOTOGRAPHIE DU MODÈLE');
   const title=el('h2','am-photo-title');
   const close=el('button','am-photo-close','×');
   close.type='button';close.setAttribute('aria-label','Fermer la photo');
@@ -33,13 +33,16 @@
   link.target='_blank';link.rel='noopener noreferrer nofollow';
   for(const b of [prev,next,zoom]) b.type='button';
   bottom.append(prev,position,next,zoom,link);
-  const note=el('p','am-photo-note','Photographies des références exactes · images et tarifs non contractuels.');
+  const note=el('p','am-photo-note','Photographies des références déclarées autorisées par l’éditeur, sans vérification indépendante des licences. Images et prix non contractuels.');
   dialog.append(top,canvas,bottom,note);
   const source=p=>{
     const t=p.photoReview||{};
     if(t.publicUsageApproved!==true)return null;
     // Do not load a research URL outside this site when the local photo fails.
-    return t.localUrl==='./assets/watches/'+p.id+'.webp'?assetPrefix+t.localUrl.slice(2):null;
+    if(!/^[a-z0-9-]{4,64}$/.test(p.id))return null;
+    const allowed=['./assets/watches/'+p.id+'.webp',
+      './assets/watches-popular/'+p.id+'.webp'];
+    return allowed.includes(t.localUrl)?assetPrefix+t.localUrl.slice(2):null;
   };
   const render=()=>{
     const p=items[index];

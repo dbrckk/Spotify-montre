@@ -2,6 +2,7 @@ import {readFileSync,writeFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {loadApprovedPopularPhotos} from './popular-photo-rights.mjs';
 import {loadVerifiedPopularLinks} from './popular-verified-affiliate.mjs';
+import {responsiveAttrs} from './responsive-images.mjs';
 
 const allowedStyles=new Set(['sport','classic','minimal','retro','statement']);
 const styleMap={sport:'sport',retro:'retro',compact:'minimal',steel:'classic',dress:'classic'};
@@ -23,6 +24,7 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
   if(coreProducts.length!==15||extras.length!==37)throw Error('Unified discovery: unexpected source catalogue coverage');
   const approvedPhotos=loadApprovedPopularPhotos({root,picks:extras});
   const directLinks=loadVerifiedPopularLinks({root,picks:extras,affiliates,amazonPartnerTag});
+  const coreById=new Map(coreProducts.map(p=>[p.id,p]));
   const ids=new Set();
   const normalized=[];
   function add(item){
@@ -74,16 +76,22 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
   // An affiliate tag is verified upstream by affiliate-policy.mjs. Do not
   // second-guess it here: negative and multi-account fixtures use other tags.
   const photoMarkup=p=>p.photoUrl
-    ?'<img src="../'+e(p.photoUrl.slice(2))+'" alt="Montre '+e(p.brand+' '+p.model)+' — photographie du modèle" width="540" height="540" loading="lazy" decoding="async">'
-    :'<span class="ud-art-fallback"><span>'+e(p.brand)+'</span><strong>'+e(p.model)+'</strong><small>Photo exacte consultable chez le vendeur</small></span>';
+    ?'<img src="../'+e(p.photoUrl.slice(2))+'"'
+      +(p.kind==='core'?responsiveAttrs(root,coreById.get(p.id),{
+        prefix:'../',sizes:'(max-width: 580px) 85vw, (max-width: 850px) 48vw, (max-width: 1220px) 31vw, 24vw',escape:e}):'')
+      +' alt="Photographie du modèle '+e(p.brand+' '+p.model)+'" width="540" height="540" loading="lazy" decoding="async">'
+    :'<span class="ud-art-fallback"><span class="ud-art-fallback-kicker">Fiche produit documentée</span><span class="ud-art-fallback-brand">'+e(p.brand)+'</span><strong>'+e(p.model)+'</strong><small>Aucune photographie publiée pour cette référence</small></span>';
   const card=p=>{
     const merchant=p.merchantUrl
       ?'<a class="ud-merchant" target="_blank" rel="noopener noreferrer nofollow sponsored" data-amazon-'+(p.merchantKind==='direct'?'product':'search-id')+'="'+e(p.id)+'" data-amazon-placement="popular" href="'+e(p.merchantUrl)+'">'+(p.merchantKind==='direct'?'Voir cette référence sur Amazon.fr':'Rechercher sur Amazon.fr')+' · lien rémunéré</a>'
       :'<a class="ud-merchant ud-merchant-official" target="_blank" rel="noopener noreferrer nofollow" href="'+e(p.officialUrl)+'">Voir la fiche fournisseur</a>';
     return '<article class="ud-card" id="modele-'+e(p.id)+'" data-id="'+e(p.id)+'"'
       +' data-brand="'+e(p.brand)+'" data-tier="'+e(p.tier)+'" data-style="'+e(p.style)+'"'
-      +' data-movement="'+e(p.movement)+'" data-search="'+e([p.brand,p.model,p.description,p.lead,p.caseText,p.movement].join(' '))+'">'
+      +' data-movement="'+e(p.movement)+'" data-visual="'+(p.photoUrl?'photo':'no-photo')+'" data-search="'+e([p.brand,p.model,p.description,p.lead,p.caseText,p.movement].join(' '))+'">'
+      +'<div class="ud-media '+(p.photoUrl?'ud-media-verified':'ud-media-no-photo')+'">'
       +'<a class="ud-photo" href="'+e(p.detailUrl.replace('./montres/','./'))+'">'+photoMarkup(p)+'</a>'
+      +(p.photoUrl?'<button type="button" class="ud-zoom" data-zoom-id="'+e(p.id)+'" aria-label="Agrandir la photographie de '+e(p.brand+' '+p.model)+'" hidden><span aria-hidden="true">＋</span> Agrandir</button>':'')
+      +'<span class="ud-visual-label">'+(p.photoUrl?'Photo du modèle':'Sans photo publiée')+'</span></div>'
       +'<div class="ud-card-main"><p class="ud-kicker">'+e(tierLabels[p.tier])+' · '+e(styleLabels[p.style])+'</p>'
       +'<h2><a href="'+e(p.detailUrl.replace('./montres/','./'))+'">'+e(p.brand+' '+p.model)+'</a></h2>'
       +'<p class="ud-description">'+e(p.lead)+'</p>'
@@ -106,7 +114,11 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
     +'<label>Mouvement<select id="udMovement"><option value="all">Tous les mouvements</option>'+Object.entries(movementLabels).map(([key,label])=>'<option value="'+key+'">'+e(label)+'</option>').join('')+'</select></label>'
     +'<label>Gamme<select id="udTier"><option value="all">Toutes les gammes</option>'+Object.entries(tierLabels).map(([key,label])=>'<option value="'+key+'">'+e(label)+'</option>').join('')+'</select></label>'
     +'<label>Diamètre documenté<select id="udSize"><option value="all">Toutes les tailles</option><option value="compact">Jusqu’à 38 mm</option><option value="medium">38,1 à 40 mm</option><option value="large">Plus de 40 mm</option><option value="unknown">Non documenté</option></select></label>'
+    +'<label>Photographies<select id="udVisual"><option value="all">Toutes les références</option><option value="photo">Avec photo du modèle</option><option value="no-photo">Sans photo publiée</option></select></label>'
     +'<button type="reset">Effacer les filtres</button></form>'
+    +'<div id="udViewTools" class="ud-view-tools" hidden><p>Affichage du catalogue</p>'
+    +'<div role="group" aria-label="Taille des visuels"><button type="button" id="udViewCompact" aria-pressed="true">Grille</button>'
+    +'<button type="button" id="udViewLarge" aria-pressed="false">Grands visuels</button></div></div>'
     +'<p class="ud-count" id="udCount" role="status" aria-live="polite">52 modèles sur 52</p>'
     +'<div class="ud-grid" id="udGrid">'+normalized.map(card).join('')+'</div>'
     +'<p id="udEmpty" hidden>Aucun résultat. Essayez une autre marque, un style différent ou effacez les filtres.</p>'
@@ -127,6 +139,6 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
   ]};
   writeFileSync(join(root,path),page(pageHead({title:'52 montres homme et femme à comparer | Atelier Montres',
     description:'Explorez 52 montres Casio, SKMEI, Citizen, Seiko et autres. Comparez style, mouvement, dimensions vérifiées et liens marchands sans faux prix.',path}),main,graph)
-    .replace('</head>','<link rel="stylesheet" href="../unified-discovery.css"><script defer src="../unified-discovery.js"></script></head>'));
+    .replace('</head>','<link rel="stylesheet" href="../unified-discovery.css"><link rel="stylesheet" href="../photo-zoom.css"><script defer src="../photo-zoom.js"></script><script defer src="../unified-discovery.js"></script></head>'));
   return {path,count:normalized.length,coreCount:coreProducts.length,supplementalCount:extras.length};
 }

@@ -44,7 +44,15 @@ for(const path of ['site/affiliation.js','site/fiche.js','site/photo-zoom.js','s
   const source=load(path);
   assert.doesNotMatch(source,/\b(?:t|photo|review)\.url\b/,'Public photo client must not read a remote research photo URL: '+path);
 }
-assert.match(load('site/photo-zoom.js'),/t\.localUrl==='\.\/assets\/watches\/'.*p\.id.*'\.webp'/,'Zoom must require an exact local watch path');
+const photoZoom=load('site/photo-zoom.js');
+assert.match(photoZoom,/\['\.\/assets\/watches\/'\+p\.id\+'\.webp'/,
+  'The zoom viewer must accept only an ID-matched local core photo');
+assert.match(photoZoom,/'\.\/assets\/watches-popular\/'\+p\.id\+'\.webp'/,
+  'Supplemental zoom must use only ID-matched local merchant photos, never arbitrary external URLs');
+assert.match(photoZoom,/allowed\.includes\(t\.localUrl\)/,
+  'A signed-off exact local path must be required before loading any photo');
+assert.match(photoZoom,/\^\[a-z0-9-\]\{4,64\}\$/,
+  'The viewer must reject invalid product path identifiers');
 assert.match(load('site/fiche.js'),/if\(img\.hasAttribute\('srcset'\)\)/,'Missing responsive photo must fall back to the approved original');
 const storefront=load('site/affiliation.html');
 const storefrontJs=load('site/affiliation.js');
