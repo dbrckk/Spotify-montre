@@ -9,6 +9,10 @@ on:
       - 'scripts/test-mobile-live-storefront.mjs'
       - 'scripts/test-recently-viewed.mjs'
       - 'scripts/test-compare-persistence.mjs'
+      - 'scripts/test-unified-compare-tray.mjs'
+      - 'scripts/build-unified-discovery.mjs'
+      - 'site/unified-discovery.js'
+      - 'site/unified-discovery.css'
       - 'site/affiliation.js'
       - 'site/selection-share.js'
       - 'site/montre.html'
@@ -60,13 +64,16 @@ jobs:
           # A healthy homepage can belong to the PREVIOUS deploy. Compare the
           # bytes of assets the browser scenario actually exercises so a stale
           # CDN build never produces a false failure or false success.
-          for attempt in $(seq 1 30); do
+          for attempt in $(seq 1 42); do
             ready=1
-            for file in affiliation.js selection-share.js affiliate-ui.js catalogue-view.css premium-system.css fiche.js fiche.css seo-guides.css editorial-photo.js editorial-photo.css popular-filters.js popular-picks.css shopper-selections.css; do
+            reason=''
+            for file in affiliation.js selection-share.js affiliate-ui.js catalogue-view.css premium-system.css fiche.js fiche.css seo-guides.css editorial-photo.js editorial-photo.css popular-filters.js popular-picks.css shopper-selections.css unified-discovery.js unified-discovery.css; do
               if ! curl -fsSL --max-time 15 "$base/$file" -o "$RUNNER_TEMP/live-$file"; then
                 ready=0
+                reason="$reason [missing asset: $file]"
               elif ! cmp -s "site/$file" "$RUNNER_TEMP/live-$file"; then
                 ready=0
+                reason="$reason [outdated asset: $file]"
               fi
             done
             if [ "$ready" -eq 1 ]; then
@@ -74,8 +81,10 @@ jobs:
               # can lag the already-deployed CSS during a rolling deployment.
               if ! curl -fsSL --max-time 15 "$base/montres/citizen-tsuyosa.html" -o "$RUNNER_TEMP/live-citizen.html"; then
                 ready=0
+                reason="$reason [missing: citizen product page]"
               elif ! grep -Fq 'class="watch-facts"' "$RUNNER_TEMP/live-citizen.html"; then
                 ready=0
+                reason="$reason [incomplete: citizen product facts]"
               fi
             fi
             # An old CDN version may serve a valid homepage and the 15 existing
@@ -84,14 +93,19 @@ jobs:
             if [ "$ready" -eq 1 ]; then
               if ! curl -fsSL --max-time 15 "$base/montres/modeles-populaires.html" -o "$RUNNER_TEMP/live-popular.html"; then
                 ready=0
+                reason="$reason [missing: popular collection]"
               elif ! grep -Fq 'id="am-pick-filters"' "$RUNNER_TEMP/live-popular.html"; then
                 ready=0
+                reason="$reason [missing: popular filters]"
               elif ! grep -Fq 'id="am-picks-list"' "$RUNNER_TEMP/live-popular.html"; then
                 ready=0
+                reason="$reason [missing: popular list]"
               elif ! grep -Fq 'data-pick-id="casio-gw-m5610u-1"' "$RUNNER_TEMP/live-popular.html"; then
                 ready=0
+                reason="$reason [missing: Casio popular pick]"
               elif ! grep -Fq 'data-pick-id="seiko-speedtimer-ssc813"' "$RUNNER_TEMP/live-popular.html"; then
                 ready=0
+                reason="$reason [missing: Seiko popular pick]"
               fi
             fi
             # Also gate the three new purchase-intent SEO pages; validating
@@ -100,20 +114,40 @@ jobs:
               for slug in montres-femme-accessibles montres-homme-style-accessible montres-automatiques-selection; do
                 if ! curl -fsSL --max-time 15 "$base/montres/$slug.html" -o "$RUNNER_TEMP/live-$slug.html"; then
                   ready=0
+                  reason="$reason [missing: $slug]"
                 elif ! grep -Fq 'class="am-shopper-grid"' "$RUNNER_TEMP/live-$slug.html"; then
                   ready=0
+                  reason="$reason [missing grid: $slug]"
                 elif [ "$(grep -Fc 'class="am-shopper-card"' "$RUNNER_TEMP/live-$slug.html")" -ne 6 ]; then
                   ready=0
+                  reason="$reason [wrong card count: $slug]"
                 fi
               done
             fi
+            # The unified 52-watch catalogue and its merchant-confidence filter
+            # must be deployed before any production Android browser assertions.
             if [ "$ready" -eq 1 ]; then
-              echo "Render serves current JS/CSS and three new shopper collections (attempt $attempt)."
+              if ! curl -fsSL --max-time 15 "$base/montres/toutes-les-montres.html" -o "$RUNNER_TEMP/live-unified.html"; then
+                ready=0
+                reason="$reason [missing: unified collection]"
+              elif ! grep -Fq 'id="udMerchant"' "$RUNNER_TEMP/live-unified.html"; then
+                ready=0
+                reason="$reason [missing: merchant confidence filter]"
+              elif [ "$(grep -Fc 'class="ud-card"' "$RUNNER_TEMP/live-unified.html")" -ne 52 ]; then
+                ready=0
+                reason="$reason [wrong card count: unified 52-watch catalog]"
+              fi
+            fi
+            if [ "$ready" -eq 1 ]; then
+              echo "Render serves exact JS/CSS, the unified 52-watch filter, and purchase-intent collections (attempt $attempt)."
               exit 0
             fi
-            if [ "$attempt" -lt 30 ]; then sleep 5; fi
+            if [ "$attempt" -eq 1 ] || [ "$attempt" -eq 8 ] || [ "$attempt" -eq 20 ] || [ "$attempt" -eq 42 ]; then
+              echo "Render not ready at attempt $attempt:$reason"
+            fi
+            if [ "$attempt" -lt 42 ]; then sleep 5; fi
           done
-          echo 'Render CDN still serves stale or incomplete JS/CSS or the new shopper collections are not published after retries.'
+          echo "Render publication verification failed. Last mismatches:$reason"
           exit 1
       - name: Verify deployed website, 15 local photos, sharing and watch history
         env:
@@ -124,6 +158,7 @@ jobs:
           timeout 120s node scripts/test-selection-share.mjs
           timeout 120s node scripts/test-recently-viewed.mjs
           timeout 120s node scripts/test-compare-persistence.mjs
+          timeout 180s node scripts/test-unified-compare-tray.mjs
       - name: Save real deployment screenshots
         if: always()
         uses: actions/upload-artifact@v4
