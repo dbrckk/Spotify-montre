@@ -365,11 +365,29 @@ try{
  assert.ok(new URL(popularPage.url()).searchParams.get('compare')?.startsWith('skmei-2056,'),
    'Original SKMEI model must be the first reference in comparison');
  await popularPage.setViewportSize({width:320,height:760});
- await popularPage.goto(new URL('/montres/casio-ga-2100-1a1.html',base).href,{waitUntil:'domcontentloaded'});
+ await popularPage.goto(new URL('/montres/casio-ga-2100-1a1.html',base).href,{waitUntil:'load'});
+ await popularPage.evaluate(async()=>{
+   await document.fonts.ready;
+   await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+ });
  const narrow=await popularPage.evaluate(()=>({
    client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth
  }));
- assert.ok(narrow.scroll<=narrow.client+2,'Supplemental watch landing must reflow at 320 CSS px');
+ if(narrow.scroll>narrow.client+2){
+   const offenders=await popularPage.evaluate(()=>{
+     const limit=document.documentElement.clientWidth;
+     return [...document.querySelectorAll('body *')].map(el=>{
+       const rect=el.getBoundingClientRect();
+       return {tag:el.tagName,className:typeof el.className==='string'?el.className.slice(0,90):'',
+         left:Math.round(rect.left),right:Math.round(rect.right),width:Math.round(rect.width),
+         scrollWidth:el.scrollWidth,clientWidth:el.clientWidth};
+     }).filter(x=>x.width>0&&(x.right>limit+2||x.left< -2))
+       .sort((a,b)=>b.right-a.right).slice(0,12);
+   });
+   console.error('NARROW PRODUCTION OVERFLOW',JSON.stringify({base,narrow,offenders}));
+   await popularPage.screenshot({path:'artifacts/mobile-watch-320-overflow-diagnostic.png',fullPage:true});
+ }
+ assert.ok(narrow.scroll<=narrow.client+2,'Supplemental watch landing must reflow at 320 CSS px '+JSON.stringify(narrow));
  await popularPage.close();
  console.log('PASS: 37 SEO watch pages, seven documented Amazon.fr ASINs, thirty honest searches, exact variants and Android reflow');
  const shopFirst=await page.evaluate(()=>{

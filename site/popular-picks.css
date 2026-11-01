@@ -313,3 +313,17 @@
 @media(max-width:760px){.am-extra-art-with-photo{min-height:400px}.am-extra-art-with-photo .am-extra-licensed-photo{right:7%;top:3%;width:86%;height:76%}}
 @media(max-width:520px){.am-extra-art-with-photo{min-height:355px;padding-bottom:29px}.am-extra-zoom{top:11px;right:11px;padding:8px 10px}.am-extra-art-with-photo .am-extra-licensed-photo{top:6%;width:86%;height:73%}.am-extra-related-cta{flex-direction:column;align-items:stretch}.am-extra-related-cta>a{justify-content:center}}
 @media(prefers-reduced-motion:reduce){.am-extra-art-with-photo .am-extra-licensed-photo{transition:none!important;transform:none!important}}
+
+
+/* 320px Android: keep the long source-backed product sections inside the
+   viewport. The only intentionally sideways surface is the scrollable facts
+   table and the navigation rail, never the whole document. */
+@media(max-width:365px){
+  .am-extra-page,.am-extra-product,.am-extra-hero,.am-extra-intro,
+  .am-extra-art,.am-extra-editorial,.am-extra-provenance,.am-extra-related,
+  .am-extra-checks,.am-extra-factual-scroll{min-width:0;max-width:100%}
+  .am-extra-local-nav{max-width:100%;margin-right:0;padding-right:0}
+  .am-extra-hero{grid-template-columns:minmax(0,1fr)}
+  .am-extra-facts,.am-extra-editorial-grid,.am-extra-related ul{grid-template-columns:minmax(0,1fr)}
+  .am-extra-art-model,.am-extra-intro h1{overflow-wrap:anywhere;word-break:normal}
+}
