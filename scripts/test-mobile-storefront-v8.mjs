@@ -34,10 +34,10 @@ try{
  const popular=page.locator('#modeles-populaires');
  assert.ok(await popular.isVisible(),'Popular sourced watches should be visible below the core catalogue');
  assert.equal(await popular.locator('article.am-pick-card').count(),8,'Eight source-backed homepage ideas should render, including the exact ASIN option');
- assert.equal(await popular.locator('a[data-amazon-search-id]').count(),5,
-   'Six unverified homepage referrals must remain clearly labeled as searches');
- assert.equal(await popular.locator('a[data-amazon-product]').count(),3,
-   'G-SHOCK and F-91W have documented Amazon.fr ASINs');
+ assert.equal(await popular.locator('a[data-amazon-search-id]').count(),3,
+   'Three unverified homepage referrals must remain clearly labeled as searches');
+ assert.equal(await popular.locator('a[data-amazon-product]').count(),5,
+   'Five featured watches have documented Amazon.fr ASINs');
  assert.equal(await popular.locator('#pick-casio-gw-m5610u-1 a[data-amazon-product]').getAttribute('href'),
    'https://www.amazon.fr/dp/B09BCPP68Q?tag=drackk04-21',
    'Homepage direct link must match confirmed Amazon.fr ASIN and owner tag');
@@ -45,6 +45,10 @@ try{
   'https://www.amazon.fr/dp/B000J34HN4?tag=drackk04-21','Featured Casio F-91W must link to documented ASIN');
  assert.equal(await popular.locator('#pick-casio-ga-2100-1a1 a[data-amazon-product]').getAttribute('href'),
   'https://www.amazon.fr/dp/B07WGJ1JNW?tag=drackk04-21','Featured black G-SHOCK must link to documented ASIN');
+ for(const [id,asin] of [['addiesdive-ad2030','B0DNK5TT6D'],['pagani-pd1701','B0C7QC653D']]){
+   assert.equal(await popular.locator('#pick-'+id+' a[data-amazon-product]').getAttribute('href'),
+     'https://www.amazon.fr/dp/'+asin+'?tag=drackk04-21','Source-verified affiliate destination on homepage: '+id);
+ }
  const popularSearch=popular.locator('a[data-amazon-search-id]').first();
  assert.ok((await popularSearch.getAttribute('href')).startsWith('https://www.amazon.fr/s?k='),
    'Do not manufacture an exact ASIN link for the new model');
@@ -113,12 +117,12 @@ try{
  }
 
  assert.equal(await popularPage.locator('.am-picks-tier').count(),3,'All three editorial ranges are represented');
- assert.equal(await popularPage.locator('a[data-amazon-search-id]').count(),32,'Thirty-two variants without documented ASINs must use labeled search results');
- assert.equal(await popularPage.locator('a[data-amazon-product]').count(),5,'Five Amazon.fr models have documented ASINs');
+ assert.equal(await popularPage.locator('a[data-amazon-search-id]').count(),30,'Thirty variants without documented ASINs must use labeled search results');
+ assert.equal(await popularPage.locator('a[data-amazon-product]').count(),7,'Seven Amazon.fr models have documented ASINs');
  const confirmedGshock=popularPage.locator('#pick-casio-gw-m5610u-1 a[data-amazon-product]');
  assert.equal(await confirmedGshock.getAttribute('href'),'https://www.amazon.fr/dp/B09BCPP68Q?tag=drackk04-21');
  assert.equal(await confirmedGshock.getAttribute('data-amazon-placement'),'popular');
- for(const [id,asin] of [['casio-a158wea-1','B000GAYQJ0'],['casio-ga-2100-1a1','B07WGJ1JNW']]){
+ for(const [id,asin] of [['casio-a158wea-1','B000GAYQJ0'],['casio-ga-2100-1a1','B07WGJ1JNW'],['addiesdive-ad2030','B0DNK5TT6D'],['pagani-pd1701','B0C7QC653D']]){
    const exact=popularPage.locator('#pick-'+id+' a[data-amazon-product]');
    assert.equal(await exact.count(),1,'Verified Amazon.fr product link required for '+id);
    assert.equal(await exact.getAttribute('href'),'https://www.amazon.fr/dp/'+asin+'?tag=drackk04-21','Exact attributed destination for '+id);
@@ -187,8 +191,8 @@ try{
    'JavaScript disabled must preserve all source-backed watch ideas');
  assert.equal(await noJs.locator('#am-pick-filters:visible').count(),0,
    'Non-functional controls must not be exposed without JavaScript');
- assert.equal(await noJs.locator('a[data-amazon-search-id]').count(),32);
- assert.equal(await noJs.locator('a[data-amazon-product]').count(),5);
+ assert.equal(await noJs.locator('a[data-amazon-search-id]').count(),30);
+ assert.equal(await noJs.locator('a[data-amazon-product]').count(),7);
  await noJs.close();
  console.log('PASS: 37 source-backed watches filtered by tier, style, movement and accented search, with no-JS fallback');
 
@@ -207,6 +211,13 @@ try{
    assert.equal(await popularPage.locator('.am-extra-fact').count(),4,'Four factual product attributes: '+watch.id);
    assert.equal(await popularPage.locator('.am-extra-editorial-grid>div').count(),2,
      'Model-specific editorial rationale and caution: '+watch.id);
+   if(watch.id==='addiesdive-ad2030'||watch.id==='pagani-pd1701'){
+     const sourceVariant=verifiedPopular[watch.id]?.marketplaceVariant;
+     assert.ok(sourceVariant,'New exact listing must declare color or generation '+watch.id);
+     const disclosure=popularPage.locator('.am-extra-merchant-variant');
+     assert.equal(await disclosure.count(),1,'Buyer must see marketplace variant before the paid link: '+watch.id);
+     assert.ok((await disclosure.innerText()).includes(sourceVariant),'Variant on site must match Amazon provenance: '+watch.id);
+   }
    const relatedCards=popularPage.locator('.am-extra-related li');
    assert.equal(await relatedCards.count(),3,'Three contextual live alternatives per watch: '+watch.id);
    const relatedIds=await relatedCards.evaluateAll(nodes=>nodes.map(n=>n.dataset.relatedId));
@@ -282,7 +293,7 @@ try{
  }));
  assert.ok(narrow.scroll<=narrow.client+2,'Supplemental watch landing must reflow at 320 CSS px');
  await popularPage.close();
- console.log('PASS: 37 SEO watch pages, three documented Amazon.fr ASINs, thirty-four honest searches, exact sources and Android reflow');
+ console.log('PASS: 37 SEO watch pages, seven documented Amazon.fr ASINs, thirty honest searches, exact variants and Android reflow');
  const shopFirst=await page.evaluate(()=>{
    const ids=['gammes','montres','amEditorialGallery','histoire'];
    const positions=ids.map(id=>document.getElementById(id)?.getBoundingClientRect().top+window.scrollY);

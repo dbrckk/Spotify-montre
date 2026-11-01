@@ -151,8 +151,8 @@ try {
   const manifest=JSON.parse(readFileSync(join(target,'seo-manifest.json'),'utf8'));
   assert.equal(manifest.affiliateActive,true);
   assert.equal(manifest.affiliateCount,13,'Publish the 13 owner-tagged core product matches');
-  assert.equal(manifest.popularAffiliateDirectLinks,5,'Five documented direct links in supplementary selection');
-  assert.equal(manifest.popularAffiliateSearchLinks,32,'Remaining thirty-two supplemental watches must stay labeled searches');
+  assert.equal(manifest.popularAffiliateDirectLinks,7,'Seven documented direct links in supplementary selection');
+  assert.equal(manifest.popularAffiliateSearchLinks,30,'Remaining thirty supplemental watches must stay labeled searches');
   const directProduction=readFileSync(join(target,'montres/casio-gw-m5610u-1.html'),'utf8');
   assert.ok(directProduction.includes('href="https://www.amazon.fr/dp/B09BCPP68Q?tag=drackk04-21"'),
     'Publish only the independently source-confirmed G-SHOCK Amazon.fr direct match');
@@ -164,6 +164,15 @@ try {
       'New Amazon.fr exact-model referral requires its proof-backed ASIN '+id);
     assert.ok(detail.includes('data-amazon-product="'+id+'"')&&!detail.includes('data-amazon-search-id="'+id+'"'),
       'Never advertise a verified direct ASIN as an Amazon search '+id);
+  }
+  for(const [id,asin,fragment] of [['addiesdive-ad2030','B0DNK5TT6D','SH-DE-AD2030-Steel-blue'],['pagani-pd1701','B0C7QC653D','PGN-1701']]){
+    const html=readFileSync(join(target,'montres/'+id+'.html'),'utf8');
+    assert.ok(html.includes('href="https://www.amazon.fr/dp/'+asin+'?tag=drackk04-21"'),
+      'Direct affiliate exit must match documented ASIN for '+id);
+    assert.ok(html.includes('data-amazon-product="'+id+'"')&&!html.includes('data-amazon-search-id="'+id+'"'),
+      'Exact destination must never be mislabeled search '+id);
+    assert.ok(html.includes('Variante de la fiche Amazon :')&&html.includes(fragment),
+      'Exact matched listing must disclose variant limitations: '+id);
   }
   const realResearch=JSON.parse(readFileSync(join(repository,'research','amazon-fr-exact-products.json'),'utf8'));
   const publicHome=readFileSync(join(target,'index.html'),'utf8');

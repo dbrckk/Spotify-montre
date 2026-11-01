@@ -61,6 +61,31 @@
       "evidenceType": "amazon_fr_product_page",
       "evidenceNote": "Fiche Amazon.fr directement consultée le 1er novembre 2026 depuis le lien commercial de BFM Shopping du 10 avril 2024. Le titre de produit Amazon.fr affiche Casio GA-2100-1A1ER et l'ASIN B07WGJ1JNW figure dans l'URL et les éléments de la page. L'offre historique relayée dans l'article n'est pas une preuve du prix, du stock, du vendeur ou de la disponibilité actuelle.",
       "corroborationUrl": "https://www.bfmtv.com/pratique/mode/casio-g-shock-choisissez-l-un-des-meilleurs-rapports-qualite-prix-du-marche-avec-cette-offre_AB-202404100033.html"
+    },
+    "addiesdive-ad2030": {
+      "brand": "ADDIESDIVE",
+      "canonicalModel": "AD2030",
+      "marketplaceModel": "AD2030",
+      "asin": "B0DNK5TT6D",
+      "verifiedAt": "2026-11-01",
+      "evidenceUrl": "https://www.amazon.fr/dp/B0DNK5TT6D",
+      "evidenceListingTitle": "ADDIESDIVE AD2030 Montre analogique à Quartz pour Homme 36 mm K1 Verre Miroir Étanche à 100 m avec Bracelet en Acier Inoxydable, Sh-de-ad2030-steel-blue, Minimaliste",
+      "evidenceType": "amazon_fr_product_page",
+      "evidenceNote": "Fiche Amazon.fr consultée directement le 1er novembre 2026 : la page nomme ADDIESDIVE AD2030, indique l'ASIN B0DNK5TT6D et désigne explicitement la variante SH-DE-AD2030-Steel-blue, cadran bleu et mouvement VH31. Le catalogue du site couvre différentes couleurs et variantes de l'AD2030 : seul ce coloris bleu est identifié ici ; ne pas affirmer qu'un autre coloris, le stock, le vendeur ou le prix sont confirmés.",
+      "marketplaceVariant": "SH-DE-AD2030-Steel-blue — cadran bleu (variante de cette fiche Amazon.fr)"
+    },
+    "pagani-pd1701": {
+      "brand": "Pagani Design",
+      "canonicalModel": "PD-1701",
+      "marketplaceModel": "1701",
+      "asin": "B0C7QC653D",
+      "verifiedAt": "2026-11-01",
+      "evidenceUrl": "https://www.amazon.fr/dp/B0C7QC653D",
+      "evidenceListingTitle": "Pagani Design 1701 Montre à Quartz pour Hommes. Chronographe Professionnel, Mouvement Japonais VK63, étanche à 100 mètres, Bracelet en Acier Inoxydable, Verre Saphir Montre",
+      "evidenceType": "amazon_fr_product_page",
+      "evidenceNote": "Fiche Amazon.fr consultée directement le 1er novembre 2026 : titre Pagani Design 1701, ASIN B0C7QC653D, données produit modèle PGN-1701, tableau de variantes mentionnant aussi PD-1701 V4. La page fabricant https://www.paganidesignwatch.com/fr/pagani-design-pd-1701/ confirme l'appellation PD-1701 et le calibre VK63. La génération, la couleur, le bracelet, le vendeur, la disponibilité et le prix de la variante sélectionnée doivent être recontrôlés : ne pas assimiler toutes les générations et finitions.",
+      "marketplaceVariant": "1701 / PGN-1701 — génération, coloris et bracelet à vérifier sur Amazon.fr",
+      "corroborationUrl": "https://www.paganidesignwatch.com/fr/pagani-design-pd-1701/"
     }
   }
 }
