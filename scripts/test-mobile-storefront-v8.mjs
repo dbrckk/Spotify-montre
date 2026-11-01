@@ -104,7 +104,26 @@ try{
  assert.equal(await focus.locator('li.am-focus-item').count(),10,
    'Ten editorial priority watches must be visible without JavaScript');
  assert.equal(await focus.locator('a.am-focus-detail').count(),10,
-   'Every priority must lead to its model page and verified merchant options');
+   'Every priority must preserve a factual internal model page');
+ assert.equal(await focus.locator('.am-focus-merchant a').count(),10,
+   'Ten shortlist cards must offer an honest one-step merchant option');
+ assert.equal(await focus.locator('a[data-amazon-product]').count(),5,
+   'Only five of the shortlist models have a documented exact Amazon product page');
+ assert.equal(await focus.locator('a[data-merchant-official-id]').count(),5,
+   'Five unverified Amazon models should point to the product-specific vendor source instead');
+ assert.equal(await focus.locator('a[data-amazon-search-id]').count(),0,
+   'Shortlist must never present a generic Amazon search as a direct seller option');
+ const paganiSeller=focus.locator('[data-focus-id="pagani-pd1776"] .am-focus-merchant a');
+ assert.equal(await paganiSeller.getAttribute('href'),'https://paganidesign.com/products/pd-1776',
+   'PD-1776 primary seller destination must open a specific product page');
+ assert.doesNotMatch(await paganiSeller.getAttribute('rel'),/sponsored/,
+   'Pagani supplier link must not invent an unapproved commission');
+ const adAmazon=focus.locator('[data-focus-id="addiesdive-ad2030"] .am-focus-merchant a');
+ assert.equal(await adAmazon.getAttribute('href'),
+   'https://www.amazon.fr/dp/B0DNK5TT6D?tag=drackk04-21');
+ assert.match(await adAmazon.getAttribute('rel'),/sponsored/);
+ assert.match(await focus.locator('[data-focus-id="addiesdive-ad2030"]').innerText(),
+   /Variante de la fiche Amazon/,'Verify the advertised variant before visiting Amazon');
  assert.equal(await focus.locator('.am-focus-with-photo img').count(),7,
    'Seven shortlist photos must match declared-rights model assets');
  for(const id of ['skmei-2056','skmei-2256','skmei-2514','addiesdive-ad2030','pagani-pd1701']){
@@ -139,7 +158,8 @@ try{
 
  assert.equal(await popularPage.locator('.am-picks-tier').count(),3,'All three editorial ranges are represented');
  assert.equal(await popularPage.locator('a[data-amazon-search-id]').count(),30,'Thirty variants without documented ASINs must use labeled search results');
- assert.equal(await popularPage.locator('a[data-amazon-product]').count(),7,'Seven Amazon.fr models have documented ASINs');
+ assert.equal(await popularPage.locator('a[data-amazon-product]').count(),12,
+   'Seven original exact products plus five direct-merchant shortlist cards are attributed without new ASINs');
  const confirmedGshock=popularPage.locator('#pick-casio-gw-m5610u-1 a[data-amazon-product]');
  assert.equal(await confirmedGshock.getAttribute('href'),'https://www.amazon.fr/dp/B09BCPP68Q?tag=drackk04-21');
  assert.equal(await confirmedGshock.getAttribute('data-amazon-placement'),'popular');
