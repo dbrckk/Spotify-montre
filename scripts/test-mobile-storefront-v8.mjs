@@ -199,8 +199,18 @@ try{
    assert.equal(await popularPage.locator('.am-extra-fact').count(),4,'Four factual product attributes: '+watch.id);
    assert.equal(await popularPage.locator('.am-extra-editorial-grid>div').count(),2,
      'Model-specific editorial rationale and caution: '+watch.id);
-   assert.equal(await popularPage.locator('.am-extra-related li').count(),3,
-     'Three live comparable models must have internal landing links: '+watch.id);
+   const relatedCards=popularPage.locator('.am-extra-related li');
+   assert.equal(await relatedCards.count(),3,'Three contextual live alternatives per watch: '+watch.id);
+   const relatedIds=await relatedCards.evaluateAll(nodes=>nodes.map(n=>n.dataset.relatedId));
+   assert.equal(new Set(relatedIds).size,3,'Alternatives must be distinct: '+watch.id);
+   assert.ok(!relatedIds.includes(watch.id),'No self-recommendation: '+watch.id);
+   assert.ok(relatedIds.every(id=>supplemental.some(p=>p.id===id)),'Alternatives must link to documented supplementary watches: '+watch.id);
+   assert.equal(await relatedCards.locator('img').count(),relatedIds.filter(id=>Boolean(approvedWatchPhotos[id])).length,
+     'Related images must be source-registered real product photos: '+watch.id);
+   assert.ok((await popularPage.locator('.am-extra-reference').innerText()).includes(watch.model),
+     'Exact manufacturer reference must be displayed before external purchase: '+watch.id);
+   assert.equal(await popularPage.locator('.am-extra-related>a[href="./toutes-les-montres.html"]').count(),1,
+     'Recommendations must lead to the complete 52-watch comparison: '+watch.id);
    const expectedImage=approvedWatchPhotos[watch.id];
    assert.equal(await popularPage.locator('img.am-extra-licensed-photo').count(),expectedImage?1:0,
      'Only registered exact-model imagery may be published: '+watch.id);
@@ -231,12 +241,16 @@ try{
  assert.equal(merchant.origin,'https://www.amazon.fr');
  assert.equal(merchant.searchParams.get('tag'),'drackk04-21');
  if(verified){
+   assert.match(await popularPage.locator('.am-extra-link-status').innerText(),/Fiche Amazon.fr correspondant au code modèle/,
+     'A documented exact listing must be identified to the visitor: '+watch.id);
    assert.equal(merchant.pathname,'/dp/'+verified.asin,'Use only a source-verified exact ASIN: '+watch.id);
    assert.equal(await popularPage.locator('a[data-amazon-search-id]').count(),0,
      'Never mix a direct link and a search CTA for the same confirmed model: '+watch.id);
    assert.match(await popularPage.locator('.am-extra-disclosure').innerText(),/Correspondance du code modèle vérifiée/,
      'Exact-match evidence and price/stock limitations must be visible: '+watch.id);
  }else{
+   assert.match(await popularPage.locator('.am-extra-link-status').innerText(),/Recherche Amazon.fr — modèle non garanti/,
+     'An Amazon search must never appear as a confirmed exact offer: '+watch.id);
    assert.equal(merchant.pathname,'/s','Non-confirmed watches must remain search links: '+watch.id);
    assert.ok(merchant.searchParams.get('k').includes(watch.model),
      'Search must include the manufacturer model reference: '+watch.id);

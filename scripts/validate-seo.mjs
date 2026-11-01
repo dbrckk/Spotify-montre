@@ -319,6 +319,23 @@ for(const p of popularFeed.products){
   assert.ok(popularHtml.includes('href="./'+p.id+'.html"'),'Selected watch card must link its unique landing page: '+p.id);
   assert.match(detailHtml,/<h1>[^<]+<\/h1>/,'Every model needs a clear visible H1: '+p.id);
   assert.ok(detailHtml.includes('data-popular-watch-id="'+p.id+'"'),'Landing page must match product identity: '+p.id);
+  assert.ok(detailHtml.includes('Référence à retrouver chez le marchand'),'Show exact model reference before external purchase: '+p.id);
+  assert.ok(detailHtml.includes('Comparer les 52 montres'),'Related models must link to full comparison: '+p.id);
+  const recommendations=[...detailHtml.matchAll(/<li data-related-id="([a-z0-9-]+)" data-related-reason="([^"]+)"/g)];
+  assert.equal(recommendations.length,3,'Three contextual model alternatives required: '+p.id);
+  assert.equal(new Set(recommendations.map(m=>m[1])).size,3,'Never recommend the same watch twice: '+p.id);
+  assert.ok(!recommendations.some(m=>m[1]===p.id),'Do not self-recommend: '+p.id);
+  for(const [,id,reason] of recommendations){
+    const q=popularFeed.products.find(w=>w.id===id);
+    assert.ok(q,'Recommended watch must exist in the researched source catalogue: '+id);
+    assert.ok(['Même marque','Style proche','Mouvement comparable','Autre approche'].includes(reason),'Reason must not imply ranking or test: '+id);
+    assert.ok(detailHtml.includes('class="am-extra-related-name" href="./'+id+'.html"'),'A live related detail page must be linked: '+id);
+    const approved=approvedPopularPhotos.get(id);
+    if(approved)assert.ok(detailHtml.includes('src="../'+approved.url+'"'),'Recommended product photo must be approved: '+id);
+    else assert.ok(detailHtml.includes('class="am-extra-related-fallback"'),'Missing related photos need an honest fallback: '+id);
+  }
+  if(popularFeed.products.filter(w=>w.brand===p.brand&&w.id!==p.id).length>=2)
+    assert.equal(recommendations.filter(m=>popularFeed.products.find(w=>w.id===m[1]).brand===p.brand).length,2,'Brand alternatives must include two distinct models: '+p.id);
   assert.ok(detailHtml.includes('rel="canonical" href="'+manifest.siteUrl+detailPath+'"'),
     'Dedicated product canonical must be self-referencing: '+p.id);
   assert.ok(detailHtml.includes('name="robots" content="index,follow'),'New editorial product pages should be crawlable: '+p.id);
@@ -335,7 +352,7 @@ for(const p of popularFeed.products){
     assert.ok(detailHtml.includes('src="../'+approvedPopularPhotos.get(p.id).url+'"'),
       'Registered exact-model photograph must appear in the product page: '+p.id);
   }else{
-    assert.doesNotMatch(detailHtml,/<img\b/i,'Non-registered photos must not be embedded: '+p.id);
+    assert.ok(!detailHtml.includes('class="am-extra-licensed-photo"'),'An unapproved hero photo must never be embedded: '+p.id);
   }
   const ai=aiVisuals.get(p.id);
   if(ai){
@@ -366,10 +383,12 @@ for(const p of popularFeed.products){
       'Distinct product vs search tracking required: '+p.id);
     assert.match(detailHtml,/rel="noopener noreferrer nofollow sponsored"/,'Paid merchant exit must be clearly marked: '+p.id);
     if(direct){
+      assert.ok(detailHtml.includes('Fiche Amazon.fr correspondant au code modèle'),'Direct link must visibly identify a documented matching listing: '+p.id);
       assert.ok(detailHtml.includes('Correspondance du code modèle vérifiée'),'Direct link must document model evidence: '+p.id);
       assert.ok(detailHtml.includes('prix, vendeur et disponibilité restent à contrôler'),'No unverified stock claim: '+p.id);
       assert.ok(!detailHtml.includes('data-amazon-search-id="'+p.id+'"'),'Verified product must not masquer search results: '+p.id);
     }else{
+      assert.ok(detailHtml.includes('Recherche Amazon.fr — modèle non garanti'),'Search must not imply an exact offer: '+p.id);
       assert.ok(detailHtml.includes('Le lien ouvre des résultats de recherche'),'Search must warn about different variants: '+p.id);
       assert.ok(!detailHtml.includes('data-amazon-product="'+p.id+'"'),'No invented exact ASIN: '+p.id);
     }
