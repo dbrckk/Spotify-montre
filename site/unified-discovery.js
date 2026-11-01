@@ -4,7 +4,10 @@
   const $=id=>document.getElementById(id);
   const root=$('udGrid'),form=$('udFilters'),status=$('udCount'),empty=$('udEmpty');
   const compareStatus=$('udCompareStatus'),compareClear=$('udCompareClear'),compareTable=$('udCompareTable');
-  if(!root||!form||!status||!empty||!compareStatus||!compareClear||!compareTable)return;
+  const tray=$('udCompareTray'),trayItems=$('udTrayItems'),trayCount=$('udTrayCount'),
+    trayOpen=$('udTrayOpen'),trayClear=$('udTrayClear'),catalogue=document.querySelector('.ud-page');
+  if(!root||!form||!status||!empty||!compareStatus||!compareClear||!compareTable
+    ||!tray||!trayItems||!trayCount||!trayOpen||!trayClear||!catalogue)return;
   const cards=[...root.querySelectorAll('article.ud-card[data-id]')];
   const node=(tag,text,cls)=>{
     const el=document.createElement(tag);
@@ -70,7 +73,30 @@
   const link=(label,url)=>{
     const a=node('a',label);a.href=url;return a;
   };
+  const updateTray=()=>{
+    // No-JS browsing remains untouched: the dock is revealed only after the
+    // verified 52-watch JSON has been loaded and a real ID is selected.
+    tray.hidden=selected.length===0;
+    catalogue.classList.toggle('ud-has-tray',selected.length>0);
+    trayCount.textContent=selected.length===1
+      ?'1 sur 3 · ajoutez une deuxième montre'
+      :selected.length+' sur 3 modèles sélectionnés';
+    trayOpen.hidden=selected.length<2;
+    trayOpen.textContent=selected.length>=2
+      ?'Comparer '+selected.length+' montres':'Voir la comparaison';
+    const nodes=selected.map(id=>{
+      const p=watches.get(id),li=node('li',null,'ud-tray-item');
+      if(!p)return li;
+      li.append(node('span',p.brand+' '+p.model,'ud-tray-name'));
+      const remove=node('button','×','ud-tray-remove');
+      remove.type='button';remove.dataset.trayRemove=id;
+      remove.setAttribute('aria-label','Retirer '+p.brand+' '+p.model+' de la comparaison');
+      li.append(remove);return li;
+    });
+    trayItems.replaceChildren(...nodes);
+  };
   const renderCompare=()=>{
+    updateTray();
     compareStatus.textContent=selected.length===0?'Sélectionnez au moins deux modèles.'
       :selected.length===1?'Une montre choisie ; ajoutez-en une deuxième.'
       :selected.length+' montres choisies. Les informations inconnues sont affichées comme « Non documenté ».';
@@ -123,6 +149,19 @@
     renderCompare();
   });
   compareClear.addEventListener('click',()=>{selected=[];renderCompare()});
+  trayClear.addEventListener('click',()=>{selected=[];renderCompare()});
+  trayItems.addEventListener('click',event=>{
+    const btn=event.target.closest('button[data-tray-remove]');
+    if(!btn||!selected.includes(btn.dataset.trayRemove))return;
+    selected=selected.filter(id=>id!==btn.dataset.trayRemove);
+    renderCompare();
+  });
+  trayOpen.addEventListener('click',()=>{
+    if(selected.length<2)return;
+    // The native anchor scrolls to the real comparison. Focusing its scroll
+    // region makes keyboard and screen-reader navigation immediately useful.
+    compareTable.focus({preventScroll:true});
+  });
   form.addEventListener('input',render);
   form.addEventListener('change',render);
   form.addEventListener('reset',()=>{requestAnimationFrame(render)});
