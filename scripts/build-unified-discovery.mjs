@@ -82,17 +82,20 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
       +' alt="Photographie du modèle '+e(p.brand+' '+p.model)+'" width="540" height="540" loading="lazy" decoding="async">'
     :'<span class="ud-art-fallback"><span class="ud-art-fallback-kicker">Fiche produit documentée</span><span class="ud-art-fallback-brand">'+e(p.brand)+'</span><strong>'+e(p.model)+'</strong><small>Aucune photographie publiée pour cette référence</small></span>';
   const card=p=>{
+    const merchantType=p.merchantKind||'official';
+    const merchantLabel={direct:'Fiche du modèle identifiée',search:'Recherche marchande · variante à confirmer',official:'Source externe · sans lien d’achat vérifié'}[merchantType];
     const merchant=p.merchantUrl
       ?'<a class="ud-merchant" target="_blank" rel="noopener noreferrer nofollow sponsored" data-amazon-'+(p.merchantKind==='direct'?'product':'search-id')+'="'+e(p.id)+'" data-amazon-placement="popular" href="'+e(p.merchantUrl)+'">'+(p.merchantKind==='direct'?'Voir cette référence sur Amazon.fr':'Rechercher sur Amazon.fr')+' · lien rémunéré</a>'
       :'<a class="ud-merchant ud-merchant-official" target="_blank" rel="noopener noreferrer nofollow" href="'+e(p.officialUrl)+'">Voir la fiche fournisseur</a>';
     return '<article class="ud-card" id="modele-'+e(p.id)+'" data-id="'+e(p.id)+'"'
       +' data-brand="'+e(p.brand)+'" data-tier="'+e(p.tier)+'" data-style="'+e(p.style)+'"'
-      +' data-movement="'+e(p.movement)+'" data-visual="'+(p.photoUrl?'photo':'no-photo')+'" data-search="'+e([p.brand,p.model,p.description,p.lead,p.caseText,p.movement].join(' '))+'">'
+      +' data-movement="'+e(p.movement)+'" data-merchant="'+merchantType+'" data-visual="'+(p.photoUrl?'photo':'no-photo')+'" data-search="'+e([p.brand,p.model,p.description,p.lead,p.caseText,p.movement].join(' '))+'">'
       +'<div class="ud-media '+(p.photoUrl?'ud-media-verified':'ud-media-no-photo')+'">'
       +'<a class="ud-photo" href="'+e(p.detailUrl.replace('./montres/','./'))+'">'+photoMarkup(p)+'</a>'
       +(p.photoUrl?'<button type="button" class="ud-zoom" data-zoom-id="'+e(p.id)+'" aria-label="Agrandir la photographie de '+e(p.brand+' '+p.model)+'" hidden><span aria-hidden="true">＋</span> Agrandir</button>':'')
       +'<span class="ud-visual-label">'+(p.photoUrl?'Photo du modèle':'Sans photo publiée')+'</span></div>'
       +'<div class="ud-card-main"><p class="ud-kicker">'+e(tierLabels[p.tier])+' · '+e(styleLabels[p.style])+'</p>'
+      +'<p class="ud-merchant-kind">'+e(merchantLabel)+'</p>'
       +'<h2><a href="'+e(p.detailUrl.replace('./montres/','./'))+'">'+e(p.brand+' '+p.model)+'</a></h2>'
       +'<p class="ud-description">'+e(p.lead)+'</p>'
       +'<dl><div><dt>Mouvement</dt><dd>'+e(movementLabels[p.movement])+'</dd></div><div><dt>Boîtier</dt><dd>'+e(p.caseText)+'</dd></div></dl>'
@@ -115,6 +118,7 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
     +'<label>Gamme<select id="udTier"><option value="all">Toutes les gammes</option>'+Object.entries(tierLabels).map(([key,label])=>'<option value="'+key+'">'+e(label)+'</option>').join('')+'</select></label>'
     +'<label>Diamètre documenté<select id="udSize"><option value="all">Toutes les tailles</option><option value="compact">Jusqu’à 38 mm</option><option value="medium">38,1 à 40 mm</option><option value="large">Plus de 40 mm</option><option value="unknown">Non documenté</option></select></label>'
     +'<label>Photographies<select id="udVisual"><option value="all">Toutes les références</option><option value="photo">Avec photo du modèle</option><option value="no-photo">Sans photo publiée</option></select></label>'
+    +'<label>Accès marchand<select id="udMerchant"><option value="all">Tous les accès</option><option value="direct">Fiche du modèle identifiée</option><option value="search">Recherche Amazon · modèle à confirmer</option><option value="official">Source externe sans lien d’achat vérifié</option></select></label>'
     +'<button type="reset">Effacer les filtres</button></form>'
     +'<div id="udViewTools" class="ud-view-tools" hidden><p>Affichage du catalogue</p>'
     +'<div role="group" aria-label="Taille des visuels"><button type="button" id="udViewCompact" aria-pressed="true">Grille</button>'
