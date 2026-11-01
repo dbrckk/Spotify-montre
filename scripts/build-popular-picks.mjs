@@ -50,6 +50,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     +'&tag='+encodeURIComponent(amazonPartnerTag);
   const link=(href,txt,commercial=false,id='',kind='search')=>'<a href="'+e(href)+'" target="_blank" rel="noopener noreferrer nofollow'+(commercial?' sponsored':'')+'"'
     +(commercial?' data-amazon-'+(kind==='product'?'product':'search-id')+'="'+e(id)+'" data-amazon-placement="popular"':'')
+    +(kind==='official'&&!commercial?' data-merchant-official-id="'+e(id)+'" data-merchant-placement="popular"':'')
     +'>'+e(txt)+'</a>';
   const verifiedLinks=loadVerifiedPopularLinks({root,picks,affiliates,amazonPartnerTag});
   const approvedPhotos=loadApprovedPopularPhotos({root,picks});
@@ -85,7 +86,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
       +(front?'':'<p class="am-pick-caution"><strong>Avant achat :</strong> '+e(p.caution)+'</p>')
       +'<div class="am-pick-actions">'
       +affiliateLink(p)
-      +link(p.officialUrl,p.brand==='SKMEI'?'Photos et fiche vendeur':'Photos et fiche fabricant')
+      +link(p.officialUrl,p.brand==='SKMEI'?'Photos et fiche vendeur':'Photos et fiche fabricant',false,p.id,'official')
       +'</div><p class="am-pick-source">Pourquoi ici ? '+link(p.marketEvidence.url,p.marketEvidence.label)+'</p>'
       +'<p class="am-pick-note">'+(verifiedLinks.has(p.id)?'Lien vers une fiche Amazon.fr correspondant à la référence documentée. Vérifiez la variante, le vendeur, le prix et la disponibilité lors de la visite.':'La recherche Amazon peut présenter des variantes ou d’autres produits. Vérifier la référence exacte, le vendeur et le prix avant de commander.')+'</p>'
       +'</div></article>';
