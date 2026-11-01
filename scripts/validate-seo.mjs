@@ -233,6 +233,31 @@ assert.equal((unifiedHtml.match(/class="ud-card"/g)||[]).length,52,
   'All 52 item cards must be rendered in static HTML before JavaScript');
 assert.equal((unifiedHtml.match(/class="ud-select"/g)||[]).length,52,
   'Each watch must have an opt-in local comparison button');
+const photoCount=unified.products.filter(p=>p.photoUrl!==null).length;
+assert.equal(photoCount,36,'Exactly 15 core and 21 supplemental owner-attested photos');
+assert.equal(unified.products.filter(p=>p.photoUrl===null).length,16,
+  'Missing published photos must remain explicit rather than be replaced with AI packshots');
+assert.equal((unifiedHtml.match(/data-visual="photo"/g)||[]).length,36);
+assert.equal((unifiedHtml.match(/data-visual="no-photo"/g)||[]).length,16);
+assert.equal((unifiedHtml.match(/class="ud-zoom"/g)||[]).length,36,
+  'Only photograph-backed models can provide a zoom control');
+assert.equal((unifiedHtml.match(/Aucune photographie publiée pour cette référence/g)||[]).length,16);
+assert.ok(unifiedHtml.includes('id="udVisual"')&&unifiedHtml.includes('value="no-photo"'),
+  'Users must be able to distinguish photo-backed models from honest fallbacks');
+assert.ok(unifiedHtml.includes('id="udViewTools" class="ud-view-tools" hidden'),
+  'Display controls must not be shown without a working JavaScript catalogue');
+assert.ok(unifiedHtml.includes('id="udViewLarge" aria-pressed="false"'),
+  'Large photo layout must be opt-in and accessible');
+assert.ok(unifiedHtml.includes('href="../photo-zoom.css"')&&unifiedHtml.includes('src="../photo-zoom.js"'),
+  'Full-size authorized model viewer must be loaded on the unified catalogue');
+assert.match(read('photo-zoom.js'),/watches-popular/,
+  'Shared viewer must accept exact locally registered supplemental watch photos');
+const visualJs=read('unified-discovery.js');
+assert.match(visualJs,/window\.AtelierPhoto\.open/,'Viewer actions must use the shared accessible photo component');
+assert.match(visualJs,/changeView\(params\.get\('view'\)/,
+  'Shareable grid and large-photo view must restore safely from URL');
+assert.match(visualJs,/controls\.visual\.value/,
+  'Photo availability filter must operate on trusted catalogue data');
 assert.match(unifiedHtml,/id="udFilters"[^>]*hidden/,'Filter controls invisible before JS initialization');
 assert.match(unifiedHtml,/id="udCompareTable"/,'Comparison must be accessible');
 assert.match(unifiedHtml,/<aside id="udCompareTray"[^>]*aria-label="Votre sélection de montres" hidden>/,
