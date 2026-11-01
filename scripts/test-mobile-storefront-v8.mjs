@@ -233,7 +233,10 @@ try{
  assert.equal(await noJs.locator('#am-pick-filters:visible').count(),0,
    'Non-functional controls must not be exposed without JavaScript');
  assert.equal(await noJs.locator('a[data-amazon-search-id]').count(),30);
- assert.equal(await noJs.locator('a[data-amazon-product]').count(),7);
+ assert.equal(await noJs.locator('a[data-amazon-product]').count(),12,
+   'Without JavaScript, all seven original and five shortlist exact Amazon options remain clickable');
+ assert.equal(await noJs.locator('#selection-10-montres .am-focus-merchant a').count(),10,
+   'Ten seller-specific choices remain visible without scripting');
  await noJs.close();
  console.log('PASS: 37 source-backed watches filtered by tier, style, movement and accented search, with no-JS fallback');
 
