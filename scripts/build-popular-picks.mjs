@@ -57,7 +57,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
   const approvedPhotos=loadApprovedPopularPhotos({root,picks});
   const aiVisuals=loadPopularAiVisuals({root,picks});
   const shopper=buildShopperSelections({root,coreProducts:existingProducts,picks,partners:affiliates,verifiedPopularLinks:verifiedLinks,approvedPopularPhotos:approvedPhotos,amazonSearch,pageHead,page,e,u});
-  const commercialFocus=buildCommercialShortlist({picks,verifiedLinks,approvedPhotos,e});
+  const commercialFocus=buildCommercialShortlist({picks,verifiedLinks,approvedPhotos,affiliatesEnabled:affiliates.enabled,e});
   const affiliateLink=p=>{
     if(!affiliates.enabled)return '';
     const direct=verifiedLinks.get(p.id);
