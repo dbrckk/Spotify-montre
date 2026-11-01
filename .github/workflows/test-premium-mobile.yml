@@ -33,6 +33,10 @@ on:
       - 'scripts/build-seo.mjs'
       - 'scripts/validate-seo.mjs'
       - 'scripts/test-watch-comparisons-browser.mjs'
+      - 'scripts/test-unified-compare-tray.mjs'
+      - 'scripts/build-unified-discovery.mjs'
+      - 'site/unified-discovery.js'
+      - 'site/unified-discovery.css'
       - '.github/workflows/test-premium-mobile.yml'
   pull_request:
   workflow_dispatch:
@@ -71,6 +75,7 @@ jobs:
           WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-selection-share.mjs
           WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-adviser-browser.mjs
           WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-watch-comparisons-browser.mjs
+          WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-unified-compare-tray.mjs
           WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-premium-readability.mjs
       - name: Preserve mobile and desktop screenshots
         if: always()
