@@ -75,7 +75,7 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
   // second-guess it here: negative and multi-account fixtures use other tags.
   const photoMarkup=p=>p.photoUrl
     ?'<img src="../'+e(p.photoUrl.slice(2))+'" alt="Montre '+e(p.brand+' '+p.model)+' — photographie du modèle" width="540" height="540" loading="lazy" decoding="async">'
-    :'<span class="ud-art-fallback" role="img" aria-label="Pas de photographie publiée pour cette référence"><span>'+e(p.brand)+'</span><strong>'+e(p.model)+'</strong><small>Photo exacte consultable chez le vendeur</small></span>';
+    :'<span class="ud-art-fallback"><span>'+e(p.brand)+'</span><strong>'+e(p.model)+'</strong><small>Photo exacte consultable chez le vendeur</small></span>';
   const card=p=>{
     const merchant=p.merchantUrl
       ?'<a class="ud-merchant" target="_blank" rel="noopener noreferrer nofollow sponsored" data-amazon-'+(p.merchantKind==='direct'?'product':'search-id')+'="'+e(p.id)+'" data-amazon-placement="popular" href="'+e(p.merchantUrl)+'">'+(p.merchantKind==='direct'?'Voir cette référence sur Amazon.fr':'Rechercher sur Amazon.fr')+' · lien rémunéré</a>'
@@ -83,7 +83,7 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
     return '<article class="ud-card" id="modele-'+e(p.id)+'" data-id="'+e(p.id)+'"'
       +' data-brand="'+e(p.brand)+'" data-tier="'+e(p.tier)+'" data-style="'+e(p.style)+'"'
       +' data-movement="'+e(p.movement)+'" data-search="'+e([p.brand,p.model,p.description,p.lead,p.caseText,p.movement].join(' '))+'">'
-      +'<a class="ud-photo" href="'+e(p.detailUrl.replace('./montres/','./'))+'" aria-label="Découvrir '+e(p.brand+' '+p.model)+'">'+photoMarkup(p)+'</a>'
+      +'<a class="ud-photo" href="'+e(p.detailUrl.replace('./montres/','./'))+'">'+photoMarkup(p)+'</a>'
       +'<div class="ud-card-main"><p class="ud-kicker">'+e(tierLabels[p.tier])+' · '+e(styleLabels[p.style])+'</p>'
       +'<h2><a href="'+e(p.detailUrl.replace('./montres/','./'))+'">'+e(p.brand+' '+p.model)+'</a></h2>'
       +'<p class="ud-description">'+e(p.lead)+'</p>'
