@@ -12,8 +12,8 @@ const manifest=JSON.parse(read('seo-manifest.json'));
 assert.equal(manifest.productCount,15);
 assert.equal(manifest.popularAdditionalCount,37,'37 researched models complement the 15 photo-backed core products');
 assert.equal(manifest.popularDetailCount,37,'Every supplemental model requires a dedicated factual landing page');
-assert.equal(manifest.popularAffiliateDirectLinks,manifest.affiliateActive?5:0,'Only source-verified supplementary ASINs may become direct product links');
-assert.equal(manifest.popularAffiliateSearchLinks,manifest.affiliateActive?32:0,'All remaining supplemental products require labeled Amazon searches');
+assert.equal(manifest.popularAffiliateDirectLinks,manifest.affiliateActive?7:0,'Only source-verified supplementary ASINs may become direct product links');
+assert.equal(manifest.popularAffiliateSearchLinks,manifest.affiliateActive?30:0,'All remaining supplemental products require labeled Amazon searches');
 const insightData=JSON.parse(read('editorial-insights.json'));
 assert.equal(insightData.version,1);
 assert.equal(Object.keys(insightData.products).length,15,'15 unique editorial briefs required');
@@ -187,12 +187,21 @@ assert.equal((home.match(/rel="canonical"/g)||[]).length,1,'Homepage has exactly
 // source-confirmed Amazon.fr ASINs can become direct product links.
 const exactPopular=JSON.parse(readFileSync(resolve(root,'../research/amazon-fr-popular-verified.json'),'utf8'));
 const exactPopularLinks=exactPopular.verifiedProducts;
-assert.equal(Object.keys(exactPopularLinks).length,5,'ASIN promotion requires a source-verified registry entry');
+assert.equal(Object.keys(exactPopularLinks).length,7,'ASIN promotion requires a source-verified registry entry');
 assert.equal(exactPopularLinks['casio-gw-m5610u-1'].asin,'B09BCPP68Q','Actual Amazon.fr G-SHOCK source code must be used');
 assert.equal(exactPopularLinks['casio-f91w-1'].asin,'B000J34HN4','Casio F-91W documented Amazon.fr ASIN');
 assert.equal(exactPopularLinks['casio-a168wg-9'].asin,'B002LAS086','Casio vintage gold documented Amazon.fr ASIN');
 assert.equal(exactPopularLinks['casio-a158wea-1'].asin,'B000GAYQJ0','Casio A158 silver exact regional listing and Amazon.fr ASIN');
 assert.equal(exactPopularLinks['casio-ga-2100-1a1'].asin,'B07WGJ1JNW','GA-2100 blackout G-SHOCK exact regional listing and Amazon.fr ASIN');
+for(const [id,asin] of [['addiesdive-ad2030','B0DNK5TT6D'],['pagani-pd1701','B0C7QC653D']]){
+  const proof=exactPopularLinks[id];
+  assert.equal(proof.asin,asin,'Published ASIN must be independently documented: '+id);
+  assert.equal(proof.verifiedAt,'2026-11-01','New Amazon.fr proof must be dated: '+id);
+  assert.equal(proof.evidenceType,'amazon_fr_product_page','Source must be Amazon.fr detail listing: '+id);
+  assert.ok(proof.evidenceListingTitle.includes(proof.marketplaceModel),'Amazon title must include the exact documented model: '+id);
+  assert.equal(proof.evidenceUrl,'https://www.amazon.fr/dp/'+asin,'Evidence URL must match published product ASIN: '+id);
+  assert.ok(proof.marketplaceVariant?.length>30,'Exact marketplace variant must be explicitly disclosed: '+id);
+}
 for(const id of ['casio-a158wea-1','casio-ga-2100-1a1']){
   const match=exactPopularLinks[id];
   assert.equal(match.verifiedAt,'2026-11-01','The evidence is dated for '+id);
@@ -268,9 +277,13 @@ assert.doesNotMatch(home,/src="\.\.\/popular-filters\.js"/,'Homepage must not lo
 assert.ok(home.includes('id="pick-casio-gw-m5610u-1"'),'Verified Amazon G-SHOCK must be featured on homepage');
 assert.ok(home.includes('https://www.amazon.fr/dp/B09BCPP68Q?tag=drackk04-21'),'Home feature must link to the verified G-SHOCK ASIN');
 assert.equal((home.match(/data-amazon-product="casio-gw-m5610u-1"/g)||[]).length,1,'Only one direct Amazon supplemental CTA should be featured');
-assert.equal((home.match(/data-amazon-search-id=/g)||[]).length,5,'Five other homepage features retain clearly labeled Amazon search links');
+assert.equal((home.match(/data-amazon-search-id=/g)||[]).length,3,'Three featured SKMEI and Pagani variants without exact ASINs remain honest searches');
 assert.equal((home.match(/data-amazon-product="casio-f91w-1"/g)||[]).length,1,'F-91W featured exact-model Amazon referral');
 assert.equal((home.match(/data-amazon-product="casio-ga-2100-1a1"/g)||[]).length,1,'GA-2100 featured exact-model Amazon referral');
+for(const [id,asin] of [['addiesdive-ad2030','B0DNK5TT6D'],['pagani-pd1701','B0C7QC653D']]){
+  assert.equal((home.match(new RegExp('data-amazon-product="'+id+'"','g'))||[]).length,1,'New exact Amazon product featured once: '+id);
+  assert.ok(home.includes('https://www.amazon.fr/dp/'+asin+'?tag=drackk04-21'),'Verified Amazon link must be attributed: '+id);
+}
 assert.ok(home.includes('https://www.amazon.fr/dp/B07WGJ1JNW?tag=drackk04-21'),'Homepage must link to source-backed GA-2100 listing');
 
 const shopperCollections=[
@@ -389,6 +402,14 @@ for(const p of popularFeed.products){
     :'https://www.amazon.fr/s?k='+encodeURIComponent((p.brand+' '+p.model).slice(0,130))+'&amp;tag=drackk04-21';
   if(manifest.affiliateActive){
     assert.ok(detailHtml.includes('href="'+expectedMerchant+'"'),'Exact merchant destination missing on individual watch page: '+p.id);
+    if(['addiesdive-ad2030','pagani-pd1701'].includes(p.id)){
+      assert.ok(direct?.marketplaceVariant,'Two newly source-verified watches require honest variant disclosure: '+p.id);
+      assert.ok(detailHtml.includes('Variante de la fiche Amazon :'),'The exact marketplace variant must be user-visible: '+p.id);
+      assert.ok(detailHtml.includes(direct.marketplaceVariant.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')),
+        'Public buying UI must match Amazon source variant exactly: '+p.id);
+      assert.ok(popularHtml.includes(direct.marketplaceVariant.replace(/&/g,'&amp;')),
+        'Collection card must disclose variant ambiguity: '+p.id);
+    }
     assert.ok(popularHtml.includes('href="'+expectedMerchant+'"'),'Merchant destination must match source-led collection: '+p.id);
     assert.ok(detailHtml.includes('data-amazon-'+(direct?'product':'search-id')+'="'+p.id+'"'),
       'Distinct product vs search tracking required: '+p.id);
