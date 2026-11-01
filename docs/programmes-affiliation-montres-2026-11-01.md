@@ -41,6 +41,12 @@ La vérification du domaine est faite à l'aide d'une liste fermée d'hôtes de 
 Ni une adhésion Awin, ni un accord Pagani, ni un taux de commission contractuel ne peuvent être présumés depuis un site public. Cette recherche ne génère aucun revenu à elle seule. L'activation d'une nouvelle régie exige l'accès au compte officiel et les liens produits délivrés pour l'éditeur.
 
 
+## Qualification préalable des SKMEI AliExpress
+
+Le registre [`research/aliexpress-skmei-candidates.json`](../research/aliexpress-skmei-candidates.json) documente désormais quatre identifiants candidats repérés sur des index tiers : **deux pour SKMEI 2056, deux pour SKMEI 2514 et aucun pour SKMEI 2256**. Les sources et limites sont détaillées dans [`docs/skmei-aliexpress-qualification-2026-11-01.md`](skmei-aliexpress-qualification-2026-11-01.md).
+
+**Un identifiant d'article, même accompagné d'un lien Awin valide, ne suffit plus à activer un bouton rémunéré.** Un contrôle primaire daté des variantes, de l'expédition et du passage en caisse France, ainsi que de l'éligibilité à l'affiliation Awin, doit être enregistré et validé dans la même révision. Aucune offre n'a été ainsi qualifiée pour publication.
+
 ## Intégration technique Awin ajoutée le 1er novembre 2026
 
 La base technique a désormais un **registre privé au build** : `research/partner-affiliate-offers.json` et un validateur `scripts/approved-partner-offers.mjs`. Le site Render est toujours statique ; ce fichier de recherche n'est pas publié automatiquement comme catalogue public et **aucun nouveau programme n'est activé**. Aucune adhésion ou rémunération supplémentaire n'a été réalisée.
