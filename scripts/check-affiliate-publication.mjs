@@ -78,11 +78,18 @@ try {
   assert.ok(trackedHome.includes('src="./analytics.js"'));
   assert.ok(trackedProduct.includes('src="../analytics.js"'));
   assert.ok(trackedProduct.includes('data-amazon-product="citizen-tsuyosa"'));
-  assert.match(privacyText(),/Les visites et clics vers Amazon sont mesurés avec Umami Cloud/);
+  assert.match(privacyText(),/Les visites et clics sortants vers Amazon\.fr et les fiches des marques ou vendeurs documentés sont mesurés avec Umami Cloud/);
+  const trackedSupplement=readFileSync(join(target,'montres/skmei-2056.html'),'utf8');
+  assert.ok(trackedSupplement.includes('data-merchant-official-id="skmei-2056" data-merchant-placement="popular"'),
+    'The SKMEI product must be measurable as vendor intent only with opted-in analytics');
+  assert.ok(trackedHome.includes('data-merchant-official-id="skmei-2056"'),
+    'The home storefront must distinguish non-commissioned SKMEI vendor exits');
+  assert.ok(!trackedSupplement.includes('href="https://www.amazon.fr/dp/B0C7W5NNX2?'),
+    'Unavailable exact Amazon.fr listing must never replace current SKMEI search');
   build({UMAMI_WEBSITE_ID:umamiId}); // repeat deploy must be idempotent
   build({UMAMI_WEBSITE_ID:''}); // turning metrics off restores the privacy notice
   assert.ok(!readFileSync(join(target,'index.html'),'utf8').includes('cloud.umami.is'));
-  assert.doesNotMatch(privacyText(),/Les visites et clics vers Amazon sont mesurés avec Umami Cloud/);
+  assert.doesNotMatch(privacyText(),/Les visites et clics sortants vers Amazon\.fr et les fiches des marques ou vendeurs documentés sont mesurés avec Umami Cloud/);
   let invalidAnalyticsIdBlocked=false;
   try {build({UMAMI_WEBSITE_ID:'"><img src=x onerror=alert(1)>'})}catch{invalidAnalyticsIdBlocked=true}
   assert.equal(invalidAnalyticsIdBlocked,true,'Invalid analytics identifiers must not inject arbitrary HTML');

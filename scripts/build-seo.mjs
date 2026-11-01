@@ -333,9 +333,11 @@ import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
     const privacyPath=join(root,'confidentialite.html');
     const currentPrivacy=readFileSync(privacyPath,'utf8');
     const inactive="Nous n'avons pas installé de système de publicité ciblée, de cookies de suivi ou de régie analytique sur la page.";
-    const active="Les visites et clics vers Amazon sont mesurés avec Umami Cloud (statistiques agrégées et anonymisées, sans cookies). Seuls la référence publique de la montre, l’emplacement du lien et des données techniques de navigation sont traités ; aucun nom, email, identifiant utilisateur ni donnée de commande n’est envoyé. Le paramètre Do Not Track est respecté. La conservation dépend du forfait Umami actif.";
-    if(!currentPrivacy.includes(inactive)&&!currentPrivacy.includes(active))throw Error('Notice de vie privée obsolète');
-    const updated=umamiId?currentPrivacy.replace(inactive,active):currentPrivacy.replace(active,inactive);
+    const legacyActive="Les visites et clics vers Amazon sont mesurés avec Umami Cloud (statistiques agrégées et anonymisées, sans cookies). Seuls la référence publique de la montre, l’emplacement du lien et des données techniques de navigation sont traités ; aucun nom, email, identifiant utilisateur ni donnée de commande n’est envoyé. Le paramètre Do Not Track est respecté. La conservation dépend du forfait Umami actif.";
+    const active="Les visites et clics sortants vers Amazon.fr et les fiches des marques ou vendeurs documentés sont mesurés avec Umami Cloud (statistiques agrégées, sans cookies publicitaires). Seuls la référence publique de la montre, l’emplacement du lien et des données techniques de navigation sont traités ; aucun nom, email, identifiant utilisateur ni donnée de commande n’est envoyé par nos événements. Le paramètre Do Not Track est respecté. La conservation dépend du forfait Umami actif. Ces clics ne démontrent ni une commande ni une commission.";
+    if(![inactive,active,legacyActive].some(text=>currentPrivacy.includes(text)))throw Error('Notice de vie privée obsolète');
+    const updated=umamiId?currentPrivacy.replace(inactive,active).replace(legacyActive,active)
+      :currentPrivacy.replace(active,inactive).replace(legacyActive,inactive);
     if(updated!==currentPrivacy)writeFileSync(privacyPath,updated);
   }
   writeFileSync(join(root,'robots.txt'),`User-agent: *\nAllow: /\nSitemap: ${u('sitemap.xml')}\n`);

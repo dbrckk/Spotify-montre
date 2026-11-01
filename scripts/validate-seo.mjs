@@ -248,6 +248,13 @@ for(const product of unified.products){
     assert.match(product.caseText,/diam[eè]tre/i,'Do not infer diameter from a rectangular width');
 }
 
+// A model match that was explicitly observed as unavailable is research,
+ // not an active commercial destination: it must never receive a paid exact ASIN.
+const skippedCandidates=JSON.parse(readFileSync(resolve(root,'../research/amazon-fr-popular-asin-candidates.json'),'utf8'));
+const unavailableSkmei=skippedCandidates.candidates.find(x=>x.productId==='skmei-2056');
+assert.equal(unavailableSkmei.status,'verified_model_but_unavailable_on_amazon_fr_do_not_publish');
+assert.equal(unavailableSkmei.asinCandidate,'B0C7W5NNX2');
+assert.ok(!exactPopularLinks['skmei-2056'],'Unavailable SKMEI 2056 ASIN must not be published as a direct link');
 const aiVisuals=loadPopularAiVisuals({root,picks:popularFeed.products});
 const popularPath='montres/modeles-populaires.html';
 const popularHtml=read(popularPath);
@@ -258,6 +265,8 @@ assert.ok(popularSitemap.includes(manifest.siteUrl+popularPath),'Research-led co
 assert.match(popularHtml,/rel="canonical"/,'Canonical for supplemental source-led page');
 assert.match(popularHtml,/aucun|Aucun/,'Supplemental section must disclose limitations');
 assert.equal((popularHtml.match(/<article class="am-pick-card /g)||[]).length,37,'One editorial card for each researched watch');
+assert.equal((popularHtml.match(/data-merchant-official-id=/g)||[]).length,37,
+  'Every supplemental card must expose one unmodified official vendor exit for opt-in analytics');
 assert.equal((home.match(/<article class="am-pick-card /g)||[]).length,8,'Eight diverse supplemental models feature prominently, including direct-link G-SHOCK');
 assert.equal((home.match(/class="am-pick-detail-link"/g)||[]).length,8,'Every featured model title must link its source-backed SEO landing page');
 assert.equal((popularHtml.match(/<section class="am-picks-tier"/g)||[]).length,3,'All three ranges visibly represented');
@@ -364,6 +373,8 @@ for(const p of popularFeed.products){
     'Dedicated product canonical must be self-referencing: '+p.id);
   assert.ok(detailHtml.includes('name="robots" content="index,follow'),'New editorial product pages should be crawlable: '+p.id);
   assert.ok(detailHtml.includes('href="'+p.officialUrl+'"'),'The correct manufacturer page must remain accessible: '+p.id);
+  assert.ok(detailHtml.includes('data-merchant-official-id="'+p.id+'" data-merchant-placement="popular"'),
+    'Every model detail must distinguish its source-vendor exit from Amazon for analytics: '+p.id);
   assert.ok(detailHtml.includes('href="'+p.marketEvidence.url+'"'),'Source for the bestseller claim or editorial choice missing: '+p.id);
   for(const fact of [p.model,p.movement,p.case,p.glass,p.water,p.caution]){
     assert.ok(detailHtml.includes(fact.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')),
@@ -725,7 +736,9 @@ assert.ok(!read('affiliation.html').includes('AM_SEO_LINKS_START') || read('affi
 assert.ok(sitemap.includes(manifest.siteUrl+'montres/guide-choisir-montre.html'));
 assert.match(read('robots.txt'),/Sitemap: https:\/\//);
 const privacy=read('confidentialite.html');
-assert.equal(privacy.includes('Les visites et clics vers Amazon sont mesurés avec Umami Cloud'),analyticsConfigured);
+assert.equal(privacy.includes('Les visites et clics sortants vers Amazon.fr et les fiches des marques ou vendeurs documentés sont mesurés avec Umami Cloud'),analyticsConfigured);
+assert.ok(read('analytics.js').includes("merchantHosts=new Set([")&&read('analytics.js').includes("'merchant:'+id+':'+placement"),
+  'Brand/vendor conversion-intent events require a strict destination allowlist');
 assert.ok(privacy.includes('chez Render'),'Privacy notice must identify actual host');
 const guide=read('montres/guide-choisir-montre.html');
 assert.match(guide,/<h1>Comment choisir une montre/);
