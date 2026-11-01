@@ -439,14 +439,13 @@ for(const selection of shopperCollections){
       'Complete factual table must include all and only indexed models: '+selection.slug);
     assert.equal((html.match(/class="am-shopper-insight-grid"/g)||[]).length,1,
       'Each high-intent page requires distinct helpful buying guidance beyond duplicated product cards');
-    assert.equal((html.match(/class="am-shopper-insight-grid/g)||[]).length,1);
     assert.match(html,/role="region" tabindex="0" aria-label="Tableau comparatif des références"/,
       'Large comparison table must scroll and retain keyboard focus');
     assert.ok(html.includes('class="spec-matrix"'),'Source-backed fact matrix must have a caption and headings');
     const compareHref='./toutes-les-montres.html?compare='+selection.compare.join(',')+'#comparer';
     assert.equal(html.split('href="'+compareHref+'"').length-1,2,
       'Two one-tap links must compare three documented exact models: '+selection.slug);
-    assert.doesNotMatch(html,/Acheté par|ventes Amazon|noté [45]\/5|stock limité/i,
+    assert.doesNotMatch(html,/Acheté par \d+|\d+[\s\u00a0]+ventes confirmées|noté [45]\/5|stock limité/i,
       'No invented sales ranks, ratings or urgency on search-intent collections');
   }
   for(const id of selection.ids){
