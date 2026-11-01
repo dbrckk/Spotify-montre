@@ -30,7 +30,9 @@ export function loadVerifiedPopularLinks({root,picks,affiliates,amazonPartnerTag
     const regionalEquivalents={
       'casio-gw-m5610u-1':'GW-M5610U-1ER',
       'casio-f91w-1':'F-91W-1YER',
-      'casio-a168wg-9':'A168WG-9EF'
+      'casio-a168wg-9':'A168WG-9EF',
+      'casio-a158wea-1':'A158WEA-1EF',
+      'casio-ga-2100-1a1':'GA-2100-1A1ER'
     };
     if(item.marketplaceModel!==p.model&&item.marketplaceModel!==regionalEquivalents[id])
       throw Error('Unverified regional edition or variant: '+id);
