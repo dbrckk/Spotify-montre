@@ -22,6 +22,19 @@ Le navigateur affiche les 52 cartes même **sans JavaScript** et active les filt
 - Le conseiller utilise le même JSON 52, propose trois modèles et ouvre leurs **vraies fiches SEO**. Il passe les trois IDs sélectionnés au comparateur.
 - Les 15 anciennes cartes du comparateur complexe restent accessibles depuis l'accueil pour conserver toutes leurs fonctionnalités ; elles ne sont plus présentées comme **tout** le catalogue du site.
 
+## Comparaison mobile persistante — 1er novembre 2026
+
+Sur le catalogue unifié des **52 montres**, le sélecteur « Ajouter à la comparaison » active désormais une **barre fixe accessible en bas de l’écran**. Elle n’apparaît qu’après chargement et validation du registre JSON des 52 références et après sélection d’un vrai modèle.
+
+- Avec **une montre**, la barre indique « 1 sur 3 », montre l’intitulé réel et invite à ajouter un deuxième modèle. Elle ne propose pas de tableau prématuré.
+- Avec **deux ou trois montres**, la barre affiche les références, permet de retirer une montre individuellement et propose « Comparer 2/3 montres » vers le tableau factuel existant. Les caractéristiques inconnues restent explicitement non documentées.
+- « Tout effacer » vide à la fois la barre, le tableau et la sélection partageable dans l’URL. Les paramètres `?compare=id1,id2` restent compatibles avec le conseiller et les liens transmis.
+- Les filtres ne détruisent pas les montres déjà choisies, même lorsqu’elles ne figurent plus dans les résultats visibles. À 3 montres, l’ajout d’une quatrième est refusé avec une explication.
+- **Sans JavaScript, ou en cas de registre invalide/indisponible**, la barre et les sélecteurs restent masqués ; les 52 cartes HTML et leurs fiches restent consultables sans erreur.
+- Le dock respecte les zones de sécurité des mobiles, les cibles tactiles de **44 px minimum**, les commandes clavier et l’absence de défilement horizontal, sans fabriquer de photos ou de données commerciales.
+
+La suite `scripts/test-unified-compare-tray.mjs` est exécutée en Chromium Android et desktop dans le workflow `test-premium-mobile.yml`. Elle couvre le préchargement depuis l’URL, le retrait unitaire, les filtres, la limite de trois, l’effacement, le lien direct au tableau et le scénario sans JavaScript. Les captures restent des artefacts de CI, pas des images de montres non licenciées.
+
 ## Transparence commerciale
 
 - Vraies photos locales contrôlées par les registres et permissions déclarées. Les rendus IA ne sont **pas** employés comme photos produit exactes dans le catalogue unifié.
