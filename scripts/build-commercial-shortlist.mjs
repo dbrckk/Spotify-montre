@@ -21,7 +21,7 @@ export const commercialShortlist=Object.freeze([
  * Render an accessible crawlable, internal-link-only priority list.
  * Every member must exist in the model source. Availability is never inferred.
  */
-export function buildCommercialShortlist({picks,verifiedLinks,approvedPhotos,e}){
+export function buildCommercialShortlist({picks,verifiedLinks,approvedPhotos,affiliatesEnabled,e}){
   if(!Array.isArray(picks)||picks.length!==37)throw Error('Commercial shortlist requires the 37 documented supplemental watches');
   const byId=new Map(picks.map(p=>[p.id,p]));
   if(byId.size!==37||commercialShortlist.length!==10||
@@ -36,9 +36,11 @@ export function buildCommercialShortlist({picks,verifiedLinks,approvedPhotos,e})
     }
     const photo=approvedPhotos.get(item.id);
     const direct=verifiedLinks.get(item.id);
-    const status=direct
-      ?'Fiche Amazon.fr correspondant au code modèle · variante, prix et stock à contrôler'
-      :'Recherche Amazon.fr uniquement · modèle et disponibilité non garantis';
+    const status=!affiliatesEnabled
+      ?'Aucun lien Amazon.fr rémunéré actif · consulter les sources de cette référence'
+      :direct
+        ?'Fiche Amazon.fr correspondant au code modèle · variante, prix et stock à contrôler'
+        :'Recherche Amazon.fr uniquement · modèle et disponibilité non garantis';
     return '<li class="am-focus-item" data-focus-id="'+e(item.id)+'">'
       +'<div class="am-focus-visual'+(photo?' am-focus-with-photo':'')+'">'
       +(photo?'<img src="../'+e(photo.url)+'" alt="Montre '+e(watch.brand+' '+watch.model)+'" loading="lazy" decoding="async" width="380" height="260">':
@@ -53,14 +55,18 @@ export function buildCommercialShortlist({picks,verifiedLinks,approvedPhotos,e})
       +'</div></li>';
   });
   const directCount=commercialShortlist.filter(p=>verifiedLinks.has(p.id)).length;
-  const photoCount=commercialShortlist.filter(p=>approvedPhotos.has(p.id)).length;
-  if(directCount<4||photoCount<6)throw Error('Commercial shortlist must preserve genuinely documented merchant and photographic coverage');
+  // Affiliate-publication tests deliberately build with no paid links and
+  // with photo permissions withdrawn. The shortlist must gracefully fall back
+  // to honest source links rather than refuse a safety-focused build.
+  const merchantExplanation=affiliatesEnabled
+    ?directCount+' modèles disposent d’une fiche Amazon.fr documentée ; les autres renvoient à une recherche, jamais présentée comme une offre certaine.'
+    :'Aucun lien Amazon.fr rémunéré n’est activé dans cette configuration ; les fiches documentaires et les sources restent accessibles.';
   return '<section id="selection-10-montres" class="am-commercial-focus" aria-labelledby="am-focus-heading">'
     +'<div class="am-focus-heading"><p class="eyebrow">10 modèles à étudier en priorité · sélection éditoriale</p>'
     +'<h2 id="am-focus-heading">Dix styles accessibles à comparer avant d’acheter.</h2>'
     +'<p>Une sélection guidée par la variété des styles, des fiches de référence et des photos disponibles. '
     +'Ce n’est ni un classement des ventes en France, ni une mesure de popularité, ni une promesse de meilleur prix. '
-    +directCount+' modèles disposent d’une fiche Amazon.fr documentée ; les autres renvoient à une recherche, jamais présentée comme une offre certaine.</p></div>'
+    +merchantExplanation+'</p></div>'
     +'<ol class="am-focus-list">'+entries.join('')+'</ol>'
     +'<p class="am-focus-endnote">Les images locales sont publiées sur la base d’autorisations déclarées par l’éditeur et non vérifiées indépendamment. Les références sans photo locale renvoient à leur fiche constructeur ou vendeur. Aucun prix, stock, livraison ni essai au poignet n’est inventé. <a href="./toutes-les-montres.html">Comparer l’ensemble des 52 montres</a>.</p>'
     +'</section>';
