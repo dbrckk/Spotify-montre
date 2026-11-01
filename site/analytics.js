@@ -16,6 +16,7 @@
     'fr.citizenwatch.eu','www.orientwatch.fr','www.tissotwatches.com',
     'www.seikowatches.com','www.hamiltonwatch.com',
     'www.addiesdivewatches.com','www.paganidesignwatch.com',
+    'paganidesign.com','www.paganidesign.com',
     'www.currenwatches.com','www.montre.com','www.swatch.com'
   ]);
   document.addEventListener('click',event=>{
