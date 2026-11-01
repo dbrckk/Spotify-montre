@@ -235,6 +235,23 @@ assert.equal((unifiedHtml.match(/class="ud-select"/g)||[]).length,52,
   'Each watch must have an opt-in local comparison button');
 assert.match(unifiedHtml,/id="udFilters"[^>]*hidden/,'Filter controls invisible before JS initialization');
 assert.match(unifiedHtml,/id="udCompareTable"/,'Comparison must be accessible');
+assert.match(unifiedHtml,/<aside id="udCompareTray"[^>]*aria-label="Votre sélection de montres" hidden>/,
+  'Compare dock must be accessible and hidden before verified JSON finishes loading');
+for(const id of ['udTrayItems','udTrayCount','udTrayOpen','udTrayClear'])
+  assert.ok(unifiedHtml.includes('id="'+id+'"'),'Missing comparison dock control: '+id);
+assert.ok(unifiedHtml.includes('id="udTrayOpen" class="ud-tray-open" href="#comparer" hidden'),
+  'Compare action must navigate to the existing real data table after at least two watches');
+const trayJS=read('unified-discovery.js');
+assert.match(trayJS,/selected\.length<2/,'One watch must not unlock comparison');
+assert.match(trayJS,/catalogue\.classList\.toggle\('ud-has-tray'/,
+  'Selected models need safe extra page padding for fixed mobile dock');
+assert.match(trayJS,/trayItems\.replaceChildren/,'Watch chips must come from validated selected catalogue IDs');
+assert.doesNotMatch(trayJS,/innerHTML\s*=/,
+  'Untrusted watch labels must not be concatenated as HTML');
+const trayCSS=read('unified-discovery.css');
+assert.match(trayCSS,/\.ud-tray\[hidden\]/,
+  'Dock must not be visible in no-JavaScript mode');
+assert.match(trayCSS,/safe-area-inset-bottom/,'Android/iOS dock must respect bottom safe area');
 assert.ok(unifiedHtml.includes('src="../unified-discovery.js"'));
 assert.ok(unifiedHtml.includes('href="../unified-discovery.css"'));
 assert.ok(home.includes('href="./montres/toutes-les-montres.html"'),'Homepage must link the full catalogue');
