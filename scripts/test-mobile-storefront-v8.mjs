@@ -100,6 +100,27 @@ try{
  const popularPage=await browser.newPage({viewport:{width:393,height:852},isMobile:true,hasTouch:true,locale:'fr-FR'});
  await popularPage.goto(new URL('/montres/modeles-populaires.html',base).href,{waitUntil:'domcontentloaded'});
  assert.equal(await popularPage.locator('article.am-pick-card').count(),37,'All supplemental watch models on one source-backed page');
+ const focus=popularPage.locator('#selection-10-montres');
+ assert.equal(await focus.locator('li.am-focus-item').count(),10,
+   'Ten editorial priority watches must be visible without JavaScript');
+ assert.equal(await focus.locator('a.am-focus-detail').count(),10,
+   'Every priority must lead to its model page and verified merchant options');
+ assert.equal(await focus.locator('.am-focus-with-photo img').count(),7,
+   'Seven shortlist photos must match declared-rights model assets');
+ for(const id of ['skmei-2056','skmei-2256','skmei-2514','addiesdive-ad2030','pagani-pd1701']){
+   const item=focus.locator('[data-focus-id="'+id+'"]');
+   assert.equal(await item.count(),1,'High-priority affordable model represented once: '+id);
+   assert.equal(await item.locator('a.am-focus-detail').getAttribute('href'),'./'+id+'.html');
+ }
+ assert.match(await focus.innerText(),/Ce n’est ni un classement des ventes en France/,
+   'Shortlist is not a fabricated ranking by sales volume');
+ assert.ok(await popularPage.locator('a[href="./toutes-les-montres.html"]').count()>0,
+   'No featured shortlist can hide the complete 52-watch catalogue');
+ const focusDimensions=await popularPage.evaluate(()=>({
+   client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth
+ }));
+ assert.ok(focusDimensions.scroll<=focusDimensions.client+2,'Shortlist must fit Android width');
+ await focus.screenshot({path:'artifacts/android-commercial-shortlist.png'});
 
  // Each SEO selection must work on Android without a filter, script or shop account.
  for (const slug of ['montres-femme-accessibles','montres-homme-style-accessible','montres-automatiques-selection']) {
