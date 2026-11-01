@@ -68,7 +68,7 @@ for(const [id,entry] of Object.entries(amazon.links)){
  assert.ok(!entry.url.includes('?tag='),'Unapproved affiliate tracking cannot be published');
 }
 
-assert.equal(manifest.paths.length,71);
+assert.equal(manifest.paths.length,74);
 assert.equal(manifest.unifiedCount,52,'Unified catalogue must contain all 52 source-backed watches');
 assert.equal(manifest.unifiedPath,'montres/toutes-les-montres.html');
 assert.ok(manifest.paths.every(url=>url.startsWith(manifest.siteUrl)));
@@ -408,7 +408,10 @@ assert.ok(home.includes('https://www.amazon.fr/dp/B07WGJ1JNW?tag=drackk04-21'),'
 const shopperCollections=[
   {slug:'montres-femme-accessibles',ids:['casio-ltp1302','skmei-1874','casio-la-20wh-4a1','casio-ltp-1234pgl-7a','curren-cur210','pagani-pd1776']},
   {slug:'montres-homme-style-accessible',ids:['casio-mtp-1302','casio-a168wa','casio-mdv107','skmei-2256','addiesdive-ad2030','pagani-pd1701']},
-  {slug:'montres-automatiques-selection',ids:['orient-bambino','citizen-tsuyosa','seiko-5','orient-bambino-38-cream','citizen-tsuyosa-37-blue','pagani-pd1751']}
+  {slug:'montres-automatiques-selection',ids:['orient-bambino','citizen-tsuyosa','seiko-5','orient-bambino-38-cream','citizen-tsuyosa-37-blue','pagani-pd1751']},
+  {slug:'montres-skmei',kind:'skmei',ids:['skmei-1251','skmei-1257','skmei-2056','skmei-2514','skmei-9156','skmei-9353','skmei-1874','skmei-2471','skmei-1220','skmei-2256'],compare:['skmei-2056','skmei-2256','skmei-9156']},
+  {slug:'montres-pagani-design',kind:'pagani',ids:['pagani-pd1701','pagani-pd1751','pagani-pd1776'],compare:['pagani-pd1701','pagani-pd1751','pagani-pd1776']},
+  {slug:'montres-numeriques',kind:'digital',ids:['skmei-1251','skmei-1257','skmei-2056','skmei-2514','skmei-2471','skmei-1220','casio-a158wea-1','casio-la-20wh-4a1','casio-f91w-1','casio-a168wg-9','casio-dw5600rl-1','casio-ae1200wh-1av'],compare:['skmei-2056','casio-f91w-1','skmei-2471']}
 ];
 const shopperProducts=new Map([...feed.products,...popularFeed.products].map(p=>[p.id,p]));
 for(const selection of shopperCollections){
@@ -427,6 +430,25 @@ for(const selection of shopperCollections){
   assert.equal(graph[0]['@type'],'CollectionPage');
   assert.equal(graph[0].url,manifest.siteUrl+path);
   assert.deepEqual(graph[1].itemListElement.map(x=>x.url),selection.ids.map(id=>manifest.siteUrl+'montres/'+id+'.html'));
+  if(selection.kind){
+    const source=[...shopperProducts.values()].filter(p=>selection.kind==='skmei'?p.brand==='SKMEI'
+      :selection.kind==='pagani'?p.brand==='Pagani Design'
+      :/numérique|digital/i.test(p.movement)).map(p=>p.id).sort();
+    assert.deepEqual([...selection.ids].sort(),source,'Curated brand and digital index must cover exact source selection: '+selection.slug);
+    assert.equal((html.match(/data-matrix-watch="/g)||[]).length,selection.ids.length,
+      'Complete factual table must include all and only indexed models: '+selection.slug);
+    assert.equal((html.match(/class="am-shopper-insight-grid"/g)||[]).length,1,
+      'Each high-intent page requires distinct helpful buying guidance beyond duplicated product cards');
+    assert.equal((html.match(/class="am-shopper-insight-grid/g)||[]).length,1);
+    assert.match(html,/role="region" tabindex="0" aria-label="Tableau comparatif des références"/,
+      'Large comparison table must scroll and retain keyboard focus');
+    assert.ok(html.includes('class="spec-matrix"'),'Source-backed fact matrix must have a caption and headings');
+    const compareHref='./toutes-les-montres.html?compare='+selection.compare.join(',')+'#comparer';
+    assert.equal(html.split('href="'+compareHref+'"').length-1,2,
+      'Two one-tap links must compare three documented exact models: '+selection.slug);
+    assert.doesNotMatch(html,/Acheté par|ventes Amazon|noté [45]\/5|stock limité/i,
+      'No invented sales ranks, ratings or urgency on search-intent collections');
+  }
   for(const id of selection.ids){
     const p=shopperProducts.get(id);
     assert.ok(p,'Unknown watch in curated collection: '+id);
@@ -753,7 +775,7 @@ for(const name of ['revue-photo.html','revue-photo.js','revue-photo.css']){
 }
 assert.ok(existsSync(resolve(root,'seo-watch-art.js')),'SEO watch illustrations script is required');
 const sitemap=read('sitemap.xml');
-assert.equal((sitemap.match(/<loc>/g)||[]).length,71);
+assert.equal((sitemap.match(/<loc>/g)||[]).length,74);
 const comparisons=JSON.parse(read('comparaisons-montres.json'));
 assert.equal(comparisons.version,1);
 assert.equal(comparisons.comparisons.length,4);
@@ -875,4 +897,4 @@ assert.ok(read('analytics.js').includes("merchantHosts=new Set([")&&read('analyt
 assert.ok(privacy.includes('chez Render'),'Privacy notice must identify actual host');
 const guide=read('montres/guide-choisir-montre.html');
 assert.match(guide,/<h1>Comment choisir une montre/);
-console.log('SEO validation OK: 15 model pages, 3 categories, 4 guides, 4 comparisons, transparent editorial method, 13 Amazon links, 71 sitemap URLs, 37 individual source-backed product pages and genuine hero LCP preload');
+console.log('SEO validation OK: 15 model pages, 6 shopper collections, 3 core categories, 4 guides, 4 comparisons, 13 Amazon links, 74 sitemap URLs, 37 source-backed detailed product pages and genuine hero LCP preload');
