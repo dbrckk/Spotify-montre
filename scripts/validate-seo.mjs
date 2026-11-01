@@ -226,6 +226,18 @@ assert.deepEqual(new Set(unified.products.map(p=>p.id)),
   new Set([...feed.products,...popularFeed.products].map(p=>p.id)),
   'The advisor and the unified storefront cannot silently omit a model');
 const unifiedPath='montres/toutes-les-montres.html';
+for(const watch of JSON.parse(read('selection-populaires.json')).products){
+  const html=read('montres/'+watch.id+'.html');
+  assert.ok(html.includes('class="am-extra-factual-table"'),'Missing comparison on '+watch.id);
+  assert.ok(html.includes('class="am-extra-factual-scroll" role="region" tabindex="0"'),
+    'Accessible comparison required: '+watch.id);
+  assert.ok(html.includes('href="../extra-factual-comparison.css"'),'Missing comparison CSS: '+watch.id);
+  const table=html.split('<table class="am-extra-factual-table">')[1]?.split('</table>')[0];
+  assert.ok(table,'Missing table: '+watch.id);
+  assert.equal(table.split('<th scope="col">').length-1,5,'Five headings including labels: '+watch.id);
+  assert.equal(table.split('<th scope="row">').length-1,4,'Four source facts: '+watch.id);
+  assert.ok(table.includes('Modèle consulté'),'Current model label required: '+watch.id);
+}
 const unifiedHtml=read(unifiedPath);
 assert.ok(manifest.paths.includes(manifest.siteUrl+unifiedPath),'Unified page canonical in sitemap');
 assert.ok(unifiedHtml.includes('rel="canonical" href="'+manifest.siteUrl+unifiedPath+'"'));
