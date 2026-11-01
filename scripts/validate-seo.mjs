@@ -12,8 +12,8 @@ const manifest=JSON.parse(read('seo-manifest.json'));
 assert.equal(manifest.productCount,15);
 assert.equal(manifest.popularAdditionalCount,37,'37 researched models complement the 15 photo-backed core products');
 assert.equal(manifest.popularDetailCount,37,'Every supplemental model requires a dedicated factual landing page');
-assert.equal(manifest.popularAffiliateDirectLinks,manifest.affiliateActive?3:0,'Only source-verified supplementary ASINs may become direct product links');
-assert.equal(manifest.popularAffiliateSearchLinks,manifest.affiliateActive?34:0,'All remaining supplemental products require labeled Amazon searches');
+assert.equal(manifest.popularAffiliateDirectLinks,manifest.affiliateActive?5:0,'Only source-verified supplementary ASINs may become direct product links');
+assert.equal(manifest.popularAffiliateSearchLinks,manifest.affiliateActive?32:0,'All remaining supplemental products require labeled Amazon searches');
 const insightData=JSON.parse(read('editorial-insights.json'));
 assert.equal(insightData.version,1);
 assert.equal(Object.keys(insightData.products).length,15,'15 unique editorial briefs required');
@@ -187,10 +187,19 @@ assert.equal((home.match(/rel="canonical"/g)||[]).length,1,'Homepage has exactly
 // source-confirmed Amazon.fr ASINs can become direct product links.
 const exactPopular=JSON.parse(readFileSync(resolve(root,'../research/amazon-fr-popular-verified.json'),'utf8'));
 const exactPopularLinks=exactPopular.verifiedProducts;
-assert.equal(Object.keys(exactPopularLinks).length,3,'ASIN promotion requires a source-verified registry entry');
+assert.equal(Object.keys(exactPopularLinks).length,5,'ASIN promotion requires a source-verified registry entry');
 assert.equal(exactPopularLinks['casio-gw-m5610u-1'].asin,'B09BCPP68Q','Actual Amazon.fr G-SHOCK source code must be used');
 assert.equal(exactPopularLinks['casio-f91w-1'].asin,'B000J34HN4','Casio F-91W documented Amazon.fr ASIN');
 assert.equal(exactPopularLinks['casio-a168wg-9'].asin,'B002LAS086','Casio vintage gold documented Amazon.fr ASIN');
+assert.equal(exactPopularLinks['casio-a158wea-1'].asin,'B000GAYQJ0','Casio A158 silver exact regional listing and Amazon.fr ASIN');
+assert.equal(exactPopularLinks['casio-ga-2100-1a1'].asin,'B07WGJ1JNW','GA-2100 blackout G-SHOCK exact regional listing and Amazon.fr ASIN');
+for(const id of ['casio-a158wea-1','casio-ga-2100-1a1']){
+  const match=exactPopularLinks[id];
+  assert.equal(match.verifiedAt,'2026-11-01','The evidence is dated for '+id);
+  assert.ok(match.evidenceListingTitle.includes(match.marketplaceModel),'Amazon title must contain exact regional model '+id);
+  assert.ok(match.evidenceUrl.endsWith('/dp/'+match.asin),'Evidence URL must point to exact verified ASIN '+id);
+  assert.match(match.corroborationUrl,/^https:\/\/www\.bfmtv\.com\/pratique\//,'Independent article must corroborate exact reference '+id);
+}
 const popularFeed=JSON.parse(read('selection-populaires.json'));
 const approvedPopularPhotos=loadApprovedPopularPhotos({root,picks:popularFeed.products});
 
@@ -259,8 +268,10 @@ assert.doesNotMatch(home,/src="\.\.\/popular-filters\.js"/,'Homepage must not lo
 assert.ok(home.includes('id="pick-casio-gw-m5610u-1"'),'Verified Amazon G-SHOCK must be featured on homepage');
 assert.ok(home.includes('https://www.amazon.fr/dp/B09BCPP68Q?tag=drackk04-21'),'Home feature must link to the verified G-SHOCK ASIN');
 assert.equal((home.match(/data-amazon-product="casio-gw-m5610u-1"/g)||[]).length,1,'Only one direct Amazon supplemental CTA should be featured');
-assert.equal((home.match(/data-amazon-search-id=/g)||[]).length,6,'Six other homepage features retain clearly labeled Amazon search links');
+assert.equal((home.match(/data-amazon-search-id=/g)||[]).length,5,'Five other homepage features retain clearly labeled Amazon search links');
 assert.equal((home.match(/data-amazon-product="casio-f91w-1"/g)||[]).length,1,'F-91W featured exact-model Amazon referral');
+assert.equal((home.match(/data-amazon-product="casio-ga-2100-1a1"/g)||[]).length,1,'GA-2100 featured exact-model Amazon referral');
+assert.ok(home.includes('https://www.amazon.fr/dp/B07WGJ1JNW?tag=drackk04-21'),'Homepage must link to source-backed GA-2100 listing');
 
 const shopperCollections=[
   {slug:'montres-femme-accessibles',ids:['casio-ltp1302','skmei-1874','casio-la-20wh-4a1','casio-ltp-1234pgl-7a','curren-cur210','pagani-pd1776']},
