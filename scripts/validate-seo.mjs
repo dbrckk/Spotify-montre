@@ -273,6 +273,36 @@ for(const watch of unified.products){
   if(watch.merchantKind===null)assert.ok(!card.includes('lien rémunéré</a>'),
     'Source-only cards must not imply payable merchant offers: '+watch.id);
 }
+// The visible editorial showroom is generated from six real, photographed
+// models, never a purported bestseller or a synthetic product offer.
+const spotlightIds=['skmei-2056','skmei-2514','addiesdive-ad2030',
+  'pagani-pd1701','casio-mtp-1302','citizen-tsuyosa'];
+assert.equal((unifiedHtml.match(/class="ud-feature-card"/g)||[]).length,6,
+  'Exactly six real watch photographs must appear in the editorial showroom');
+assert.ok(unifiedHtml.includes('id="udSpotlightTitle"'),'Editorial showroom must be accessible');
+assert.ok(!unifiedHtml.includes('Meilleures ventes garanties')&&!unifiedHtml.includes('Stock confirmé'),
+  'A curated visual collection cannot invent sales or inventory');
+for(const id of spotlightIds){
+  const p=unified.products.find(item=>item.id===id);
+  assert.ok(p?.photoUrl,'Spotlight must only use a source-attested exact photograph: '+id);
+  const start=unifiedHtml.indexOf('<article class="ud-feature-card" data-feature-id="'+id+'"');
+  const end=unifiedHtml.indexOf('</article>',start);
+  assert.ok(start>=0&&end>start,'Missing editorial card: '+id);
+  const card=unifiedHtml.slice(start,end);
+  assert.ok(card.includes('../'+p.photoUrl.slice(2)),'Model photo must match the exact SKU: '+id);
+  assert.ok(card.includes('href="./'+id+'.html"'),'Model facts and sources must remain accessible: '+id);
+  if(p.merchantKind==='direct'){
+    assert.ok(card.includes(p.merchantUrl.replaceAll('&','&amp;'))||card.includes(p.merchantUrl),
+      'Exact merchant destination must not be substituted: '+id);
+    assert.ok(card.includes('nofollow sponsored')&&card.includes('lien rémunéré'),
+      'Confirmed direct referrals must be visibly marked compensated: '+id);
+  }else{
+    assert.ok(card.includes(p.officialUrl.replaceAll('&','&amp;'))||card.includes(p.officialUrl),
+      'The manufacturer, not an unverified Amazon search, is the primary exit: '+id);
+    assert.ok(!card.includes('sponsored')&&card.includes('lien non rémunéré'),
+      'A manufacturer-only exit cannot be labelled as paid: '+id);
+  }
+}
 assert.ok(unifiedHtml.includes('id="udViewTools" class="ud-view-tools" hidden'),
   'Display controls must not be shown without a working JavaScript catalogue');
 assert.ok(unifiedHtml.includes('id="udViewLarge" aria-pressed="false"'),
