@@ -89,7 +89,7 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       +'<dl class="am-extra-facts">'+facts+'</dl>'
       +'<p class="am-extra-reference"><span>Référence à retrouver chez le marchand</span><strong>'+e(name)+'</strong></p>'
       +'<p class="am-extra-approval">À vérifier auprès du vendeur : référence exacte, variante, prix, disponibilité, garantie et conditions de retour. Nous ne vendons pas directement ce produit.</p>'
-      +(affiliates.enabled?'<p class="am-extra-link-status '+(direct?'am-extra-link-direct':'am-extra-link-search')+'"><strong>'+(direct?'Fiche Amazon.fr correspondant au code modèle':'Recherche Amazon.fr — modèle non garanti')+'</strong><span>'+(direct?'Lien associé à un ASIN documenté. Contrôlez la variante, le vendeur et le stock.':'Les résultats peuvent contenir d’autres montres. Vérifiez le code affiché ci-dessus avant l’achat.')+'</span></p>':'')
+      +(affiliates.enabled?'<p class="am-extra-link-status '+(direct?'am-extra-link-direct':'am-extra-link-search')+'"><strong>'+(direct?'Fiche Amazon.fr correspondant au code modèle':'Recherche Amazon.fr — modèle non garanti')+'</strong><span>'+(direct?'Lien associé à un ASIN documenté. Contrôlez la variante, le vendeur et le stock.':'Les résultats peuvent contenir d’autres montres. Vérifiez le code affiché ci-dessus avant l’achat.')+'</span>'+(direct?.marketplaceVariant?'<span class="am-extra-merchant-variant"><strong>Variante de la fiche Amazon :</strong> '+e(direct.marketplaceVariant)+'</span>':'')+'</p>':'')
       +'<div class="am-extra-actions">'+actions+'</div>'
       +(affiliates.enabled
         ?'<p class="am-extra-disclosure">Lien rémunéré Amazon.fr : une commission peut nous être versée pour un achat éligible. '
