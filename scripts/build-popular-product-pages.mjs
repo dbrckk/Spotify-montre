@@ -54,6 +54,12 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       ?'Ce modèle est proposé comme une alternative de style, et non comme une meilleure vente mesurée.'
       :'Le signal de popularité provient uniquement de la source citée. Il ne s’agit pas d’un classement Amazon.fr ni d’un volume de ventes nationales.';
     const suggestions=relatedWatches(p);
+    // All three IDs are drawn from this exact source-backed catalog.
+    // Comparison remains available without JavaScript from a regular link.
+    const compareIds=[p.id,...suggestions.slice(0,2).map(q=>q.id)];
+    if(new Set(compareIds).size!==3||compareIds.some(id=>!products.some(q=>q.id===id)))
+      throw Error('Invalid exact-model comparison trio: '+p.id);
+    const compareUrl='./toutes-les-montres.html?compare='+compareIds.join(',')+'#comparer';
     const facts=keyFacts.map(([label,value])=>
       '<div class="am-extra-fact"><dt>'+e(label)+'</dt><dd>'+e(value)+'</dd></div>').join('');
     const direct=verifiedLinks.get(p.id);
@@ -77,14 +83,15 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
     }).join('');
     const main='<div class="wrap am-extra-page">'
       +'<nav class="crumb" aria-label="Fil d’Ariane"><a href="../index.html">Collection</a> / <a href="./modeles-populaires.html">'+products.length+' modèles complémentaires</a> / '+e(name)+'</nav>'
-      +'<article class="am-extra-product" data-popular-watch-id="'+e(p.id)+'">'
+      +'<article class="am-extra-product" data-popular-watch-id="'+e(p.id)+'" data-brand="'+e(p.brand)+'" data-model="'+e(p.model)+'" data-official-url="'+e(p.officialUrl)+'">'
       +'<div class="am-extra-hero">'
-      +'<div class="am-extra-art am-pick-'+e(p.style)+'" role="group" aria-label="'+(photo?'Photo du modèle exact, droits de publication déclarés':'Composition graphique non contractuelle, sans photographie de cette montre')+'">'
+      +'<div class="am-extra-art am-pick-'+e(p.style)+(photo?' am-extra-art-with-photo':'')+'" role="group" aria-label="'+(photo?'Photo du modèle exact, droits de publication déclarés':'Composition graphique non contractuelle, sans photographie de cette montre')+'">'
       +(photo?'<img class="am-extra-licensed-photo" src="../'+e(photo.url)+'" alt="Montre '+e(name)+'" decoding="async" loading="eager">':'')
       +'<span class="am-extra-art-kicker">'+e(p.category)+'</span><span class="am-extra-art-brand">'+e(p.brand)+'</span>'
       +'<span class="am-extra-art-model">'+e(p.model)+'</span>'
       +(!photo&&p.brand==='SKMEI'?'<span class="am-budget-watch am-budget-watch-large" aria-hidden="true"><span class="am-budget-dial"></span></span>':'')
       +'<span class="am-extra-art-label">'+(photo?'Photo de marque · accord déclaré · '+e(photo.rightsHolder):'Une référence à découvrir · photographie exacte chez le vendeur ou la marque')+'</span>'
+      +(photo?'<button type="button" class="am-extra-zoom" data-extra-zoom-id="'+e(p.id)+'" aria-label="Agrandir la photo du modèle '+e(name)+'" hidden>Agrandir la photo du modèle</button>':'')
       +'</div>'
       +'<div class="am-extra-intro"><p class="am-extra-overline">'+e(tierNames[p.tier])+' / '+e(category)+'</p>'
       +'<h1>'+e(name)+'</h1><p class="am-extra-subtitle">'+e(p.lead)+'</p>'
@@ -93,6 +100,7 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       +'<p class="am-extra-approval">À vérifier auprès du vendeur : référence exacte, variante, prix, disponibilité, garantie et conditions de retour. Nous ne vendons pas directement ce produit.</p>'
       +(affiliates.enabled?'<p class="am-extra-link-status '+(direct?'am-extra-link-direct':'am-extra-link-search')+'"><strong>'+(direct?'Fiche Amazon.fr correspondant au code modèle':'Recherche Amazon.fr — modèle non garanti')+'</strong><span>'+(direct?'Lien associé à un ASIN documenté. Contrôlez la variante, le vendeur et le stock.':'Les résultats peuvent contenir d’autres montres. Vérifiez le code affiché ci-dessus avant l’achat.')+'</span>'+(direct?.marketplaceVariant?'<span class="am-extra-merchant-variant"><strong>Variante de la fiche Amazon :</strong> '+e(direct.marketplaceVariant)+'</span>':'')+'</p>':'')
       +'<div class="am-extra-actions">'+actions+'</div>'
+      +'<a class="am-extra-compare-cta" href="'+e(compareUrl)+'" data-compare-source="'+e(p.id)+'">Comparer avec '+e(suggestions[0].brand+' '+suggestions[0].model)+' et '+e(suggestions[1].brand+' '+suggestions[1].model)+'</a>'
       +(affiliates.enabled
         ?'<p class="am-extra-disclosure">Lien rémunéré Amazon.fr : une commission peut nous être versée pour un achat éligible. '
           +(direct?'Correspondance du code modèle vérifiée le '+e(direct.verifiedAt)+' sur une fiche Amazon.fr ; prix, vendeur et disponibilité restent à contrôler lors de la visite.':'Le lien ouvre des résultats de recherche pouvant inclure d’autres références ou variantes.')
@@ -118,7 +126,8 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       +'<p>'+(photo?'L’éditeur déclare disposer de l’autorisation commerciale de la marque. Cette autorisation n’a pas été vérifiée indépendamment.':'Les photos sont consultables chez la marque ou le vendeur cité : nous ne les republions pas sans autorisation.')+' La mention de meilleures ventes, lorsqu’elle existe, n’atteste pas le classement de ce modèle sur Amazon.fr.</p></section>'
       +'<section id="comparables" class="am-extra-related" aria-labelledby="am-extra-related-heading">'
       +'<h2 id="am-extra-related-heading">Trois montres dans le même esprit</h2><p>Suggestions établies à partir de la marque, du style et du mouvement indiqués dans nos fiches. Elles ne constituent ni des essais comparatifs ni un classement de qualité ; seules les photos déclarées autorisées sont affichées.</p>'
-      +'<ul>'+relatedItems+'</ul><a href="./toutes-les-montres.html">Comparer les 52 montres</a></section>'
+      +'<ul>'+relatedItems+'</ul><div class="am-extra-related-cta"><a class="am-extra-compare-cta" href="'+e(compareUrl)+'" data-compare-source="'+e(p.id)+'">Comparer ces références à cette montre</a>'
+      +'<a href="./toutes-les-montres.html">Comparer les 52 montres</a></div></section>'
       +'<section id="verifications" class="am-extra-checks"><h2>Avant de commander</h2>'
       +'<ol><li>Confirmer le code '+e(p.model)+' et la couleur auprès du vendeur : une fiche de recherche peut afficher d’autres variantes.</li>'
       +'<li>Vérifier les dimensions du boîtier, le réglage et les matériaux sur la fiche de référence de '+e(p.brand)+'.</li>'
@@ -141,7 +150,9 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
     const description=(name+' : '+p.lead+' Caractéristiques, sources fabricant et conseils avant achat.').slice(0,185);
     const html=page(pageHead({title:name+' : caractéristiques et photos fabricant | Atelier Montres',
       description,path,type:'product'}),main,graph)
-      .replace('</head>','<link rel="stylesheet" href="../popular-picks.css"></head>');
+      .replace('</head>','<link rel="stylesheet" href="../popular-picks.css">'
+        +(photo?'<link rel="stylesheet" href="../photo-zoom.css"><script defer src="../photo-zoom.js"></script><script defer src="../extra-product-viewer.js"></script>':'')
+        +'</head>');
     writeFileSync(join(root,path),html);
     paths.push(path);
   }

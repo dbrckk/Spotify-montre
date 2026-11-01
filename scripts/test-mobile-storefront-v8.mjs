@@ -272,11 +272,22 @@ try{
      'Related images must be source-registered real product photos: '+watch.id);
    assert.ok((await popularPage.locator('.am-extra-reference').innerText()).includes(watch.model),
      'Exact manufacturer reference must be displayed before external purchase: '+watch.id);
-   assert.equal(await popularPage.locator('.am-extra-related>a[href="./toutes-les-montres.html"]').count(),1,
+   assert.equal(await popularPage.locator('.am-extra-related-cta>a[href="./toutes-les-montres.html"]').count(),1,
      'Recommendations must lead to the complete 52-watch comparison: '+watch.id);
+   const expectedCompare='./toutes-les-montres.html?compare='+
+     [watch.id,...relatedIds.slice(0,2)].join(',')+'#comparer';
+   const productCompare=popularPage.locator('a.am-extra-compare-cta[data-compare-source="'+watch.id+'"]');
+   assert.equal(await productCompare.count(),2,
+     'Visible one-tap comparison near both purchase paths and related models: '+watch.id);
+   for(const href of await productCompare.evaluateAll(nodes=>nodes.map(x=>x.getAttribute('href'))))
+     assert.equal(href,expectedCompare,'Compare only these 3 real documented models: '+watch.id);
    const expectedImage=approvedWatchPhotos[watch.id];
    assert.equal(await popularPage.locator('img.am-extra-licensed-photo').count(),expectedImage?1:0,
      'Only registered exact-model imagery may be published: '+watch.id);
+   assert.equal(await popularPage.locator('button.am-extra-zoom').count(),expectedImage?1:0,
+     'Zoom control must exist only for registered exact-model local photography: '+watch.id);
+   assert.equal(await popularPage.locator('.am-extra-art-with-photo').count(),expectedImage?1:0,
+     'Premium hero must accurately distinguish the locally sourced product photo: '+watch.id);
    const aiArt=visualResearch[watch.id];
    assert.equal(await popularPage.locator('section.am-ai-editorial').count(),aiArt?1:0,
      'AI design section is shown only for the nine recorded SKMEI watches: '+watch.id);
@@ -291,6 +302,20 @@ try{
      assert.ok((await img.getAttribute('src')).includes('assets/watches-popular/'+watch.id+'.webp'));
      assert.ok(await img.evaluate(el=>el.complete&&el.naturalWidth>300),
        'Published manufacturer photo must decode correctly: '+watch.id);
+     if(['skmei-2056','pagani-pd1701'].includes(watch.id)){
+       await popularPage.locator('button.am-extra-zoom').click();
+       const dlg=popularPage.locator('#amPhotoDialog');
+       await dlg.waitFor({state:'visible'});
+       assert.match(await dlg.locator('h2.am-photo-title').innerText(),new RegExp(watch.model,'i'),
+         'The modal must identify the exact original product: '+watch.id);
+       const full=dlg.locator('img.am-photo-large');
+       await full.waitFor({state:'visible'});
+       assert.ok(await full.evaluate((image,id)=>image.naturalWidth>300&&
+         image.currentSrc.includes('/assets/watches-popular/'+id+'.webp'),watch.id),
+         'The photo viewer must display a local exact-model WebP, never an IA illustration: '+watch.id);
+       await popularPage.keyboard.press('Escape');
+       await dlg.waitFor({state:'hidden'});
+     }
    }
  assert.ok(verifiedPopular[watch.id]||watch.id!=='casio-gw-m5610u-1',
    'The confirmed reference must exist in the verified Amazon registry');
@@ -330,6 +355,15 @@ try{
      await popularPage.screenshot({path:'artifacts/mobile-extra-'+watch.id+'.png',fullPage:true});
    }
  }
+ // One-tap comparison from an actual SKMEI detail must navigate to the same
+ // fact-backed 52-watch matrix and preselect exactly three real references.
+ await popularPage.goto(new URL('/montres/skmei-2056.html',base).href,{waitUntil:'domcontentloaded'});
+ await popularPage.locator('article.am-extra-product a.am-extra-compare-cta').first().click();
+ await popularPage.locator('#udCompareTable table').waitFor({state:'visible',timeout:20000});
+ assert.equal(await popularPage.locator('#udCompareTable th[scope=col]').count(),4,
+   'Watch detail CTA must truly open a source-backed three-model comparison');
+ assert.ok(new URL(popularPage.url()).searchParams.get('compare')?.startsWith('skmei-2056,'),
+   'Original SKMEI model must be the first reference in comparison');
  await popularPage.setViewportSize({width:320,height:760});
  await popularPage.goto(new URL('/montres/casio-ga-2100-1a1.html',base).href,{waitUntil:'domcontentloaded'});
  const narrow=await popularPage.evaluate(()=>({
