@@ -109,6 +109,26 @@
 .am-extra-related li{min-width:0;display:flex;flex-direction:column;gap:9px;background:#fffefa;border:1px solid #d9ded1;padding:18px}
 .am-extra-related li a{font:700 15px/1.4 system-ui,sans-serif;overflow-wrap:anywhere}
 .am-extra-related li span{font:400 13px/1.65 system-ui,sans-serif;color:#435b4b}
+
+/* Reference-first conversion: do not confuse a search with an exact product. */
+.am-extra-reference{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px;margin:0 0 12px;padding:12px 15px;border:1px solid #d4dccc;background:#eef1e8}
+.am-extra-reference span{font:650 12px/1.5 system-ui,sans-serif;color:#38563e}
+.am-extra-reference strong{font:750 15px/1.5 system-ui,sans-serif;color:#1c3f2a;overflow-wrap:anywhere}
+.am-extra-link-status{display:flex;flex-direction:column;gap:5px;margin:0 0 11px;padding:12px 15px;border:1px solid #d5d4c7;border-left:4px solid #8d754e;background:#faf7ef;color:#3c4c3e}
+.am-extra-link-status strong{font:750 13px/1.5 system-ui,sans-serif}
+.am-extra-link-status span{font:400 12px/1.6 system-ui,sans-serif}
+.am-extra-link-direct{border-left-color:#35644b;background:#eff4ec}
+.am-extra-related li{padding:11px}
+.am-extra-related li .am-extra-related-thumb{display:grid;place-items:center;width:100%;height:160px;margin-bottom:3px;overflow:hidden;background:linear-gradient(145deg,#f7f7f1,#e4ebe2);text-decoration:none;border:1px solid #e1e4d9}
+.am-extra-related li .am-extra-related-thumb img{width:100%;height:100%;object-fit:contain;padding:8px}
+.am-extra-related li .am-extra-related-fallback{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;width:100%;height:100%;padding:12px;text-align:center;color:#d9eadc;background:linear-gradient(145deg,#436052,#243f35)}
+.am-extra-related li .am-extra-related-fallback span{color:#e6e9d9;font:700 11px/1.35 system-ui,sans-serif;letter-spacing:.1em}
+.am-extra-related li .am-extra-related-fallback strong{font:500 25px/1.15 Georgia,serif;color:#fff;overflow-wrap:anywhere}
+.am-extra-related li .am-extra-related-fallback small{font:450 11px/1.4 system-ui,sans-serif;color:#e1e7dc}
+.am-extra-related li .am-extra-related-label{color:#6b532d;font:750 11px/1.45 system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase}
+.am-extra-related li .am-extra-related-name{min-height:42px;display:inline-flex;align-items:center;font:750 15px/1.45 system-ui,sans-serif}
+.am-extra-related li .am-extra-related-thumb:focus-visible{outline:3px solid #b9852b;outline-offset:3px}
+
 .am-extra-related>a{display:inline-flex;align-items:center;min-height:44px;font:700 14px/1.45 system-ui,sans-serif}
 .am-extra-checks ol{padding-left:24px;max-width:90ch}
 .am-extra-checks li{padding-left:5px;margin-bottom:8px}
