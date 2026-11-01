@@ -72,7 +72,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
       ?link(direct.url,'Voir le modèle exact sur Amazon.fr · lien rémunéré',true,p.id,'product')
       :link(amazonSearch(p),'Rechercher sur Amazon.fr · lien rémunéré',true,p.id,'search');
   };
-  const detailPaths=buildPopularProductPages({root,products:picks,coreProducts:existingProducts,affiliates,amazonPartnerTag,pageHead,page,e,u,link,amazonSearch,tierNames,affiliateLink,partnerLink,verifiedLinks,approvedPhotos,aiVisuals});
+  const detailPaths=buildPopularProductPages({root,products:picks,coreProducts:existingProducts,affiliates,amazonPartnerTag,pageHead,page,e,u,link,amazonSearch,tierNames,affiliateLink,partnerLink,partnerOffers,verifiedLinks,approvedPhotos,aiVisuals});
   const movementKind=p=>p.movement.startsWith('Automatique')?'automatic':p.movement.startsWith('Quartz solaire')?'solar':'quartz';
   const card=(p,front=false)=>{
     const photo=approvedPhotos.get(p.id);
@@ -108,7 +108,10 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     ?approvedPhotos.size+' photographies de modèles supplémentaires sont publiées sur la base d’autorisations déclarées par l’éditeur, non vérifiées indépendamment. Les autres photos restent consultables sur les sites sources.'
     :'Aucune photographie supplémentaire n’est publiée sans déclaration de droits de reproduction; les photos exactes restent sur les sites sources.';
   const globalDisclaimer='Ces références complètent les 15 modèles du comparateur. Certaines figurent sur des pages de meilleures ventes de fabricants ou de distributeurs ; ce ne sont pas les meilleures ventes mesurées sur Amazon.fr. Aucun tarif, stock, note ou volume de ventes n’est déduit de ces sources. '+photoDisclaimer+'';
-  const affiliateNote=affiliates.enabled?'Les liens Amazon portent notre identifiant Partenaires. Une fiche directe dispose d’une correspondance de référence documentée ; les autres liens mènent à une recherche. Aucun lien ne garantit la disponibilité, le tarif ou l’approbation définitive de notre compte.':'Aucun lien Amazon rémunéré n’est activé.';
+  const affiliateNote=(affiliates.enabled
+    ?'Les liens Amazon portent notre identifiant Partenaires. Une fiche directe dispose d’une correspondance de référence documentée ; les autres liens mènent à une recherche. Aucun lien ne garantit la disponibilité, le tarif ou l’approbation définitive de notre compte.'
+    :'Aucun lien Amazon rémunéré n’est activé.')
+    +(partnerOffers.size?' Des liens Awin rémunérés supplémentaires sont explicitement identifiés sur '+partnerOffers.size+' référence(s), sans garantie d’achat ou de commission.':'');
   const teaser='<section class="am-picks" id="modeles-populaires" aria-labelledby="am-picks-title"><div class="wrap">'
     +'<div class="am-picks-heading"><p class="overline kicker">01 · MODÈLES COMPLÉMENTAIRES</p>'
     +'<h2 id="am-picks-title">Des références remarquées, au-delà des 15 montres comparées.</h2>'
