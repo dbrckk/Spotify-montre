@@ -35,6 +35,19 @@ Sur le catalogue unifié des **52 montres**, le sélecteur « Ajouter à la comp
 
 La suite `scripts/test-unified-compare-tray.mjs` est exécutée en Chromium Android et desktop dans le workflow `test-premium-mobile.yml`. Elle couvre le préchargement depuis l’URL, le retrait unitaire, les filtres, la limite de trois, l’effacement, le lien direct au tableau et le scénario sans JavaScript. Les captures restent des artefacts de CI, pas des images de montres non licenciées.
 
+## Présentation visuelle premium — 1er novembre 2026
+
+Le catalogue unique propose désormais une présentation **plus photographique sans inventer de montres**. Les 15 photographies du catalogue principal et les 21 photographies complémentaires sont publiées exclusivement selon les registres d'autorisations déclarées et les contrôles de fichiers locaux existants. La déclaration du propriétaire n'est **pas une vérification juridique indépendante** des droits ; ce statut reste explicite.
+
+- **Visionneuse existante réutilisée :** chaque carte dotée d'une photographie locale validée présente un bouton **Agrandir**. La fenêtre modale du projet affiche la référence réelle, permet le zoom ×2, les flèches clavier, Échap et le glissement tactile entre les **36 montres photographiées**. Les sources sont uniquement les fichiers WebP locaux déjà autorisés par déclaration ; une photo manquante n'est jamais remplacée silencieusement par une image externe.
+- **16 fiches sans photo publiée :** elles conservent une composition typographique identifiant la marque et le modèle, avec la mention **« Aucune photographie publiée pour cette référence »** ; pas d'image IA ressemblant à une vraie photo produit.
+- **Filtre « Photographies » :** parmi les 52 modèles, les visiteurs peuvent limiter les résultats aux 36 cartes avec photographie ou aux 16 sans photographie. Le filtre fonctionne avec les six critères préexistants, même lors d'une comparaison en cours, et son état est partageable dans l'URL via `?visual=photo`.
+- **Grille / grands visuels :** la grille compacte originale reste le choix initial, tandis que **« Grands visuels »** agrandit la scène produit : trois colonnes larges sur PC, deux sur tablette et une colonne sur mobile. Ce choix est partageable via `?view=large` et l'interface respecte les préférences de mouvement réduit.
+- **Chargement :** les 15 photographies principales utilisent désormais les variantes WebP responsives enregistrées lorsqu'elles existent (`srcset`/ `sizes`), sans recréer ni télécharger de nouvelles photos. Les 21 photos complémentaires déjà compressées restent en WebP local. Les images sont en chargement différé.
+- **Fiabilité :** sans JavaScript ou si le catalogue JSON ne peut être validé, les sélecteurs de zoom et de présentation restent masqués, mais les 52 fiches HTML restent accessibles.
+
+Les tests Playwright Android sur une largeur de **393 px** couvrent les filtres, les 36/16 cartes, la conservation de la sélection et de la vue par URL, l'ouverture d'une véritable image SKMEI 2056, Échap, le débordement horizontal, et le mode sans JavaScript. Le contrôle SEO refuse toute divergence de provenance (photo publiée versus source déclarée), et le workflow Android lance ces tests avant fusion.
+
 ## Transparence commerciale
 
 - Vraies photos locales contrôlées par les registres et permissions déclarées. Les rendus IA ne sont **pas** employés comme photos produit exactes dans le catalogue unifié.
