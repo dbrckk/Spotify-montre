@@ -36,6 +36,11 @@ jobs:
           git add docs/deploy-package-*.json
           if ! git diff --cached --quiet; then
             git commit -m 'build: static storefront plus 15 real watch images ready to deploy [skip ci]'
+            # The generator may also modify source HTML or leave untracked build files.
+            # Only the committed docs/deploy-package-*.json outputs belong in this push.
+            # Rebase requires a clean worktree; discard ephemeral generated files first.
+            git reset --hard HEAD
+            git clean -fd
             git fetch origin main
             git rebase -X theirs origin/main
             git push origin HEAD:main
