@@ -111,7 +111,7 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
   const featured=featureIds.map(id=>normalized.find(p=>p.id===id));
   if(featured.some(p=>!p||!p.photoUrl||!p.detailUrl||!p.officialUrl))
     throw Error('Editorial showroom must contain six documented, photographed references');
-  if(featured.filter(p=>p.merchantKind==='direct').length<3)
+  if(affiliates.enabled&&featured.filter(p=>p.merchantKind==='direct').length<3)
     throw Error('Editorial showroom requires at least three identified merchant listings');
   const featureCard=p=>{
     const direct=p.merchantKind==='direct';
