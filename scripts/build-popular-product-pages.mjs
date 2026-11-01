@@ -58,7 +58,7 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       '<div class="am-extra-fact"><dt>'+e(label)+'</dt><dd>'+e(value)+'</dd></div>').join('');
     const direct=verifiedLinks.get(p.id);
     const actions=affiliateLink(p)
-      +link(p.officialUrl,p.brand==='SKMEI'?'Voir les photos et la fiche vendeur':'Voir les vraies photos et la fiche constructeur');
+      +link(p.officialUrl,p.brand==='SKMEI'?'Voir les photos et la fiche vendeur':'Voir les vraies photos et la fiche constructeur',false,p.id,'official');
     const source=link(p.marketEvidence.url,p.marketEvidence.label);
     const relatedItems=suggestions.map(q=>{
       const otherPhoto=approvedPhotos.get(q.id);
