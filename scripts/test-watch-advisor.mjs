@@ -66,6 +66,10 @@ assert.deepEqual(Array.from(ids(e.recommend(products,{},3))),Array.from(ids(feat
 const html=read('site/conseiller.html'),ui=read('site/conseiller.js'),css=read('site/conseiller.css');
 for(const id of ['advisorForm','advisorResults','advisorStatus','advisorSummary','advisorCriteria','advisorError','advisorReset'])assert.ok(html.includes('id="'+id+'"'),id);
 for(const value of ['essential','signature','prestige','sport','classic','minimal','retro','statement','quartz','automatic','eco-drive','compact','medium'])assert.ok(html.includes('value="'+value+'"'),value);
+assert.match(html,/href="\.\/montres\/toutes-les-montres\.html"/,'Advisor navigation must open all 52 watches');
+assert.match(html,/href="\.\/montres\/modeles-populaires\.html"/,'Advisor navigation must expose popular watches');
+assert.doesNotMatch(html,/href="\.\/affiliation\.html(?:#montres)?"/,'Advisor navigation must not lead back to the 15-watch legacy collection');
+assert.match(html,/Quatre choix simples/,'Advisor asks four questions, not three');
 assert.match(html,/id="advisorHeroArt"/);
 assert.match(html,/name="size"/);
 assert.match(html,/id="advisorCompare"/,'Shortlist requires a one-tap compare action');
