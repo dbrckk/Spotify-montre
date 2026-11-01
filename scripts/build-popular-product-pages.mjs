@@ -5,13 +5,35 @@ import {join} from 'node:path';
 // invented Amazon ASINs, or unverifiable prices. The existing 15 core models
 // continue to own the photo-backed interactive comparison experience.
 export function buildPopularProductPages({root,products,coreProducts,affiliates,pageHead,page,e,u,link,tierNames,affiliateLink,verifiedLinks,approvedPhotos,aiVisuals}){
-  const byId=new Map(coreProducts.map(p=>[p.id,p]));
-  const related={
-    sport:['casio-mdv107','seiko-5','hamilton-khaki'],
-    retro:['casio-a168wa','casio-mtp-b145','swatch-clearly'],
-    compact:['casio-ltp1302','orient-bambino','casio-a168wa'],
-    steel:['citizen-tsuyosa','tissot-prx-quartz','seiko-sharp'],
-    dress:['orient-bambino','citizen-openheart','hamilton-khaki']
+  // Recommendations are real, distinct watches from the same 37-model
+  // source catalogue, not the old static 15-watch lists. Keep the merchant
+  // verification registry separate: similarity does not imply product testing.
+  const movementFamily=value=>/automatique/i.test(value)?'automatic'
+    :/solaire|eco-drive/i.test(value)?'solar'
+    :/numérique|digital/i.test(value)?'digital'
+    :/chronographe/i.test(value)?'chrono':'quartz';
+  const relatedWatches=p=>{
+    const family=movementFamily(p.movement);
+    const ranked=products.filter(q=>q.id!==p.id).sort((a,b)=>{
+      const score=q=>(q.style===p.style?8:0)
+        +(q.brand===p.brand?9:0)
+        +(movementFamily(q.movement)===family?4:0)
+        +(q.tier===p.tier?2:0)
+        +(approvedPhotos.has(q.id)?1:0);
+      return score(b)-score(a)||a.id.localeCompare(b.id,'fr');
+    });
+    // Prioritize up to two different references of this manufacturer and
+    // ensure at least one alternative from another brand when possible.
+    const picks=ranked.filter(q=>q.brand===p.brand).slice(0,2);
+    const brandCounts=new Map(picks.map(q=>[q.brand,(picks.filter(x=>x.brand===q.brand)).length]));
+    for(const q of ranked){
+      if(picks.length===3)break;
+      if(picks.some(x=>x.id===q.id)||(brandCounts.get(q.brand)||0)>=2)continue;
+      picks.push(q);brandCounts.set(q.brand,(brandCounts.get(q.brand)||0)+1);
+    }
+    if(picks.length!==3||new Set(picks.map(q=>q.id)).size!==3||picks.some(q=>q.id===p.id))
+      throw Error('Three distinct source-backed related watches required: '+p.id);
+    return picks;
   };
   const paths=[];
   for(const p of products){
@@ -31,18 +53,26 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
     const ranking=p.marketEvidence.kind==='editorial'
       ?'Ce modèle est proposé comme une alternative de style, et non comme une meilleure vente mesurée.'
       :'Le signal de popularité provient uniquement de la source citée. Il ne s’agit pas d’un classement Amazon.fr ni d’un volume de ventes nationales.';
-    const suggestions=(related[p.style]||[]).map(id=>byId.get(id));
-    if(suggestions.length!==3||suggestions.some(x=>!x))throw Error('Missing source-backed core comparison for '+p.id);
+    const suggestions=relatedWatches(p);
     const facts=keyFacts.map(([label,value])=>
       '<div class="am-extra-fact"><dt>'+e(label)+'</dt><dd>'+e(value)+'</dd></div>').join('');
     const direct=verifiedLinks.get(p.id);
     const actions=affiliateLink(p)
       +link(p.officialUrl,p.brand==='SKMEI'?'Voir les photos et la fiche vendeur':'Voir les vraies photos et la fiche constructeur');
     const source=link(p.marketEvidence.url,p.marketEvidence.label);
-    const relatedItems=suggestions.map(q=>
-      '<li><a href="./'+e(q.id)+'.html"><strong>'+e(q.brand+' '+q.model)+'</strong></a>'
-      +'<span>'+e(q.description||q.title||'Consulter ses caractéristiques')+'</span></li>'
-    ).join('');
+    const relatedItems=suggestions.map(q=>{
+      const otherPhoto=approvedPhotos.get(q.id);
+      const reason=q.brand===p.brand?'Même marque'
+        :q.style===p.style?'Style proche'
+        :movementFamily(q.movement)===movementFamily(p.movement)?'Mouvement comparable':'Autre approche';
+      return '<li data-related-id="'+e(q.id)+'" data-related-reason="'+e(reason)+'">'
+        +'<a class="am-extra-related-thumb" href="./'+e(q.id)+'.html" aria-label="Voir la montre '+e(q.brand+' '+q.model)+'">'
+        +(otherPhoto?'<img loading="lazy" decoding="async" width="320" height="220" src="../'+e(otherPhoto.url)+'" alt="Photographie de '+e(q.brand+' '+q.model)+'">'
+          :'<span class="am-extra-related-fallback"><span>'+e(q.brand)+'</span><strong>'+e(q.model)+'</strong><small>Photo chez le vendeur</small></span>')
+        +'</a><span class="am-extra-related-label">'+e(reason)+'</span>'
+        +'<a class="am-extra-related-name" href="./'+e(q.id)+'.html">'+e(q.brand+' '+q.model)+'</a>'
+        +'<span>'+e(q.movement)+' · '+e(q.case)+'</span></li>';
+    }).join('');
     const main='<div class="wrap am-extra-page">'
       +'<nav class="crumb" aria-label="Fil d’Ariane"><a href="../index.html">Collection</a> / <a href="./modeles-populaires.html">'+products.length+' modèles complémentaires</a> / '+e(name)+'</nav>'
       +'<article class="am-extra-product" data-popular-watch-id="'+e(p.id)+'">'
@@ -57,7 +87,9 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       +'<div class="am-extra-intro"><p class="am-extra-overline">'+e(tierNames[p.tier])+' / '+e(category)+'</p>'
       +'<h1>'+e(name)+'</h1><p class="am-extra-subtitle">'+e(p.lead)+'</p>'
       +'<dl class="am-extra-facts">'+facts+'</dl>'
+      +'<p class="am-extra-reference"><span>Référence à retrouver chez le marchand</span><strong>'+e(name)+'</strong></p>'
       +'<p class="am-extra-approval">À vérifier auprès du vendeur : référence exacte, variante, prix, disponibilité, garantie et conditions de retour. Nous ne vendons pas directement ce produit.</p>'
+      +(affiliates.enabled?'<p class="am-extra-link-status '+(direct?'am-extra-link-direct':'am-extra-link-search')+'"><strong>'+(direct?'Fiche Amazon.fr correspondant au code modèle':'Recherche Amazon.fr — modèle non garanti')+'</strong><span>'+(direct?'Lien associé à un ASIN documenté. Contrôlez la variante, le vendeur et le stock.':'Les résultats peuvent contenir d’autres montres. Vérifiez le code affiché ci-dessus avant l’achat.')+'</span></p>':'')
       +'<div class="am-extra-actions">'+actions+'</div>'
       +(affiliates.enabled
         ?'<p class="am-extra-disclosure">Lien rémunéré Amazon.fr : une commission peut nous être versée pour un achat éligible. '
@@ -78,8 +110,8 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       +'<p><strong>Caractéristiques et photos exactes :</strong> '+link(p.officialUrl,(p.brand==='SKMEI'?'Fiche du vendeur SKMEI':'Site officiel '+p.brand))+'</p>'
       +'<p>'+(photo?'L’éditeur déclare disposer de l’autorisation commerciale de la marque. Cette autorisation n’a pas été vérifiée indépendamment.':'Les photos sont consultables chez la marque ou le vendeur cité : nous ne les republions pas sans autorisation.')+' La mention de meilleures ventes, lorsqu’elle existe, n’atteste pas le classement de ce modèle sur Amazon.fr.</p></section>'
       +'<section id="comparables" class="am-extra-related" aria-labelledby="am-extra-related-heading">'
-      +'<h2 id="am-extra-related-heading">Trois autres montres à examiner</h2><p>Ces références de notre sélection principale disposent de fiches documentées et de photographies locales déclarées autorisées. Elles constituent des pistes de comparaison, non un classement.</p>'
-      +'<ul>'+relatedItems+'</ul><a href="../index.html#montres">Comparer les 15 références principales</a></section>'
+      +'<h2 id="am-extra-related-heading">Trois montres dans le même esprit</h2><p>Suggestions établies à partir de la marque, du style et du mouvement indiqués dans nos fiches. Elles ne constituent ni des essais comparatifs ni un classement de qualité ; seules les photos déclarées autorisées sont affichées.</p>'
+      +'<ul>'+relatedItems+'</ul><a href="./toutes-les-montres.html">Comparer les 52 montres</a></section>'
       +'<section id="verifications" class="am-extra-checks"><h2>Avant de commander</h2>'
       +'<ol><li>Confirmer le code '+e(p.model)+' et la couleur auprès du vendeur : une fiche de recherche peut afficher d’autres variantes.</li>'
       +'<li>Vérifier les dimensions du boîtier, le réglage et les matériaux sur la fiche de référence de '+e(p.brand)+'.</li>'
