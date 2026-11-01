@@ -151,13 +151,20 @@ try {
   const manifest=JSON.parse(readFileSync(join(target,'seo-manifest.json'),'utf8'));
   assert.equal(manifest.affiliateActive,true);
   assert.equal(manifest.affiliateCount,13,'Publish the 13 owner-tagged core product matches');
-  assert.equal(manifest.popularAffiliateDirectLinks,3,'Three documented direct link in the supplementary selection');
-  assert.equal(manifest.popularAffiliateSearchLinks,34,'Remaining thirty-four supplemental watches must stay labeled searches');
+  assert.equal(manifest.popularAffiliateDirectLinks,5,'Five documented direct links in supplementary selection');
+  assert.equal(manifest.popularAffiliateSearchLinks,32,'Remaining thirty-two supplemental watches must stay labeled searches');
   const directProduction=readFileSync(join(target,'montres/casio-gw-m5610u-1.html'),'utf8');
   assert.ok(directProduction.includes('href="https://www.amazon.fr/dp/B09BCPP68Q?tag=drackk04-21"'),
     'Publish only the independently source-confirmed G-SHOCK Amazon.fr direct match');
   assert.ok(!directProduction.includes('data-amazon-search-id="casio-gw-m5610u-1"'),
     'An exact product match must not be mislabeled as an unverified search');
+  for(const [id,asin] of [['casio-a158wea-1','B000GAYQJ0'],['casio-ga-2100-1a1','B07WGJ1JNW']]){
+    const detail=readFileSync(join(target,'montres/'+id+'.html'),'utf8');
+    assert.ok(detail.includes('href="https://www.amazon.fr/dp/'+asin+'?tag=drackk04-21"'),
+      'New Amazon.fr exact-model referral requires its proof-backed ASIN '+id);
+    assert.ok(detail.includes('data-amazon-product="'+id+'"')&&!detail.includes('data-amazon-search-id="'+id+'"'),
+      'Never advertise a verified direct ASIN as an Amazon search '+id);
+  }
   const realResearch=JSON.parse(readFileSync(join(repository,'research','amazon-fr-exact-products.json'),'utf8'));
   const publicHome=readFileSync(join(target,'index.html'),'utf8');
   assert.match(publicHome,/En tant que Partenaire Amazon/,'The homepage must disclose paid links');
