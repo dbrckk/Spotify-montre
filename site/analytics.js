@@ -47,7 +47,7 @@
       const qs=target.searchParams,keys=[...qs.keys()];
       if(keys.length!==new Set(keys).size||keys.some(key=>!['awinmid','awinaffid','ued','clickref','campaign'].includes(key))
         ||!['26009','94513'].includes(qs.get('awinmid'))
-        ||!/^[1-9]\\d{0,11}$/.test(qs.get('awinaffid')||''))return;
+        ||!/^[1-9][0-9]{0,11}$/.test(qs.get('awinaffid')||''))return;
       let destination;
       try{destination=new URL(qs.get('ued'))}catch{return}
       if(destination.protocol!=='https:'||destination.username||destination.password
@@ -56,7 +56,7 @@
         if(!['www.addiesdivewatches.com','addiesdivewatches.com'].includes(destination.hostname)
           ||!destination.pathname.startsWith('/products/'))return;
       }else if(destination.hostname!=='www.aliexpress.com'
-        ||!/^\\/item\\/\\d{11,16}\\.html$/.test(destination.pathname))return;
+        ||!new RegExp('^/item/[0-9]{11,16}[.]html$').test(destination.pathname))return;
       try{window.umami.track('awin:'+id+':'+placement)}catch{/* Navigation must continue. */}
       return;
     }
