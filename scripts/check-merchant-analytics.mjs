@@ -22,17 +22,20 @@ assert.equal(typeof click,'function','The real tracker must register a delegated
 
 const trigger=({url,id='skmei-2056',placement='popular',kind='official'})=>{
   const names=kind==='official'?['data-merchant-official-id']:
-    kind==='search'?['data-amazon-search-id']:['data-amazon-product'];
+    kind==='partner'?['data-partner-offer-id']:
+      kind==='search'?['data-amazon-search-id']:['data-amazon-product'];
   const attrs=new Set(names);
   const el={
     href:url,
     hasAttribute:name=>attrs.has(name),
     dataset:kind==='official'?{merchantOfficialId:id,merchantPlacement:placement}:
-      kind==='search'?{amazonSearchId:id,amazonPlacement:placement}:
-        {amazonProduct:id,amazonPlacement:placement}
+      kind==='partner'?{partnerOfferId:id,partnerPlacement:placement}:
+        kind==='search'?{amazonSearchId:id,amazonPlacement:placement}:
+          {amazonProduct:id,amazonPlacement:placement}
   };
   click({target:{closest:selector=>{
-    assert.match(selector,/data-merchant-official-id/);
+    assert.match(selector,/data-partner-offer-id/,
+      'Merchant click listener should include approved partner offer attributes');
     return el;
   }}});
 };
@@ -46,6 +49,13 @@ trigger({url:'https://paganidesign.com/fr/products/pagani-design-1701',id:'pagan
 assert.equal(events.at(-1),'merchant:pagani-pd1701:popular');
 trigger({url:'https://www.addiesdivewatches.com/products/new-addiesdive-36mm-quartz-watch-vh31-movement-ad2030',id:'addiesdive-ad2030'});
 assert.equal(events.at(-1),'merchant:addiesdive-ad2030:popular');
+const awin=new URL('https://www.awin1.com/cread.php');
+awin.searchParams.set('awinmid','94513');
+awin.searchParams.set('awinaffid','123456');
+awin.searchParams.set('ued','https://www.addiesdivewatches.com/products/new-addiesdive-36mm-quartz-watch-vh31-movement-ad2030');
+trigger({url:awin.href,kind:'partner',id:'addiesdive-ad2030'});
+assert.equal(events.at(-1),'awin:addiesdive-ad2030:popular',
+  'Awin valid publisher-issued deep-link clicks must be distinguished from Amazon and manufacturer interest');
 trigger({url:'https://www.amazon.fr/s?k=SKMEI%202056&tag=drackk04-21',kind:'search'});
 assert.equal(events.at(-1),'amazon-search:skmei-2056','Old Amazon search event names must remain unchanged');
 trigger({url:'https://www.amazon.fr/dp/B0DNK5TT6D?tag=drackk04-21',id:'addiesdive-ad2030',kind:'direct'});
@@ -62,6 +72,11 @@ for(const url of [
 ]){
   trigger({url});
 }
+for(const forged of [
+  awin.href.replace('www.awin1.com','www.awin1.com.evil.example'),
+  awin.href.replace('awinmid=94513','awinmid=10001'),
+  awin.href.replace('awinaffid=123456','awinaffid=000000')
+])trigger({url:forged,kind:'partner',id:'addiesdive-ad2030'});
 trigger({url:'https://www.shopskmei.com/product/skmei-2056/',id:'_bad'});
 trigger({url:'https://www.shopskmei.com/product/skmei-2056/',placement:'unauthorised'});
 assert.equal(events.length,count,'Forged merchant targets, wrong hosts, paths and IDs must not become analytics events');
