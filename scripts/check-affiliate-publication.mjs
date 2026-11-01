@@ -209,7 +209,37 @@ try {
   assert.match(comparison,/tag=drackk04-21/,'Curated comparisons must carry the confirmed tag');
   build();
   assert.equal(JSON.parse(readFileSync(join(target,'seo-manifest.json'),'utf8')).affiliateCount,13,'Idempotent second build');
-  console.log('Affiliate publication functional check OK: 13 owned tagged links, disclosures, exact ASIN, pending final review and idempotent build');
+
+  // Isolated integration fixture: a publisher and SKMEI item that are NOT
+  // represented as real approved production links. Test the complete
+  // build/product/shortlist route only after all fail-closed production checks.
+  const partnerResearchPath=join(tmp,'research','partner-affiliate-offers.json');
+  const fakeDestination='https://www.aliexpress.com/item/1005000000000.html';
+  const fakeLink=new URL('https://www.awin1.com/cread.php');
+  fakeLink.searchParams.set('awinmid','26009');
+  fakeLink.searchParams.set('awinaffid','314159');
+  fakeLink.searchParams.set('ued',fakeDestination);
+  writeFileSync(partnerResearchPath,JSON.stringify({
+    version:1,enabled:true,publisherId:314159,publisherApproved:true,
+    programs:{'aliexpress-fr':{advertiserId:26009,joined:true},
+      addiesdive:{advertiserId:94513,joined:false}},
+    offers:{'skmei-2056':{program:'aliexpress-fr',destinationUrl:fakeDestination,
+      trackingUrl:fakeLink.href,variant:'SKMEI 2056 example testing-only variant',
+      verifiedAt:'2026-11-01',issuedInPublisherAccount:true,modelAndVariantConfirmed:true}}
+  }));
+  build();
+  const partnerHtml=readFileSync(join(target,'montres/skmei-2056.html'),'utf8');
+  const priorityHtml=readFileSync(join(target,'montres/modeles-populaires.html'),'utf8');
+  assert.ok(partnerHtml.includes('href="'+fakeLink.href.replace(/&/g,'&amp;')+'"'),
+    'An approved-in-test, exact-item Awin LinkBuilder URL must be displayed on the watch details');
+  assert.equal((partnerHtml.match(/data-partner-offer-id="skmei-2056"/g)||[]).length,1,
+    'Exactly one Awin exit on a model detail');
+  assert.equal((priorityHtml.match(/data-partner-offer-id="skmei-2056"/g)||[]).length,2,
+    'The catalogue and the priority shortlist must both expose the same verified item');
+  assert.equal(JSON.parse(readFileSync(join(target,'seo-manifest.json'),'utf8')).popularPartnerAffiliateLinks,1,
+    'Manifest must count approved Awin models, not the number of duplicated CTA placements');
+
+  console.log('Affiliate publication functional check OK: Amazon intact, Awin disabled in production, isolated approved deep-link test and idempotent build');
 } finally {
   rmSync(tmp,{recursive:true,force:true});
 }
