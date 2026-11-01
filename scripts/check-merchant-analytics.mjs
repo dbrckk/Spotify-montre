@@ -39,6 +39,11 @@ const trigger=({url,id='skmei-2056',placement='popular',kind='official'})=>{
 
 trigger({url:'https://www.shopskmei.com/product/skmei-2056-digital-sport-watch/'});
 assert.deepEqual(events,['merchant:skmei-2056:popular'],'Brand/vendor clicks must be counted separately from sponsored referrals');
+trigger({url:'https://paganidesign.com/products/pd-1776',id:'pagani-pd1776'});
+assert.equal(events.at(-1),'merchant:pagani-pd1776:popular',
+  'The newly verified Pagani seller product page must be an optional merchant intent event');
+trigger({url:'https://paganidesign.com/fr/products/pagani-design-1701',id:'pagani-pd1701'});
+assert.equal(events.at(-1),'merchant:pagani-pd1701:popular');
 trigger({url:'https://www.addiesdivewatches.com/products/new-addiesdive-36mm-quartz-watch-vh31-movement-ad2030',id:'addiesdive-ad2030'});
 assert.equal(events.at(-1),'merchant:addiesdive-ad2030:popular');
 trigger({url:'https://www.amazon.fr/s?k=SKMEI%202056&tag=drackk04-21',kind:'search'});
@@ -51,7 +56,9 @@ for(const url of [
   'https://www.shopskmei.com.evil.example/product/skmei-2056/',
   'http://www.shopskmei.com/product/skmei-2056/',
   'https://www.amazon.fr/dp/B0C7W5NNX2',
-  'https://www.shopskmei.com:8443/product/skmei-2056/'
+  'https://www.shopskmei.com:8443/product/skmei-2056/',
+  'https://paganidesign.com.attacker.example/products/pd-1776',
+  'http://paganidesign.com/products/pd-1776'
 ]){
   trigger({url});
 }
