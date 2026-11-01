@@ -23,6 +23,9 @@
 .ud-art-fallback small{font:400 11px/1.6 system-ui,sans-serif}
 .ud-card-main{display:flex;flex-direction:column;flex:1;padding:18px;gap:11px}
 .ud-kicker{color:#88623d;letter-spacing:.06em;font:700 11px/1.5 system-ui,sans-serif;text-transform:uppercase;margin:0}
+.ud-merchant-kind{align-self:flex-start;margin:0;padding:5px 8px;border:1px solid #c9d8c7;border-radius:3px;background:#eef5ed;color:#26513a;font:700 10px/1.35 system-ui,sans-serif}
+.ud-card[data-merchant="search"] .ud-merchant-kind{border-color:#dbcba8;background:#faf3e7;color:#725127}
+.ud-card[data-merchant="official"] .ud-merchant-kind{border-color:#d6d9d5;background:#f0f1ef;color:#4b5c50}
 .ud-card h2{font:400 clamp(21px,2.2vw,29px)/1.17 Georgia,serif;margin:0;color:#20432e}
 .ud-card h2 a{color:inherit;text-decoration:none}
 .ud-card h2 a:hover{text-decoration:underline}
