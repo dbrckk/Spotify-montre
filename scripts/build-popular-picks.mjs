@@ -2,6 +2,7 @@ import {readFileSync,writeFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {buildPopularProductPages} from './build-popular-product-pages.mjs';
 import {loadVerifiedPopularLinks} from './popular-verified-affiliate.mjs';
+import {loadApprovedPartnerOffers} from './approved-partner-offers.mjs';
 import {loadApprovedPopularPhotos} from './popular-photo-rights.mjs';
 import {loadPopularAiVisuals} from './popular-ai-visuals.mjs';
 import {buildShopperSelections} from './build-shopper-selections.mjs';
@@ -50,14 +51,20 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     +encodeURIComponent((p.brand+' '+p.model).slice(0,130))
     +'&tag='+encodeURIComponent(amazonPartnerTag);
   const link=(href,txt,commercial=false,id='',kind='search')=>'<a href="'+e(href)+'" target="_blank" rel="noopener noreferrer nofollow'+(commercial?' sponsored':'')+'"'
-    +(commercial?' data-amazon-'+(kind==='product'?'product':'search-id')+'="'+e(id)+'" data-amazon-placement="popular"':'')
+    +(commercial&&kind!=='partner'?' data-amazon-'+(kind==='product'?'product':'search-id')+'="'+e(id)+'" data-amazon-placement="popular"':'')
+    +(commercial&&kind==='partner'?' data-partner-offer-id="'+e(id)+'" data-partner-placement="popular"':'')
     +(kind==='official'&&!commercial?' data-merchant-official-id="'+e(id)+'" data-merchant-placement="popular"':'')
     +'>'+e(txt)+'</a>';
   const verifiedLinks=loadVerifiedPopularLinks({root,picks,affiliates,amazonPartnerTag});
+  const partnerOffers=loadApprovedPartnerOffers({root,picks});
   const approvedPhotos=loadApprovedPopularPhotos({root,picks});
   const aiVisuals=loadPopularAiVisuals({root,picks});
   const shopper=buildShopperSelections({root,coreProducts:existingProducts,picks,partners:affiliates,verifiedPopularLinks:verifiedLinks,approvedPopularPhotos:approvedPhotos,amazonSearch,pageHead,page,e,u});
-  const commercialFocus=buildCommercialShortlist({picks,verifiedLinks,approvedPhotos,affiliatesEnabled:affiliates.enabled,link,e});
+  const partnerLink=p=>{
+    const offer=partnerOffers.get(p.id);
+    return offer?link(offer.url,'Voir cette référence via Awin · lien rémunéré',true,p.id,'partner'):'';
+  };
+  const commercialFocus=buildCommercialShortlist({picks,verifiedLinks,partnerOffers,partnerLink,approvedPhotos,affiliatesEnabled:affiliates.enabled,link,e});
   const affiliateLink=p=>{
     if(!affiliates.enabled)return '';
     const direct=verifiedLinks.get(p.id);
@@ -65,7 +72,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
       ?link(direct.url,'Voir le modèle exact sur Amazon.fr · lien rémunéré',true,p.id,'product')
       :link(amazonSearch(p),'Rechercher sur Amazon.fr · lien rémunéré',true,p.id,'search');
   };
-  const detailPaths=buildPopularProductPages({root,products:picks,coreProducts:existingProducts,affiliates,amazonPartnerTag,pageHead,page,e,u,link,amazonSearch,tierNames,affiliateLink,verifiedLinks,approvedPhotos,aiVisuals});
+  const detailPaths=buildPopularProductPages({root,products:picks,coreProducts:existingProducts,affiliates,amazonPartnerTag,pageHead,page,e,u,link,amazonSearch,tierNames,affiliateLink,partnerLink,partnerOffers,verifiedLinks,approvedPhotos,aiVisuals});
   const movementKind=p=>p.movement.startsWith('Automatique')?'automatic':p.movement.startsWith('Quartz solaire')?'solar':'quartz';
   const card=(p,front=false)=>{
     const photo=approvedPhotos.get(p.id);
@@ -88,6 +95,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
       +(front?'':'<p class="am-pick-caution"><strong>Avant achat :</strong> '+e(p.caution)+'</p>')
       +'<div class="am-pick-actions">'
       +affiliateLink(p)
+      +partnerLink(p)
       +link(p.officialUrl,p.brand==='SKMEI'?'Photos et fiche vendeur':'Photos et fiche fabricant',false,p.id,'official')
       +'</div><p class="am-pick-source">Pourquoi ici ? '+link(p.marketEvidence.url,p.marketEvidence.label)+'</p>'
       +'<p class="am-pick-note">'+(verifiedLinks.has(p.id)?'Lien vers une fiche Amazon.fr correspondant à la référence documentée. Vérifiez la variante, le vendeur, le prix et la disponibilité lors de la visite.':'La recherche Amazon peut présenter des variantes ou d’autres produits. Vérifier la référence exacte, le vendeur et le prix avant de commander.')+'</p>'
@@ -100,7 +108,10 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     ?approvedPhotos.size+' photographies de modèles supplémentaires sont publiées sur la base d’autorisations déclarées par l’éditeur, non vérifiées indépendamment. Les autres photos restent consultables sur les sites sources.'
     :'Aucune photographie supplémentaire n’est publiée sans déclaration de droits de reproduction; les photos exactes restent sur les sites sources.';
   const globalDisclaimer='Ces références complètent les 15 modèles du comparateur. Certaines figurent sur des pages de meilleures ventes de fabricants ou de distributeurs ; ce ne sont pas les meilleures ventes mesurées sur Amazon.fr. Aucun tarif, stock, note ou volume de ventes n’est déduit de ces sources. '+photoDisclaimer+'';
-  const affiliateNote=affiliates.enabled?'Les liens Amazon portent notre identifiant Partenaires. Une fiche directe dispose d’une correspondance de référence documentée ; les autres liens mènent à une recherche. Aucun lien ne garantit la disponibilité, le tarif ou l’approbation définitive de notre compte.':'Aucun lien Amazon rémunéré n’est activé.';
+  const affiliateNote=(affiliates.enabled
+    ?'Les liens Amazon portent notre identifiant Partenaires. Une fiche directe dispose d’une correspondance de référence documentée ; les autres liens mènent à une recherche. Aucun lien ne garantit la disponibilité, le tarif ou l’approbation définitive de notre compte.'
+    :'Aucun lien Amazon rémunéré n’est activé.')
+    +(partnerOffers.size?' Des liens Awin rémunérés supplémentaires sont explicitement identifiés sur '+partnerOffers.size+' référence(s), sans garantie d’achat ou de commission.':'');
   const teaser='<section class="am-picks" id="modeles-populaires" aria-labelledby="am-picks-title"><div class="wrap">'
     +'<div class="am-picks-heading"><p class="overline kicker">01 · MODÈLES COMPLÉMENTAIRES</p>'
     +'<h2 id="am-picks-title">Des références remarquées, au-delà des 15 montres comparées.</h2>'
@@ -138,5 +149,5 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     {'@type':'ItemList',numberOfItems:picks.length,itemListElement:picks.map((p,i)=>({'@type':'ListItem',position:i+1,name:p.brand+' '+p.model,url:u('montres/'+p.id+'.html')}))}
   ]};
   writeFileSync(join(root,path),page(pageHead({title:picks.length+' montres à découvrir : SKMEI, Casio, ADDIESDIVE, Pagani | Atelier Montres',description:picks.length+' montres sourcées, dont SKMEI accessibles : rétro, sport, acier, quartz et automatiques. Recherches Amazon signalées.',path}),main,graph).replace('</head>','<link rel="stylesheet" href="../popular-picks.css"><script defer src="../popular-filters.js"></script></head>'));
-  return {path,detailPaths,shopperPaths:shopper.paths,teaser,count:picks.length,featuredCount:featured.length,searchLinks:affiliates.enabled?picks.length-verifiedLinks.size:0,directLinks:verifiedLinks.size};
+  return {path,detailPaths,shopperPaths:shopper.paths,teaser,count:picks.length,featuredCount:featured.length,searchLinks:affiliates.enabled?picks.length-verifiedLinks.size:0,directLinks:verifiedLinks.size,partnerAffiliateLinks:partnerOffers.size};
 }

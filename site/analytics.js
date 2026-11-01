@@ -20,14 +20,17 @@
     'www.currenwatches.com','www.montre.com','www.swatch.com'
   ]);
   document.addEventListener('click',event=>{
-    const el=event.target?.closest?.('a[data-amazon-product],a[data-amazon-search-id],a[data-merchant-official-id]');
+    const el=event.target?.closest?.('a[data-amazon-product],a[data-amazon-search-id],a[data-merchant-official-id],a[data-partner-offer-id]');
     if(!el||typeof window.umami?.track!=='function')return;
     const official=el.hasAttribute('data-merchant-official-id');
     const search=el.hasAttribute('data-amazon-search-id');
-    if(official&&(search||el.hasAttribute('data-amazon-product')))return;
-    const id=official?el.dataset.merchantOfficialId:
+    const partner=el.hasAttribute('data-partner-offer-id');
+    if((official&&(search||partner||el.hasAttribute('data-amazon-product')))
+       ||(partner&&(search||el.hasAttribute('data-amazon-product'))))return;
+    const id=partner?el.dataset.partnerOfferId:official?el.dataset.merchantOfficialId:
       search?el.dataset.amazonSearchId:el.dataset.amazonProduct;
-    const placement=official?el.dataset.merchantPlacement:el.dataset.amazonPlacement;
+    const placement=partner?el.dataset.partnerPlacement:
+      official?el.dataset.merchantPlacement:el.dataset.amazonPlacement;
     if(!idPattern.test(id||'')||!placements.has(placement))return;
     let target;
     try {target=new URL(el.href)}catch{return}
@@ -36,6 +39,25 @@
     if(official){
       if(!merchantHosts.has(target.hostname)||!target.pathname.startsWith('/'))return;
       try {window.umami.track('merchant:'+id+':'+placement)}catch{/* Navigation must continue. */}
+      return;
+    }
+    if(partner){
+      if(target.hostname!=='www.awin1.com'||target.pathname!=='/cread.php'
+        ||placement!=='popular')return;
+      const qs=target.searchParams,keys=[...qs.keys()];
+      if(keys.length!==new Set(keys).size||keys.some(key=>!['awinmid','awinaffid','ued','clickref','campaign'].includes(key))
+        ||!['26009','94513'].includes(qs.get('awinmid'))
+        ||!/^[1-9][0-9]{0,11}$/.test(qs.get('awinaffid')||''))return;
+      let destination;
+      try{destination=new URL(qs.get('ued'))}catch{return}
+      if(destination.protocol!=='https:'||destination.username||destination.password
+        ||destination.port||destination.hash||destination.search)return;
+      if(qs.get('awinmid')==='94513'){
+        if(!['www.addiesdivewatches.com','addiesdivewatches.com'].includes(destination.hostname)
+          ||!destination.pathname.startsWith('/products/'))return;
+      }else if(destination.hostname!=='www.aliexpress.com'
+        ||!new RegExp('^/item/[0-9]{11,16}[.]html$').test(destination.pathname))return;
+      try{window.umami.track('awin:'+id+':'+placement)}catch{/* Navigation must continue. */}
       return;
     }
     if(target.hostname!=='www.amazon.fr')return;

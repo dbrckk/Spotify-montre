@@ -4,7 +4,7 @@ import {join} from 'node:path';
 // Conversion-friendly product landing pages without unlicensed watch images,
 // invented Amazon ASINs, or unverifiable prices. The existing 15 core models
 // continue to own the photo-backed interactive comparison experience.
-export function buildPopularProductPages({root,products,coreProducts,affiliates,pageHead,page,e,u,link,tierNames,affiliateLink,verifiedLinks,approvedPhotos,aiVisuals}){
+export function buildPopularProductPages({root,products,coreProducts,affiliates,pageHead,page,e,u,link,tierNames,affiliateLink,partnerLink,partnerOffers,verifiedLinks,approvedPhotos,aiVisuals}){
   // Recommendations are real, distinct watches from the same 37-model
   // source catalogue, not the old static 15-watch lists. Keep the merchant
   // verification registry separate: similarity does not imply product testing.
@@ -57,7 +57,9 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
     const facts=keyFacts.map(([label,value])=>
       '<div class="am-extra-fact"><dt>'+e(label)+'</dt><dd>'+e(value)+'</dd></div>').join('');
     const direct=verifiedLinks.get(p.id);
+    const alternatePartner=partnerOffers.get(p.id);
     const actions=affiliateLink(p)
+      +partnerLink(p)
       +link(p.officialUrl,p.brand==='SKMEI'?'Voir les photos et la fiche vendeur':'Voir les vraies photos et la fiche constructeur',false,p.id,'official');
     const source=link(p.marketEvidence.url,p.marketEvidence.label);
     const relatedItems=suggestions.map(q=>{
@@ -95,7 +97,12 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
         ?'<p class="am-extra-disclosure">Lien rémunéré Amazon.fr : une commission peut nous être versée pour un achat éligible. '
           +(direct?'Correspondance du code modèle vérifiée le '+e(direct.verifiedAt)+' sur une fiche Amazon.fr ; prix, vendeur et disponibilité restent à contrôler lors de la visite.':'Le lien ouvre des résultats de recherche pouvant inclure d’autres références ou variantes.')
           +' En tant que Partenaire Amazon, je réalise un bénéfice sur les achats remplissant les conditions requises.</p>'
-        :'<p class="am-extra-disclosure">Aucun lien rémunéré actif pour ce modèle.</p>')
+        :alternatePartner
+          ?'<p class="am-extra-disclosure">Lien rémunéré Awin vers une référence documentée : une commission peut nous être versée en cas d’achat éligible, sans garantie de disponibilité ni de rémunération. La variante reste à contrôler chez le marchand.</p>'
+          :'<p class="am-extra-disclosure">Aucun lien rémunéré actif pour ce modèle.</p>')
+      +(affiliates.enabled&&alternatePartner
+        ?'<p class="am-extra-disclosure">Lien Awin rémunéré alternatif : l’éligibilité et le taux de commission dépendent de l’annonceur ; prix, variante et livraison restent à vérifier.</p>'
+        :'')
       +'</div></div>'
       +(ai?'<section class="am-ai-editorial" id="vue-ia" aria-labelledby="am-ai-title"><div class="am-ai-editorial-media"><img src="'+e(ai.url)+'" loading="lazy" decoding="async" width="768" height="768" alt="Illustration artistique IA inspirée de la SKMEI '+e(p.model)+' ; aspect non contractuel"><span class="am-ai-editorial-stamp">Interprétation IA · non contractuelle</span></div><div class="am-ai-editorial-copy"><p class="am-extra-overline">Studio créatif · Atelier Montres</p><h2 id="am-ai-title">Une interprétation artistique de la '+e(name)+'</h2><p>Ce visuel a été créé par intelligence artificielle pour présenter l’esprit de la collection. Il ne s’agit pas d’une photographie du produit : la forme du cadran, les inscriptions, les finitions ou les couleurs peuvent différer de la montre vendue.</p><p>Pour vérifier le modèle exact, consultez la photographie du produit présentée en haut de cette fiche et '+link(p.officialUrl,'la fiche vendeur de la référence '+p.model)+'.</p></div></section>':'')
       +'<nav class="am-extra-local-nav" aria-label="Rubriques de cette montre"><a href="#essentiel">Notre regard</a><a href="#sources">Sources</a><a href="#comparables">Autres modèles</a><a href="#verifications">Avant achat</a></nav>'

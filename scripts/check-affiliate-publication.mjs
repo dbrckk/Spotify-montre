@@ -32,6 +32,7 @@ try {
   mkdirSync(join(tmp,'research'),{recursive:true});
   cpSync(join(repository,'research','amazon-fr-exact-products.json'),join(tmp,'research','amazon-fr-exact-products.json'));
   cpSync(join(repository,'research','amazon-fr-popular-verified.json'),join(tmp,'research','amazon-fr-popular-verified.json'));
+  cpSync(join(repository,'research','partner-affiliate-offers.json'),join(tmp,'research','partner-affiliate-offers.json'));
   const verifiedPopularPath=join(tmp,'research','amazon-fr-popular-verified.json');
   const build=(extraEnv={})=>execFileSync(process.execPath,[join(repository,'scripts/build-seo.mjs')],{
     cwd:tmp,env:{...process.env,PUBLIC_SITE_URL:'https://atelier-montres-selection-fr.onrender.com/',UMAMI_WEBSITE_ID:'',...extraEnv},encoding:'utf8',timeout:15000
@@ -51,6 +52,8 @@ try {
   build({GOOGLE_SITE_VERIFICATION:'Valid_Example_Token_123456'});
   const disabledShortlist=readFileSync(join(target,'montres/modeles-populaires.html'),'utf8');
   const disabledFocus=(disabledShortlist.split('<section id="selection-10-montres"')[1]||'').split('</section>')[0];
+  assert.equal((disabledShortlist.match(/data-partner-offer-id=/g)||[]).length,0,
+    'No Awin paid link may leak into the production-disabled affiliate fixture');
   assert.equal((disabledFocus.match(/data-amazon-product=/g)||[]).length,0,
     'No Amazon paid CTA may survive on the priority collection when affiliation is disabled');
   assert.equal((disabledFocus.match(/data-merchant-official-id=/g)||[]).length,10,
@@ -166,6 +169,7 @@ try {
   assert.equal(manifest.affiliateCount,13,'Publish the 13 owner-tagged core product matches');
   assert.equal(manifest.popularAffiliateDirectLinks,7,'Seven documented direct links in supplementary selection');
   assert.equal(manifest.popularAffiliateSearchLinks,30,'Remaining thirty supplemental watches must stay labeled searches');
+  assert.equal(manifest.popularPartnerAffiliateLinks,0,'No unapproved Awin partner URL is published');
   const directProduction=readFileSync(join(target,'montres/casio-gw-m5610u-1.html'),'utf8');
   assert.ok(directProduction.includes('href="https://www.amazon.fr/dp/B09BCPP68Q?tag=drackk04-21"'),
     'Publish only the independently source-confirmed G-SHOCK Amazon.fr direct match');
@@ -205,7 +209,37 @@ try {
   assert.match(comparison,/tag=drackk04-21/,'Curated comparisons must carry the confirmed tag');
   build();
   assert.equal(JSON.parse(readFileSync(join(target,'seo-manifest.json'),'utf8')).affiliateCount,13,'Idempotent second build');
-  console.log('Affiliate publication functional check OK: 13 owned tagged links, disclosures, exact ASIN, pending final review and idempotent build');
+
+  // Isolated integration fixture: a publisher and SKMEI item that are NOT
+  // represented as real approved production links. Test the complete
+  // build/product/shortlist route only after all fail-closed production checks.
+  const partnerResearchPath=join(tmp,'research','partner-affiliate-offers.json');
+  const fakeDestination='https://www.aliexpress.com/item/1005000000000.html';
+  const fakeLink=new URL('https://www.awin1.com/cread.php');
+  fakeLink.searchParams.set('awinmid','26009');
+  fakeLink.searchParams.set('awinaffid','314159');
+  fakeLink.searchParams.set('ued',fakeDestination);
+  writeFileSync(partnerResearchPath,JSON.stringify({
+    version:1,enabled:true,publisherId:314159,publisherApproved:true,
+    programs:{'aliexpress-fr':{advertiserId:26009,joined:true},
+      addiesdive:{advertiserId:94513,joined:false}},
+    offers:{'skmei-2056':{program:'aliexpress-fr',destinationUrl:fakeDestination,
+      trackingUrl:fakeLink.href,variant:'SKMEI 2056 example testing-only variant',
+      verifiedAt:'2026-11-01',issuedInPublisherAccount:true,modelAndVariantConfirmed:true}}
+  }));
+  build();
+  const partnerHtml=readFileSync(join(target,'montres/skmei-2056.html'),'utf8');
+  const priorityHtml=readFileSync(join(target,'montres/modeles-populaires.html'),'utf8');
+  assert.ok(partnerHtml.includes('href="'+fakeLink.href.replace(/&/g,'&amp;')+'"'),
+    'An approved-in-test, exact-item Awin LinkBuilder URL must be displayed on the watch details');
+  assert.equal((partnerHtml.match(/data-partner-offer-id="skmei-2056"/g)||[]).length,1,
+    'Exactly one Awin exit on a model detail');
+  assert.equal((priorityHtml.match(/data-partner-offer-id="skmei-2056"/g)||[]).length,2,
+    'The catalogue and the priority shortlist must both expose the same verified item');
+  assert.equal(JSON.parse(readFileSync(join(target,'seo-manifest.json'),'utf8')).popularPartnerAffiliateLinks,1,
+    'Manifest must count approved Awin models, not the number of duplicated CTA placements');
+
+  console.log('Affiliate publication functional check OK: Amazon intact, Awin disabled in production, isolated approved deep-link test and idempotent build');
 } finally {
   rmSync(tmp,{recursive:true,force:true});
 }

@@ -21,7 +21,8 @@ export const commercialShortlist=Object.freeze([
  * Render an accessible crawlable, internal-link-only priority list.
  * Every member must exist in the model source. Availability is never inferred.
  */
-export function buildCommercialShortlist({picks,verifiedLinks,approvedPhotos,affiliatesEnabled,link,e}){
+export function buildCommercialShortlist({picks,verifiedLinks,partnerOffers,partnerLink,approvedPhotos,affiliatesEnabled,link,e}){
+  if(!(partnerOffers instanceof Map)||typeof partnerLink!=='function')throw Error('Partner links require approved registry and validated renderer');
   if(typeof link!=='function')throw Error('A validated outbound merchant link renderer is required');
   if(!Array.isArray(picks)||picks.length!==37)throw Error('Commercial shortlist requires the 37 documented supplemental watches');
   const byId=new Map(picks.map(p=>[p.id,p]));
@@ -37,18 +38,24 @@ export function buildCommercialShortlist({picks,verifiedLinks,approvedPhotos,aff
     }
     const photo=approvedPhotos.get(item.id);
     const direct=verifiedLinks.get(item.id);
-    const status=!affiliatesEnabled
-      ?'Aucun lien Amazon.fr rémunéré actif · consulter les sources de cette référence'
-      :direct
-        ?'Fiche Amazon.fr correspondant au code modèle · variante, prix et stock à contrôler'
-        :'Recherche Amazon.fr uniquement · modèle et disponibilité non garantis';
+    const partner=partnerOffers.get(item.id);
+    const status=partner
+      ?'Lien Awin généré pour une référence documentée · vérifier variante et disponibilité chez le marchand'
+      :!affiliatesEnabled
+        ?'Aucun lien Amazon.fr rémunéré actif · consulter les sources de cette référence'
+        :direct
+          ?'Fiche Amazon.fr correspondant au code modèle · variante, prix et stock à contrôler'
+          :'Recherche Amazon.fr uniquement · modèle et disponibilité non garantis';
     // The first outbound option prioritises a documented, directly matching
     // Amazon listing only when affiliate links are enabled. Otherwise use
     // the existing model-specific vendor/manufacturer reference, never a
     // generic Amazon search disguised as an exact product.
     const merchantAction=affiliatesEnabled&&direct
       ?link(direct.url,'Consulter la fiche Amazon.fr · lien rémunéré',true,item.id,'product')
-      :link(watch.officialUrl,'Consulter la fiche chez le vendeur · lien non rémunéré',false,item.id,'official');
+      :partner?partnerLink(watch)
+        :link(watch.officialUrl,'Consulter la fiche chez le vendeur · lien non rémunéré',false,item.id,'official');
+    const alternativePartner=affiliatesEnabled&&direct&&partner
+      ?'<div class="am-focus-merchant">'+partnerLink(watch)+'</div>':'';
     const variantNotice=affiliatesEnabled&&direct?.marketplaceVariant
       ?'<p class="am-focus-variant"><strong>Variante de la fiche Amazon :</strong> '+e(direct.marketplaceVariant)+'</p>'
       :'';
@@ -64,16 +71,18 @@ export function buildCommercialShortlist({picks,verifiedLinks,approvedPhotos,aff
       +'<p class="am-focus-status">'+e(status)+'</p>'
       +variantNotice
       +'<div class="am-focus-actions"><a class="am-focus-detail" href="./'+e(item.id)+'.html">Voir les caractéristiques et les sources</a>'
-      +'<div class="am-focus-merchant">'+merchantAction+'</div></div>'
+      +'<div class="am-focus-merchant">'+merchantAction+'</div>'+alternativePartner+'</div>'
       +'</div></li>';
   });
   const directCount=commercialShortlist.filter(p=>verifiedLinks.has(p.id)).length;
   // Affiliate-publication tests deliberately build with no paid links and
   // with photo permissions withdrawn. The shortlist must gracefully fall back
   // to honest source links rather than refuse a safety-focused build.
-  const merchantExplanation=affiliatesEnabled
-    ?directCount+' modèles disposent d’une fiche Amazon.fr documentée ; les autres possèdent une fiche vendeur, sans promesse de stock, de livraison en France ni de commission. Les recherches Amazon génériques restent identifiées comme telles sur chaque fiche détaillée.'
-    :'Aucun lien Amazon.fr rémunéré n’est activé dans cette configuration ; les fiches documentaires et les sources restent accessibles.';
+  const merchantExplanation=partnerOffers.size
+    ?directCount+' modèles disposent d’une fiche Amazon.fr documentée ; '+partnerOffers.size+' référence(s) disposent aussi d’un lien Awin validé par le registre. Les autres possèdent une fiche vendeur. Aucune commission ni livraison n’est garantie.'
+    :affiliatesEnabled
+      ?directCount+' modèles disposent d’une fiche Amazon.fr documentée ; les autres possèdent une fiche vendeur, sans promesse de stock, de livraison en France ni de commission. Les recherches Amazon génériques restent identifiées comme telles sur chaque fiche détaillée.'
+      :'Aucun lien Amazon.fr rémunéré n’est activé dans cette configuration ; les fiches documentaires et les sources restent accessibles.';
   return '<section id="selection-10-montres" class="am-commercial-focus" aria-labelledby="am-focus-heading">'
     +'<div class="am-focus-heading"><p class="eyebrow">10 modèles à étudier en priorité · sélection éditoriale</p>'
     +'<h2 id="am-focus-heading">Dix styles accessibles à comparer avant d’acheter.</h2>'

@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "enabled": false,
+  "publisherId": null,
+  "publisherApproved": false,
+  "programs": {
+    "aliexpress-fr": {
+      "advertiserId": 26009,
+      "joined": false
+    },
+    "addiesdive": {
+      "advertiserId": 94513,
+      "joined": false
+    }
+  },
+  "offers": {}
+}
