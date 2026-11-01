@@ -150,7 +150,9 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
     const description=(name+' : '+p.lead+' Caractéristiques, sources fabricant et conseils avant achat.').slice(0,185);
     const html=page(pageHead({title:name+' : caractéristiques et photos fabricant | Atelier Montres',
       description,path,type:'product'}),main,graph)
-      .replace('</head>','<link rel="stylesheet" href="../popular-picks.css"><link rel="stylesheet" href="../photo-zoom.css"><script defer src="../photo-zoom.js"></script><script defer src="../extra-product-viewer.js"></script></head>');
+      .replace('</head>','<link rel="stylesheet" href="../popular-picks.css">'
+        +(photo?'<link rel="stylesheet" href="../photo-zoom.css"><script defer src="../photo-zoom.js"></script><script defer src="../extra-product-viewer.js"></script>':'')
+        +'</head>');
     writeFileSync(join(root,path),html);
     paths.push(path);
   }
