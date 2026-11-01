@@ -96,7 +96,7 @@ try{
   assert.ok(await dialog.locator('img.am-photo-large').evaluate(img=>
     img.naturalWidth>100&&img.currentSrc.includes('watches-popular/skmei-2056.webp')),
     'The licensed local SKMEI photo must be decoded in the viewer');
-  assert.match(await dialog.locator('.am-photo-note').innerText(),/non vérifiées indépendamment/,
+  assert.match(await dialog.locator('.am-photo-note').innerText(),/sans vérification indépendante des licences/,
     'The editorial photo-rights declaration must not be presented as an independently proven licence');
   await phone.keyboard.press('Escape');
   await dialog.waitFor({state:'hidden'});
