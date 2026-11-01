@@ -256,6 +256,23 @@ assert.equal((unifiedHtml.match(/class="ud-zoom"/g)||[]).length,36,
 assert.equal((unifiedHtml.match(/Aucune photographie publiée pour cette référence/g)||[]).length,16);
 assert.ok(unifiedHtml.includes('id="udVisual"')&&unifiedHtml.includes('value="no-photo"'),
   'Users must be able to distinguish photo-backed models from honest fallbacks');
+assert.ok(unifiedHtml.includes('id="udMerchant"')&&unifiedHtml.includes('value="direct"')
+  &&unifiedHtml.includes('value="search"')&&unifiedHtml.includes('value="official"'),
+  'Merchant-confidence filter must distinguish exact listing, search and source-only links');
+for(const watch of unified.products){
+  const start=unifiedHtml.indexOf('<article class="ud-card" id="modele-'+watch.id+'"');
+  const end=unifiedHtml.indexOf('</article>',start);
+  assert.ok(start>=0&&end>start,'Missing source-backed card for '+watch.id);
+  const card=unifiedHtml.slice(start,end);
+  assert.ok(card.includes('data-merchant="'+(watch.merchantKind||'official')+'"'),
+    'Card must reflect verified merchant destination type: '+watch.id);
+  assert.ok(card.includes('class="ud-merchant-kind"'),
+    'Card must explain its merchant-link confidence: '+watch.id);
+  if(watch.merchantKind==='search')assert.match(card,/Rechercher sur Amazon\.fr/,
+    'A broad merchant search cannot masquerade as an exact offer: '+watch.id);
+  if(watch.merchantKind===null)assert.ok(!card.includes('lien rémunéré</a>'),
+    'Source-only cards must not imply payable merchant offers: '+watch.id);
+}
 assert.ok(unifiedHtml.includes('id="udViewTools" class="ud-view-tools" hidden'),
   'Display controls must not be shown without a working JavaScript catalogue');
 assert.ok(unifiedHtml.includes('id="udViewLarge" aria-pressed="false"'),

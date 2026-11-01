@@ -20,7 +20,8 @@
   const normalized=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'')
     .toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
   const controls={q:$('udSearch'),brand:$('udBrand'),style:$('udStyle'),
-    movement:$('udMovement'),tier:$('udTier'),size:$('udSize'),visual:$('udVisual')};
+    movement:$('udMovement'),tier:$('udTier'),size:$('udSize'),visual:$('udVisual'),
+    merchant:$('udMerchant')};
   let watches=new Map(),selected=[],view='grid';
   const validId=x=>typeof x==='string'&&/^[a-z0-9-]{4,64}$/.test(x);
   const matchSize=(p,value)=>{
@@ -54,7 +55,8 @@
   const render=()=>{
     const q=normalized(controls.q.value),brand=controls.brand.value,
       style=controls.style.value,movement=controls.movement.value,
-      tier=controls.tier.value,size=controls.size.value,visual=controls.visual.value;
+      tier=controls.tier.value,size=controls.size.value,visual=controls.visual.value,
+      merchant=controls.merchant.value;
     const tokens=q.split(' ').filter(Boolean);
     let visible=0;
     for(const card of cards){
@@ -65,6 +67,7 @@
         &&(movement==='all'||p.movement===movement)
         &&(tier==='all'||p.tier===tier)
         &&matchSize(p,size)
+        &&(merchant==='all'||(p.merchantKind||'official')===merchant)
         &&(visual==='all'||(visual==='photo'&&Boolean(p.photoUrl))
           ||(visual==='no-photo'&&!p.photoUrl))
         &&tokens.every(term=>normalized([p.brand,p.model,p.description,p.lead,p.caseText,p.glass,p.water].join(' ')).includes(term));
