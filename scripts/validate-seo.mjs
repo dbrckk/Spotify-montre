@@ -5,6 +5,7 @@ import {createHash} from 'node:crypto';
 import {responsiveSrcset} from './responsive-images.mjs';
 import {loadApprovedPopularPhotos} from './popular-photo-rights.mjs';
 import {loadPopularAiVisuals} from './popular-ai-visuals.mjs';
+import {commercialShortlist} from './build-commercial-shortlist.mjs';
 const root=resolve(process.cwd(),'site');
 const read=p=>readFileSync(resolve(root,p),'utf8');
 const feed=JSON.parse(read('selection-affiliation.json'));
@@ -267,6 +268,40 @@ assert.match(popularHtml,/aucun|Aucun/,'Supplemental section must disclose limit
 assert.equal((popularHtml.match(/<article class="am-pick-card /g)||[]).length,37,'One editorial card for each researched watch');
 assert.equal((popularHtml.match(/data-merchant-official-id=/g)||[]).length,37,
   'Every supplemental card must expose one unmodified official vendor exit for opt-in analytics');
+// Commercial shortlist: an explicitly editorial priority list, not sales data.
+// The existing 52 catalogue entries and Amazon paid CTA counts must stay intact.
+assert.equal(commercialShortlist.length,10,'Ten documented watches selected for commercial qualification');
+const focusMatches=[...popularHtml.matchAll(/<li class="am-focus-item" data-focus-id="([^"]+)"/g)].map(m=>m[1]);
+assert.deepEqual(focusMatches,commercialShortlist.map(item=>item.id),
+  'Commercial shortlist must follow the reviewed source file and never substitute products');
+assert.equal(new Set(focusMatches).size,10,'Shortlist cannot repeat a product');
+assert.ok(popularHtml.includes('id="selection-10-montres"'),'Priorities must be reachable via a stable accessible anchor');
+assert.ok(home.includes('href="./montres/modeles-populaires.html#selection-10-montres"'),
+  'Homepage must surface the priorities without duplicating all ten full cards');
+assert.ok(popularHtml.includes('Ce n’est ni un classement des ventes en France'),
+  'Editorial readiness must not be mistaken for sales ranking or verified popularity');
+assert.equal(commercialShortlist.filter(item=>Boolean(exactPopularLinks[item.id])).length,5,
+  'Five source-confirmed listings and five explicitly uncertain searches in this editorial mix');
+assert.equal(commercialShortlist.filter(item=>approvedPopularPhotos.has(item.id)).length,7,
+  'Seven shortlist watches have declared-authorised local model photos');
+assert.equal((popularHtml.match(/class="am-focus-detail"/g)||[]).length,10,
+  'Every shortlist entry needs its own direct internal source-and-merchant action');
+for(const item of commercialShortlist){
+  const p=popularFeed.products.find(x=>x.id===item.id);
+  assert.ok(p,'Shortlist model must originate from the 37-watch catalogue');
+  const html=popularHtml.match(new RegExp('<li class="am-focus-item" data-focus-id="'+item.id+'"[\\s\\S]*?<\\/li>'))?.[0];
+  assert.ok(html,'Shortlist card missing: '+item.id);
+  assert.ok(html.includes('href="./'+item.id+'.html"'),'Only a real detail page is linked: '+item.id);
+  assert.ok(html.includes(item.caution),'Editorial caveat must be visible: '+item.id);
+  assert.ok(html.includes(exactPopularLinks[item.id]?
+    'Fiche Amazon.fr correspondant au code modèle':'Recherche Amazon.fr uniquement'),
+    'Never mislabel generic search as an exact merchant listing: '+item.id);
+  if(approvedPopularPhotos.has(item.id))
+    assert.ok(html.includes('src="../'+approvedPopularPhotos.get(item.id).url+'"'),
+      'Only the recorded authorised model photo may be shown: '+item.id);
+  else assert.ok(!html.includes('<img'),'Never invent a watch image: '+item.id);
+}
+assert.match(read('popular-picks.css'),/\.am-focus-list\{/, 'Mobile-friendly shortlist CSS required');
 assert.equal((home.match(/<article class="am-pick-card /g)||[]).length,8,'Eight diverse supplemental models feature prominently, including direct-link G-SHOCK');
 assert.equal((home.match(/class="am-pick-detail-link"/g)||[]).length,8,'Every featured model title must link its source-backed SEO landing page');
 assert.equal((popularHtml.match(/<section class="am-picks-tier"/g)||[]).length,3,'All three ranges visibly represented');

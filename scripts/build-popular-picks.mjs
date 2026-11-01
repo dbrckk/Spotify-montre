@@ -5,6 +5,7 @@ import {loadVerifiedPopularLinks} from './popular-verified-affiliate.mjs';
 import {loadApprovedPopularPhotos} from './popular-photo-rights.mjs';
 import {loadPopularAiVisuals} from './popular-ai-visuals.mjs';
 import {buildShopperSelections} from './build-shopper-selections.mjs';
+import {buildCommercialShortlist} from './build-commercial-shortlist.mjs';
 
 // Curated discovery intentionally stays outside the 15-watch comparator until
 // individual Amazon ASINs and licensed exact-model images are validated.
@@ -56,6 +57,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
   const approvedPhotos=loadApprovedPopularPhotos({root,picks});
   const aiVisuals=loadPopularAiVisuals({root,picks});
   const shopper=buildShopperSelections({root,coreProducts:existingProducts,picks,partners:affiliates,verifiedPopularLinks:verifiedLinks,approvedPopularPhotos:approvedPhotos,amazonSearch,pageHead,page,e,u});
+  const commercialFocus=buildCommercialShortlist({picks,verifiedLinks,approvedPhotos,affiliatesEnabled:affiliates.enabled,e});
   const affiliateLink=p=>{
     if(!affiliates.enabled)return '';
     const direct=verifiedLinks.get(p.id);
@@ -103,7 +105,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     +'<div class="am-picks-heading"><p class="overline kicker">01 · MODÈLES COMPLÉMENTAIRES</p>'
     +'<h2 id="am-picks-title">Des références remarquées, au-delà des 15 montres comparées.</h2>'
     +'<p>SKMEI, Curren et ADDIESDIVE à petit budget, Casio et Pagani Design : huit pistes pour explorer nos '+picks.length+' montres documentées, dont des Casio, ADDIESDIVE et Pagani Design avec fiche Amazon.fr correspondant à la référence documentée (variante à vérifier). Aucun prix ni stock annoncé.</p>'
-    +'</div>'+shopper.navHome+'<div class="am-picks-grid">'+featured.map(p=>card(p,true)).join('')+'</div>'
+    +'</div>'+shopper.navHome+'<p class="am-focus-promo">Dix références aux styles distincts, avec une explication de l’intérêt et des limites de chaque fiche : <a href="./montres/modeles-populaires.html#selection-10-montres">Consulter notre sélection éditoriale de 10 montres</a>. Aucun classement de ventes revendiqué.</p><div class="am-picks-grid">'+featured.map(p=>card(p,true)).join('')+'</div>'
     +'<p class="am-picks-disclaimer">'+e(globalDisclaimer)+' '+e(affiliateNote)+'</p>'
     +'<a class="am-picks-more" href="./montres/modeles-populaires.html">Voir les '+picks.length+' modèles supplémentaires, par gamme →</a>'
     +'</div></section>';
@@ -127,7 +129,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     +'<p>'+e(globalDisclaimer)+'</p><p>'+e(affiliateNote)+'</p>'
     +'<nav class="am-picks-tier-nav" aria-label="Choisir une gamme"><a href="#pick-skmei-2056">SKMEI · petit budget</a>'
     +tiers.map(t=>'<a href="#gamme-'+e(t)+'">'+e(tierNames[t])+'</a>').join('')
-    +'</nav>'+shopper.navPopular+'</header>'+filters+'<div id="am-picks-list">'+sections+'</div>'+emptyMessage
+    +'</nav>'+shopper.navPopular+'</header>'+commercialFocus+filters+'<div id="am-picks-list">'+sections+'</div>'+emptyMessage
     +'<aside class="am-picks-method"><h2>Comment ces montres sont-elles sélectionnées ?</h2>'
     +'<p>Chaque code de modèle et caractéristique sont rapprochés de la fiche de la marque ou du distributeur cité. Les mentions « meilleures ventes » décrivent uniquement la liste citée, à la date du '+e(source.reviewedOn)+'. Elles ne constituent pas des données de ventes Amazon ni un palmarès national.</p>'
     +'<p>Nous n’affichons pas de photographie d’un modèle sans autorisation de reproduction, ni de prix Amazon non synchronisé. Les recherches Amazon.fr sont explicitement annoncées comme telles et peuvent mener à plusieurs variantes. Seules les références contrôlées sur une fiche Amazon.fr disposent d’un lien direct. Pour comparer directement des modèles aux photographies locales déjà documentées, <a href="../index.html#montres">revenir aux 15 montres du comparateur</a>.</p></aside></div>';
