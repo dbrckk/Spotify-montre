@@ -66,7 +66,7 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
         :q.style===p.style?'Style proche'
         :movementFamily(q.movement)===movementFamily(p.movement)?'Mouvement comparable':'Autre approche';
       return '<li data-related-id="'+e(q.id)+'" data-related-reason="'+e(reason)+'">'
-        +'<a class="am-extra-related-thumb" href="./'+e(q.id)+'.html" aria-label="Voir la montre '+e(q.brand+' '+q.model)+'">'
+        +'<a class="am-extra-related-thumb" href="./'+e(q.id)+'.html">'
         +(otherPhoto?'<img loading="lazy" decoding="async" width="320" height="220" src="../'+e(otherPhoto.url)+'" alt="Photographie de '+e(q.brand+' '+q.model)+'">'
           :'<span class="am-extra-related-fallback"><span>'+e(q.brand)+'</span><strong>'+e(q.model)+'</strong><small>Photo chez le vendeur</small></span>')
         +'</a><span class="am-extra-related-label">'+e(reason)+'</span>'
