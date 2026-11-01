@@ -54,7 +54,7 @@ try {
     for(const link of await actions.all())
       assert.equal(await link.getAttribute('href'),expectedUrl,
         'Comparable models must be the three selected source references '+path);
-    const schema=JSON.parse(await phone.locator('script[type="application/ld+json"]').first().innerText());
+    const schema=JSON.parse(await phone.locator('script[type="application/ld+json"]').first().textContent());
     const list=schema['@graph'].find(x=>x['@type']==='ItemList');
     assert.equal(list.numberOfItems,selection.count,'ItemList count must match visible HTML '+path);
     assert.equal(list.itemListElement.length,selection.count);
