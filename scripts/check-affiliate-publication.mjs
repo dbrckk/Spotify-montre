@@ -215,13 +215,14 @@ try {
   // represented as real approved production links. Test the complete
   // build/product/shortlist route only after all fail-closed production checks.
   const partnerResearchPath=join(tmp,'research','partner-affiliate-offers.json');
+  const fixtureReviewDate=new Date().toISOString().slice(0,10);
   const fakeDestination='https://www.aliexpress.com/item/1005007793914474.html';
   const fakeVariant='SKMEI 2056 example testing-only exact black variant';
   const isolatedResearchPath=join(tmp,'research','aliexpress-skmei-candidates.json');
   const isolatedResearch=JSON.parse(readFileSync(isolatedResearchPath,'utf8'));
   const fixtureCandidate=isolatedResearch.products['skmei-2056'].candidates[0];
   fixtureCandidate.status='merchant_reviewed_exact_variant_fr';
-  fixtureCandidate.review={checkedOn:'2026-11-01',modelConfirmed:'2056',
+  fixtureCandidate.review={checkedOn:fixtureReviewDate,modelConfirmed:'2056',
     variant:fakeVariant,sellerName:'TEST-ONLY simulated merchant',
     franceShippingConfirmed:true,franceCheckoutConfirmed:true,
     awinEligibilityConfirmed:true,merchantProductUrl:fakeDestination,
@@ -237,7 +238,7 @@ try {
       addiesdive:{advertiserId:94513,joined:false}},
     offers:{'skmei-2056':{program:'aliexpress-fr',destinationUrl:fakeDestination,
       trackingUrl:fakeLink.href,variant:fakeVariant,
-      verifiedAt:'2026-11-01',issuedInPublisherAccount:true,modelAndVariantConfirmed:true}}
+      verifiedAt:fixtureReviewDate,issuedInPublisherAccount:true,modelAndVariantConfirmed:true}}
   }));
   build();
   const partnerHtml=readFileSync(join(target,'montres/skmei-2056.html'),'utf8');
