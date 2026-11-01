@@ -6,6 +6,7 @@ import {responsiveSrcset} from './responsive-images.mjs';
 import {loadApprovedPopularPhotos} from './popular-photo-rights.mjs';
 import {loadPopularAiVisuals} from './popular-ai-visuals.mjs';
 import {commercialShortlist} from './build-commercial-shortlist.mjs';
+import {loadApprovedPartnerOffers} from './approved-partner-offers.mjs';
 const root=resolve(process.cwd(),'site');
 const read=p=>readFileSync(resolve(root,p),'utf8');
 const feed=JSON.parse(read('selection-affiliation.json'));
@@ -259,6 +260,24 @@ assert.ok(!exactPopularLinks['skmei-2056'],'Unavailable SKMEI 2056 ASIN must not
 const aiVisuals=loadPopularAiVisuals({root,picks:popularFeed.products});
 const popularPath='montres/modeles-populaires.html';
 const popularHtml=read(popularPath);
+const approvedPartnerOffers=loadApprovedPartnerOffers({root,picks:popularFeed.products});
+assert.equal(manifest.popularPartnerAffiliateLinks,approvedPartnerOffers.size,
+  'Manifest counts approved Awin models, not clicks or duplicate CTA placements');
+const approvedPriorityIds=new Set(commercialShortlist.map(item=>item.id));
+const expectedPartnerCTAs=[...approvedPartnerOffers.keys()]
+  .reduce((n,id)=>n+1+(approvedPriorityIds.has(id)?1:0),0);
+assert.equal((popularHtml.match(/data-partner-offer-id=/g)||[]).length,expectedPartnerCTAs,
+  'Only approved Awin links may appear in collection and commercial priority sections');
+for(const [id,offer] of approvedPartnerOffers){
+  const encoded=offer.url.replace(/&/g,'&amp;');
+  assert.ok(popularHtml.includes('href="'+encoded+'"'),
+    'Awin product entry must use the exact generated issuer URL: '+id);
+  const page=read('montres/'+id+'.html');
+  assert.ok(page.includes('href="'+encoded+'"')&&page.includes('data-partner-offer-id="'+id+'"'),
+    'Awin partner link must be published on the real model page: '+id);
+  assert.ok(page.includes('rel="noopener noreferrer nofollow sponsored"'),
+    'Approved partner links must be marked sponsored: '+id);
+}
 const popularSitemap=read('sitemap.xml');
 assert.equal(popularFeed.products.length,37);
 assert.ok(manifest.paths.includes(manifest.siteUrl+popularPath),'Research-led selection must enter sitemap');
