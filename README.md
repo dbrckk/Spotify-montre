@@ -1,5 +1,9 @@
 # Atelier Montres — boutique de montres indépendante
 
+## Démarrer l'affiliation Awin depuis Android — 1er novembre 2026
+
+**[Guide d'inscription Awin, URL du site, candidatures AliExpress et ADDIESDIVE, dépôt de garantie et vérification légale](docs/guide-inscription-awin-android-2026-11-01.md)**. Le site contient 52 montres, mais **les mentions légales de l'éditeur restent incomplètes** ; le statut et les coordonnées réels doivent être fournis avant de prétendre être entièrement prêt à la validation commerciale. Les coordonnées de l'hébergeur Render sont désormais sourcées. `npm run publisher:preflight` affiche les étapes manquantes, `npm run publisher:strict` refuse l'état « prêt » tant que les justificatifs nécessaires sont absents. Aucune inscription Awin ni commission supplémentaire n'est présumée.
+
 ## Catalogue unifié et conseiller de 52 montres — 1er novembre 2026
 
 L'accueil propose désormais un accès au [catalogue complet de 52 montres](https://atelier-montres-selection-fr.onrender.com/montres/toutes-les-montres.html), qui réunit **15 modèles historiquement comparés + 37 compléments**, avec filtres mobiles, recherche et comparaison transversale de deux à trois références. Le conseiller lit la même source générée et peut proposer n'importe quelle montre du catalogue. Les 70 pages historiques sont conservées : **71 URL** en sitemap. Photos réelles uniquement lorsqu'une publication déclarée est contrôlée ; aucune image IA non contractuelle ne remplace la photographie d'une référence exacte dans cette expérience. [Architecture, limites et critères d'acceptation](docs/catalogue-unifie-52-2026-11-01.md).
