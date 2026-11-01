@@ -85,6 +85,14 @@ for(const name of ['citizen-tsuyosa','tissot-prx-quartz','orient-bambino','casio
 assert.match(read('editorial-photo.js'),/assets\/watch-thumbs\/.*item\.id/,'Featured picker must request smaller local thumbnails');
 assert.match(read('affiliation.js'),/assets\/watch-responsive\/.*p\.id/,'Dynamic catalogue must prefer responsive photos');
 const home=read('index.html');
+const legacyHome=read('affiliation.html');
+assert.equal(home,legacyHome,'Generated landing pages must remain byte-identical');
+assert.ok(home.includes('52 MONTRES DOCUMENTÉES'),'The hero must present the full 52-model range');
+assert.ok(home.includes('Explorer les 52 montres'),'Primary discovery CTA must open the complete catalogue');
+assert.ok(home.includes('15 montres comparées en détail'),'The 15 in-depth subset must remain clearly described');
+assert.ok(home.includes('href="./montres/toutes-les-montres.html">52 montres</a>'),'Navigation must link to unified collection');
+assert.ok(!/découvrez 15 références réelles|parmi nos 15 modèles authentiques|Découvrir les 15 modèles/i.test(home),'No stale 15-only main offer');
+assert.ok(home.includes('52 montres documentées à découvrir, dont 15 comparées en profondeur'),'Social preview must match real scope');
 const premiumCss=read('premium-system.css');
 assert.match(premiumCss,/--am-p-paper:/,'Premium color tokens must ship');
 assert.match(premiumCss,/prefers-reduced-motion:reduce/,'Motion preferences must be respected');

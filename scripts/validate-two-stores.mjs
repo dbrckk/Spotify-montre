@@ -29,7 +29,8 @@ for(const p of products.products){
  assert.equal(u.protocol,'https:');
  assert.ok(domains.some(d=>u.hostname===d||u.hostname.endsWith('.'+d)),p.officialUrl);
 }
-assert.match(page,/Quinze façons d'affirmer son style/);
+assert.match(page,/15 montres comparées en détail/,'The legacy in-depth selector remains clearly labeled as a 15-watch subset');
+assert.match(page,/Explorer les 52 montres/,'The homepage promotes the complete 52-watch catalogue');
 assert.match(page,/id="affGrid"/);
 assert.match(page,/id="affSavedCount"/);
 assert.match(page,/liens rémunérés, lorsqu'ils sont actifs, sont identifiés clairement/,'The source storefront must truthfully disclose possible tracked links');
