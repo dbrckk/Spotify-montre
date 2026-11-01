@@ -37,6 +37,30 @@
       "evidenceType": "amazon_fr_product_page",
       "evidenceNote": "La référence A168WG-9EF et l'ASIN B002LAS086 sont rattachés par une ancienne URL de produit Amazon.fr publiée en 2011, corroborée par des données de catalogue consultées en septembre 2026. Impossible de confirmer l'offre active sur Amazon.fr au 31 octobre 2026 : stock, prix et page restent à vérifier.",
       "corroborationUrl": "https://www.dameskarlette.com/2011/12/amazon-et-concours.html"
+    },
+    "casio-a158wea-1": {
+      "brand": "Casio",
+      "canonicalModel": "A158WEA-1",
+      "marketplaceModel": "A158WEA-1EF",
+      "asin": "B000GAYQJ0",
+      "verifiedAt": "2026-11-01",
+      "evidenceUrl": "https://www.amazon.fr/Casio-Montre-Digitale-Bracelet-Inoxydable/dp/B000GAYQJ0",
+      "evidenceListingTitle": "Casio Montre Homme Digitale avec Bracelet en Acier Inoxydable – A158WEA-1EF",
+      "evidenceType": "amazon_fr_product_page",
+      "evidenceNote": "Fiche Amazon.fr directement consultée le 1er novembre 2026 depuis le lien commercial publié dans un article BFM Shopping du 14 février 2025. Le titre Amazon.fr mentionne explicitement Casio et A158WEA-1EF, l'URL contient l'ASIN B000GAYQJ0, et le sélecteur de variante signale argent/argent pour cet ASIN. Cette observation ne garantit ni prix, ni stock, ni vendeur, ni conservation de la variante choisie lors d'une visite ultérieure.",
+      "corroborationUrl": "https://www.bfmtv.com/pratique/mode/la-plus-classique-des-montres-casio-profite-d-un-prix-vraiment-avantageux_AB-202502140003.html"
+    },
+    "casio-ga-2100-1a1": {
+      "brand": "Casio G-SHOCK",
+      "canonicalModel": "GA-2100-1A1",
+      "marketplaceModel": "GA-2100-1A1ER",
+      "asin": "B07WGJ1JNW",
+      "verifiedAt": "2026-11-01",
+      "evidenceUrl": "https://www.amazon.fr/Casio-Watches-Bracelet-Caoutchouc-GA-2100-1A1ER/dp/B07WGJ1JNW",
+      "evidenceListingTitle": "Casio Montre Quartz Homme 45.40mm avec Cadran Noir analogique/numérique et Bracelet en Plastic/Resin Strap Noir GA-2100-1A1ER",
+      "evidenceType": "amazon_fr_product_page",
+      "evidenceNote": "Fiche Amazon.fr directement consultée le 1er novembre 2026 depuis le lien commercial de BFM Shopping du 10 avril 2024. Le titre de produit Amazon.fr affiche Casio GA-2100-1A1ER et l'ASIN B07WGJ1JNW figure dans l'URL et les éléments de la page. L'offre historique relayée dans l'article n'est pas une preuve du prix, du stock, du vendeur ou de la disponibilité actuelle.",
+      "corroborationUrl": "https://www.bfmtv.com/pratique/mode/casio-g-shock-choisissez-l-un-des-meilleurs-rapports-qualite-prix-du-marche-avec-cette-offre_AB-202404100033.html"
     }
   }
 }
