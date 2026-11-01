@@ -118,7 +118,7 @@ jobs:
                 elif ! grep -Fq 'class="am-shopper-grid"' "$RUNNER_TEMP/live-$slug.html"; then
                   ready=0
                   reason="$reason [missing grid: $slug]"
-                elif [ "$(grep -Fc 'class="am-shopper-card"' "$RUNNER_TEMP/live-$slug.html")" -ne 6 ]; then
+                elif [ "$(grep -oF 'class="am-shopper-card"' "$RUNNER_TEMP/live-$slug.html" | wc -l)" -ne 6 ]; then
                   ready=0
                   reason="$reason [wrong card count: $slug]"
                 fi
@@ -133,9 +133,12 @@ jobs:
               elif ! grep -Fq 'id="udMerchant"' "$RUNNER_TEMP/live-unified.html"; then
                 ready=0
                 reason="$reason [missing: merchant confidence filter]"
-              elif [ "$(grep -Ec '<article class="ud-card" id="modele-' "$RUNNER_TEMP/live-unified.html")" -ne 52 ]; then
+              elif [ "$(grep -oF '<article class="ud-card" id="modele-' "$RUNNER_TEMP/live-unified.html" | wc -l)" -ne 52 ]; then
                 ready=0
                 reason="$reason [wrong card count: unified 52-watch catalog]"
+              elif [ "$(grep -oF 'class="ud-feature-card"' "$RUNNER_TEMP/live-unified.html" | wc -l)" -ne 6 ]; then
+                ready=0
+                reason="$reason [missing or incomplete: six-photo editorial showroom]"
               fi
             fi
             if [ "$ready" -eq 1 ]; then

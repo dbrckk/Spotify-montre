@@ -25,6 +25,35 @@ try{
   const tray=phone.locator('#udCompareTray');
   assert.equal(await tray.isVisible(),false,'The dock must not obstruct browsing before selection');
   assert.equal(await phone.locator('.ud-card').count(),52);
+  // The six source-backed editorial features must be usable before the 52-card
+  // comparison, with real local photos and accurately distinguished merchants.
+  const spotlight=phone.locator('.ud-showroom');
+  assert.ok(await spotlight.isVisible(),'The premium editorial gallery must be visible on mobile');
+  assert.equal(await spotlight.locator('.ud-feature-card').count(),6);
+  assert.equal(await spotlight.locator('.ud-feature-photo img').count(),6,
+    'Every promoted watch requires its actual documented model photo');
+  for(const id of ['skmei-2056','skmei-2514']){
+    const feature=spotlight.locator('[data-feature-id="'+id+'"]');
+    assert.match(await feature.locator('.ud-feature-exit').innerText(),/non rémunéré/,
+      'SKMEI without verified ASIN must link to the official source, not a purported paid listing');
+    assert.ok((await feature.locator('.ud-feature-exit').getAttribute('href')).startsWith('https://www.shopskmei.com/product/'));
+    assert.equal(await feature.locator('.ud-feature-exit').getAttribute('data-amazon-product'),null);
+  }
+  for(const id of ['addiesdive-ad2030','pagani-pd1701','casio-mtp-1302','citizen-tsuyosa']){
+    const feature=spotlight.locator('[data-feature-id="'+id+'"]');
+    assert.match(await feature.locator('.ud-feature-exit').innerText(),/lien rémunéré/);
+    assert.match(await feature.locator('.ud-feature-exit').getAttribute('href'),
+      /^https:\/\/www\.amazon\.fr\/dp\/[A-Z0-9]{10}\?tag=/);
+    assert.equal(await feature.locator('.ud-feature-exit').getAttribute('data-amazon-product'),id);
+    assert.match(await feature.locator('.ud-feature-exit').getAttribute('rel'),/sponsored/);
+  }
+  const heroPhoto=spotlight.locator('[data-feature-id="skmei-2056"] img');
+  await heroPhoto.scrollIntoViewIfNeeded();
+  assert.ok(await heroPhoto.evaluate(async img=>{
+    try{await img.decode();return img.naturalWidth>=400}catch{return false}
+  }),'The SKMEI hero photo must really load and decode');
+  await checkOverflow(phone,'Mobile editorial photo showroom');
+
   await phone.locator('#modele-skmei-2056 button.ud-select').click();
   assert.ok(await tray.isVisible(),'Selecting one watch reveals the accessible compare tray');
   assert.equal(await phone.locator('#udTrayItems li').count(),1);
@@ -149,6 +178,8 @@ try{
   const noJs=await browser.newPage({viewport:{width:393,height:852},
     javaScriptEnabled:false,isMobile:true,hasTouch:true});
   await noJs.goto(new URL('/montres/toutes-les-montres.html',base).href,{waitUntil:'domcontentloaded'});
+  assert.equal(await noJs.locator('.ud-feature-card:visible').count(),6,
+    'Source-backed editorial watches remain navigable with JavaScript disabled');
   assert.equal(await noJs.locator('.ud-card:visible').count(),52,
     'All factual watch cards must remain visible without JS or feed fetching');
   assert.equal(await noJs.locator('#udCompareTray:visible').count(),0,
