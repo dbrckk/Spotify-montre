@@ -32,7 +32,9 @@ export function loadVerifiedPopularLinks({root,picks,affiliates,amazonPartnerTag
       'casio-f91w-1':'F-91W-1YER',
       'casio-a168wg-9':'A168WG-9EF',
       'casio-a158wea-1':'A158WEA-1EF',
-      'casio-ga-2100-1a1':'GA-2100-1A1ER'
+      'casio-ga-2100-1a1':'GA-2100-1A1ER',
+      // Manufacturer PD-1701 is also presented as 1701/PGN-1701 in the Amazon listing.
+      'pagani-pd1701':'1701'
     };
     if(item.marketplaceModel!==p.model&&item.marketplaceModel!==regionalEquivalents[id])
       throw Error('Unverified regional edition or variant: '+id);
@@ -49,6 +51,15 @@ export function loadVerifiedPopularLinks({root,picks,affiliates,amazonPartnerTag
       throw Error('Exact Amazon.fr product title and model not substantiated: '+id);
     if(typeof item.evidenceNote!=='string'||item.evidenceNote.length<80)
       throw Error('Evidence limitations must be documented: '+id);
+    // Exact-family URLs are not equivalent to all colors or generations.
+    // Force the Amazon-listed variant into buyer-visible copy when provided.
+    if(item.marketplaceVariant!==undefined
+      &&(typeof item.marketplaceVariant!=='string'||item.marketplaceVariant.length<20
+        ||item.marketplaceVariant.length>240))
+      throw Error('Invalid exact-listing variant disclosure: '+id);
+    if(['addiesdive-ad2030','pagani-pd1701'].includes(id)
+      &&(!item.marketplaceVariant||!item.evidenceNote.includes(item.marketplaceModel)))
+      throw Error('Missing manufacturer model and marketplace variant evidence: '+id);
     let evidence;
     try{evidence=new URL(item.evidenceUrl)}catch{throw Error('Invalid Amazon.fr source URL: '+id)}
     if(evidence.protocol!=='https:'||evidence.hostname!=='www.amazon.fr'
@@ -62,6 +73,7 @@ export function loadVerifiedPopularLinks({root,picks,affiliates,amazonPartnerTag
         asin:item.asin,model:item.marketplaceModel,
         url:'https://www.amazon.fr/dp/'+item.asin+'?tag='+encodeURIComponent(amazonPartnerTag),
         verifiedAt:item.verifiedAt,
+        marketplaceVariant:item.marketplaceVariant||null,
         source:item.evidenceUrl
       }));
     }
