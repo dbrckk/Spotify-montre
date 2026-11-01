@@ -37,6 +37,8 @@ on:
       - 'scripts/build-unified-discovery.mjs'
       - 'site/unified-discovery.js'
       - 'site/unified-discovery.css'
+      - 'site/photo-zoom.js'
+      - 'site/photo-zoom.css'
       - '.github/workflows/test-premium-mobile.yml'
   pull_request:
   workflow_dispatch:
