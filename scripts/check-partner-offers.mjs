@@ -12,6 +12,8 @@ const research=join(tmp,'research');
 mkdirSync(root);mkdirSync(research);
 const path=join(research,'partner-affiliate-offers.json');
 cpSync(join(sourceRoot,'research/partner-affiliate-offers.json'),path);
+const candidatePath=join(research,'aliexpress-skmei-candidates.json');
+cpSync(join(sourceRoot,'research/aliexpress-skmei-candidates.json'),candidatePath);
 const load=()=>loadApprovedPartnerOffers({root,picks});
 const read=()=>JSON.parse(readFileSync(path,'utf8'));
 const set=value=>writeFileSync(path,JSON.stringify(value));
@@ -69,15 +71,48 @@ try{
   // Independent AliExpress programme: only individual SKMEI item links, never
   // general searches or unverifiable merchant landing URLs. These are test
   // fixtures; no fictitious URL is added to the public merchant registry.
-  const url='https://www.aliexpress.com/item/1005000000000.html';
+  const url='https://www.aliexpress.com/item/1005007793914474.html';
+  const reviewedVariant='SKMEI 2056 black resin watch test-only exact variant';
   const skmei={...approved,programs:{...approved.programs,
     'aliexpress-fr':{advertiserId:26009,joined:true}},
     offers:{'skmei-2056':{program:'aliexpress-fr',destinationUrl:url,
       trackingUrl:track(26009,url,{clickref:'skmei2056'}),
-      variant:'SKMEI 2056, modèle contrôlé, variante à confirmer en programme',
+      variant:reviewedVariant,
       verifiedAt:'2026-11-01',issuedInPublisherAccount:true,modelAndVariantConfirmed:true}}};
+  // Even a publisher-issued link for a plausible item is NOT enough if the
+  // primary merchant, selected variant and delivery to France are unchecked.
   set(skmei);
+  assert.throws(load,/Unreviewed AliExpress item/,
+    'A third-party source must not be treated as live merchant verification');
+  const sourceEvidence=JSON.parse(readFileSync(candidatePath,'utf8'));
+  const originalCandidate=sourceEvidence.products['skmei-2056'].candidates[0];
+  originalCandidate.status='merchant_reviewed_exact_variant_fr';
+  originalCandidate.review={
+    checkedOn:'2026-11-01',modelConfirmed:'2056',variant:reviewedVariant,
+    sellerName:'TEST ONLY simulated seller',franceShippingConfirmed:true,
+    franceCheckoutConfirmed:true,awinEligibilityConfirmed:true,
+    merchantProductUrl:url,
+    evidenceNote:'ISOLATED TEST DATA ONLY: hypothetical review of exact SKU, France checkout, seller and eligible merchant item. No live commercial proof exists.'
+  };
+  writeFileSync(candidatePath,JSON.stringify(sourceEvidence));
+  assert.equal(load().get('skmei-2056').program,'aliexpress-fr',
+    'Test-only fully reviewed candidate may pass all independently checked registry gates');
+  rejects({...skmei,offers:{'skmei-2056':{...skmei.offers['skmei-2056'],
+    variant:'SKMEI 2056 wrong color variant'}}},
+    'Wrong variant must never inherit an approved item');
+  set(skmei);
+  originalCandidate.review.franceShippingConfirmed=false;
+  writeFileSync(candidatePath,JSON.stringify(sourceEvidence));
+  assert.throws(load,/Missing fresh primary merchant/,
+    'France delivery must be confirmed by primary merchant review');
+  originalCandidate.review.franceShippingConfirmed=true;
+  writeFileSync(candidatePath,JSON.stringify(sourceEvidence));
   assert.equal(load().get('skmei-2056').program,'aliexpress-fr');
+  const unknownItem='https://www.aliexpress.com/item/1005000000000.html';
+  rejects({...skmei,offers:{'skmei-2056':{...skmei.offers['skmei-2056'],
+    destinationUrl:unknownItem,trackingUrl:track(26009,unknownItem)}}},
+    'Unreviewed, unregistered AliExpress item must be blocked');
+  set(skmei);
   rejects({...skmei,offers:{'skmei-2056':{...skmei.offers['skmei-2056'],
     destinationUrl:'https://www.aliexpress.com/w/wholesale-skmei.html',
     trackingUrl:track(26009,'https://www.aliexpress.com/w/wholesale-skmei.html')}}},
