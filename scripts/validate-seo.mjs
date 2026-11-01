@@ -66,7 +66,9 @@ for(const [id,entry] of Object.entries(amazon.links)){
  assert.ok(!entry.url.includes('?tag='),'Unapproved affiliate tracking cannot be published');
 }
 
-assert.equal(manifest.paths.length,70);
+assert.equal(manifest.paths.length,71);
+assert.equal(manifest.unifiedCount,52,'Unified catalogue must contain all 52 source-backed watches');
+assert.equal(manifest.unifiedPath,'montres/toutes-les-montres.html');
 assert.ok(manifest.paths.every(url=>url.startsWith(manifest.siteUrl)));
 // Ensure small, local, original-source thumbnails are shipped with the site.
 for(const name of ['citizen-tsuyosa','tissot-prx-quartz','orient-bambino','casio-mtp-b145']){
@@ -183,6 +185,43 @@ assert.equal(exactPopularLinks['casio-f91w-1'].asin,'B000J34HN4','Casio F-91W do
 assert.equal(exactPopularLinks['casio-a168wg-9'].asin,'B002LAS086','Casio vintage gold documented Amazon.fr ASIN');
 const popularFeed=JSON.parse(read('selection-populaires.json'));
 const approvedPopularPhotos=loadApprovedPopularPhotos({root,picks:popularFeed.products});
+
+// Universal discovery must be source-backed, useful without JS and complete.
+const unified=JSON.parse(read('discovery-catalogue.json'));
+assert.equal(unified.version,1);
+assert.equal(unified.total,52);
+assert.equal(unified.coreCount,15);
+assert.equal(unified.supplementalCount,37);
+assert.equal(unified.products.length,52);
+assert.equal(new Set(unified.products.map(p=>p.id)).size,52);
+assert.deepEqual(new Set(unified.products.map(p=>p.id)),
+  new Set([...feed.products,...popularFeed.products].map(p=>p.id)),
+  'The advisor and the unified storefront cannot silently omit a model');
+const unifiedPath='montres/toutes-les-montres.html';
+const unifiedHtml=read(unifiedPath);
+assert.ok(manifest.paths.includes(manifest.siteUrl+unifiedPath),'Unified page canonical in sitemap');
+assert.ok(unifiedHtml.includes('rel="canonical" href="'+manifest.siteUrl+unifiedPath+'"'));
+assert.equal((unifiedHtml.match(/class="ud-card"/g)||[]).length,52,
+  'All 52 item cards must be rendered in static HTML before JavaScript');
+assert.equal((unifiedHtml.match(/class="ud-select"/g)||[]).length,52,
+  'Each watch must have an opt-in local comparison button');
+assert.match(unifiedHtml,/id="udFilters"[^>]*hidden/,'Filter controls invisible before JS initialization');
+assert.match(unifiedHtml,/id="udCompareTable"/,'Comparison must be accessible');
+assert.ok(unifiedHtml.includes('src="../unified-discovery.js"'));
+assert.ok(unifiedHtml.includes('href="../unified-discovery.css"'));
+assert.ok(home.includes('href="./montres/toutes-les-montres.html"'),'Homepage must link the full catalogue');
+assert.equal(unified.products.filter(p=>p.merchantKind==='search').length,manifest.popularAffiliateSearchLinks);
+assert.equal(unified.products.filter(p=>p.merchantKind==='direct').length,
+  manifest.affiliateActive?manifest.affiliateCount+manifest.popularAffiliateDirectLinks:0);
+for(const product of unified.products){
+  assert.equal(product.detailUrl,'./montres/'+product.id+'.html');
+  assert.ok(unifiedHtml.includes('id="modele-'+product.id+'"'),'Unified card missing: '+product.id);
+  assert.equal(typeof product.officialUrl,'string');
+  if(product.photoUrl)assert.ok(/^\.\/assets\/(?:watches|watches-popular)\/[a-z0-9-]+\.webp$/.test(product.photoUrl),'Only local, exact model WebP is eligible');
+  if(product.kind==='supplemental' && product.diameterMm!==null)
+    assert.match(product.caseText,/diam[eè]tre/i,'Do not infer diameter from a rectangular width');
+}
+
 const aiVisuals=loadPopularAiVisuals({root,picks:popularFeed.products});
 const popularPath='montres/modeles-populaires.html';
 const popularHtml=read(popularPath);
@@ -511,7 +550,7 @@ for(const name of ['revue-photo.html','revue-photo.js','revue-photo.css']){
 }
 assert.ok(existsSync(resolve(root,'seo-watch-art.js')),'SEO watch illustrations script is required');
 const sitemap=read('sitemap.xml');
-assert.equal((sitemap.match(/<loc>/g)||[]).length,70);
+assert.equal((sitemap.match(/<loc>/g)||[]).length,71);
 const comparisons=JSON.parse(read('comparaisons-montres.json'));
 assert.equal(comparisons.version,1);
 assert.equal(comparisons.comparisons.length,4);
@@ -631,4 +670,4 @@ assert.equal(privacy.includes('Les visites et clics vers Amazon sont mesurés av
 assert.ok(privacy.includes('chez Render'),'Privacy notice must identify actual host');
 const guide=read('montres/guide-choisir-montre.html');
 assert.match(guide,/<h1>Comment choisir une montre/);
-console.log('SEO validation OK: 15 model pages, 3 categories, 4 guides, 4 comparisons, transparent editorial method, 13 Amazon links, 70 sitemap URLs, 37 individual source-backed product pages and genuine hero LCP preload');
+console.log('SEO validation OK: 15 model pages, 3 categories, 4 guides, 4 comparisons, transparent editorial method, 13 Amazon links, 71 sitemap URLs, 37 individual source-backed product pages and genuine hero LCP preload');

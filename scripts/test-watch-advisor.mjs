@@ -70,6 +70,8 @@ assert.match(html,/id="advisorHeroArt"/);
 assert.match(html,/name="size"/);
 assert.match(html,/id="advisorCompare"/,'Shortlist requires a one-tap compare action');
 assert.match(ui,/ids\.map\(encodeURIComponent\)\.join\(','\)/,'All recommended IDs must reach the compare deep link');
+assert.match(ui,/toutes-les-montres\.html\?compare=/,'Mixed core and supplemental watches must be comparable');
+assert.match(html,/52 MONTRES/,'Advisor must describe all 52 references, not only the original 15');
 assert.ok(html.includes('04</span> Quelle taille de boîtier'));
 assert.ok(!html.includes('Habituellement sous 120 €'),'Unverified shop prices may not be used as purchase guidance');
 assert.match(ui,/entry\.sizeNote/);
@@ -79,13 +81,44 @@ assert.doesNotMatch(html,/src="\.\/assets\/watches\//);
 assert.match(html,/src="\.\/conseiller-engine\.js" defer/);
 assert.match(html,/src="\.\/conseiller\.js" defer/);
 assert.match(html,/Sans inscription/);
-assert.match(ui,/encodeURIComponent\(p\.id\)/);
-assert.match(ui,/photoReview/);
-assert.match(ui,/localUrl/);
-assert.match(ui,/publicUsageApproved===true/);
+assert.match(ui,/detail\.href=p\.detailUrl/,'Advisor must navigate directly to each verified static watch page');
+assert.match(ui,/photoUrl/);
+assert.match(ui,/assets\/\(\?:watches\|watches-popular\)/);
+assert.match(ui,/discovery-catalogue\.json/,'Advisor must use the same generated feed as the 52-watch storefront');
 assert.match(ui,/window\.AtelierWatch\?\.render/);
 assert.doesNotMatch(ui,/innerHTML\s*=/);
 assert.match(css,/@media\(max-width:560px\)/);
 assert.match(read('site/affiliation.html'),/href="\.\/conseiller\.html"/);
 assert.match(read('site/montre.html'),/href="\.\/conseiller\.html"/);
-console.log('Advisor: 15 watches, 135 preference combinations, documented sizing and missing-data warnings — OK');
+
+// Test against the two REAL, committed source catalogues. The generated
+// 52-watch JSON is validated separately after the SEO build; npm test also
+// runs before that build in the storefront workflow.
+const extra=JSON.parse(read('site/selection-populaires.json')).products;
+assert.equal(extra.length,37);
+assert.equal(new Set([...products,...extra].map(p=>p.id)).size,52);
+const styleMap={sport:'sport',retro:'retro',compact:'minimal',steel:'classic',dress:'classic'};
+const supplement=extra.map(p=>({
+  id:p.id,kind:'supplemental',tier:p.tier,style:styleMap[p.style],
+  movement:/automatique/i.test(p.movement)?'automatic':/solaire/i.test(p.movement)?'eco-drive':'quartz',
+  diameterMm:/diam[eè]tre\s*(?:annonc[eé]\s*)?(?:de\s*)?(\d{1,2}(?:[,.]\d{1,2})?)\s*mm/i.test(p.case)
+    ?Number(/diam[eè]tre\s*(?:annonc[eé]\s*)?(?:de\s*)?(\d{1,2}(?:[,.]\d{1,2})?)\s*mm/i.exec(p.case)[1].replace(',','.')):null
+}));
+const combined=[...products,...supplement];
+const sport=e.recommend(combined,{tier:'essential',style:'sport'},3);
+assert.equal(sport.length,3);
+assert.ok(sport.some(x=>x.product.kind==='supplemental'),'SKMEI sport models should compete with the main collection');
+const normalisedCompact=e.recommend(combined,{size:'compact'},3);
+assert.equal(normalisedCompact.length,3,'Three recommendations must be available across normalized sources');
+assert.ok(normalisedCompact.every(entry=>entry.product&&typeof entry.product.id==='string'));
+const skmei1874=supplement.find(x=>x.id==='skmei-1874');
+assert.equal(e.diameterMm(skmei1874),31,'Verified round diameter for supplemental watch must be recognized');
+const withDocumentedRound=e.recommend([skmei1874],{size:'compact'},1);
+assert.equal(withDocumentedRound[0].matched,1,'Normalized watch diameter must count as a match');
+assert.ok(withDocumentedRound[0].details.some(x=>x.includes('31 mm')),
+  'Normalized watch diameter must be displayable without legacy specs');
+assert.equal(e.diameterMm(supplement.find(x=>x.id==='skmei-1251')),null,
+ 'Unknown circular diameter must not be inferred from vendor metadata');
+assert.match(read('site/conseiller.js'),/discovery-catalogue\.json/,'Advisor must load common build output');
+assert.match(read('scripts/build-unified-discovery.mjs'),/loadApprovedPopularPhotos/,'Common feed must enforce exact-model photo permissions');
+console.log('Advisor: 52-model shared source, 15 legacy checks, 135 preference combinations and safe size handling — OK');
