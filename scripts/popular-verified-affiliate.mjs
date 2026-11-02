@@ -33,6 +33,7 @@ export function loadVerifiedPopularLinks({root,picks,affiliates,amazonPartnerTag
       'casio-a168wg-9':'A168WG-9EF',
       'casio-a158wea-1':'A158WEA-1EF',
       'casio-ga-2100-1a1':'GA-2100-1A1ER',
+      'casio-ae1200wh-1av':'AE-1200WH-1AVEF',
       // Manufacturer PD-1701 is also presented as 1701/PGN-1701 in the Amazon listing.
       'pagani-pd1701':'1701'
     };
@@ -44,13 +45,27 @@ export function loadVerifiedPopularLinks({root,picks,affiliates,amazonPartnerTag
     if(!/^20\d{2}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(item.verifiedAt||'')
       ||!Number.isFinite(Date.parse(item.verifiedAt)))
       throw Error('Missing valid source verification date: '+id);
-    if(item.evidenceType!=='amazon_fr_product_page'
+    if(!['amazon_fr_product_page','amazon_fr_comparator_redirect'].includes(item.evidenceType)
       ||typeof item.evidenceListingTitle!=='string'
       ||!item.evidenceListingTitle.toLowerCase().includes(item.marketplaceModel.toLowerCase())
       ||!item.evidenceListingTitle.toLowerCase().includes(p.brand.split(' ')[0].toLowerCase()))
       throw Error('Exact Amazon.fr product title and model not substantiated: '+id);
     if(typeof item.evidenceNote!=='string'||item.evidenceNote.length<80)
       throw Error('Evidence limitations must be documented: '+id);
+    // A source-backed marketplace redirect is useful but is NOT a first-hand
+    // inspection of Amazon's current listing. Never silently upgrade its
+    // evidentiary status. Only known external comparisons may qualify.
+    if(item.evidenceType==='amazon_fr_comparator_redirect'){
+      const compare=new URL(item.comparisonUrl);
+      const corroborate=new URL(item.corroborationUrl);
+      if(compare.protocol!=='https:'||!['www.leguide.com','www.123comparer.fr'].includes(compare.hostname)
+        ||compare.username||compare.password||compare.hash
+        ||corroborate.protocol!=='https:'||corroborate.username||corroborate.password
+        ||corroborate.hostname===compare.hostname||corroborate.hostname==='www.amazon.fr'
+        ||!item.marketplaceVariant||!item.evidenceNote.includes('pas pu être consultée directement')
+        ||!item.evidenceNote.includes(item.asin))
+        throw Error('Comparator proof needs separately corroborated ASIN and explicit uncertainty: '+id);
+    }
     // Exact-family URLs are not equivalent to all colors or generations.
     // Force the Amazon-listed variant into buyer-visible copy when provided.
     if(item.marketplaceVariant!==undefined
@@ -74,6 +89,7 @@ export function loadVerifiedPopularLinks({root,picks,affiliates,amazonPartnerTag
         url:'https://www.amazon.fr/dp/'+item.asin+'?tag='+encodeURIComponent(amazonPartnerTag),
         verifiedAt:item.verifiedAt,
         marketplaceVariant:item.marketplaceVariant||null,
+        evidenceType:item.evidenceType,
         source:item.evidenceUrl
       }));
     }
