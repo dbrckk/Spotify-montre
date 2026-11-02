@@ -196,6 +196,12 @@ assert.ok(home.indexOf('id="selection-accessible"')>home.indexOf('class="aff-her
   &&home.indexOf('id="selection-accessible"')<home.indexOf('id="gammes"'),
   'Affordable photographic models must appear immediately after the hero, before the 15-model catalogue');
 const affordableIds=['skmei-1257','skmei-1251','addiesdive-ad2030','pagani-pd1701'];
+const affordableComparePairs={
+  'skmei-1257':'skmei-1251',
+  'skmei-1251':'skmei-1257',
+  'addiesdive-ad2030':'pagani-pd1701',
+  'pagani-pd1701':'addiesdive-ad2030'
+};
 assert.deepEqual([...affordableHtml.matchAll(/data-affordable-id="([^"]+)"/g)].map(m=>m[1]),affordableIds,
   'The showcase contains four distinct researched and buyer-visible economical choices');
 assert.ok(affordableHtml.includes('sans prix, stock ni classement de ventes inventés'));
@@ -209,6 +215,14 @@ for(const id of affordableIds){
     'Each affordably styled watch must link to its genuine product detail page: '+id);
   assert.ok(card.includes('src="./assets/watches-popular/'+id+'.webp"'),
     'Real and approved local model photo required in the public four-model presentation: '+id);
+  const comparedId=affordableComparePairs[id];
+  assert.ok(comparedId&&comparedId!==id&&affordableIds.includes(comparedId),
+    'Home comparison must always use a second documented affordable watch: '+id);
+  const expectedCompare='./montres/toutes-les-montres.html?compare='+encodeURIComponent(id+','+comparedId)+'#comparer';
+  assert.ok(card.includes('href="'+expectedCompare+'"'),
+    'No-JS page must link to a real prefilled two-watch comparison: '+id);
+  assert.ok(card.includes('data-affordable-compare="'+id+'"'),
+    'Buyer comparison actions must retain their exact source watch ID: '+id);
   assert.equal((card.match(/data-amazon-product=/g)||[]).length,manifest.affiliateActive?1:0,
     'No extra or unapproved sponsored exit can appear in the affordable showroom: '+id);
   assert.equal((card.match(/data-merchant-official-id=/g)||[]).length,manifest.affiliateActive?0:1,
