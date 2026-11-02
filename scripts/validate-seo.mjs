@@ -728,6 +728,18 @@ for(const p of popularFeed.products){
   assert.equal(graph[0].url,manifest.siteUrl+detailPath);
   assert.equal(graph[0].model,p.model);
   assert.equal(graph[0].additionalProperty.length,4);
+  // Search engines may use genuine exact-model photographs, but must never
+  // interpret AI editorial concepts as authentic commercial product photos.
+  const approved=approvedPopularPhotos.get(p.id);
+  if(approved){
+    assert.deepEqual(graph[0].image,[manifest.siteUrl+approved.url],
+      'Structured Product.image must reference only the exact approved local watch photo: '+p.id);
+    assert.ok(detailHtml.includes('src="../'+approved.url+'"'),
+      'Structured photo must also be genuinely displayed on its product page: '+p.id);
+  }else{
+    assert.equal(Object.hasOwn(graph[0],'image'),false,
+      'A watch without approved exact-model photography must not receive fabricated Product.image: '+p.id);
+  }
   const direct=exactPopularLinks[p.id];
   const expectedMerchant=direct
     ?'https://www.amazon.fr/dp/'+direct.asin+'?tag=drackk04-21'
