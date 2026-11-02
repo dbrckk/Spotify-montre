@@ -6,7 +6,9 @@ const evidence=[
  'exactVariantMatched','supplierIdentityVerified','supplierStockConfirmed',
  'shippingToFranceConfirmed','importTaxesAndDdpReviewed','euProductComplianceVerified',
  'photoRightsVerified','merchantLegalAndCgvReady','returnsAndWarrantyReady',
- 'shopifyPaymentsLiveVerified','shopifyVariantMapped',
+ 'independentPaymentAccountVerified','paymentWebhookReconciliationVerified',
+ 'independentCheckoutBackendVerified','encryptedShippingDataVerified',
+ 'catalogueSupplierVariantMapped',
  'automaticSupplierOrderVerified','automaticSupplierPaymentVerified',
  'supplierFundingAvailable','idempotenceAndFailureAlertsVerified'
 ];
@@ -36,6 +38,12 @@ assert.equal(valid.eligibleForMerchantReview,true);
 assert.equal(valid.checkoutActivated,false);
 const withChange=change=>({...structuredClone(base),...change});
 assert.equal(evaluateDropshipOffer(withChange({fulfilmentMode:'manual'}),date).eligibleForMerchantReview,false);
+const legacy=structuredClone(base);
+legacy.proofs.shopifyPaymentsLiveVerified=true;
+assert.throws(()=>evaluateDropshipOffer(legacy,date),/Preuve inconnue/);
+const missingPayment=structuredClone(base);
+missingPayment.proofs.paymentWebhookReconciliationVerified=false;
+assert.equal(evaluateDropshipOffer(missingPayment,date).eligibleForMerchantReview,false);
 const missing=structuredClone(base);
 missing.proofs.supplierFundingAvailable=false;
 assert.ok(evaluateDropshipOffer(missing,date).missingProofs.includes('supplierFundingAvailable'));
