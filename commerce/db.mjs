@@ -1,4 +1,5 @@
 import pg from 'pg';
+import {validateCommercialCeiling} from './landed-cost.mjs';
 import {readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {ClientError,digest,hmac,newOrderId,newPublicToken,sealAddress,sameHash,checkoutFingerprint} from './security.mjs';
@@ -25,7 +26,9 @@ export async function listApprovedOffers(pool){
     WHERE approved=true AND stock_confirmed=true AND legal_verified=true
       AND eu_compliance_verified=true AND photo_rights_verified=true
       AND supplier_payment_verified=true AND verified_until > now()
-      AND amount_eur_cents >= unit_cost_eur_cents + reserves_eur_cents
+      AND supplier_landed_eur_ceiling_cents > 0
+      AND supplier_landed_eur_ceiling_cents >= unit_cost_eur_cents
+      AND amount_eur_cents > supplier_landed_eur_ceiling_cents + reserves_eur_cents
     ORDER BY label LIMIT 30
   `);
   return rows;
@@ -38,7 +41,9 @@ export async function getApprovedOffer(pool,offerId){
       AND stock_confirmed=true AND legal_verified=true
       AND eu_compliance_verified=true AND photo_rights_verified=true
       AND supplier_payment_verified=true AND verified_until>now()
-      AND amount_eur_cents > unit_cost_eur_cents + reserves_eur_cents LIMIT 1
+      AND supplier_landed_eur_ceiling_cents > 0
+      AND supplier_landed_eur_ceiling_cents >= unit_cost_eur_cents
+      AND amount_eur_cents > supplier_landed_eur_ceiling_cents + reserves_eur_cents LIMIT 1
   `,[offerId]);
   return rows[0]||null;
 }
@@ -61,12 +66,15 @@ export async function reserveCheckout(pool,request,{encryptionKey,idempotencySec
       AND stock_confirmed=true AND legal_verified=true AND eu_compliance_verified=true
       AND photo_rights_verified=true AND supplier_payment_verified=true
       AND verified_until>now()
+      AND supplier_landed_eur_ceiling_cents > 0
+      AND supplier_landed_eur_ceiling_cents >= unit_cost_eur_cents
+      AND amount_eur_cents > supplier_landed_eur_ceiling_cents + reserves_eur_cents
       FOR UPDATE
     `,[request.offerId]);
     const offer=result.rows[0];
     if(!offer)throw new ClientError('Cette montre n’est pas disponible pour un achat direct',409);
-    if(offer.amount_eur_cents < offer.unit_cost_eur_cents + offer.reserves_eur_cents)
-      throw new ClientError('Offre commercialement indisponible',409);
+    try{validateCommercialCeiling(offer)}
+    catch{throw new ClientError('Offre commercialement indisponible',409)}
     // A single pilot purchase at a time per supplier SKU prevents overselling
     // during payment and fulfillment. The row lock on commerce_offers serializes reservations.
     const active=await client.query(`
