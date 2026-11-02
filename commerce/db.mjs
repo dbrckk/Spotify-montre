@@ -22,13 +22,20 @@ export async function transaction(pool,run){
 }
 export async function listApprovedOffers(pool){
   const {rows}=await pool.query(`
-    SELECT id,label,amount_eur_cents AS "amountCents" FROM commerce_offers
+    SELECT id,label,amount_eur_cents AS "amountCents",
+      delivery_min_business_days AS "deliveryMinDays",
+      delivery_max_business_days AS "deliveryMaxDays"
+    FROM commerce_offers
     WHERE approved=true AND stock_confirmed=true AND legal_verified=true
       AND eu_compliance_verified=true AND photo_rights_verified=true
       AND supplier_payment_verified=true AND verified_until > now()
       AND supplier_landed_eur_ceiling_cents > 0
       AND supplier_landed_eur_ceiling_cents >= unit_cost_eur_cents
       AND tax_treatment_verified=true AND supplier_fx_verified=true
+      AND return_policy_verified=true AND gpsr_traceability_verified=true
+      AND data_transfer_verified=true
+      AND delivery_min_business_days BETWEEN 1 AND 90
+      AND delivery_max_business_days BETWEEN delivery_min_business_days AND 120
       AND vat_rate_bps BETWEEN 0 AND 3000
       AND round(amount_eur_cents * 10000.0 / (10000+vat_rate_bps))*3
           >= (supplier_landed_eur_ceiling_cents+reserves_eur_cents)*4
@@ -39,7 +46,7 @@ export async function listApprovedOffers(pool){
 export async function getApprovedOffer(pool,offerId){
   const {rows}=await pool.query(`
     SELECT id,label,amount_eur_cents,supplier_vid,supplier_max_usd_cents,
-      logistics_name,from_country_code
+      logistics_name,from_country_code,delivery_min_business_days,delivery_max_business_days
     FROM commerce_offers WHERE id=$1 AND approved=true
       AND stock_confirmed=true AND legal_verified=true
       AND eu_compliance_verified=true AND photo_rights_verified=true
@@ -47,6 +54,10 @@ export async function getApprovedOffer(pool,offerId){
       AND supplier_landed_eur_ceiling_cents > 0
       AND supplier_landed_eur_ceiling_cents >= unit_cost_eur_cents
       AND tax_treatment_verified=true AND supplier_fx_verified=true
+      AND return_policy_verified=true AND gpsr_traceability_verified=true
+      AND data_transfer_verified=true
+      AND delivery_min_business_days BETWEEN 1 AND 90
+      AND delivery_max_business_days BETWEEN delivery_min_business_days AND 120
       AND vat_rate_bps BETWEEN 0 AND 3000
       AND round(amount_eur_cents * 10000.0 / (10000+vat_rate_bps))*3
           >= (supplier_landed_eur_ceiling_cents+reserves_eur_cents)*4 LIMIT 1
@@ -75,6 +86,10 @@ export async function reserveCheckout(pool,request,{encryptionKey,idempotencySec
       AND supplier_landed_eur_ceiling_cents > 0
       AND supplier_landed_eur_ceiling_cents >= unit_cost_eur_cents
       AND tax_treatment_verified=true AND supplier_fx_verified=true
+      AND return_policy_verified=true AND gpsr_traceability_verified=true
+      AND data_transfer_verified=true
+      AND delivery_min_business_days BETWEEN 1 AND 90
+      AND delivery_max_business_days BETWEEN delivery_min_business_days AND 120
       AND vat_rate_bps BETWEEN 0 AND 3000
       AND round(amount_eur_cents * 10000.0 / (10000+vat_rate_bps))*3
           >= (supplier_landed_eur_ceiling_cents+reserves_eur_cents)*4
