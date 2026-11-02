@@ -164,8 +164,8 @@ try{
 
  assert.equal(await popularPage.locator('.am-picks-tier').count(),3,'All three editorial ranges are represented');
  assert.equal(await popularPage.locator('a[data-amazon-search-id]').count(),29,'Twenty-nine variants without documented ASINs must use labeled search results');
- assert.equal(await popularPage.locator('a[data-amazon-product]').count(),13,
-   'Eight original exact products plus five direct-merchant shortlist cards are attributed without new ASINs');
+ assert.equal(await popularPage.locator('a[data-amazon-product]').count(),14,
+   'Eight original exact products plus six direct-merchant shortlist cards are attributed without new ASINs');
  const confirmedGshock=popularPage.locator('#pick-casio-gw-m5610u-1 a[data-amazon-product]');
  assert.equal(await confirmedGshock.getAttribute('href'),'https://www.amazon.fr/dp/B09BCPP68Q?tag=drackk04-21');
  assert.equal(await confirmedGshock.getAttribute('data-amazon-placement'),'popular');
@@ -239,8 +239,8 @@ try{
  assert.equal(await noJs.locator('#am-pick-filters:visible').count(),0,
    'Non-functional controls must not be exposed without JavaScript');
  assert.equal(await noJs.locator('a[data-amazon-search-id]').count(),29);
- assert.equal(await noJs.locator('a[data-amazon-product]').count(),13,
-   'Without JavaScript, all eight original and five shortlist exact Amazon options remain clickable');
+ assert.equal(await noJs.locator('a[data-amazon-product]').count(),14,
+   'Without JavaScript, all eight original and six shortlist exact Amazon options remain clickable');
  assert.equal(await noJs.locator('#selection-10-montres .am-focus-merchant a').count(),10,
    'Ten seller-specific choices remain visible without scripting');
  await noJs.close();
