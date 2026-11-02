@@ -207,3 +207,55 @@
   .ud-feature-photo{height:220px;min-height:0}
 }
 @media(prefers-reduced-motion:reduce){.ud-feature-photo img{transition:none!important}}
+
+
+/* The same local favourites as the 15-watch gallery, extended to all 52.
+   Progressive enhancement: controls stay hidden if catalog verification fails. */
+.ud-favorite-tools{
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;
+  gap:16px;margin:0 0 18px;padding:18px clamp(14px,3vw,25px);
+  border:1px solid #d8c9af;border-radius:8px;
+  background:linear-gradient(115deg,#f7f1e5,#f1f5eb);color:#24432f;
+}
+.ud-favorite-tools>div{flex:1 1 250px;min-width:0}
+.ud-favorite-tools strong{display:block;font:400 clamp(20px,2.7vw,28px)/1.2 Georgia,serif}
+.ud-favorite-tools p{font:400 13px/1.55 system-ui,sans-serif;margin:6px 0 0;color:#45604b}
+.ud-favorite-tools button{
+  border:1px solid #466b50;background:#fffdf9;color:#224632;
+  border-radius:5px;min-height:48px;padding:11px 16px;cursor:pointer;
+  display:inline-flex;justify-content:center;align-items:center;gap:7px;
+  font:750 13px/1.35 system-ui,sans-serif;flex:0 1 auto;
+}
+.ud-favorite-tools button[aria-pressed=true]{background:#214b34;color:#fff;border-color:#214b34}
+.ud-favorite-tools button>span:first-child{font-size:23px;line-height:1}
+.ud-favorite-tools button:hover{box-shadow:0 5px 18px #24452c20}
+.ud-media{position:relative}
+.ud-save{
+  position:absolute;top:10px;right:10px;z-index:2;
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  min-height:44px;min-width:44px;max-width:calc(100% - 20px);
+  padding:7px 12px;border:1px solid #95a99a;border-radius:999px;
+  background:rgba(255,253,247,.97);color:#244631;
+  box-shadow:0 5px 18px #213d2a24;
+  font:750 12px/1.25 system-ui,sans-serif;cursor:pointer;
+}
+.ud-save-heart{font:700 23px/1 system-ui,sans-serif;color:#6b492f}
+.ud-save[aria-pressed=true]{background:#244c35;color:white;border-color:#244c35}
+.ud-save[aria-pressed=true] .ud-save-heart{color:#ffe0bc}
+.ud-save:hover{border-color:#31533d}
+.ud-save:focus-visible,.ud-favorite-tools button:focus-visible{
+  outline:3px solid #bb8b3f;outline-offset:3px;
+}
+@media(max-width:580px){
+  .ud-favorite-tools{padding:13px;gap:12px}
+  .ud-favorite-tools button{width:100%;min-width:0;flex:1 1 100%}
+  .ud-save{top:7px;right:7px;padding:7px;max-width:44px}
+  .ud-save-word{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+  .ud-save,.ud-favorite-tools button{transition:none!important}
+}
+
+/* Keep the photo/source provenance badge distinct from the save control. */
+.ud-visual-label{max-width:calc(100% - 125px);overflow-wrap:break-word}
+@media(max-width:580px){.ud-visual-label{max-width:calc(100% - 65px);line-height:1.2}}

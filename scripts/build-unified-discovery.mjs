@@ -110,6 +110,7 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
       +' data-movement="'+e(p.movement)+'" data-merchant="'+merchantType+'" data-visual="'+(p.photoUrl?'photo':'no-photo')+'" data-search="'+e([p.brand,p.model,p.description,p.lead,p.caseText,p.movement].join(' '))+'">'
       +'<div class="ud-media '+(p.photoUrl?'ud-media-verified':'ud-media-no-photo')+'">'
       +'<a class="ud-photo" href="'+e(p.detailUrl.replace('./montres/','./'))+'">'+photoMarkup(p)+'</a>'
+      +'<button type="button" class="ud-save" data-save-id="'+e(p.id)+'" aria-pressed="false" aria-label="Favoris : ajouter '+e(p.brand+' '+p.model)+'" hidden><span class="ud-save-heart" aria-hidden="true">♡</span><span class="ud-save-word">Favoris</span></button>'
       +(p.photoUrl?'<button type="button" class="ud-zoom" data-zoom-id="'+e(p.id)+'" aria-label="Agrandir la photographie de '+e(p.brand+' '+p.model)+'" hidden><span aria-hidden="true">＋</span> Agrandir</button>':'')
       +'<span class="ud-visual-label">'+(p.photoUrl?'Photo du modèle':'Sans photo publiée')+'</span></div>'
       +'<div class="ud-card-main"><p class="ud-kicker">'+e(tierLabels[p.tier])+' · '+e(styleLabels[p.style])+'</p>'
@@ -166,6 +167,7 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
     +'<h1>52 montres à découvrir et comparer.</h1><p>Des digitales SKMEI accessibles aux belles mécaniques. Explorez toutes nos références documentées, sans prix inventé ni classement commercial fictif.</p>'
     +'<p class="ud-disclosure">Atelier Montres est un guide indépendant : aucun achat ni paiement ici. Chaque fiche donne accès à la référence chez sa marque ou son vendeur source ; certains liens Amazon sont rémunérés. Une recherche Amazon ne garantit pas le modèle exact. Vérifiez toujours le vendeur, la variante, la livraison et le tarif avant de commander.</p></header>'
     +showroom
+    +'<div class="ud-favorite-tools" id="udFavoriteTools" hidden><div><strong>Votre sélection, à votre rythme.</strong><p>Gardez vos modèles préférés sur cet appareil, puis comparez-les parmi les 52 montres.</p></div><button id="udSavedToggle" type="button" aria-pressed="false"><span aria-hidden="true">♡</span> <span id="udSavedButtonLabel">Voir mes favoris</span> <span class="ud-favorite-total">(<span id="udSavedCount">0</span>)</span></button></div>'
     +'<form id="udFilters" class="ud-filters" role="search" aria-label="Affiner les 52 montres" hidden>'
     +'<label>Recherche<input id="udSearch" type="search" maxlength="100" placeholder="Marque, modèle, caractéristiques…"></label>'
     +'<label>Marque<select id="udBrand"><option value="all">Toutes les marques</option>'

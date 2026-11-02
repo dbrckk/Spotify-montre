@@ -7,9 +7,11 @@
   const tray=$('udCompareTray'),trayItems=$('udTrayItems'),trayCount=$('udTrayCount'),
     trayOpen=$('udTrayOpen'),trayClear=$('udTrayClear'),catalogue=document.querySelector('.ud-page');
   const viewTools=$('udViewTools'),viewCompact=$('udViewCompact'),viewLarge=$('udViewLarge');
+  const favoriteTools=$('udFavoriteTools'),savedToggle=$('udSavedToggle'),
+    savedCount=$('udSavedCount'),savedButtonLabel=$('udSavedButtonLabel');
   if(!root||!form||!status||!empty||!compareStatus||!compareClear||!compareTable
     ||!tray||!trayItems||!trayCount||!trayOpen||!trayClear||!catalogue
-    ||!viewTools||!viewCompact||!viewLarge)return;
+    ||!viewTools||!viewCompact||!viewLarge||!favoriteTools||!savedToggle||!savedCount||!savedButtonLabel)return;
   const cards=[...root.querySelectorAll('article.ud-card[data-id]')];
   const editorialOrder=new Map(cards.map((card,index)=>[card.dataset.id,index]));
   const node=(tag,text,cls)=>{
@@ -23,8 +25,17 @@
   const controls={q:$('udSearch'),brand:$('udBrand'),style:$('udStyle'),
     movement:$('udMovement'),tier:$('udTier'),size:$('udSize'),visual:$('udVisual'),
     merchant:$('udMerchant'),sort:$('udSort')};
-  let watches=new Map(),selected=[],view='grid',currentSort=null;
+  let watches=new Map(),selected=[],view='grid',currentSort=null,saved=new Set(),savedOnly=false;
   const validId=x=>typeof x==='string'&&/^[a-z0-9-]{4,64}$/.test(x);
+  // Shared with the 15-watch comparison gallery: a watch saved on either
+  // page must remain saved across the entire 52-watch catalogue.
+  const FAVORITES_KEY='atelier-montres-multibrand-favorites-v1';
+  const loadSaved=()=>{
+    try{
+      const values=JSON.parse(localStorage.getItem(FAVORITES_KEY)||'[]');
+      return Array.isArray(values)?new Set(values.filter(validId).slice(0,100)):new Set();
+    }catch(_){return new Set()}
+  };
   const matchSize=(p,value)=>{
     if(value==='all')return true;
     const n=p?.diameterMm;
@@ -36,6 +47,8 @@
     return false;
   };
   const params=new URLSearchParams(location.search);
+  saved=loadSaved();
+  savedOnly=params.get('saved')==='1';
   for(const [key,control] of Object.entries(controls)){
     const value=params.get(key);
     if(!value)continue;
@@ -50,6 +63,7 @@
         query.set(name,value.slice(0,100));
     }
     if(selected.length)query.set('compare',selected.join(','));
+    if(savedOnly)query.set('saved','1');
     if(view==='large')query.set('view','large');
     const next=location.pathname+(query.size?'?'+query.toString():'')+location.hash;
     history.replaceState(null,'',next);
@@ -75,6 +89,24 @@
     root.replaceChildren(...ordered);
     currentSort=mode;
   };
+  const updateSavedUI=()=>{
+    const count=cards.filter(card=>saved.has(card.dataset.id)).length;
+    savedCount.textContent=String(count);
+    savedToggle.setAttribute('aria-pressed',String(savedOnly));
+    savedButtonLabel.textContent=savedOnly?'Voir toutes les montres':'Voir mes favoris';
+    for(const card of cards){
+      const button=card.querySelector('button.ud-save');
+      if(!button)continue;
+      const active=saved.has(card.dataset.id);
+      const p=watches.get(card.dataset.id);
+      button.setAttribute('aria-pressed',String(active));
+      button.setAttribute('aria-label','Favoris : '+(active?'retirer ':'ajouter ')+(p?.brand||'')+' '+(p?.model||''));
+      const heart=button.querySelector('.ud-save-heart');
+      const word=button.querySelector('.ud-save-word');
+      if(heart)heart.textContent=active?'♥':'♡';
+      if(word)word.textContent='Favoris';
+    }
+  };
   const render=()=>{
     const q=normalized(controls.q.value),brand=controls.brand.value,
       style=controls.style.value,movement=controls.movement.value,
@@ -85,6 +117,7 @@
     for(const card of cards){
       const p=watches.get(card.dataset.id);
       const ok=Boolean(p)
+        &&(!savedOnly||saved.has(p.id))
         &&(brand==='all'||p.brand===brand)
         &&(style==='all'||p.style===style)
         &&(movement==='all'||p.movement===movement)
@@ -98,8 +131,12 @@
       if(ok)visible++;
     }
     reorderCards(controls.sort.value);
-    status.textContent=visible+' modèle'+(visible===1?'':'s')+' sur '+cards.length;
+    status.textContent=visible+' modèle'+(visible===1?'':'s')+' sur '+cards.length
+      +(savedOnly?' · Mes favoris':'');
+    empty.textContent=savedOnly?'Aucun favori ne correspond à ces critères. Enregistrez des montres avec le cœur, ou affichez tout le catalogue.'
+      :'Aucun résultat. Essayez une autre marque, un style différent ou effacez les filtres.';
     empty.hidden=visible!==0;
+    updateSavedUI();
     persist();
   };
   const changeView=mode=>{
@@ -111,6 +148,10 @@
   };
   viewCompact.addEventListener('click',()=>changeView('grid'));
   viewLarge.addEventListener('click',()=>changeView('large'));
+  savedToggle.addEventListener('click',()=>{
+    savedOnly=!savedOnly;
+    render();
+  });
   const link=(label,url)=>{
     const a=node('a',label);a.href=url;return a;
   };
@@ -191,6 +232,15 @@
       window.AtelierPhoto.open(photos,id,{assetPrefix:'../'});
       return;
     }
+    const favourite=event.target.closest('button.ud-save[data-save-id]');
+    if(favourite){
+      const id=favourite.dataset.saveId;
+      if(!watches.has(id))return;
+      if(saved.has(id))saved.delete(id);else saved.add(id);
+      try{localStorage.setItem(FAVORITES_KEY,JSON.stringify([...saved]))}catch(_){}
+      render();
+      return;
+    }
     const btn=event.target.closest('button.ud-select[data-compare-id]');
     if(!btn)return;
     const id=btn.dataset.compareId;
@@ -216,7 +266,18 @@
   });
   form.addEventListener('input',render);
   form.addEventListener('change',render);
-  form.addEventListener('reset',()=>{requestAnimationFrame(render)});
+  form.addEventListener('reset',()=>{requestAnimationFrame(()=>{savedOnly=false;render()})});
+  // Returning from a 15-watch detail page through the Android back button
+  // can restore the page from bfcache; refresh favourites without reloading.
+  window.addEventListener('pageshow',()=>{
+    saved=loadSaved();
+    if(watches.size)render();
+  });
+  window.addEventListener('storage',event=>{
+    if(event.key!==FAVORITES_KEY)return;
+    saved=loadSaved();
+    if(watches.size)render();
+  });
   fetch('../discovery-catalogue.json',{cache:'no-store'}).then(r=>{
     if(!r.ok)throw Error('Catalogue indisponible');return r.json();
   }).then(data=>{
@@ -227,7 +288,9 @@
       throw Error('Les fiches visibles ne correspondent pas aux références documentées');
     form.hidden=false;
     viewTools.hidden=false;
+    favoriteTools.hidden=false;
     for(const card of cards){
+      card.querySelector('button.ud-save')?.removeAttribute('hidden');
       card.querySelector('button.ud-select')?.removeAttribute('hidden');
       if(window.AtelierPhoto?.open)
         card.querySelector('button.ud-zoom')?.removeAttribute('hidden');

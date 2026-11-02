@@ -37,6 +37,34 @@ try{
   const tray=phone.locator('#udCompareTray');
   assert.equal(await tray.isVisible(),false,'The dock must not obstruct browsing before selection');
   assert.equal(await phone.locator('.ud-card').count(),52);
+  // The 15-watch gallery and 52-watch catalogue share the same local-only
+  // favourites. Verify real Android touch actions, reload and URL restoration.
+  assert.ok(await phone.locator('#udFavoriteTools').isVisible());
+  const save=phone.locator('#modele-skmei-2056 .ud-save');
+  assert.ok(await save.isVisible(),'Every real model needs a save control');
+  await save.click();
+  assert.equal(await save.getAttribute('aria-pressed'),'true');
+  assert.equal(await phone.locator('#udSavedCount').innerText(),'1');
+  const savedOnDisk=await phone.evaluate(()=>JSON.parse(
+    localStorage.getItem('atelier-montres-multibrand-favorites-v1')||'[]'));
+  assert.deepEqual(savedOnDisk,['skmei-2056']);
+  await phone.locator('#udSavedToggle').click();
+  assert.equal(await phone.locator('#udSavedToggle').getAttribute('aria-pressed'),'true');
+  assert.equal(new URL(phone.url()).searchParams.get('saved'),'1');
+  assert.equal(await phone.locator('.ud-card:visible').count(),1);
+  assert.ok(await phone.locator('#modele-skmei-2056').isVisible());
+  await phone.reload({waitUntil:'domcontentloaded'});
+  await phone.locator('#udFilters').waitFor({state:'visible'});
+  assert.equal(await phone.locator('#udSavedCount').innerText(),'1');
+  assert.equal(await phone.locator('.ud-card:visible').count(),1,
+    'Reload must keep the saved-only view on this Android browser');
+  await phone.locator('#udSavedToggle').click();
+  assert.equal(new URL(phone.url()).searchParams.has('saved'),false);
+  assert.equal(await phone.locator('.ud-card:visible').count(),52);
+  await phone.locator('#modele-skmei-2056 .ud-save').click();
+  assert.equal(await phone.locator('#udSavedCount').innerText(),'0');
+  assert.equal(await phone.locator('#modele-skmei-2056 .ud-save').getAttribute('aria-pressed'),'false');
+  await checkOverflow(phone,'52-watch favorites on Android');
   // This is NOT a price ranking: editorial tiers and documented merchant
   // destinations are the only signals, without a fabricated sales score.
   assert.equal(await phone.locator('#udSort').inputValue(),'essential');
