@@ -148,9 +148,17 @@ assert.throws(()=>computeCjFreightCents({
   clearanceOperationFee:0.45
 }),/tariff is missing/);
 assert.throws(()=>usdToCents('1.999'),/at most 2 decimals/);
-const approvedCosts={amount_eur_cents:4590,unit_cost_eur_cents:1100,
-  supplier_landed_eur_ceiling_cents:2390,reserves_eur_cents:900};
-assert.equal(validateCommercialCeiling(approvedCosts).provisionalContributionEurCents,1300);
+const approvedCosts={amount_eur_cents:5990,unit_cost_eur_cents:1100,
+  supplier_landed_eur_ceiling_cents:2390,reserves_eur_cents:900,
+  vat_rate_bps:2000,tax_treatment_verified:true,supplier_fx_verified:true};
+assert.equal(validateCommercialCeiling(approvedCosts).sellerNetRevenueCents,4992);
+assert.equal(validateCommercialCeiling(approvedCosts).provisionalContributionEurCents,1702);
+assert.throws(()=>validateCommercialCeiling({...approvedCosts,
+  tax_treatment_verified:false}),/VAT treatment/);
+assert.throws(()=>validateCommercialCeiling({...approvedCosts,
+  supplier_fx_verified:false}),/FX reserve/);
+assert.throws(()=>validateCommercialCeiling({...approvedCosts,
+  amount_eur_cents:4990}),/25 percent/);
 assert.throws(()=>validateCommercialCeiling({...approvedCosts,
   supplier_landed_eur_ceiling_cents:0}),/required/);
 assert.throws(()=>validateCommercialCeiling({...approvedCosts,
