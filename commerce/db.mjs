@@ -28,7 +28,10 @@ export async function listApprovedOffers(pool){
       AND supplier_payment_verified=true AND verified_until > now()
       AND supplier_landed_eur_ceiling_cents > 0
       AND supplier_landed_eur_ceiling_cents >= unit_cost_eur_cents
-      AND amount_eur_cents > supplier_landed_eur_ceiling_cents + reserves_eur_cents
+      AND tax_treatment_verified=true AND supplier_fx_verified=true
+      AND vat_rate_bps BETWEEN 0 AND 3000
+      AND round(amount_eur_cents * 10000.0 / (10000+vat_rate_bps))*3
+          >= (supplier_landed_eur_ceiling_cents+reserves_eur_cents)*4
     ORDER BY label LIMIT 30
   `);
   return rows;
@@ -43,7 +46,10 @@ export async function getApprovedOffer(pool,offerId){
       AND supplier_payment_verified=true AND verified_until>now()
       AND supplier_landed_eur_ceiling_cents > 0
       AND supplier_landed_eur_ceiling_cents >= unit_cost_eur_cents
-      AND amount_eur_cents > supplier_landed_eur_ceiling_cents + reserves_eur_cents LIMIT 1
+      AND tax_treatment_verified=true AND supplier_fx_verified=true
+      AND vat_rate_bps BETWEEN 0 AND 3000
+      AND round(amount_eur_cents * 10000.0 / (10000+vat_rate_bps))*3
+          >= (supplier_landed_eur_ceiling_cents+reserves_eur_cents)*4 LIMIT 1
   `,[offerId]);
   return rows[0]||null;
 }
@@ -68,7 +74,10 @@ export async function reserveCheckout(pool,request,{encryptionKey,idempotencySec
       AND verified_until>now()
       AND supplier_landed_eur_ceiling_cents > 0
       AND supplier_landed_eur_ceiling_cents >= unit_cost_eur_cents
-      AND amount_eur_cents > supplier_landed_eur_ceiling_cents + reserves_eur_cents
+      AND tax_treatment_verified=true AND supplier_fx_verified=true
+      AND vat_rate_bps BETWEEN 0 AND 3000
+      AND round(amount_eur_cents * 10000.0 / (10000+vat_rate_bps))*3
+          >= (supplier_landed_eur_ceiling_cents+reserves_eur_cents)*4
       FOR UPDATE
     `,[request.offerId]);
     const offer=result.rows[0];
