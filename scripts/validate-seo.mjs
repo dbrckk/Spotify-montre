@@ -1102,7 +1102,7 @@ for(const name of ['revue-photo.html','revue-photo.js','revue-photo.css']){
 }
 assert.ok(existsSync(resolve(root,'seo-watch-art.js')),'SEO watch illustrations script is required');
 const sitemap=read('sitemap.xml');
-assert.equal((sitemap.match(/<loc>/g)||[]).length,74);
+assert.equal((sitemap.match(/<loc>/g)||[]).length,78,'All four original buyer duels must be published in sitemap');
 const comparisons=JSON.parse(read('comparaisons-montres.json'));
 assert.equal(comparisons.version,1);
 assert.equal(comparisons.comparisons.length,4);
@@ -1224,4 +1224,4 @@ assert.ok(read('analytics.js').includes("merchantHosts=new Set([")&&read('analyt
 assert.ok(privacy.includes('chez Render'),'Privacy notice must identify actual host');
 const guide=read('montres/guide-choisir-montre.html');
 assert.match(guide,/<h1>Comment choisir une montre/);
-console.log('SEO validation OK: 15 model pages, 6 shopper collections, 3 core categories, 4 guides, 4 comparisons, 13 Amazon links, 74 sitemap URLs, 37 source-backed detailed product pages and genuine hero LCP preload');
+console.log('SEO validation OK: 15 model pages, 6 shopper collections, 3 core categories, 4 guides, 4 historical comparisons, 4 affordable buyer duels, 13 Amazon links, 78 sitemap URLs, 37 source-backed detailed product pages and genuine hero LCP preload');
