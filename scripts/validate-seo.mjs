@@ -259,6 +259,11 @@ assert.ok(unifiedHtml.includes('id="udVisual"')&&unifiedHtml.includes('value="no
 assert.ok(unifiedHtml.includes('id="udMerchant"')&&unifiedHtml.includes('value="direct"')
   &&unifiedHtml.includes('value="search"')&&unifiedHtml.includes('value="official"'),
   'Merchant-confidence filter must distinguish exact listing, search and source-only links');
+assert.ok(unifiedHtml.includes('id="udSort"')
+  &&['essential','direct','photo','alpha','editorial'].every(value=>unifiedHtml.includes('<option value="'+value+'">')),
+  'Buyer-priority sorting must remain accessible and honest about unknown prices');
+assert.match(read('unified-discovery.js'),/reorderCards\(controls\.sort\.value\)/,
+  'Interactive priority ordering must use source-backed model attributes');
 for(const watch of unified.products){
   const start=unifiedHtml.indexOf('<article class="ud-card" id="modele-'+watch.id+'"');
   const end=unifiedHtml.indexOf('</article>',start);

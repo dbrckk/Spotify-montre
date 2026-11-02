@@ -25,6 +25,32 @@ try{
   const tray=phone.locator('#udCompareTray');
   assert.equal(await tray.isVisible(),false,'The dock must not obstruct browsing before selection');
   assert.equal(await phone.locator('.ud-card').count(),52);
+  // This is NOT a price ranking: editorial tiers and documented merchant
+  // destinations are the only signals, without a fabricated sales score.
+  assert.equal(await phone.locator('#udSort').inputValue(),'essential');
+  assert.equal(await phone.locator('#udGrid .ud-card').first().getAttribute('data-tier'),'essential',
+    'The accessible-price editorial tier should be discoverable immediately');
+  await phone.locator('#udSort').selectOption('direct');
+  assert.equal(await phone.locator('#udGrid .ud-card').first().getAttribute('data-merchant'),'direct',
+    'Users must be able to prioritize the identified merchant product pages');
+  assert.equal(new URL(phone.url()).searchParams.get('sort'),'direct',
+    'Merchant-first ordering is part of the shareable URL');
+  await phone.reload({waitUntil:'domcontentloaded'});
+  await phone.locator('#udFilters').waitFor({state:'visible'});
+  assert.equal(await phone.locator('#udSort').inputValue(),'direct',
+    'A shared URL must restore the chosen order after a real navigation');
+  assert.equal(await phone.locator('#udGrid .ud-card').first().getAttribute('data-merchant'),'direct');
+  await phone.locator('#udSort').selectOption('photo');
+  assert.equal(await phone.locator('#udGrid .ud-card').first().getAttribute('data-visual'),'photo',
+    'Photo-first ordering cannot promote unphotographed fallback cards');
+  await phone.locator('#udSort').selectOption('alpha');
+  assert.equal(await phone.locator('#udGrid .ud-card').first().getAttribute('data-brand'),'ADDIESDIVE',
+    'Alphabetical sort must use real manufacturer names');
+  await phone.locator('#udSort').selectOption('editorial');
+  assert.equal(new URL(phone.url()).searchParams.get('sort'),'editorial');
+  await phone.locator('#udSort').selectOption('essential');
+  assert.equal(new URL(phone.url()).searchParams.has('sort'),false,
+    'The default editorial tier order must not clutter shared URLs');
   // The six source-backed editorial features must be usable before the 52-card
   // comparison, with real local photos and accurately distinguished merchants.
   const spotlight=phone.locator('.ud-showroom');
