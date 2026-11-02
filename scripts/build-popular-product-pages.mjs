@@ -154,6 +154,9 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       '@context':'https://schema.org','@graph':[
         {'@type':'Product',name,model:p.model,brand:{'@type':'Brand',name:p.brand},url:u(path),
           description:p.lead,
+          // Only owner-declared, model-exact local photos are eligible for
+          // product structured data. Never expose AI illustrations as photos.
+          ...(photo?{image:[u(photo.url)]}:{}),
           additionalProperty:keyFacts.map(([name,value])=>({'@type':'PropertyValue',name,value}))},
         {'@type':'BreadcrumbList',itemListElement:[
           {'@type':'ListItem',position:1,name:'Atelier Montres',item:u('')},
