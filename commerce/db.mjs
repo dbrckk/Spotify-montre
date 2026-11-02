@@ -325,6 +325,14 @@ export async function claimSupplierRecoveryProbe(pool){
       'INSERT INTO commerce_events(order_id,event_type) VALUES($1,$2)',
       [o.id,'SUPPLIER_RECOVERY_CHECK_STARTED']
     );
+    if(o.supplier_recovery_attempts===11){
+      await client.query(
+        'INSERT INTO commerce_events(order_id,event_type,details) VALUES($1,$2,$3)',
+        [o.id,'SUPPLIER_RECOVERY_EXHAUSTED',JSON.stringify({
+          action:'manual_cj_order_lookup_and_payment_refund_decision'
+        })]
+      );
+    }
     return o;
   });
 }
