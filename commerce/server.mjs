@@ -3,7 +3,8 @@ import {createHostedPayment,verifyHostedPayment} from '../scripts/commerce-molli
 import {createDatabase,initializeDatabase,listApprovedOffers,reserveCheckout,saveCreatedPayment,
   flagPaymentReview,getApprovedOffer,getOrderByPayment,getOrderForStatus,recordPaymentStatus,pendingPayments,
   claimSupplierOrder,recordSupplierAttempt,ordersForSupplierReconciliation,recordSupplierDetail,
-  quarantineStaleSupplierAttempts,quarantineStalePaymentCreation,getCommerceExceptionSummary} from './db.mjs';
+  quarantineStaleSupplierAttempts,quarantineStalePaymentCreation,getCommerceExceptionSummary,
+  claimSupplierRecoveryProbe,recordRecoveredSupplierOrder} from './db.mjs';
 import {ClientError,validateCheckoutBody,readJsonBody,readWebhookBody,openAddress} from './security.mjs';
 import {submitCjBalanceOrder,fetchCjOrder,preflightCjDelivery} from './cj.mjs';
 
@@ -85,6 +86,32 @@ async function supplierWork(){
     for(const row of await pendingPayments(pool)){
       try{await reconcilePayment(row.payment_id)}
       catch{console.error('payment_reconciliation_requires_review',row.id)}
+    }
+    // A previous CJ POST may already have purchased the watch when HTTP failed.
+    // Recovery is strictly GET-only by our merchant order reference; never
+    // submit/pay an uncertain second supplier order.
+    const orphan=await claimSupplierRecoveryProbe(pool);
+    if(orphan){
+      try{
+        const proof=await verifyHostedPayment({
+          apiKey:mollieKey,paymentId:orphan.payment_id,
+          orderId:orphan.id,amountCents:orphan.amount_eur_cents
+        });
+        if(!proof.paid){
+          console.error('supplier_recovery_payment_not_verified',orphan.id);
+        }else{
+          const matched=await fetchCjOrder({
+            orderId:orphan.id,accessToken:cjToken
+          });
+          const recovered=await recordRecoveredSupplierOrder(
+            pool,orphan.id,matched,encryptionKey,proof
+          );
+          if(recovered.changed)
+            console.log('supplier_order_recovered_read_only',orphan.id,recovered.status);
+        }
+      }catch{
+        console.error('supplier_recovery_requires_review',orphan.id);
+      }
     }
     const order=await claimSupplierOrder(pool,{dailyCapUsdCents:dailyCap});
     if(order){
