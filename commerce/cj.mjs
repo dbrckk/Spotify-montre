@@ -23,7 +23,7 @@ async function api(path,token,{method='GET',body,fetcher=fetch}={}){
   },...(body?{body:JSON.stringify(body)}:{}),signal:AbortSignal.timeout(12000)});
   if(!response.ok)throw Error('CJ API returned HTTP error');
   const data=await response.json();
-  if(data?.success!==true||data.result===false||data.code!==200)
+  if(data?.success===false||data?.result!==true||data?.code!==200)
     throw Error('CJ API did not confirm success');
   return data.data;
 }
@@ -36,6 +36,40 @@ function usdCents(value){
   if(!Number.isSafeInteger(sum))throw Error('CJ USD amount unsafe');
   return sum;
 }
+// Refuse payment before an up-to-date inventory and French postage quote exists.
+export async function preflightCjDelivery({vid,originCountry='CN',postalCode,
+  logisticsName,maxSupplierUsdCents,accessToken,fetcher=fetch}){
+  if(!/^[a-zA-Z0-9_-]{3,100}$/.test(vid||'')||!/^[A-Z]{2}$/.test(originCountry||'')
+    ||!/^[0-9]{5}$/.test(postalCode||'')||!/^[^\\r\\n]{3,50}$/.test(logisticsName||''))
+    throw Error('Supplier or delivery data invalid');
+  if(!Number.isSafeInteger(maxSupplierUsdCents)||maxSupplierUsdCents<=0)throw Error('Supplier limit absent');
+  const stock=await api('/product/stock/queryByVid?vid='+encodeURIComponent(vid),
+    accessToken,{fetcher});
+  if(!Array.isArray(stock)||!stock.some(row=>row?.countryCode===originCountry&&
+    row?.vid===vid&&Number.isInteger(row.cjInventoryNum)&&row.cjInventoryNum>=1))
+    throw Error('Supplier warehouse inventory unavailable: do not accept payment');
+  const freight=await api('/logistic/freightCalculate',accessToken,{
+    method:'POST',body:{startCountryCode:originCountry,endCountryCode:'FR',
+      zip:postalCode,products:[{quantity:1,vid}]},fetcher
+  });
+  if(!Array.isArray(freight))throw Error('Supplier freight response invalid');
+  const candidate=freight.find(x=>x.logisticName===logisticsName);
+  if(!candidate)throw Error('No confirmed delivery method to this French postcode');
+  // Quote amounts are USD, may omit taxes: absence is NOT equivalent to zero.
+  const postage=candidate.totalPostageFee??candidate.logisticPrice;
+  const postageCents=usdCents(postage);
+  if(candidate.taxesFee===undefined||candidate.clearanceOperationFee===undefined)
+    throw Error('Supplier customs or tax quote incomplete: refuse checkout');
+  const shippingAndTaxes=postageCents+
+    usdCents(candidate.taxesFee)+usdCents(candidate.clearanceOperationFee);
+  if(shippingAndTaxes>=maxSupplierUsdCents)
+    throw Error('Supplier shipping and customs already exceed total approved budget');
+  const balance=await getCjBalance({accessToken,fetcher});
+  if(balance<maxSupplierUsdCents)throw Error('Supplier wallet insufficient for a new sale');
+  return {freightUsdCents:shippingAndTaxes,balanceUsdCents:balance,
+    logisticsName,stockConfirmed:true};
+}
+
 export async function getCjBalance({accessToken,fetcher=fetch}){
   const data=await api('/shopping/pay/getBalance',accessToken,{fetcher});
   return usdCents(data?.amount);
