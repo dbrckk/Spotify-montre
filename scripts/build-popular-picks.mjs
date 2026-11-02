@@ -114,10 +114,21 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     throw Error('Affordable showroom must contain four distinct researched watches');
   if(affiliates.enabled&&affordable.some(p=>!verifiedLinks.has(p.id)))
     throw Error('Affordable merchant showroom requires four documented exact ASIN destinations');
-  const affordableCard=p=>{
+  // Pairs use exact local catalogue IDs; they compare factual sources rather
+  // than claiming identical quality or a measured sales/price ranking.
+  const affordablePairs={
+    'skmei-1257':'skmei-1251',
+    'skmei-1251':'skmei-1257',
+    'addiesdive-ad2030':'pagani-pd1701',
+    'pagani-pd1701':'addiesdive-ad2030'
+  };
+    const affordableCard=p=>{
     const photo=approvedPhotos.get(p.id);
     const direct=verifiedLinks.get(p.id);
     const viaComparator=direct?.evidenceType==='amazon_fr_comparator_redirect';
+    const other=affordable.find(q=>q.id===affordablePairs[p.id]);
+    if(!other||other.id===p.id)throw Error('Affordable comparison must use a distinct actual watch model: '+p.id);
+    const compareLink='./montres/toutes-les-montres.html?compare='+encodeURIComponent(p.id+','+other.id)+'#comparer';
     const label=viaComparator?'ASIN recoupé via comparateur'
       :direct?'Fiche Amazon.fr documentée':'Référence et vendeur documentés';
     const merchant=direct
@@ -137,6 +148,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
         +e(direct.marketplaceVariant)+'</p>':'')
       +(viaComparator?'<p class="am-affordable-comparator">La page Amazon.fr n’a pas été consultée directement : référence et ASIN recoupés via des sources tierces.</p>':'')
       +'<div class="am-affordable-actions"><a class="am-affordable-detail" href="./montres/'+e(p.id)+'.html">Caractéristiques et sources</a>'
+      +'<a class="am-affordable-compare" href="'+e(compareLink)+'" data-affordable-compare="'+e(p.id)+'">Comparer avec '+e(other.brand+' '+other.model)+'</a>'
       +merchant+'</div></div></article>';
   };
   const budgetShowcase='<section class="am-affordable" id="selection-accessible" aria-labelledby="amAffordableTitle">'

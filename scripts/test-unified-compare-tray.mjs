@@ -247,6 +247,48 @@ try{
   assert.equal(new URL(phone.url()).searchParams.has('merchant'),false);
   await phone.close();
 
+  // Homepage four-model photographic gallery must also open a functional
+  // two-watch comparison without asking the visitor to select models again.
+  const heroPage=await browser.newPage({viewport:{width:393,height:852},
+    isMobile:true,hasTouch:true,locale:'fr-FR'});
+  heroPage.on('pageerror',e=>errors.push('showroom: '+e.message));
+  await heroPage.goto(new URL('/index.html#selection-accessible',base).href,
+    {waitUntil:'domcontentloaded'});
+  const featuredCard=heroPage.locator('[data-affordable-id="skmei-1257"]');
+  assert.ok(await featuredCard.isVisible(),'Affordable real-watch gallery must be visible on Android');
+  await featuredCard.locator('a.am-affordable-compare').click();
+  await heroPage.locator('#udCompareTable table').waitFor({state:'visible'});
+  assert.equal(new URL(heroPage.url()).searchParams.get('compare'),'skmei-1257,skmei-1251',
+    'The homepage comparison CTA must preserve the two exact SKMEI references');
+  assert.equal(await heroPage.locator('#udTrayItems li').count(),2);
+  await checkOverflow(heroPage,'Mobile homepage affordable comparison');
+  await heroPage.close();
+
+  // Real Android journey: go from the 10-watch editorial shortlist to a
+  // preselected comparison of two exact, distinct documented watches.
+  const shortlistPage=await browser.newPage({viewport:{width:393,height:852},
+    isMobile:true,hasTouch:true,locale:'fr-FR'});
+  shortlistPage.on('pageerror',e=>errors.push('shortlist: '+e.message));
+  await shortlistPage.goto(new URL('/montres/modeles-populaires.html#selection-10-montres',base).href,
+    {waitUntil:'domcontentloaded'});
+  const shortlist=shortlistPage.locator('#selection-10-montres');
+  assert.equal(await shortlist.locator('.am-focus-item').count(),10,
+    'Ten genuine editorial choices must remain discoverable');
+  const first=shortlist.locator('[data-focus-id="addiesdive-ad2030"]');
+  assert.match(await first.locator('.am-focus-evidence').innerText(),/stock actuel/,
+    'No outdated Amazon model claim may imply live stock');
+  await first.locator('a.am-focus-compare').click();
+  await shortlistPage.locator('#udCompareTable table').waitFor({state:'visible'});
+  assert.equal(new URL(shortlistPage.url()).pathname,'/montres/toutes-les-montres.html');
+  assert.equal(new URL(shortlistPage.url()).searchParams.get('compare'),
+    'addiesdive-ad2030,pagani-pd1776');
+  assert.equal(await shortlistPage.locator('#udTrayItems li').count(),2,
+    'Shortlist comparison must restore two exact watch models');
+  assert.equal(await shortlistPage.locator('#udCompareTable th[scope=col]').count(),3);
+  await checkOverflow(shortlistPage,'Mobile shortlist to exact comparison');
+  await shortlistPage.screenshot({path:'artifacts/mobile-shortlist-comparison.png',fullPage:false});
+  await shortlistPage.close();
+
   const linked=await browser.newPage({viewport:{width:393,height:852},isMobile:true,hasTouch:true});
   linked.on('pageerror',e=>errors.push('deep-link: '+e.message));
   await linked.goto(new URL('/montres/toutes-les-montres.html?compare=skmei-2056,citizen-tsuyosa#comparer',base).href,

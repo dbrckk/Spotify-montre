@@ -196,6 +196,12 @@ assert.ok(home.indexOf('id="selection-accessible"')>home.indexOf('class="aff-her
   &&home.indexOf('id="selection-accessible"')<home.indexOf('id="gammes"'),
   'Affordable photographic models must appear immediately after the hero, before the 15-model catalogue');
 const affordableIds=['skmei-1257','skmei-1251','addiesdive-ad2030','pagani-pd1701'];
+const affordableComparePairs={
+  'skmei-1257':'skmei-1251',
+  'skmei-1251':'skmei-1257',
+  'addiesdive-ad2030':'pagani-pd1701',
+  'pagani-pd1701':'addiesdive-ad2030'
+};
 assert.deepEqual([...affordableHtml.matchAll(/data-affordable-id="([^"]+)"/g)].map(m=>m[1]),affordableIds,
   'The showcase contains four distinct researched and buyer-visible economical choices');
 assert.ok(affordableHtml.includes('sans prix, stock ni classement de ventes inventés'));
@@ -209,6 +215,14 @@ for(const id of affordableIds){
     'Each affordably styled watch must link to its genuine product detail page: '+id);
   assert.ok(card.includes('src="./assets/watches-popular/'+id+'.webp"'),
     'Real and approved local model photo required in the public four-model presentation: '+id);
+  const comparedId=affordableComparePairs[id];
+  assert.ok(comparedId&&comparedId!==id&&affordableIds.includes(comparedId),
+    'Home comparison must always use a second documented affordable watch: '+id);
+  const expectedCompare='./montres/toutes-les-montres.html?compare='+encodeURIComponent(id+','+comparedId)+'#comparer';
+  assert.ok(card.includes('href="'+expectedCompare+'"'),
+    'No-JS page must link to a real prefilled two-watch comparison: '+id);
+  assert.ok(card.includes('data-affordable-compare="'+id+'"'),
+    'Buyer comparison actions must retain their exact source watch ID: '+id);
   assert.equal((card.match(/data-amazon-product=/g)||[]).length,manifest.affiliateActive?1:0,
     'No extra or unapproved sponsored exit can appear in the affordable showroom: '+id);
   assert.equal((card.match(/data-merchant-official-id=/g)||[]).length,manifest.affiliateActive?0:1,
@@ -525,6 +539,20 @@ for(const item of commercialShortlist){
   const html=popularHtml.match(new RegExp('<li class="am-focus-item" data-focus-id="'+item.id+'"[\\s\\S]*?<\\/li>'))?.[0];
   assert.ok(html,'Shortlist card missing: '+item.id);
   assert.ok(html.includes('href="./'+item.id+'.html"'),'The genuine model detail page must be linked: '+item.id);
+  const alt=popularFeed.products.find(x=>x.id===item.compareWith);
+  assert.ok(alt&&alt.id!==item.id,'Only real distinct catalog models can be compared: '+item.id);
+  const compareHref='./toutes-les-montres.html?compare='+encodeURIComponent(item.id+','+alt.id)+'#comparer';
+  assert.ok(html.includes('href="'+compareHref+'"'),
+    'A buyer must be able to open the exact curated two-watch comparison: '+item.id);
+  assert.ok(html.includes('data-focus-compare="'+item.id+'"'),
+    'Comparison action must identify its watch and stay keyboard accessible: '+item.id);
+  assert.ok(html.includes('Comparer avec '+alt.brand+' '+alt.model),
+    'Comparison needs the real alternative model label: '+item.id);
+  assert.ok(html.includes('class="am-focus-evidence"'),
+    'Source proof must be in static HTML without requiring JavaScript: '+item.id);
+  assert.ok(html.includes('Source constructeur ou vendeur')||html.includes('ASIN recoupé')||html.includes('Comparateur + seconde source'),
+    'No unverified sale or invented proof may appear on shortlist: '+item.id);
+
   const sellerLink=exactPopularLinks[item.id];
   const expectedAction=sellerLink?
     'https://www.amazon.fr/dp/'+sellerLink.asin+'?tag=drackk04-21':p.officialUrl;
@@ -537,6 +565,21 @@ for(const item of commercialShortlist){
   if(sellerLink?.marketplaceVariant)
     assert.ok(html.includes(sellerLink.marketplaceVariant.replace(/&/g,'&amp;')),
       'Shortlist direct Amazon CTA needs variant disclosure: '+item.id);
+  if(sellerLink){
+    assert.ok(html.includes(sellerLink.verifiedAt),
+      'Evidence verification date must be visible separately from live availability: '+item.id);
+    assert.ok(html.includes('ce n’est pas un contrôle du stock actuel'),
+      'A recorded ASIN must never imply current Amazon availability: '+item.id);
+    if(sellerLink.evidenceType==='amazon_fr_comparator_redirect')
+      assert.ok(html.includes('Amazon.fr non consulté directement'),
+        'Comparison-source evidence cannot be upgraded to firsthand Amazon inspection: '+item.id);
+  }else{
+    assert.ok(html.includes('Aucune fiche Amazon exacte confirmée'),
+      'Unknown ASIN must remain explicitly unknown on shortlist: '+item.id);
+  }
+  assert.ok(html.includes(approvedPopularPhotos.has(item.id)
+    ?'droits déclarés, non vérifiés indépendamment':'Photo exacte à consulter chez la marque ou le vendeur'),
+    'Every buyer must understand whether a watch has an owner-attested source photo: '+item.id);
   if(sellerLink)assert.ok(html.includes('rel="noopener noreferrer nofollow sponsored"'),
     'Shortlist paid product exits require sponsored relationship: '+item.id);
   assert.ok(html.includes(item.caution),'Editorial caveat must be visible: '+item.id);
