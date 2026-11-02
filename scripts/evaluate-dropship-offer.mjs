@@ -10,7 +10,9 @@ const REQUIRED_PROOFS=[
   'exactVariantMatched','supplierIdentityVerified','supplierStockConfirmed',
   'shippingToFranceConfirmed','importTaxesAndDdpReviewed','euProductComplianceVerified',
   'photoRightsVerified','merchantLegalAndCgvReady','returnsAndWarrantyReady',
-  'shopifyPaymentsLiveVerified','shopifyVariantMapped',
+  'independentPaymentAccountVerified','paymentWebhookReconciliationVerified',
+  'independentCheckoutBackendVerified','encryptedShippingDataVerified',
+  'catalogueSupplierVariantMapped',
   'automaticSupplierOrderVerified','automaticSupplierPaymentVerified',
   'supplierFundingAvailable','idempotenceAndFailureAlertsVerified'
 ];
@@ -58,6 +60,8 @@ export function evaluateDropshipOffer(record,{asOf=new Date().toISOString().slic
   if(!costs||typeof costs!=='object'||Array.isArray(costs))throw Error('Coûts détaillés requis');
   if(!proofs||typeof proofs!=='object'||Array.isArray(proofs))throw Error('Preuves requises');
   for(const name of REQUIRED_COSTS)euroCents(costs[name],name);
+  if(Object.keys(proofs).some(name=>!REQUIRED_PROOFS.includes(name)))throw Error('Preuve inconnue : contrat de validation commerce indépendant');
+  if(Object.keys(proofs).some(name=>typeof proofs[name]!=='boolean'))throw Error('Preuves : valeurs booléennes requises');
   for(const name of ['sellingVatBasisPoints','paymentFeeBasisPoints']){
     if(!Number.isSafeInteger(costs[name])||costs[name]<0||costs[name]>10000)
       throw Error(name+': taux en points de base de 0 à 10000 requis');
