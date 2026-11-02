@@ -3,6 +3,7 @@ import {Readable} from 'node:stream';
 import {newOrderId,newPublicToken,sealAddress,openAddress,digest,sameHash,
   validateCheckoutBody,checkoutFingerprint,readWebhookBody} from './security.mjs';
 import {buildCjOrder,getCjBalance,submitCjBalanceOrder,fetchCjOrder,preflightCjDelivery} from './cj.mjs';
+import {usdToCents,computeCjFreightCents,computeCjLandedCents,validateCommercialCeiling} from './landed-cost.mjs';
 
 const key='a1'.repeat(32);
 const customer={fullName:'Test Client',email:'test@example.fr',address1:'12 rue des Montres',
@@ -96,7 +97,7 @@ const supplierPreflight=async(url,options)=>{
     assert.equal(request.endCountryCode,'FR');
     assert.equal(request.products[0].vid,order.supplier_vid);
     return {ok:true,json:async()=>({code:200,result:true,data:[
-      {logisticName:'PostNL',logisticPrice:3.1,totalPostageFee:3.1,taxesFee:0.85,clearanceOperationFee:0.45}
+      {logisticName:'PostNL',logisticPrice:3.1,totalPostageFee:4.4,taxesFee:0.85,clearanceOperationFee:0.45,tariff:0}
     ]})};
   }
   if(url.endsWith('/shopping/pay/getBalance'))return {ok:true,json:async()=>({
@@ -122,5 +123,39 @@ await assert.rejects(preflightCjDelivery({
   logisticsName:'PostNL',maxSupplierUsdCents:1200,accessToken:'a'.repeat(40),
   fetcher:supplierPreflight
 }),/exceed total/);
+
+
+// Official CJ quote: totalPostageFee already contains taxes, customs and tariff.
+const inclusive=computeCjFreightCents({
+  logisticName:'PostNL',logisticPrice:'3.10',taxesFee:'0.85',
+  clearanceOperationFee:'0.45',tariff:'0.00',totalPostageFee:'4.40'
+});
+assert.equal(inclusive.mode,'inclusive_postage');
+assert.equal(inclusive.shippingUsdCents,310);
+assert.equal(inclusive.freightAndImportUsdCents,440,'Tax/customs must NOT be double-counted');
+assert.equal(computeCjLandedCents(1130,inclusive),1570);
+const fallbackFreight=computeCjFreightCents({
+  logisticName:'PostNL',logisticPrice:3.1,taxesFee:0.85,
+  clearanceOperationFee:0.45,tariff:0.2
+});
+assert.equal(fallbackFreight.freightAndImportUsdCents,460);
+assert.throws(()=>computeCjFreightCents({
+  logisticName:'PostNL',totalPostageFee:3.1,taxesFee:0.85,
+  clearanceOperationFee:0.45,tariff:0.2
+}),/contradicts/);
+assert.throws(()=>computeCjFreightCents({
+  logisticName:'PostNL',totalPostageFee:4.4,taxesFee:0.85,
+  clearanceOperationFee:0.45
+}),/tariff is missing/);
+assert.throws(()=>usdToCents('1.999'),/at most 2 decimals/);
+const approvedCosts={amount_eur_cents:4590,unit_cost_eur_cents:1100,
+  supplier_landed_eur_ceiling_cents:2390,reserves_eur_cents:900};
+assert.equal(validateCommercialCeiling(approvedCosts).provisionalContributionEurCents,1300);
+assert.throws(()=>validateCommercialCeiling({...approvedCosts,
+  supplier_landed_eur_ceiling_cents:0}),/required/);
+assert.throws(()=>validateCommercialCeiling({...approvedCosts,
+  supplier_landed_eur_ceiling_cents:4200}),/no contribution/);
+assert.throws(()=>validateCommercialCeiling({...approvedCosts,
+  supplier_landed_eur_ceiling_cents:100}),/below unit cost/);
 
 console.log('Independent commerce checks OK: encrypted address, checkout safety, CJ balance, exact shipping, paid submission and ambiguous-cost refusal');
