@@ -253,7 +253,7 @@ html{scroll-padding-top:105px}
  .aff-tier-grid>a{min-height:145px}
  .aff-tools{padding:12px;gap:10px}
  .aff-tabs{gap:7px}
- .aff-tabs button{font-size:12px}
+ .aff-tabs button{font-size:13px;min-height:44px}
  .aff-grid{gap:11px}
  .aff-card-body{padding:13px}
  .aff-card h3{font-size:21px}
