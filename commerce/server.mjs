@@ -1,10 +1,10 @@
 import {createServer} from 'node:http';
 import {createHostedPayment,verifyHostedPayment} from '../scripts/commerce-mollie.mjs';
 import {createDatabase,initializeDatabase,listApprovedOffers,reserveCheckout,saveCreatedPayment,
-  flagPaymentReview,getOrderByPayment,getOrderForStatus,recordPaymentStatus,pendingPayments,
+  flagPaymentReview,getApprovedOffer,getOrderByPayment,getOrderForStatus,recordPaymentStatus,pendingPayments,
   claimSupplierOrder,recordSupplierAttempt,ordersForSupplierReconciliation,recordSupplierDetail} from './db.mjs';
 import {ClientError,validateCheckoutBody,readJsonBody,readWebhookBody,openAddress} from './security.mjs';
-import {submitCjBalanceOrder,fetchCjOrder} from './cj.mjs';
+import {submitCjBalanceOrder,fetchCjOrder,preflightCjDelivery} from './cj.mjs';
 
 const origin=process.env.STOREFRONT_ORIGIN||'https://atelier-montres-selection-fr.onrender.com';
 const enabled=process.env.COMMERCE_ENABLED==='true';
@@ -95,6 +95,15 @@ async function route(req,res){
     if(req.headers.origin!==origin)return reply(res,403,{error:'Origine refusée'});
     if(!merchantReady())return reply(res,503,{error:'Achat direct temporairement indisponible'},cors(req));
     const request=validateCheckoutBody(await readJsonBody(req));
+    const offer=await getApprovedOffer(pool,request.offerId);
+    if(!offer)return reply(res,409,{error:'Cette montre n’est pas en vente directe actuellement'},cors(req));
+    try{
+      await preflightCjDelivery({vid:offer.supplier_vid,originCountry:offer.from_country_code,
+        postalCode:request.customer.postalCode,logisticsName:offer.logistics_name,
+        maxSupplierUsdCents:offer.supplier_max_usd_cents,accessToken:cjToken});
+    }catch{
+      return reply(res,409,{error:'Stock, frais ou livraison non vérifiables pour cette adresse. Aucun paiement demandé.'},cors(req));
+    }
     const order=await reserveCheckout(pool,request,{
       encryptionKey,idempotencySecret
     });
