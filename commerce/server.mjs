@@ -2,7 +2,8 @@ import {createServer} from 'node:http';
 import {createHostedPayment,verifyHostedPayment} from '../scripts/commerce-mollie.mjs';
 import {createDatabase,initializeDatabase,listApprovedOffers,reserveCheckout,saveCreatedPayment,
   flagPaymentReview,getApprovedOffer,getOrderByPayment,getOrderForStatus,recordPaymentStatus,pendingPayments,
-  claimSupplierOrder,recordSupplierAttempt,ordersForSupplierReconciliation,recordSupplierDetail} from './db.mjs';
+  claimSupplierOrder,recordSupplierAttempt,ordersForSupplierReconciliation,recordSupplierDetail,
+  quarantineStaleSupplierAttempts,quarantineStalePaymentCreation,getCommerceExceptionSummary} from './db.mjs';
 import {ClientError,validateCheckoutBody,readJsonBody,readWebhookBody,openAddress} from './security.mjs';
 import {submitCjBalanceOrder,fetchCjOrder,preflightCjDelivery} from './cj.mjs';
 
@@ -15,7 +16,7 @@ const idempotencySecret=process.env.IDEMPOTENCY_SECRET||'';
 const backendUrl=process.env.COMMERCE_PUBLIC_URL||'';
 const rawCap=Number(process.env.CJ_DAILY_CAP_USD_CENTS||0);
 const dailyCap=Number.isSafeInteger(rawCap)&&rawCap>0?rawCap:0;
-let pool=null,dbReady=false,workerBusy=false;
+let pool=null,dbReady=false,workerBusy=false,lastExceptionAlertAt=0;
 
 function safeHttps(u){
   try{const p=new URL(u);return p.protocol==='https:'&&!p.username&&!p.password&&!p.hash&&p.pathname==='/'&&p.search==='' }
@@ -48,9 +49,19 @@ async function reconcilePayment(paymentId){
   return recordPaymentStatus(pool,existing.id,verified);
 }
 async function supplierWork(){
-  if(workerBusy||!merchantReady())return;
+  if(workerBusy||!dbReady||!pool)return;
   workerBusy=true;
   try{
+    const supplierStale=await quarantineStaleSupplierAttempts(pool);
+    const paymentStale=await quarantineStalePaymentCreation(pool);
+    if(supplierStale.length||paymentStale.length)
+      console.error('commerce_attempts_quarantined',{supplier:supplierStale.length,payment:paymentStale.length});
+    if(Date.now()-lastExceptionAlertAt>15*60*1000){
+      lastExceptionAlertAt=Date.now();
+      const summary=await getCommerceExceptionSummary(pool);
+      if(Object.values(summary).some(Number))console.error('commerce_manual_intervention_required',summary);
+    }
+    if(!merchantReady())return;
     // Reconciliation is safe to repeat; NEVER retry an uncertain supplier creation.
     for(const row of await pendingPayments(pool)){
       try{await reconcilePayment(row.payment_id)}
@@ -59,12 +70,31 @@ async function supplierWork(){
     const order=await claimSupplierOrder(pool,{dailyCapUsdCents:dailyCap});
     if(order){
       try{
+        // Revalidate the customer's payment at the final irreversible boundary.
+        // A later refund or chargeback must stop the CJ wallet from being debited.
+        const payment=await verifyHostedPayment({
+          apiKey:mollieKey,paymentId:order.payment_id,
+          orderId:order.id,amountCents:order.amount_eur_cents
+        });
+        if(!payment.paid){
+          await recordPaymentStatus(pool,order.id,payment);
+          throw Error('Payment not settled immediately before supplier debit');
+        }
         const customer=openAddress(order.address_encrypted,encryptionKey);
+        // The first stock/landed-cost check happened before taking payment.
+        // Repeat immediately before committing the customer's paid order at CJ.
+        // Never buy if the item, postcode, duties or wallet have changed.
+        await preflightCjDelivery({
+          vid:order.supplier_vid,originCountry:order.from_country_code,
+          postalCode:customer.postalCode,logisticsName:order.logistics_name,
+          maxSupplierUsdCents:order.supplier_max_usd_cents,accessToken:cjToken
+        });
         const result=await submitCjBalanceOrder({order,customer,accessToken:cjToken});
         await recordSupplierAttempt(pool,order.id,result,null);
       }catch{
-        // This status intentionally stays blocked; no automatic duplicate payment to CJ.
-        await recordSupplierAttempt(pool,order.id,null,true);
+        // If a payment reversal already changed the order to EXCEPTION,
+        // do not overwrite it. If the provider failed, quarantine the attempt.
+        await recordSupplierAttempt(pool,order.id,null,true).catch(()=>{});
         console.error('supplier_order_requires_manual_reconciliation',order.id);
       }
     }

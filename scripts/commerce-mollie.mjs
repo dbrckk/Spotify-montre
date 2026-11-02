@@ -1,3 +1,4 @@
+import {createHash} from 'node:crypto';
 /*
  * Atelier Montres — transport de paiement hébergé Mollie pour notre propre site.
  * Bibliothèque SERVEUR uniquement : ne jamais l'importer depuis site/.
@@ -46,6 +47,15 @@ const amountMatches=(payment,amountCents)=>payment?.amount?.currency==='EUR'&&
   typeof payment.amount.value==='string'&&AMOUNT.test(payment.amount.value)&&
   payment.amount.value===euro(amountCents);
 const belongs=(payment,orderId)=>payment?.metadata?.order_id===orderId;
+const hasPositiveReversal=(field,name)=>{
+  if(field===undefined||field===null)return false;
+  if(field.currency!=='EUR'||typeof field.value!=='string'||!AMOUNT.test(field.value))
+    throw Error('Montant '+name+' invalide : intervention obligatoire');
+  const amount=Number(field.value.replace('.',''));
+  if(!Number.isSafeInteger(amount))throw Error('Montant '+name+' non fiable');
+  return amount>0;
+};
+
 
 /*
  * À appeler uniquement APRÈS une transaction DB idempotente créant l'ordre.
@@ -65,7 +75,8 @@ export async function createHostedPayment({apiKey,orderId,amountCents,descriptio
     metadata:{order_id:orderId}
   };
   const res=await fetcher(API,{method:'POST',redirect:'error',
-    headers:{'Authorization':'Bearer '+apiKey,'Content-Type':'application/json','Accept':'application/json'},
+    headers:{'Authorization':'Bearer '+apiKey,'Content-Type':'application/json','Accept':'application/json',
+      'Idempotency-Key':createHash('sha256').update('atelier-montres:mollie:'+orderId).digest('hex')},
     body:JSON.stringify(payload),signal:AbortSignal.timeout(10000)});
   const p=await responseJson(res);
   if(!PAYMENT.test(p.id||'')||p.mode!==expectedMode||!belongs(p,orderId)||
@@ -94,5 +105,8 @@ export async function verifyHostedPayment({apiKey,paymentId,orderId,amountCents,
     !amountMatches(p,amountCents))throw Error('Paiement non concordant : ne pas préparer la commande fournisseur');
   const statuses=['open','pending','authorized','paid','failed','canceled','expired'];
   if(!statuses.includes(p.status))throw Error('Statut de paiement inattendu : intervention requise');
-  return {paymentId:p.id,orderId,amountCents,status:p.status,paid:p.status==='paid',mode:p.mode};
+  const reversed=hasPositiveReversal(p.amountRefunded,'remboursement')
+    ||hasPositiveReversal(p.amountChargedBack,'rétrofacturation');
+  return {paymentId:p.id,orderId,amountCents,status:p.status,
+    paid:p.status==='paid'&&!reversed,reversed,mode:p.mode};
 }

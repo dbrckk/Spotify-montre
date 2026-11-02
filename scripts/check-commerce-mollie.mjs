@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
 import {createHostedPayment,verifyHostedPayment} from './commerce-mollie.mjs';
 
 const apiKey='test_'+'A'.repeat(24);
@@ -21,6 +22,9 @@ const fetcher=async(url,options)=>{
   assert.equal(options.method,'POST');
   assert.equal(options.redirect,'error');
   assert.equal(options.headers.Authorization,'Bearer '+apiKey);
+  assert.equal(options.headers['Idempotency-Key'],
+    createHash('sha256').update('atelier-montres:mollie:'+orderId).digest('hex'));
+  assert.equal(options.headers['Idempotency-Key'].length,64);
   const body=JSON.parse(options.body);
   assert.deepEqual(body.amount,{currency:'EUR',value:'39.90'});
   assert.equal(body.metadata.order_id,orderId);
@@ -45,6 +49,23 @@ assert.equal(paid.status,'paid');
 const pending=await verifyHostedPayment({apiKey,paymentId,orderId,amountCents,
   fetcher:async()=>json(payment('pending'))});
 assert.equal(pending.paid,false);
+const refunded=payment('paid');
+refunded.amountRefunded={currency:'EUR',value:'0.01'};
+const verifiedRefund=await verifyHostedPayment({
+  apiKey,paymentId,orderId,amountCents,fetcher:async()=>json(refunded)
+});
+assert.equal(verifiedRefund.reversed,true);
+assert.equal(verifiedRefund.paid,false,'partially refunded payment must never trigger fulfillment');
+const chargedBack=payment('paid');
+chargedBack.amountChargedBack={currency:'EUR',value:'39.90'};
+assert.equal((await verifyHostedPayment({
+  apiKey,paymentId,orderId,amountCents,fetcher:async()=>json(chargedBack)
+})).paid,false);
+const inconsistentRefund=payment('paid');
+inconsistentRefund.amountRefunded={currency:'USD',value:'1.00'};
+await assert.rejects(verifyHostedPayment({
+  apiKey,paymentId,orderId,amountCents,fetcher:async()=>json(inconsistentRefund)
+}),/Montant remboursement invalide/);
 for(const [label,mutate] of [
   ['wrong customer order',p=>{p.metadata.order_id='ord_fake123456789012';}],
   ['wrong amount',p=>{p.amount.value='0.01';}],
