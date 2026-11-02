@@ -469,14 +469,16 @@ try{
    const ids=['gammes','montres','amEditorialGallery','histoire'];
    const positions=ids.map(id=>document.getElementById(id)?.getBoundingClientRect().top+window.scrollY);
    const firstCard=document.querySelector('#affGrid .aff-card')?.getBoundingClientRect().top+window.scrollY;
-   return {positions,firstCard};
+   const bridge=document.querySelector('.am-catalogue-bridge');
+   const bridgeHeight=bridge?.getBoundingClientRect().height||0;
+   return {positions,firstCard,bridgeHeight};
  });
  assert.ok(shopFirst.positions.every((x,i)=>Number.isFinite(x)&&(i===0||x>shopFirst.positions[i-1])),
    'Mobile home must place the catalog directly after tiers and before editorial content');
  const firstAffordable=await page.locator('#selection-accessible .am-affordable-card').first().evaluate(el=>el.getBoundingClientRect().top+window.scrollY);
  assert.ok(firstAffordable<2600,
    'A genuine watch model, not just a marketing illustration, must be shown close to the top: '+firstAffordable);
- assert.ok(shopFirst.firstCard<5700,
+ assert.ok(shopFirst.firstCard<5700+shopFirst.bridgeHeight,
    'The new mobile swipe rail must keep the full historical catalogue within reasonable reach: '+JSON.stringify(shopFirst));
  const discovery=await page.locator('.am-discovery-grid').evaluate(el=>{
    const style=getComputedStyle(el);

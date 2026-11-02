@@ -87,3 +87,16 @@ body:has(#affCompareTray:not([hidden])) main{padding-bottom:175px}
 }
 /* The floating comparison dock must never cover content before selection or after clearing. */
 body .aff-selection .am-compare-tray[hidden]{display:none}
+
+.am-catalogue-bridge{background:#f5f0e7;color:#213c2c;border-bottom:1px solid #e2d8c6}
+.am-catalogue-bridge-inner{display:flex;align-items:center;justify-content:space-between;gap:32px;padding-block:clamp(26px,4vw,48px)}
+.am-catalogue-bridge-inner>div:first-child{flex:1 1 490px;min-width:0}
+.am-catalogue-bridge .overline{margin:0 0 8px;color:#314a37;opacity:1}
+.am-catalogue-bridge h2{font:400 clamp(27px,3.4vw,45px)/1.12 Georgia,serif;letter-spacing:-.03em;margin:0 0 12px}
+.am-catalogue-bridge h2 em{font-style:italic;color:#647c60}
+.am-catalogue-bridge p:not(.overline){max-width:710px;font-size:15px;line-height:1.65;margin:0;color:#526055}
+.am-catalogue-bridge-actions{display:flex;flex-direction:column;align-items:stretch;gap:12px;min-width:225px}
+.am-catalogue-bridge-actions .button{text-align:center;justify-content:center}
+.am-catalogue-bridge-actions>a:not(.button){text-align:center;color:#24513a;font-weight:650;text-underline-offset:4px;padding:10px}
+.am-catalogue-bridge a:focus-visible{outline:3px solid #a77c3a;outline-offset:3px}
+@media(max-width:760px){.am-catalogue-bridge-inner{flex-wrap:wrap;gap:18px}.am-catalogue-bridge-actions{width:100%;min-width:0}.am-catalogue-bridge h2{max-width:20ch}}
