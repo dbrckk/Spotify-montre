@@ -1,5 +1,7 @@
 # Atelier Montres — boutique de montres indépendante
 
+**Nouveau — fiches et conseiller premium :** [refonte photographique, choix rapides par style, fiches interactives et indexables, tests Android et WCAG](docs/REFONTE_FICHES_CONSEILLER_STAR_LIST_2026-11-03.md). Cette mise à jour complète la [refonte de l’accueil et du catalogue](docs/REFONTE_UX_UI_STAR_LIST_2026-11-02.md) ; aucun encaissement n’est activé.
+
 **Refonte visuelle :** [nouvelle direction graphite/cuivre, photographies locales, accès rapides par style, UX Android et sources du dépôt `star-list`](docs/REFONTE_UX_UI_STAR_LIST_2026-11-02.md). Les données produit, le catalogue de 52 montres, les liens partenaires et la désactivation de la vente directe restent inchangés.
 
 ## Vente directe sur notre propre site — 2 novembre 2026
