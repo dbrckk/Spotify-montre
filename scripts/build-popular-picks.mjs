@@ -11,7 +11,7 @@ import {buildCommercialShortlist} from './build-commercial-shortlist.mjs';
 // Curated discovery intentionally stays outside the 15-watch comparator until
 // individual Amazon ASINs and licensed exact-model images are validated.
 // This prevents an invented product match or silently unlicensed photograph.
-export function buildPopularPicks({root,existingProducts,affiliates,amazonPartnerTag,pageHead,page,e,u}){
+export function buildPopularPicks({root,existingProducts,affiliates,amazonPartnerTag,pageHead,page,e,u,comparisonLinks=new Map()}){
   const source=JSON.parse(readFileSync(join(root,'selection-populaires.json'),'utf8'));
   const picks=source.products;
   const known=new Set(existingProducts.map(p=>p.id));
@@ -72,7 +72,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
       ?link(direct.url,'Voir le modèle exact sur Amazon.fr · lien rémunéré',true,p.id,'product')
       :link(amazonSearch(p),'Rechercher sur Amazon.fr · lien rémunéré',true,p.id,'search');
   };
-  const detailPaths=buildPopularProductPages({root,products:picks,coreProducts:existingProducts,affiliates,amazonPartnerTag,pageHead,page,e,u,link,amazonSearch,tierNames,affiliateLink,partnerLink,partnerOffers,verifiedLinks,approvedPhotos,aiVisuals});
+  const detailPaths=buildPopularProductPages({root,products:picks,coreProducts:existingProducts,affiliates,amazonPartnerTag,pageHead,page,e,u,link,amazonSearch,tierNames,affiliateLink,partnerLink,partnerOffers,verifiedLinks,approvedPhotos,aiVisuals,comparisonLinks});
   const movementKind=p=>p.movement.startsWith('Automatique')?'automatic':p.movement.startsWith('Quartz solaire')?'solar':'quartz';
   const card=(p,front=false)=>{
     const photo=approvedPhotos.get(p.id);
@@ -162,6 +162,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     +'<div class="am-affordable-footer"><p>Les liens Amazon.fr peuvent être rémunérés. Une correspondance ASIN ne garantit pas le prix, le vendeur,'
     +' la livraison ni la variante en stock. Les droits de publication des photos reposent sur les déclarations de l’éditeur,'
     +' non vérifiées indépendamment.</p>'
+    +'<a href="#duels-accessibles">Quatre comparaisons pour choisir entre les modèles</a>'
     +'<a href="./montres/montres-skmei.html">Explorer les dix modèles SKMEI</a>'
     +'<a href="./montres/toutes-les-montres.html?merchant=direct&sort=direct">Voir les références avec fiche Amazon identifiée</a></div>'
     +'</div></section>';
