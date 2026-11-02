@@ -2,5 +2,5 @@
   "status": "prelaunch",
   "newsletterUrl": null,
   "checkoutMode": "inactive",
-  "commerceApiUrl": null
+  "commerceApiUrl": "https://atelier-montres-commerce-api.onrender.com/"
 }
