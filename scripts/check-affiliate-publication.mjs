@@ -168,20 +168,27 @@ try {
   const manifest=JSON.parse(readFileSync(join(target,'seo-manifest.json'),'utf8'));
   assert.equal(manifest.affiliateActive,true);
   assert.equal(manifest.affiliateCount,13,'Publish the 13 owner-tagged core product matches');
-  assert.equal(manifest.popularAffiliateDirectLinks,8,'Eight documented direct links in supplementary selection');
-  assert.equal(manifest.popularAffiliateSearchLinks,29,'Remaining twenty-nine supplemental watches must stay labeled searches');
+  assert.equal(manifest.popularAffiliateDirectLinks,10,'Ten documented direct links in supplementary selection');
+  assert.equal(manifest.popularAffiliateSearchLinks,27,'Remaining twenty-seven supplemental watches must stay labeled searches');
   assert.equal(manifest.popularPartnerAffiliateLinks,0,'No unapproved Awin partner URL is published');
   const directProduction=readFileSync(join(target,'montres/casio-gw-m5610u-1.html'),'utf8');
   assert.ok(directProduction.includes('href="https://www.amazon.fr/dp/B09BCPP68Q?tag=drackk04-21"'),
     'Publish only the independently source-confirmed G-SHOCK Amazon.fr direct match');
   assert.ok(!directProduction.includes('data-amazon-search-id="casio-gw-m5610u-1"'),
     'An exact product match must not be mislabeled as an unverified search');
-  for(const [id,asin] of [['skmei-1257','B07B6ML1VJ'],['casio-a158wea-1','B000GAYQJ0'],['casio-ga-2100-1a1','B07WGJ1JNW']]){
+  for(const [id,asin] of [['skmei-1251','B072JTCP5H'],['casio-ae1200wh-1av','B0099M2IWI'],['skmei-1257','B07B6ML1VJ'],['casio-a158wea-1','B000GAYQJ0'],['casio-ga-2100-1a1','B07WGJ1JNW']]){
     const detail=readFileSync(join(target,'montres/'+id+'.html'),'utf8');
     assert.ok(detail.includes('href="https://www.amazon.fr/dp/'+asin+'?tag=drackk04-21"'),
       'New Amazon.fr exact-model referral requires its proof-backed ASIN '+id);
     assert.ok(detail.includes('data-amazon-product="'+id+'"')&&!detail.includes('data-amazon-search-id="'+id+'"'),
       'Never advertise a verified direct ASIN as an Amazon search '+id);
+  }
+  for(const id of ['skmei-1251','casio-ae1200wh-1av']){
+    const detail=readFileSync(join(target,'montres/'+id+'.html'),'utf8');
+    assert.ok(detail.includes('via redirection du comparateur et source indépendante'),
+      'Comparator corroboration is not a firsthand inspection of Amazon: '+id);
+    assert.ok(detail.includes('fiche Amazon.fr non consultée directement'),
+      'Buyers must understand the weaker evidence grade before visiting Amazon: '+id);
   }
   for(const [id,asin,fragment] of [['addiesdive-ad2030','B0DNK5TT6D','SH-DE-AD2030-Steel-blue'],['pagani-pd1701','B0C7QC653D','PGN-1701']]){
     const html=readFileSync(join(target,'montres/'+id+'.html'),'utf8');
