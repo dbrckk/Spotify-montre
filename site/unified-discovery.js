@@ -100,11 +100,11 @@
       const active=saved.has(card.dataset.id);
       const p=watches.get(card.dataset.id);
       button.setAttribute('aria-pressed',String(active));
-      button.setAttribute('aria-label',(active?'Retirer des favoris : ':'Ajouter aux favoris : ')+(p?.brand||'')+' '+(p?.model||''));
+      button.setAttribute('aria-label','Favoris : '+(active?'retirer ':'ajouter ')+(p?.brand||'')+' '+(p?.model||''));
       const heart=button.querySelector('.ud-save-heart');
       const word=button.querySelector('.ud-save-word');
       if(heart)heart.textContent=active?'♥':'♡';
-      if(word)word.textContent=active?'Enregistré':'Favori';
+      if(word)word.textContent='Favoris';
     }
   };
   const render=()=>{
