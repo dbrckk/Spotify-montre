@@ -51,6 +51,51 @@ try{
   await phone.locator('#udSort').selectOption('essential');
   assert.equal(new URL(phone.url()).searchParams.has('sort'),false,
     'The default editorial tier order must not clutter shared URLs');
+  // All models retain their own documented source in addition to any
+  // compensated Amazon referral. Generic searches are always SECONDARY.
+  const exits=await phone.locator('.ud-card').evaluateAll(cards=>cards.map(card=>{
+    const actions=[...card.querySelectorAll('.ud-actions a')];
+    const source=card.querySelector('.ud-source');
+    return {
+      id:card.dataset.id,merchant:card.dataset.merchant,
+      sourceCount:card.querySelectorAll('.ud-source').length,
+      sourceUrl:source?.href||'',sourceText:source?.textContent||'',
+      sourceLabel:source?.getAttribute('aria-label')||'',
+      sourceTracking:source?.getAttribute('data-merchant-official-id')||'',
+      sourcePlacement:source?.getAttribute('data-merchant-placement')||'',
+      links:actions.map(a=>a.className),
+      searchTracking:card.querySelectorAll('a[data-amazon-search-id]').length,
+      directTracking:card.querySelectorAll('a[data-amazon-product]').length
+    };
+  }));
+  assert.equal(exits.length,52);
+  for(const exit of exits){
+    assert.equal(exit.sourceCount,1,'One genuine model source per card '+exit.id);
+    assert.match(exit.sourceUrl,/^https:\/\//,'No insecure model source '+exit.id);
+    assert.match(exit.sourceText,/Vérifier la référence chez la marque ou le vendeur/);
+    assert.ok(exit.sourceLabel.startsWith(exit.sourceText),
+      'Accessible destination name must include visible text '+exit.id);
+    assert.equal(exit.sourceTracking,exit.id,'Source click attribution should identify its watch');
+    assert.equal(exit.sourcePlacement,'popular');
+    if(exit.merchant==='search'){
+      assert.deepEqual(exit.links,['ud-details','ud-source','ud-merchant'],
+        'Model-specific source must appear BEFORE an unverified Amazon search '+exit.id);
+      assert.equal(exit.searchTracking,1,'One clearly labelled compensated search '+exit.id);
+    }else if(exit.merchant==='direct'){
+      assert.deepEqual(exit.links,['ud-details','ud-merchant','ud-source'],
+        'Identified product listing takes priority without hiding the source '+exit.id);
+      assert.equal(exit.directTracking,1,'Only identified product pages use ASIN tracking '+exit.id);
+    }else{
+      assert.deepEqual(exit.links,['ud-details','ud-source'],
+        'Non-affiliate models must never pretend an Amazon purchase destination exists '+exit.id);
+      assert.equal(exit.directTracking+exit.searchTracking,0);
+    }
+  }
+  for(const id of ['addiesdive-ad2030','pagani-pd1701']){
+    const item=phone.locator('#modele-'+id);
+    assert.match(await item.locator('.ud-exact-variant').innerText(),/Variante Amazon à vérifier/,
+      'A documented marketplace variant must be explained on the catalogue card');
+  }
   // The six source-backed editorial features must be usable before the 52-card
   // comparison, with real local photos and accurately distinguished merchants.
   const spotlight=phone.locator('.ud-showroom');
