@@ -1,8 +1,9 @@
 import pg from 'pg';
 import {validateCommercialCeiling} from './landed-cost.mjs';
+import {verifyCjOrderDetail} from './cj-status.mjs';
 import {readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
-import {ClientError,digest,hmac,newOrderId,newPublicToken,sealAddress,sameHash,checkoutFingerprint} from './security.mjs';
+import {ClientError,digest,hmac,newOrderId,newPublicToken,sealAddress,openAddress,sameHash,checkoutFingerprint} from './security.mjs';
 
 const schema=readFileSync(fileURLToPath(new URL('./schema.sql',import.meta.url)),'utf8');
 export function createDatabase(connectionString){
@@ -301,29 +302,46 @@ export async function ordersForSupplierReconciliation(pool){
   `);
   return rows;
 }
-export async function recordSupplierDetail(pool,id,detail){
-  const supplierStatus=String(detail.orderStatus||'').toUpperCase();
-  if(!['CREATED','IN_CART','UNPAID','PENDING','PROCESSING','UNSHIPPED','SHIPPED','DELIVERED','CANCELLED','OTHER'].includes(supplierStatus))
-    throw Error('Unrecognized supplier order status');
-  const reportedId=detail.orderNum||detail.orderNumber||detail.platformOrderId;
-  if(reportedId&&reportedId!==id)throw Error('CJ supplier order number mismatch');
-  let next=null;
-  if(supplierStatus==='DELIVERED'&&detail.paymentDate)next='DELIVERED';
-  else if(supplierStatus==='SHIPPED'&&detail.paymentDate)next='SHIPPED';
-  else if(['UNSHIPPED','PENDING','PROCESSING'].includes(supplierStatus)&&detail.paymentDate)next='SUPPLIER_PAID';
-  else if(supplierStatus==='CANCELLED')next='EXCEPTION';
+export async function recordSupplierDetail(pool,id,detail,encryptionKey){
   return transaction(pool,async client=>{
-    const {rows}=await client.query('SELECT status FROM commerce_orders WHERE id=$1 FOR UPDATE',[id]);
-    const status=rows[0]?.status;
-    if(!['SUPPLIER_SUBMITTED','SUPPLIER_PAID','SHIPPED'].includes(status))return;
-    const rank={SUPPLIER_SUBMITTED:0,SUPPLIER_PAID:1,SHIPPED:2,DELIVERED:3};
-    if(next==='EXCEPTION'||(next&&rank[next]>rank[status])){
-      await client.query(`
-        UPDATE commerce_orders SET status=$2,supplier_status=$3,
-          tracking_number=$4,tracking_url=$5,updated_at=now() WHERE id=$1
-      `,[id,next,supplierStatus,String(detail.trackNumber||'').slice(0,120)||null,
-        typeof detail.trackingUrl==='string'&&detail.trackingUrl.startsWith('https://')?detail.trackingUrl.slice(0,450):null]);
-      await client.query('INSERT INTO commerce_events(order_id,event_type) VALUES($1,$2)',[id,next]);
+    const {rows}=await client.query(
+      'SELECT * FROM commerce_orders WHERE id=$1 FOR UPDATE',[id]
+    );
+    const o=rows[0];
+    if(!o||!['SUPPLIER_SUBMITTED','SUPPLIER_PAID','SHIPPED'].includes(o.status))
+      return {changed:false};
+    let result;
+    try{
+      const customer=openAddress(o.address_encrypted,encryptionKey);
+      result=verifyCjOrderDetail(o,detail,customer);
     }
+    catch(error){
+      // Untrusted/mismatched provider detail must never advance paid or
+      // delivery states. Quarantine and investigate the supplier manually.
+      await client.query(
+        "UPDATE commerce_orders SET status='EXCEPTION',updated_at=now() WHERE id=$1",
+        [o.id]
+      );
+      await client.query(
+        'INSERT INTO commerce_events(order_id,event_type,details) VALUES($1,$2,$3)',
+        [o.id,'SUPPLIER_IDENTITY_REVIEW',JSON.stringify({
+          reason:error.message.slice(0,180),
+          action:'reconcile_with_cj_no_automatic_supplier_repayment'
+        })]
+      );
+      return {changed:true,exception:true};
+    }
+    const {next,supplierStatus,tracking,trackingUrl}=result;
+    const rank={SUPPLIER_SUBMITTED:0,SUPPLIER_PAID:1,SHIPPED:2,DELIVERED:3};
+    if(next!=='EXCEPTION'&&(!next||rank[next]<=rank[o.status]))
+      return {changed:false,status:o.status};
+    await client.query(`
+      UPDATE commerce_orders SET status=$2,supplier_status=$3,
+        tracking_number=$4,tracking_url=$5,updated_at=now() WHERE id=$1
+    `,[o.id,next,supplierStatus,tracking,trackingUrl]);
+    await client.query(
+      'INSERT INTO commerce_events(order_id,event_type) VALUES($1,$2)',[o.id,next]
+    );
+    return {changed:true,status:next};
   });
 }
