@@ -14,7 +14,7 @@
     a.className='am-direct-card-link';
     a.href=staticLink.href+'?modele='+encodeURIComponent(id);
     a.textContent='Acheter sur Atelier Montres · '+euro(item.amountCents)+' TTC';
-    a.setAttribute('aria-label','Acheter '+item.label+' sur Atelier Montres, '+euro(item.amountCents)+' TTC, livraison annoncée incluse');
+    a.setAttribute('aria-label',a.textContent+' — '+item.label);
     return a;
   };
   const enrich=()=>{
