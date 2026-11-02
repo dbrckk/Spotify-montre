@@ -143,6 +143,10 @@ html{scroll-padding-top:105px}
 .aff-partners article{border-radius:10px;border-color:#d6cec1;background:#fffdf8;box-shadow:var(--atelier-shadow)}
 .faq{background:#f9f7f2}
 .newsletter{background:#1e2d2f;color:#f8f2e5}
+.newsletter h2{color:#fff7e9}
+.newsletter .kicker.overline{color:#efd0a3}
+.newsletter .newsletter-description{color:#e0e9e4}
+.newsletter .newsletter-box{color:#21352f}
 .footer{background:#10191c}
 .footer a{color:#f2d09b}
 /* Unified catalogue: legible summary, elegant showroom and airy photography */
