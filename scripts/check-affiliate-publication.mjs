@@ -8,7 +8,7 @@ const tmp=mkdtempSync(join(tmpdir(),'atelier-affiliate-integration-'));
 try {
   const target=join(tmp,'site');
   mkdirSync(target,{recursive:true});
-  for(const name of ['selection-affiliation.json','selection-populaires.json','popular-photo-rights.json','popular-ai-visuals.json','affiliation.html','confidentialite.html','affiliate-links.json','comparaisons-montres.json','editorial-insights.json']){
+  for(const name of ['selection-affiliation.json','selection-populaires.json','popular-photo-rights.json','popular-ai-visuals.json','affiliation.html','confidentialite.html','affiliate-links.json','comparaisons-montres.json','comparaisons-accessibles.json','editorial-insights.json']){
     cpSync(join(repository,'site',name),join(target,name));
   }
   // Keep source image files in the temporary integration build so the
@@ -51,6 +51,12 @@ try {
 
   const verifiedPopularOriginal=readFileSync(verifiedPopularPath,'utf8');
   build({GOOGLE_SITE_VERIFICATION:'Valid_Example_Token_123456'});
+  const disabledDuel=readFileSync(join(target,'montres/comparer-skmei-1257-vs-casio-f91w.html'),'utf8');
+  assert.ok(disabledDuel.includes('data-merchant-official-id="skmei-1257"')
+    &&disabledDuel.includes('data-merchant-official-id="casio-f91w-1"'),
+    'Affiliate-disabled fixture must use real manufacturer sources on both new duel cards');
+  assert.equal((disabledDuel.match(/data-amazon-product=/g)||[]).length,0,
+    'No paid link may leak into the new buyer guide when Amazon attribution is disabled');
   const disabledShortlist=readFileSync(join(target,'montres/modeles-populaires.html'),'utf8');
   const disabledFocus=(disabledShortlist.split('<section id="selection-10-montres"')[1]||'').split('</section>')[0];
   assert.equal((disabledShortlist.match(/data-partner-offer-id=/g)||[]).length,0,
@@ -134,6 +140,12 @@ try {
   cfg.links['citizen-tsuyosa'].url='https://www.amazon.fr/dp/B0BG7VD5YL?tag=example-21';
   writeFileSync(join(target,'affiliate-links.json'),JSON.stringify(cfg));
   build();
+  const activeDuel=readFileSync(join(target,'montres/comparer-skmei-1257-vs-casio-f91w.html'),'utf8');
+  assert.ok(activeDuel.includes('https://www.amazon.fr/dp/B07B6ML1VJ?tag=example-21')
+    &&activeDuel.includes('https://www.amazon.fr/dp/B000J34HN4?tag=example-21'),
+    'Both exact supplemental ASINs must use the real active account tag, including negative fixtures');
+  assert.equal((activeDuel.match(/rel="noopener noreferrer nofollow sponsored"/g)||[]).length,2,
+    'No paid buyer links without sponsored disclosures');
   const directExample=readFileSync(join(target,'montres/casio-gw-m5610u-1.html'),'utf8');
   assert.ok(directExample.includes('https://www.amazon.fr/dp/B09BCPP68Q?tag=example-21'),
     'The verified Amazon.fr ASIN should inherit the active account tag without hardcoding');

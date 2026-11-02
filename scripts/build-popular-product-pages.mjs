@@ -4,7 +4,7 @@ import {join} from 'node:path';
 // Conversion-friendly product landing pages without unlicensed watch images,
 // invented Amazon ASINs, or unverifiable prices. The existing 15 core models
 // continue to own the photo-backed interactive comparison experience.
-export function buildPopularProductPages({root,products,coreProducts,affiliates,pageHead,page,e,u,link,tierNames,affiliateLink,partnerLink,partnerOffers,verifiedLinks,approvedPhotos,aiVisuals}){
+export function buildPopularProductPages({root,products,coreProducts,affiliates,pageHead,page,e,u,link,tierNames,affiliateLink,partnerLink,partnerOffers,verifiedLinks,approvedPhotos,aiVisuals,comparisonLinks=new Map()}){
   // Recommendations are real, distinct watches from the same 37-model
   // source catalogue, not the old static 15-watch lists. Keep the merchant
   // verification registry separate: similarity does not imply product testing.
@@ -96,6 +96,14 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
         +'<a class="am-extra-related-name" href="./'+e(q.id)+'.html">'+e(q.brand+' '+q.model)+'</a>'
         +'<span>'+e(q.movement)+' · '+e(q.case)+'</span></li>';
     }).join('');
+    // Editorial comparison links are generated only for exact source-backed pairs.
+    const duels=comparisonLinks.get(p.id)||[];
+    const duelBlock=duels.length
+      ?'<div class="am-extra-duels"><h3>Comparer avant de choisir</h3><div class="am-extra-duel-grid">'
+        +duels.map(item=>'<div class="am-extra-duel-entry"><a href="./'+e(item.path.replace(/^montres\//,''))+'">'
+          +e(item.title)+'</a><small>Face à '+e(item.other)+' · faits et limites documentés</small></div>').join('')
+        +'</div></div>'
+      :'';
     const main='<div class="wrap am-extra-page">'
       +'<nav class="crumb" aria-label="Fil d’Ariane"><a href="../index.html">Collection</a> / <a href="./modeles-populaires.html">'+products.length+' modèles complémentaires</a> / '+e(name)+'</nav>'
       +'<article class="am-extra-product" data-popular-watch-id="'+e(p.id)+'" data-brand="'+e(p.brand)+'" data-model="'+e(p.model)+'" data-official-url="'+e(p.officialUrl)+'">'
@@ -141,7 +149,7 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       +'<p>'+(photo?'L’éditeur déclare disposer de l’autorisation commerciale de la marque. Cette autorisation n’a pas été vérifiée indépendamment.':'Les photos sont consultables chez la marque ou le vendeur cité : nous ne les republions pas sans autorisation.')+' La mention de meilleures ventes, lorsqu’elle existe, n’atteste pas le classement de ce modèle sur Amazon.fr.</p></section>'
       +'<section id="comparables" class="am-extra-related" aria-labelledby="am-extra-related-heading">'
       +'<h2 id="am-extra-related-heading">Trois montres dans le même esprit</h2><p>Suggestions établies à partir de la marque, du style et du mouvement indiqués dans nos fiches. Elles ne constituent ni des essais comparatifs ni un classement de qualité ; seules les photos déclarées autorisées sont affichées.</p>'
-      +'<ul>'+relatedItems+'</ul>'+comparisonTable+'<div class="am-extra-related-cta"><a class="am-extra-compare-cta" href="'+e(compareUrl)+'" data-compare-source="'+e(p.id)+'">Comparer ces références à cette montre</a>'
+      +'<ul>'+relatedItems+'</ul>'+duelBlock+comparisonTable+'<div class="am-extra-related-cta"><a class="am-extra-compare-cta" href="'+e(compareUrl)+'" data-compare-source="'+e(p.id)+'">Comparer ces références à cette montre</a>'
       +'<a href="./toutes-les-montres.html">Comparer les 52 montres</a></div></section>'
       +'<section id="verifications" class="am-extra-checks"><h2>Avant de commander</h2>'
       +'<ol><li>Confirmer le code '+e(p.model)+' et la couleur auprès du vendeur : une fiche de recherche peut afficher d’autres variantes.</li>'

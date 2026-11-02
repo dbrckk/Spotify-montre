@@ -45,7 +45,8 @@ assert.ok(casioPair.includes('38,5 mm de diamètre'),'Casio round diameter must 
 assert.ok(!casioPair.includes('boîtier plus compact de 35 mm'),'Old misleading 35mm diameter language persists');
 assert.match(read('seo-guides.css'),/\.watch-decision-grid/,'Editorial cards styling missing');
 
-assert.equal(manifest.comparisonCount,4,'Four evidence-based pairs must be indexable');
+assert.equal(manifest.comparisonCount,4,'Four evidence-based historical pairs must remain indexable');
+assert.equal(manifest.affordableComparisonCount,4,'Four independent affordable buying decisions must be indexable');
 assert.equal(manifest.categoryCount,3,'Three distinct editorial search-intent collections are required');
 const config=JSON.parse(read('affiliate-links.json'));
 assert.equal(manifest.affiliateActive,config.enabled);
@@ -68,7 +69,7 @@ for(const [id,entry] of Object.entries(amazon.links)){
  assert.ok(!entry.url.includes('?tag='),'Unapproved affiliate tracking cannot be published');
 }
 
-assert.equal(manifest.paths.length,74);
+assert.equal(manifest.paths.length,78,'Existing 74 SEO URLs plus four original affordable duels');
 assert.equal(manifest.unifiedCount,52,'Unified catalogue must contain all 52 source-backed watches');
 assert.equal(manifest.unifiedPath,'montres/toutes-les-montres.html');
 assert.ok(manifest.paths.every(url=>url.startsWith(manifest.siteUrl)));
@@ -87,6 +88,85 @@ for(const name of ['citizen-tsuyosa','tissot-prx-quartz','orient-bambino','casio
 assert.match(read('editorial-photo.js'),/assets\/watch-thumbs\/.*item\.id/,'Featured picker must request smaller local thumbnails');
 assert.match(read('affiliation.js'),/assets\/watch-responsive\/.*p\.id/,'Dynamic catalogue must prefer responsive photos');
 const home=read('index.html');
+const affordableDuels=JSON.parse(read('comparaisons-accessibles.json'));
+const escapeEditorialHtml=value=>String(value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+const affordableCatalog=JSON.parse(read('selection-populaires.json')).products;
+const affordableRights=JSON.parse(read('popular-photo-rights.json')).photos;
+const affordableASIN=JSON.parse(readFileSync(resolve(root,'../research/amazon-fr-popular-verified.json'),'utf8')).verifiedProducts;
+assert.equal(affordableDuels.version,1);
+assert.equal(affordableDuels.comparisons.length,4);
+assert.equal(new Set(affordableDuels.comparisons.map(pair=>pair.slug)).size,4);
+const affordableById=new Map(affordableCatalog.map(p=>[p.id,p]));
+const duelsById=new Map();
+const duelPairs=new Set();
+const xmlSitemap=read('sitemap.xml');
+for(const pair of affordableDuels.comparisons){
+  const left=affordableById.get(pair.left),right=affordableById.get(pair.right);
+  assert.ok(left&&right&&left.id!==right.id,'Buyer duel must compare two different documented models');
+  const key=[left.id,right.id].sort().join('|');
+  assert.ok(!duelPairs.has(key),'No duplicate commercial comparison pages');
+  duelPairs.add(key);
+  const path='montres/comparer-'+pair.slug+'.html';
+  const url=manifest.siteUrl+path;
+  const html=read(path);
+  assert.ok(manifest.paths.includes(url)&&xmlSitemap.includes(url),'New buyer duel must be crawlable: '+pair.slug);
+  assert.ok(html.includes('<link rel="canonical" href="'+url+'">'),'Unique canonical URL required for '+pair.slug);
+  assert.ok(html.includes('data-affordable-duel="'+pair.slug+'"'),'Correct pair identity required: '+pair.slug);
+  assert.ok(html.includes('<h1>'+pair.title+'</h1>'),'Original editorial comparison title required');
+  assert.ok([pair.intro,pair.leftAdvice,pair.rightAdvice,pair.caution].every(copy=>html.includes(escapeEditorialHtml(copy))),
+    'Original distinct buying guidance missing or not safely HTML-escaped for '+pair.slug);
+  assert.equal((html.match(/class="am-duel-model" data-duel-model="/g)||[]).length,2,
+    'Two and only two real products in the buying comparison: '+pair.slug);
+  assert.ok(html.includes('href="./'+left.id+'.html"')&&html.includes('href="./'+right.id+'.html"'),
+    'Both actual model fiches must be accessible from the buyer article');
+  assert.match(html,/class="spec-matrix"/,'Factual accessible comparison table required');
+  assert.ok(html.includes(left.movement)&&html.includes(right.movement)
+    &&html.includes(left.case)&&html.includes(right.case)
+    &&html.includes(left.glass)&&html.includes(right.glass)
+    &&html.includes(left.water)&&html.includes(right.water),
+    'Buyer table must use the original sourced facts, including unknowns');
+  const prefill='./toutes-les-montres.html?compare='+left.id+','+right.id+'#comparer';
+  assert.ok(html.includes('href="'+prefill+'"'),'One-tap exact product comparison required: '+pair.slug);
+  const jsonLd=JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)?.[1]||'{}');
+  assert.equal(jsonLd['@graph'][0]['@type'],'Article');
+  assert.equal(jsonLd['@graph'][0].mainEntityOfPage,url);
+  assert.deepEqual(jsonLd['@graph'][1].itemListElement.map(x=>x.url),
+    [manifest.siteUrl+'montres/'+left.id+'.html',manifest.siteUrl+'montres/'+right.id+'.html']);
+  assert.doesNotMatch(html,/"offers"\s*:|"aggregateRating"\s*:|data-checkout|class="add-to-cart"/,
+    'No invented stock, ratings or transaction checkout: '+pair.slug);
+  assert.equal((html.match(/class="am-duel-merchant"/g)||[]).length,2,
+    'Both products need a genuinely reachable source or direct merchant');
+  for(const p of [left,right]){
+    const amazonEntry=affordableASIN[p.id];
+    const shouldLink=manifest.affiliateActive&&Boolean(amazonEntry);
+    const photo=affordableRights[p.id];
+    assert.ok(html.includes(photo?'src="../assets/watches-popular/'+p.id+'.webp"':
+      'Photographie exacte à consulter chez le fabricant'),
+      'Never invent or substitute a missing product photo: '+p.id);
+    if(shouldLink){
+      const href='https://www.amazon.fr/dp/'+amazonEntry.asin+'?tag='+config.amazonPartnerTag;
+      assert.ok(html.includes('href="'+href+'"'),'Amazon buyer CTA must use source-backed ASIN and owner tag: '+p.id);
+      assert.ok(html.includes('data-amazon-product="'+p.id+'"'),'Amazon source tracking missing for '+p.id);
+      assert.match(html,/rel="noopener noreferrer nofollow sponsored"/);
+      if(amazonEntry.marketplaceVariant)
+        assert.ok(html.includes(escapeEditorialHtml(amazonEntry.marketplaceVariant)),
+          'Variant disclosures must not disappear on editorial duels: '+p.id);
+      if(amazonEntry.evidenceType==='amazon_fr_comparator_redirect')
+        assert.ok(html.includes('Amazon.fr non consulté directement'),
+          'Comparator-only ASIN must not claim direct Amazon inspection: '+p.id);
+    }else{
+      assert.ok(html.includes('href="'+p.officialUrl.replace(/&/g,'&amp;')+'"'),
+        'No verified ASIN means manufacturer source, never invented direct purchase: '+p.id);
+      assert.ok(html.includes('data-merchant-official-id="'+p.id+'"'),
+        'Uncompensated source must stay distinct from Amazon click: '+p.id);
+    }
+    if(!duelsById.has(p.id))duelsById.set(p.id,[]);
+    duelsById.get(p.id).push(pair.slug);
+  }
+}
+assert.match(read('affordable-comparisons.css'),/\.am-duel-promo-grid\{/,
+  'Fully responsive premium comparison design must be deployed');
+
 const legacyHome=read('affiliation.html');
 assert.equal(home,legacyHome,'Generated landing pages must remain byte-identical');
 assert.ok(home.includes('52 MONTRES DOCUMENTÉES'),'The hero must present the full 52-model range');
@@ -523,6 +603,25 @@ assert.deepEqual(focusMatches,commercialShortlist.map(item=>item.id),
   'Commercial shortlist must follow the reviewed source file and never substitute products');
 assert.equal(new Set(focusMatches).size,10,'Shortlist cannot repeat a product');
 assert.ok(popularHtml.includes('id="selection-10-montres"'),'Priorities must be reachable via a stable accessible anchor');
+
+assert.ok(home.includes('id="duels-accessibles"'),'Four affordable buyer guides must be promoted from the homepage');
+assert.equal((home.match(/class="am-duel-promo-card" data-duel-promo="/g)||[]).length,4,
+  'Four real watch duel cards should be visible even without JavaScript');
+assert.ok(home.includes('href="#duels-accessibles"'),
+  'Homepage four-photo showroom must connect the shopper to the evidence-based duels');
+assert.ok(home.includes('href="./affordable-comparisons.css"'),
+  'Homepage must load the new lightweight buyer comparison styles');
+for(const pair of affordableDuels.comparisons){
+  assert.ok(home.includes('href="./montres/comparer-'+pair.slug+'.html"'),
+    'Each original comparison needs a crawlable homepage entry');
+}
+for(const [id,slugs] of duelsById){
+  const html=read('montres/'+id+'.html');
+  assert.ok(html.includes('class="am-extra-duels"'),'Exact watch detail must link to its relevant original duel: '+id);
+  for(const slug of slugs)assert.ok(html.includes('href="./comparer-'+slug+'.html"'),
+    'Buyer guide must return a link from its product details: '+id+'/'+slug);
+}
+
 assert.ok(home.includes('href="./montres/modeles-populaires.html#selection-10-montres"'),
   'Homepage must surface the priorities without duplicating all ten full cards');
 assert.ok(popularHtml.includes('Ce n’est ni un classement des ventes en France'),
@@ -1003,7 +1102,7 @@ for(const name of ['revue-photo.html','revue-photo.js','revue-photo.css']){
 }
 assert.ok(existsSync(resolve(root,'seo-watch-art.js')),'SEO watch illustrations script is required');
 const sitemap=read('sitemap.xml');
-assert.equal((sitemap.match(/<loc>/g)||[]).length,74);
+assert.equal((sitemap.match(/<loc>/g)||[]).length,78,'All four original buyer duels must be published in sitemap');
 const comparisons=JSON.parse(read('comparaisons-montres.json'));
 assert.equal(comparisons.version,1);
 assert.equal(comparisons.comparisons.length,4);
@@ -1125,4 +1224,4 @@ assert.ok(read('analytics.js').includes("merchantHosts=new Set([")&&read('analyt
 assert.ok(privacy.includes('chez Render'),'Privacy notice must identify actual host');
 const guide=read('montres/guide-choisir-montre.html');
 assert.match(guide,/<h1>Comment choisir une montre/);
-console.log('SEO validation OK: 15 model pages, 6 shopper collections, 3 core categories, 4 guides, 4 comparisons, 13 Amazon links, 74 sitemap URLs, 37 source-backed detailed product pages and genuine hero LCP preload');
+console.log('SEO validation OK: 15 model pages, 6 shopper collections, 3 core categories, 4 guides, 4 historical comparisons, 4 affordable buyer duels, 13 Amazon links, 78 sitemap URLs, 37 source-backed detailed product pages and genuine hero LCP preload');
