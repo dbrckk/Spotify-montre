@@ -20,6 +20,7 @@ const popular=JSON.parse(readFileSync(resolve(repoRoot,'site/selection-populaire
 const core=JSON.parse(readFileSync(resolve(repoRoot,'site/selection-affiliation.json'),'utf8')).products;
 const verified=JSON.parse(readFileSync(resolve(repoRoot,'research/amazon-fr-popular-verified.json'),'utf8')).verifiedProducts;
 const approvedPhotos=JSON.parse(readFileSync(resolve(repoRoot,'site/popular-photo-rights.json'),'utf8')).photos;
+const affordableDuels=JSON.parse(readFileSync(resolve(repoRoot,'site/comparaisons-accessibles.json'),'utf8')).comparisons;
 if(popular.length!==37||core.length!==15||new Set([...popular,...core].map(p=>p.id)).size!==52)throw Error('Expected 52 unique documented watches in current catalog');
 const report={checkedAt:new Date().toISOString(),site:base.href,pages:0,issues,checked,commercialPages:0,commercialChecks:0};
 let affiliateActive=null;
@@ -176,7 +177,7 @@ async function audit(){
       const manifest=JSON.parse(manifestText);
       affiliateActive=manifest.affiliateActive;
       if(typeof affiliateActive!=='boolean')issues.push('seo-manifest.json: missing affiliateActive flag');
-      if(manifest.productCount!==15||manifest.popularAdditionalCount!==37||manifest.popularDetailCount!==37)
+      if(manifest.productCount!==15||manifest.popularAdditionalCount!==37||manifest.popularDetailCount!==37||manifest.affordableComparisonCount!==4)
         issues.push('seo-manifest.json: current 52-watch inventory mismatch');
       if(manifest.siteUrl!==base.href||!Array.isArray(manifest.paths)||
           manifest.paths.length!==urls.length||
@@ -185,6 +186,10 @@ async function audit(){
         issues.push('seo-manifest.json: manifest and sitemap disagree');
       }
     }catch(e){issues.push('seo-manifest.json: invalid JSON ('+e.message+')');}
+  }
+  for(const duel of affordableDuels){
+    if(!urls.includes(new URL('montres/comparer-'+duel.slug+'.html',base).href))
+      issues.push('sitemap.xml: missing original affordable model-to-model guide '+duel.slug);
   }
   for(const p of [...core,...popular]){
     if(!urls.includes(new URL('montres/'+p.id+'.html',base).href))
