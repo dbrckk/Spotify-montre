@@ -203,10 +203,10 @@ assert.equal(skmei1257.evidenceUrl,'https://www.amazon.fr/dp/B07B6ML1VJ');
 assert.match(skmei1257.evidenceListingTitle,/SKMEI.*1257/i);
 assert.match(skmei1257.marketplaceVariant,/1257 Black/,'Specific black variant must not become a generic model claim');
 
-for(const [id,asin] of [['addiesdive-ad2030','B0DNK5TT6D'],['pagani-pd1701','B0C7QC653D']]){
+for(const [id,asin] of [['skmei-1257','B07B6ML1VJ'],['addiesdive-ad2030','B0DNK5TT6D'],['pagani-pd1701','B0C7QC653D']]){
   const proof=exactPopularLinks[id];
   assert.equal(proof.asin,asin,'Published ASIN must be independently documented: '+id);
-  assert.equal(proof.verifiedAt,'2026-11-01','New Amazon.fr proof must be dated: '+id);
+  assert.equal(proof.verifiedAt,id==='skmei-1257'?'2026-11-02':'2026-11-01','Each exact listing must retain its genuine verification date: '+id);
   assert.equal(proof.evidenceType,'amazon_fr_product_page','Source must be Amazon.fr detail listing: '+id);
   assert.ok(proof.evidenceListingTitle.includes(proof.marketplaceModel),'Amazon title must include the exact documented model: '+id);
   assert.equal(proof.evidenceUrl,'https://www.amazon.fr/dp/'+asin,'Evidence URL must match published product ASIN: '+id);
@@ -423,8 +423,8 @@ assert.ok(popularSitemap.includes(manifest.siteUrl+popularPath),'Research-led co
 assert.match(popularHtml,/rel="canonical"/,'Canonical for supplemental source-led page');
 assert.match(popularHtml,/aucun|Aucun/,'Supplemental section must disclose limitations');
 assert.equal((popularHtml.match(/<article class="am-pick-card /g)||[]).length,37,'One editorial card for each researched watch');
-assert.equal((popularHtml.match(/data-merchant-official-id=/g)||[]).length,42,
-  'Every supplemental card and five model-specific shortlist seller options must expose privacy-minimal vendor intent');
+assert.equal((popularHtml.match(/data-merchant-official-id=/g)||[]).length,41,
+  'Every supplemental card and four model-specific shortlist seller options must expose privacy-minimal vendor intent');
 // Commercial shortlist: an explicitly editorial priority list, not sales data.
 // The existing 52 catalogue entries and Amazon paid CTA counts must stay intact.
 assert.equal(commercialShortlist.length,10,'Ten documented watches selected for commercial qualification');
@@ -437,8 +437,8 @@ assert.ok(home.includes('href="./montres/modeles-populaires.html#selection-10-mo
   'Homepage must surface the priorities without duplicating all ten full cards');
 assert.ok(popularHtml.includes('Ce n’est ni un classement des ventes en France'),
   'Editorial readiness must not be mistaken for sales ranking or verified popularity');
-assert.equal(commercialShortlist.filter(item=>Boolean(exactPopularLinks[item.id])).length,5,
-  'Five source-confirmed listings and five explicitly uncertain searches in this editorial mix');
+assert.equal(commercialShortlist.filter(item=>Boolean(exactPopularLinks[item.id])).length,6,
+  'Six source-confirmed listings and four explicitly uncertain source-only models in this editorial mix');
 assert.equal(commercialShortlist.filter(item=>approvedPopularPhotos.has(item.id)).length,7,
   'Seven shortlist watches have declared-authorised local model photos');
 assert.equal((popularHtml.match(/class="am-focus-detail"/g)||[]).length,10,
@@ -492,7 +492,7 @@ assert.doesNotMatch(home,/src="\.\.\/popular-filters\.js"/,'Homepage must not lo
 assert.ok(home.includes('id="pick-casio-gw-m5610u-1"'),'Verified Amazon G-SHOCK must be featured on homepage');
 assert.ok(home.includes('https://www.amazon.fr/dp/B09BCPP68Q?tag=drackk04-21'),'Home feature must link to the verified G-SHOCK ASIN');
 assert.equal((home.match(/data-amazon-product="casio-gw-m5610u-1"/g)||[]).length,1,'Only one direct Amazon supplemental CTA should be featured');
-assert.equal((home.match(/data-amazon-search-id=/g)||[]).length,3,'Three featured SKMEI and Pagani variants without exact ASINs remain honest searches');
+assert.equal((home.match(/data-amazon-search-id=/g)||[]).length,2,'Two featured SKMEI variants without exact ASINs remain honest searches');
 assert.equal((home.match(/data-amazon-product="casio-f91w-1"/g)||[]).length,1,'F-91W featured exact-model Amazon referral');
 assert.equal((home.match(/data-amazon-product="casio-ga-2100-1a1"/g)||[]).length,1,'GA-2100 featured exact-model Amazon referral');
 for(const [id,asin] of [['addiesdive-ad2030','B0DNK5TT6D'],['pagani-pd1701','B0C7QC653D']]){
@@ -691,9 +691,9 @@ const trackedResults=popularHtml.match(/data-amazon-search-id=/g)||[];
 const trackedDirect=popularHtml.match(/data-amazon-product=/g)||[];
 const sponsoring=popularHtml.match(/rel="noopener noreferrer nofollow sponsored"/g)||[];
 assert.equal(trackedResults.length,manifest.popularAffiliateSearchLinks,'Only unverified models may have search links');
-assert.equal(trackedDirect.length,manifest.popularAffiliateDirectLinks+(manifest.affiliateActive?5:0),
-  'Five source-confirmed shortlist merchant actions augment 8 original cards, without pretending to verify new ASINs');
-assert.equal(sponsoring.length,manifest.affiliateActive?42:0,'All 37 catalogue and five shortlist paid actions must carry sponsored relation');
+assert.equal(trackedDirect.length,manifest.popularAffiliateDirectLinks+(manifest.affiliateActive?6:0),
+  'Six source-confirmed shortlist merchant actions augment 8 original cards, without pretending to verify new ASINs');
+assert.equal(sponsoring.length,manifest.affiliateActive?43:0,'All 37 catalogue and six shortlist paid actions must carry sponsored relation');
 assert.equal((popularHtml.match(/amazon\.fr\/dp\/B09BCPP68Q/g)||[]).length,manifest.affiliateActive?2:0,
   'The same G-SHOCK ASIN appears in one standard card and one shortlist action, never a new unverified ASIN');
 for(const [id,url] of [['pagani-pd1701','https://paganidesign.com/fr/products/pagani-design-1701'],['pagani-pd1776','https://paganidesign.com/products/pd-1776']]){

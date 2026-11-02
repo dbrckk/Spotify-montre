@@ -34,10 +34,10 @@ try{
  const popular=page.locator('#modeles-populaires');
  assert.ok(await popular.isVisible(),'Popular sourced watches should be visible below the core catalogue');
  assert.equal(await popular.locator('article.am-pick-card').count(),8,'Eight source-backed homepage ideas should render, including the exact ASIN option');
- assert.equal(await popular.locator('a[data-amazon-search-id]').count(),3,
-   'Three unverified homepage referrals must remain clearly labeled as searches');
- assert.equal(await popular.locator('a[data-amazon-product]').count(),5,
-   'Five featured watches have documented Amazon.fr ASINs');
+ assert.equal(await popular.locator('a[data-amazon-search-id]').count(),2,
+   'Two unverified homepage referrals must remain clearly labeled as searches');
+ assert.equal(await popular.locator('a[data-amazon-product]').count(),6,
+   'Six featured watches have documented Amazon.fr ASINs');
  assert.equal(await popular.locator('#pick-casio-gw-m5610u-1 a[data-amazon-product]').getAttribute('href'),
    'https://www.amazon.fr/dp/B09BCPP68Q?tag=drackk04-21',
    'Homepage direct link must match confirmed Amazon.fr ASIN and owner tag');
@@ -45,7 +45,7 @@ try{
   'https://www.amazon.fr/dp/B000J34HN4?tag=drackk04-21','Featured Casio F-91W must link to documented ASIN');
  assert.equal(await popular.locator('#pick-casio-ga-2100-1a1 a[data-amazon-product]').getAttribute('href'),
   'https://www.amazon.fr/dp/B07WGJ1JNW?tag=drackk04-21','Featured black G-SHOCK must link to documented ASIN');
- for(const [id,asin] of [['addiesdive-ad2030','B0DNK5TT6D'],['pagani-pd1701','B0C7QC653D']]){
+ for(const [id,asin] of [['skmei-1257','B07B6ML1VJ'],['addiesdive-ad2030','B0DNK5TT6D'],['pagani-pd1701','B0C7QC653D']]){
    assert.equal(await popular.locator('#pick-'+id+' a[data-amazon-product]').getAttribute('href'),
      'https://www.amazon.fr/dp/'+asin+'?tag=drackk04-21','Source-verified affiliate destination on homepage: '+id);
  }
@@ -107,10 +107,10 @@ try{
    'Every priority must preserve a factual internal model page');
  assert.equal(await focus.locator('.am-focus-merchant a').count(),10,
    'Ten shortlist cards must offer an honest one-step merchant option');
- assert.equal(await focus.locator('a[data-amazon-product]').count(),5,
-   'Only five of the shortlist models have a documented exact Amazon product page');
- assert.equal(await focus.locator('a[data-merchant-official-id]').count(),5,
-   'Five unverified Amazon models should point to the product-specific vendor source instead');
+ assert.equal(await focus.locator('a[data-amazon-product]').count(),6,
+   'Six of the shortlist models have a documented exact Amazon product page');
+ assert.equal(await focus.locator('a[data-merchant-official-id]').count(),4,
+   'Four models without exact Amazon listings should point to the product-specific vendor source instead');
  assert.equal(await focus.locator('a[data-amazon-search-id]').count(),0,
    'Shortlist must never present a generic Amazon search as a direct seller option');
  const paganiSeller=focus.locator('[data-focus-id="pagani-pd1776"] .am-focus-merchant a');
@@ -118,6 +118,12 @@ try{
    'PD-1776 primary seller destination must open a specific product page');
  assert.doesNotMatch(await paganiSeller.getAttribute('rel'),/sponsored/,
    'Pagani supplier link must not invent an unapproved commission');
+ const skmeiDirect=focus.locator('[data-focus-id="skmei-1257"]');
+ assert.equal(await skmeiDirect.locator('a[data-amazon-product]').getAttribute('href'),
+   'https://www.amazon.fr/dp/B07B6ML1VJ?tag=drackk04-21',
+   'Editorial SKMEI 1257 CTA must open the exact validated Amazon.fr product');
+ assert.match(await skmeiDirect.innerText(),/1257 Black/,
+   'A source-backed black SKU must disclose its actual Amazon variant');
  const adAmazon=focus.locator('[data-focus-id="addiesdive-ad2030"] .am-focus-merchant a');
  assert.equal(await adAmazon.getAttribute('href'),
    'https://www.amazon.fr/dp/B0DNK5TT6D?tag=drackk04-21');
@@ -126,7 +132,7 @@ try{
    /Variante de la fiche Amazon/,'Verify the advertised variant before visiting Amazon');
  assert.equal(await focus.locator('.am-focus-with-photo img').count(),7,
    'Seven shortlist photos must match declared-rights model assets');
- for(const id of ['skmei-2056','skmei-2256','skmei-2514','addiesdive-ad2030','pagani-pd1701']){
+ for(const id of ['skmei-1257','skmei-2056','skmei-2256','skmei-2514','addiesdive-ad2030','pagani-pd1701']){
    const item=focus.locator('[data-focus-id="'+id+'"]');
    assert.equal(await item.count(),1,'High-priority affordable model represented once: '+id);
    assert.equal(await item.locator('a.am-focus-detail').getAttribute('href'),'./'+id+'.html');
@@ -158,8 +164,8 @@ try{
 
  assert.equal(await popularPage.locator('.am-picks-tier').count(),3,'All three editorial ranges are represented');
  assert.equal(await popularPage.locator('a[data-amazon-search-id]').count(),29,'Twenty-nine variants without documented ASINs must use labeled search results');
- assert.equal(await popularPage.locator('a[data-amazon-product]').count(),13,
-   'Eight original exact products plus five direct-merchant shortlist cards are attributed without new ASINs');
+ assert.equal(await popularPage.locator('a[data-amazon-product]').count(),14,
+   'Eight original exact products plus six direct-merchant shortlist cards are attributed without new ASINs');
  const confirmedGshock=popularPage.locator('#pick-casio-gw-m5610u-1 a[data-amazon-product]');
  assert.equal(await confirmedGshock.getAttribute('href'),'https://www.amazon.fr/dp/B09BCPP68Q?tag=drackk04-21');
  assert.equal(await confirmedGshock.getAttribute('data-amazon-placement'),'popular');
@@ -233,8 +239,8 @@ try{
  assert.equal(await noJs.locator('#am-pick-filters:visible').count(),0,
    'Non-functional controls must not be exposed without JavaScript');
  assert.equal(await noJs.locator('a[data-amazon-search-id]').count(),29);
- assert.equal(await noJs.locator('a[data-amazon-product]').count(),13,
-   'Without JavaScript, all eight original and five shortlist exact Amazon options remain clickable');
+ assert.equal(await noJs.locator('a[data-amazon-product]').count(),14,
+   'Without JavaScript, all eight original and six shortlist exact Amazon options remain clickable');
  assert.equal(await noJs.locator('#selection-10-montres .am-focus-merchant a').count(),10,
    'Ten seller-specific choices remain visible without scripting');
  await noJs.close();
