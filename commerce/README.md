@@ -96,6 +96,22 @@ Les endpoints `/api/checkout`, `/api/webhooks/mollie` et
   `SUPPLIER_SENDING` abandonnés. Un remboursement ne doit pas être annoncé
   sans preuve du prestataire ; aucune reprise de paiement fournisseur à l'aveugle.
 
+## Rapprochement CJ avant d'annoncer une livraison
+
+Le statut `getOrderDetail` contient **plusieurs identifiants distincts** :
+`orderId` est l'identifiant CJ, `orderNum` peut être différent du numéro marchand,
+et `productList[].storeLineItemId` correspond à notre ligne de commande.
+La fonction `verifyCjOrderDetail` exige une correspondance du numéro de commande
+dans la ligne fournisseur, l'identifiant CJ enregistré, la même variante et
+quantité, le bon destinataire/adresse française, le transport prévu et un coût
+USD inférieur au plafond accepté. Les réponses sandbox, les litiges, les
+mauvaises devises ou les états inattendus sont mis en **EXCEPTION** (aucun
+réapprovisionnement automatique). Sans `paymentDate` CJ, on n'affiche pas
+« fournisseur payé ». Sans numéro de suivi cohérent, on n'affiche pas « expédié ».
+
+**Références** : [CJ Query Order](https://developers.cjdropshipping.com/en/api/api2/api/shopping.html#1-7-query-order-get)
+et [statuts fournisseur](https://developers.cjdropshipping.com/en/api/api2/api/shopping.html#order-status).
+
 ## Limites actuellement non levées
 
 Le code des connexions Mollie et CJ et la logique de paiement/commande sont réels,
