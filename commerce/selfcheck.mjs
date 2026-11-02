@@ -140,7 +140,7 @@ const fallbackFreight=computeCjFreightCents({
 });
 assert.equal(fallbackFreight.freightAndImportUsdCents,460);
 assert.throws(()=>computeCjFreightCents({
-  logisticName:'PostNL',totalPostageFee:3.1,taxesFee:0.85,
+  logisticName:'PostNL',totalPostageFee:1.0,taxesFee:0.85,
   clearanceOperationFee:0.45,tariff:0.2
 }),/contradicts/);
 assert.throws(()=>computeCjFreightCents({
