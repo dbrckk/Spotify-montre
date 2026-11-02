@@ -656,8 +656,8 @@ for(const p of popularFeed.products){
     :'https://www.amazon.fr/s?k='+encodeURIComponent((p.brand+' '+p.model).slice(0,130))+'&amp;tag=drackk04-21';
   if(manifest.affiliateActive){
     assert.ok(detailHtml.includes('href="'+expectedMerchant+'"'),'Exact merchant destination missing on individual watch page: '+p.id);
-    if(['addiesdive-ad2030','pagani-pd1701'].includes(p.id)){
-      assert.ok(direct?.marketplaceVariant,'Two newly source-verified watches require honest variant disclosure: '+p.id);
+    if(['addiesdive-ad2030','pagani-pd1701','skmei-1257'].includes(p.id)){
+      assert.ok(direct?.marketplaceVariant,'Three source-verified watches require honest variant disclosure: '+p.id);
       assert.ok(detailHtml.includes('Variante de la fiche Amazon :'),'The exact marketplace variant must be user-visible: '+p.id);
       assert.ok(detailHtml.includes(direct.marketplaceVariant.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')),
         'Public buying UI must match Amazon source variant exactly: '+p.id);
