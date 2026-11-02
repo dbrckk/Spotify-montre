@@ -423,8 +423,8 @@ assert.ok(popularSitemap.includes(manifest.siteUrl+popularPath),'Research-led co
 assert.match(popularHtml,/rel="canonical"/,'Canonical for supplemental source-led page');
 assert.match(popularHtml,/aucun|Aucun/,'Supplemental section must disclose limitations');
 assert.equal((popularHtml.match(/<article class="am-pick-card /g)||[]).length,37,'One editorial card for each researched watch');
-assert.equal((popularHtml.match(/data-merchant-official-id=/g)||[]).length,42,
-  'Every supplemental card and five model-specific shortlist seller options must expose privacy-minimal vendor intent');
+assert.equal((popularHtml.match(/data-merchant-official-id=/g)||[]).length,41,
+  'Every supplemental card and four model-specific shortlist seller options must expose privacy-minimal vendor intent');
 // Commercial shortlist: an explicitly editorial priority list, not sales data.
 // The existing 52 catalogue entries and Amazon paid CTA counts must stay intact.
 assert.equal(commercialShortlist.length,10,'Ten documented watches selected for commercial qualification');
@@ -691,9 +691,9 @@ const trackedResults=popularHtml.match(/data-amazon-search-id=/g)||[];
 const trackedDirect=popularHtml.match(/data-amazon-product=/g)||[];
 const sponsoring=popularHtml.match(/rel="noopener noreferrer nofollow sponsored"/g)||[];
 assert.equal(trackedResults.length,manifest.popularAffiliateSearchLinks,'Only unverified models may have search links');
-assert.equal(trackedDirect.length,manifest.popularAffiliateDirectLinks+(manifest.affiliateActive?5:0),
-  'Five source-confirmed shortlist merchant actions augment 8 original cards, without pretending to verify new ASINs');
-assert.equal(sponsoring.length,manifest.affiliateActive?42:0,'All 37 catalogue and five shortlist paid actions must carry sponsored relation');
+assert.equal(trackedDirect.length,manifest.popularAffiliateDirectLinks+(manifest.affiliateActive?6:0),
+  'Six source-confirmed shortlist merchant actions augment 8 original cards, without pretending to verify new ASINs');
+assert.equal(sponsoring.length,manifest.affiliateActive?43:0,'All 37 catalogue and six shortlist paid actions must carry sponsored relation');
 assert.equal((popularHtml.match(/amazon\.fr\/dp\/B09BCPP68Q/g)||[]).length,manifest.affiliateActive?2:0,
   'The same G-SHOCK ASIN appears in one standard card and one shortlist action, never a new unverified ASIN');
 for(const [id,url] of [['pagani-pd1701','https://paganidesign.com/fr/products/pagani-design-1701'],['pagani-pd1776','https://paganidesign.com/products/pd-1776']]){
