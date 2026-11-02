@@ -71,13 +71,23 @@ export function validateCommercialCeiling(offer){
   const {amount_eur_cents:sale,
     supplier_landed_eur_ceiling_cents:landed,
     reserves_eur_cents:reserves,
-    unit_cost_eur_cents:unit}=offer||{};
-  if(![sale,landed,reserves,unit].every(Number.isSafeInteger)
+    unit_cost_eur_cents:unit,
+    vat_rate_bps:vatBps,
+    tax_treatment_verified:taxVerified,
+    supplier_fx_verified:fxVerified}=offer||{};
+  if(![sale,landed,reserves,unit,vatBps].every(Number.isSafeInteger)
     ||sale<=0||landed<=0||reserves<0||unit<0)
     throw Error('Real EUR supplier ceiling and costs are required');
+  if(vatBps<0||vatBps>3000||taxVerified!==true||fxVerified!==true)
+    throw Error('Seller VAT treatment and supplier FX reserve not validated');
   if(landed<unit)throw Error('All-in supplier ceiling cannot be below unit cost');
-  const margin=sale-landed-reserves;
+  const sellerNetRevenueCents=Math.round(sale*10000/(10000+vatBps));
+  const margin=sellerNetRevenueCents-landed-reserves;
   if(margin<=0)throw Error('The fully landed supplier cost leaves no contribution');
-  return {grossEurCents:sale,maxLandedEurCents:landed,reserveEurCents:reserves,
-    provisionalContributionEurCents:margin};
+  if(margin*10000<sellerNetRevenueCents*2500)
+    throw Error('Contribution is below required 25 percent of seller net revenue');
+  return {grossEurCents:sale,sellerNetRevenueCents,
+    maxLandedEurCents:landed,reserveEurCents:reserves,
+    provisionalContributionEurCents:margin,
+    provisionalContributionMarginPct:Math.round(margin*10000/sellerNetRevenueCents)/100};
 }
