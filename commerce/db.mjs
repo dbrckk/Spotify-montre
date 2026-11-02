@@ -192,6 +192,52 @@ export async function recordSupplierAttempt(pool,orderId,result,error){
     await client.query('INSERT INTO commerce_events(order_id,event_type) VALUES($1,$2)',[orderId,'SUPPLIER_SUBMITTED']);
   });
 }
+/* A supplier request may have reached CJ before an API timeout or restart.
+ * Quarantine, audit and require manual reconciliation: never blindly retry. */
+export async function quarantineStaleSupplierAttempts(pool){
+  return transaction(pool,async client=>{
+    const {rows}=await client.query(`
+      UPDATE commerce_orders SET status='EXCEPTION',updated_at=now()
+      WHERE status='SUPPLIER_SENDING'
+        AND supplier_requested_at < now() - interval '5 minutes'
+      RETURNING id
+    `);
+    for(const row of rows)await client.query(
+      'INSERT INTO commerce_events(order_id,event_type,details) VALUES($1,$2,$3)',
+      [row.id,'SUPPLIER_ATTEMPT_STALE',JSON.stringify({
+        reason:'worker_or_network_interrupted',
+        action:'reconcile_order_number_with_cj_before_any_retry'
+      })]);
+    return rows.map(row=>row.id);
+  });
+}
+
+/* Mollie may have created a payable checkout before a timeout. No blind retry. */
+export async function quarantineStalePaymentCreation(pool){
+  return transaction(pool,async client=>{
+    const {rows}=await client.query(`
+      UPDATE commerce_orders SET status='PAYMENT_REVIEW',updated_at=now()
+      WHERE status='PAYMENT_CREATING'
+        AND created_at < now() - interval '15 minutes'
+      RETURNING id
+    `);
+    for(const row of rows)await client.query(
+      'INSERT INTO commerce_events(order_id,event_type,details) VALUES($1,$2,$3)',
+      [row.id,'PAYMENT_CREATION_STALE',JSON.stringify({
+        reason:'mollie_result_unknown',action:'reconcile_provider_before_new_payment'
+      })]);
+    return rows.map(row=>row.id);
+  });
+}
+
+export async function getCommerceExceptionSummary(pool){
+  const {rows}=await pool.query(`
+    SELECT status,count(*)::integer AS count FROM commerce_orders
+    WHERE status IN ('PAYMENT_REVIEW','EXCEPTION','SUPPLIER_SENDING')
+    GROUP BY status ORDER BY status
+  `);
+  return Object.fromEntries(rows.map(row=>[row.status,row.count]));
+}
 export async function ordersForSupplierReconciliation(pool){
   const {rows}=await pool.query(`
     SELECT id,supplier_order_id,status FROM commerce_orders
