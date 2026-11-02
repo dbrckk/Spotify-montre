@@ -1,0 +1,197 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Atelier Montres — devis réel pour une vente directe (usage privé, jamais publié)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "catalogueId",
+    "supplierName",
+    "supplierSku",
+    "quoteReference",
+    "fulfilmentMode",
+    "quotedOn",
+    "validThrough",
+    "costs",
+    "proofs"
+  ],
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "catalogueId": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]{4,64}$"
+    },
+    "supplierName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "supplierSku": {
+      "type": "string",
+      "minLength": 1
+    },
+    "quoteReference": {
+      "type": "string",
+      "minLength": 1
+    },
+    "fulfilmentMode": {
+      "enum": [
+        "cj_wallet_api",
+        "verified_partner_api",
+        "manual"
+      ]
+    },
+    "quotedOn": {
+      "type": "string",
+      "format": "date"
+    },
+    "validThrough": {
+      "type": "string",
+      "format": "date"
+    },
+    "costs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sellingPriceInclVatCents",
+        "sellingVatBasisPoints",
+        "supplierUnitCents",
+        "supplierShippingCents",
+        "customsAndHandlingCents",
+        "nonRecoverableImportVatCents",
+        "paymentFeeBasisPoints",
+        "paymentFixedCents",
+        "packingCents",
+        "refundReserveCents",
+        "warrantyReserveCents",
+        "supportReserveCents",
+        "otherVariableCostsCents"
+      ],
+      "properties": {
+        "sellingPriceInclVatCents": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sellingVatBasisPoints": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "supplierUnitCents": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "supplierShippingCents": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "customsAndHandlingCents": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "nonRecoverableImportVatCents": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "paymentFeeBasisPoints": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "paymentFixedCents": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "packingCents": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "refundReserveCents": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "warrantyReserveCents": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "supportReserveCents": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "otherVariableCostsCents": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "proofs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "exactVariantMatched",
+        "supplierIdentityVerified",
+        "supplierStockConfirmed",
+        "shippingToFranceConfirmed",
+        "importTaxesAndDdpReviewed",
+        "euProductComplianceVerified",
+        "photoRightsVerified",
+        "merchantLegalAndCgvReady",
+        "returnsAndWarrantyReady",
+        "shopifyPaymentsLiveVerified",
+        "shopifyVariantMapped",
+        "automaticSupplierOrderVerified",
+        "automaticSupplierPaymentVerified",
+        "supplierFundingAvailable",
+        "idempotenceAndFailureAlertsVerified"
+      ],
+      "properties": {
+        "exactVariantMatched": {
+          "type": "boolean"
+        },
+        "supplierIdentityVerified": {
+          "type": "boolean"
+        },
+        "supplierStockConfirmed": {
+          "type": "boolean"
+        },
+        "shippingToFranceConfirmed": {
+          "type": "boolean"
+        },
+        "importTaxesAndDdpReviewed": {
+          "type": "boolean"
+        },
+        "euProductComplianceVerified": {
+          "type": "boolean"
+        },
+        "photoRightsVerified": {
+          "type": "boolean"
+        },
+        "merchantLegalAndCgvReady": {
+          "type": "boolean"
+        },
+        "returnsAndWarrantyReady": {
+          "type": "boolean"
+        },
+        "shopifyPaymentsLiveVerified": {
+          "type": "boolean"
+        },
+        "shopifyVariantMapped": {
+          "type": "boolean"
+        },
+        "automaticSupplierOrderVerified": {
+          "type": "boolean"
+        },
+        "automaticSupplierPaymentVerified": {
+          "type": "boolean"
+        },
+        "supplierFundingAvailable": {
+          "type": "boolean"
+        },
+        "idempotenceAndFailureAlertsVerified": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}
