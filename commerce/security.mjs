@@ -33,8 +33,10 @@ export function openAddress(value,key){
 function stringField(x,name,min,max,optional=false){
   if(optional&&(x===undefined||x===null||x===''))return '';
   if(typeof x!=='string')throw new ClientError('Champ invalide : '+name);
-  const text=x.normalize('NFC').trim();
-  if(text.length<min||text.length>max||/[\u0000-\u001f\u007f]/u.test(text))
+  const normalized=x.normalize('NFC');
+  if(/[\u0000-\u001f\u007f]/u.test(normalized))throw new ClientError('Champ invalide : '+name);
+  const text=normalized.trim();
+  if(text.length<min||text.length>max)
     throw new ClientError('Champ invalide : '+name);
   return text;
 }
