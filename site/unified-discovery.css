@@ -255,3 +255,7 @@
 @media(prefers-reduced-motion:reduce){
   .ud-save,.ud-favorite-tools button{transition:none!important}
 }
+
+/* Keep the photo/source provenance badge distinct from the save control. */
+.ud-visual-label{max-width:calc(100% - 125px);overflow-wrap:break-word}
+@media(max-width:580px){.ud-visual-label{max-width:calc(100% - 65px);line-height:1.2}}
