@@ -77,14 +77,14 @@ export async function readJsonBody(req,max=4096){
   let length=0;const chunks=[];
   for await(const chunk of req){length+=chunk.length;
     if(length>max)throw new ClientError('Requête trop volumineuse',413);
-    chunks.push(chunk);
+    chunks.push(Buffer.isBuffer(chunk)?chunk:Buffer.from(chunk));
   }
   try{return JSON.parse(Buffer.concat(chunks).toString('utf8'))}
   catch{throw new ClientError('JSON invalide')}
 }
 export async function readWebhookBody(req,max=2048){
   const chunks=[];let len=0;
-  for await(const chunk of req){len+=chunk.length;if(len>max)throw new ClientError('Webhook trop volumineux',413);chunks.push(chunk);}
+  for await(const chunk of req){len+=chunk.length;if(len>max)throw new ClientError('Webhook trop volumineux',413);chunks.push(Buffer.isBuffer(chunk)?chunk:Buffer.from(chunk));}
   const raw=Buffer.concat(chunks).toString('utf8');
   const form=new URLSearchParams(raw);
   const values=form.getAll('id');
