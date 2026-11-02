@@ -61,6 +61,14 @@ assert.equal(events.at(-1),'amazon-search:skmei-2056','Old Amazon search event n
 trigger({url:'https://www.amazon.fr/dp/B0DNK5TT6D?tag=drackk04-21',id:'addiesdive-ad2030',kind:'direct'});
 assert.equal(events.at(-1),'amazon:addiesdive-ad2030:popular','Old Amazon product event names must remain unchanged');
 
+trigger({url:'https://www.amazon.fr/dp/B07B6ML1VJ?tag=drackk04-21',kind:'direct',
+  placement:'showroom',id:'skmei-1257'});
+assert.equal(events.at(-1),'amazon:skmei-1257:showroom',
+  'New conversion landing must be measurable separately from older popular watch placements');
+trigger({url:'https://www.shopskmei.com/product/skmei-2056-digital-sport-watch/',
+  kind:'official',placement:'showroom'});
+assert.equal(events.at(-1),'merchant:skmei-2056:showroom',
+  'Source fallback click tracking must preserve its new showroom attribution');
 const count=events.length;
 for(const url of [
   'https://www.shopskmei.com.evil.example/product/skmei-2056/',
