@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {Readable} from 'node:stream';
 import {newOrderId,newPublicToken,sealAddress,openAddress,digest,sameHash,
   validateCheckoutBody,checkoutFingerprint,readWebhookBody} from './security.mjs';
-import {buildCjOrder,getCjBalance,submitCjBalanceOrder,fetchCjOrder} from './cj.mjs';
+import {buildCjOrder,getCjBalance,submitCjBalanceOrder,fetchCjOrder,preflightCjDelivery} from './cj.mjs';
 
 const key='a1'.repeat(32);
 const customer={fullName:'Test Client',email:'test@example.fr',address1:'12 rue des Montres',
@@ -82,4 +82,45 @@ const expensive=async(url)=>{
     data:{orderId:'1',orderNumber:order.id,actualPayment:'25.01'}})};
 };
 await assert.rejects(submitCjBalanceOrder({order,customer,accessToken:'a'.repeat(40),fetcher:expensive}),/exceeded/);
+
+const supplierPreflight=async(url,options)=>{
+  if(url.includes('/product/variant/queryByVid'))return {ok:true,json:async()=>({
+    code:200,result:true,data:{vid:order.supplier_vid,variantSellPrice:11.3}
+  })};
+  if(url.includes('/product/stock/queryByVid'))return {ok:true,json:async()=>({
+    code:200,result:true,data:[{vid:order.supplier_vid,countryCode:'CN',cjInventoryNum:7}]
+  })};
+  if(url.endsWith('/logistic/freightCalculate')){
+    const request=JSON.parse(options.body);
+    assert.equal(request.zip,'75002');
+    assert.equal(request.endCountryCode,'FR');
+    assert.equal(request.products[0].vid,order.supplier_vid);
+    return {ok:true,json:async()=>({code:200,result:true,data:[
+      {logisticName:'PostNL',logisticPrice:3.1,totalPostageFee:3.1,taxesFee:0.85,clearanceOperationFee:0.45}
+    ]})};
+  }
+  if(url.endsWith('/shopping/pay/getBalance'))return {ok:true,json:async()=>({
+    code:200,result:true,data:{amount:31.0}
+  })};
+  throw Error('unexpected preflight endpoint');
+};
+const ready=await preflightCjDelivery({
+  vid:order.supplier_vid,originCountry:'CN',postalCode:'75002',
+  logisticsName:'PostNL',maxSupplierUsdCents:2500,accessToken:'a'.repeat(40),
+  fetcher:supplierPreflight
+});
+assert.equal(ready.productUsdCents,1130);
+assert.equal(ready.freightUsdCents,440);
+assert.equal(ready.balanceUsdCents,3100);
+await assert.rejects(preflightCjDelivery({
+  vid:order.supplier_vid,originCountry:'CN',postalCode:'75002',
+  logisticsName:'NonexistentCarrier',maxSupplierUsdCents:2500,accessToken:'a'.repeat(40),
+  fetcher:supplierPreflight
+}),/delivery method/);
+await assert.rejects(preflightCjDelivery({
+  vid:order.supplier_vid,originCountry:'CN',postalCode:'75002',
+  logisticsName:'PostNL',maxSupplierUsdCents:1200,accessToken:'a'.repeat(40),
+  fetcher:supplierPreflight
+}),/exceed total/);
+
 console.log('Independent commerce checks OK: encrypted address, checkout safety, CJ balance, exact shipping, paid submission and ambiguous-cost refusal');
