@@ -17,9 +17,11 @@ const origin=base.origin;
 const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 const repoRoot=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const popular=JSON.parse(readFileSync(resolve(repoRoot,'site/selection-populaires.json'),'utf8')).products;
+const core=JSON.parse(readFileSync(resolve(repoRoot,'site/selection-affiliation.json'),'utf8')).products;
 const verified=JSON.parse(readFileSync(resolve(repoRoot,'research/amazon-fr-popular-verified.json'),'utf8')).verifiedProducts;
-if(popular.length!==13||Object.keys(verified).length!==1)throw Error('Source catalog and Amazon direct-link registry changed: update audit assertions deliberately');
+if(popular.length!==37||core.length!==15||new Set([...popular,...core].map(p=>p.id)).size!==52)throw Error('Expected 52 unique documented watches in current catalog');
 const report={checkedAt:new Date().toISOString(),site:base.href,pages:0,issues,checked,commercialPages:0,commercialChecks:0};
+let affiliateActive=null;
 
 async function request(url){
   let error;
@@ -91,20 +93,29 @@ async function auditPage(url){
     expect(html.includes('href="'+model.officialUrl+'"'),'manufacturer URL absent');
     expect(html.includes('href="'+model.marketEvidence.url+'"'),'research source absent');
     expect((html.match(/class="am-extra-fact"/g)||[]).length===4,'expected four model-specific facts');
-    expect(html.includes('En tant que Partenaire Amazon'),'affiliate disclosure absent');
+    if(affiliateActive===true)expect(html.includes('En tant que Partenaire Amazon'),'affiliate disclosure absent');
     expect((html.match(/class="am-extra-related"/g)||[]).length===1,'internal comparison links absent');
+    const structured=html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
+    expect(Boolean(structured),'Product structured data absent');
+    if(structured){
+      try{
+        const product=JSON.parse(structured[1])['@graph']?.find(item=>item['@type']==='Product');
+        expect(product?.model===model.model,'Structured Product model must match exact watch');
+        expect(!product?.offers&&!product?.aggregateRating,'No invented commercial offers or ratings');
+      }catch(error){issues.push(path+': invalid Product JSON-LD ('+error.message+')');}
+    }
     const direct=verified[model.id];
-    if(direct){
+    if(direct&&affiliateActive===true){
       expect(html.includes('https://www.amazon.fr/dp/'+direct.asin+'?tag=drackk04-21'),
         'verified exact-model Amazon.fr destination missing');
       expect(html.includes('data-amazon-product="'+model.id+'"'),'direct product attribution missing');
       expect(!html.includes('data-amazon-search-id="'+model.id+'"'),'verified ASIN should not silently revert to a search');
-    }else{
+    }else if(affiliateActive===true){
       expect(html.includes('data-amazon-search-id="'+model.id+'"'),'unverified model must use a labeled search');
       expect(!html.includes('data-amazon-product="'+model.id+'"'),'unverified model must not claim an exact ASIN');
       expect(html.includes('https://www.amazon.fr/s?k='),'Amazon.fr search destination missing');
     }
-    expect(/rel="[^"]*sponsored/.test(html),'paid outbound link must be labeled sponsored');
+    if(affiliateActive===true)expect(/rel="[^"]*sponsored/.test(html),'paid outbound link must be labeled sponsored');
   }
 }
 async function audit(){
@@ -120,7 +131,7 @@ async function audit(){
   if(xml!==null){
     if(!/<urlset\b/.test(xml))issues.push('sitemap.xml: missing urlset root');
     urls=[...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>decodeXml(m[1].trim()));
-    if(urls.length!==43)issues.push('sitemap.xml: expected exactly 43 documented pages (15 core + 13 supplemental + editorial routes), found '+urls.length);
+    if(urls.length<52)issues.push('sitemap.xml: expected at least 52 documented product pages, found '+urls.length);
     if(!urls.includes(new URL('montres/methode-selection.html',base).href)){
       issues.push('sitemap.xml: published selection methodology is missing');
     }
@@ -138,6 +149,10 @@ async function audit(){
   if(manifestText!==null){
     try{
       const manifest=JSON.parse(manifestText);
+      affiliateActive=manifest.affiliateActive;
+      if(typeof affiliateActive!=='boolean')issues.push('seo-manifest.json: missing affiliateActive flag');
+      if(manifest.productCount!==15||manifest.popularAdditionalCount!==37||manifest.popularDetailCount!==37)
+        issues.push('seo-manifest.json: current 52-watch inventory mismatch');
       if(manifest.siteUrl!==base.href||!Array.isArray(manifest.paths)||
           manifest.paths.length!==urls.length||
           new Set(manifest.paths).size!==manifest.paths.length||
@@ -146,7 +161,7 @@ async function audit(){
       }
     }catch(e){issues.push('seo-manifest.json: invalid JSON ('+e.message+')');}
   }
-  for(const p of popular){
+  for(const p of [...core,...popular]){
     if(!urls.includes(new URL('montres/'+p.id+'.html',base).href))
       issues.push('sitemap.xml: missing individual commercial landing page '+p.id);
   }
