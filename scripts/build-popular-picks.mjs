@@ -149,7 +149,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     +'<div class="am-affordable-footer"><p>Les liens Amazon.fr peuvent être rémunérés. Une correspondance ASIN ne garantit pas le prix, le vendeur,'
     +' la livraison ni la variante en stock. Les droits de publication des photos reposent sur les déclarations de l’éditeur,'
     +' non vérifiées indépendamment.</p>'
-    +'<a href="./montres/toutes-les-montres.html?brand=SKMEI">Explorer les dix modèles SKMEI</a>'
+    +'<a href="./montres/montres-skmei.html">Explorer les dix modèles SKMEI</a>'
     +'<a href="./montres/toutes-les-montres.html?merchant=direct&sort=direct">Voir les références avec fiche Amazon identifiée</a></div>'
     +'</div></section>';
   const featuredIds=['casio-gw-m5610u-1','skmei-2056','skmei-2256','casio-ga-2100-1a1','skmei-1257','casio-f91w-1','addiesdive-ad2030','pagani-pd1701'];
