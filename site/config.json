@@ -1,5 +1,6 @@
 {
   "status": "prelaunch",
   "newsletterUrl": null,
-  "checkoutMode": "inactive"
+  "checkoutMode": "inactive",
+  "commerceApiUrl": null
 }

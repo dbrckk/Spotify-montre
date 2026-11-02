@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,follow">
+<meta name="theme-color" content="#172d24">
+<title>Achat direct sécurisé | Atelier Montres</title>
+<meta name="description" content="Commander une montre sur Atelier Montres uniquement lorsqu'une offre fournisseur et sa livraison sont vérifiées.">
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="./base.css">
+<link rel="stylesheet" href="./direct-commerce.css">
+<script defer src="./acheter-direct.js"></script>
+</head>
+<body>
+<a class="am-direct-skip" href="#contenu">Aller au formulaire</a>
+<header class="am-direct-top"><a href="./index.html">✦ Atelier Montres</a><a href="./montres/toutes-les-montres.html">Les 52 montres</a></header>
+<main id="contenu" class="am-direct-wrap">
+<p class="am-direct-eyebrow">ATELIER MONTRES / ACHAT DIRECT</p>
+<h1>Choisir une montre. <em>Une livraison réelle.</em></h1>
+<p class="am-direct-lead">Seules les références dont nous avons vérifié le fournisseur, la variante, les frais et la livraison peuvent être achetées directement. Les autres restent accessibles dans le catalogue de comparaison.</p>
+<div class="am-direct-grid">
+<section class="am-direct-panel" aria-labelledby="checkoutTitle">
+<h2 id="checkoutTitle">Votre commande</h2>
+<p id="amDirectStatus" role="status" aria-live="polite">Vérification des offres disponibles…</p>
+<form id="amDirectForm" hidden>
+<label for="amDirectOffers">Modèle disponible</label>
+<select id="amDirectOffers" name="offerId" required></select>
+<strong id="amDirectPrice" class="am-direct-price" aria-live="polite"></strong>
+<p class="am-direct-hint">Le prix affiché est TTC, livraison prévue en France métropolitaine incluse. Aucun frais supplémentaire non annoncé ne doit être imposé après le paiement.</p>
+<div class="am-direct-fields">
+<label>Nom complet<input name="fullName" autocomplete="name" maxlength="50" minlength="3" required></label>
+<label>Adresse e-mail<input name="email" type="email" autocomplete="email" maxlength="120" required></label>
+<label class="am-wide">Adresse de livraison<input name="address1" autocomplete="street-address" maxlength="200" required></label>
+<label class="am-wide">Complément d'adresse (facultatif)<input name="address2" maxlength="160"></label>
+<label>Code postal<input name="postalCode" inputmode="numeric" autocomplete="postal-code" pattern="[0-9]{5}" maxlength="5" required></label>
+<label>Ville<input name="city" autocomplete="address-level2" maxlength="50" required></label>
+<label class="am-wide">Département / région<input name="region" autocomplete="address-level1" maxlength="50" required></label>
+<label class="am-wide">Téléphone pour la livraison (facultatif)<input name="phone" type="tel" autocomplete="tel" maxlength="20"></label>
+</div>
+<label class="am-direct-check"><input type="checkbox" name="acceptTerms" required><span>Je confirme avoir consulté les informations de vente, de livraison, de rétractation et de confidentialité, et j'accepte les conditions applicables. <a href="./informations-legales.html">Informations légales</a> · <a href="./confidentialite.html">Vie privée</a>.</span></label>
+<button class="am-direct-button" id="amDirectSubmit" type="submit">Payer sur la page sécurisée du prestataire</button>
+<p class="am-direct-hint">Le paiement est traité sur une page externe sécurisée. Vous revenez ensuite sur notre site pour consulter l'état de votre commande. Les adresses sont transmises au fournisseur uniquement pour expédier la montre.</p>
+</form>
+</section>
+<aside class="am-direct-aside">
+<h2>Un parcours contrôlé</h2>
+<p><strong>01</strong> Choisissez une montre réellement disponible.</p>
+<p><strong>02</strong> Vérifiez le total et payez chez le prestataire sécurisé.</p>
+<p><strong>03</strong> Votre commande fournisseur est lancée après confirmation du paiement.</p>
+<p><strong>04</strong> Le fournisseur livre directement à l'adresse renseignée ; le suivi sera accessible lorsqu'il sera fourni.</p>
+<a href="./montres/toutes-les-montres.html">Explorer la sélection complète ↗</a>
+</aside>
+</div>
+</main>
+<footer class="am-direct-footer"><p>Atelier Montres · Achat direct uniquement lorsque l'ensemble des contrôles marchands est activé. <a href="./informations-legales.html">Informations légales</a></p></footer>
+</body>
+</html>

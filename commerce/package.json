@@ -1,0 +1,17 @@
+{
+  "name": "atelier-montres-commerce-api",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Independent Atelier Montres order, payment and supplier fulfillment service",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "check": "node --check server.mjs && node --check db.mjs && node --check security.mjs && node --check cj.mjs && node selfcheck.mjs"
+  },
+  "dependencies": {
+    "pg": "^8.13.3"
+  }
+}

@@ -1,0 +1,97 @@
+# Atelier Montres — moteur de commandes directes
+
+Ce service est **indépendant des plateformes de boutique**. Il ne remplace pas la vitrine
+[Atelier Montres](https://atelier-montres-selection-fr.onrender.com/) : celle-ci reste hébergée
+sur Render statique avec le catalogue 52 montres et ses liens d'affiliation.
+
+## Flux de production conçu
+
+1. Notre API ne publie que les offres enregistrées en base PostgreSQL, approuvées,
+   en stock et assorties de preuves de conformité, photo, livraison, taxes et coût.
+2. Le navigateur soumet l'adresse française, le consentement aux CGV et une clé
+   d'idempotence. Le serveur calcule **lui-même** le prix complet en euros ;
+   le navigateur ne fournit aucun prix.
+3. La commande unique est écrite en base, l'adresse chiffrée par AES-256-GCM.
+4. Mollie crée un lien HTTPS de paiement hébergé. Notre site ne traite aucun numéro
+   de carte. Le webhook Mollie n'est **pas** interprété comme une preuve de paiement :
+   un GET Mollie avec la clé privée vérifie référence, montant, monnaie et mode.
+5. Une commande payée passe dans une file persistante. Le worker réserve
+   une seule tentative CJ dans une transaction SQL avec budget quotidien global.
+6. CJ vérifie le solde en USD, reçoit le bon VID, la méthode de transport, le
+   nom et l'adresse du client et `payType=2` pour régler depuis le portefeuille.
+   Une réponse incertaine passe en état **EXCEPTION** : il est interdit de payer
+   une seconde fois sans réconciliation manuelle.
+7. Le worker interroge le détail de commande CJ et met à jour paiement fournisseur,
+   expédition, suivi et livraison. Le client consulte son statut avec une preuve
+   de possession, sans exposition d'adresse en public.
+
+**Aucun SKU n'est préinstallé.** L'offre est toujours vide lorsque `COMMERCE_ENABLED`
+est absent ou différent de `true`.
+
+## Environnement nécessaire
+
+Service Node >=22, PostgreSQL persistant, HTTPS, connexion fournisseur et prestataire
+de paiement. Variables privées à renseigner **dans le serveur** (jamais dans le site statique
+ni sur GitHub) :
+
+| Variable | Usage |
+| --- | --- |
+| `DATABASE_URL` | PostgreSQL durable ; tables créées au démarrage |
+| `COMMERCE_ENABLED` | `true` seulement après validation légale et opérationnelle |
+| `MOLLIE_API_KEY` | Clé **live** du compte marchand Mollie vérifié |
+| `CJ_ACCESS_TOKEN` | Jeton CJ OpenAPI valide avec droits de commande |
+| `ADDRESS_ENCRYPTION_KEY` | Clé aléatoire 32 octets en hexadécimal (64 caractères) |
+| `IDEMPOTENCY_SECRET` | Chaîne cryptographiquement aléatoire d'au moins 40 caractères |
+| `CJ_DAILY_CAP_USD_CENTS` | Plafond d'engagement fournisseur quotidien en cents USD |
+| `STOREFRONT_ORIGIN` | Origine HTTPS publique de notre site, sans chemin |
+| `COMMERCE_PUBLIC_URL` | Origine HTTPS du service de commandes, avec / final |
+| `PORT` | Fourni par Render ; 8787 localement |
+
+**Initialisation locale :**
+
+```sh
+npm --prefix commerce install --omit=dev --no-audit --no-fund
+npm --prefix commerce run check
+npm --prefix commerce start
+```
+
+`GET /healthz` répond sans données sensibles et indique si le checkout est désactivé.
+`GET /api/offers` répond avec une liste vide tant que les conditions ne sont pas levées.
+Les endpoints `/api/checkout`, `/api/webhooks/mollie` et
+`/api/orders/:id` exigent des vérifications effectives avant toute action.
+
+## Conditions **avant activation**
+
+- Entreprise établie, CGV, politique de confidentialité, rétractation, mentions légales
+  authentiques, TVA, garanties, conformité et responsabilité importateur.
+- Compte marchand et banque **validés par Mollie**, approvisionnement CJ suffisant.
+- Une à trois montres physiquement échantillonnées, fournisseur et VID exacts,
+  photos autorisées, stock, frais transport et taxes DDP documentés, retours garantis.
+- Devis fournisseurs approuvés avec une marge après paiement, TVA, douanes, SAV
+  et chargebacks. `scripts/evaluate-dropship-offer.mjs` permet une vérification
+  **préparatoire** d'un devis réel ; celle-ci ne remplace pas les validations humaines.
+- Trésorerie suffisante pour payer CJ avant le versement des fonds Mollie.
+- End-to-end sur un véritable environnement autorisé : paiement, webhook, commande
+  CJ confirmée, livraison, remboursement, panne fournisseur et restauration de DB.
+- Journal de surveillance des `EXCEPTION`, des `PAYMENT_REVIEW` et
+  `SUPPLIER_SENDING` abandonnés. Un remboursement ne doit pas être annoncé
+  sans preuve du prestataire ; aucune reprise de paiement fournisseur à l'aveugle.
+
+## Limites actuellement non levées
+
+Le code des connexions Mollie et CJ et la logique de paiement/commande sont réels,
+mais **aucun compte marchand, offre ni portefeuille CJ n'est encore validé ici**.
+Le checkout reste désactivé. Les dépôts et webhooks de clients réels ne sont pas
+testables tant que ces comptes ne sont pas opérationnels. Une commission d'affiliation
+versée par un fournisseur tiers serait un autre modèle contractuel ; dans ce parcours
+nous conservons la **marge** de vendeur, et supportons ses obligations.
+
+Le site statique n'est pas une base de commandes : ne jamais écrire les adresses ou
+les secrets dans les fichiers publiés. PostgreSQL est la source durable et les
+statuts publics ne révèlent jamais l'adresse.
+
+## Références de protocole
+
+- [Mollie Payments : création et webhook, contrôle GET serveur](https://docs.mollie.com/docs/accepting-payments).
+- [CJ OpenAPI : `createOrderV2` `payType=2`, balance, détail](https://developers.cjdropshipping.com/en/api/api2/api/shopping.html).
+- [DGCCRF : obligations du vendeur en dropshipping](https://www.economie.gouv.fr/dgccrf/les-fiches-pratiques/dropshipping-comment-respecter-la-reglementation).
