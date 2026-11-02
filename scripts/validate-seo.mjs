@@ -89,6 +89,7 @@ assert.match(read('editorial-photo.js'),/assets\/watch-thumbs\/.*item\.id/,'Feat
 assert.match(read('affiliation.js'),/assets\/watch-responsive\/.*p\.id/,'Dynamic catalogue must prefer responsive photos');
 const home=read('index.html');
 const affordableDuels=JSON.parse(read('comparaisons-accessibles.json'));
+const escapeEditorialHtml=value=>String(value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 const affordableCatalog=JSON.parse(read('selection-populaires.json')).products;
 const affordableRights=JSON.parse(read('popular-photo-rights.json')).photos;
 const affordableASIN=JSON.parse(readFileSync(resolve(root,'../research/amazon-fr-popular-verified.json'),'utf8')).verifiedProducts;
@@ -112,8 +113,8 @@ for(const pair of affordableDuels.comparisons){
   assert.ok(html.includes('<link rel="canonical" href="'+url+'">'),'Unique canonical URL required for '+pair.slug);
   assert.ok(html.includes('data-affordable-duel="'+pair.slug+'"'),'Correct pair identity required: '+pair.slug);
   assert.ok(html.includes('<h1>'+pair.title+'</h1>'),'Original editorial comparison title required');
-  assert.ok(html.includes(pair.intro)&&html.includes(pair.leftAdvice)&&html.includes(pair.rightAdvice)
-    &&html.includes(pair.caution),'Original distinct buying guidance missing for '+pair.slug);
+  assert.ok([pair.intro,pair.leftAdvice,pair.rightAdvice,pair.caution].every(copy=>html.includes(escapeEditorialHtml(copy))),
+    'Original distinct buying guidance missing or not safely HTML-escaped for '+pair.slug);
   assert.equal((html.match(/class="am-duel-model" data-duel-model="/g)||[]).length,2,
     'Two and only two real products in the buying comparison: '+pair.slug);
   assert.ok(html.includes('href="./'+left.id+'.html"')&&html.includes('href="./'+right.id+'.html"'),
