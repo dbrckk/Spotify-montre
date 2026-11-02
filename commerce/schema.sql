@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS commerce_offers (
   label text NOT NULL CHECK (length(label) BETWEEN 4 AND 180),
   amount_eur_cents integer NOT NULL CHECK (amount_eur_cents BETWEEN 100 AND 1000000),
   unit_cost_eur_cents integer NOT NULL CHECK (unit_cost_eur_cents >= 0),
+  supplier_landed_eur_ceiling_cents integer NOT NULL DEFAULT 0 CHECK (supplier_landed_eur_ceiling_cents >= 0),
   reserves_eur_cents integer NOT NULL CHECK (reserves_eur_cents >= 0),
   supplier_max_usd_cents integer NOT NULL CHECK (supplier_max_usd_cents > 0),
   supplier_vid text NOT NULL CHECK (length(supplier_vid) BETWEEN 3 AND 100),
@@ -21,6 +22,11 @@ CREATE TABLE IF NOT EXISTS commerce_offers (
   updated_at timestamptz NOT NULL DEFAULT now(),
   CHECK (amount_eur_cents - unit_cost_eur_cents - reserves_eur_cents > 0)
 );
+-- Upgrade the existing Neon database without dropping any orders or offers.
+-- A zero ceiling deliberately blocks approval until an all-in EUR quote is documented.
+ALTER TABLE commerce_offers ADD COLUMN IF NOT EXISTS
+  supplier_landed_eur_ceiling_cents integer NOT NULL DEFAULT 0;
+
 CREATE TABLE IF NOT EXISTS commerce_orders (
   id text PRIMARY KEY CHECK (id ~ '^ord_[a-z0-9_-]{12,80}$'),
   public_token_hash text NOT NULL CHECK (length(public_token_hash)=64),
