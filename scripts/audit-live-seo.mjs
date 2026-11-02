@@ -95,6 +95,15 @@ async function auditPage(url){
     expect((html.match(/class="am-extra-fact"/g)||[]).length===4,'expected four model-specific facts');
     if(affiliateActive===true)expect(html.includes('En tant que Partenaire Amazon'),'affiliate disclosure absent');
     expect((html.match(/class="am-extra-related"/g)||[]).length===1,'internal comparison links absent');
+    const structured=html.match(/<script type="application\\/ld\\+json">([\\s\\S]*?)<\\/script>/);
+    expect(Boolean(structured),'Product structured data absent');
+    if(structured){
+      try{
+        const product=JSON.parse(structured[1])['@graph']?.find(item=>item['@type']==='Product');
+        expect(product?.model===model.model,'Structured Product model must match exact watch');
+        expect(!product?.offers&&!product?.aggregateRating,'No invented commercial offers or ratings');
+      }catch(error){issues.push(path+': invalid Product JSON-LD ('+error.message+')');}
+    }
     const direct=verified[model.id];
     if(direct&&affiliateActive===true){
       expect(html.includes('https://www.amazon.fr/dp/'+direct.asin+'?tag=drackk04-21'),
@@ -152,7 +161,7 @@ async function audit(){
       }
     }catch(e){issues.push('seo-manifest.json: invalid JSON ('+e.message+')');}
   }
-  for(const p of popular){
+  for(const p of [...core,...popular]){
     if(!urls.includes(new URL('montres/'+p.id+'.html',base).href))
       issues.push('sitemap.xml: missing individual commercial landing page '+p.id);
   }
