@@ -112,11 +112,15 @@ export async function reserveCheckout(pool,request,{encryptionKey,idempotencySec
       INSERT INTO commerce_orders (
         id,public_token_hash,idempotency_hash,request_hash,offer_id,product_label,
         amount_eur_cents,supplier_vid,supplier_max_usd_cents,logistics_name,
-        from_country_code,address_encrypted,status
-      ) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,'PAYMENT_CREATING')
+        from_country_code,address_encrypted,vat_rate_bps_snapshot,
+        supplier_landed_eur_ceiling_cents,promised_delivery_min_business_days,
+        promised_delivery_max_business_days,status
+      ) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,'PAYMENT_CREATING')
     `,[orderId,digest(token),idempotencyHash,requestHash,offer.id,offer.label,
        offer.amount_eur_cents,offer.supplier_vid,offer.supplier_max_usd_cents,
-       offer.logistics_name,offer.from_country_code,sealAddress(request.customer,encryptionKey)]);
+       offer.logistics_name,offer.from_country_code,sealAddress(request.customer,encryptionKey),
+       offer.vat_rate_bps,offer.supplier_landed_eur_ceiling_cents,
+       offer.delivery_min_business_days,offer.delivery_max_business_days]);
     await client.query('INSERT INTO commerce_events(order_id,event_type) VALUES($1,$2)',[orderId,'ORDER_RESERVED']);
     return {orderId,token,amountCents:offer.amount_eur_cents,description:offer.label};
   });
@@ -145,13 +149,16 @@ export async function getOrderForStatus(pool,id,token){
     throw new ClientError('Accès à la commande non autorisé',403);
   const {rows}=await pool.query(`
     SELECT id,status,product_label,amount_eur_cents,public_token_hash,
-      tracking_number,tracking_url,created_at FROM commerce_orders WHERE id=$1 LIMIT 1
+      tracking_number,tracking_url,promised_delivery_min_business_days,
+      promised_delivery_max_business_days,created_at FROM commerce_orders WHERE id=$1 LIMIT 1
   `,[id]);
   if(!rows[0]||!sameHash(rows[0].public_token_hash,digest(token)))
     throw new ClientError('Accès à la commande non autorisé',403);
   const o=rows[0];
   return {orderId:o.id,status:o.status,product:o.product_label,
     amountCents:o.amount_eur_cents,trackingNumber:o.tracking_number||null,
+    deliveryMinDays:o.promised_delivery_min_business_days,
+    deliveryMaxDays:o.promised_delivery_max_business_days,
     trackingUrl:o.tracking_url||null,createdAt:o.created_at};
 }
 export async function recordPaymentStatus(pool,orderId,verified){
