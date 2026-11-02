@@ -6,9 +6,9 @@
 
 Les premiers composants sont intégrés au dépôt : **audit de marge TTC et de disponibilité fournisseur**, contrat de devis réel, appels API serveur pour créer et vérifier un paiement Mollie. Le moteur exige désormais des preuves du **backend indépendant**, du **paiement confirmé**, de la **sécurité des adresses** et de la **correspondance exacte des variantes**.
 
-**Aucun paiement public n'est actuellement activé** (\`site/config.json\` → \`checkoutMode: "inactive"\`) : pas de backend transactionnel déployé, de compte marchand validé ni de référence fournisseur prête à commander. L'affiliation Amazon et les 52 fiches restent utilisables.
+**Aucun paiement public n'est actuellement activé** (`site/config.json` → `checkoutMode: "inactive"`) : pas de backend transactionnel déployé, de compte marchand validé ni de référence fournisseur prête à commander. L'affiliation Amazon et les 52 fiches restent utilisables.
 
-**[Architecture, état réel et étapes pour encaisser et commander automatiquement](docs/COMMERCE_INDEPENDANT_ATELIER_MONTRES_2026-11-02.md)** · Vérifier un devis réel : \`npm run commerce:quote -- chemin/devis-reel.json\`. Aucune donnée personnelle ni clé fournisseur ne doit figurer dans le dépôt public.
+**[Architecture, état réel et étapes pour encaisser et commander automatiquement](docs/COMMERCE_INDEPENDANT_ATELIER_MONTRES_2026-11-02.md)** · Vérifier un devis réel : `npm run commerce:quote -- chemin/devis-reel.json`. Aucune donnée personnelle ni clé fournisseur ne doit figurer dans le dépôt public.
 
 ## Démarrer l'affiliation Awin depuis Android — 1er novembre 2026
 
