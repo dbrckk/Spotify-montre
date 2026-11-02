@@ -1,4 +1,6 @@
-> **Architecture commerciale mise à jour le 02/11/2026 :** le site public reste notre propre site statique Render ; toute vente directe éventuelle passe par un backend indépendant et un prestataire de paiement, sans plateforme de boutique externe. [Source commerciale active](COMMERCE_INDEPENDANT_ATELIER_MONTRES_2026-11-02.md). Les descriptions historiques de modules tiers dans ce plan ne doivent pas être interprétées comme une dépendance actuelle.\n\n# Atelier Montres — Plan directeur d'évolution produit, acquisition et rentabilité
+> **Architecture commerciale mise à jour le 02/11/2026 :** le site public reste notre propre site statique Render ; toute vente directe éventuelle passe par un backend indépendant et un prestataire de paiement, sans plateforme de boutique externe. [Source commerciale active](COMMERCE_INDEPENDANT_ATELIER_MONTRES_2026-11-02.md). Les descriptions historiques de modules tiers dans ce plan ne doivent pas être interprétées comme une dépendance actuelle.
+
+# Atelier Montres — Plan directeur d'évolution produit, acquisition et rentabilité
 
 **Date : 2 novembre 2026.** Référence inspectée : `dbrckk/Spotify-montre`, branche `main`, commit `d43f2be720d2d7c11b0eaaa1df0f14b268980d01`. Site : <https://atelier-montres-selection-fr.onrender.com/>. Ce document complète et actualise `docs/strategie-systemique-rentabilite-2026-11-01.md`. Il propose une trajectoire et des critères de décision, **pas** une preuve de ventes ou de référencement.
 
