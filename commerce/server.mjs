@@ -120,7 +120,7 @@ async function supplierWork(){
     for(const row of await ordersForSupplierReconciliation(pool)){
       try{
         const detail=await fetchCjOrder({orderId:row.supplier_order_id,accessToken:cjToken});
-        await recordSupplierDetail(pool,row.id,detail);
+        await recordSupplierDetail(pool,row.id,detail,encryptionKey);
       }catch{console.error('supplier_status_reconciliation_requires_review',row.id)}
     }
   }catch{dbReady=false;console.error('commerce_worker_unavailable_database_or_job_error')}
