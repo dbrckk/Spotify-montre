@@ -24,7 +24,23 @@ try{
   assert.equal(await items.count(),3,'Three recently opened models are shown');
   assert.ok((await items.first().getAttribute('href')).includes('seiko-5'),'Most recent comes first');
   const thumbnail=items.first().locator('img');
-  await thumbnail.evaluate(img=>img.decode());
+  // These thumbnails are deliberately lazy-loaded in the product UI. Calling
+  // img.decode() before scrolling the offscreen rail into view can wait forever
+  // on real Android/prod, and the 120-second CI timeout then hides the cause.
+  // Request the actual thumbnail, and cap the wait with a specific diagnostic.
+  await thumbnail.scrollIntoViewIfNeeded({timeout:15000});
+  await thumbnail.waitFor({state:'visible',timeout:15000});
+  await page.waitForFunction(()=>{
+    const img=document.querySelector('#affRecentlyViewed .am-recent-card img');
+    return img?.complete===true&&img.naturalWidth>=100;
+  },null,{timeout:20000, polling:250}).catch(async error=>{
+    const state=await thumbnail.evaluate(img=>({
+      complete:img.complete,naturalWidth:img.naturalWidth,src:img.currentSrc,
+      loading:img.loading,visibility:getComputedStyle(img).visibility
+    })).catch(()=>({thumbnail:'missing'}));
+    throw new Error('Recent watch photo failed to load after being scrolled into view: '
+      +JSON.stringify(state)+'; '+error.message);
+  });
   const historyPhoto=await thumbnail.evaluate(img=>({width:img.naturalWidth,src:img.currentSrc}));
   assert.ok(historyPhoto.width>=100,'History thumbnail must decode for its actual 120px displayed size');
   assert.ok(new URL(historyPhoto.src).origin===new URL(base).origin&&/\/assets\/(watches|watch-responsive)\/seiko-5(?:-480|-800)?\.webp/.test(historyPhoto.src),'Recent watches must use the authorized local photo or its responsive derivative');
