@@ -569,8 +569,10 @@ assert.equal((home.match(/data-amazon-product="casio-gw-m5610u-1"/g)||[]).length
 assert.equal((home.match(/data-amazon-search-id=/g)||[]).length,2,'Two featured SKMEI variants without exact ASINs remain honest searches');
 assert.equal((home.match(/data-amazon-product="casio-f91w-1"/g)||[]).length,1,'F-91W featured exact-model Amazon referral');
 assert.equal((home.match(/data-amazon-product="casio-ga-2100-1a1"/g)||[]).length,1,'GA-2100 featured exact-model Amazon referral');
+const popularTeaser=home.match(/<section class="am-picks" id="modeles-populaires"[\s\S]*?<\/section>/)?.[0];
+assert.ok(popularTeaser,'Existing eight-watch homepage teaser is distinct from the new affordable showroom');
 for(const [id,asin] of [['addiesdive-ad2030','B0DNK5TT6D'],['pagani-pd1701','B0C7QC653D']]){
-  assert.equal((home.match(new RegExp('data-amazon-product="'+id+'"','g'))||[]).length,1,'New exact Amazon product featured once: '+id);
+  assert.equal((popularTeaser.match(new RegExp('data-amazon-product="'+id+'"','g'))||[]).length,1,'New exact Amazon product featured once within the eight-card teaser: '+id);
   assert.ok(home.includes('https://www.amazon.fr/dp/'+asin+'?tag=drackk04-21'),'Verified Amazon link must be attributed: '+id);
 }
 assert.ok(home.includes('https://www.amazon.fr/dp/B07WGJ1JNW?tag=drackk04-21'),'Homepage must link to source-backed GA-2100 listing');
