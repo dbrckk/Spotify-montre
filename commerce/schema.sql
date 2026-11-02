@@ -79,6 +79,8 @@ CREATE TABLE IF NOT EXISTS commerce_orders (
   supplier_order_id text,
   supplier_reserved_usd_cents integer CHECK (supplier_reserved_usd_cents>=0),
   supplier_requested_at timestamptz,
+  supplier_recovery_checked_at timestamptz,
+  supplier_recovery_attempts integer NOT NULL DEFAULT 0 CHECK (supplier_recovery_attempts BETWEEN 0 AND 24),
   supplier_received_at timestamptz,
   supplier_status text,
   tracking_number text,
@@ -96,6 +98,12 @@ ALTER TABLE commerce_orders ADD COLUMN IF NOT EXISTS
   promised_delivery_min_business_days smallint NOT NULL DEFAULT 0;
 ALTER TABLE commerce_orders ADD COLUMN IF NOT EXISTS
   promised_delivery_max_business_days smallint NOT NULL DEFAULT 0;
+
+-- Recovery probes never trigger a second supplier purchase.
+ALTER TABLE commerce_orders ADD COLUMN IF NOT EXISTS
+  supplier_recovery_checked_at timestamptz;
+ALTER TABLE commerce_orders ADD COLUMN IF NOT EXISTS
+  supplier_recovery_attempts integer NOT NULL DEFAULT 0;
 
 CREATE INDEX IF NOT EXISTS commerce_orders_supplier_queue ON commerce_orders(status,created_at)
   WHERE status IN ('PAID','SUPPLIER_SUBMITTED');

@@ -3,7 +3,8 @@ import {createHostedPayment,verifyHostedPayment} from '../scripts/commerce-molli
 import {createDatabase,initializeDatabase,listApprovedOffers,reserveCheckout,saveCreatedPayment,
   flagPaymentReview,getApprovedOffer,getOrderByPayment,getOrderForStatus,recordPaymentStatus,pendingPayments,
   claimSupplierOrder,recordSupplierAttempt,ordersForSupplierReconciliation,recordSupplierDetail,
-  quarantineStaleSupplierAttempts,quarantineStalePaymentCreation,getCommerceExceptionSummary} from './db.mjs';
+  quarantineStaleSupplierAttempts,quarantineStalePaymentCreation,getCommerceExceptionSummary,
+  claimSupplierRecoveryProbe,recordRecoveredSupplierOrder} from './db.mjs';
 import {ClientError,validateCheckoutBody,readJsonBody,readWebhookBody,openAddress} from './security.mjs';
 import {submitCjBalanceOrder,fetchCjOrder,preflightCjDelivery} from './cj.mjs';
 
@@ -80,12 +81,46 @@ async function supplierWork(){
       const summary=await getCommerceExceptionSummary(pool);
       if(Object.values(summary).some(Number))console.error('commerce_manual_intervention_required',summary);
     }
-    if(!merchantReady())return;
-    // Reconciliation is safe to repeat; NEVER retry an uncertain supplier creation.
-    for(const row of await pendingPayments(pool)){
-      try{await reconcilePayment(row.payment_id)}
-      catch{console.error('payment_reconciliation_requires_review',row.id)}
+    // A sales freeze must stop new CJ purchases, not blind the operator to
+    // existing customer payments and already-created supplier shipments.
+    const canReadPayment=/^live_[a-zA-Z0-9]{12,}$/.test(mollieKey);
+    const canReadSupplier=cjToken.length>=20&&/^[a-fA-F0-9]{64}$/.test(encryptionKey);
+    if(canReadPayment){
+      for(const row of await pendingPayments(pool)){
+        try{await reconcilePayment(row.payment_id)}
+        catch{console.error('payment_reconciliation_requires_review',row.id)}
+      }
     }
+    // A previous CJ POST may already have purchased the watch when HTTP failed.
+    // Recovery is strictly GET-only by our merchant order reference; never
+    // submit/pay an uncertain second supplier order.
+    if(canReadPayment&&canReadSupplier){
+    const orphan=await claimSupplierRecoveryProbe(pool);
+    if(orphan){
+      try{
+        const proof=await verifyHostedPayment({
+          apiKey:mollieKey,paymentId:orphan.payment_id,
+          orderId:orphan.id,amountCents:orphan.amount_eur_cents
+        });
+        if(!proof.paid){
+          console.error('supplier_recovery_payment_not_verified',orphan.id);
+        }else{
+          const matched=await fetchCjOrder({
+            orderId:orphan.id,accessToken:cjToken
+          });
+          const recovered=await recordRecoveredSupplierOrder(
+            pool,orphan.id,matched,encryptionKey,proof
+          );
+          if(recovered.changed)
+            console.log('supplier_order_recovered_read_only',orphan.id,recovered.status);
+        }
+      }catch{
+        console.error('supplier_recovery_requires_review',orphan.id);
+      }
+    }
+    }
+    // Only this section can create and pay a new supplier order.
+    if(merchantReady()){
     const order=await claimSupplierOrder(pool,{dailyCapUsdCents:dailyCap});
     if(order){
       try{
@@ -117,11 +152,14 @@ async function supplierWork(){
         console.error('supplier_order_requires_manual_reconciliation',order.id);
       }
     }
+    }
+    if(canReadSupplier){
     for(const row of await ordersForSupplierReconciliation(pool)){
       try{
         const detail=await fetchCjOrder({orderId:row.supplier_order_id,accessToken:cjToken});
         await recordSupplierDetail(pool,row.id,detail,encryptionKey);
       }catch{console.error('supplier_status_reconciliation_requires_review',row.id)}
+    }
     }
   }catch{dbReady=false;console.error('commerce_worker_unavailable_database_or_job_error')}
   finally{workerBusy=false;}

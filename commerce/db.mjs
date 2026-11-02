@@ -293,6 +293,96 @@ export async function getCommerceExceptionSummary(pool){
   `);
   return Object.fromEntries(rows.map(row=>[row.status,row.count]));
 }
+/**
+ * A CJ POST may have succeeded despite a broken network response.
+ * Look up our merchant orderNumber via CJ's documented read-only
+ * getOrderDetail endpoint. Never re-POST createOrderV2.
+ */
+export async function claimSupplierRecoveryProbe(pool){
+  return transaction(pool,async client=>{
+    const {rows}=await client.query(`
+      SELECT o.* FROM commerce_orders o
+      WHERE o.status='EXCEPTION'
+        AND o.supplier_order_id IS NULL AND o.supplier_requested_at IS NOT NULL
+        AND o.payment_id IS NOT NULL
+        AND o.supplier_recovery_attempts < 12
+        AND (o.supplier_recovery_checked_at IS NULL
+          OR o.supplier_recovery_checked_at < now()-interval '10 minutes')
+        AND EXISTS (SELECT 1 FROM commerce_events e WHERE e.order_id=o.id
+          AND e.event_type IN ('SUPPLIER_RECONCILIATION_REQUIRED','SUPPLIER_ATTEMPT_STALE'))
+        AND NOT EXISTS (SELECT 1 FROM commerce_events e WHERE e.order_id=o.id
+          AND e.event_type='PAYMENT_REVERSAL_DETECTED')
+      ORDER BY o.supplier_requested_at
+      FOR UPDATE OF o SKIP LOCKED LIMIT 1
+    `);
+    const o=rows[0];if(!o)return null;
+    await client.query(`
+      UPDATE commerce_orders SET supplier_recovery_checked_at=now(),
+        supplier_recovery_attempts=supplier_recovery_attempts+1,
+        updated_at=now() WHERE id=$1
+    `,[o.id]);
+    await client.query(
+      'INSERT INTO commerce_events(order_id,event_type) VALUES($1,$2)',
+      [o.id,'SUPPLIER_RECOVERY_CHECK_STARTED']
+    );
+    if(o.supplier_recovery_attempts===11){
+      await client.query(
+        'INSERT INTO commerce_events(order_id,event_type,details) VALUES($1,$2,$3)',
+        [o.id,'SUPPLIER_RECOVERY_EXHAUSTED',JSON.stringify({
+          action:'manual_cj_order_lookup_and_payment_refund_decision'
+        })]
+      );
+    }
+    return o;
+  });
+}
+
+/**
+ * Non-creating recovery: we only attach a CJ ID after authenticated GET
+ * returns the exact line/variant and decrypted customer address.
+ * Unpaid CJ orders remain in EXCEPTION; never debit the wallet again.
+ */
+export async function recordRecoveredSupplierOrder(pool,id,detail,encryptionKey,payment){
+  return transaction(pool,async client=>{
+    const {rows}=await client.query(
+      'SELECT * FROM commerce_orders WHERE id=$1 FOR UPDATE',[id]
+    );
+    const o=rows[0];
+    if(!o||o.status!=='EXCEPTION'||o.supplier_order_id||
+      !o.supplier_requested_at)return {changed:false};
+    if(!payment?.paid||payment.paymentId!==o.payment_id||
+      payment.amountCents!==o.amount_eur_cents)
+      throw Error('Buyer payment not verified for CJ recovery');
+    const reversed=await client.query(`
+      SELECT 1 FROM commerce_events WHERE order_id=$1
+        AND event_type='PAYMENT_REVERSAL_DETECTED' LIMIT 1
+    `,[id]);
+    if(reversed.rows.length)throw Error('Reversed payment cannot be recovered automatically');
+    const cjId=String(detail?.orderId||'');
+    if(!/^[a-zA-Z0-9_-]{1,100}$/.test(cjId))
+      throw Error('Invalid CJ orderId for recovery');
+    const customer=openAddress(o.address_encrypted,encryptionKey);
+    const match=verifyCjOrderDetail(
+      {...o,supplier_order_id:cjId},detail,customer
+    );
+    const status=match.next&&match.next!=='EXCEPTION'?match.next:'EXCEPTION';
+    await client.query(`
+      UPDATE commerce_orders SET supplier_order_id=$2,
+        supplier_status=$3,supplier_received_at=now(),
+        status=$4,tracking_number=$5,tracking_url=$6,updated_at=now()
+      WHERE id=$1
+    `,[o.id,cjId,match.supplierStatus,status,match.tracking,match.trackingUrl]);
+    await client.query(
+      'INSERT INTO commerce_events(order_id,event_type,details) VALUES($1,$2,$3)',
+      [o.id,'SUPPLIER_ORDER_RECOVERED',JSON.stringify({
+        supplierPaid:Boolean(match.next&&match.next!=='EXCEPTION'),
+        action:status==='EXCEPTION'?'supplier_payment_review_required':'monitor_supplier_delivery'
+      })]
+    );
+    return {changed:true,status,supplierPaid:status!=='EXCEPTION'};
+  });
+}
+
 export async function ordersForSupplierReconciliation(pool){
   const {rows}=await pool.query(`
     SELECT id,supplier_order_id,status FROM commerce_orders
