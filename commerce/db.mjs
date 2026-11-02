@@ -3,7 +3,7 @@ import {validateCommercialCeiling} from './landed-cost.mjs';
 import {verifyCjOrderDetail} from './cj-status.mjs';
 import {readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
-import {ClientError,digest,hmac,newOrderId,newPublicToken,sealAddress,sameHash,checkoutFingerprint} from './security.mjs';
+import {ClientError,digest,hmac,newOrderId,newPublicToken,sealAddress,openAddress,sameHash,checkoutFingerprint} from './security.mjs';
 
 const schema=readFileSync(fileURLToPath(new URL('./schema.sql',import.meta.url)),'utf8');
 export function createDatabase(connectionString){
@@ -302,7 +302,7 @@ export async function ordersForSupplierReconciliation(pool){
   `);
   return rows;
 }
-export async function recordSupplierDetail(pool,id,detail){
+export async function recordSupplierDetail(pool,id,detail,encryptionKey){
   return transaction(pool,async client=>{
     const {rows}=await client.query(
       'SELECT * FROM commerce_orders WHERE id=$1 FOR UPDATE',[id]
@@ -311,7 +311,10 @@ export async function recordSupplierDetail(pool,id,detail){
     if(!o||!['SUPPLIER_SUBMITTED','SUPPLIER_PAID','SHIPPED'].includes(o.status))
       return {changed:false};
     let result;
-    try{result=verifyCjOrderDetail(o,detail)}
+    try{
+      const customer=openAddress(o.address_encrypted,encryptionKey);
+      result=verifyCjOrderDetail(o,detail,customer);
+    }
     catch(error){
       // Untrusted/mismatched provider detail must never advance paid or
       // delivery states. Quarantine and investigate the supplier manually.
