@@ -10,7 +10,7 @@ import {usdToCents} from './landed-cost.mjs';
  * https://developers.cjdropshipping.com/en/api/api2/api/shopping.html#1-7-query-order-get
  */
 const normalizeAddress=s=>typeof s==='string'?s.normalize('NFC')
-  .trim().replace(/\\s+/g,' ').toLocaleLowerCase('fr-FR'):null;
+  .trim().replace(/\s+/g,' ').toLocaleLowerCase('fr-FR'):null;
 
 export function verifyCjOrderDetail(order,detail,customer){
   const invalid=message=>{throw Error('CJ fulfillment mismatch: '+message)};
