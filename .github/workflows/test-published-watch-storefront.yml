@@ -27,6 +27,9 @@ on:
       - 'site/fiche.css'
       - 'site/seo-guides.css'
       - 'site/popular-picks.css'
+      - 'site/comparaisons-accessibles.json'
+      - 'site/affordable-comparisons.css'
+      - 'scripts/build-affordable-comparisons.mjs'
       - 'site/extra-factual-comparison.css'
       - 'site/shopper-selections.css'
       - 'scripts/build-shopper-selections.mjs'
@@ -68,7 +71,7 @@ jobs:
           for attempt in $(seq 1 42); do
             ready=1
             reason=''
-            for file in affiliation.js selection-share.js affiliate-ui.js catalogue-view.css premium-system.css fiche.js fiche.css seo-guides.css editorial-photo.js editorial-photo.css popular-filters.js popular-picks.css extra-factual-comparison.css shopper-selections.css unified-discovery.js unified-discovery.css; do
+            for file in affiliation.js selection-share.js affiliate-ui.js catalogue-view.css premium-system.css fiche.js fiche.css seo-guides.css editorial-photo.js editorial-photo.css popular-filters.js popular-picks.css affordable-comparisons.css extra-factual-comparison.css shopper-selections.css unified-discovery.js unified-discovery.css; do
               if ! curl -fsSL --max-time 15 "$base/$file" -o "$RUNNER_TEMP/live-$file"; then
                 ready=0
                 reason="$reason [missing asset: $file]"
@@ -141,6 +144,19 @@ jobs:
                 ready=0
                 reason="$reason [missing or incomplete: six-photo editorial showroom]"
               fi
+            fi
+            # New release: do not run browser checks against an old CDN page
+            # that still lacks the four published original watch comparisons.
+            if [ "$ready" -eq 1 ]; then
+              for slug in skmei-1257-vs-casio-f91w skmei-2056-vs-casio-ae1200 skmei-1251-vs-casio-a158 addiesdive-ad2030-vs-pagani-pd1701; do
+                if ! curl -fsSL --max-time 15 "$base/montres/comparer-$slug.html" -o "$RUNNER_TEMP/live-duel-$slug.html"; then
+                  ready=0
+                  reason="$reason [missing: affordable comparison $slug]"
+                elif ! grep -Fq "data-affordable-duel=\"$slug\"" "$RUNNER_TEMP/live-duel-$slug.html"; then
+                  ready=0
+                  reason="$reason [stale: affordable comparison $slug]"
+                fi
+              done
             fi
             if [ "$ready" -eq 1 ]; then
               echo "Render serves exact JS/CSS, the unified 52-watch filter, and purchase-intent collections (attempt $attempt)."
