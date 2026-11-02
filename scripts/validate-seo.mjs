@@ -202,7 +202,7 @@ assert.ok(affordableHtml.includes('sans prix, stock ni classement de ventes inve
 assert.ok(affordableHtml.includes('non vérifiées indépendamment'),
   'Publisher-attested product photo permissions must not masquer independent licensing');
 for(const id of affordableIds){
-  const card=affordableHtml.match(new RegExp('<article class="am-affordable-card" data-affordable-id="'+id+'"[\s\S]*?<\/article>'))?.[0];
+  const card=affordableHtml.match(new RegExp('<article class="am-affordable-card" data-affordable-id="'+id+'"[\\s\\S]*?<\\/article>'))?.[0];
   assert.ok(card,'Missing sourced homepage hero watch '+id);
   const product=JSON.parse(read('selection-populaires.json')).products.find(p=>p.id===id);
   assert.ok(product&&card.includes('href="./montres/'+id+'.html"'),
@@ -219,7 +219,7 @@ if(manifest.affiliateActive){
     ['skmei-1257','B07B6ML1VJ'],['skmei-1251','B072JTCP5H'],
     ['addiesdive-ad2030','B0DNK5TT6D'],['pagani-pd1701','B0C7QC653D']
   ]){
-    const card=affordableHtml.match(new RegExp('<article class="am-affordable-card" data-affordable-id="'+id+'"[\s\S]*?<\/article>'))?.[0];
+    const card=affordableHtml.match(new RegExp('<article class="am-affordable-card" data-affordable-id="'+id+'"[\\s\\S]*?<\\/article>'))?.[0];
     assert.ok(card.includes('https://www.amazon.fr/dp/'+asin+'?tag=drackk04-21'),
       'Only the source-backed exact ASIN and current owner tag may be featured: '+id);
     assert.match(card,/rel="noopener noreferrer nofollow sponsored"/);
