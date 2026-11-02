@@ -112,6 +112,30 @@ réapprovisionnement automatique). Sans `paymentDate` CJ, on n'affiche pas
 **Références** : [CJ Query Order](https://developers.cjdropshipping.com/en/api/api2/api/shopping.html#1-7-query-order-get)
 et [statuts fournisseur](https://developers.cjdropshipping.com/en/api/api2/api/shopping.html#order-status).
 
+## Récupération automatisée d'un achat CJ interrompu
+
+Lorsque le serveur a réservé une commande fournisseur mais n'a pas reçu la réponse
+`createOrderV2`, il stocke l'état `EXCEPTION`. **Il ne tente jamais de
+créer ou de payer une seconde commande.** En présence d'une API CJ réellement
+connectée et d'un paiement acheteur toujours confirmé chez Mollie, le worker
+utilise uniquement `GET /shopping/order/getOrderDetail?orderId=ord_...`
+(la documentation CJ accepte l'identifiant marchand personnalisé).
+
+L'ordre CJ n'est rattaché à notre base qu'après vérification : référence de
+ligne, VID et quantité, identité CJ, adresse/destinataire, devise, coût plafonné,
+mode non-sandbox et preuve de règlement. Si CJ indique un état créé mais
+non payé, la commande reste en `EXCEPTION` avec son ID fournisseur pour
+traitement humain (aucun débit automatique du wallet). Si CJ confirme son
+règlement puis son expédition, le suivi reprend sans achat supplémentaire.
+
+Au maximum **12 vérifications espacées d'au moins 10 minutes** ;
+`SUPPLIER_RECOVERY_EXHAUSTED` est journalisé si aucune correspondance fiable
+n'a été trouvée. Une réponse CJ inaccessible ou ambiguë n'est jamais une
+autorisation de recommander la montre. L'absence d'un compte fournisseur
+actif laisse naturellement les commandes en attente de résolution manuelle.
+
+Source : [CJ OpenAPI 1.7 Query Order — accepts custom order ID](https://developers.cjdropshipping.com/en/api/api2/api/shopping.html#1-7-query-order-get).
+
 ## Limites actuellement non levées
 
 Le code des connexions Mollie et CJ et la logique de paiement/commande sont réels,
