@@ -43,6 +43,11 @@ export async function preflightCjDelivery({vid,originCountry='CN',postalCode,
     ||!/^[0-9]{5}$/.test(postalCode||'')||!/^[^\\r\\n]{3,50}$/.test(logisticsName||''))
     throw Error('Supplier or delivery data invalid');
   if(!Number.isSafeInteger(maxSupplierUsdCents)||maxSupplierUsdCents<=0)throw Error('Supplier limit absent');
+  const variant=await api('/product/variant/queryByVid?vid='+encodeURIComponent(vid),
+    accessToken,{fetcher});
+  if(variant?.vid!==vid)throw Error('Supplier variant identity mismatch');
+  const productCostUsdCents=usdCents(variant.variantSellPrice);
+  if(productCostUsdCents<=0)throw Error('Supplier product price unavailable');
   const stock=await api('/product/stock/queryByVid?vid='+encodeURIComponent(vid),
     accessToken,{fetcher});
   if(!Array.isArray(stock)||!stock.some(row=>row?.countryCode===originCountry&&
@@ -62,11 +67,11 @@ export async function preflightCjDelivery({vid,originCountry='CN',postalCode,
     throw Error('Supplier customs or tax quote incomplete: refuse checkout');
   const shippingAndTaxes=postageCents+
     usdCents(candidate.taxesFee)+usdCents(candidate.clearanceOperationFee);
-  if(shippingAndTaxes>=maxSupplierUsdCents)
-    throw Error('Supplier shipping and customs already exceed total approved budget');
+  if(productCostUsdCents+shippingAndTaxes>maxSupplierUsdCents)
+    throw Error('Supplier product, freight or customs exceed total approved budget');
   const balance=await getCjBalance({accessToken,fetcher});
   if(balance<maxSupplierUsdCents)throw Error('Supplier wallet insufficient for a new sale');
-  return {freightUsdCents:shippingAndTaxes,balanceUsdCents:balance,
+  return {productUsdCents:productCostUsdCents,freightUsdCents:shippingAndTaxes,balanceUsdCents:balance,
     logisticsName,stockConfirmed:true};
 }
 
