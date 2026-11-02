@@ -67,6 +67,14 @@ export async function reserveCheckout(pool,request,{encryptionKey,idempotencySec
     if(!offer)throw new ClientError('Cette montre n’est pas disponible pour un achat direct',409);
     if(offer.amount_eur_cents < offer.unit_cost_eur_cents + offer.reserves_eur_cents)
       throw new ClientError('Offre commercialement indisponible',409);
+    // A single pilot purchase at a time per supplier SKU prevents overselling
+    // during payment and fulfillment. The row lock on commerce_offers serializes reservations.
+    const active=await client.query(`
+      SELECT count(*)::int AS n FROM commerce_orders
+      WHERE offer_id=$1 AND status IN ('PAYMENT_CREATING','PAYMENT_PENDING',
+        'PAYMENT_REVIEW','PAID','SUPPLIER_SENDING','SUPPLIER_SUBMITTED','SUPPLIER_PAID')
+    `,[offer.id]);
+    if(active.rows[0].n>0)throw new ClientError('Une commande est déjà en cours pour ce modèle',409);
     const orderId=newOrderId();
     await client.query(`
       INSERT INTO commerce_orders (
