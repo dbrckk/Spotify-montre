@@ -30,6 +30,18 @@ export async function listApprovedOffers(pool){
   `);
   return rows;
 }
+export async function getApprovedOffer(pool,offerId){
+  const {rows}=await pool.query(`
+    SELECT id,label,amount_eur_cents,supplier_vid,supplier_max_usd_cents,
+      logistics_name,from_country_code
+    FROM commerce_offers WHERE id=$1 AND approved=true
+      AND stock_confirmed=true AND legal_verified=true
+      AND eu_compliance_verified=true AND photo_rights_verified=true
+      AND supplier_payment_verified=true AND verified_until>now()
+      AND amount_eur_cents > unit_cost_eur_cents + reserves_eur_cents LIMIT 1
+  `,[offerId]);
+  return rows[0]||null;
+}
 export async function reserveCheckout(pool,request,{encryptionKey,idempotencySecret}){
   const token=newPublicToken();
   const idempotencyHash=hmac(idempotencySecret,request.idempotencyKey);
