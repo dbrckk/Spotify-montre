@@ -10,6 +10,11 @@ CREATE TABLE IF NOT EXISTS commerce_offers (
   vat_rate_bps integer NOT NULL DEFAULT -1 CHECK (vat_rate_bps BETWEEN -1 AND 3000),
   tax_treatment_verified boolean NOT NULL DEFAULT false,
   supplier_fx_verified boolean NOT NULL DEFAULT false,
+  return_policy_verified boolean NOT NULL DEFAULT false,
+  gpsr_traceability_verified boolean NOT NULL DEFAULT false,
+  data_transfer_verified boolean NOT NULL DEFAULT false,
+  delivery_min_business_days smallint NOT NULL DEFAULT 0 CHECK (delivery_min_business_days BETWEEN 0 AND 90),
+  delivery_max_business_days smallint NOT NULL DEFAULT 0 CHECK (delivery_max_business_days BETWEEN 0 AND 120),
   reserves_eur_cents integer NOT NULL CHECK (reserves_eur_cents >= 0),
   supplier_max_usd_cents integer NOT NULL CHECK (supplier_max_usd_cents > 0),
   supplier_vid text NOT NULL CHECK (length(supplier_vid) BETWEEN 3 AND 100),
@@ -35,6 +40,16 @@ ALTER TABLE commerce_offers ADD COLUMN IF NOT EXISTS
   tax_treatment_verified boolean NOT NULL DEFAULT false;
 ALTER TABLE commerce_offers ADD COLUMN IF NOT EXISTS
   supplier_fx_verified boolean NOT NULL DEFAULT false;
+ALTER TABLE commerce_offers ADD COLUMN IF NOT EXISTS
+  return_policy_verified boolean NOT NULL DEFAULT false;
+ALTER TABLE commerce_offers ADD COLUMN IF NOT EXISTS
+  gpsr_traceability_verified boolean NOT NULL DEFAULT false;
+ALTER TABLE commerce_offers ADD COLUMN IF NOT EXISTS
+  data_transfer_verified boolean NOT NULL DEFAULT false;
+ALTER TABLE commerce_offers ADD COLUMN IF NOT EXISTS
+  delivery_min_business_days smallint NOT NULL DEFAULT 0;
+ALTER TABLE commerce_offers ADD COLUMN IF NOT EXISTS
+  delivery_max_business_days smallint NOT NULL DEFAULT 0;
 
 CREATE TABLE IF NOT EXISTS commerce_orders (
   id text PRIMARY KEY CHECK (id ~ '^ord_[a-z0-9_-]{12,80}$'),
