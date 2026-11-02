@@ -5,16 +5,16 @@
  * additional 37 models that need product-to-merchant conversion work.
  */
 export const commercialShortlist=Object.freeze([
-  {id:'addiesdive-ad2030',intent:'Cadran épuré et boîtier compact',reason:'La référence AD2030 offre une silhouette sobre et un boîtier de 36 mm annoncé.',caution:'Vérifier le cadran bleu de la fiche Amazon, la variante du mouvement et le vendeur.'},
-  {id:'pagani-pd1701',intent:'Chronographe au style sportif',reason:'Le modèle PD-1701 met en avant une présentation chronographe et le mouvement VK63 documenté.',caution:'La génération, le coloris et le bracelet peuvent varier selon le vendeur.'},
-  {id:'skmei-1257',intent:'Numérique sport noire au style affirmé',reason:'Une montre digitale SKMEI avec un code modèle identifié et une fiche Amazon.fr correspondant à la variante noire.',caution:'Vérifier la finition noire, le vendeur, le prix, la livraison en France et les conditions d’étanchéité avant achat.'},
-  {id:'skmei-2056',intent:'Montre numérique transparente',reason:'Un style numérique rétro et un boîtier transparent très distinctif.',caution:'Pas de fiche Amazon.fr achetable et vérifiée pour la variante proposée ; contrôler les résultats de recherche.'},
-  {id:'skmei-2256',intent:'Montre analogique acier accessible',reason:'Une allure acier sobre avec guichet date, pour comparer un modèle analogique économique.',caution:'Les 3 bar annoncés ne conviennent pas à la natation ; confirmer la finition.'},
-  {id:'skmei-2514',intent:'Style rétro numérique sur acier',reason:'Un design de montre numérique rétro avec bracelet acier documenté dans la fiche vendeur.',caution:'Confirmer les dimensions et la couleur du modèle exact avant commande.'},
-  {id:'casio-f91w-1',intent:'Numérique minimaliste et classique',reason:'Une référence Casio à affichage digital très identifiable pour un usage quotidien simple.',caution:'Contrôler la variante régionale F-91W-1YER et la disponibilité chez le marchand.'},
-  {id:'casio-ga-2100-1a1',intent:'G-SHOCK sport à cadran sombre',reason:'Un design analogique-numérique sportif et un cadran noir distinctif.',caution:'Contrôler le code régional GA-2100-1A1ER sur la fiche commerçant.'},
-  {id:'casio-gw-m5610u-1',intent:'G-SHOCK solaire et radiopilotée',reason:'Une alternative sportive au style numérique avec fonctions solaires et radiopilotées documentées.',caution:'Vérifier la variante régionale GW-M5610U-1ER, l’expédition et la garantie.'},
-  {id:'pagani-pd1776',intent:'Boîtier compact et style soigné',reason:'Un format compact et un mouvement quartz annoncé pour une montre habillée polyvalente.',caution:'La recherche Amazon n’atteste pas que la variante exacte est proposée.'}
+  {id:'addiesdive-ad2030',compareWith:'pagani-pd1776',intent:'Cadran épuré et boîtier compact',reason:'La référence AD2030 offre une silhouette sobre et un boîtier de 36 mm annoncé.',caution:'Vérifier le cadran bleu de la fiche Amazon, la variante du mouvement et le vendeur.'},
+  {id:'pagani-pd1701',compareWith:'addiesdive-ad2030',intent:'Chronographe au style sportif',reason:'Le modèle PD-1701 met en avant une présentation chronographe et le mouvement VK63 documenté.',caution:'La génération, le coloris et le bracelet peuvent varier selon le vendeur.'},
+  {id:'skmei-1257',compareWith:'casio-f91w-1',intent:'Numérique sport noire au style affirmé',reason:'Une montre digitale SKMEI avec un code modèle identifié et une fiche Amazon.fr correspondant à la variante noire.',caution:'Vérifier la finition noire, le vendeur, le prix, la livraison en France et les conditions d’étanchéité avant achat.'},
+  {id:'skmei-2056',compareWith:'skmei-1257',intent:'Montre numérique transparente',reason:'Un style numérique rétro et un boîtier transparent très distinctif.',caution:'Pas de fiche Amazon.fr achetable et vérifiée pour la variante proposée ; contrôler les résultats de recherche.'},
+  {id:'skmei-2256',compareWith:'pagani-pd1776',intent:'Montre analogique acier accessible',reason:'Une allure acier sobre avec guichet date, pour comparer un modèle analogique économique.',caution:'Les 3 bar annoncés ne conviennent pas à la natation ; confirmer la finition.'},
+  {id:'skmei-2514',compareWith:'casio-f91w-1',intent:'Style rétro numérique sur acier',reason:'Un design de montre numérique rétro avec bracelet acier documenté dans la fiche vendeur.',caution:'Confirmer les dimensions et la couleur du modèle exact avant commande.'},
+  {id:'casio-f91w-1',compareWith:'skmei-1257',intent:'Numérique minimaliste et classique',reason:'Une référence Casio à affichage digital très identifiable pour un usage quotidien simple.',caution:'Contrôler la variante régionale F-91W-1YER et la disponibilité chez le marchand.'},
+  {id:'casio-ga-2100-1a1',compareWith:'casio-gw-m5610u-1',intent:'G-SHOCK sport à cadran sombre',reason:'Un design analogique-numérique sportif et un cadran noir distinctif.',caution:'Contrôler le code régional GA-2100-1A1ER sur la fiche commerçant.'},
+  {id:'casio-gw-m5610u-1',compareWith:'casio-ga-2100-1a1',intent:'G-SHOCK solaire et radiopilotée',reason:'Une alternative sportive au style numérique avec fonctions solaires et radiopilotées documentées.',caution:'Vérifier la variante régionale GW-M5610U-1ER, l’expédition et la garantie.'},
+  {id:'pagani-pd1776',compareWith:'skmei-2256',intent:'Boîtier compact et style soigné',reason:'Un format compact et un mouvement quartz annoncé pour une montre habillée polyvalente.',caution:'La recherche Amazon n’atteste pas que la variante exacte est proposée.'}
 ].map(x=>Object.freeze(x)));
 
 /**
@@ -36,6 +36,10 @@ export function buildCommercialShortlist({picks,verifiedLinks,partnerOffers,part
       if(typeof item[field]!=='string'||item[field].length<25||item[field].length>270)
         throw Error('Unusable commercial shortlist editorial field: '+item.id+'/'+field);
     }
+    const alternative=byId.get(item.compareWith);
+    if(!alternative||alternative.id===item.id
+      ||!/^[a-z0-9-]{4,64}$/.test(item.compareWith))
+      throw Error('Comparison target must be another documented supplemental model: '+item.id);
     const photo=approvedPhotos.get(item.id);
     const direct=verifiedLinks.get(item.id);
     const partner=partnerOffers.get(item.id);
@@ -59,6 +63,23 @@ export function buildCommercialShortlist({picks,verifiedLinks,partnerOffers,part
     const variantNotice=affiliatesEnabled&&direct?.marketplaceVariant
       ?'<p class="am-focus-variant"><strong>Variante de la fiche Amazon :</strong> '+e(direct.marketplaceVariant)+'</p>'
       :'';
+    // Buyer-verifiable evidence shown in the actual HTML, including without JS.
+    // Dates refer only to the source correspondence, never the live offer.
+    const evidenceKind=direct?.evidenceType==='amazon_fr_comparator_redirect'
+      ?'Comparateur + seconde source (Amazon.fr non consulté directement)'
+      :direct?'ASIN recoupé avec une fiche ou des sources Amazon.fr'
+        :partner?'Lien partenaire autorisé pour la référence'
+          :'Source constructeur ou vendeur, sans ASIN Amazon.fr identifié';
+    const evidenceStatus=direct?'Fiche Amazon identifiée':'Aucune fiche Amazon exacte confirmée';
+    const proof='<dl class="am-focus-evidence" aria-label="Éléments vérifiables pour '+e(watch.brand+' '+watch.model)+'">'
+      +'<div><dt>Accès</dt><dd>'+e(evidenceStatus)+'</dd></div>'
+      +'<div><dt>Origine</dt><dd>'+e(evidenceKind)+'</dd></div>'
+      +(direct?'<div><dt>Référence contrôlée</dt><dd>'+e(direct.verifiedAt)+' · ce n’est pas un contrôle du stock actuel</dd></div>':'')
+      +'<div><dt>Photo</dt><dd>'+(photo?'Photo locale du modèle · droits déclarés, non vérifiés indépendamment':'Photo exacte à consulter chez la marque ou le vendeur')+'</dd></div>'
+      +'</dl>';
+    const compareUrl='./toutes-les-montres.html?compare='+encodeURIComponent(item.id+','+alternative.id)+'#comparer';
+    const compareAction='<a class="am-focus-compare" href="'+e(compareUrl)+'" data-focus-compare="'+e(item.id)+'">'
+      +'Comparer avec '+e(alternative.brand+' '+alternative.model)+'</a>';
     return '<li class="am-focus-item" data-focus-id="'+e(item.id)+'">'
       +'<div class="am-focus-visual'+(photo?' am-focus-with-photo':'')+'">'
       +(photo?'<img src="../'+e(photo.url)+'" alt="Montre '+e(watch.brand+' '+watch.model)+'" loading="lazy" decoding="async" width="380" height="260">':
@@ -69,9 +90,9 @@ export function buildCommercialShortlist({picks,verifiedLinks,partnerOffers,part
       +'<p>'+e(item.reason)+'</p>'
       +'<p class="am-focus-caution"><strong>À vérifier :</strong> '+e(item.caution)+'</p>'
       +'<p class="am-focus-status">'+e(status)+'</p>'
-      +variantNotice
+      +proof+variantNotice
       +'<div class="am-focus-actions"><a class="am-focus-detail" href="./'+e(item.id)+'.html">Voir les caractéristiques et les sources</a>'
-      +'<div class="am-focus-merchant">'+merchantAction+'</div>'+alternativePartner+'</div>'
+      +compareAction+'<div class="am-focus-merchant">'+merchantAction+'</div>'+alternativePartner+'</div>'
       +'</div></li>';
   });
   const directCount=commercialShortlist.filter(p=>verifiedLinks.has(p.id)).length;
