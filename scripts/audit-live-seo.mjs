@@ -122,10 +122,23 @@ async function auditPage(url){
         'verified exact-model Amazon.fr destination missing');
       expect(html.includes('data-amazon-product="'+model.id+'"'),'direct product attribution missing');
       expect(!html.includes('data-amazon-search-id="'+model.id+'"'),'verified ASIN should not silently revert to a search');
+      expect(html.includes('data-amazon-product="'+model.id+'"'),'Amazon click must carry model ID');
+      if(direct.marketplaceVariant){
+        const escapeHtml=value=>String(value).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+          .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+        expect(html.includes(escapeHtml(direct.marketplaceVariant)),
+          'Exact Amazon marketplace variant warning missing from live product page');
+      }
+      if(direct.evidenceType==='amazon_fr_comparator_redirect')
+        expect(html.includes('fiche Amazon.fr non consultée directement'),
+          'Comparator-only evidence must never be presented as direct Amazon inspection');
+
     }else if(affiliateActive===true){
       expect(html.includes('data-amazon-search-id="'+model.id+'"'),'unverified model must use a labeled search');
       expect(!html.includes('data-amazon-product="'+model.id+'"'),'unverified model must not claim an exact ASIN');
       expect(html.includes('https://www.amazon.fr/s?k='),'Amazon.fr search destination missing');
+      expect(html.includes('Recherche Amazon.fr — modèle non garanti'),
+        'Amazon search must not be presented as an exact verified listing');
     }
     if(affiliateActive===true)expect(/rel="[^"]*sponsored/.test(html),'paid outbound link must be labeled sponsored');
   }
