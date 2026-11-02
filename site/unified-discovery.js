@@ -11,6 +11,7 @@
     ||!tray||!trayItems||!trayCount||!trayOpen||!trayClear||!catalogue
     ||!viewTools||!viewCompact||!viewLarge)return;
   const cards=[...root.querySelectorAll('article.ud-card[data-id]')];
+  const editorialOrder=new Map(cards.map((card,index)=>[card.dataset.id,index]));
   const node=(tag,text,cls)=>{
     const el=document.createElement(tag);
     if(text!==undefined&&text!==null)el.textContent=String(text);
@@ -21,8 +22,8 @@
     .toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
   const controls={q:$('udSearch'),brand:$('udBrand'),style:$('udStyle'),
     movement:$('udMovement'),tier:$('udTier'),size:$('udSize'),visual:$('udVisual'),
-    merchant:$('udMerchant')};
-  let watches=new Map(),selected=[],view='grid';
+    merchant:$('udMerchant'),sort:$('udSort')};
+  let watches=new Map(),selected=[],view='grid',currentSort=null;
   const validId=x=>typeof x==='string'&&/^[a-z0-9-]{4,64}$/.test(x);
   const matchSize=(p,value)=>{
     if(value==='all')return true;
@@ -45,12 +46,34 @@
     const query=new URLSearchParams();
     for(const [name,control] of Object.entries(controls)){
       const value=control.value;
-      if(value&&(name==='q'||value!=='all'))query.set(name,value.slice(0,100));
+      if(value&&(name==='q'||value!=='all')&&(name!=='sort'||value!=='essential'))
+        query.set(name,value.slice(0,100));
     }
     if(selected.length)query.set('compare',selected.join(','));
     if(view==='large')query.set('view','large');
     const next=location.pathname+(query.size?'?'+query.toString():'')+location.hash;
     history.replaceState(null,'',next);
+  };
+  const reorderCards=mode=>{
+    if(currentSort===mode)return;
+    const tiers={essential:0,signature:1,prestige:2};
+    const merchants={direct:0,search:1,official:2};
+    const rank=(p)=>merchants[p.merchantKind||'official'];
+    const ordered=[...cards].sort((a,b)=>{
+      const left=watches.get(a.dataset.id),right=watches.get(b.dataset.id);
+      const original=editorialOrder.get(left.id)-editorialOrder.get(right.id);
+      if(mode==='essential')return tiers[left.tier]-tiers[right.tier]
+        ||Number(Boolean(right.photoUrl))-Number(Boolean(left.photoUrl))
+        ||rank(left)-rank(right)||original;
+      if(mode==='direct')return rank(left)-rank(right)
+        ||tiers[left.tier]-tiers[right.tier]||original;
+      if(mode==='photo')return Number(Boolean(right.photoUrl))-Number(Boolean(left.photoUrl))
+        ||tiers[left.tier]-tiers[right.tier]||original;
+      if(mode==='alpha')return (left.brand+' '+left.model).localeCompare(right.brand+' '+right.model,'fr')||original;
+      return original;
+    });
+    root.replaceChildren(...ordered);
+    currentSort=mode;
   };
   const render=()=>{
     const q=normalized(controls.q.value),brand=controls.brand.value,
@@ -74,6 +97,7 @@
       card.hidden=!ok;
       if(ok)visible++;
     }
+    reorderCards(controls.sort.value);
     status.textContent=visible+' modèle'+(visible===1?'':'s')+' sur '+cards.length;
     empty.hidden=visible!==0;
     persist();
