@@ -229,4 +229,24 @@ assert.equal(verifyCjOrderDetail(persisted,{
   ...cjDetail,trackingUrl:'javascript:alert(1)'
 },customer).trackingUrl,null,'Reject unsafe external tracking URLs');
 
+
+// A lost createOrderV2 HTTP response must be recovered via CJ GET by our
+// original merchant orderNumber, with no new POST or balance payment.
+let recoveryReads=0;
+const recoveredByMerchantReference=await fetchCjOrder({
+  orderId:order.id,accessToken:'a'.repeat(40),
+  fetcher:async(url,options)=>{
+    recoveryReads++;
+    assert.equal(options.method,'GET');
+    assert.equal(url,'https://developers.cjdropshipping.com/api2.0/v1/shopping/order/getOrderDetail?orderId='+order.id);
+    assert.ok(!('body' in options),'Supplier recovery must never send purchase data');
+    return {ok:true,json:async()=>({
+      code:200,result:true,data:{...cjDetail,orderNum:'SD_CJ_INTERNAL_NUMBER'}
+    })};
+  }
+});
+assert.equal(recoveryReads,1);
+assert.equal(recoveredByMerchantReference.orderId,persisted.supplier_order_id);
+assert.equal(verifyCjOrderDetail(persisted,recoveredByMerchantReference,customer).next,'SHIPPED');
+
 console.log('Independent commerce checks OK: encrypted address, checkout safety, CJ balance, exact shipping, paid submission and ambiguous-cost refusal');
