@@ -223,6 +223,8 @@ if(manifest.affiliateActive){
     assert.ok(card.includes('https://www.amazon.fr/dp/'+asin+'?tag=drackk04-21'),
       'Only the source-backed exact ASIN and current owner tag may be featured: '+id);
     assert.match(card,/rel="noopener noreferrer nofollow sponsored"/);
+    assert.ok(card.includes('data-amazon-placement="showroom"'),
+      'Four new buy-now links must be attributable to their actual homepage placement');
   }
   assert.ok(affordableHtml.includes('data-affordable-proof="comparator"')
     &&affordableHtml.includes('La page Amazon.fr n’a pas été consultée directement'),
