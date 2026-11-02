@@ -239,6 +239,7 @@ import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
   collection=collection.replace(/<!-- AM_SEO_LINKS_START -->[\s\S]*?<!-- AM_SEO_LINKS_END -->\s*/g,'');
   collection=collection.replace(/<!-- AM_SEO_GUIDES_START -->[\s\S]*?<!-- AM_SEO_GUIDES_END -->\s*/g,'');
   collection=collection.replace(/<!-- AM_POPULAR_PICKS_START -->[\s\S]*?<!-- AM_POPULAR_PICKS_END -->\s*/g,'');
+  collection=collection.replace(/<!-- AM_AFFORDABLE_SHOWROOM_START -->[\s\S]*?<!-- AM_AFFORDABLE_SHOWROOM_END -->\s*/g,'');
   collection=collection.replace(/<!-- AM_SEO_COMPARISONS_START -->[\s\S]*?<!-- AM_SEO_COMPARISONS_END -->\s*/g,'');
   collection=collection.replace(/<!-- AM_SEO_CATEGORIES_START -->[\s\S]*?<!-- AM_SEO_CATEGORIES_END -->\s*/g,'');
   collection=collection.replace(/<!-- AM_SEO_HEAD_START -->[\s\S]*?<!-- AM_SEO_HEAD_END -->/g,'');
@@ -255,6 +256,13 @@ import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
   collection=collection.replace(/<!-- AM_UNIFIED_DISCOVERY_START -->[\s\S]*?<!-- AM_UNIFIED_DISCOVERY_END -->/g,'');
   collection=collection.replace('<section class="aff-advisor-teaser" aria-labelledby="advisorTeaserTitle">',
     '<!-- AM_UNIFIED_DISCOVERY_START --><div class="wrap" style="padding-block:16px"><a class="button" href="./montres/toutes-les-montres.html">Explorer et comparer les 52 montres documentées →</a></div><!-- AM_UNIFIED_DISCOVERY_END --><section class="aff-advisor-teaser" aria-labelledby="advisorTeaserTitle">');
+  // Put the four actual photographed economical models directly after the
+  // cover scene, rather than burying the paid/source options below 15 cards.
+  if(!collection.includes('<section id="gammes" class="aff-tiers">'))
+    throw Error('Accessible watch showroom insertion point missing from homepage');
+  collection=collection.replace('<section id="gammes" class="aff-tiers">',
+    '<!-- AM_AFFORDABLE_SHOWROOM_START -->'+popularPicks.budgetShowcase
+    +'<!-- AM_AFFORDABLE_SHOWROOM_END -->\n<section id="gammes" class="aff-tiers">');
   collection=collection.replace('<section class="am-editorial-gallery" id="amEditorialGallery"', '<!-- AM_POPULAR_PICKS_START -->'+popularPicks.teaser+'<!-- AM_POPULAR_PICKS_END -->\n<section class="am-editorial-gallery" id="amEditorialGallery"');
   collection=collection.replace('<section class="am-editorial" id="histoire"', '<!-- AM_SEO_GUIDES_START -->'+guideCards+'<!-- AM_SEO_GUIDES_END -->\n<!-- AM_SEO_CATEGORIES_START -->'+collections.homeCards+'<!-- AM_SEO_CATEGORIES_END -->\n<!-- AM_SEO_COMPARISONS_START -->'+comparisons.comparisonCards+'<!-- AM_SEO_COMPARISONS_END -->\n<section class="am-editorial" id="histoire"');
   collection=collection.replace(/<title>[^<]+<\/title>/,'<title>52 montres homme et femme à découvrir | Atelier Montres</title>');
