@@ -59,6 +59,10 @@ CREATE TABLE IF NOT EXISTS commerce_orders (
   offer_id text NOT NULL REFERENCES commerce_offers(id),
   product_label text NOT NULL,
   amount_eur_cents integer NOT NULL CHECK (amount_eur_cents>0),
+  vat_rate_bps_snapshot integer NOT NULL DEFAULT -1,
+  supplier_landed_eur_ceiling_cents integer NOT NULL DEFAULT 0,
+  promised_delivery_min_business_days smallint NOT NULL DEFAULT 0,
+  promised_delivery_max_business_days smallint NOT NULL DEFAULT 0,
   supplier_vid text NOT NULL,
   supplier_max_usd_cents integer NOT NULL CHECK (supplier_max_usd_cents>0),
   logistics_name text NOT NULL,
@@ -82,6 +86,17 @@ CREATE TABLE IF NOT EXISTS commerce_orders (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
+-- Contractual price/tax, supplier ceiling and shipping promise are immutable
+-- snapshots per order, independent of later offer price updates.
+ALTER TABLE commerce_orders ADD COLUMN IF NOT EXISTS
+  vat_rate_bps_snapshot integer NOT NULL DEFAULT -1;
+ALTER TABLE commerce_orders ADD COLUMN IF NOT EXISTS
+  supplier_landed_eur_ceiling_cents integer NOT NULL DEFAULT 0;
+ALTER TABLE commerce_orders ADD COLUMN IF NOT EXISTS
+  promised_delivery_min_business_days smallint NOT NULL DEFAULT 0;
+ALTER TABLE commerce_orders ADD COLUMN IF NOT EXISTS
+  promised_delivery_max_business_days smallint NOT NULL DEFAULT 0;
+
 CREATE INDEX IF NOT EXISTS commerce_orders_supplier_queue ON commerce_orders(status,created_at)
   WHERE status IN ('PAID','SUPPLIER_SUBMITTED');
 CREATE INDEX IF NOT EXISTS commerce_orders_created ON commerce_orders(created_at);
