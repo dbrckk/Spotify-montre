@@ -1,5 +1,13 @@
 # Atelier Montres — boutique de montres indépendante
 
+## Vente directe : préparation Shopify + CJ, sans connexion Stripe — 2 novembre 2026
+
+La boutique Shopify liée est encore en **essai** et ne comporte **aucun produit commercial enregistré** lors de l'audit. **Ne pas ouvrir un checkout public** : le compte Shopify Payments, les offres fournisseurs, le règlement automatique et les obligations vendeur ne sont pas validés. Les 52 montres et les liens d'affiliation actuels doivent rester disponibles.
+
+**Stratégie prioritaire :** conserver Render pour le comparateur, puis ne proposer un achat via Shopify Payments et un **Shopify Buy Button** que pour 2–3 variantes réelles, avec CJdropshipping comme candidat au paiement fournisseur par solde autorisé et vérifié. Shopify Collective ne prend pas en charge une boutique située en France à la date de vérification ; le parcours AliExpress + DSers exige encore un paiement fournisseur manuel dans le cas courant.
+
+**[Décision détaillée, preuves, conditions d'activation et workflow](docs/VENTE_DIRECTE_SHOPIFY_CJ_SANS_STRIPE_2026-11-02.md)**. Contrôle économique en centimes entiers : `npm run commerce:quote -- chemin/vers/devis-reel.json` (aucun devis fictif prérempli, aucune donnée client stockée). La réussite de ce contrôle ne permet jamais à elle seule d'encaisser.
+
 ## Démarrer l'affiliation Awin depuis Android — 1er novembre 2026
 
 **[Guide d'inscription Awin, URL du site, candidatures AliExpress et ADDIESDIVE, dépôt de garantie et vérification légale](docs/guide-inscription-awin-android-2026-11-01.md)**. Le site contient 52 montres, mais **les mentions légales de l'éditeur restent incomplètes** ; le statut et les coordonnées réels doivent être fournis avant de prétendre être entièrement prêt à la validation commerciale. Les coordonnées de l'hébergeur Render sont désormais sourcées. `npm run publisher:preflight` affiche les étapes manquantes, `npm run publisher:strict` refuse l'état « prêt » tant que les justificatifs nécessaires sont absents. Aucune inscription Awin ni commission supplémentaire n'est présumée.
