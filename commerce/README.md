@@ -128,6 +128,8 @@ non payé, la commande reste en `EXCEPTION` avec son ID fournisseur pour
 traitement humain (aucun débit automatique du wallet). Si CJ confirme son
 règlement puis son expédition, le suivi reprend sans achat supplémentaire.
 
+Même si les **nouvelles ventes sont mises en pause** (`COMMERCE_ENABLED=false`), les vérifications en lecture seule des paiements, du suivi et des commandes fournisseurs existantes continuent tant que leurs clés sont disponibles ; aucun débit fournisseur nouveau ne peut partir pendant cette pause.
+
 Au maximum **12 vérifications espacées d'au moins 10 minutes** ;
 `SUPPLIER_RECOVERY_EXHAUSTED` est journalisé si aucune correspondance fiable
 n'a été trouvée. Une réponse CJ inaccessible ou ambiguë n'est jamais une
