@@ -1,3 +1,4 @@
+import {createHash} from 'node:crypto';
 /*
  * Atelier Montres — transport de paiement hébergé Mollie pour notre propre site.
  * Bibliothèque SERVEUR uniquement : ne jamais l'importer depuis site/.
@@ -65,7 +66,8 @@ export async function createHostedPayment({apiKey,orderId,amountCents,descriptio
     metadata:{order_id:orderId}
   };
   const res=await fetcher(API,{method:'POST',redirect:'error',
-    headers:{'Authorization':'Bearer '+apiKey,'Content-Type':'application/json','Accept':'application/json'},
+    headers:{'Authorization':'Bearer '+apiKey,'Content-Type':'application/json','Accept':'application/json',
+      'Idempotency-Key':createHash('sha256').update('atelier-montres:mollie:'+orderId).digest('hex')},
     body:JSON.stringify(payload),signal:AbortSignal.timeout(10000)});
   const p=await responseJson(res);
   if(!PAYMENT.test(p.id||'')||p.mode!==expectedMode||!belongs(p,orderId)||
