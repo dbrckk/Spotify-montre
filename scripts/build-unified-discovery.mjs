@@ -161,12 +161,18 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
     +'<div class="ud-feature-grid">'+featured.map(featureCard).join('')+'</div>'
     +'<p class="ud-showroom-note">Les photographies correspondent aux modèles présentés, selon les déclarations de droits de l’éditeur. Une fiche marchande identifiée ne garantit ni le stock ni la variante disponible. Les liens rémunérés sont signalés. Les achats partenaires sont conclus chez le vendeur externe ; une commande directe n’est possible que si un prix TTC et une disponibilité vérifiés sont explicitement affichés sur Atelier Montres.</p>'
     +'</section>';
+  const shortcuts='<nav class="ud-discovery-links" aria-label="Parcourir la collection selon votre envie">'
+    +'<a href="?brand=SKMEI#udCount"><span>01 / Marque</span><strong>Découvrir SKMEI ↗</strong></a>'
+    +'<a href="?movement=automatic#udCount"><span>02 / Mouvement</span><strong>Automatiques ↗</strong></a>'
+    +'<a href="?size=compact#udCount"><span>03 / Proportions</span><strong>Petits boîtiers ↗</strong></a>'
+    +'<a href="?visual=photo#udCount"><span>04 / Photographies</span><strong>Modèles photographiés ↗</strong></a>'
+    +'</nav>';
   const path='montres/toutes-les-montres.html';
   const main='<div class="wrap ud-page"><nav class="crumb" aria-label="Fil d’Ariane"><a href="../index.html">Accueil</a> / Les 52 montres</nav>'
     +'<header class="ud-heading"><span class="eyebrow">Un seul catalogue · 52 références réelles</span>'
     +'<h1>52 montres à découvrir et comparer.</h1><p>Des digitales SKMEI accessibles aux belles mécaniques. Explorez toutes nos références documentées, sans prix inventé ni classement commercial fictif.</p>'
-    +'<p class="ud-disclosure">Atelier Montres est un guide indépendant : aucun achat ni paiement ici. Chaque fiche donne accès à la référence chez sa marque ou son vendeur source ; certains liens Amazon sont rémunérés. Une recherche Amazon ne garantit pas le modèle exact. Vérifiez toujours le vendeur, la variante, la livraison et le tarif avant de commander.</p></header>'
-    +showroom
+    +'<p class="ud-disclosure">Atelier Montres présente des références sourcées. Les liens Amazon, lorsqu’ils sont rémunérés, mènent au vendeur partenaire. La vente directement sur notre site ne sera proposée que pour les montres dont le prix TTC, la livraison et le fournisseur ont été vérifiés. Une recherche Amazon ne garantit pas la variante exacte : contrôlez toujours la référence avant achat.</p></header>'
+    +shortcuts+showroom
     +'<div class="ud-favorite-tools" id="udFavoriteTools" hidden><div><strong>Votre sélection, à votre rythme.</strong><p>Gardez vos modèles préférés sur cet appareil, puis comparez-les parmi les 52 montres.</p></div><button id="udSavedToggle" type="button" aria-pressed="false"><span aria-hidden="true">♡</span> <span id="udSavedButtonLabel">Voir mes favoris</span> <span class="ud-favorite-total">(<span id="udSavedCount">0</span>)</span></button></div>'
     +'<form id="udFilters" class="ud-filters" role="search" aria-label="Affiner les 52 montres" hidden>'
     +'<label>Recherche<input id="udSearch" type="search" maxlength="100" placeholder="Marque, modèle, caractéristiques…"></label>'
@@ -203,6 +209,6 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
   ]};
   writeFileSync(join(root,path),page(pageHead({title:'52 montres homme et femme à comparer | Atelier Montres',
     description:'Explorez 52 montres Casio, SKMEI, Citizen, Seiko et autres. Comparez style, mouvement, dimensions vérifiées et liens marchands sans faux prix.',path}),main,graph)
-    .replace('</head>','<link rel="stylesheet" href="../unified-discovery.css"><link rel="stylesheet" href="../photo-zoom.css"><script defer src="../photo-zoom.js"></script><link rel="stylesheet" href="../direct-offer-links.css"><script defer src="../unified-discovery.js"></script><script defer src="../direct-offer-links.js"></script></head>'));
+    .replace('</head>','<link rel="stylesheet" href="../unified-discovery.css"><link rel="stylesheet" href="../photo-zoom.css"><script defer src="../photo-zoom.js"></script><link rel="stylesheet" href="../direct-offer-links.css"><link rel="stylesheet" href="../editorial-atelier-2026.css"><script defer src="../unified-discovery.js"></script><script defer src="../direct-offer-links.js"></script></head>'));
   return {path,count:normalized.length,coreCount:coreProducts.length,supplementalCount:extras.length};
 }
