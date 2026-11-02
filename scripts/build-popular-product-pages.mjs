@@ -99,10 +99,10 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
     // Editorial comparison links are generated only for exact source-backed pairs.
     const duels=comparisonLinks.get(p.id)||[];
     const duelBlock=duels.length
-      ?'<div class="am-extra-duels"><h3>Comparer avant de choisir</h3><ul>'
-        +duels.map(item=>'<li><a href="./'+e(item.path.replace(/^montres\//,''))+'">'
-          +e(item.title)+'</a><small>Face à '+e(item.other)+' · faits et limites documentés</small></li>').join('')
-        +'</ul></div>'
+      ?'<div class="am-extra-duels"><h3>Comparer avant de choisir</h3><div class="am-extra-duel-grid">'
+        +duels.map(item=>'<div class="am-extra-duel-entry"><a href="./'+e(item.path.replace(/^montres\//,''))+'">'
+          +e(item.title)+'</a><small>Face à '+e(item.other)+' · faits et limites documentés</small></div>').join('')
+        +'</div></div>'
       :'';
     const main='<div class="wrap am-extra-page">'
       +'<nav class="crumb" aria-label="Fil d’Ariane"><a href="../index.html">Collection</a> / <a href="./modeles-populaires.html">'+products.length+' modèles complémentaires</a> / '+e(name)+'</nav>'
