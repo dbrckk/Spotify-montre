@@ -9,7 +9,10 @@ import {usdToCents} from './landed-cost.mjs';
  * Official contract:
  * https://developers.cjdropshipping.com/en/api/api2/api/shopping.html#1-7-query-order-get
  */
-export function verifyCjOrderDetail(order,detail){
+const normalizeAddress=s=>typeof s==='string'?s.normalize('NFC')
+  .trim().replace(/\\s+/g,' ').toLocaleLowerCase('fr-FR'):null;
+
+export function verifyCjOrderDetail(order,detail,customer){
   const invalid=message=>{throw Error('CJ fulfillment mismatch: '+message)};
   if(!order||!detail||typeof detail!=='object'||Array.isArray(detail))
     invalid('missing order or detail');
@@ -17,8 +20,18 @@ export function verifyCjOrderDetail(order,detail){
     invalid('merchant order id');
   if(!order.supplier_order_id||String(detail.orderId||'')!==String(order.supplier_order_id))
     invalid('CJ order id');
-  if(detail.shippingCountryCode!=='FR')
+  if(detail.shippingCountryCode!=='FR'||customer?.countryCode!=='FR')
     invalid('shipping destination country');
+  // A CJ order delivered to another address can never be called fulfilled.
+  // Compare the exact shipping snapshot with our encrypted customer record.
+  if(!normalizeAddress(customer.fullName)||!normalizeAddress(customer.address1)||
+    !normalizeAddress(customer.city)||
+    normalizeAddress(detail.shippingCustomerName)!==normalizeAddress(customer.fullName)||
+    normalizeAddress(detail.shippingAddress)!==normalizeAddress(customer.address1)||
+    normalizeAddress(detail.shippingCity)!==normalizeAddress(customer.city))
+    invalid('shipping recipient or delivery address');
+  if(detail.shippingZip&&detail.shippingZip!==customer.postalCode)
+    invalid('recipient postal code');
   if(detail.isSandbox!==0)
     invalid('sandbox or unverified live order');
   if(detail.currency!=='USD')
