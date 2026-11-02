@@ -110,7 +110,7 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
       +' data-movement="'+e(p.movement)+'" data-merchant="'+merchantType+'" data-visual="'+(p.photoUrl?'photo':'no-photo')+'" data-search="'+e([p.brand,p.model,p.description,p.lead,p.caseText,p.movement].join(' '))+'">'
       +'<div class="ud-media '+(p.photoUrl?'ud-media-verified':'ud-media-no-photo')+'">'
       +'<a class="ud-photo" href="'+e(p.detailUrl.replace('./montres/','./'))+'">'+photoMarkup(p)+'</a>'
-      +'<button type="button" class="ud-save" data-save-id="'+e(p.id)+'" aria-pressed="false" aria-label="Ajouter aux favoris : '+e(p.brand+' '+p.model)+'" hidden><span class="ud-save-heart" aria-hidden="true">♡</span><span class="ud-save-word">Favori</span></button>'
+      +'<button type="button" class="ud-save" data-save-id="'+e(p.id)+'" aria-pressed="false" aria-label="Favoris : ajouter '+e(p.brand+' '+p.model)+'" hidden><span class="ud-save-heart" aria-hidden="true">♡</span><span class="ud-save-word">Favoris</span></button>'
       +(p.photoUrl?'<button type="button" class="ud-zoom" data-zoom-id="'+e(p.id)+'" aria-label="Agrandir la photographie de '+e(p.brand+' '+p.model)+'" hidden><span aria-hidden="true">＋</span> Agrandir</button>':'')
       +'<span class="ud-visual-label">'+(p.photoUrl?'Photo du modèle':'Sans photo publiée')+'</span></div>'
       +'<div class="ud-card-main"><p class="ud-kicker">'+e(tierLabels[p.tier])+' · '+e(styleLabels[p.style])+'</p>'
