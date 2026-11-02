@@ -149,7 +149,7 @@ for(const pair of affordableDuels.comparisons){
       assert.ok(html.includes('data-amazon-product="'+p.id+'"'),'Amazon source tracking missing for '+p.id);
       assert.match(html,/rel="noopener noreferrer nofollow sponsored"/);
       if(amazonEntry.marketplaceVariant)
-        assert.ok(html.includes(amazonEntry.marketplaceVariant.replace(/&/g,'&amp;')),
+        assert.ok(html.includes(escapeEditorialHtml(amazonEntry.marketplaceVariant)),
           'Variant disclosures must not disappear on editorial duels: '+p.id);
       if(amazonEntry.evidenceType==='amazon_fr_comparator_redirect')
         assert.ok(html.includes('Amazon.fr non consulté directement'),
