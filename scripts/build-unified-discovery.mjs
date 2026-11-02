@@ -49,7 +49,7 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
       glass:p.specs?.glass||'Non documenté',water:p.specs?.waterResistance||'Non documenté',
       description:p.description,lead:p.story||p.description,caution:null,officialUrl:p.officialUrl,
       photoUrl:photo,detailUrl:'./montres/'+p.id+'.html',
-      merchantUrl:paid?.url||null,merchantKind:paid?'direct':null
+      merchantUrl:paid?.url||null,merchantKind:paid?'direct':null,marketplaceVariant:null
     });
   }
   for(const p of extras){
@@ -64,7 +64,8 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
       photoUrl:photo?safePath(p.id,'watches-popular'):null,
       detailUrl:'./montres/'+p.id+'.html',
       merchantUrl:affiliates.enabled?(verified?.url||'https://www.amazon.fr/s?k='+encodeURIComponent((p.brand+' '+p.model).slice(0,130))+'&tag='+encodeURIComponent(amazonPartnerTag)):null,
-      merchantKind:!affiliates.enabled?null:verified?'direct':'search'
+      merchantKind:!affiliates.enabled?null:verified?'direct':'search',
+      marketplaceVariant:verified?.marketplaceVariant||null
     });
   }
   if(normalized.length!==52||new Set(normalized.map(p=>p.id)).size!==52)
@@ -86,7 +87,19 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
     const merchantLabel={direct:'Fiche du modèle identifiée',search:'Recherche marchande · variante à confirmer',official:'Source externe · sans lien d’achat vérifié'}[merchantType];
     const merchant=p.merchantUrl
       ?'<a class="ud-merchant" target="_blank" rel="noopener noreferrer nofollow sponsored" aria-label="'+e((p.merchantKind==='direct'?'Voir cette référence sur Amazon.fr · lien rémunéré':'Rechercher sur Amazon.fr · lien rémunéré')+' — '+p.brand+' '+p.model+(p.merchantKind==='direct'?' ; fiche marchande identifiée':' ; vérifier la variante avant achat'))+'" data-amazon-'+(p.merchantKind==='direct'?'product':'search-id')+'="'+e(p.id)+'" data-amazon-placement="popular" href="'+e(p.merchantUrl)+'">'+(p.merchantKind==='direct'?'Voir cette référence sur Amazon.fr':'Rechercher sur Amazon.fr')+' · lien rémunéré</a>'
-      :'<a class="ud-merchant ud-merchant-official" target="_blank" rel="noopener noreferrer nofollow" href="'+e(p.officialUrl)+'">Voir la fiche fournisseur</a>';
+      :'';
+    // Every one of the 52 model cards must offer its model-specific source
+    // rather than forcing visitors to rely on a generic Amazon search.
+    // Neither link describes stock, shipping to France or an approved sale.
+    const sourceLabel='Vérifier la référence chez la marque ou le vendeur';
+    const source='<a class="ud-source" target="_blank" rel="noopener noreferrer nofollow"'
+      +' data-merchant-official-id="'+e(p.id)+'" data-merchant-placement="popular"'
+      +' aria-label="'+e(sourceLabel+' — '+p.brand+' '+p.model)+'"'
+      +' href="'+e(p.officialUrl)+'">'+e(sourceLabel)+'</a>';
+    const actions=p.merchantKind==='search'?source+merchant:merchant+source;
+    const variant=p.merchantKind==='direct'&&p.marketplaceVariant
+      ?'<p class="ud-exact-variant"><strong>Variante Amazon à vérifier :</strong> '+e(p.marketplaceVariant)+'</p>':'';
+
     return '<article class="ud-card" id="modele-'+e(p.id)+'" data-id="'+e(p.id)+'"'
       +' data-brand="'+e(p.brand)+'" data-tier="'+e(p.tier)+'" data-style="'+e(p.style)+'"'
       +' data-movement="'+e(p.movement)+'" data-merchant="'+merchantType+'" data-visual="'+(p.photoUrl?'photo':'no-photo')+'" data-search="'+e([p.brand,p.model,p.description,p.lead,p.caseText,p.movement].join(' '))+'">'
@@ -96,11 +109,12 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
       +'<span class="ud-visual-label">'+(p.photoUrl?'Photo du modèle':'Sans photo publiée')+'</span></div>'
       +'<div class="ud-card-main"><p class="ud-kicker">'+e(tierLabels[p.tier])+' · '+e(styleLabels[p.style])+'</p>'
       +'<p class="ud-merchant-kind">'+e(merchantLabel)+'</p>'
+      +variant
       +'<h2><a href="'+e(p.detailUrl.replace('./montres/','./'))+'">'+e(p.brand+' '+p.model)+'</a></h2>'
       +'<p class="ud-description">'+e(p.lead)+'</p>'
       +'<dl><div><dt>Mouvement</dt><dd>'+e(movementLabels[p.movement])+'</dd></div><div><dt>Boîtier</dt><dd>'+e(p.caseText)+'</dd></div></dl>'
       +'<div class="ud-actions"><a class="ud-details" href="'+e(p.detailUrl.replace('./montres/','./'))+'">Voir la fiche et les sources</a>'
-      +merchant+'</div>'
+      +actions+'</div>'
       +'<button type="button" class="ud-select" data-compare-id="'+e(p.id)+'" aria-pressed="false" hidden>Ajouter à la comparaison</button>'
       +'</div></article>';
   };
@@ -145,7 +159,7 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
   const main='<div class="wrap ud-page"><nav class="crumb" aria-label="Fil d’Ariane"><a href="../index.html">Accueil</a> / Les 52 montres</nav>'
     +'<header class="ud-heading"><span class="eyebrow">Un seul catalogue · 52 références réelles</span>'
     +'<h1>52 montres à découvrir et comparer.</h1><p>Des digitales SKMEI accessibles aux belles mécaniques. Explorez toutes nos références documentées, sans prix inventé ni classement commercial fictif.</p>'
-    +'<p class="ud-disclosure">Atelier Montres est un guide indépendant : aucun achat ni paiement ici. Certains liens Amazon sont rémunérés ; une recherche Amazon ne garantit pas le modèle exact. Vérifiez toujours le vendeur, la variante et le tarif avant de commander.</p></header>'
+    +'<p class="ud-disclosure">Atelier Montres est un guide indépendant : aucun achat ni paiement ici. Chaque fiche donne accès à la référence chez sa marque ou son vendeur source ; certains liens Amazon sont rémunérés. Une recherche Amazon ne garantit pas le modèle exact. Vérifiez toujours le vendeur, la variante, la livraison et le tarif avant de commander.</p></header>'
     +showroom
     +'<form id="udFilters" class="ud-filters" role="search" aria-label="Affiner les 52 montres" hidden>'
     +'<label>Recherche<input id="udSearch" type="search" maxlength="100" placeholder="Marque, modèle, caractéristiques…"></label>'
