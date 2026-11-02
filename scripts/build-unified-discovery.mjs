@@ -159,7 +159,7 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
     +'<h2 id="udSpotlightTitle">Six pièces à découvrir en premier.</h2></div>'
     +'<p>Rétro digital, cadran travaillé ou chronographe : six références choisies pour leur style et leurs caractéristiques documentées, sans classement de ventes inventé.</p></div>'
     +'<div class="ud-feature-grid">'+featured.map(featureCard).join('')+'</div>'
-    +'<p class="ud-showroom-note">Les photographies correspondent aux modèles présentés, selon les déclarations de droits de l’éditeur. Une fiche marchande identifiée ne garantit ni le stock ni la variante disponible. Les liens rémunérés sont signalés ; aucun paiement n’est encaissé sur ce site.</p>'
+    +'<p class="ud-showroom-note">Les photographies correspondent aux modèles présentés, selon les déclarations de droits de l’éditeur. Une fiche marchande identifiée ne garantit ni le stock ni la variante disponible. Les liens rémunérés sont signalés. Les achats partenaires sont conclus chez le vendeur externe ; une commande directe n’est possible que si un prix TTC et une disponibilité vérifiés sont explicitement affichés sur Atelier Montres.</p>'
     +'</section>';
   const path='montres/toutes-les-montres.html';
   const main='<div class="wrap ud-page"><nav class="crumb" aria-label="Fil d’Ariane"><a href="../index.html">Accueil</a> / Les 52 montres</nav>'

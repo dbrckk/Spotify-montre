@@ -52,6 +52,12 @@
       output('amOrderProduct').textContent=String(data.product||'Modèle non disponible').slice(0,180);
       output('amOrderAmount').textContent=Number.isSafeInteger(data.amountCents)?
         new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR'}).format(data.amountCents/100):'Non disponible';
+      const eta=output('amOrderDelivery');
+      if(eta)eta.textContent=Number.isSafeInteger(data.deliveryMinDays)
+        &&Number.isSafeInteger(data.deliveryMaxDays)
+        &&data.deliveryMinDays>0&&data.deliveryMaxDays>=data.deliveryMinDays
+        ?data.deliveryMinDays+' à '+data.deliveryMaxDays+' jours ouvrés après paiement'
+        :'Délai contractuel à confirmer avec le vendeur';
       const shipping=output('amOrderShipping');
       shipping.replaceChildren();
       if(typeof data.trackingNumber==='string'&&data.trackingNumber){

@@ -1,4 +1,5 @@
 import pg from 'pg';
+import {validateCommercialCeiling} from './landed-cost.mjs';
 import {readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {ClientError,digest,hmac,newOrderId,newPublicToken,sealAddress,sameHash,checkoutFingerprint} from './security.mjs';
@@ -21,11 +22,23 @@ export async function transaction(pool,run){
 }
 export async function listApprovedOffers(pool){
   const {rows}=await pool.query(`
-    SELECT id,label,amount_eur_cents AS "amountCents" FROM commerce_offers
+    SELECT id,label,amount_eur_cents AS "amountCents",
+      delivery_min_business_days AS "deliveryMinDays",
+      delivery_max_business_days AS "deliveryMaxDays"
+    FROM commerce_offers
     WHERE approved=true AND stock_confirmed=true AND legal_verified=true
       AND eu_compliance_verified=true AND photo_rights_verified=true
       AND supplier_payment_verified=true AND verified_until > now()
-      AND amount_eur_cents >= unit_cost_eur_cents + reserves_eur_cents
+      AND supplier_landed_eur_ceiling_cents > 0
+      AND supplier_landed_eur_ceiling_cents >= unit_cost_eur_cents
+      AND tax_treatment_verified=true AND supplier_fx_verified=true
+      AND return_policy_verified=true AND gpsr_traceability_verified=true
+      AND data_transfer_verified=true
+      AND delivery_min_business_days BETWEEN 1 AND 90
+      AND delivery_max_business_days BETWEEN delivery_min_business_days AND 120
+      AND vat_rate_bps BETWEEN 0 AND 3000
+      AND round(amount_eur_cents * 10000.0 / (10000+vat_rate_bps))*3
+          >= (supplier_landed_eur_ceiling_cents+reserves_eur_cents)*4
     ORDER BY label LIMIT 30
   `);
   return rows;
@@ -33,12 +46,21 @@ export async function listApprovedOffers(pool){
 export async function getApprovedOffer(pool,offerId){
   const {rows}=await pool.query(`
     SELECT id,label,amount_eur_cents,supplier_vid,supplier_max_usd_cents,
-      logistics_name,from_country_code
+      logistics_name,from_country_code,delivery_min_business_days,delivery_max_business_days
     FROM commerce_offers WHERE id=$1 AND approved=true
       AND stock_confirmed=true AND legal_verified=true
       AND eu_compliance_verified=true AND photo_rights_verified=true
       AND supplier_payment_verified=true AND verified_until>now()
-      AND amount_eur_cents > unit_cost_eur_cents + reserves_eur_cents LIMIT 1
+      AND supplier_landed_eur_ceiling_cents > 0
+      AND supplier_landed_eur_ceiling_cents >= unit_cost_eur_cents
+      AND tax_treatment_verified=true AND supplier_fx_verified=true
+      AND return_policy_verified=true AND gpsr_traceability_verified=true
+      AND data_transfer_verified=true
+      AND delivery_min_business_days BETWEEN 1 AND 90
+      AND delivery_max_business_days BETWEEN delivery_min_business_days AND 120
+      AND vat_rate_bps BETWEEN 0 AND 3000
+      AND round(amount_eur_cents * 10000.0 / (10000+vat_rate_bps))*3
+          >= (supplier_landed_eur_ceiling_cents+reserves_eur_cents)*4 LIMIT 1
   `,[offerId]);
   return rows[0]||null;
 }
@@ -61,12 +83,22 @@ export async function reserveCheckout(pool,request,{encryptionKey,idempotencySec
       AND stock_confirmed=true AND legal_verified=true AND eu_compliance_verified=true
       AND photo_rights_verified=true AND supplier_payment_verified=true
       AND verified_until>now()
+      AND supplier_landed_eur_ceiling_cents > 0
+      AND supplier_landed_eur_ceiling_cents >= unit_cost_eur_cents
+      AND tax_treatment_verified=true AND supplier_fx_verified=true
+      AND return_policy_verified=true AND gpsr_traceability_verified=true
+      AND data_transfer_verified=true
+      AND delivery_min_business_days BETWEEN 1 AND 90
+      AND delivery_max_business_days BETWEEN delivery_min_business_days AND 120
+      AND vat_rate_bps BETWEEN 0 AND 3000
+      AND round(amount_eur_cents * 10000.0 / (10000+vat_rate_bps))*3
+          >= (supplier_landed_eur_ceiling_cents+reserves_eur_cents)*4
       FOR UPDATE
     `,[request.offerId]);
     const offer=result.rows[0];
     if(!offer)throw new ClientError('Cette montre n’est pas disponible pour un achat direct',409);
-    if(offer.amount_eur_cents < offer.unit_cost_eur_cents + offer.reserves_eur_cents)
-      throw new ClientError('Offre commercialement indisponible',409);
+    try{validateCommercialCeiling(offer)}
+    catch{throw new ClientError('Offre commercialement indisponible',409)}
     // A single pilot purchase at a time per supplier SKU prevents overselling
     // during payment and fulfillment. The row lock on commerce_offers serializes reservations.
     const active=await client.query(`
@@ -80,11 +112,15 @@ export async function reserveCheckout(pool,request,{encryptionKey,idempotencySec
       INSERT INTO commerce_orders (
         id,public_token_hash,idempotency_hash,request_hash,offer_id,product_label,
         amount_eur_cents,supplier_vid,supplier_max_usd_cents,logistics_name,
-        from_country_code,address_encrypted,status
-      ) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,'PAYMENT_CREATING')
+        from_country_code,address_encrypted,vat_rate_bps_snapshot,
+        supplier_landed_eur_ceiling_cents,promised_delivery_min_business_days,
+        promised_delivery_max_business_days,status
+      ) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,'PAYMENT_CREATING')
     `,[orderId,digest(token),idempotencyHash,requestHash,offer.id,offer.label,
        offer.amount_eur_cents,offer.supplier_vid,offer.supplier_max_usd_cents,
-       offer.logistics_name,offer.from_country_code,sealAddress(request.customer,encryptionKey)]);
+       offer.logistics_name,offer.from_country_code,sealAddress(request.customer,encryptionKey),
+       offer.vat_rate_bps,offer.supplier_landed_eur_ceiling_cents,
+       offer.delivery_min_business_days,offer.delivery_max_business_days]);
     await client.query('INSERT INTO commerce_events(order_id,event_type) VALUES($1,$2)',[orderId,'ORDER_RESERVED']);
     return {orderId,token,amountCents:offer.amount_eur_cents,description:offer.label};
   });
@@ -113,13 +149,16 @@ export async function getOrderForStatus(pool,id,token){
     throw new ClientError('Accès à la commande non autorisé',403);
   const {rows}=await pool.query(`
     SELECT id,status,product_label,amount_eur_cents,public_token_hash,
-      tracking_number,tracking_url,created_at FROM commerce_orders WHERE id=$1 LIMIT 1
+      tracking_number,tracking_url,promised_delivery_min_business_days,
+      promised_delivery_max_business_days,created_at FROM commerce_orders WHERE id=$1 LIMIT 1
   `,[id]);
   if(!rows[0]||!sameHash(rows[0].public_token_hash,digest(token)))
     throw new ClientError('Accès à la commande non autorisé',403);
   const o=rows[0];
   return {orderId:o.id,status:o.status,product:o.product_label,
     amountCents:o.amount_eur_cents,trackingNumber:o.tracking_number||null,
+    deliveryMinDays:o.promised_delivery_min_business_days,
+    deliveryMaxDays:o.promised_delivery_max_business_days,
     trackingUrl:o.tracking_url||null,createdAt:o.created_at};
 }
 export async function recordPaymentStatus(pool,orderId,verified){

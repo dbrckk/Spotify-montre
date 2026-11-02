@@ -1,5 +1,24 @@
 # Atelier Montres — moteur de commandes directes
 
+**Plan directeur :** [vente directe entièrement automatisée](../docs/ROADMAP_VENTE_DIRECTE_AUTOMATISEE_2026-11-02.md).
+
+### Nouvelles conditions de publication obligatoires (novembre 2026)
+
+Un SKU ne peut apparaître dans `GET /api/offers` ni être commandé sans :
+- plafond de coût fournisseur **livré tout compris** exprimé en EUR (`supplier_landed_eur_ceiling_cents`) avec risque de change documenté (`supplier_fx_verified`) ;
+- régime TVA vendeur vérifié (`vat_rate_bps` et `tax_treatment_verified`) ; **marge contributive d'au moins 25 % du revenu net de TVA**, après réserves ;
+- stock, fournisseur, données produits et variante exacte, photo autorisée, dossier de conformité/traçabilité GPSR ;
+- politique retours, garanties et transferts de données fournisseur validés ;
+- délai annoncé de livraison en jours ouvrés, entre 1 et 120, avec valeur mini et maxi cohérentes ;
+- devis `verified_until` non expiré et compte/paiement fournisseur automatisable.
+
+Le fournisseur CJ fournit les montants en USD. Quand `totalPostageFee` est disponible, il **inclut déjà les frais de dédouanement, taxes et droits** selon la documentation CJ ; ne jamais les additionner une seconde fois. En l'absence de ventilation taxes/tariff, ne pas présumer zéro. La conversion USD vers le plafond EUR et sa réserve de volatilité doivent être vérifiées avant approbation de l'offre.
+
+Ces champs arrivent sur Neon via une migration SQL **sans perte** exécutée au prochain démarrage de l'API ; les offres existantes non qualifiées deviennent non achetables, même si le drapeau marchand est actif. Le prix, taux TVA et délai de livraison sont enregistrés dans chaque commande au moment de la vente, indépendamment des évolutions du catalogue.
+
+**Une base initialisée sans offre = fonctionnement attendu.** Ne créer ni SKU, ni prix ou droits fictifs pour « débloquer » l'achat. Une commande client ne doit pas être autorisée pendant l'attente de CGV validées ou d'un prestataire marchand réel.
+
+
 Ce service est **indépendant des plateformes de boutique**. Il ne remplace pas la vitrine
 [Atelier Montres](https://atelier-montres-selection-fr.onrender.com/) : celle-ci reste hébergée
 sur Render statique avec le catalogue 52 montres et ses liens d'affiliation.

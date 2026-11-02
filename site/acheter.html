@@ -26,8 +26,8 @@
 <form id="amDirectForm" hidden>
 <label for="amDirectOffers">Modèle disponible</label>
 <select id="amDirectOffers" name="offerId" required></select>
-<strong id="amDirectPrice" class="am-direct-price" aria-live="polite"></strong>
-<p class="am-direct-hint">Le prix affiché est TTC, livraison prévue en France métropolitaine incluse. Aucun frais supplémentaire non annoncé ne doit être imposé après le paiement.</p>
+<strong id="amDirectPrice" class="am-direct-price" aria-live="polite"></strong><p id="amDirectDelivery" class="am-direct-delivery" aria-live="polite"></p>
+<p class="am-direct-hint">Prix total TTC pour la France métropolitaine, frais de livraison annoncés inclus. Le délai indiqué dépend de la référence sélectionnée. Aucun paiement ne doit être demandé sans confirmation de ces conditions.</p>
 <div class="am-direct-fields">
 <label>Nom complet<input name="fullName" autocomplete="name" maxlength="50" minlength="3" required></label>
 <label>Adresse e-mail<input name="email" type="email" autocomplete="email" maxlength="120" required></label>

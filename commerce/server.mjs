@@ -16,8 +16,25 @@ const idempotencySecret=process.env.IDEMPOTENCY_SECRET||'';
 const backendUrl=process.env.COMMERCE_PUBLIC_URL||'';
 const rawCap=Number(process.env.CJ_DAILY_CAP_USD_CENTS||0);
 const dailyCap=Number.isSafeInteger(rawCap)&&rawCap>0?rawCap:0;
-let pool=null,dbReady=false,workerBusy=false,lastExceptionAlertAt=0;
+let pool=null,dbReady=false,dbConnectBusy=false,workerBusy=false,
+  lastExceptionAlertAt=0,lastDatabaseAlertAt=0;
 
+async function ensureDatabase(){
+  if(dbReady||dbConnectBusy||!process.env.DATABASE_URL)return;
+  dbConnectBusy=true;
+  try{
+    if(!pool)pool=createDatabase(process.env.DATABASE_URL);
+    await initializeDatabase(pool);
+    dbReady=true;
+    console.log('commerce_database_ready');
+  }catch{
+    dbReady=false;
+    if(Date.now()-lastDatabaseAlertAt>15*60*1000){
+      lastDatabaseAlertAt=Date.now();
+      console.error('commerce_database_unavailable_will_retry');
+    }
+  }finally{dbConnectBusy=false;}
+}
 function safeHttps(u){
   try{const p=new URL(u);return p.protocol==='https:'&&!p.username&&!p.password&&!p.hash&&p.pathname==='/'&&p.search==='' }
   catch{return false}
@@ -49,9 +66,11 @@ async function reconcilePayment(paymentId){
   return recordPaymentStatus(pool,existing.id,verified);
 }
 async function supplierWork(){
-  if(workerBusy||!dbReady||!pool)return;
+  if(workerBusy)return;
   workerBusy=true;
   try{
+    await ensureDatabase();
+    if(!dbReady||!pool)return;
     const supplierStale=await quarantineStaleSupplierAttempts(pool);
     const paymentStale=await quarantineStalePaymentCreation(pool);
     if(supplierStale.length||paymentStale.length)
@@ -104,7 +123,7 @@ async function supplierWork(){
         await recordSupplierDetail(pool,row.id,detail);
       }catch{console.error('supplier_status_reconciliation_requires_review',row.id)}
     }
-  }catch{console.error('commerce_worker_unavailable')}
+  }catch{dbReady=false;console.error('commerce_worker_unavailable_database_or_job_error')}
   finally{workerBusy=false;}
 }
 async function route(req,res){
@@ -171,14 +190,14 @@ async function route(req,res){
   return reply(res,404,{error:'Route inexistante'});
 }
 async function start(){
-  if(process.env.DATABASE_URL){
-    try{pool=createDatabase(process.env.DATABASE_URL);await initializeDatabase(pool);dbReady=true}
-    catch{dbReady=false;console.error('commerce_database_unavailable')}
-  }
+  await ensureDatabase();
   const port=Number(process.env.PORT||8787);
   const server=createServer((req,res)=>route(req,res).catch(error=>{
     const status=error instanceof ClientError?error.status:503;
-    if(status===503)console.error('commerce_request_failed');
+    if(status===503){
+      if(!(error instanceof ClientError))dbReady=false;
+      console.error('commerce_request_failed');
+    }
     if(!res.writableEnded)reply(res,status,{error:error instanceof ClientError?
       error.message:'Service temporairement indisponible'},cors(req));
   }));
@@ -187,7 +206,7 @@ async function start(){
   server.listen(port,'0.0.0.0',()=>console.log('commerce_api_listening',
     {port,checkoutEnabled:Boolean(merchantReady())}));
   const interval=setInterval(()=>supplierWork(),45000);interval.unref();
-  if(merchantReady())setImmediate(()=>supplierWork());
+  setImmediate(()=>supplierWork());
   const terminate=()=>{clearInterval(interval);server.close();pool?.end().catch(()=>{});};
   process.once('SIGTERM',terminate);process.once('SIGINT',terminate);
 }

@@ -30,7 +30,9 @@
       list=Array.isArray(data.offers)?data.offers.filter(x=>
         typeof x.id==='string'&&/^[a-z0-9-]{4,64}$/.test(x.id)&&
         typeof x.amountCents==='number'&&Number.isSafeInteger(x.amountCents)&&x.amountCents>0
-        &&typeof x.label==='string'):[];
+        &&typeof x.label==='string'&&
+        Number.isSafeInteger(x.deliveryMinDays)&&x.deliveryMinDays>=1&&
+        Number.isSafeInteger(x.deliveryMaxDays)&&x.deliveryMaxDays>=x.deliveryMinDays&&x.deliveryMaxDays<=120):[];
       if(!data.checkoutEnabled||!list.length)return show('Aucune montre n’est actuellement disponible en achat direct. Les liens partenaires restent accessibles.');
       const selected=new URLSearchParams(location.search).get('modele');
       const elements=list.map(item=>{
@@ -46,9 +48,13 @@
     }catch{return show('Le service marchand ne répond pas. Aucun paiement n’a été demandé.',true)}
   }
   const price=$('amDirectPrice');
+  const delivery=$('amDirectDelivery');
   function updatePrice(){
     const item=list.find(x=>x.id===offers.value);
     if(item&&price)price.textContent=euro(item.amountCents)+' TTC';
+    if(delivery)delivery.textContent=item?
+      'Délai de livraison annoncé : '+item.deliveryMinDays+' à '+item.deliveryMaxDays+
+      ' jours ouvrés après confirmation du paiement.':'Délai non vérifié';
   }
   offers.addEventListener('change',()=>{updatePrice();});
   form.addEventListener('submit',async ev=>{
