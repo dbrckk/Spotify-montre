@@ -41,7 +41,9 @@
       if(data.checkoutEnabled!==true||!Array.isArray(data.offers))return;
       offerMap=new Map(data.offers.filter(o=>o&&/^[a-z0-9-]{4,64}$/.test(o.id||'')&&
         Number.isSafeInteger(o.amountCents)&&o.amountCents>0&&
-        typeof o.label==='string'&&o.label.length>3).map(o=>[o.id,o]));
+        typeof o.label==='string'&&o.label.length>3&&
+        Number.isSafeInteger(o.deliveryMinDays)&&o.deliveryMinDays>=1&&
+        Number.isSafeInteger(o.deliveryMaxDays)&&o.deliveryMaxDays>=o.deliveryMinDays&&o.deliveryMaxDays<=120).map(o=>[o.id,o]));
       enrich();
       const gallery=document.getElementById('affGrid');
       if(gallery)new MutationObserver(enrich).observe(gallery,{childList:true});
