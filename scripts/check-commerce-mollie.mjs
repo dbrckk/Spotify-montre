@@ -49,6 +49,23 @@ assert.equal(paid.status,'paid');
 const pending=await verifyHostedPayment({apiKey,paymentId,orderId,amountCents,
   fetcher:async()=>json(payment('pending'))});
 assert.equal(pending.paid,false);
+const refunded=payment('paid');
+refunded.amountRefunded={currency:'EUR',value:'0.01'};
+const verifiedRefund=await verifyHostedPayment({
+  apiKey,paymentId,orderId,amountCents,fetcher:async()=>json(refunded)
+});
+assert.equal(verifiedRefund.reversed,true);
+assert.equal(verifiedRefund.paid,false,'partially refunded payment must never trigger fulfillment');
+const chargedBack=payment('paid');
+chargedBack.amountChargedBack={currency:'EUR',value:'39.90'};
+assert.equal((await verifyHostedPayment({
+  apiKey,paymentId,orderId,amountCents,fetcher:async()=>json(chargedBack)
+})).paid,false);
+const inconsistentRefund=payment('paid');
+inconsistentRefund.amountRefunded={currency:'USD',value:'1.00'};
+await assert.rejects(verifyHostedPayment({
+  apiKey,paymentId,orderId,amountCents,fetcher:async()=>json(inconsistentRefund)
+}),/Montant remboursement invalide/);
 for(const [label,mutate] of [
   ['wrong customer order',p=>{p.metadata.order_id='ord_fake123456789012';}],
   ['wrong amount',p=>{p.amount.value='0.01';}],
