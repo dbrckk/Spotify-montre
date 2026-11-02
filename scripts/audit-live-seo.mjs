@@ -95,7 +95,7 @@ async function auditPage(url){
     expect((html.match(/class="am-extra-fact"/g)||[]).length===4,'expected four model-specific facts');
     if(affiliateActive===true)expect(html.includes('En tant que Partenaire Amazon'),'affiliate disclosure absent');
     expect((html.match(/class="am-extra-related"/g)||[]).length===1,'internal comparison links absent');
-    const structured=html.match(/<script type="application\\/ld\\+json">([\\s\\S]*?)<\\/script>/);
+    const structured=html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
     expect(Boolean(structured),'Product structured data absent');
     if(structured){
       try{
