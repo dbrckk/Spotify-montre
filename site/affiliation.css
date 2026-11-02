@@ -91,7 +91,7 @@ body .aff-selection .am-compare-tray[hidden]{display:none}
 .am-catalogue-bridge{background:#f5f0e7;color:#213c2c;border-bottom:1px solid #e2d8c6}
 .am-catalogue-bridge-inner{display:flex;align-items:center;justify-content:space-between;gap:32px;padding-block:clamp(26px,4vw,48px)}
 .am-catalogue-bridge-inner>div:first-child{flex:1 1 490px;min-width:0}
-.am-catalogue-bridge .overline{margin:0 0 8px;color:#876c43}
+.am-catalogue-bridge .overline{margin:0 0 8px;color:#314a37;opacity:1}
 .am-catalogue-bridge h2{font:400 clamp(27px,3.4vw,45px)/1.12 Georgia,serif;letter-spacing:-.03em;margin:0 0 12px}
 .am-catalogue-bridge h2 em{font-style:italic;color:#647c60}
 .am-catalogue-bridge p:not(.overline){max-width:710px;font-size:15px;line-height:1.65;margin:0;color:#526055}
