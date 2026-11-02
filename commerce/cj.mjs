@@ -40,7 +40,7 @@ function usdCents(value){
 export async function preflightCjDelivery({vid,originCountry='CN',postalCode,
   logisticsName,maxSupplierUsdCents,accessToken,fetcher=fetch}){
   if(!/^[a-zA-Z0-9_-]{3,100}$/.test(vid||'')||!/^[A-Z]{2}$/.test(originCountry||'')
-    ||!/^[0-9]{5}$/.test(postalCode||'')||!/^[^\\r\\n]{3,50}$/.test(logisticsName||''))
+    ||!/^[0-9]{5}$/.test(postalCode||'')||!/^[^\r\n]{3,50}$/.test(logisticsName||''))
     throw Error('Supplier or delivery data invalid');
   if(!Number.isSafeInteger(maxSupplierUsdCents)||maxSupplierUsdCents<=0)throw Error('Supplier limit absent');
   const variant=await api('/product/variant/queryByVid?vid='+encodeURIComponent(vid),
