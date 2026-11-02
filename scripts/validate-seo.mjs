@@ -328,7 +328,7 @@ for(const watch of unified.products){
     assert.ok(watch.merchantKind==='direct','Only documented ASIN links may mention marketplace variant');
     assert.ok(card.includes('class="ud-exact-variant"'),
       'The Amazon variant must be disclosed at the listing level: '+watch.id);
-    assert.ok(card.includes(watch.marketplaceVariant.replace(/&/g,'&amp;')),
+    assert.ok(card.includes(watch.marketplaceVariant.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')),
       'The exact researched marketplace variant must be shown: '+watch.id);
   }
 
