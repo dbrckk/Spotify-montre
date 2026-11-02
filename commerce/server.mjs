@@ -70,6 +70,16 @@ async function supplierWork(){
     const order=await claimSupplierOrder(pool,{dailyCapUsdCents:dailyCap});
     if(order){
       try{
+        // Revalidate the customer's payment at the final irreversible boundary.
+        // A later refund or chargeback must stop the CJ wallet from being debited.
+        const payment=await verifyHostedPayment({
+          apiKey:mollieKey,paymentId:order.payment_id,
+          orderId:order.id,amountCents:order.amount_eur_cents
+        });
+        if(!payment.paid){
+          await recordPaymentStatus(pool,order.id,payment);
+          throw Error('Payment not settled immediately before supplier debit');
+        }
         const customer=openAddress(order.address_encrypted,encryptionKey);
         // The first stock/landed-cost check happened before taking payment.
         // Repeat immediately before committing the customer's paid order at CJ.
@@ -82,8 +92,9 @@ async function supplierWork(){
         const result=await submitCjBalanceOrder({order,customer,accessToken:cjToken});
         await recordSupplierAttempt(pool,order.id,result,null);
       }catch{
-        // This status intentionally stays blocked; no automatic duplicate payment to CJ.
-        await recordSupplierAttempt(pool,order.id,null,true);
+        // If a payment reversal already changed the order to EXCEPTION,
+        // do not overwrite it. If the provider failed, quarantine the attempt.
+        await recordSupplierAttempt(pool,order.id,null,true).catch(()=>{});
         console.error('supplier_order_requires_manual_reconciliation',order.id);
       }
     }
