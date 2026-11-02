@@ -91,6 +91,18 @@ try{
       assert.equal(exit.directTracking+exit.searchTracking,0);
     }
   }
+  for(const [id,asin] of [['skmei-1251','B072JTCP5H'],['casio-ae1200wh-1av','B0099M2IWI']]){
+    const card=phone.locator('#modele-'+id);
+    assert.equal(await card.getAttribute('data-merchant'),'direct',
+      'A source-matched ASIN redirect is a model-specific destination, not a generic search: '+id);
+    assert.equal(await card.locator('.ud-redirect-proof').count(),1,
+      'Comparator-based evidence must never be presented as a directly visited Amazon page: '+id);
+    assert.match(await card.locator('.ud-redirect-proof').innerText(),/non consultée directement/);
+    assert.match(await card.locator('.ud-exact-variant').innerText(),/Variante Amazon à vérifier/);
+    assert.equal(await card.locator('a[data-amazon-product]').getAttribute('href'),
+      'https://www.amazon.fr/dp/'+asin+'?tag=drackk04-21');
+    assert.equal(await card.locator('a[data-amazon-search-id]').count(),0);
+  }
   for(const id of ['addiesdive-ad2030','pagani-pd1701']){
     const item=phone.locator('#modele-'+id);
     assert.match(await item.locator('.ud-exact-variant').innerText(),/Variante Amazon à vérifier/,
