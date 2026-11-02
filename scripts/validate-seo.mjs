@@ -273,6 +273,30 @@ for(const watch of unified.products){
     'Card must reflect verified merchant destination type: '+watch.id);
   assert.ok(card.includes('class="ud-merchant-kind"'),
     'Card must explain its merchant-link confidence: '+watch.id);
+  assert.equal((card.match(/class="ud-source"/g)||[]).length,1,
+    'Exactly one documented vendor/manufacturer source on every unified card: '+watch.id);
+  assert.ok(card.includes('data-merchant-official-id="'+watch.id+'" data-merchant-placement="popular"'),
+    'Source must be model-attributed without claiming a paid referral: '+watch.id);
+  assert.ok(card.includes('href="'+watch.officialUrl.replace(/&/g,'&amp;')+'"'),
+    'The exact model URL must be preserved in the catalog card: '+watch.id);
+  const linkOrder=[...card.matchAll(/class="(ud-details|ud-source|ud-merchant)"/g)].map(m=>m[1]);
+  if(watch.merchantKind==='search')assert.deepEqual(linkOrder,
+    ['ud-details','ud-source','ud-merchant'],
+    'The exact reference source must precede non-exact Amazon searches: '+watch.id);
+  if(watch.merchantKind==='direct')assert.deepEqual(linkOrder,
+    ['ud-details','ud-merchant','ud-source'],
+    'Direct Amazon model and official source must both remain accessible: '+watch.id);
+  if(!watch.merchantKind)assert.deepEqual(linkOrder,
+    ['ud-details','ud-source'],
+    'Unpaid models must not claim an Amazon purchase link: '+watch.id);
+  if(watch.marketplaceVariant){
+    assert.ok(watch.merchantKind==='direct','Only documented ASIN links may mention marketplace variant');
+    assert.ok(card.includes('class="ud-exact-variant"'),
+      'The Amazon variant must be disclosed at the listing level: '+watch.id);
+    assert.ok(card.includes(watch.marketplaceVariant.replace(/&/g,'&amp;')),
+      'The exact researched marketplace variant must be shown: '+watch.id);
+  }
+
   if(watch.merchantKind==='search')assert.match(card,/Rechercher sur Amazon\.fr/,
     'A broad merchant search cannot masquerade as an exact offer: '+watch.id);
   if(watch.merchantKind===null)assert.ok(!card.includes('lien rémunéré</a>'),

@@ -38,6 +38,15 @@
 .ud-actions a,.ud-select{display:grid;place-items:center;text-align:center;min-height:44px;border-radius:4px;padding:10px 12px;text-decoration:none;font:700 12px/1.35 system-ui,sans-serif;cursor:pointer}
 .ud-details{background:#2c543d;color:#fff!important}
 .ud-merchant{border:1px solid #a9bcad;background:#f0f5ed;color:#235138!important}
+/* Source-first on unconfirmed Amazon searches: the reference is documented,
+   but an Amazon search result is neither an identified listing nor a stock claim. */
+.ud-source{border:1px solid #b0bba7;background:#fafcf7;color:#254c37!important}
+.ud-card[data-merchant="search"] .ud-source{border-color:#3e654b;background:#ebf3e9}
+.ud-card[data-merchant="search"] .ud-merchant{background:#fff9ef;border-color:#dcc9a4;color:#785829!important}
+.ud-exact-variant{margin:0;padding:10px 11px;background:#f8f4ed;border-left:3px solid #ac8856;color:#4d584d;font:400 11px/1.5 system-ui,sans-serif;overflow-wrap:anywhere}
+.ud-exact-variant strong{color:#3d4e3e}
+.ud-merchant:hover,.ud-source:hover{filter:brightness(.965)}
+
 .ud-select{width:100%;border:1px solid #c4cbbf;background:#fffdf7;color:#294934}
 .ud-select[aria-pressed=true]{border-color:#306045;background:#e2eee6}
 .ud-compare{margin:60px 0 30px;padding:25px;background:#f6f4ed;border-top:3px solid #4d7559;color:#2a4935}
