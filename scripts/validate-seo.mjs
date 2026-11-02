@@ -206,7 +206,7 @@ assert.match(skmei1257.marketplaceVariant,/1257 Black/,'Specific black variant m
 for(const [id,asin] of [['skmei-1257','B07B6ML1VJ'],['addiesdive-ad2030','B0DNK5TT6D'],['pagani-pd1701','B0C7QC653D']]){
   const proof=exactPopularLinks[id];
   assert.equal(proof.asin,asin,'Published ASIN must be independently documented: '+id);
-  assert.equal(proof.verifiedAt,'2026-11-01','New Amazon.fr proof must be dated: '+id);
+  assert.equal(proof.verifiedAt,id==='skmei-1257'?'2026-11-02':'2026-11-01','Each exact listing must retain its genuine verification date: '+id);
   assert.equal(proof.evidenceType,'amazon_fr_product_page','Source must be Amazon.fr detail listing: '+id);
   assert.ok(proof.evidenceListingTitle.includes(proof.marketplaceModel),'Amazon title must include the exact documented model: '+id);
   assert.equal(proof.evidenceUrl,'https://www.amazon.fr/dp/'+asin,'Evidence URL must match published product ASIN: '+id);
