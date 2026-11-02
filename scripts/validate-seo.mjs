@@ -203,7 +203,7 @@ assert.equal(skmei1257.evidenceUrl,'https://www.amazon.fr/dp/B07B6ML1VJ');
 assert.match(skmei1257.evidenceListingTitle,/SKMEI.*1257/i);
 assert.match(skmei1257.marketplaceVariant,/1257 Black/,'Specific black variant must not become a generic model claim');
 
-for(const [id,asin] of [['addiesdive-ad2030','B0DNK5TT6D'],['pagani-pd1701','B0C7QC653D']]){
+for(const [id,asin] of [['skmei-1257','B07B6ML1VJ'],['addiesdive-ad2030','B0DNK5TT6D'],['pagani-pd1701','B0C7QC653D']]){
   const proof=exactPopularLinks[id];
   assert.equal(proof.asin,asin,'Published ASIN must be independently documented: '+id);
   assert.equal(proof.verifiedAt,'2026-11-01','New Amazon.fr proof must be dated: '+id);
@@ -437,8 +437,8 @@ assert.ok(home.includes('href="./montres/modeles-populaires.html#selection-10-mo
   'Homepage must surface the priorities without duplicating all ten full cards');
 assert.ok(popularHtml.includes('Ce n’est ni un classement des ventes en France'),
   'Editorial readiness must not be mistaken for sales ranking or verified popularity');
-assert.equal(commercialShortlist.filter(item=>Boolean(exactPopularLinks[item.id])).length,5,
-  'Five source-confirmed listings and five explicitly uncertain searches in this editorial mix');
+assert.equal(commercialShortlist.filter(item=>Boolean(exactPopularLinks[item.id])).length,6,
+  'Six source-confirmed listings and four explicitly uncertain source-only models in this editorial mix');
 assert.equal(commercialShortlist.filter(item=>approvedPopularPhotos.has(item.id)).length,7,
   'Seven shortlist watches have declared-authorised local model photos');
 assert.equal((popularHtml.match(/class="am-focus-detail"/g)||[]).length,10,
@@ -492,7 +492,7 @@ assert.doesNotMatch(home,/src="\.\.\/popular-filters\.js"/,'Homepage must not lo
 assert.ok(home.includes('id="pick-casio-gw-m5610u-1"'),'Verified Amazon G-SHOCK must be featured on homepage');
 assert.ok(home.includes('https://www.amazon.fr/dp/B09BCPP68Q?tag=drackk04-21'),'Home feature must link to the verified G-SHOCK ASIN');
 assert.equal((home.match(/data-amazon-product="casio-gw-m5610u-1"/g)||[]).length,1,'Only one direct Amazon supplemental CTA should be featured');
-assert.equal((home.match(/data-amazon-search-id=/g)||[]).length,3,'Three featured SKMEI and Pagani variants without exact ASINs remain honest searches');
+assert.equal((home.match(/data-amazon-search-id=/g)||[]).length,2,'Two featured SKMEI variants without exact ASINs remain honest searches');
 assert.equal((home.match(/data-amazon-product="casio-f91w-1"/g)||[]).length,1,'F-91W featured exact-model Amazon referral');
 assert.equal((home.match(/data-amazon-product="casio-ga-2100-1a1"/g)||[]).length,1,'GA-2100 featured exact-model Amazon referral');
 for(const [id,asin] of [['addiesdive-ad2030','B0DNK5TT6D'],['pagani-pd1701','B0C7QC653D']]){
