@@ -3,6 +3,19 @@
   "marketplace": "amazon.fr",
   "standard": "amazon_fr_exact_model_listing_title_and_ASIN",
   "verifiedProducts": {
+    "skmei-1257": {
+      "brand": "SKMEI",
+      "canonicalModel": "1257",
+      "marketplaceModel": "1257",
+      "asin": "B07B6ML1VJ",
+      "verifiedAt": "2026-11-02",
+      "evidenceUrl": "https://www.amazon.fr/dp/B07B6ML1VJ",
+      "evidenceListingTitle": "SKMEI Montre de sport numérique pour homme, écran LED, grand cadran, électronique, montre militaire, étanche, alarme, chronomètre, rétro-éclairage, noir – 1257, Noir",
+      "evidenceType": "amazon_fr_product_page",
+      "evidenceNote": "La fiche Amazon.fr consultée le 2 novembre 2026 via la redirection du comparateur LeGuide présente explicitement SKMEI 1257, l’ASIN B07B6ML1VJ et la variante Black/Noir. Le rapprochement porte uniquement sur cette variante : ni le stock, ni le prix, ni le marchand, ni la livraison en France ne sont garantis pour une visite ultérieure.",
+      "marketplaceVariant": "1257 Black — variante noire identifiée sur Amazon.fr ; contrôler couleur, vendeur, stock et livraison avant tout achat",
+      "corroborationUrl": "https://www.leguide.com/c/internet-et-telecom/smartwatches-100570713/?marque=129959%7Cskmei"
+    },
     "casio-gw-m5610u-1": {
       "brand": "Casio G-SHOCK",
       "canonicalModel": "GW-M5610U-1",
