@@ -50,6 +50,8 @@ try{
      'https://www.amazon.fr/dp/'+asin+'?tag=drackk04-21',
      'Source-confirmed model direct Amazon link must remain attributed: '+id);
    assert.match(await card.locator('a[data-amazon-product]').getAttribute('rel'),/sponsored/);
+   assert.equal(await card.locator('a[data-amazon-product]').getAttribute('data-amazon-placement'),'showroom',
+     'Homepage showroom clicks must be tracked separately, not mixed with old popular clicks');
    assert.equal(await card.locator('h3 a').getAttribute('href'),'./montres/'+id+'.html');
    const photo=card.locator('img[src*="watches-popular/"]');
    await photo.scrollIntoViewIfNeeded();
