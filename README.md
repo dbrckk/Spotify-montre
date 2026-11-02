@@ -1,5 +1,7 @@
 # Atelier Montres — boutique de montres indépendante
 
+**Refonte visuelle :** [nouvelle direction graphite/cuivre, photographies locales, accès rapides par style, UX Android et sources du dépôt `star-list`](docs/REFONTE_UX_UI_STAR_LIST_2026-11-02.md). Les données produit, le catalogue de 52 montres, les liens partenaires et la désactivation de la vente directe restent inchangés.
+
 ## Vente directe sur notre propre site — 2 novembre 2026
 
 **[Feuille de route détaillée et critères de mise en vente](docs/ROADMAP_VENTE_DIRECTE_AUTOMATISEE_2026-11-02.md)** — priorités, architecture, prestataires comparés, conformité France/UE, coûts, suivi financier et livrables réels. Les ventes directes restent désactivées jusqu'à validation des comptes et des offres fournisseurs.
