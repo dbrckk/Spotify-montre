@@ -50,10 +50,10 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
   const amazonSearch=p=>'https://www.amazon.fr/s?k='
     +encodeURIComponent((p.brand+' '+p.model).slice(0,130))
     +'&tag='+encodeURIComponent(amazonPartnerTag);
-  const link=(href,txt,commercial=false,id='',kind='search')=>'<a href="'+e(href)+'" target="_blank" rel="noopener noreferrer nofollow'+(commercial?' sponsored':'')+'"'
-    +(commercial&&kind!=='partner'?' data-amazon-'+(kind==='product'?'product':'search-id')+'="'+e(id)+'" data-amazon-placement="popular"':'')
-    +(commercial&&kind==='partner'?' data-partner-offer-id="'+e(id)+'" data-partner-placement="popular"':'')
-    +(kind==='official'&&!commercial?' data-merchant-official-id="'+e(id)+'" data-merchant-placement="popular"':'')
+  const link=(href,txt,commercial=false,id='',kind='search',placement='popular')=>'<a href="'+e(href)+'" target="_blank" rel="noopener noreferrer nofollow'+(commercial?' sponsored':'')+'"'
+    +(commercial&&kind!=='partner'?' data-amazon-'+(kind==='product'?'product':'search-id')+'="'+e(id)+'" data-amazon-placement="'+e(placement)+'"':'')
+    +(commercial&&kind==='partner'?' data-partner-offer-id="'+e(id)+'" data-partner-placement="'+e(placement)+'"':'')
+    +(kind==='official'&&!commercial?' data-merchant-official-id="'+e(id)+'" data-merchant-placement="'+e(placement)+'"':'')
     +'>'+e(txt)+'</a>';
   const verifiedLinks=loadVerifiedPopularLinks({root,picks,affiliates,amazonPartnerTag});
   const partnerOffers=loadApprovedPartnerOffers({root,picks});
@@ -121,8 +121,8 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     const label=viaComparator?'ASIN recoupé via comparateur'
       :direct?'Fiche Amazon.fr documentée':'Référence et vendeur documentés';
     const merchant=direct
-      ?link(direct.url,'Voir la fiche Amazon.fr · lien rémunéré',true,p.id,'product')
-      :link(p.officialUrl,'Voir la fiche de la marque · lien non rémunéré',false,p.id,'official');
+      ?link(direct.url,'Voir la fiche Amazon.fr · lien rémunéré',true,p.id,'product','showroom')
+      :link(p.officialUrl,'Voir la fiche de la marque · lien non rémunéré',false,p.id,'official','showroom');
     return '<article class="am-affordable-card" data-affordable-id="'+e(p.id)+'"'
       +' data-affordable-proof="'+(viaComparator?'comparator':direct?'listing':'source')+'">'
       +'<a class="am-affordable-media" href="./montres/'+e(p.id)+'.html" aria-label="Voir la fiche de '+e(p.brand+' '+p.model)+'">'
