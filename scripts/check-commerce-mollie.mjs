@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
 import {createHostedPayment,verifyHostedPayment} from './commerce-mollie.mjs';
 
 const apiKey='test_'+'A'.repeat(24);
@@ -21,6 +22,9 @@ const fetcher=async(url,options)=>{
   assert.equal(options.method,'POST');
   assert.equal(options.redirect,'error');
   assert.equal(options.headers.Authorization,'Bearer '+apiKey);
+  assert.equal(options.headers['Idempotency-Key'],
+    createHash('sha256').update('atelier-montres:mollie:'+orderId).digest('hex'));
+  assert.equal(options.headers['Idempotency-Key'].length,64);
   const body=JSON.parse(options.body);
   assert.deepEqual(body.amount,{currency:'EUR',value:'39.90'});
   assert.equal(body.metadata.order_id,orderId);
