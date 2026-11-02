@@ -2,6 +2,9 @@
 
 ## Vente directe sur notre propre site — 2 novembre 2026
 
+**[Feuille de route détaillée et critères de mise en vente](docs/ROADMAP_VENTE_DIRECTE_AUTOMATISEE_2026-11-02.md)** — priorités, architecture, prestataires comparés, conformité France/UE, coûts, suivi financier et livrables réels. Les ventes directes restent désactivées jusqu'à validation des comptes et des offres fournisseurs.
+
+
 **Architecture retenue :** vitrine Atelier Montres sur Render + API commerciale indépendante + paiements hébergés via **Mollie** + commande fournisseur CJ seulement lorsque l'accès, les références et le paiement par solde sont réellement vérifiés. Aucun service de boutique externe ne pilote le catalogue, les commandes ou la présentation.
 
 Les premiers composants sont intégrés au dépôt : **audit de marge TTC et de disponibilité fournisseur**, contrat de devis réel, appels API serveur pour créer et vérifier un paiement Mollie. Le moteur exige désormais des preuves du **backend indépendant**, du **paiement confirmé**, de la **sécurité des adresses** et de la **correspondance exacte des variantes**.
