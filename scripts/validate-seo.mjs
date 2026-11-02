@@ -14,8 +14,8 @@ const manifest=JSON.parse(read('seo-manifest.json'));
 assert.equal(manifest.productCount,15);
 assert.equal(manifest.popularAdditionalCount,37,'37 researched models complement the 15 photo-backed core products');
 assert.equal(manifest.popularDetailCount,37,'Every supplemental model requires a dedicated factual landing page');
-assert.equal(manifest.popularAffiliateDirectLinks,manifest.affiliateActive?7:0,'Only source-verified supplementary ASINs may become direct product links');
-assert.equal(manifest.popularAffiliateSearchLinks,manifest.affiliateActive?30:0,'All remaining supplemental products require labeled Amazon searches');
+assert.equal(manifest.popularAffiliateDirectLinks,manifest.affiliateActive?8:0,'Only source-verified supplementary ASINs may become direct product links');
+assert.equal(manifest.popularAffiliateSearchLinks,manifest.affiliateActive?29:0,'All remaining supplemental products require labeled Amazon searches');
 const insightData=JSON.parse(read('editorial-insights.json'));
 assert.equal(insightData.version,1);
 assert.equal(Object.keys(insightData.products).length,15,'15 unique editorial briefs required');
@@ -189,12 +189,20 @@ assert.equal((home.match(/rel="canonical"/g)||[]).length,1,'Homepage has exactly
 // source-confirmed Amazon.fr ASINs can become direct product links.
 const exactPopular=JSON.parse(readFileSync(resolve(root,'../research/amazon-fr-popular-verified.json'),'utf8'));
 const exactPopularLinks=exactPopular.verifiedProducts;
-assert.equal(Object.keys(exactPopularLinks).length,7,'ASIN promotion requires a source-verified registry entry');
+assert.equal(Object.keys(exactPopularLinks).length,8,'ASIN promotion requires a source-verified registry entry');
 assert.equal(exactPopularLinks['casio-gw-m5610u-1'].asin,'B09BCPP68Q','Actual Amazon.fr G-SHOCK source code must be used');
 assert.equal(exactPopularLinks['casio-f91w-1'].asin,'B000J34HN4','Casio F-91W documented Amazon.fr ASIN');
 assert.equal(exactPopularLinks['casio-a168wg-9'].asin,'B002LAS086','Casio vintage gold documented Amazon.fr ASIN');
 assert.equal(exactPopularLinks['casio-a158wea-1'].asin,'B000GAYQJ0','Casio A158 silver exact regional listing and Amazon.fr ASIN');
 assert.equal(exactPopularLinks['casio-ga-2100-1a1'].asin,'B07WGJ1JNW','GA-2100 blackout G-SHOCK exact regional listing and Amazon.fr ASIN');
+const skmei1257=exactPopularLinks['skmei-1257'];
+assert.equal(skmei1257.asin,'B07B6ML1VJ','SKMEI 1257 black must use its directly inspected Amazon.fr ASIN');
+assert.equal(skmei1257.marketplaceModel,'1257');
+assert.equal(skmei1257.verifiedAt,'2026-11-02','SKMEI evidence must be dated');
+assert.equal(skmei1257.evidenceUrl,'https://www.amazon.fr/dp/B07B6ML1VJ');
+assert.match(skmei1257.evidenceListingTitle,/SKMEI.*1257/i);
+assert.match(skmei1257.marketplaceVariant,/1257 Black/,'Specific black variant must not become a generic model claim');
+
 for(const [id,asin] of [['addiesdive-ad2030','B0DNK5TT6D'],['pagani-pd1701','B0C7QC653D']]){
   const proof=exactPopularLinks[id];
   assert.equal(proof.asin,asin,'Published ASIN must be independently documented: '+id);
@@ -684,7 +692,7 @@ const trackedDirect=popularHtml.match(/data-amazon-product=/g)||[];
 const sponsoring=popularHtml.match(/rel="noopener noreferrer nofollow sponsored"/g)||[];
 assert.equal(trackedResults.length,manifest.popularAffiliateSearchLinks,'Only unverified models may have search links');
 assert.equal(trackedDirect.length,manifest.popularAffiliateDirectLinks+(manifest.affiliateActive?5:0),
-  'Five source-confirmed shortlist merchant actions augment 7 original cards, without pretending to verify new ASINs');
+  'Five source-confirmed shortlist merchant actions augment 8 original cards, without pretending to verify new ASINs');
 assert.equal(sponsoring.length,manifest.affiliateActive?42:0,'All 37 catalogue and five shortlist paid actions must carry sponsored relation');
 assert.equal((popularHtml.match(/amazon\.fr\/dp\/B09BCPP68Q/g)||[]).length,manifest.affiliateActive?2:0,
   'The same G-SHOCK ASIN appears in one standard card and one shortlist action, never a new unverified ASIN');
