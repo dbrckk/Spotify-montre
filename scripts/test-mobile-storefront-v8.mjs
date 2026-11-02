@@ -72,7 +72,17 @@ try{
  await checkWidth('Affordable photo-backed showroom');
  await affordable.screenshot({path:'artifacts/android-affordable-showroom.png'});
  const pocket=await browser.newPage({viewport:{width:320,height:740},isMobile:true,hasTouch:true,javaScriptEnabled:false});
- await pocket.goto(new URL('/index.html',base).href,{waitUntil:'domcontentloaded'});
+ // On a remote CDN, DOMContentLoaded can precede responsive CSS completion
+ // on the no-JS 320px browser. Do not classify unstyled HTML as a layout bug.
+ await pocket.goto(new URL('/index.html',base).href,{waitUntil:'load',timeout:30000});
+ const pocketLayout=await pocket.locator('.am-affordable-grid').evaluate(el=>({
+   flow:getComputedStyle(el).gridAutoFlow,
+   overflow:getComputedStyle(el).overflowX
+ }));
+ assert.equal(pocketLayout.flow,'column',
+   '320px buying rail must load mobile CSS before checking document width');
+ assert.equal(pocketLayout.overflow,'auto',
+   '320px buying rail must contain horizontal scrolling rather than expanding the page');
  assert.equal(await pocket.locator('.am-affordable-card:visible').count(),4,
    'All four model cards and their real source links must function with scripts disabled');
  assert.equal(await pocket.locator('.am-affordable a[data-amazon-product]').count(),4);
