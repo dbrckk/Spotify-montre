@@ -29,6 +29,59 @@ try{
  const cards=page.locator('#affGrid .aff-card');
  await cards.first().waitFor({state:'visible',timeout:20000});
  assert.equal(await cards.count(),15,'The full genuine catalogue should render');
+ // Major visual commerce path: real photos, no fabricated prices or ASINs.
+ const affordable=page.locator('#selection-accessible');
+ assert.equal(await affordable.locator('article.am-affordable-card').count(),4,
+   'Homepage must feature four sourced economical watches immediately after hero');
+ assert.equal(await page.evaluate(()=>{
+   const hero=document.querySelector('.aff-hero'),a=document.querySelector('#selection-accessible');
+   const next=document.querySelector('#gammes');
+   return Boolean(hero&&a&&next&&(hero.compareDocumentPosition(a)&Node.DOCUMENT_POSITION_FOLLOWING)
+     &&(a.compareDocumentPosition(next)&Node.DOCUMENT_POSITION_FOLLOWING));
+ }),true,'The new photo-backed catalogue follows the hero and precedes the 15-card range');
+ for(const [id,asin,proof] of [
+   ['skmei-1257','B07B6ML1VJ','listing'],['skmei-1251','B072JTCP5H','comparator'],
+   ['addiesdive-ad2030','B0DNK5TT6D','listing'],['pagani-pd1701','B0C7QC653D','listing']
+ ]){
+   const card=affordable.locator('[data-affordable-id="'+id+'"]');
+   assert.equal(await card.getAttribute('data-affordable-proof'),proof,
+     'Evidence quality must be source-backed and visible: '+id);
+   assert.equal(await card.locator('a[data-amazon-product]').getAttribute('href'),
+     'https://www.amazon.fr/dp/'+asin+'?tag=drackk04-21',
+     'Source-confirmed model direct Amazon link must remain attributed: '+id);
+   assert.match(await card.locator('a[data-amazon-product]').getAttribute('rel'),/sponsored/);
+   assert.equal(await card.locator('a[data-amazon-product]').getAttribute('data-amazon-placement'),'showroom',
+     'Homepage showroom clicks must be tracked separately, not mixed with old popular clicks');
+   assert.equal(await card.locator('h3 a').getAttribute('href'),'./montres/'+id+'.html');
+   const photo=card.locator('img[src*="watches-popular/"]');
+   await photo.scrollIntoViewIfNeeded();
+   await photo.evaluate(el=>el.decode());
+   assert.ok(await photo.evaluate(el=>el.naturalWidth>100&&el.naturalHeight>100),
+     'Every featured watch must load its real, locally hosted model photo: '+id);
+   if(proof==='comparator')assert.match(await card.innerText(),/pas été consultée directement/,
+     'Comparator evidence must not imply direct inspection of Amazon.fr');
+ }
+ const mobileRail=await affordable.locator('.am-affordable-grid').evaluate(el=>({
+   flow:getComputedStyle(el).gridAutoFlow,scroll:el.scrollWidth,visible:el.clientWidth,
+   keyboard:el.tabIndex
+ }));
+ assert.equal(mobileRail.flow,'column','Economical watch cards must swipe horizontally on Android');
+ assert.ok(mobileRail.scroll>mobileRail.visible,
+   'The mobile rail must be genuinely scrollable, not four vertical product stacks');
+ assert.equal(mobileRail.keyboard,0,'Horizontal product rail must be keyboard accessible');
+ await checkWidth('Affordable photo-backed showroom');
+ await affordable.screenshot({path:'artifacts/android-affordable-showroom.png'});
+ const pocket=await browser.newPage({viewport:{width:320,height:740},isMobile:true,hasTouch:true,javaScriptEnabled:false});
+ await pocket.goto(new URL('/index.html',base).href,{waitUntil:'domcontentloaded'});
+ assert.equal(await pocket.locator('.am-affordable-card:visible').count(),4,
+   'All four model cards and their real source links must function with scripts disabled');
+ assert.equal(await pocket.locator('.am-affordable a[data-amazon-product]').count(),4);
+ const pocketExtent=await pocket.evaluate(()=>({client:document.documentElement.clientWidth,
+   scroll:document.documentElement.scrollWidth}));
+ assert.ok(pocketExtent.scroll<=pocketExtent.client+2,
+   'New visual buying section must not overflow 320px Android: '+JSON.stringify(pocketExtent));
+ await pocket.screenshot({path:'artifacts/android-320-affordable-showroom.png',fullPage:false});
+ await pocket.close();
  // The 37 additional popular/editorial models are a clearly separated
  // commercial discovery path, not fake 15-card catalog entries.
  const popular=page.locator('#modeles-populaires');
@@ -410,7 +463,11 @@ try{
  });
  assert.ok(shopFirst.positions.every((x,i)=>Number.isFinite(x)&&(i===0||x>shopFirst.positions[i-1])),
    'Mobile home must place the catalog directly after tiers and before editorial content');
- assert.ok(shopFirst.firstCard<5000,'Mobile visitors should see real watches before excessive editorial scrolling: '+JSON.stringify(shopFirst));
+ const firstAffordable=await page.locator('#selection-accessible .am-affordable-card').first().evaluate(el=>el.getBoundingClientRect().top+window.scrollY);
+ assert.ok(firstAffordable<2600,
+   'A genuine watch model, not just a marketing illustration, must be shown close to the top: '+firstAffordable);
+ assert.ok(shopFirst.firstCard<5700,
+   'The new mobile swipe rail must keep the full historical catalogue within reasonable reach: '+JSON.stringify(shopFirst));
  const discovery=await page.locator('.am-discovery-grid').evaluate(el=>{
    const style=getComputedStyle(el);
    return {flow:style.gridAutoFlow,scrollWidth:el.scrollWidth,clientWidth:el.clientWidth};

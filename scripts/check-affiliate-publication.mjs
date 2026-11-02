@@ -59,6 +59,13 @@ try {
     'No Amazon paid CTA may survive on the priority collection when affiliation is disabled');
   assert.equal((disabledFocus.match(/data-merchant-official-id=/g)||[]).length,10,
     'Affiliate-disabled priority list must keep only real seller-documentation links');
+  const disabledHome=readFileSync(join(target,'index.html'),'utf8');
+  const disabledBudget=disabledHome.match(/<section class="am-affordable" id="selection-accessible"[\s\S]*?<\/section>/)?.[0];
+  assert.ok(disabledBudget,'Source-backed home showcase must survive affiliate-disabled builds');
+  assert.equal((disabledBudget.match(/data-amazon-product=/g)||[]).length,0,
+    'Do not manufacture compensated shopping buttons when Amazon is disabled');
+  assert.equal((disabledBudget.match(/data-merchant-official-id=/g)||[]).length,4,
+    'Four genuine seller/factory links must remain usable without an Amazon affiliate account');
   const disabledWatch=readFileSync(join(target,'montres','casio-gw-m5610u-1.html'),'utf8');
   assert.ok(!disabledWatch.includes('data-amazon-product="casio-gw-m5610u-1"'),
     'Affiliate-disabled mode must not display the G-SHOCK direct product CTA');
@@ -171,6 +178,14 @@ try {
   assert.equal(manifest.popularAffiliateDirectLinks,10,'Ten documented direct links in supplementary selection');
   assert.equal(manifest.popularAffiliateSearchLinks,27,'Remaining twenty-seven supplemental watches must stay labeled searches');
   assert.equal(manifest.popularPartnerAffiliateLinks,0,'No unapproved Awin partner URL is published');
+  const liveHome=readFileSync(join(target,'index.html'),'utf8');
+  const liveBudget=liveHome.match(/<section class="am-affordable" id="selection-accessible"[\s\S]*?<\/section>/)?.[0];
+  assert.ok(liveBudget,'Photographic economical showcase must be published in real configuration');
+  assert.equal((liveBudget.match(/data-amazon-product=/g)||[]).length,4,
+    'Exactly four approved attributed Amazon referrals in the affordable selection');
+  assert.ok(liveBudget.includes('https://www.amazon.fr/dp/B072JTCP5H?tag=drackk04-21')
+    &&liveBudget.includes('La page Amazon.fr n’a pas été consultée directement'),
+    'A comparator-proven ASIN may be linked but cannot masquerade firsthand Amazon inspection');
   const directProduction=readFileSync(join(target,'montres/casio-gw-m5610u-1.html'),'utf8');
   assert.ok(directProduction.includes('href="https://www.amazon.fr/dp/B09BCPP68Q?tag=drackk04-21"'),
     'Publish only the independently source-confirmed G-SHOCK Amazon.fr direct match');

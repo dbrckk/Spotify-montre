@@ -185,6 +185,55 @@ for(const marker of ['AM_SEO_LINKS_START','AM_SEO_LINKS_END','AM_SEO_HEAD_START'
 }
 assert.equal((home.match(/rel="canonical"/g)||[]).length,1,'Homepage has exactly one canonical link');
 
+// Four high-intent, photographed references must be visible immediately after
+// the homepage hero, without misleading prices, invented ASINs or fake photos.
+assert.equal((home.match(/AM_AFFORDABLE_SHOWROOM_START/g)||[]).length,1,
+  'Exactly one accessible showroom must be injected into every build');
+assert.equal((home.match(/AM_AFFORDABLE_SHOWROOM_END/g)||[]).length,1);
+const affordableHtml=home.match(/<section class="am-affordable" id="selection-accessible"[\s\S]*?<\/section>/)?.[0];
+assert.ok(affordableHtml,'The commercial showroom must remain a no-JS, crawlable section');
+assert.ok(home.indexOf('id="selection-accessible"')>home.indexOf('class="aff-hero"')
+  &&home.indexOf('id="selection-accessible"')<home.indexOf('id="gammes"'),
+  'Affordable photographic models must appear immediately after the hero, before the 15-model catalogue');
+const affordableIds=['skmei-1257','skmei-1251','addiesdive-ad2030','pagani-pd1701'];
+assert.deepEqual([...affordableHtml.matchAll(/data-affordable-id="([^"]+)"/g)].map(m=>m[1]),affordableIds,
+  'The showcase contains four distinct researched and buyer-visible economical choices');
+assert.ok(affordableHtml.includes('sans prix, stock ni classement de ventes inventés'));
+assert.ok(affordableHtml.includes('non vérifiées indépendamment'),
+  'Publisher-attested product photo permissions must not masquer independent licensing');
+for(const id of affordableIds){
+  const card=affordableHtml.match(new RegExp('<article class="am-affordable-card" data-affordable-id="'+id+'"[\\s\\S]*?<\\/article>'))?.[0];
+  assert.ok(card,'Missing sourced homepage hero watch '+id);
+  const product=JSON.parse(read('selection-populaires.json')).products.find(p=>p.id===id);
+  assert.ok(product&&card.includes('href="./montres/'+id+'.html"'),
+    'Each affordably styled watch must link to its genuine product detail page: '+id);
+  assert.ok(card.includes('src="./assets/watches-popular/'+id+'.webp"'),
+    'Real and approved local model photo required in the public four-model presentation: '+id);
+  assert.equal((card.match(/data-amazon-product=/g)||[]).length,manifest.affiliateActive?1:0,
+    'No extra or unapproved sponsored exit can appear in the affordable showroom: '+id);
+  assert.equal((card.match(/data-merchant-official-id=/g)||[]).length,manifest.affiliateActive?0:1,
+    'Non-monetized fixture must show the real manufacturer/supplier source: '+id);
+}
+if(manifest.affiliateActive){
+  for(const [id,asin] of [
+    ['skmei-1257','B07B6ML1VJ'],['skmei-1251','B072JTCP5H'],
+    ['addiesdive-ad2030','B0DNK5TT6D'],['pagani-pd1701','B0C7QC653D']
+  ]){
+    const card=affordableHtml.match(new RegExp('<article class="am-affordable-card" data-affordable-id="'+id+'"[\\s\\S]*?<\\/article>'))?.[0];
+    assert.ok(card.includes('https://www.amazon.fr/dp/'+asin+'?tag=drackk04-21'),
+      'Only the source-backed exact ASIN and current owner tag may be featured: '+id);
+    assert.match(card,/rel="noopener noreferrer nofollow sponsored"/);
+    assert.ok(card.includes('data-amazon-placement="showroom"'),
+      'Four new buy-now links must be attributable to their actual homepage placement');
+  }
+  assert.ok(affordableHtml.includes('data-affordable-proof="comparator"')
+    &&affordableHtml.includes('La page Amazon.fr n’a pas été consultée directement'),
+    'SKMEI 1251 comparator-only evidence must remain explicit in the leading commercial showroom');
+}
+assert.match(read('popular-picks.css'),/\.am-affordable-grid\{/,
+  'Premium mobile responsive layout is required for above-hero commercial showcase');
+
+
 // Every supplemental model has manufacturer evidence. Only explicitly
 // source-confirmed Amazon.fr ASINs can become direct product links.
 const exactPopular=JSON.parse(readFileSync(resolve(root,'../research/amazon-fr-popular-verified.json'),'utf8'));
@@ -522,8 +571,10 @@ assert.equal((home.match(/data-amazon-product="casio-gw-m5610u-1"/g)||[]).length
 assert.equal((home.match(/data-amazon-search-id=/g)||[]).length,2,'Two featured SKMEI variants without exact ASINs remain honest searches');
 assert.equal((home.match(/data-amazon-product="casio-f91w-1"/g)||[]).length,1,'F-91W featured exact-model Amazon referral');
 assert.equal((home.match(/data-amazon-product="casio-ga-2100-1a1"/g)||[]).length,1,'GA-2100 featured exact-model Amazon referral');
+const popularTeaser=home.match(/<section class="am-picks" id="modeles-populaires"[\s\S]*?<\/section>/)?.[0];
+assert.ok(popularTeaser,'Existing eight-watch homepage teaser is distinct from the new affordable showroom');
 for(const [id,asin] of [['addiesdive-ad2030','B0DNK5TT6D'],['pagani-pd1701','B0C7QC653D']]){
-  assert.equal((home.match(new RegExp('data-amazon-product="'+id+'"','g'))||[]).length,1,'New exact Amazon product featured once: '+id);
+  assert.equal((popularTeaser.match(new RegExp('data-amazon-product="'+id+'"','g'))||[]).length,1,'New exact Amazon product featured once within the eight-card teaser: '+id);
   assert.ok(home.includes('https://www.amazon.fr/dp/'+asin+'?tag=drackk04-21'),'Verified Amazon link must be attributed: '+id);
 }
 assert.ok(home.includes('https://www.amazon.fr/dp/B07WGJ1JNW?tag=drackk04-21'),'Homepage must link to source-backed GA-2100 listing');
