@@ -11,8 +11,20 @@ assert.ok(origin.protocol==='https:'||(origin.protocol==='http:'&&
 const browser=await chromium.launch({headless:true});
 const errors=[];
 const checkOverflow=async(page,label)=>{
-  const w=await page.evaluate(()=>({client:document.documentElement.clientWidth,
-    scroll:document.documentElement.scrollWidth}));
+  const w=await page.evaluate(()=>{
+    const client=document.documentElement.clientWidth;
+    const scroll=document.documentElement.scrollWidth;
+    const culprits=scroll>client+2
+      ?[...document.querySelectorAll('body *')].map(el=>{
+        const rect=el.getBoundingClientRect();
+        const css=getComputedStyle(el);
+        return {tag:el.tagName.toLowerCase(),cls:String(el.className||'').slice(0,90),
+          width:Math.round(rect.width),left:Math.round(rect.left),right:Math.round(rect.right),
+          overflowX:css.overflowX,grid:css.gridTemplateColumns};
+      }).filter(x=>x.right>client+2&&x.width>20).slice(0,12)
+      :[];
+    return {client,scroll,culprits};
+  });
   assert.ok(w.scroll<=w.client+2,label+': horizontal overflow '+JSON.stringify(w));
 };
 mkdirSync('artifacts',{recursive:true});
