@@ -1,12 +1,14 @@
 # Atelier Montres — boutique de montres indépendante
 
-## Vente directe : préparation Shopify + CJ, sans connexion Stripe — 2 novembre 2026
+## Vente directe sur notre propre site — 2 novembre 2026
 
-La boutique Shopify liée est encore en **essai** et ne comporte **aucun produit commercial enregistré** lors de l'audit. **Ne pas ouvrir un checkout public** : le compte Shopify Payments, les offres fournisseurs, le règlement automatique et les obligations vendeur ne sont pas validés. Les 52 montres et les liens d'affiliation actuels doivent rester disponibles.
+**Architecture retenue :** vitrine Atelier Montres sur Render + API commerciale indépendante + paiements hébergés via **Mollie** + commande fournisseur CJ seulement lorsque l'accès, les références et le paiement par solde sont réellement vérifiés. Aucun service de boutique externe ne pilote le catalogue, les commandes ou la présentation.
 
-**Stratégie prioritaire :** conserver Render pour le comparateur, puis ne proposer un achat via Shopify Payments et un **Shopify Buy Button** que pour 2–3 variantes réelles, avec CJdropshipping comme candidat au paiement fournisseur par solde autorisé et vérifié. Shopify Collective ne prend pas en charge une boutique située en France à la date de vérification ; le parcours AliExpress + DSers exige encore un paiement fournisseur manuel dans le cas courant.
+Les premiers composants sont intégrés au dépôt : **audit de marge TTC et de disponibilité fournisseur**, contrat de devis réel, appels API serveur pour créer et vérifier un paiement Mollie. Le moteur exige désormais des preuves du **backend indépendant**, du **paiement confirmé**, de la **sécurité des adresses** et de la **correspondance exacte des variantes**.
 
-**[Décision détaillée, preuves, conditions d'activation et workflow](docs/VENTE_DIRECTE_SHOPIFY_CJ_SANS_STRIPE_2026-11-02.md)**. Contrôle économique en centimes entiers : `npm run commerce:quote -- chemin/vers/devis-reel.json` (aucun devis fictif prérempli, aucune donnée client stockée). La réussite de ce contrôle ne permet jamais à elle seule d'encaisser.
+**Aucun paiement public n'est actuellement activé** (`site/config.json` → `checkoutMode: "inactive"`) : pas de backend transactionnel déployé, de compte marchand validé ni de référence fournisseur prête à commander. L'affiliation Amazon et les 52 fiches restent utilisables.
+
+**[Architecture, état réel et étapes pour encaisser et commander automatiquement](docs/COMMERCE_INDEPENDANT_ATELIER_MONTRES_2026-11-02.md)** · Vérifier un devis réel : `npm run commerce:quote -- chemin/devis-reel.json`. Aucune donnée personnelle ni clé fournisseur ne doit figurer dans le dépôt public.
 
 ## Démarrer l'affiliation Awin depuis Android — 1er novembre 2026
 
