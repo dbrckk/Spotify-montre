@@ -138,8 +138,11 @@
         "photoRightsVerified",
         "merchantLegalAndCgvReady",
         "returnsAndWarrantyReady",
-        "shopifyPaymentsLiveVerified",
-        "shopifyVariantMapped",
+        "independentPaymentAccountVerified",
+        "paymentWebhookReconciliationVerified",
+        "independentCheckoutBackendVerified",
+        "encryptedShippingDataVerified",
+        "catalogueSupplierVariantMapped",
         "automaticSupplierOrderVerified",
         "automaticSupplierPaymentVerified",
         "supplierFundingAvailable",
@@ -173,10 +176,10 @@
         "returnsAndWarrantyReady": {
           "type": "boolean"
         },
-        "shopifyPaymentsLiveVerified": {
+        "independentPaymentAccountVerified": {
           "type": "boolean"
         },
-        "shopifyVariantMapped": {
+        "catalogueSupplierVariantMapped": {
           "type": "boolean"
         },
         "automaticSupplierOrderVerified": {
@@ -189,6 +192,15 @@
           "type": "boolean"
         },
         "idempotenceAndFailureAlertsVerified": {
+          "type": "boolean"
+        },
+        "paymentWebhookReconciliationVerified": {
+          "type": "boolean"
+        },
+        "independentCheckoutBackendVerified": {
+          "type": "boolean"
+        },
+        "encryptedShippingDataVerified": {
           "type": "boolean"
         }
       }
