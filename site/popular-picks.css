@@ -438,3 +438,18 @@
   .am-focus-evidence>div:nth-child(odd){border-right:0}
   .am-focus-evidence>div:nth-last-child(2){border-bottom:1px solid #d7dfd2}
 }
+
+/* Fast factual pair comparisons in the front-page four-watch showroom. */
+.am-affordable-actions .am-affordable-compare{
+  background:#fbf5e9;
+  color:#3e5337;
+  border:1px solid #b99d6b;
+}
+.am-affordable-actions .am-affordable-compare:hover{
+  background:#f1e4cb;
+  color:#283f2f;
+}
+.am-affordable-actions .am-affordable-compare:focus-visible{
+  outline:3px solid #b9852b;
+  outline-offset:3px;
+}
