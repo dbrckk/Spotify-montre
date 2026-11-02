@@ -183,31 +183,37 @@ const cjDetail={
   orderNum:'CJ2608010711150328200',
   platformOrderId:'6387689586969',
   shippingCountryCode:'FR',fromCountryCode:'CN',isSandbox:0,
+  shippingCustomerName:customer.fullName,shippingAddress:customer.address1,
+  shippingCity:customer.city,shippingZip:customer.postalCode,
   currency:'USD',logisticName:'PostNL',orderAmount:'18.50',
   orderStatus:'SHIPPED',paymentDate:'2026-11-02 22:00:00',
   trackNumber:'SY123456789CN',trackingUrl:'https://track.example.net/SY123456789CN',
   productList:[{vid:order.supplier_vid,quantity:1,storeLineItemId:order.id}]
 };
-assert.equal(verifyCjOrderDetail(persisted,cjDetail).next,'SHIPPED');
-assert.equal(verifyCjOrderDetail(persisted,cjDetail).tracking,'SY123456789CN');
+assert.equal(verifyCjOrderDetail(persisted,cjDetail,customer).next,'SHIPPED');
+assert.equal(verifyCjOrderDetail(persisted,cjDetail,customer).tracking,'SY123456789CN');
 assert.equal(verifyCjOrderDetail(persisted,{
   ...cjDetail,orderStatus:'DELIVERED'
-}).next,'DELIVERED');
+},customer).next,'DELIVERED');
 assert.equal(verifyCjOrderDetail(persisted,{
   ...cjDetail,orderStatus:'UNSHIPPED',trackNumber:null
-}).next,'SUPPLIER_PAID');
+},customer).next,'SUPPLIER_PAID');
 assert.equal(verifyCjOrderDetail(persisted,{
   ...cjDetail,orderStatus:'SHIPPED',trackNumber:null
-}).next,'SUPPLIER_PAID','Do not claim shipped before tracking evidence');
+},customer).next,'SUPPLIER_PAID','Do not claim shipped before tracking evidence');
 assert.equal(verifyCjOrderDetail(persisted,{
   ...cjDetail,paymentDate:null
-}).next,null,'No claim of supplier payment before actual pay date');
+},customer).next,null,'No claim of supplier payment before actual pay date');
 assert.equal(verifyCjOrderDetail(persisted,{
   ...cjDetail,orderStatus:'CANCELLED',paymentDate:null
-}).next,'EXCEPTION');
+},customer).next,'EXCEPTION');
 for(const [description,invalid] of [
   ['CJ ID',{orderId:'wrong-supplier-id'}],
   ['destination',{shippingCountryCode:'US'}],
+  ['recipient',{shippingCustomerName:'Wrong Recipient'}],
+  ['street',{shippingAddress:'999 avenue inconnue'}],
+  ['city',{shippingCity:'Lyon'}],
+  ['postcode',{shippingZip:'69002'}],
   ['sandbox',{isSandbox:1}],
   ['variant',{productList:[{...cjDetail.productList[0],vid:'unrelated-vid'}]}],
   ['quantity',{productList:[{...cjDetail.productList[0],quantity:2}]}],
@@ -216,11 +222,11 @@ for(const [description,invalid] of [
   ['cost ceiling',{orderAmount:'25.01'}],
   ['provider discrepancy',{disputeId:'DP100'}]
 ]){
-  assert.throws(()=>verifyCjOrderDetail(persisted,{...cjDetail,...invalid}),
+  assert.throws(()=>verifyCjOrderDetail(persisted,{...cjDetail,...invalid},customer),
     /CJ fulfillment mismatch/,description);
 }
 assert.equal(verifyCjOrderDetail(persisted,{
   ...cjDetail,trackingUrl:'javascript:alert(1)'
-}).trackingUrl,null,'Reject unsafe external tracking URLs');
+},customer).trackingUrl,null,'Reject unsafe external tracking URLs');
 
 console.log('Independent commerce checks OK: encrypted address, checkout safety, CJ balance, exact shipping, paid submission and ambiguous-cost refusal');
