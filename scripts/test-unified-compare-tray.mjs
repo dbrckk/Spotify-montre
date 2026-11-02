@@ -264,6 +264,46 @@ try{
   await checkOverflow(heroPage,'Mobile homepage affordable comparison');
   await heroPage.close();
 
+  // Original buyer content: homepage -> factual watch article -> two-model dock.
+  const duelPage=await browser.newPage({viewport:{width:393,height:852},
+    isMobile:true,hasTouch:true,locale:'fr-FR'});
+  duelPage.on('pageerror',e=>errors.push('duel: '+e.message));
+  await duelPage.goto(new URL('/index.html#duels-accessibles',base).href,{waitUntil:'domcontentloaded'});
+  assert.equal(await duelPage.locator('.am-duel-promo-card').count(),4,
+    'Four distinct, photographed-or-fallback buyer decision articles must be discoverable');
+  await duelPage.locator('[data-duel-promo="addiesdive-ad2030-vs-pagani-pd1701"] a').click();
+  assert.equal(new URL(duelPage.url()).pathname,
+    '/montres/comparer-addiesdive-ad2030-vs-pagani-pd1701.html');
+  assert.equal(await duelPage.locator('.am-duel-model').count(),2);
+  assert.equal(await duelPage.locator('.am-duel-model img').count(),2,
+    'Both exact-model photos in the steel-watch duel must be locally hosted');
+  assert.equal(await duelPage.locator('a[data-amazon-product]').count(),2,
+    'Only verified matched ASINs may receive paid Amazon exits in this duel');
+  assert.match(await duelPage.locator('.am-duel-variant').first().innerText(),
+    /SH-DE-AD2030-Steel-blue/);
+  await checkOverflow(duelPage,'Mobile accessible watch editorial duel');
+  await duelPage.locator('.am-duel-bottom-actions a.primary').click();
+  await duelPage.locator('#udCompareTable table').waitFor({state:'visible'});
+  assert.equal(new URL(duelPage.url()).searchParams.get('compare'),
+    'addiesdive-ad2030,pagani-pd1701');
+  assert.equal(await duelPage.locator('#udTrayItems li').count(),2);
+  await checkOverflow(duelPage,'Mobile editorial duel to direct factual comparison');
+  await duelPage.screenshot({path:'artifacts/android-affordable-duel-comparison.png',fullPage:false});
+  await duelPage.close();
+
+  const smallDuel=await browser.newPage({viewport:{width:320,height:740},
+    isMobile:true,hasTouch:true,javaScriptEnabled:false,locale:'fr-FR'});
+  await smallDuel.goto(new URL('/montres/comparer-skmei-1257-vs-casio-f91w.html',base).href,
+    {waitUntil:'load'});
+  assert.equal(await smallDuel.locator('.am-duel-model').count(),2);
+  assert.equal(await smallDuel.locator('.am-duel-model img').count(),1,
+    'Without JS, absent manufacturer photo is text, never a fake Casio packshot');
+  assert.equal(await smallDuel.locator('.am-duel-model a.am-duel-merchant').count(),2,
+    'Source-backed outbound links must work without JavaScript');
+  await checkOverflow(smallDuel,'No-JS 320px buyer duel layout');
+  await smallDuel.screenshot({path:'artifacts/android-320-watch-duel.png',fullPage:false});
+  await smallDuel.close();
+
   // Real Android journey: go from the 10-watch editorial shortlist to a
   // preselected comparison of two exact, distinct documented watches.
   const shortlistPage=await browser.newPage({viewport:{width:393,height:852},
