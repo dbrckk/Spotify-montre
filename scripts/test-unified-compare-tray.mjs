@@ -247,6 +247,31 @@ try{
   assert.equal(new URL(phone.url()).searchParams.has('merchant'),false);
   await phone.close();
 
+  // Real Android journey: go from the 10-watch editorial shortlist to a
+  // preselected comparison of two exact, distinct documented watches.
+  const shortlistPage=await browser.newPage({viewport:{width:393,height:852},
+    isMobile:true,hasTouch:true,locale:'fr-FR'});
+  shortlistPage.on('pageerror',e=>errors.push('shortlist: '+e.message));
+  await shortlistPage.goto(new URL('/montres/modeles-populaires.html#selection-10-montres',base).href,
+    {waitUntil:'domcontentloaded'});
+  const shortlist=shortlistPage.locator('#selection-10-montres');
+  assert.equal(await shortlist.locator('.am-focus-item').count(),10,
+    'Ten genuine editorial choices must remain discoverable');
+  const first=shortlist.locator('[data-focus-id="addiesdive-ad2030"]');
+  assert.match(await first.locator('.am-focus-evidence').innerText(),/stock actuel/,
+    'No outdated Amazon model claim may imply live stock');
+  await first.locator('a.am-focus-compare').click();
+  await shortlistPage.locator('#udCompareTable table').waitFor({state:'visible'});
+  assert.equal(new URL(shortlistPage.url()).pathname,'/montres/toutes-les-montres.html');
+  assert.equal(new URL(shortlistPage.url()).searchParams.get('compare'),
+    'addiesdive-ad2030,pagani-pd1776');
+  assert.equal(await shortlistPage.locator('#udTrayItems li').count(),2,
+    'Shortlist comparison must restore two exact watch models');
+  assert.equal(await shortlistPage.locator('#udCompareTable th[scope=col]').count(),3);
+  await checkOverflow(shortlistPage,'Mobile shortlist to exact comparison');
+  await shortlistPage.screenshot({path:'artifacts/mobile-shortlist-comparison.png',fullPage:false});
+  await shortlistPage.close();
+
   const linked=await browser.newPage({viewport:{width:393,height:852},isMobile:true,hasTouch:true});
   linked.on('pageerror',e=>errors.push('deep-link: '+e.message));
   await linked.goto(new URL('/montres/toutes-les-montres.html?compare=skmei-2056,citizen-tsuyosa#comparer',base).href,
