@@ -157,6 +157,7 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
     +'<label>Diamètre documenté<select id="udSize"><option value="all">Toutes les tailles</option><option value="compact">Jusqu’à 38 mm</option><option value="medium">38,1 à 40 mm</option><option value="large">Plus de 40 mm</option><option value="unknown">Non documenté</option></select></label>'
     +'<label>Photographies<select id="udVisual"><option value="all">Toutes les références</option><option value="photo">Avec photo du modèle</option><option value="no-photo">Sans photo publiée</option></select></label>'
     +'<label>Accès marchand<select id="udMerchant"><option value="all">Tous les accès</option><option value="direct">Fiche du modèle identifiée</option><option value="search">Recherche Amazon · modèle à confirmer</option><option value="official">Source externe sans lien d’achat vérifié</option></select></label>'
+    +'<label>Afficher en premier<select id="udSort"><option value="essential">Gamme essentielle · prix à vérifier</option><option value="direct">Fiches marchandes identifiées</option><option value="photo">Modèles avec photographie</option><option value="alpha">Marque A à Z</option><option value="editorial">Ordre éditorial initial</option></select></label>'
     +'<button type="reset">Effacer les filtres</button></form>'
     +'<div id="udViewTools" class="ud-view-tools" hidden><p>Affichage du catalogue</p>'
     +'<div role="group" aria-label="Taille des visuels"><button type="button" id="udViewCompact" aria-pressed="true">Grille</button>'
