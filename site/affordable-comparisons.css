@@ -229,3 +229,48 @@
 @media(prefers-reduced-motion:reduce){
   .am-duel-promo *, .am-duel-page *{scroll-behavior:auto!important;transition:none!important}
 }
+
+
+/* Keep the editorial table's minimum width inside its own scrolling region.
+   Narrow Android viewports must never inherit that table's intrinsic width
+   as the width of the article, its headings or the document. */
+.am-duel-page,
+.am-duel-page .am-duel-decision,
+.am-duel-page .am-duel-models,
+.am-duel-page .am-duel-model,
+.am-duel-page .am-duel-product-copy,
+.am-duel-page .am-duel-choices,
+.am-duel-page .am-duel-bottom-actions{
+  min-width:0;
+  max-width:100%;
+}
+.am-duel-page :is(h1,h2,h3,p,small,a){
+  overflow-wrap:anywhere;
+}
+.am-duel-page .comparison-scroll{
+  display:block;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  overflow-x:auto;
+  overscroll-behavior-x:contain;
+  -webkit-overflow-scrolling:touch;
+}
+.am-duel-page .comparison-scroll .spec-matrix{
+  width:100%;
+  min-width:540px;
+}
+@media(max-width:760px){
+  .am-duel-page .am-duel-models,
+  .am-duel-page .am-duel-choices{
+    grid-template-columns:minmax(0,1fr);
+  }
+  .am-duel-page .am-duel-bottom-actions{
+    flex-direction:column;
+    align-items:stretch;
+  }
+  .am-duel-page .am-duel-bottom-actions>a{
+    width:100%;
+    flex:0 1 auto;
+  }
+}
