@@ -14,8 +14,8 @@ const manifest=JSON.parse(read('seo-manifest.json'));
 assert.equal(manifest.productCount,15);
 assert.equal(manifest.popularAdditionalCount,37,'37 researched models complement the 15 photo-backed core products');
 assert.equal(manifest.popularDetailCount,37,'Every supplemental model requires a dedicated factual landing page');
-assert.equal(manifest.popularAffiliateDirectLinks,manifest.affiliateActive?8:0,'Only source-verified supplementary ASINs may become direct product links');
-assert.equal(manifest.popularAffiliateSearchLinks,manifest.affiliateActive?29:0,'All remaining supplemental products require labeled Amazon searches');
+assert.equal(manifest.popularAffiliateDirectLinks,manifest.affiliateActive?10:0,'Only source-verified supplementary ASINs may become direct product links');
+assert.equal(manifest.popularAffiliateSearchLinks,manifest.affiliateActive?27:0,'All remaining supplemental products require labeled Amazon searches');
 const insightData=JSON.parse(read('editorial-insights.json'));
 assert.equal(insightData.version,1);
 assert.equal(Object.keys(insightData.products).length,15,'15 unique editorial briefs required');
@@ -189,7 +189,7 @@ assert.equal((home.match(/rel="canonical"/g)||[]).length,1,'Homepage has exactly
 // source-confirmed Amazon.fr ASINs can become direct product links.
 const exactPopular=JSON.parse(readFileSync(resolve(root,'../research/amazon-fr-popular-verified.json'),'utf8'));
 const exactPopularLinks=exactPopular.verifiedProducts;
-assert.equal(Object.keys(exactPopularLinks).length,8,'ASIN promotion requires a source-verified registry entry');
+assert.equal(Object.keys(exactPopularLinks).length,10,'ASIN promotion requires a source-verified registry entry');
 assert.equal(exactPopularLinks['casio-gw-m5610u-1'].asin,'B09BCPP68Q','Actual Amazon.fr G-SHOCK source code must be used');
 assert.equal(exactPopularLinks['casio-f91w-1'].asin,'B000J34HN4','Casio F-91W documented Amazon.fr ASIN');
 assert.equal(exactPopularLinks['casio-a168wg-9'].asin,'B002LAS086','Casio vintage gold documented Amazon.fr ASIN');
@@ -202,6 +202,30 @@ assert.equal(skmei1257.verifiedAt,'2026-11-02','SKMEI evidence must be dated');
 assert.equal(skmei1257.evidenceUrl,'https://www.amazon.fr/dp/B07B6ML1VJ');
 assert.match(skmei1257.evidenceListingTitle,/SKMEI.*1257/i);
 assert.match(skmei1257.marketplaceVariant,/1257 Black/,'Specific black variant must not become a generic model claim');
+
+for(const [id,asin,model] of [
+  ['skmei-1251','B072JTCP5H','1251'],
+  ['casio-ae1200wh-1av','B0099M2IWI','AE-1200WH-1AVEF']
+]){
+  const proof=exactPopularLinks[id];
+  assert.ok(proof,'Missing cross-referenced Amazon.fr comparator redirect: '+id);
+  assert.equal(proof.asin,asin,'Redirect ASIN must match the source evidence: '+id);
+  assert.equal(proof.marketplaceModel,model);
+  assert.equal(proof.verifiedAt,'2026-11-02');
+  assert.equal(proof.evidenceType,'amazon_fr_comparator_redirect',
+    'A comparator redirect is NOT a firsthand inspection of Amazon: '+id);
+  assert.equal(proof.evidenceUrl,'https://www.amazon.fr/dp/'+asin);
+  assert.match(proof.evidenceNote,/pas pu être consultée directement/,
+    'The inability to visit the Amazon listing must be documented: '+id);
+  assert.match(proof.comparisonUrl,/^https:\/\/(?:www\.leguide\.com|www\.123comparer\.fr)\//);
+  assert.match(proof.corroborationUrl,/^https:\/\/www\.desertcart\./);
+  const detail=read('montres/'+id+'.html');
+  assert.ok(detail.includes('via redirection du comparateur et source indépendante'),
+    'Product page must NOT claim direct Amazon inspection: '+id);
+  assert.ok(detail.includes('fiche Amazon.fr non consultée directement'),
+    'Buyer-facing evidence status must be prominent: '+id);
+}
+
 
 for(const [id,asin] of [['skmei-1257','B07B6ML1VJ'],['addiesdive-ad2030','B0DNK5TT6D'],['pagani-pd1701','B0C7QC653D']]){
   const proof=exactPopularLinks[id];
@@ -297,11 +321,14 @@ for(const watch of unified.products){
   if(!watch.merchantKind)assert.deepEqual(linkOrder,
     ['ud-details','ud-source'],
     'Unpaid models must not claim an Amazon purchase link: '+watch.id);
+  if(watch.merchantEvidenceType==='amazon_fr_comparator_redirect')assert.ok(
+    card.includes('class="ud-redirect-proof"')&&card.includes('page Amazon.fr non consultée directement'),
+    'Comparator-sourced ASIN must never masquerade a directly inspected Amazon product: '+watch.id);
   if(watch.marketplaceVariant){
     assert.ok(watch.merchantKind==='direct','Only documented ASIN links may mention marketplace variant');
     assert.ok(card.includes('class="ud-exact-variant"'),
       'The Amazon variant must be disclosed at the listing level: '+watch.id);
-    assert.ok(card.includes(watch.marketplaceVariant.replace(/&/g,'&amp;')),
+    assert.ok(card.includes(watch.marketplaceVariant.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')),
       'The exact researched marketplace variant must be shown: '+watch.id);
   }
 
@@ -692,7 +719,7 @@ const trackedDirect=popularHtml.match(/data-amazon-product=/g)||[];
 const sponsoring=popularHtml.match(/rel="noopener noreferrer nofollow sponsored"/g)||[];
 assert.equal(trackedResults.length,manifest.popularAffiliateSearchLinks,'Only unverified models may have search links');
 assert.equal(trackedDirect.length,manifest.popularAffiliateDirectLinks+(manifest.affiliateActive?6:0),
-  'Six source-confirmed shortlist merchant actions augment 8 original cards, without pretending to verify new ASINs');
+  'Six source-confirmed shortlist merchant actions augment 10 original cards, without pretending to verify new ASINs');
 assert.equal(sponsoring.length,manifest.affiliateActive?43:0,'All 37 catalogue and six shortlist paid actions must carry sponsored relation');
 assert.equal((popularHtml.match(/amazon\.fr\/dp\/B09BCPP68Q/g)||[]).length,manifest.affiliateActive?2:0,
   'The same G-SHOCK ASIN appears in one standard card and one shortlist action, never a new unverified ASIN');

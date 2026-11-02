@@ -77,6 +77,7 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
     const facts=keyFacts.map(([label,value])=>
       '<div class="am-extra-fact"><dt>'+e(label)+'</dt><dd>'+e(value)+'</dd></div>').join('');
     const direct=verifiedLinks.get(p.id);
+    const comparator=direct?.evidenceType==='amazon_fr_comparator_redirect';
     const alternatePartner=partnerOffers.get(p.id);
     const actions=affiliateLink(p)
       +partnerLink(p)
@@ -112,12 +113,12 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       +'<dl class="am-extra-facts">'+facts+'</dl>'
       +'<p class="am-extra-reference"><span>Référence à retrouver chez le marchand</span><strong>'+e(name)+'</strong></p>'
       +'<p class="am-extra-approval">À vérifier auprès du vendeur : référence exacte, variante, prix, disponibilité, garantie et conditions de retour. Nous ne vendons pas directement ce produit.</p>'
-      +(affiliates.enabled?'<p class="am-extra-link-status '+(direct?'am-extra-link-direct':'am-extra-link-search')+'"><strong>'+(direct?'Fiche Amazon.fr correspondant au code modèle':'Recherche Amazon.fr — modèle non garanti')+'</strong><span>'+(direct?'Lien associé à un ASIN documenté. Contrôlez la variante, le vendeur et le stock.':'Les résultats peuvent contenir d’autres montres. Vérifiez le code affiché ci-dessus avant l’achat.')+'</span>'+(direct?.marketplaceVariant?'<span class="am-extra-merchant-variant"><strong>Variante de la fiche Amazon :</strong> '+e(direct.marketplaceVariant)+'</span>':'')+'</p>':'')
+      +(affiliates.enabled?'<p class="am-extra-link-status '+(direct?'am-extra-link-direct':'am-extra-link-search')+'"><strong>'+(direct?'Fiche Amazon.fr correspondant au code modèle':'Recherche Amazon.fr — modèle non garanti')+'</strong><span>'+(direct?(comparator?'ASIN recoupé via un comparateur et une source indépendante ; fiche Amazon.fr non consultée directement. Vérifiez la variante, le vendeur et le stock.':'Lien associé à un ASIN documenté. Contrôlez la variante, le vendeur et le stock.'):'Les résultats peuvent contenir d’autres montres. Vérifiez le code affiché ci-dessus avant l’achat.')+'</span>'+(direct?.marketplaceVariant?'<span class="am-extra-merchant-variant"><strong>Variante de la fiche Amazon :</strong> '+e(direct.marketplaceVariant)+'</span>':'')+'</p>':'')
       +'<div class="am-extra-actions">'+actions+'</div>'
       +'<a class="am-extra-compare-cta" href="'+e(compareUrl)+'" data-compare-source="'+e(p.id)+'">Comparer avec '+e(suggestions[0].brand+' '+suggestions[0].model)+' et '+e(suggestions[1].brand+' '+suggestions[1].model)+'</a>'
       +(affiliates.enabled
         ?'<p class="am-extra-disclosure">Lien rémunéré Amazon.fr : une commission peut nous être versée pour un achat éligible. '
-          +(direct?'Correspondance du code modèle vérifiée le '+e(direct.verifiedAt)+' sur une fiche Amazon.fr ; prix, vendeur et disponibilité restent à contrôler lors de la visite.':'Le lien ouvre des résultats de recherche pouvant inclure d’autres références ou variantes.')
+          +(direct?'Correspondance du code modèle vérifiée le '+e(direct.verifiedAt)+(comparator?' via redirection du comparateur et source indépendante (Amazon.fr non consulté directement) ; prix, vendeur et disponibilité restent à contrôler lors de la visite.':' sur une fiche Amazon.fr ; prix, vendeur et disponibilité restent à contrôler lors de la visite.'):'Le lien ouvre des résultats de recherche pouvant inclure d’autres références ou variantes.')
           +' En tant que Partenaire Amazon, je réalise un bénéfice sur les achats remplissant les conditions requises.</p>'
         :alternatePartner
           ?'<p class="am-extra-disclosure">Lien rémunéré Awin vers une référence documentée : une commission peut nous être versée en cas d’achat éligible, sans garantie de disponibilité ni de rémunération. La variante reste à contrôler chez le marchand.</p>'

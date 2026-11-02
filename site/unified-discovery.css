@@ -45,6 +45,8 @@
 .ud-card[data-merchant="search"] .ud-merchant{background:#fff9ef;border-color:#dcc9a4;color:#785829!important}
 .ud-exact-variant{margin:0;padding:10px 11px;background:#f8f4ed;border-left:3px solid #ac8856;color:#4d584d;font:400 11px/1.5 system-ui,sans-serif;overflow-wrap:anywhere}
 .ud-exact-variant strong{color:#3d4e3e}
+.ud-redirect-proof{margin:0;padding:9px 11px;border-left:3px solid #b29a72;background:#f9f7f0;color:#465447;font:500 11px/1.55 system-ui,sans-serif;overflow-wrap:anywhere}
+
 .ud-merchant:hover,.ud-source:hover{filter:brightness(.965)}
 
 .ud-select{width:100%;border:1px solid #c4cbbf;background:#fffdf7;color:#294934}

@@ -49,7 +49,7 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
       glass:p.specs?.glass||'Non documenté',water:p.specs?.waterResistance||'Non documenté',
       description:p.description,lead:p.story||p.description,caution:null,officialUrl:p.officialUrl,
       photoUrl:photo,detailUrl:'./montres/'+p.id+'.html',
-      merchantUrl:paid?.url||null,merchantKind:paid?'direct':null,marketplaceVariant:null
+      merchantUrl:paid?.url||null,merchantKind:paid?'direct':null,marketplaceVariant:null,merchantEvidenceType:null
     });
   }
   for(const p of extras){
@@ -65,7 +65,8 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
       detailUrl:'./montres/'+p.id+'.html',
       merchantUrl:affiliates.enabled?(verified?.url||'https://www.amazon.fr/s?k='+encodeURIComponent((p.brand+' '+p.model).slice(0,130))+'&tag='+encodeURIComponent(amazonPartnerTag)):null,
       merchantKind:!affiliates.enabled?null:verified?'direct':'search',
-      marketplaceVariant:verified?.marketplaceVariant||null
+      marketplaceVariant:verified?.marketplaceVariant||null,
+      merchantEvidenceType:verified?.evidenceType||null
     });
   }
   if(normalized.length!==52||new Set(normalized.map(p=>p.id)).size!==52)
@@ -84,7 +85,9 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
     :'<span class="ud-art-fallback"><span class="ud-art-fallback-kicker">Fiche produit documentée</span><span class="ud-art-fallback-brand">'+e(p.brand)+'</span><strong>'+e(p.model)+'</strong><small>Aucune photographie publiée pour cette référence</small></span>';
   const card=p=>{
     const merchantType=p.merchantKind||'official';
-    const merchantLabel={direct:'Fiche du modèle identifiée',search:'Recherche marchande · variante à confirmer',official:'Source externe · sans lien d’achat vérifié'}[merchantType];
+    const merchantLabel=p.merchantEvidenceType==='amazon_fr_comparator_redirect'
+      ?'Référence et ASIN recoupés via comparateur'
+      :{direct:'Fiche du modèle identifiée',search:'Recherche marchande · variante à confirmer',official:'Source externe · sans lien d’achat vérifié'}[merchantType];
     const merchant=p.merchantUrl
       ?'<a class="ud-merchant" target="_blank" rel="noopener noreferrer nofollow sponsored" aria-label="'+e((p.merchantKind==='direct'?'Voir cette référence sur Amazon.fr · lien rémunéré':'Rechercher sur Amazon.fr · lien rémunéré')+' — '+p.brand+' '+p.model+(p.merchantKind==='direct'?' ; fiche marchande identifiée':' ; vérifier la variante avant achat'))+'" data-amazon-'+(p.merchantKind==='direct'?'product':'search-id')+'="'+e(p.id)+'" data-amazon-placement="popular" href="'+e(p.merchantUrl)+'">'+(p.merchantKind==='direct'?'Voir cette référence sur Amazon.fr':'Rechercher sur Amazon.fr')+' · lien rémunéré</a>'
       :'';
@@ -99,6 +102,8 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
     const actions=p.merchantKind==='search'?source+merchant:merchant+source;
     const variant=p.merchantKind==='direct'&&p.marketplaceVariant
       ?'<p class="ud-exact-variant"><strong>Variante Amazon à vérifier :</strong> '+e(p.marketplaceVariant)+'</p>':'';
+    const redirectProof=p.merchantEvidenceType==='amazon_fr_comparator_redirect'
+      ?'<p class="ud-redirect-proof">ASIN recoupé via comparateur et catalogue tiers ; page Amazon.fr non consultée directement. Vérifier le produit avant commande.</p>':'';
 
     return '<article class="ud-card" id="modele-'+e(p.id)+'" data-id="'+e(p.id)+'"'
       +' data-brand="'+e(p.brand)+'" data-tier="'+e(p.tier)+'" data-style="'+e(p.style)+'"'
@@ -109,7 +114,7 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
       +'<span class="ud-visual-label">'+(p.photoUrl?'Photo du modèle':'Sans photo publiée')+'</span></div>'
       +'<div class="ud-card-main"><p class="ud-kicker">'+e(tierLabels[p.tier])+' · '+e(styleLabels[p.style])+'</p>'
       +'<p class="ud-merchant-kind">'+e(merchantLabel)+'</p>'
-      +variant
+      +variant+redirectProof
       +'<h2><a href="'+e(p.detailUrl.replace('./montres/','./'))+'">'+e(p.brand+' '+p.model)+'</a></h2>'
       +'<p class="ud-description">'+e(p.lead)+'</p>'
       +'<dl><div><dt>Mouvement</dt><dd>'+e(movementLabels[p.movement])+'</dd></div><div><dt>Boîtier</dt><dd>'+e(p.caseText)+'</dd></div></dl>'
