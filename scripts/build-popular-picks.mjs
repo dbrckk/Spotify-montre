@@ -104,6 +104,54 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
       +'<p class="am-pick-note">'+(verifiedLinks.has(p.id)?'Lien vers une fiche Amazon.fr correspondant à la référence documentée. Vérifiez la variante, le vendeur, le prix et la disponibilité lors de la visite.':'La recherche Amazon peut présenter des variantes ou d’autres produits. Vérifier la référence exacte, le vendeur et le prix avant de commander.')+'</p>'
       +'</div></article>';
   };
+  // Premium, source-backed shopping path near the very top of the homepage.
+  // All displayed references exist in the 37-watch research catalogue. These
+  // are editorial affordable-style choices, NOT asserted prices/bestsellers.
+  // The default product action must remain usable with JavaScript disabled.
+  const affordableIds=['skmei-1257','skmei-1251','addiesdive-ad2030','pagani-pd1701'];
+  const affordable=affordableIds.map(id=>picks.find(p=>p.id===id));
+  if(affordable.some(p=>!p)||new Set(affordableIds).size!==4)
+    throw Error('Affordable showroom must contain four distinct researched watches');
+  if(affiliates.enabled&&affordable.some(p=>!verifiedLinks.has(p.id)))
+    throw Error('Affordable merchant showroom requires four documented exact ASIN destinations');
+  const affordableCard=p=>{
+    const photo=approvedPhotos.get(p.id);
+    const direct=verifiedLinks.get(p.id);
+    const viaComparator=direct?.evidenceType==='amazon_fr_comparator_redirect';
+    const label=viaComparator?'ASIN recoupé via comparateur'
+      :direct?'Fiche Amazon.fr documentée':'Référence et vendeur documentés';
+    const merchant=direct
+      ?link(direct.url,'Voir la fiche Amazon.fr · lien rémunéré',true,p.id,'product')
+      :link(p.officialUrl,'Voir la fiche de la marque · lien non rémunéré',false,p.id,'official');
+    return '<article class="am-affordable-card" data-affordable-id="'+e(p.id)+'"'
+      +' data-affordable-proof="'+(viaComparator?'comparator':direct?'listing':'source')+'">'
+      +'<a class="am-affordable-media" href="./montres/'+e(p.id)+'.html" aria-label="Voir la fiche de '+e(p.brand+' '+p.model)+'">'
+      +(photo?'<img src="./'+e(photo.url)+'" alt="Montre '+e(p.brand+' '+p.model)+' — photo du modèle"'
+        +' width="440" height="440" loading="lazy" decoding="async">'
+        :'<span class="am-affordable-no-photo"><strong>'+e(p.brand)+'</strong><small>Photo exacte sur la fiche vendeur</small></span>')
+      +'</a><div class="am-affordable-body"><span class="am-affordable-category">'+e(p.category)+'</span>'
+      +'<h3><a href="./montres/'+e(p.id)+'.html">'+e(p.brand+' '+p.model)+'</a></h3>'
+      +'<p class="am-affordable-lead">'+e(p.lead)+'</p>'
+      +'<p class="am-affordable-proof">'+e(label)+'</p>'
+      +(direct?.marketplaceVariant?'<p class="am-affordable-variant"><strong>Variante à contrôler :</strong> '
+        +e(direct.marketplaceVariant)+'</p>':'')
+      +(viaComparator?'<p class="am-affordable-comparator">La page Amazon.fr n’a pas été consultée directement : référence et ASIN recoupés via des sources tierces.</p>':'')
+      +'<div class="am-affordable-actions"><a class="am-affordable-detail" href="./montres/'+e(p.id)+'.html">Caractéristiques et sources</a>'
+      +merchant+'</div></div></article>';
+  };
+  const budgetShowcase='<section class="am-affordable" id="selection-accessible" aria-labelledby="amAffordableTitle">'
+    +'<div class="wrap"><div class="am-affordable-header"><div>'
+    +'<p class="am-affordable-eyebrow">Montres accessibles · sélection éditoriale</p>'
+    +'<h2 id="amAffordableTitle">Quatre styles à découvrir, sans détour.</h2>'
+    +'</div><p>Deux digitales SKMEI, une ADDIESDIVE au cadran épuré et un chronographe Pagani Design.'
+    +' Des photographies des modèles et des références marchandes documentées, sans prix, stock ni classement de ventes inventés.</p></div>'
+    +'<div class="am-affordable-grid">'+affordable.map(affordableCard).join('')+'</div>'
+    +'<div class="am-affordable-footer"><p>Les liens Amazon.fr peuvent être rémunérés. Une correspondance ASIN ne garantit pas le prix, le vendeur,'
+    +' la livraison ni la variante en stock. Les droits de publication des photos reposent sur les déclarations de l’éditeur,'
+    +' non vérifiées indépendamment.</p>'
+    +'<a href="./montres/toutes-les-montres.html?brand=SKMEI">Explorer les dix modèles SKMEI</a>'
+    +'<a href="./montres/toutes-les-montres.html?merchant=direct&sort=direct">Voir les références avec fiche Amazon identifiée</a></div>'
+    +'</div></section>';
   const featuredIds=['casio-gw-m5610u-1','skmei-2056','skmei-2256','casio-ga-2100-1a1','skmei-1257','casio-f91w-1','addiesdive-ad2030','pagani-pd1701'];
   const featured=featuredIds.map(id=>picks.find(p=>p.id===id));
   if(featured.some(p=>!p))throw Error('Featured model not in source catalog');
@@ -152,5 +200,5 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     {'@type':'ItemList',numberOfItems:picks.length,itemListElement:picks.map((p,i)=>({'@type':'ListItem',position:i+1,name:p.brand+' '+p.model,url:u('montres/'+p.id+'.html')}))}
   ]};
   writeFileSync(join(root,path),page(pageHead({title:picks.length+' montres à découvrir : SKMEI, Casio, ADDIESDIVE, Pagani | Atelier Montres',description:picks.length+' montres sourcées, dont SKMEI accessibles : rétro, sport, acier, quartz et automatiques. Recherches Amazon signalées.',path}),main,graph).replace('</head>','<link rel="stylesheet" href="../popular-picks.css"><script defer src="../popular-filters.js"></script></head>'));
-  return {path,detailPaths,shopperPaths:shopper.paths,teaser,count:picks.length,featuredCount:featured.length,searchLinks:affiliates.enabled?picks.length-verifiedLinks.size:0,directLinks:verifiedLinks.size,partnerAffiliateLinks:partnerOffers.size};
+  return {path,detailPaths,shopperPaths:shopper.paths,teaser,budgetShowcase,count:picks.length,featuredCount:featured.length,searchLinks:affiliates.enabled?picks.length-verifiedLinks.size:0,directLinks:verifiedLinks.size,partnerAffiliateLinks:partnerOffers.size};
 }
