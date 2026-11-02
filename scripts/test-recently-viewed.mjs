@@ -24,7 +24,16 @@ try{
   assert.equal(await items.count(),3,'Three recently opened models are shown');
   assert.ok((await items.first().getAttribute('href')).includes('seiko-5'),'Most recent comes first');
   const thumbnail=items.first().locator('img');
-  await thumbnail.evaluate(img=>img.decode());
+  // History thumbnails are intentionally lazy-loaded below the fold.
+  // Calling decode() before scrolling can wait forever for a request the
+  // browser has not started; production CI previously timed out at 120s.
+  await thumbnail.scrollIntoViewIfNeeded({timeout:15000});
+  await thumbnail.evaluate(async img=>{
+    await Promise.race([
+      img.decode(),
+      new Promise((_,reject)=>setTimeout(()=>reject(new Error('History image did not decode within 15s after scrolling into view')),15000))
+    ]);
+  });
   const historyPhoto=await thumbnail.evaluate(img=>({width:img.naturalWidth,src:img.currentSrc}));
   assert.ok(historyPhoto.width>=100,'History thumbnail must decode for its actual 120px displayed size');
   assert.ok(new URL(historyPhoto.src).origin===new URL(base).origin&&/\/assets\/(watches|watch-responsive)\/seiko-5(?:-480|-800)?\.webp/.test(historyPhoto.src),'Recent watches must use the authorized local photo or its responsive derivative');
