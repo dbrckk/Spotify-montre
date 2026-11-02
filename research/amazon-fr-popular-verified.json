@@ -3,6 +3,34 @@
   "marketplace": "amazon.fr",
   "standard": "amazon_fr_exact_model_listing_title_and_ASIN",
   "verifiedProducts": {
+    "skmei-1251": {
+      "brand": "SKMEI",
+      "canonicalModel": "1251",
+      "marketplaceModel": "1251",
+      "asin": "B072JTCP5H",
+      "verifiedAt": "2026-11-02",
+      "evidenceUrl": "https://www.amazon.fr/dp/B072JTCP5H",
+      "evidenceListingTitle": "SKMEI 1251 Montre pour homme Montre de sport numérique Noire",
+      "evidenceType": "amazon_fr_comparator_redirect",
+      "comparisonUrl": "https://www.leguide.com/c/internet-et-telecom/smartwatches-100570713/?marque=129959%7Cskmei",
+      "corroborationUrl": "https://www.desertcart.in/products/253735536-skmei-waterproof-fashion-digital-watch",
+      "marketplaceVariant": "SKMEI 1251 noire — titre du comparateur ; couleur et modèle final à confirmer sur Amazon.fr",
+      "evidenceNote": "Le 2 novembre 2026, la fiche publique LeGuide affiche SKMEI 1251 noire et sa redirection marchande Amazon.fr aboutit à /dp/B072JTCP5H. Une fiche externe Desertcart relie cet ASIN à la marque SKMEI et au coloris All Black. La page Amazon.fr elle-même n'a pas pu être consultée directement. Identification par rapprochement de redirection et catalogue tiers, sans preuve de prix, stock, vendeur, expédition en France ou validation du coloris dans la page Amazon actuelle."
+    },
+    "casio-ae1200wh-1av": {
+      "brand": "Casio",
+      "canonicalModel": "AE-1200WH-1AV",
+      "marketplaceModel": "AE-1200WH-1AVEF",
+      "asin": "B0099M2IWI",
+      "verifiedAt": "2026-11-02",
+      "evidenceUrl": "https://www.amazon.fr/dp/B0099M2IWI",
+      "evidenceListingTitle": "Casio Collection Montre Homme AE-1200WH-1AVEF",
+      "evidenceType": "amazon_fr_comparator_redirect",
+      "comparisonUrl": "https://www.123comparer.fr/Montres-homme/gohuqcjagwad1ptagh4dy.html",
+      "corroborationUrl": "https://www.desertcart.com.au/products/49304274-collection-mens-watch-ae-1200wh",
+      "marketplaceVariant": "Casio AE-1200WH-1AVEF — variante régionale noire à bracelet résine ; confirmer auprès d'Amazon.fr",
+      "evidenceNote": "Le 2 novembre 2026, la page 123comparer identifie la montre noire Casio AE-1200WH-1AVEF et son lien marchand Amazon.fr redirige vers /dp/B0099M2IWI. Une fiche produit tierce Desertcart relie précisément l'ASIN, le numéro fabricant AE-1200WH-1AVEF et le bracelet noir en résine. Amazon.fr ne s'est pas laissé consulter directement. Le rapprochement ASIN/référence est documenté par ces deux sources, sans prétendre connaître prix, stock, vendeur, livraison ou variante choisie lors d'une visite future."
+    },
     "skmei-1257": {
       "brand": "SKMEI",
       "canonicalModel": "1257",
