@@ -7,7 +7,7 @@
 (() => {
   const idPattern=/^[a-z0-9-]{4,64}$/;
   const asinPattern=/^\/dp\/[A-Z0-9]{10}$/;
-  const placements=new Set(['catalogue','fiche','seo','popular']);
+  const placements=new Set(['catalogue','fiche','seo','popular','showroom']);
   // An exact host allowlist prevents counting arbitrary destinations as
   // approved watch merchants; tracking still never proves an affiliate sale.
   const merchantHosts=new Set([
