@@ -19,6 +19,7 @@ const repoRoot=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const popular=JSON.parse(readFileSync(resolve(repoRoot,'site/selection-populaires.json'),'utf8')).products;
 const core=JSON.parse(readFileSync(resolve(repoRoot,'site/selection-affiliation.json'),'utf8')).products;
 const verified=JSON.parse(readFileSync(resolve(repoRoot,'research/amazon-fr-popular-verified.json'),'utf8')).verifiedProducts;
+const approvedPhotos=JSON.parse(readFileSync(resolve(repoRoot,'site/popular-photo-rights.json'),'utf8')).photos;
 if(popular.length!==37||core.length!==15||new Set([...popular,...core].map(p=>p.id)).size!==52)throw Error('Expected 52 unique documented watches in current catalog');
 const report={checkedAt:new Date().toISOString(),site:base.href,pages:0,issues,checked,commercialPages:0,commercialChecks:0};
 let affiliateActive=null;
@@ -103,6 +104,17 @@ async function auditPage(url){
         expect(product?.model===model.model,'Structured Product model must match exact watch');
         expect(!product?.offers&&!product?.aggregateRating,'No invented commercial offers or ratings');
       }catch(error){issues.push(path+': invalid Product JSON-LD ('+error.message+')');}
+    }
+    const photo=approvedPhotos[model.id];
+    if(structured){
+      try{
+        const product=JSON.parse(structured[1])['@graph']?.find(item=>item['@type']==='Product');
+        const expectedImage=photo?new URL(photo.file,base).href:null;
+        expect(expectedImage?JSON.stringify(product?.image)==JSON.stringify([expectedImage]):!product?.image,
+          'Published Product.image must match the exact authorized model photo, or be absent');
+        if(expectedImage)expect(html.includes(photo.file.split('/').pop()),
+          'Approved product photo missing from rendered page');
+      }catch(error){issues.push(path+': invalid Product.image verification ('+error.message+')');}
     }
     const direct=verified[model.id];
     if(direct&&affiliateActive===true){
@@ -193,6 +205,19 @@ async function audit(){
       if(!response.ok||!(response.headers.get('content-type')||'').includes('image/webp')){
         issues.push(asset+': missing optimized WebP in production (HTTP '+response.status+')');
       }
+      await response.body?.cancel();
+    }catch(error){issues.push(asset+': '+error.message);}
+  }
+  // Audit a representative cross-brand sample of approved local product photos.
+  // This verifies the actual public image endpoint, not only its HTML URL.
+  const imageCandidates=Object.values(approvedPhotos);
+  const imageSamples=[imageCandidates[0],imageCandidates[Math.floor(imageCandidates.length/2)],imageCandidates.at(-1)].filter(Boolean);
+  for(const photo of imageSamples){
+    const asset=photo.file;
+    try{
+      const response=await request(new URL(asset,base));
+      if(!response.ok||!(response.headers.get('content-type')||'').includes('image/webp'))
+        issues.push(asset+': authorized product photo unavailable or not WebP (HTTP '+response.status+')');
       await response.body?.cancel();
     }catch(error){issues.push(asset+': '+error.message);}
   }
