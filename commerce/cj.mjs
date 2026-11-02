@@ -1,3 +1,4 @@
+import {usdToCents,computeCjFreightCents,computeCjLandedCents} from './landed-cost.mjs';
 // CJdropshipping OpenAPI v2. All calls are server-side; no credentials/client data in browser.
 const ROOT='https://developers.cjdropshipping.com/api2.0/v1';
 function assertToken(token){
@@ -27,15 +28,6 @@ async function api(path,token,{method='GET',body,fetcher=fetch}={}){
     throw Error('CJ API did not confirm success');
   return data.data;
 }
-function usdCents(value){
-  if(!['string','number'].includes(typeof value)||value===null||value==='')throw Error('CJ USD amount missing');
-  const str=String(value);
-  if(!/^(?:0|[1-9]\d{0,7})(?:\.\d{1,2})?$/.test(str))throw Error('CJ USD amount invalid');
-  const [d,c='']=str.split('.');
-  const sum=Number(d)*100+Number(c.padEnd(2,'0'));
-  if(!Number.isSafeInteger(sum))throw Error('CJ USD amount unsafe');
-  return sum;
-}
 // Refuse payment before an up-to-date inventory and French postage quote exists.
 export async function preflightCjDelivery({vid,originCountry='CN',postalCode,
   logisticsName,maxSupplierUsdCents,accessToken,fetcher=fetch}){
@@ -46,7 +38,7 @@ export async function preflightCjDelivery({vid,originCountry='CN',postalCode,
   const variant=await api('/product/variant/queryByVid?vid='+encodeURIComponent(vid),
     accessToken,{fetcher});
   if(variant?.vid!==vid)throw Error('Supplier variant identity mismatch');
-  const productCostUsdCents=usdCents(variant.variantSellPrice);
+  const productCostUsdCents=usdToCents(variant.variantSellPrice);
   if(productCostUsdCents<=0)throw Error('Supplier product price unavailable');
   const stock=await api('/product/stock/queryByVid?vid='+encodeURIComponent(vid),
     accessToken,{fetcher});
@@ -60,24 +52,23 @@ export async function preflightCjDelivery({vid,originCountry='CN',postalCode,
   if(!Array.isArray(freight))throw Error('Supplier freight response invalid');
   const candidate=freight.find(x=>x.logisticName===logisticsName);
   if(!candidate)throw Error('No confirmed delivery method to this French postcode');
-  // Quote amounts are USD, may omit taxes: absence is NOT equivalent to zero.
-  const postage=candidate.totalPostageFee??candidate.logisticPrice;
-  const postageCents=usdCents(postage);
-  if(candidate.taxesFee===undefined||candidate.clearanceOperationFee===undefined)
-    throw Error('Supplier customs or tax quote incomplete: refuse checkout');
-  const shippingAndTaxes=postageCents+
-    usdCents(candidate.taxesFee)+usdCents(candidate.clearanceOperationFee);
-  if(productCostUsdCents+shippingAndTaxes>maxSupplierUsdCents)
+  // CJ totalPostageFee already includes duties/taxes/clearance.
+  // A missing tariff or tax value is not proof that the fee is zero.
+  const freightBreakdown=computeCjFreightCents(candidate);
+  const shippingAndTaxes=freightBreakdown.freightAndImportUsdCents;
+  const landedUsdCents=computeCjLandedCents(productCostUsdCents,freightBreakdown);
+  if(landedUsdCents>maxSupplierUsdCents)
     throw Error('Supplier product, freight or customs exceed total approved budget');
   const balance=await getCjBalance({accessToken,fetcher});
   if(balance<maxSupplierUsdCents)throw Error('Supplier wallet insufficient for a new sale');
-  return {productUsdCents:productCostUsdCents,freightUsdCents:shippingAndTaxes,balanceUsdCents:balance,
+  return {productUsdCents:productCostUsdCents,freightUsdCents:shippingAndTaxes,
+    landedUsdCents,balanceUsdCents:balance,freightBreakdown,
     logisticsName,stockConfirmed:true};
 }
 
 export async function getCjBalance({accessToken,fetcher=fetch}){
   const data=await api('/shopping/pay/getBalance',accessToken,{fetcher});
-  return usdCents(data?.amount);
+  return usdToCents(data?.amount);
 }
 export function buildCjOrder(order,customer){
   validOrder(order,customer);
@@ -108,7 +99,7 @@ export async function submitCjBalanceOrder({order,customer,accessToken,fetcher=f
     throw Error('CJ order response mismatch: manual reconciliation required');
   let actualCents=null;
   if(data.actualPayment!==undefined&&data.actualPayment!==null&&data.actualPayment!=='')
-    actualCents=usdCents(data.actualPayment);
+    actualCents=usdToCents(data.actualPayment);
   if(actualCents!==null&&actualCents>order.supplier_max_usd_cents)
     throw Error('CJ supplier charge exceeded the approved ceiling; investigate payment immediately');
   return {supplierId:String(data.orderId),orderNumber:order.id,
