@@ -81,7 +81,15 @@ assert.ok(!html.includes('Habituellement sous 120 €'),'Unverified shop prices 
 assert.match(ui,/entry\.sizeNote/);
 assert.match(ui,/tier','style','movement','size/);
 assert.match(html,/src="\.\/watch-illustrations\.js" defer/);
-assert.doesNotMatch(html,/src="\.\/assets\/watches\//);
+// The three editorial shortcuts use only declared, committed exact-model
+// photographs. Recommendation images themselves remain data-driven and rights-gated.
+const editorialImageSources=[...html.matchAll(/<img src="(\.\/assets\/watches(?:-popular)?\/[a-z0-9-]+\.webp)"/g)]
+  .map(match=>match[1]);
+assert.deepEqual(editorialImageSources,[
+  './assets/watches-popular/skmei-2056.webp',
+  './assets/watches/citizen-tsuyosa.webp',
+  './assets/watches-popular/pagani-pd1701.webp'
+],'Only the three verified editorial watch shortcuts may embed local packshots directly');
 assert.match(html,/src="\.\/conseiller-engine\.js" defer/);
 assert.match(html,/src="\.\/conseiller\.js" defer/);
 assert.match(html,/Sans inscription/);
