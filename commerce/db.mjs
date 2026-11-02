@@ -127,6 +127,21 @@ export async function recordPaymentStatus(pool,orderId,verified){
     const {rows}=await client.query('SELECT * FROM commerce_orders WHERE id=$1 FOR UPDATE',[orderId]);
     const o=rows[0];if(!o||o.payment_id!==verified.paymentId||
       o.amount_eur_cents!==verified.amountCents)throw Error('Payment and stored order mismatch');
+    // A chargeback or refund may arrive while the original payment still
+    // reports status=paid. Block dispatch and alert the operator immediately.
+    if(verified.reversed===true&&
+      ['PAYMENT_PENDING','PAID','SUPPLIER_SENDING','SUPPLIER_SUBMITTED',
+        'SUPPLIER_PAID','SHIPPED','DELIVERED'].includes(o.status)){
+      const next=o.status==='PAYMENT_PENDING'?'PAYMENT_REVIEW':'EXCEPTION';
+      await client.query('UPDATE commerce_orders SET status=$2,updated_at=now() WHERE id=$1',[o.id,next]);
+      await client.query(
+        'INSERT INTO commerce_events(order_id,event_type,details) VALUES($1,$2,$3)',
+        [o.id,'PAYMENT_REVERSAL_DETECTED',JSON.stringify({
+          previousStatus:o.status,action:'manual_refund_or_dispute_review_no_automatic_supplier_order'
+        })]
+      );
+      return {changed:true,status:next};
+    }
     if(o.status==='PAYMENT_PENDING'){
       const next=verified.paid?'PAID':
         ['failed','expired','canceled'].includes(verified.status)?'PAYMENT_FAILED':null;
