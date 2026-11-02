@@ -157,13 +157,13 @@ try{
  }
 
  assert.equal(await popularPage.locator('.am-picks-tier').count(),3,'All three editorial ranges are represented');
- assert.equal(await popularPage.locator('a[data-amazon-search-id]').count(),30,'Thirty variants without documented ASINs must use labeled search results');
- assert.equal(await popularPage.locator('a[data-amazon-product]').count(),12,
-   'Seven original exact products plus five direct-merchant shortlist cards are attributed without new ASINs');
+ assert.equal(await popularPage.locator('a[data-amazon-search-id]').count(),29,'Twenty-nine variants without documented ASINs must use labeled search results');
+ assert.equal(await popularPage.locator('a[data-amazon-product]').count(),13,
+   'Eight original exact products plus five direct-merchant shortlist cards are attributed without new ASINs');
  const confirmedGshock=popularPage.locator('#pick-casio-gw-m5610u-1 a[data-amazon-product]');
  assert.equal(await confirmedGshock.getAttribute('href'),'https://www.amazon.fr/dp/B09BCPP68Q?tag=drackk04-21');
  assert.equal(await confirmedGshock.getAttribute('data-amazon-placement'),'popular');
- for(const [id,asin] of [['casio-a158wea-1','B000GAYQJ0'],['casio-ga-2100-1a1','B07WGJ1JNW'],['addiesdive-ad2030','B0DNK5TT6D'],['pagani-pd1701','B0C7QC653D']]){
+ for(const [id,asin] of [['skmei-1257','B07B6ML1VJ'],['casio-a158wea-1','B000GAYQJ0'],['casio-ga-2100-1a1','B07WGJ1JNW'],['addiesdive-ad2030','B0DNK5TT6D'],['pagani-pd1701','B0C7QC653D']]){
    const exact=popularPage.locator('#pick-'+id+' a[data-amazon-product]');
    assert.equal(await exact.count(),1,'Verified Amazon.fr product link required for '+id);
    assert.equal(await exact.getAttribute('href'),'https://www.amazon.fr/dp/'+asin+'?tag=drackk04-21','Exact attributed destination for '+id);
@@ -389,7 +389,7 @@ try{
  }
  assert.ok(narrow.scroll<=narrow.client+2,'Supplemental watch landing must reflow at 320 CSS px '+JSON.stringify(narrow));
  await popularPage.close();
- console.log('PASS: 37 SEO watch pages, seven documented Amazon.fr ASINs, thirty honest searches, exact variants and Android reflow');
+ console.log('PASS: 37 SEO watch pages, eight documented Amazon.fr ASINs, twenty-nine honest searches, exact variants and Android reflow');
  const shopFirst=await page.evaluate(()=>{
    const ids=['gammes','montres','amEditorialGallery','histoire'];
    const positions=ids.map(id=>document.getElementById(id)?.getBoundingClientRect().top+window.scrollY);
