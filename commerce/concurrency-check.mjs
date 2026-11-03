@@ -37,11 +37,16 @@ try{
        data_transfer_verified,verified_until,delivery_min_business_days,
        delivery_max_business_days)
     VALUES ($1,'Synthetic CI watch — never for sale',8000,1200,
-      2200,2000,900,3000,'ci-supplier-sku','ci-shipping','CN',
+      2200,2000,900,2000,'ci-supplier-sku','ci-shipping','CN',
       true,true,true,true,true,true,true,true,true,true,true,
       now()+interval '1 day',7,20)
   `,[offerId]);
   inserted=true;
+  // Also support the stricter FX migration when the parallel finance PR lands.
+  const fxColumn=await pool.query(
+    "SELECT 1 FROM information_schema.columns WHERE table_schema=current_schema() AND table_name='commerce_offers' AND column_name='supplier_fx_max_eur_per_usd_bps'");
+  if(fxColumn.rowCount)
+    await pool.query('UPDATE commerce_offers SET supplier_fx_max_eur_per_usd_bps=10500 WHERE id=$1',[offerId]);
   // Two clients can both find no prior order before either transaction commits.
   // The DB lock must let exactly one reserve and the other reuse it.
   const [a,b]=await Promise.all([
