@@ -22,6 +22,57 @@ son prix final consommateur.
 Ne jamais mettre `MOLLIE_API_KEY` ni `DATABASE_URL` dans ce workflow de
 découverte : le compte marchand et la base n'y sont pas nécessaires.
 
+## Recherche automatique par mot-clé, sans connaître un VID
+
+Le nouveau workflow **[Rechercher des montres CJ sans VID ni achat](https://github.com/dbrckk/Spotify-montre/actions/workflows/search-cj-watches.yml)**
+supprime l'étape manuelle de recherche de l'identifiant de variante.
+
+Sur Android : ouvrir le lien, **Run workflow**, conserver `SKMEI` et
+`75002`, puis confirmer. Le workflow utilise le secret
+`CJ_API_KEY` (ou `CJ_ACCESS_TOKEN`) déjà indiqué plus haut.
+Aucun identifiant de variante ne doit être saisi.
+
+Le script `commerce/search-cj.mjs` :
+1. consulte **une seule page de 12 références** via l'API officielle
+   `/product/listV2`, filtrée sur les entrepôts CN ;
+2. retient au maximum **deux fiches** qui décrivent des montres plutôt
+   que des bracelets ou accessoires ;
+3. récupère les **VID réels** via `/product/variant/query` et choisit
+   une variante clairement identifiée ;
+4. recontrôle son prix via `variant/queryByVid`, le stock CJ CN et,
+   uniquement si du stock existe, les frais d'envoi et d'importation
+   vers le code postal de référence ;
+5. affiche les **VID et méthodes de transport acceptables** dans le
+   journal du workflow. Les frais en USD ne sont pas convertis en EUR
+   avant une validation explicite du taux et du régime TVA.
+
+Coût API plafonné : **une requête de liste à 50 points**, puis au plus
+**deux fois 40 points** (liste des variantes 10, détail VID 10,
+stock 10, transport 10) = **130 points CJ par exécution au maximum**,
+hors appel d'authentification. Le workflow est **manuel**, pas
+quotidien, pour ne pas consommer les points fournisseur inutilement.
+Une sélection vide ou un devis incomplet ne déclenche aucune vente.
+
+Le compteur `listedNum` de CJ représente des annonces/listings,
+**pas les ventes** : ne pas l'utiliser pour affirmer qu'une montre
+est best-seller. Les noms produits, marques, photos, conformité GPSR,
+droit d'exploitation et délais doivent encore être validés sur une
+variante précise. Les journaux GitHub sont publics sur un dépôt public
+et exposent les identifiants et prix fournisseurs résumés, **jamais**
+les clés, adresses clients ou commandes.
+
+Depuis un environnement privé avec `CJ_API_KEY` :
+```sh
+CJ_SEARCH_KEYWORD=SKMEI CJ_POSTAL_CODE=75002 node commerce/search-cj.mjs
+```
+
+La sortie `sample_shipping_available` **n'approuve pas l'offre**.
+Vérifier ensuite le portefeuille CJ, le taux de change et les frais,
+les garanties, les documents légaux, les photos et la conformité, puis
+passer au processus `stage-offer.mjs inspect|stage` documenté ci-dessous.
+Le mode `stage` reste un brouillon non achetable, et l'ouverture
+des paiements continue à nécessiter toutes les validations marchandes.
+
 ## Examiner une variante réelle en moins de quatre interactions
 
 1. Relever le **VID exact**, qui identifie une variante précise dans le
