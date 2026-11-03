@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import {discoverCjVariant} from './cj.mjs';
+import {discoverCjVariant,obtainCjAccessToken} from './cj.mjs';
 
 /**
  * One-query operator lookup. Compatible with GitHub Actions workflow_dispatch:
@@ -9,9 +9,15 @@ import {discoverCjVariant} from './cj.mjs';
 async function main(){
   if(process.argv.length!==2)throw Error('Set CJ_VID and CJ_POSTAL_CODE in the environment');
   const vid=process.env.CJ_VID,postalCode=process.env.CJ_POSTAL_CODE||'75002';
-  const accessToken=process.env.CJ_ACCESS_TOKEN;
+  const apiKey=process.env.CJ_API_KEY;
+  let accessToken;
+  if(typeof apiKey==='string'&&apiKey.length>=20){
+    accessToken=await obtainCjAccessToken({apiKey});
+    // CJ documents an account-level call rate as low as 1 request/second.
+    await new Promise(resolve=>setTimeout(resolve,1200));
+  }else accessToken=process.env.CJ_ACCESS_TOKEN;
   if(typeof accessToken!=='string'||accessToken.length<20)
-    throw Error('CJ_ACCESS_TOKEN GitHub Actions secret is missing');
+    throw Error('CJ_API_KEY or CJ_ACCESS_TOKEN GitHub secret is missing');
   const inspection=await discoverCjVariant({vid,postalCode,accessToken});
   const {variantName,variantSku,originCountry,productUsdCents,stockConfirmed,
     warehouseRows,shippingMethods,shippingMethodsAvailable,
@@ -36,7 +42,7 @@ main().catch(error=>{
   const message=error?.message||'';
   // Supplier raw responses and accidental credentials must not reach public
   // GitHub Actions logs. All unexpected errors are deliberately generic.
-  const safe=/^(Set CJ_VID|CJ_ACCESS_TOKEN GitHub|Provide exact CJ VID|CJ variant identity|CJ variant price|CJ inventory payload|CJ freight payload|CJ API|CJ-Access-Token)/;
+  const safe=/^(Set CJ_VID|CJ_API_KEY or CJ_ACCESS_TOKEN GitHub|CJ API key|CJ authentication|CJ account|Provide exact CJ VID|CJ variant identity|CJ variant price|CJ inventory payload|CJ freight payload|CJ API|CJ-Access-Token)/;
   console.error(safe.test(message)?message:'CJ variant discovery failed; inspect account access and try again');
   process.exitCode=1;
 });
