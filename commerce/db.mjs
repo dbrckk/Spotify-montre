@@ -33,6 +33,9 @@ export async function listApprovedOffers(pool){
       AND supplier_landed_eur_ceiling_cents > 0
       AND supplier_landed_eur_ceiling_cents >= unit_cost_eur_cents
       AND tax_treatment_verified=true AND supplier_fx_verified=true
+      AND supplier_fx_max_eur_per_usd_bps BETWEEN 1000 AND 20000
+      AND supplier_max_usd_cents::bigint * supplier_fx_max_eur_per_usd_bps
+          <= supplier_landed_eur_ceiling_cents::bigint * 10000
       AND return_policy_verified=true AND gpsr_traceability_verified=true
       AND data_transfer_verified=true
       AND delivery_min_business_days BETWEEN 1 AND 90
@@ -47,6 +50,7 @@ export async function listApprovedOffers(pool){
 export async function getApprovedOffer(pool,offerId){
   const {rows}=await pool.query(`
     SELECT id,label,amount_eur_cents,supplier_vid,supplier_max_usd_cents,
+      supplier_landed_eur_ceiling_cents,supplier_fx_max_eur_per_usd_bps,
       logistics_name,from_country_code,delivery_min_business_days,delivery_max_business_days
     FROM commerce_offers WHERE id=$1 AND approved=true
       AND stock_confirmed=true AND legal_verified=true
@@ -55,6 +59,9 @@ export async function getApprovedOffer(pool,offerId){
       AND supplier_landed_eur_ceiling_cents > 0
       AND supplier_landed_eur_ceiling_cents >= unit_cost_eur_cents
       AND tax_treatment_verified=true AND supplier_fx_verified=true
+      AND supplier_fx_max_eur_per_usd_bps BETWEEN 1000 AND 20000
+      AND supplier_max_usd_cents::bigint * supplier_fx_max_eur_per_usd_bps
+          <= supplier_landed_eur_ceiling_cents::bigint * 10000
       AND return_policy_verified=true AND gpsr_traceability_verified=true
       AND data_transfer_verified=true
       AND delivery_min_business_days BETWEEN 1 AND 90
@@ -102,6 +109,9 @@ export async function reserveCheckout(pool,request,{encryptionKey,idempotencySec
       AND supplier_landed_eur_ceiling_cents > 0
       AND supplier_landed_eur_ceiling_cents >= unit_cost_eur_cents
       AND tax_treatment_verified=true AND supplier_fx_verified=true
+      AND supplier_fx_max_eur_per_usd_bps BETWEEN 1000 AND 20000
+      AND supplier_max_usd_cents::bigint * supplier_fx_max_eur_per_usd_bps
+          <= supplier_landed_eur_ceiling_cents::bigint * 10000
       AND return_policy_verified=true AND gpsr_traceability_verified=true
       AND data_transfer_verified=true
       AND delivery_min_business_days BETWEEN 1 AND 90
@@ -129,14 +139,15 @@ export async function reserveCheckout(pool,request,{encryptionKey,idempotencySec
         id,public_token_hash,idempotency_hash,request_hash,offer_id,product_label,
         amount_eur_cents,supplier_vid,supplier_max_usd_cents,logistics_name,
         from_country_code,address_encrypted,vat_rate_bps_snapshot,
-        supplier_landed_eur_ceiling_cents,promised_delivery_min_business_days,
-        promised_delivery_max_business_days,status
-      ) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,'PAYMENT_CREATING')
+        supplier_landed_eur_ceiling_cents,supplier_fx_max_eur_per_usd_bps,
+        promised_delivery_min_business_days,promised_delivery_max_business_days,status
+      ) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,'PAYMENT_CREATING')
     `,[orderId,digest(token),idempotencyHash,requestHash,offer.id,offer.label,
        offer.amount_eur_cents,offer.supplier_vid,offer.supplier_max_usd_cents,
        offer.logistics_name,offer.from_country_code,sealAddress(request.customer,encryptionKey),
        offer.vat_rate_bps,offer.supplier_landed_eur_ceiling_cents,
-       offer.delivery_min_business_days,offer.delivery_max_business_days]);
+       offer.supplier_fx_max_eur_per_usd_bps,offer.delivery_min_business_days,
+       offer.delivery_max_business_days]);
     await client.query('INSERT INTO commerce_events(order_id,event_type) VALUES($1,$2)',[orderId,'ORDER_RESERVED']);
     return {orderId,token,amountCents:offer.amount_eur_cents,description:offer.label};
   });
