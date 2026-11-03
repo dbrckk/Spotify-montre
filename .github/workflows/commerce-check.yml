@@ -54,5 +54,8 @@ jobs:
       - name: Verify supplier quote intake against isolated PostgreSQL
         working-directory: commerce
         run: node offer-intake-check.mjs
+      - name: Verify missed Mollie webhook recovery and repeated audits
+        working-directory: commerce
+        run: node payment-audit-check.mjs
       - name: Verify browser purchase script syntax
         run: node --check site/acheter-direct.js
