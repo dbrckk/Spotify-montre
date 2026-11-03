@@ -98,7 +98,7 @@ export async function discoverCjVariant({vid,postalCode,originCountry='CN',
   const base={
     vid,variantSku:typeof v.variantSku==='string'&&v.variantSku.length<=100?v.variantSku:null,
     variantName:typeof v.variantNameEn==='string'&&v.variantNameEn.length<=120&&
-      !/[\\u0000-\\u001f\\u007f]/.test(v.variantNameEn)?v.variantNameEn:null,
+      !/[\u0000-\u001f\u007f]/.test(v.variantNameEn)?v.variantNameEn:null,
     originCountry,postalCode,productUsdCents,
     stockConfirmed,warehouseRows:warehouseRows.length,
     sampleOnly:true,approvedForSale:false,requiresLegalReview:true,
@@ -117,7 +117,7 @@ export async function discoverCjVariant({vid,postalCode,originCountry='CN',
   for(const method of raw){
     const name=method?.logisticName;
     if(typeof name!=='string'||name.length<3||name.length>50||
-      /[\\u0000-\\u001f\\u007f]/.test(name)){
+      /[\u0000-\u001f\u007f]/.test(name)){
       incomplete++;continue;
     }
     try{
