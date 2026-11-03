@@ -11,7 +11,7 @@
   const topics = $('chatTopics');
   if (!launcher || !panel || !close || !history || !form || !input || !topics) return;
 
-  const affiliate = document.body?.dataset?.experience === "affiliate";
+  const affiliate = ["affiliate","home"].includes(document.body?.dataset?.experience);
   const replies = Object.freeze([
     { pattern: /bonjour|salut|hello|bonsoir/i, answer:"Bonjour ! Je suis le guide automatique d'Atelier Montres. Vous pouvez me demander où en est le projet, parler des montres, de la livraison ou de l'inscription à la newsletter." },
     { pattern: /prix|tarif|combien|coût|euros?|payer|achat/i, answer: affiliate ? "Les prix varient selon les marchands. Retrouvez 52 montres, dont 15 comparées en profondeur, avec leurs références exactes et les liens fabricants ou Amazon.fr. Certains liens Amazon sont rémunérés et clairement identifiés. Aucun paiement ne se fait sur Atelier Montres." : "La boutique n'est pas encore ouverte : aucun prix de vente n'est fixé et aucun paiement n'est accepté sur cette vitrine. Nous étudions actuellement des modèles, puis nous confirmerons les tarifs réels." },
