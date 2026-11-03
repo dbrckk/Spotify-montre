@@ -1,8 +1,26 @@
 import assert from 'node:assert/strict';
-import {discoverCjVariant} from './cj.mjs';
+import {discoverCjVariant,obtainCjAccessToken} from './cj.mjs';
 
 // Strictly local synthetic CJ responses. No live supplier key or purchase.
 const vid='12345678901234567',token='t'.repeat(40);
+const authKey='CJUserNum@api@'+'x'.repeat(40);
+let authCalls=0;
+const issued=await obtainCjAccessToken({apiKey:authKey,fetcher:async(url,options)=>{
+  authCalls++;
+  assert.ok(url.endsWith('/authentication/getAccessToken'));
+  assert.equal(options.method,'POST');
+  assert.equal(options.redirect,'error');
+  assert.equal(JSON.parse(options.body).apiKey,authKey);
+  return {ok:true,json:async()=>({code:200,result:true,data:{accessToken:token}})};
+}});
+assert.equal(issued,token);
+assert.equal(authCalls,1);
+await assert.rejects(obtainCjAccessToken({apiKey:authKey+' ',fetcher:async()=>{
+  authCalls++;throw Error('API should not have been called');
+}}),/CJ API key unavailable/);
+await assert.rejects(obtainCjAccessToken({apiKey:authKey,
+  fetcher:async()=>({ok:true,json:async()=>({code:401,result:false,message:'private'})})
+}),/CJ account did not authorize/);
 const calls=[];
 const reply=data=>({ok:true,json:async()=>({code:200,result:true,data})});
 const fake=async(url,options)=>{
