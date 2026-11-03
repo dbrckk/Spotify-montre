@@ -42,4 +42,13 @@ assert.match(css,/\.detail-layout/);
 assert.doesNotMatch(css,/url\(https?:\/\//);
 assert.match(read('site/config.json'),/"checkoutMode"\s*:\s*"inactive"/,
  'Visual redesign must not create or enable direct payments');
+// The comparison matrix uses only exact-model approved local photographs.
+const comparisonJs=read('site/unified-discovery.js');
+const comparisonCss=read('site/unified-discovery.css');
+assert.match(comparisonJs,/p\.photoUrl===expected/);
+assert.match(comparisonJs,/ud-matrix-photo/);
+assert.match(comparisonJs,/img\.onerror=\(\)=>visual\.remove\(\)/);
+assert.match(comparisonJs,/Photographie du modèle /);
+assert.match(comparisonCss,/\.ud-matrix-photo img/);
+assert.match(comparisonCss,/@media\(max-width:620px\)/);
 console.log('Editorial product/adviser structure OK: three live presets, genuine local photos, 52-watch navigation, responsive detail pages, reduced motion, no checkout activation');
