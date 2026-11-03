@@ -9,7 +9,8 @@
   },
   "scripts": {
     "start": "node server.mjs",
-    "check": "node --check server.mjs && node --check db.mjs && node --check security.mjs && node --check cj.mjs && node --check offer-intake.mjs && node --check stage-offer.mjs && node --check offer-intake-check.mjs && node --check final-supplier-gate-check.mjs && node selfcheck.mjs && node cj-identity-check.mjs"
+    "check": "node --check server.mjs && node --check db.mjs && node --check security.mjs && node --check cj.mjs && node --check offer-intake.mjs && node --check stage-offer.mjs && node --check offer-intake-check.mjs && node --check final-supplier-gate-check.mjs && node selfcheck.mjs && node cj-identity-check.mjs && node --check readiness.mjs && node --check readiness-report.mjs && node --check readiness-check.mjs",
+    "readiness": "node readiness-report.mjs"
   },
   "dependencies": {
     "pg": "^8.13.3"
