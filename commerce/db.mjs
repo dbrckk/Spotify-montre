@@ -3,7 +3,7 @@ import {validateCommercialCeiling} from './landed-cost.mjs';
 import {verifyCjOrderDetail} from './cj-status.mjs';
 import {readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
-import {ClientError,digest,hmac,newOrderId,newPublicToken,sealAddress,openAddress,sameHash,checkoutFingerprint} from './security.mjs';
+import {ClientError,digest,hmac,newOrderId,recoveryToken,restoredCheckoutState,sealAddress,openAddress,sameHash,checkoutFingerprint} from './security.mjs';
 
 const schema=readFileSync(fileURLToPath(new URL('./schema.sql',import.meta.url)),'utf8');
 export function createDatabase(connectionString){
@@ -65,8 +65,23 @@ export async function getApprovedOffer(pool,offerId){
   `,[offerId]);
   return rows[0]||null;
 }
+/** Read-only, retry-safe lookup BEFORE checking present supplier inventory.
+ * A paid or already-created customer order must not get another Mollie payment,
+ * even if its product subsequently goes out of stock. */
+export async function findExistingCheckout(pool,request,{idempotencySecret}){
+  const idempotencyHash=hmac(idempotencySecret,request.idempotencyKey);
+  const {rows}=await pool.query(`
+    SELECT id,public_token_hash,request_hash,amount_eur_cents,status,payment_checkout_url
+    FROM commerce_orders WHERE idempotency_hash=$1 LIMIT 1
+  `,[idempotencyHash]);
+  const order=rows[0];
+  if(!order)return null;
+  if(!sameHash(order.request_hash,checkoutFingerprint(request)))
+    throw new ClientError('Cette référence est déjà utilisée avec un autre panier',409);
+  return restoredCheckoutState(order,recoveryToken(idempotencySecret,request.idempotencyKey));
+}
 export async function reserveCheckout(pool,request,{encryptionKey,idempotencySecret}){
-  const token=newPublicToken();
+  const token=recoveryToken(idempotencySecret,request.idempotencyKey);
   const idempotencyHash=hmac(idempotencySecret,request.idempotencyKey);
   const requestHash=checkoutFingerprint(request);
   const initial=await transaction(pool,async client=>{
