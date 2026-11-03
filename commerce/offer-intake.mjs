@@ -98,7 +98,7 @@ export async function stageQualifiedOffer(pool,plan){
       "SELECT column_name FROM information_schema.columns WHERE table_schema=current_schema() AND table_name='commerce_offers' AND column_name='supplier_fx_max_eur_per_usd_bps'");
     const hasFx=columns.rowCount===1;
     const fxColumn=hasFx?',supplier_fx_max_eur_per_usd_bps':'';
-    const fxValue=hasFx?', $15':'';
+    const fxValue=hasFx?', $14':'';
     const params=[c.id,c.label,c.amountEurCents,c.unitCostEurCents,
       c.supplierLandedEurCeilingCents,c.vatRateBps,c.reservesEurCents,
       c.supplierMaxUsdCents,c.supplierVid,c.logisticsName,c.originCountry,
@@ -115,7 +115,7 @@ export async function stageQualifiedOffer(pool,plan){
         false,false,false,false${fxValue})
       ON CONFLICT(id) DO NOTHING
       RETURNING id
-    `,hasFx?params.filter((_,i)=>i!==13):params.slice(0,13));
+    `,hasFx?params:params.slice(0,13));
     if(inserted.rowCount!==1)
       throw Error('Offer id already exists; refusing to overwrite a commercial record');
     await client.query(`
