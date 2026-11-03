@@ -194,6 +194,30 @@ try{
   assert.equal(new URL(phone.url()).hash,'#comparer',
     'Opening the dock must navigate to the actual on-page table');
   assert.equal(await phone.locator('#udCompareTable th[scope=col]').count(),3);
+  // The visitor can decide based on factual movement/size/style preferences,
+  // not a fabricated price or bestseller rank.
+  assert.ok(await phone.locator('#udDecisionForm').isVisible(),
+    'Personal decision criteria must become available when comparing two watches');
+  assert.equal(await phone.locator('#udPrefMovement').inputValue(),'all');
+  await phone.locator('#udPrefMovement').selectOption('automatic');
+  assert.equal(new URL(phone.url()).searchParams.get('prefMovement'),'automatic');
+  assert.equal(await phone.locator('#udCompareTable .ud-decision-score').count(),2);
+  assert.equal(await phone.locator('#udCompareTable .ud-decision-score[data-match=exact]').count(),1,
+    'Only the automatic movement can match an explicitly selected automatic preference');
+  assert.match(await phone.locator('#udDecisionResult').innerText(),/1 montre sur 2/);
+  await phone.reload({waitUntil:'domcontentloaded'});
+  await phone.locator('#udDecisionForm').waitFor({state:'visible'});
+  assert.equal(await phone.locator('#udPrefMovement').inputValue(),'automatic',
+    'A real Android reload must retain the personal comparison preference');
+  assert.equal(await phone.locator('#udCompareTable .ud-decision-score[data-match=exact]').count(),1);
+  await phone.locator('#udPrefMovement').selectOption('eco-drive');
+  assert.equal(await phone.locator('#udCompareTable .ud-decision-score[data-match=exact]').count(),0);
+  assert.match(await phone.locator('#udDecisionResult').innerText(),/Aucune des 2 montres/,
+    'A no-match scenario must not invent a recommendation');
+  await phone.locator('#udDecisionReset').click();
+  assert.equal(await phone.locator('#udPrefMovement').inputValue(),'all');
+  assert.equal(new URL(phone.url()).searchParams.has('prefMovement'),false);
+  assert.equal(await phone.locator('#udCompareTable .ud-decision-score').count(),0);
   // Premium visual comparison must show exact local photos, preserve original
   // data provenance and keep criteria visible while swiping on Android.
   const matchedPhotos=phone.locator('#udCompareTable .ud-matrix-photo img');
@@ -413,6 +437,8 @@ try{
     'All factual watch cards must remain visible without JS or feed fetching');
   assert.equal(await noJs.locator('#udCompareTray:visible').count(),0,
     'The new dock must never appear as a broken control without JS');
+  assert.equal(await noJs.locator('#udDecisionForm:visible').count(),0,
+    'No-JS browsing must hide preference controls that cannot respond');
   assert.equal(await noJs.locator('#udViewTools:visible').count(),0,
     'A disabled JavaScript visitor must never see non-working image mode controls');
   assert.equal(await noJs.locator('.ud-zoom:visible').count(),0,
