@@ -3,7 +3,7 @@ import {createHostedPayment,verifyHostedPayment} from '../scripts/commerce-molli
 import {createDatabase,initializeDatabase,listApprovedOffers,reserveCheckout,saveCreatedPayment,
   flagPaymentReview,getApprovedOffer,findExistingCheckout,getOrderByPayment,getOrderForStatus,recordPaymentStatus,claimPaymentsForAudit,
   claimSupplierOrder,recordSupplierAttempt,authorizeSupplierSubmission,abortSupplierBeforePost,
-  ordersForSupplierReconciliation,recordSupplierDetail,
+  claimSupplierReconciliation,recordSupplierDetail,
   quarantineStaleSupplierAttempts,quarantineStalePaymentCreation,getCommerceExceptionSummary,
   claimSupplierRecoveryProbe,recordRecoveredSupplierOrder} from './db.mjs';
 import {ClientError,validateCheckoutBody,readJsonBody,readWebhookBody,openAddress} from './security.mjs';
@@ -177,7 +177,9 @@ async function supplierWork(){
     }
     }
     if(canReadSupplier){
-    for(const row of await ordersForSupplierReconciliation(pool)){
+    // Persisted per-order lease avoids repeatedly polling the same shipment
+    // on the 45-second worker tick, even when CJ is temporarily unavailable.
+    for(const row of await claimSupplierReconciliation(pool)){
       try{
         const detail=await fetchCjOrder({orderId:row.supplier_order_id,accessToken:cjToken});
         await recordSupplierDetail(pool,row.id,detail,encryptionKey);
