@@ -24,17 +24,16 @@ try{
     assert.match(await page.title(),/52 modèles/);
     assert.match(await page.locator('#titre-principal').innerText(),/Le temps mérite/);
     const result=await page.evaluate(async()=>{
-      await Promise.all([...document.querySelectorAll(
-        '.home-hero-photo img,.home-product-visual img,.home-path-media img'
-      )].map(async image=>{
-        if(!image.complete)await new Promise(resolve=>{
-          image.addEventListener('load',resolve,{once:true});
-          image.addEventListener('error',resolve,{once:true});
-        });
-      }));
       const photos=[...document.querySelectorAll(
         '.home-hero-photo img,.home-product-visual img,.home-path-media img'
       )];
+      // Lazy images below the fold do not start loading until scrolled into view.
+      // Promote them to eager ONLY inside this isolated browser check.
+      for(const img of photos)img.loading='eager';
+      await Promise.race([
+        Promise.all(photos.map(img=>img.decode().catch(()=>{}))),
+        new Promise(resolve=>setTimeout(resolve,15000))
+      ]);
       return {
         width:document.documentElement.clientWidth,
         scroll:document.documentElement.scrollWidth,
