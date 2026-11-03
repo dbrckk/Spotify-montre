@@ -79,6 +79,8 @@
        :coverage.exact===1
          ?'1 montre sur '+coverage.total+' correspond à tous vos critères. '+(matches?'Elle figure parmi vos suggestions.':'Retrouvez-la dans la collection complète.')
          :coverage.exact+' montres sur '+coverage.total+' correspondent à tous vos critères. '+matches+' figurent dans les trois suggestions ci-dessous.';
+   if(active)summary.dataset.matchState=coverage.exact===0?'none':'exact';
+   else delete summary.dataset.matchState;
    error.hidden=true;updateAddress(choices);
  }
  form.addEventListener('change',()=>{if(catalogue.length)render()});
