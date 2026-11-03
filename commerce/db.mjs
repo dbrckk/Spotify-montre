@@ -85,11 +85,13 @@ export async function reserveCheckout(pool,request,{encryptionKey,idempotencySec
   const idempotencyHash=hmac(idempotencySecret,request.idempotencyKey);
   const requestHash=checkoutFingerprint(request);
   const initial=await transaction(pool,async client=>{
+    // An advisory transaction lock serializes the first insert as well as retries.
+    await client.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))',[idempotencyHash]);
     const previous=await client.query('SELECT * FROM commerce_orders WHERE idempotency_hash=$1 FOR UPDATE',[idempotencyHash]);
     if(previous.rows.length){
       if(!sameHash(previous.rows[0].request_hash,requestHash))
         throw new ClientError('Cette référence est déjà utilisée avec un autre panier',409);
-      throw new ClientError('Cette commande est déjà enregistrée, sans nouveau prélèvement',409);
+      return {...restoredCheckoutState(previous.rows[0],token),reused:true};
     }
     // Simple global emergency anti-abuse ceiling; more specific per-IP throttling is mandatory before high traffic.
     const count=await client.query("SELECT count(*)::int AS n FROM commerce_orders WHERE created_at > now() - interval '1 hour'");
