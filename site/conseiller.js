@@ -59,7 +59,8 @@
  }
  function render(){
    const choices=read(),recommendations=engine.recommend(catalogue,choices,3);
-   const active=[choices.tier,choices.style,choices.movement,choices.size].filter(x=>x!=='all').length;
+   const coverage=engine.coverage(catalogue,choices);
+   const active=coverage.selected;
    const matches=recommendations.filter(x=>x.criteria>0&&x.matched===x.criteria).length;
    results.replaceChildren(...recommendations.map(card));
    const compareLink=document.getElementById('advisorCompare');
@@ -71,7 +72,13 @@
    }
    status.textContent=recommendations.length+' montre'+(recommendations.length>1?'s':'')+' à explorer parmi '+catalogue.length;
    criteria.textContent=active?active+' préférence'+(active>1?'s':'')+' retenue'+(active>1?'s':''):'Sélection de départ';
-   summary.textContent=active?matches+' modèle'+(matches>1?'s':'')+' sur '+recommendations.length+' répond'+(matches>1?'ent':'')+' à tous vos critères. Les autres sont des alternatives proches.':'Notre sélection de départ, issue de plusieurs gammes.';
+   summary.textContent=!active
+     ?'Notre sélection de départ, issue de plusieurs gammes.'
+     :coverage.exact===0
+       ?'Aucune des '+coverage.total+' montres ne correspond à tous vos critères. Voici les alternatives les plus proches : ajustez un choix pour élargir la sélection.'
+       :coverage.exact===1
+         ?'1 montre sur '+coverage.total+' correspond à tous vos critères. '+(matches?'Elle figure parmi vos suggestions.':'Retrouvez-la dans la collection complète.')
+         :coverage.exact+' montres sur '+coverage.total+' correspondent à tous vos critères. '+matches+' figurent dans les trois suggestions ci-dessous.';
    error.hidden=true;updateAddress(choices);
  }
  form.addEventListener('change',()=>{if(catalogue.length)render()});
