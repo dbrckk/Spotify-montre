@@ -88,6 +88,7 @@ CREATE TABLE IF NOT EXISTS commerce_orders (
   supplier_recovery_checked_at timestamptz,
   supplier_recovery_attempts integer NOT NULL DEFAULT 0 CHECK (supplier_recovery_attempts BETWEEN 0 AND 24),
   supplier_received_at timestamptz,
+  supplier_checked_at timestamptz,
   supplier_status text,
   tracking_number text,
   tracking_url text,
@@ -123,6 +124,14 @@ ALTER TABLE commerce_orders ADD COLUMN IF NOT EXISTS
   supplier_recovery_checked_at timestamptz;
 ALTER TABLE commerce_orders ADD COLUMN IF NOT EXISTS
   supplier_recovery_attempts integer NOT NULL DEFAULT 0;
+
+-- CJ GET order-detail polling has a persistent lease/cadence across workers
+-- and service restarts. An unknown check date means never reconciled.
+ALTER TABLE commerce_orders ADD COLUMN IF NOT EXISTS supplier_checked_at timestamptz;
+CREATE INDEX IF NOT EXISTS commerce_orders_supplier_reconciliation
+  ON commerce_orders(supplier_checked_at,created_at)
+  WHERE supplier_order_id IS NOT NULL
+    AND status IN ('SUPPLIER_SUBMITTED','SUPPLIER_PAID','SHIPPED');
 
 CREATE INDEX IF NOT EXISTS commerce_orders_supplier_queue ON commerce_orders(status,created_at)
   WHERE status IN ('PAID','SUPPLIER_SUBMITTED');
