@@ -1,0 +1,55 @@
+name: Validate independent commerce checkout safety
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'commerce/**'
+      - 'site/acheter-direct.js'
+      - '.github/workflows/commerce-check.yml'
+  pull_request:
+    paths:
+      - 'commerce/**'
+      - 'site/acheter-direct.js'
+      - '.github/workflows/commerce-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checkout-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: commerce_ci
+          POSTGRES_USER: commerce_ci
+          POSTGRES_PASSWORD: local-only-ci-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U commerce_ci -d commerce_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgresql://commerce_ci:local-only-ci-password@127.0.0.1:5432/commerce_ci
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install commerce dependencies
+        working-directory: commerce
+        run: npm install --ignore-scripts --no-audit --no-fund --package-lock=false
+      - name: Verify syntax and commerce safety checks
+        working-directory: commerce
+        run: npm run check
+      - name: Verify concurrent checkout and recovery using PostgreSQL
+        working-directory: commerce
+        run: node concurrency-check.mjs
+      - name: Verify browser purchase script syntax
+        run: node --check site/acheter-direct.js
