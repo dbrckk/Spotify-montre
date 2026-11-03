@@ -5,6 +5,27 @@ function assertToken(token){
   if(typeof token!=='string'||token.length<20||/[\s\r\n]/.test(token))
     throw Error('CJ-Access-Token unavailable');
 }
+/** Exchange the operator's private CJ API key for a transient access token.
+ * Never print or persist either value. Only the manual read-only discovery
+ * workflow uses this helper; merchant purchasing still has a separate gate.
+ */
+export async function obtainCjAccessToken({apiKey,fetcher=fetch}){
+  if(typeof apiKey!=='string'||apiKey.length<20||apiKey.length>200||
+    /\s/.test(apiKey))
+    throw Error('CJ API key unavailable');
+  const response=await fetcher(ROOT+'/authentication/getAccessToken',{
+    method:'POST',redirect:'error',headers:{
+      'Content-Type':'application/json','Accept':'application/json'
+    },body:JSON.stringify({apiKey}),signal:AbortSignal.timeout(12000)
+  });
+  if(!response.ok)throw Error('CJ authentication HTTP error');
+  const result=await response.json();
+  if(result?.code!==200||result?.result!==true||result?.success===false)
+    throw Error('CJ account did not authorize access');
+  const token=result?.data?.accessToken;
+  assertToken(token);
+  return token;
+}
 function validOrder(order,customer){
   if(!/^ord_[a-f0-9]{40}$/.test(order?.id||''))throw Error('Invalid internal supplier order reference');
   if(typeof order.supplier_vid!=='string'||!/^[\w-]{3,100}$/.test(order.supplier_vid))
@@ -69,6 +90,93 @@ export async function preflightCjDelivery({vid,originCountry='CN',postalCode,
     landedUsdCents,upperLandedEurCents:fx.upperEurCents,
     balanceUsdCents:balance,freightBreakdown,
     logisticsName,stockConfirmed:true};
+}
+
+/**
+ * Read-only supplier discovery for the first real model.
+ * No pricing assumptions, no customer address, no wallet requirement and,
+ * crucially, no CJ order/payment write endpoint.
+ * A single metropolitan French postcode is only a sample, not national coverage.
+ */
+export async function discoverCjVariant({vid,postalCode,originCountry='CN',
+  accessToken,fetcher=fetch}){
+  if(typeof vid!=='string'||!/^[a-zA-Z0-9_-]{3,100}$/.test(vid)||
+    typeof postalCode!=='string'||!/^[0-9]{5}$/.test(postalCode)||
+    /^(?:97|98)/.test(postalCode)||
+    originCountry!=='CN')
+    throw Error('Provide exact CJ VID and a metropolitan French postcode; CN warehouse pilot only');
+  // CJ account limits can be as low as 1 request/second. Synthetic CI
+  // fetchers bypass waiting; real calls are paced conservatively.
+  let lastRequestAt=0;
+  const supplierFetcher=fetcher===fetch?async(url,options)=>{
+    const remaining=1100-(Date.now()-lastRequestAt);
+    if(lastRequestAt&&remaining>0)
+      await new Promise(resolve=>setTimeout(resolve,remaining));
+    lastRequestAt=Date.now();
+    return fetcher(url,options);
+  }:fetcher;
+  const v=await api('/product/variant/queryByVid?vid='+encodeURIComponent(vid),
+    accessToken,{fetcher:supplierFetcher});
+  if(v?.vid!==vid)throw Error('CJ variant identity does not match requested VID');
+  const productUsdCents=usdToCents(v.variantSellPrice);
+  if(productUsdCents<=0)throw Error('CJ variant price is not available');
+  const inventory=await api('/product/stock/queryByVid?vid='+encodeURIComponent(vid),
+    accessToken,{fetcher:supplierFetcher});
+  if(!Array.isArray(inventory))throw Error('CJ inventory payload invalid');
+  const warehouseRows=inventory.filter(x=>x?.countryCode===originCountry&&x?.vid===vid&&
+    Number.isInteger(x.cjInventoryNum)&&x.cjInventoryNum>=0);
+  const stockConfirmed=warehouseRows.some(x=>x.cjInventoryNum>=1);
+  const base={
+    vid,variantSku:typeof v.variantSku==='string'&&v.variantSku.length<=100?v.variantSku:null,
+    variantName:typeof v.variantNameEn==='string'&&v.variantNameEn.length<=120&&
+      !/[\u0000-\u001f\u007f]/.test(v.variantNameEn)?v.variantNameEn:null,
+    originCountry,postalCode,productUsdCents,
+    stockConfirmed,warehouseRows:warehouseRows.length,
+    sampleOnly:true,approvedForSale:false,requiresLegalReview:true,
+    shippingMethods:[],excludedIncompleteShippingOptions:0,
+    notice:'Read-only CJ estimate for one postcode: not a verified watch, seller offer, tax conclusion or checkout approval.'
+  };
+  // Avoid spending further CJ API points on transport when supplier has no stock.
+  if(!stockConfirmed)return base;
+  const raw=await api('/logistic/freightCalculate',accessToken,{
+    method:'POST',body:{startCountryCode:originCountry,endCountryCode:'FR',
+      zip:postalCode,products:[{quantity:1,vid}]},fetcher:supplierFetcher
+  });
+  if(!Array.isArray(raw))throw Error('CJ freight payload invalid');
+  const byName=new Map();
+  let incomplete=0;
+  for(const method of raw){
+    const name=method?.logisticName;
+    if(typeof name!=='string'||name.length<3||name.length>50||
+      /[\u0000-\u001f\u007f]/.test(name)){
+      incomplete++;continue;
+    }
+    try{
+      const breakdown=computeCjFreightCents(method);
+      const landedUsdCents=computeCjLandedCents(productUsdCents,breakdown);
+      const entry={logisticsName:name,
+        freightAndImportUsdCents:breakdown.freightAndImportUsdCents,
+        landedUsdCents,
+        taxesUsdCents:breakdown.taxesUsdCents,
+        tariffUsdCents:breakdown.tariffUsdCents,
+        clearanceUsdCents:breakdown.clearanceUsdCents};
+      if(byName.has(name)){
+        // CJ order preflight identifies carriers by name. If one name maps to
+        // different prices, no unambiguous purchase method can be selected.
+        const old=byName.get(name);
+        if(old&&old.landedUsdCents!==entry.landedUsdCents){
+          byName.set(name,null);
+          incomplete++;
+        }
+      }else byName.set(name,entry);
+    }catch{incomplete++;}
+  }
+  const methods=[...byName.values()].filter(Boolean);
+  methods.sort((a,b)=>a.landedUsdCents-b.landedUsdCents||
+    a.logisticsName.localeCompare(b.logisticsName));
+  return {...base,shippingMethods:methods.slice(0,12),
+    shippingMethodsAvailable:methods.length,
+    excludedIncompleteShippingOptions:incomplete};
 }
 
 export async function getCjBalance({accessToken,fetcher=fetch}){
