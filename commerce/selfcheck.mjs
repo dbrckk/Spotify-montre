@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {Readable} from 'node:stream';
 import {newOrderId,newPublicToken,sealAddress,openAddress,digest,sameHash,
-  validateCheckoutBody,checkoutFingerprint,readWebhookBody} from './security.mjs';
+  validateCheckoutBody,checkoutFingerprint,readWebhookBody,recoveryToken,restoredCheckoutState} from './security.mjs';
 import {buildCjOrder,getCjBalance,submitCjBalanceOrder,fetchCjOrder,preflightCjDelivery} from './cj.mjs';
 import {verifyCjOrderDetail} from './cj-status.mjs';
 import {usdToCents,computeCjFreightCents,computeCjLandedCents,validateCommercialCeiling} from './landed-cost.mjs';
@@ -17,6 +17,22 @@ assert.deepEqual(verified.customer,customer);
 assert.equal(verified.quantity,1);
 assert.match(newOrderId(),/^ord_[a-f0-9]{40}$/);
 assert.ok(newPublicToken().length>=40);
+// Retrying the same checkout must reuse access credentials and NOT charge twice.
+const attemptSecret='S'.repeat(64);
+const resumeToken=recoveryToken(attemptSecret,verified.idempotencyKey);
+assert.equal(resumeToken,recoveryToken(attemptSecret,verified.idempotencyKey));
+assert.notEqual(resumeToken,recoveryToken(attemptSecret,'another-cryptographically-random-attempt'));
+const persistedCheckout={id:newOrderId(),public_token_hash:digest(resumeToken),
+  amount_eur_cents:5990,status:'PAYMENT_PENDING',
+  payment_checkout_url:'https://www.mollie.com/checkout/select-method/ABCD'};
+const firstRetry=restoredCheckoutState(persistedCheckout,resumeToken);
+assert.equal(firstRetry.kind,'payment');
+assert.equal(firstRetry.reused,true);
+assert.equal(firstRetry.checkoutUrl,persistedCheckout.payment_checkout_url);
+assert.equal(restoredCheckoutState({...persistedCheckout,status:'PAID'},resumeToken).kind,'status');
+assert.equal(restoredCheckoutState({...persistedCheckout,
+  payment_checkout_url:'https://untrusted.example/collect'},resumeToken).kind,'status');
+assert.throws(()=>restoredCheckoutState(persistedCheckout,'invalid'),/ne peut pas être récupérée/);
 const cipher1=sealAddress(customer,key),cipher2=sealAddress(customer,key);
 assert.notEqual(cipher1,cipher2,'fresh AES-GCM nonces are required');
 assert.deepEqual(openAddress(cipher1,key),customer);
