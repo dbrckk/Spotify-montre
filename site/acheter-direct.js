@@ -3,7 +3,13 @@
   const $=id=>document.getElementById(id);
   const status=$('amDirectStatus'),offers=$('amDirectOffers'),form=$('amDirectForm');
   if(!status||!offers||!form)return;
+  const prelaunch=$('amDirectPrelaunch');
   const show=(message,error=false)=>{status.textContent=message;status.dataset.error=String(error)};
+  const showPrelaunch=(message,error=false)=>{
+    form.hidden=true;
+    if(prelaunch)prelaunch.hidden=false;
+    show(message,error);
+  };
   const euro=c=>new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR'}).format(c/100);
   let api='',list=[];
   function validHost(raw){
@@ -19,9 +25,9 @@
       const response=await fetch('./config.json',{cache:'no-store'});
       if(!response.ok)throw Error();
       config=await response.json();
-    }catch{return show('Le service de commande est momentanément indisponible.',true)}
+    }catch{return showPrelaunch('La disponibilité des achats directs ne peut pas être vérifiée actuellement.',true)}
     if(config.checkoutMode!=='active'||!(api=validHost(config.commerceApiUrl))){
-      return show('La vente directe est en préparation. Notre catalogue et les liens partenaires restent disponibles.');
+      return showPrelaunch('Aucun paiement direct n’est actuellement ouvert. Découvrez les modèles présentés ci-dessous.');
     }
     try{
       const response=await fetch(api+'/api/offers',{cache:'no-store'});
@@ -33,7 +39,7 @@
         &&typeof x.label==='string'&&
         Number.isSafeInteger(x.deliveryMinDays)&&x.deliveryMinDays>=1&&
         Number.isSafeInteger(x.deliveryMaxDays)&&x.deliveryMaxDays>=x.deliveryMinDays&&x.deliveryMaxDays<=120):[];
-      if(!data.checkoutEnabled||!list.length)return show('Aucune montre n’est actuellement disponible en achat direct. Les liens partenaires restent accessibles.');
+      if(!data.checkoutEnabled||!list.length)return showPrelaunch('Aucune montre n’est actuellement disponible en achat direct. Découvrez notre sélection de modèles documentés.');
       const selected=new URLSearchParams(location.search).get('modele');
       const elements=list.map(item=>{
         const el=document.createElement('option');
@@ -43,9 +49,10 @@
       });
       offers.replaceChildren(...elements);
       if(list.some(x=>x.id===selected))offers.value=selected;
+      if(prelaunch)prelaunch.hidden=true;
       form.hidden=false;show('Le prix TTC de la montre sélectionnée est indiqué ci-dessous. Les frais et délais sont précisés avant validation.');
       updatePrice();
-    }catch{return show('Le service marchand ne répond pas. Aucun paiement n’a été demandé.',true)}
+    }catch{return showPrelaunch('Le service marchand ne répond pas. Aucun paiement n’a été demandé.',true)}
   }
   const price=$('amDirectPrice');
   const delivery=$('amDirectDelivery');
