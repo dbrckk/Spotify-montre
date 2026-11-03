@@ -116,4 +116,20 @@ CREATE TABLE IF NOT EXISTS commerce_events (
   created_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS commerce_events_order ON commerce_events(order_id,created_at);
+-- Real provider quote observations are operator-only audit records, never
+-- published as product approvals or payment authorizations.
+CREATE TABLE IF NOT EXISTS commerce_offer_preflight_quotes (
+  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  offer_id text NOT NULL REFERENCES commerce_offers(id),
+  postal_prefix char(2) NOT NULL CHECK (postal_prefix ~ '^[0-9]{2}),
+  product_usd_cents integer NOT NULL CHECK (product_usd_cents>0),
+  freight_usd_cents integer NOT NULL CHECK (freight_usd_cents>=0),
+  landed_usd_cents integer NOT NULL CHECK (landed_usd_cents>0),
+  fx_max_eur_per_usd_bps integer NOT NULL CHECK (fx_max_eur_per_usd_bps BETWEEN 1000 AND 20000),
+  upper_landed_eur_cents integer NOT NULL CHECK (upper_landed_eur_cents>0),
+  checked_at timestamptz NOT NULL DEFAULT now(),
+  CHECK (product_usd_cents + freight_usd_cents = landed_usd_cents)
+);
+CREATE INDEX IF NOT EXISTS commerce_offer_quotes_by_offer
+  ON commerce_offer_preflight_quotes(offer_id,checked_at DESC);
 COMMIT;
