@@ -1,7 +1,7 @@
 import {createServer} from 'node:http';
 import {createHostedPayment,verifyHostedPayment} from '../scripts/commerce-mollie.mjs';
 import {createDatabase,initializeDatabase,listApprovedOffers,reserveCheckout,saveCreatedPayment,
-  flagPaymentReview,getApprovedOffer,findExistingCheckout,getOrderByPayment,getOrderForStatus,recordPaymentStatus,pendingPayments,
+  flagPaymentReview,getApprovedOffer,findExistingCheckout,getOrderByPayment,getOrderForStatus,recordPaymentStatus,claimPaymentsForAudit,
   claimSupplierOrder,recordSupplierAttempt,ordersForSupplierReconciliation,recordSupplierDetail,
   quarantineStaleSupplierAttempts,quarantineStalePaymentCreation,getCommerceExceptionSummary,
   claimSupplierRecoveryProbe,recordRecoveredSupplierOrder} from './db.mjs';
@@ -86,7 +86,9 @@ async function supplierWork(){
     const canReadPayment=/^live_[a-zA-Z0-9]{12,}$/.test(mollieKey);
     const canReadSupplier=cjToken.length>=20&&/^[a-fA-F0-9]{64}$/.test(encryptionKey);
     if(canReadPayment){
-      for(const row of await pendingPayments(pool)){
+      // Read-only verification; paid and shipped orders also need periodic
+      // checks because legacy Mollie webhooks can be lost during an outage.
+      for(const row of await claimPaymentsForAudit(pool)){
         try{await reconcilePayment(row.payment_id)}
         catch{console.error('payment_reconciliation_requires_review',row.id)}
       }
