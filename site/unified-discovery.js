@@ -204,6 +204,18 @@
     title.scope='col';heading.append(title);
     for(const id of selected){
       const p=watches.get(id),th=node('th');th.scope='col';
+      // Only show an exact-model photograph already approved and stored
+      // locally. Never silently substitute a different watch or remote image.
+      const expected='./assets/'+(p.kind==='core'?'watches':'watches-popular')+'/'+p.id+'.webp';
+      if(p.photoUrl===expected){
+        const visual=node('div',null,'ud-matrix-photo');
+        const img=node('img');
+        img.src='../assets/'+(p.kind==='core'?'watches':'watches-popular')+'/'+p.id+'.webp';
+        img.alt='Photographie du modèle '+p.brand+' '+p.model;
+        img.loading='lazy';img.decoding='async';img.width=180;img.height=180;
+        img.onerror=()=>visual.remove();
+        visual.append(img);th.append(visual);
+      }
       th.append(link(p.brand+' '+p.model,'./'+id+'.html'));
       const remove=node('button','Retirer','ud-compare-remove');
       remove.type='button';remove.setAttribute('aria-label','Retirer '+p.brand+' '+p.model);
