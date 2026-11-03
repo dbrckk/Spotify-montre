@@ -62,6 +62,24 @@ export function computeCjLandedCents(productCostCents,freight){
   return total;
 }
 /**
+ * Compare USD cents with the merchant-approved conservative EUR/USD ceiling.
+ * The FX rate is recorded as EUR per USD in ten-thousandths (e.g. 10500 = 1.05).
+ * This is NOT a live exchange rate; the merchant must verify its validity.
+ * Refuse a missing or invalid rate rather than silently assuming parity.
+ */
+export function checkCjFxCeiling(usdCents,fxMaxEurPerUsdBps,maxLandedEurCents){
+  if(!Number.isSafeInteger(usdCents)||usdCents<=0||
+    !Number.isSafeInteger(fxMaxEurPerUsdBps)||fxMaxEurPerUsdBps<1000||
+    fxMaxEurPerUsdBps>20000||
+    !Number.isSafeInteger(maxLandedEurCents)||maxLandedEurCents<=0)
+    throw Error('Verified USD/EUR bound and EUR landed supplier ceiling required');
+  const upperEurCents=Number((BigInt(usdCents)*BigInt(fxMaxEurPerUsdBps)+9999n)/10000n);
+  if(upperEurCents>maxLandedEurCents)
+    throw Error('Supplier USD cost at approved FX ceiling exceeds EUR landed budget');
+  return {upperEurCents,fxMaxEurPerUsdBps,maxLandedEurCents};
+}
+
+/**
  * Published EUR margin guard: approved max includes supplier goods,
  * shipping, all duties and a documented FX risk cushion.
  * The selling VAT and remaining payment/return costs are accounted for
@@ -73,6 +91,8 @@ export function validateCommercialCeiling(offer){
     reserves_eur_cents:reserves,
     unit_cost_eur_cents:unit,
     vat_rate_bps:vatBps,
+    supplier_max_usd_cents:maxSupplierUsdCents,
+    supplier_fx_max_eur_per_usd_bps:fxMaxEurPerUsdBps,
     tax_treatment_verified:taxVerified,
     supplier_fx_verified:fxVerified}=offer||{};
   if(![sale,landed,reserves,unit,vatBps].every(Number.isSafeInteger)
@@ -81,13 +101,15 @@ export function validateCommercialCeiling(offer){
   if(vatBps<0||vatBps>3000||taxVerified!==true||fxVerified!==true)
     throw Error('Seller VAT treatment and supplier FX reserve not validated');
   if(landed<unit)throw Error('All-in supplier ceiling cannot be below unit cost');
+  const supplierFx=checkCjFxCeiling(maxSupplierUsdCents,fxMaxEurPerUsdBps,landed);
   const sellerNetRevenueCents=Math.round(sale*10000/(10000+vatBps));
   const margin=sellerNetRevenueCents-landed-reserves;
   if(margin<=0)throw Error('The fully landed supplier cost leaves no contribution');
   if(margin*10000<sellerNetRevenueCents*2500)
     throw Error('Contribution is below required 25 percent of seller net revenue');
   return {grossEurCents:sale,sellerNetRevenueCents,
-    maxLandedEurCents:landed,reserveEurCents:reserves,
+    maxLandedEurCents:landed,supplierWorstCaseEurCents:supplierFx.upperEurCents,
+    reserveEurCents:reserves,
     provisionalContributionEurCents:margin,
     provisionalContributionMarginPct:Math.round(margin*10000/sellerNetRevenueCents)/100};
 }
