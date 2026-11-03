@@ -57,5 +57,8 @@ jobs:
       - name: Verify missed Mollie webhook recovery and repeated audits
         working-directory: commerce
         run: node payment-audit-check.mjs
+      - name: Verify final Mollie authorization before irreversible CJ POST
+        working-directory: commerce
+        run: node final-supplier-gate-check.mjs
       - name: Verify browser purchase script syntax
         run: node --check site/acheter-direct.js

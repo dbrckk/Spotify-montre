@@ -1,0 +1,124 @@
+import assert from 'node:assert/strict';
+import {randomBytes} from 'node:crypto';
+import {createDatabase,initializeDatabase,authorizeSupplierSubmission,
+  abortSupplierBeforePost,recordPaymentStatus} from './db.mjs';
+import {newOrderId,digest} from './security.mjs';
+import {submitCjBalanceOrder} from './cj.mjs';
+
+// Strictly local PostgreSQL and synthetic provider responses: no external debit.
+const dbUrl=process.env.TEST_DATABASE_URL;
+if(!dbUrl)throw Error('TEST_DATABASE_URL required');
+const uri=new URL(dbUrl);
+if(!['127.0.0.1','localhost'].includes(uri.hostname)||uri.pathname!=='/commerce_ci')
+  throw Error('This check cannot use a production database');
+
+const pool=createDatabase(dbUrl);
+const offerId='ci-gate-'+randomBytes(7).toString('hex');
+const orders=[];
+const validPayment=order=>({
+  paymentId:order.payment_id,amountCents:order.amount_eur_cents,
+  paid:true,reversed:false,status:'paid'
+});
+async function insertOrder(status='SUPPLIER_SENDING'){
+  const id=newOrderId();
+  const paymentId='tr_'+randomBytes(15).toString('hex');
+  await pool.query(`
+    INSERT INTO commerce_orders (
+      id,public_token_hash,idempotency_hash,request_hash,offer_id,product_label,
+      amount_eur_cents,supplier_vid,supplier_max_usd_cents,logistics_name,
+      from_country_code,address_encrypted,status,payment_id,payment_mode
+    ) VALUES($1,$2,$3,$4,$5,'Synthetic gated order',5000,'sample-vid',2200,
+             'CI-shipping','CN','no real address data',$6,$7,'test')
+  `,[id,digest(randomBytes(16).toString('hex')),
+    digest(randomBytes(16).toString('hex')),
+    digest(randomBytes(16).toString('hex')),offerId,status,paymentId]);
+  const order={
+    id,payment_id:paymentId,amount_eur_cents:5000,
+    supplier_vid:'sample-vid',supplier_max_usd_cents:2200,
+    logistics_name:'CI-shipping',from_country_code:'CN'
+  };
+  orders.push(order);
+  return order;
+}
+try{
+  await initializeDatabase(pool);
+  await pool.query(`
+    INSERT INTO commerce_offers(
+      id,label,amount_eur_cents,unit_cost_eur_cents,reserves_eur_cents,
+      supplier_max_usd_cents,supplier_vid,logistics_name)
+    VALUES($1,'Synthetic pre-supplier gate check',5000,1000,500,2200,
+           'sample-vid','CI-shipping')
+  `,[offerId]);
+
+  const first=await insertOrder();
+  assert.equal(await authorizeSupplierSubmission(pool,first,validPayment(first)),true);
+  assert.equal(await authorizeSupplierSubmission(pool,first,{
+    ...validPayment(first),status:'pending',paid:false
+  }),false,'out-of-date payment status must not authorize CJ');
+  assert.equal(await authorizeSupplierSubmission(pool,first,{
+    ...validPayment(first),amountCents:1
+  }),false,'different price must not authorize CJ');
+  assert.equal(await authorizeSupplierSubmission(pool,first,{
+    ...validPayment(first),paymentId:'tr_other1234567'
+  }),false,'different provider payment must not authorize CJ');
+
+  // A webhook may arrive while the supplier stock and wallet checks are running.
+  const reversed=await recordPaymentStatus(pool,first.id,{
+    ...validPayment(first),paid:false,reversed:true
+  });
+  assert.equal(reversed.status,'EXCEPTION');
+  assert.equal(await authorizeSupplierSubmission(pool,first,validPayment(first)),false,
+    'the old paid proof must not override a newly detected chargeback');
+  assert.equal(await abortSupplierBeforePost(pool,first.id),false,
+    'already-quarantined orders must not be modified twice');
+
+  const second=await insertOrder();
+  const missedSupplier=await abortSupplierBeforePost(pool,second.id);
+  assert.equal(missedSupplier,true);
+  assert.equal(await authorizeSupplierSubmission(pool,second,validPayment(second)),false);
+  const types=(await pool.query(
+    'SELECT event_type FROM commerce_events WHERE order_id=$1',[second.id]
+  )).rows.map(x=>x.event_type);
+  assert.deepEqual(types,['SUPPLIER_PREPOST_ABORTED']);
+  const third=await insertOrder('PAID');
+  assert.equal(await authorizeSupplierSubmission(pool,third,validPayment(third)),false,
+    'only supplier-claimed orders may reach irreversible debit');
+
+  // The CJ client must not perform createOrderV2 without a *fresh* callback.
+  const customer={
+    fullName:'Synthetic Buyer',email:'test@example.fr',address1:'12 rue Exemple',
+    address2:'',postalCode:'75002',city:'Paris',region:'Ile de France',
+    countryCode:'FR',phone:''
+  };
+  let walletChecked=0,posts=0,authorizations=0;
+  const fetcher=async(url)=>{
+    if(url.endsWith('/shopping/pay/getBalance')){
+      walletChecked++;
+      return {ok:true,json:async()=>({code:200,result:true,data:{amount:'30.00'}})};
+    }
+    if(url.endsWith('/shopping/order/createOrderV2')){
+      posts++;
+      throw Error('No CJ purchase must occur in the CI test');
+    }
+    throw Error('Unexpected provider call');
+  };
+  const args={order:first,customer,accessToken:'a'.repeat(40),fetcher};
+  await assert.rejects(()=>submitCjBalanceOrder(args),/Final buyer payment authorization/);
+  assert.equal(walletChecked,0);
+  await assert.rejects(()=>submitCjBalanceOrder({
+    ...args,authorizeBeforeDebit:async()=>{
+      authorizations++;
+      assert.equal(walletChecked,1,'authorize only AFTER CJ wallet check');
+      throw Error('Provider payment reversed at final purchase boundary');
+    }
+  }),/reversed at final/);
+  assert.equal(authorizations,1);
+  assert.equal(posts,0,'no supplier POST after revoked authorization');
+  console.log('Final CJ debit gate OK: late reversal, price binding, pre-POST abort and no supplier POST');
+}finally{
+  await pool.query('DELETE FROM commerce_events WHERE order_id=ANY($1::text[])',
+    [orders.map(o=>o.id)]).catch(()=>{});
+  await pool.query('DELETE FROM commerce_orders WHERE offer_id=$1',[offerId]).catch(()=>{});
+  await pool.query('DELETE FROM commerce_offers WHERE id=$1',[offerId]).catch(()=>{});
+  await pool.end();
+}

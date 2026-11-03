@@ -91,11 +91,16 @@ export function buildCjOrder(order,customer){
     products:[{vid:order.supplier_vid,quantity:1,storeLineItemId:order.id}]
   };
 }
-export async function submitCjBalanceOrder({order,customer,accessToken,fetcher=fetch}){
+export async function submitCjBalanceOrder({order,customer,accessToken,authorizeBeforeDebit,fetcher=fetch}){
+  if(typeof authorizeBeforeDebit!=='function')
+    throw Error('Final buyer payment authorization required before CJ debit');
   const body=buildCjOrder(order,customer);
   const balance=await getCjBalance({accessToken,fetcher});
   if(balance<order.supplier_max_usd_cents)
     throw Error('Insufficient pre-funded supplier balance: delivery requires manual review');
+  // Last operation immediately before POST: authenticated Mollie re-verification
+  // and durable local state check. A failed callback must NEVER create a CJ order.
+  await authorizeBeforeDebit();
   const data=await api('/shopping/order/createOrderV2',accessToken,{
     method:'POST',body,fetcher
   });

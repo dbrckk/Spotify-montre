@@ -279,6 +279,51 @@ export async function claimSupplierOrder(pool,{dailyCapUsdCents}){
     return o;
   });
 }
+/** A last durable gate between the final authenticated Mollie GET and CJ POST.
+ * An intervening webhook may have quarantined this purchase; never override it.
+ */
+export async function authorizeSupplierSubmission(pool,order,verified){
+  if(!order||!verified||verified.paid!==true||verified.reversed===true||
+    verified.status!=='paid'||verified.paymentId!==order.payment_id||
+    verified.amountCents!==order.amount_eur_cents)
+    return false;
+  return transaction(pool,async client=>{
+    const {rows}=await client.query(`
+      SELECT id,status,payment_id,amount_eur_cents FROM commerce_orders
+      WHERE id=$1 FOR UPDATE
+    `,[order.id]);
+    const current=rows[0];
+    if(!current||current.status!=='SUPPLIER_SENDING'||
+      current.payment_id!==verified.paymentId||
+      current.amount_eur_cents!==verified.amountCents)return false;
+    const reversal=await client.query(`
+      SELECT 1 FROM commerce_events
+      WHERE order_id=$1 AND event_type='PAYMENT_REVERSAL_DETECTED' LIMIT 1
+    `,[order.id]);
+    return reversal.rowCount===0;
+  });
+}
+
+/** A failure before CJ createOrderV2 is NOT an ambiguous supplier purchase.
+ * Quarantine it for manual buyer resolution, without supplier recovery probes.
+ */
+export async function abortSupplierBeforePost(pool,orderId){
+  return transaction(pool,async client=>{
+    const {rows}=await client.query(
+      "SELECT status FROM commerce_orders WHERE id=$1 FOR UPDATE",[orderId]);
+    if(rows[0]?.status!=='SUPPLIER_SENDING')return false;
+    await client.query(`
+      UPDATE commerce_orders SET status='EXCEPTION',updated_at=now()
+      WHERE id=$1
+    `,[orderId]);
+    await client.query(`
+      INSERT INTO commerce_events(order_id,event_type,details)
+      VALUES($1,'SUPPLIER_PREPOST_ABORTED',$2)
+    `,[orderId,JSON.stringify({action:'verify_customer_payment_and_refund_or_requalify_stock_manual_only'})]);
+    return true;
+  });
+}
+
 export async function recordSupplierAttempt(pool,orderId,result,error){
   return transaction(pool,async client=>{
     const {rows}=await client.query('SELECT status FROM commerce_orders WHERE id=$1 FOR UPDATE',[orderId]);
