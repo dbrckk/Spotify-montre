@@ -14,18 +14,18 @@ async function main(){
   if(typeof token!=='string'||token.length<20)
     throw Error('A live CJ_ACCESS_TOKEN is required to inspect a real supplier quote');
   const candidate=validateOfferCandidate(JSON.parse(readFileSync(filename,'utf8')));
-  const quote=await preflightCjDelivery({
-    vid:candidate.supplierVid,
-    originCountry:candidate.originCountry,
-    postalCode:candidate.samplePostalCode,
-    logisticsName:candidate.logisticsName,
-    maxSupplierUsdCents:candidate.supplierMaxUsdCents,
-    maxSupplierEurCents:candidate.supplierLandedEurCeilingCents,
-    fxMaxEurPerUsdBps:candidate.fxMaxEurPerUsdBps,
-    accessToken:token
-  });
-  const plan=qualifyObservedCjQuote(candidate,quote);
   if(mode==='inspect'){
+    const quote=await preflightCjDelivery({
+      vid:candidate.supplierVid,
+      originCountry:candidate.originCountry,
+      postalCode:candidate.samplePostalCode,
+      logisticsName:candidate.logisticsName,
+      maxSupplierUsdCents:candidate.supplierMaxUsdCents,
+      maxSupplierEurCents:candidate.supplierLandedEurCeilingCents,
+      fxMaxEurPerUsdBps:candidate.fxMaxEurPerUsdBps,
+      accessToken:token
+    });
+    const plan=qualifyObservedCjQuote(candidate,quote);
     console.log(JSON.stringify({
       id:candidate.id,state:plan.state,observed:plan.observed,
       financial:plan.financial,
@@ -38,7 +38,7 @@ async function main(){
   const pool=createDatabase(process.env.DATABASE_URL);
   try{
     await initializeDatabase(pool);
-    const staged=await stageQualifiedOffer(pool,plan);
+    const staged=await stageQualifiedOffer(pool,candidate,{accessToken:token});
     console.log(JSON.stringify({...staged,checkoutEnabled:false,
       note:'Draft only: no approval, no live sale, no CJ purchase, no Mollie payment.'},null,2));
   }finally{await pool.end();}
