@@ -1,6 +1,9 @@
 /* Atelier Montres — real photographed editorial highlights.
    Used by affiliation.html, the actual source for the SEO-generated homepage.
    No external font, image or JavaScript dependency. */
+.home-featured .home-section-heading,
+.home-info .home-section-heading{display:flex;align-items:end;justify-content:space-between;gap:25px;margin-bottom:30px}
+.home-featured .home-section-heading>p{max-width:385px;color:#52665e;line-height:1.8;margin:0}
 .home-featured{background:#fffdf8;padding:clamp(70px,8vw,110px) 0}
 .home-featured-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:19px}
 .home-product{min-width:0;border:1px solid #e1d9cc;border-radius:12px;overflow:hidden;background:#fff;
