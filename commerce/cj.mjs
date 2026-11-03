@@ -11,7 +11,7 @@ function assertToken(token){
  */
 export async function obtainCjAccessToken({apiKey,fetcher=fetch}){
   if(typeof apiKey!=='string'||apiKey.length<20||apiKey.length>200||
-    /\\s/.test(apiKey))
+    /\s/.test(apiKey))
     throw Error('CJ API key unavailable');
   const response=await fetcher(ROOT+'/authentication/getAccessToken',{
     method:'POST',redirect:'error',headers:{
