@@ -2,7 +2,8 @@ import {createServer} from 'node:http';
 import {createHostedPayment,verifyHostedPayment} from '../scripts/commerce-mollie.mjs';
 import {createDatabase,initializeDatabase,listApprovedOffers,reserveCheckout,saveCreatedPayment,
   flagPaymentReview,getApprovedOffer,findExistingCheckout,getOrderByPayment,getOrderForStatus,recordPaymentStatus,claimPaymentsForAudit,
-  claimSupplierOrder,recordSupplierAttempt,ordersForSupplierReconciliation,recordSupplierDetail,
+  claimSupplierOrder,recordSupplierAttempt,authorizeSupplierSubmission,abortSupplierBeforePost,
+  ordersForSupplierReconciliation,recordSupplierDetail,
   quarantineStaleSupplierAttempts,quarantineStalePaymentCreation,getCommerceExceptionSummary,
   claimSupplierRecoveryProbe,recordRecoveredSupplierOrder} from './db.mjs';
 import {ClientError,validateCheckoutBody,readJsonBody,readWebhookBody,openAddress} from './security.mjs';
@@ -125,21 +126,18 @@ async function supplierWork(){
     if(merchantReady()){
     const order=await claimSupplierOrder(pool,{dailyCapUsdCents:dailyCap});
     if(order){
+      let supplierPostAuthorized=false;
       try{
-        // Revalidate the customer's payment at the final irreversible boundary.
-        // A later refund or chargeback must stop the CJ wallet from being debited.
-        const payment=await verifyHostedPayment({
+        // Avoid supplier lookups for a payment which was already reversed.
+        const initialPayment=await verifyHostedPayment({
           apiKey:mollieKey,paymentId:order.payment_id,
           orderId:order.id,amountCents:order.amount_eur_cents
         });
-        if(!payment.paid){
-          await recordPaymentStatus(pool,order.id,payment);
-          throw Error('Payment not settled immediately before supplier debit');
-        }
+        await recordPaymentStatus(pool,order.id,initialPayment);
+        if(!initialPayment.paid)
+          throw Error('Customer payment not settled before supplier preparation');
         const customer=openAddress(order.address_encrypted,encryptionKey);
-        // The first stock/landed-cost check happened before taking payment.
-        // Repeat immediately before committing the customer's paid order at CJ.
-        // Never buy if the item, postcode, duties or wallet have changed.
+        // Stock, duties, exchange ceiling and wallet can change after checkout.
         await preflightCjDelivery({
           vid:order.supplier_vid,originCountry:order.from_country_code,
           postalCode:customer.postalCode,logisticsName:order.logistics_name,
@@ -148,12 +146,32 @@ async function supplierWork(){
           fxMaxEurPerUsdBps:order.supplier_fx_max_eur_per_usd_bps,
           accessToken:cjToken
         });
-        const result=await submitCjBalanceOrder({order,customer,accessToken:cjToken});
+        const result=await submitCjBalanceOrder({
+          order,customer,accessToken:cjToken,
+          // This callback executes AFTER CJ wallet read, immediately before
+          // its irreversible createOrderV2 POST. Never use an earlier proof.
+          authorizeBeforeDebit:async()=>{
+            const latest=await verifyHostedPayment({
+              apiKey:mollieKey,paymentId:order.payment_id,
+              orderId:order.id,amountCents:order.amount_eur_cents
+            });
+            await recordPaymentStatus(pool,order.id,latest);
+            if(!await authorizeSupplierSubmission(pool,order,latest))
+              throw Error('Customer payment or local order changed before supplier debit');
+            supplierPostAuthorized=true;
+          }
+        });
         await recordSupplierAttempt(pool,order.id,result,null);
       }catch{
-        // If a payment reversal already changed the order to EXCEPTION,
-        // do not overwrite it. If the provider failed, quarantine the attempt.
-        await recordSupplierAttempt(pool,order.id,null,true).catch(()=>{});
+        if(supplierPostAuthorized){
+          // Once CJ POST was authorized, even a lost HTTP response could
+          // represent a charged supplier order: GET-only recovery is required.
+          await recordSupplierAttempt(pool,order.id,null,true).catch(()=>{});
+        }else{
+          // No POST was started; do not misclassify a preflight rejection as
+          // an uncertain CJ purchase or launch needless recovery probes.
+          await abortSupplierBeforePost(pool,order.id).catch(()=>{});
+        }
         console.error('supplier_order_requires_manual_reconciliation',order.id);
       }
     }
