@@ -4,6 +4,8 @@
   const $=id=>document.getElementById(id);
   const root=$('udGrid'),form=$('udFilters'),status=$('udCount'),empty=$('udEmpty');
   const compareStatus=$('udCompareStatus'),compareClear=$('udCompareClear'),compareTable=$('udCompareTable');
+  const decisionForm=$('udDecisionForm'),decisionReset=$('udDecisionReset');
+  const decisionEngine=window.AtelierAdvisorEngine;
   const tray=$('udCompareTray'),trayItems=$('udTrayItems'),trayCount=$('udTrayCount'),
     trayOpen=$('udTrayOpen'),trayClear=$('udTrayClear'),catalogue=document.querySelector('.ud-page');
   const viewTools=$('udViewTools'),viewCompact=$('udViewCompact'),viewLarge=$('udViewLarge');
@@ -47,6 +49,21 @@
     return false;
   };
   const params=new URLSearchParams(location.search);
+  const prefKeys=['tier','style','movement','size'];
+  const prefParam=key=>'pref'+key[0].toUpperCase()+key.slice(1);
+  const prefControls={
+    tier:$('udPrefTier'),style:$('udPrefStyle'),
+    movement:$('udPrefMovement'),size:$('udPrefSize')
+  };
+  let decisionPrefs=decisionEngine?.choices(Object.fromEntries(
+    prefKeys.map(key=>[key,params.get(prefParam(key))||'all'])))||null;
+  if(decisionPrefs)for(const key of prefKeys){
+    if(prefControls[key])prefControls[key].value=decisionPrefs[key];
+  }
+  const resetDecision=()=>{
+    if(decisionEngine)decisionPrefs=decisionEngine.choices({});
+    for(const key of prefKeys)if(prefControls[key])prefControls[key].value='all';
+  };
   saved=loadSaved();
   savedOnly=params.get('saved')==='1';
   for(const [key,control] of Object.entries(controls)){
@@ -63,6 +80,10 @@
         query.set(name,value.slice(0,100));
     }
     if(selected.length)query.set('compare',selected.join(','));
+    if(selected.length&&decisionPrefs){
+      for(const key of prefKeys)if(decisionPrefs[key]!=='all')
+        query.set(prefParam(key),decisionPrefs[key]);
+    }
     if(savedOnly)query.set('saved','1');
     if(view==='large')query.set('view','large');
     const next=location.pathname+(query.size?'?'+query.toString():'')+location.hash;
@@ -190,7 +211,15 @@
       button.setAttribute('aria-pressed',String(active));
       button.textContent=active?'Retirer de la comparaison':'Ajouter à la comparaison';
     }
-    if(selected.length<2){compareTable.replaceChildren();compareTable.hidden=true;persist();return}
+    if(selected.length<2){
+      if(decisionForm)decisionForm.hidden=true;
+      compareTable.replaceChildren();compareTable.hidden=true;persist();return;
+    }
+    if(decisionForm&&decisionEngine)decisionForm.hidden=false;
+    const decisionEntries=decisionEngine&&decisionPrefs
+      ?decisionEngine.recommend(selected.map(id=>watches.get(id)),decisionPrefs,3):[];
+    const scored=new Map(decisionEntries.map(entry=>[entry.product.id,entry]));
+    const activeCriteria=decisionEntries[0]?.criteria||0;
     const rows=[
       ['Mouvement',p=>({quartz:'Quartz',automatic:'Automatique','eco-drive':'Solaire'})[p.movement]],
       ['Boîtier',p=>p.caseText],
@@ -217,6 +246,20 @@
         visual.append(img);th.append(visual);
       }
       th.append(link(p.brand+' '+p.model,'./'+id+'.html'));
+      const evaluation=scored.get(id);
+      if(activeCriteria&&evaluation){
+        const note=node('span',evaluation.matched+' / '+evaluation.criteria+
+          ' critères concordants','ud-decision-score');
+        note.dataset.match=evaluation.matched===evaluation.criteria?'exact'
+          :evaluation.matched?'partial':'none';
+        note.title=[...evaluation.details,evaluation.sizeNote].filter(Boolean).join(' · ')
+          ||'Aucun critère vérifié parmi vos préférences';
+        th.append(note);
+        if(evaluation.details.length)
+          th.append(node('small',evaluation.details.join(' · '),'ud-decision-reasons'));
+        if(evaluation.sizeNote)
+          th.append(node('small',evaluation.sizeNote,'ud-decision-warning'));
+      }
       const remove=node('button','Retirer','ud-compare-remove');
       remove.type='button';remove.setAttribute('aria-label','Retirer '+p.brand+' '+p.model);
       remove.addEventListener('click',()=>{selected=selected.filter(x=>x!==id);renderCompare()});
@@ -245,9 +288,33 @@
       'ud-matrix-hint');
     hint.id='udCompareHint';
     table.append(caption,thead,tbody);
-    compareTable.replaceChildren(hint,table);compareTable.hidden=false;
+    const summaries=[hint];
+    if(activeCriteria){
+      const exact=decisionEntries.filter(e=>e.matched===e.criteria).length;
+      const count=selected.length;
+      const text=exact===0
+        ?'Aucune des '+count+' montres ne répond à toutes vos '+activeCriteria+
+          ' préférences. Les modèles restent des alternatives, et les données inconnues ne sont pas des correspondances.'
+        :exact+' montre'+(exact>1?'s':'')+' sur '+count+
+          ' répond'+(exact>1?'ent':'')+' à toutes vos '+activeCriteria+
+          ' préférences documentées.';
+      const result=node('p',text,'ud-decision-result');
+      result.id='udDecisionResult';
+      result.dataset.status=exact?'matched':'none';
+      result.setAttribute('aria-live','polite');
+      summaries.unshift(result);
+    }
+    compareTable.replaceChildren(...summaries,table);compareTable.hidden=false;
     persist();
   };
+  decisionForm?.addEventListener('submit',event=>event.preventDefault());
+  decisionForm?.addEventListener('change',()=>{
+    if(!decisionEngine)return;
+    decisionPrefs=decisionEngine.choices(Object.fromEntries(
+      prefKeys.map(key=>[key,prefControls[key]?.value||'all'])));
+    renderCompare();
+  });
+  decisionReset?.addEventListener('click',()=>{resetDecision();renderCompare()});
   root.addEventListener('click',event=>{
     const zoom=event.target.closest('button.ud-zoom[data-zoom-id]');
     if(zoom){
@@ -278,8 +345,8 @@
     else selected.push(id);
     renderCompare();
   });
-  compareClear.addEventListener('click',()=>{selected=[];renderCompare()});
-  trayClear.addEventListener('click',()=>{selected=[];renderCompare()});
+  compareClear.addEventListener('click',()=>{selected=[];resetDecision();renderCompare()});
+  trayClear.addEventListener('click',()=>{selected=[];resetDecision();renderCompare()});
   trayItems.addEventListener('click',event=>{
     const btn=event.target.closest('button[data-tray-remove]');
     if(!btn||!selected.includes(btn.dataset.trayRemove))return;

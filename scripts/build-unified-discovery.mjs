@@ -199,6 +199,14 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
     +'<button type="button" id="udTrayClear">Tout effacer</button></div></aside>'
     +'<section id="comparer" class="ud-compare" aria-labelledby="udCompareTitle"><h2 id="udCompareTitle">Comparer jusqu’à trois montres</h2><p>Choisissez les modèles depuis les fiches ci-dessus. Les champs non documentés restent signalés comme tels.</p>'
     +'<p id="udCompareStatus" aria-live="polite">Sélectionnez au moins deux modèles.</p><button type="button" id="udCompareClear" hidden>Effacer la comparaison</button>'
+    +'<form id="udDecisionForm" class="ud-decision-form" aria-label="Critères personnels pour comparer les montres" hidden>'
+    +'<div class="ud-decision-heading"><h3>Ce qui compte pour vous</h3><p>Comparez les faits aux préférences du conseiller. Gamme = sélection éditoriale, pas un prix. Une dimension inconnue ne correspond jamais par défaut.</p></div>'
+    +'<div class="ud-decision-controls">'
+    +'<label for="udPrefTier">Gamme<select id="udPrefTier" name="tier"><option value="all">Indifférent</option><option value="essential">Essentielle</option><option value="signature">Signature</option><option value="prestige">Prestige</option></select></label>'
+    +'<label for="udPrefStyle">Style<select id="udPrefStyle" name="style"><option value="all">Indifférent</option><option value="sport">Sport</option><option value="classic">Classique</option><option value="minimal">Minimaliste</option><option value="retro">Rétro</option><option value="statement">Audacieux</option></select></label>'
+    +'<label for="udPrefMovement">Mouvement<select id="udPrefMovement" name="movement"><option value="all">Indifférent</option><option value="quartz">Quartz</option><option value="automatic">Automatique</option><option value="eco-drive">Solaire</option></select></label>'
+    +'<label for="udPrefSize">Boîtier rond<select id="udPrefSize" name="size"><option value="all">Indifférent</option><option value="compact">Jusqu’à 38 mm</option><option value="medium">38,1 à 40 mm</option></select></label>'
+    +'</div><button type="button" id="udDecisionReset" class="ud-decision-reset">Effacer mes préférences</button></form>'
     +'<div id="udCompareTable" role="region" tabindex="0" aria-label="Tableau de comparaison des montres" hidden></div></section>'
     +'<p class="ud-back"><a href="../conseiller.html">Utiliser le conseiller pour trouver trois suggestions</a> · <a href="./modeles-populaires.html">Voir les 37 modèles complémentaires</a></p></div>';
   const graph={'@context':'https://schema.org','@graph':[
@@ -209,6 +217,6 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
   ]};
   writeFileSync(join(root,path),page(pageHead({title:'52 montres homme et femme à comparer | Atelier Montres',
     description:'Explorez 52 montres Casio, SKMEI, Citizen, Seiko et autres. Comparez style, mouvement, dimensions vérifiées et liens marchands sans faux prix.',path}),main,graph)
-    .replace('</head>','<link rel="stylesheet" href="../unified-discovery.css"><link rel="stylesheet" href="../photo-zoom.css"><script defer src="../photo-zoom.js"></script><link rel="stylesheet" href="../direct-offer-links.css"><link rel="stylesheet" href="../editorial-atelier-2026.css"><script defer src="../unified-discovery.js"></script><script defer src="../direct-offer-links.js"></script></head>'));
+    .replace('</head>','<link rel="stylesheet" href="../unified-discovery.css"><link rel="stylesheet" href="../photo-zoom.css"><script defer src="../photo-zoom.js"></script><link rel="stylesheet" href="../direct-offer-links.css"><link rel="stylesheet" href="../editorial-atelier-2026.css"><script defer src="../conseiller-engine.js"></script><script defer src="../unified-discovery.js"></script><script defer src="../direct-offer-links.js"></script></head>'));
   return {path,count:normalized.length,coreCount:coreProducts.length,supplementalCount:extras.length};
 }

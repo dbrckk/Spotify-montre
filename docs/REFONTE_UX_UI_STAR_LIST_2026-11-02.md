@@ -57,3 +57,14 @@ La palette remplace l’omniprésence du vert uniforme ; elle ne suppose aucun p
 Audit visuel sur téléphone des cartes à 360px et 412px ; test de lisibilité avec un zoom système 200 %, des liens d'affiliation, des filtres préremplis et des images locales. Vérifier l’accessibilité et les temps de chargement avec Lighthouse ; éviter animations, dépendances ou fonctionnalités non indispensables.
 
 Pour la vente directe, conserver la [feuille de route marchande](ROADMAP_VENTE_DIRECTE_AUTOMATISEE_2026-11-02.md) : le travail graphique n’active ni paiement ni commande fournisseur.
+
+
+## Itération 03/11/2026 — passage du conseil à une décision comparée
+
+**Défaut observé :** le conseiller recommandait trois montres avec quatre préférences (gamme, style, mouvement, diamètre) mais ouvrait le comparateur uniquement avec les ID. L'utilisateur perdait le *pourquoi* de la sélection.
+
+**Correction réelle :** le lien du conseiller transmet les préférences validées dans des paramètres distincts (`prefTier`, `prefStyle`, `prefMovement`, `prefSize`). Le comparateur de 52 montres réutilise **exactement `AtelierAdvisorEngine`**, affiche ces critères dans quatre listes modifiables sur mobile, et annonce pour chaque montre le nombre de critères concordants, les caractéristiques explicitement documentées et les tailles inconnues. Il avertit si **aucune montre** ne correspond à toutes les préférences, sans inventer un gagnant ou un prix.
+
+Les paramètres de préférences ne modifient **pas** les filtres de la grille : une alternative reste visible. Ils sont restaurés par URL après retour navigateur ou rechargement, effaçables indépendamment, et les interfaces sont masquées sans JavaScript. Le comparateur conserve les photos exactes, les liens vers les fiches et la matrice de différences.
+
+**Vérifications prévues :** parcours Android conseiller → comparateur, cohérence des valeurs, zéro correspondance avec un mouvement absent de la sélection, remise à zéro, actualisation et partage du lien, pas de débordement ni d'erreur JS, puis audits accessibilité/SEO/commerce. La vente directe reste volontairement inactive.
