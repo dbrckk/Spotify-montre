@@ -79,7 +79,7 @@ const fetcher=async(url,options)=>{
   throw Error('Unexpected provider request');
 };
 assert.equal(await getCjBalance({accessToken:'a'.repeat(40),fetcher}),10075);
-const submitted=await submitCjBalanceOrder({order,customer,accessToken:'a'.repeat(40),fetcher});
+const submitted=await submitCjBalanceOrder({order,customer,accessToken:'a'.repeat(40),authorizeBeforeDebit:async()=>{},fetcher});
 assert.equal(submitted.supplierId,'2608010710340327100');
 assert.equal(submitted.reportedCostUsdCents,1850);
 assert.equal(submitted.supplierStatus,'UNSHIPPED');
@@ -88,18 +88,18 @@ const detail=await fetchCjOrder({orderId:submitted.supplierId,accessToken:'a'.re
 assert.equal(detail.orderStatus,'SHIPPED');
 const noBalance=async(url)=>({ok:true,json:async()=>({code:200,result:true,success:true,
   data:{amount:0.5}})});
-await assert.rejects(submitCjBalanceOrder({order,customer,accessToken:'a'.repeat(40),fetcher:noBalance}),/Insufficient/);
+await assert.rejects(submitCjBalanceOrder({order,customer,accessToken:'a'.repeat(40),authorizeBeforeDebit:async()=>{},fetcher:noBalance}),/Insufficient/);
 const incorrect=async(url)=>{
   if(url.endsWith('/getBalance'))return {ok:true,json:async()=>({code:200,result:true,success:true,data:{amount:200}})};
   return {ok:true,json:async()=>({code:200,result:true,success:true,data:{orderId:'1',orderNumber:'WRONG',actualPayment:'1.00'}})};
 };
-await assert.rejects(submitCjBalanceOrder({order,customer,accessToken:'a'.repeat(40),fetcher:incorrect}),/mismatch/);
+await assert.rejects(submitCjBalanceOrder({order,customer,accessToken:'a'.repeat(40),authorizeBeforeDebit:async()=>{},fetcher:incorrect}),/mismatch/);
 const expensive=async(url)=>{
   if(url.endsWith('/getBalance'))return {ok:true,json:async()=>({code:200,result:true,success:true,data:{amount:200}})};
   return {ok:true,json:async()=>({code:200,result:true,success:true,
     data:{orderId:'1',orderNumber:order.id,actualPayment:'25.01'}})};
 };
-await assert.rejects(submitCjBalanceOrder({order,customer,accessToken:'a'.repeat(40),fetcher:expensive}),/exceeded/);
+await assert.rejects(submitCjBalanceOrder({order,customer,accessToken:'a'.repeat(40),authorizeBeforeDebit:async()=>{},fetcher:expensive}),/exceeded/);
 
 const supplierPreflight=async(url,options)=>{
   if(url.includes('/product/variant/queryByVid'))return {ok:true,json:async()=>({
