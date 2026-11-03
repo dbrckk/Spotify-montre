@@ -2,6 +2,8 @@
 
 **Plan directeur :** [vente directe entièrement automatisée](../docs/ROADMAP_VENTE_DIRECTE_AUTOMATISEE_2026-11-02.md).
 
+**Nouvel outil opérationnel :** [qualification de vraies variantes CJ, brouillons non achetables et preuves de devis](../docs/QUALIFICATION_VRAIES_OFFRES_CJ_2026-11-03.md) ; `node commerce/stage-offer.mjs inspect|stage /chemin/prive/candidat-reel.json`. Cette commande requiert des accès CJ réels. Aucun SKU ou paiement fictif n'est publié.
+
 ### Nouvelles conditions de publication obligatoires (novembre 2026)
 
 Un SKU ne peut apparaître dans `GET /api/offers` ni être commandé sans :
