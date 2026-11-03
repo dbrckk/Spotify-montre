@@ -55,5 +55,19 @@
   }
   return valid.map((p,i)=>score(p,c,i)).sort((a,b)=>b.matched-a.matched||b.score-a.score||a.index-b.index).slice(0,Math.max(0,Math.min(15,limit)));
  }
- scope.AtelierAdvisorEngine=Object.freeze({recommend,choices,tierNames,movementNames,styleNames,sizeNames,diameterMm});
+ function coverage(products,selection){
+  const c=choices(selection);
+  const selected=Number(c.tier!=='all')+Number(c.style!=='all')+Number(c.movement!=='all')+Number(c.size!=='all');
+  const valid=Array.isArray(products)?products.filter(p=>p&&typeof p.id==='string'
+   &&Object.hasOwn(tierNames,p.tier)&&Object.hasOwn(styleNames,p.style)
+   &&Object.hasOwn(movementNames,p.movement)):[];
+  if(selected===0)return {selected:0,exact:valid.length,total:valid.length};
+  let exact=0;
+  for(let i=0;i<valid.length;i++){
+   const result=score(valid[i],c,i);
+   if(result.matched===selected)exact++;
+  }
+  return {selected,exact,total:valid.length};
+ }
+ scope.AtelierAdvisorEngine=Object.freeze({recommend,coverage,choices,tierNames,movementNames,styleNames,sizeNames,diameterMm});
 })(globalThis);
