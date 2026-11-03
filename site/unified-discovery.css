@@ -275,3 +275,25 @@
  .ud-matrix-photo{height:112px}
  .ud-matrix-photo img{padding:6px}
 }
+
+
+/* Clear on mobile while retaining the criterion during horizontal scrolling. */
+#udCompareTable{max-width:100%;overscroll-behavior-x:contain;
+  scrollbar-color:#ac8b60 #eeeae2;scrollbar-width:thin}
+.ud-matrix th:first-child{
+  position:sticky;left:0;z-index:2;min-width:128px;
+  max-width:156px;background:#eff1e9;
+  box-shadow:3px 0 9px rgba(27,42,36,.08)
+}
+.ud-matrix thead th:first-child{z-index:3;background:#dde8dd}
+.ud-matrix .ud-matrix-diff td{background:#f9f0e2;color:#2c4239}
+.ud-matrix .ud-matrix-diff th:first-child{
+  background:#ecdfca;color:#5f3d22;border-left:4px solid #9f7443
+}
+.ud-matrix-hint{margin:12px 0 15px;padding:10px 14px;border-radius:7px;
+  border:1px solid #ddc9aa;background:#f7f1e7;color:#55432c;
+  font-size:13px;line-height:1.65}
+@media(max-width:620px){
+ .ud-matrix th:first-child{min-width:114px;max-width:125px}
+ .ud-matrix-hint{font-size:12px}
+}
