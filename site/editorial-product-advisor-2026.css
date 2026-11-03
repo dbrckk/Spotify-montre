@@ -486,3 +486,18 @@ body:has(.watch-product) .related li{
  .advisor-direction:hover,.advisor-page .advisor-card:hover,
  body:has(.detail-layout) .detail-related-card:hover{transform:none!important}
 }
+
+
+/* Recommendation clarity: an empty exact-match set is a useful editorial
+ * outcome, not a failed request or an invitation to invent product details. */
+.advisor-page .advisor-summary[data-match-state="none"]{
+  background:#f5e9d6;color:#624520;border-left:4px solid #a36d31;
+  border-radius:0 8px 8px 0;padding:13px 16px;line-height:1.65
+}
+.advisor-page .advisor-summary[data-match-state="exact"]{
+  background:#e7efe7;color:#244c3c;border-left:4px solid #48765c;
+  border-radius:0 8px 8px 0;padding:13px 16px;line-height:1.65
+}
+@media(max-width:620px){
+ .advisor-page .advisor-summary[data-match-state]{font-size:13px;padding:12px 14px}
+}
