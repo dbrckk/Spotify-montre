@@ -145,6 +145,38 @@ Test isolé : `commerce/final-supplier-gate-check.mjs` exécute des scénarios
 sur PostgreSQL local et un transport CJ contrôlé pour vérifier qu'un rejet
 de dernière minute ne crée aucun ordre fournisseur.
 
+## Suivi CJ à fréquence adaptée et partagé entre workers
+
+Le service vérifie toujours les expéditions et leur livraison par l'API
+CJ `GET /shopping/order/getOrderDetail`, sans nouvelle commande ni débit.
+Depuis ce changement, la lecture n'est plus lancée **toutes les 45 secondes**
+pour les huit premières lignes du registre : une file PostgreSQL enregistre
+`supplier_checked_at` et choisit au plus **quatre commandes éligibles** par
+passage, avec transaction `FOR UPDATE SKIP LOCKED`.
+
+| Statut interne | Intervalle minimum entre deux lectures CJ |
+| --- | --- |
+| `SUPPLIER_SUBMITTED` | 10 minutes |
+| `SUPPLIER_PAID` | 1 heure |
+| `SHIPPED` | 6 heures |
+| `DELIVERED` ou `EXCEPTION` | Pas de lecture automatique depuis cette file |
+
+Une date de contrôle absente rend l'ordre immédiatement éligible. Les
+commandes sont servies par date de dernière lecture, puis par date de
+création ; plusieurs processus ne se voient pas attribuer la même commande
+dans un lot donné. Ce système évite que les anciens colis déjà expédiés
+soient interrogés en boucle, au détriment des nouvelles commandes.
+
+La date de lecture est réservée **avant** l'appel réseau : si le processus
+s'arrête ou CJ refuse temporairement une requête, la commande redeviendra
+éligible à son prochain intervalle. La fiabilité des données CJ, l'identité
+du destinataire et les preuves de paiement fournisseur restent vérifiées
+par `recordSupplierDetail` avant tout changement d'état.
+
+Le contrôle `commerce/supplier-reconciliation-check.mjs` utilise
+PostgreSQL 16 isolé pour tester le plafonnement, les appels concurrents,
+l'absence de famine, les durées de reprise et les états terminaux.
+
 ## Conditions **avant activation**
 
 - Entreprise établie, CGV, politique de confidentialité, rétractation, mentions légales

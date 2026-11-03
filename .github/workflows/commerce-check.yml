@@ -60,5 +60,8 @@ jobs:
       - name: Verify final Mollie authorization before irreversible CJ POST
         working-directory: commerce
         run: node final-supplier-gate-check.mjs
+      - name: Verify CJ shipping reconciliation cadence with PostgreSQL
+        working-directory: commerce
+        run: node supplier-reconciliation-check.mjs
       - name: Verify browser purchase script syntax
         run: node --check site/acheter-direct.js
