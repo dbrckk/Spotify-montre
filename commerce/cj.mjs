@@ -5,6 +5,27 @@ function assertToken(token){
   if(typeof token!=='string'||token.length<20||/[\s\r\n]/.test(token))
     throw Error('CJ-Access-Token unavailable');
 }
+/** Exchange the operator's private CJ API key for a transient access token.
+ * Never print or persist either value. Only the manual read-only discovery
+ * workflow uses this helper; merchant purchasing still has a separate gate.
+ */
+export async function obtainCjAccessToken({apiKey,fetcher=fetch}){
+  if(typeof apiKey!=='string'||apiKey.length<20||apiKey.length>200||
+    /\\s/.test(apiKey))
+    throw Error('CJ API key unavailable');
+  const response=await fetcher(ROOT+'/authentication/getAccessToken',{
+    method:'POST',redirect:'error',headers:{
+      'Content-Type':'application/json','Accept':'application/json'
+    },body:JSON.stringify({apiKey}),signal:AbortSignal.timeout(12000)
+  });
+  if(!response.ok)throw Error('CJ authentication HTTP error');
+  const result=await response.json();
+  if(result?.code!==200||result?.result!==true||result?.success===false)
+    throw Error('CJ account did not authorize access');
+  const token=result?.data?.accessToken;
+  assertToken(token);
+  return token;
+}
 function validOrder(order,customer){
   if(!/^ord_[a-f0-9]{40}$/.test(order?.id||''))throw Error('Invalid internal supplier order reference');
   if(typeof order.supplier_vid!=='string'||!/^[\w-]{3,100}$/.test(order.supplier_vid))
