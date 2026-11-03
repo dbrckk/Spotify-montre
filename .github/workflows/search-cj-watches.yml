@@ -1,0 +1,43 @@
+name: Rechercher des montres CJ sans VID ni achat
+
+on:
+  workflow_dispatch:
+    inputs:
+      keyword:
+        description: "Recherche catalogue CJ, ex. SKMEI"
+        required: true
+        default: "SKMEI"
+        type: string
+      postal_code:
+        description: "Code postal FR metropolitain pour devis echantillon"
+        required: true
+        default: "75002"
+        type: string
+
+permissions:
+  contents: read
+
+# One keyword, only two watch products, up to 9 read-only CJ calls
+# /listV2 50 points + 2 x (variants 10 + variant/stock/freight 30)
+# = no more than 130 CJ points if both SKUs have stock.
+concurrency:
+  group: cj-watch-search-pilot
+  cancel-in-progress: false
+
+jobs:
+  supplier-read-only:
+    if: github.repository == 'dbrckk/Spotify-montre' && github.actor == 'dbrckk'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Rechercher CJ et verifier au plus deux variantes vers FR
+        env:
+          CJ_API_KEY: ${{ secrets.CJ_API_KEY }}
+          CJ_ACCESS_TOKEN: ${{ secrets.CJ_ACCESS_TOKEN }}
+          CJ_SEARCH_KEYWORD: ${{ inputs.keyword }}
+          CJ_POSTAL_CODE: ${{ inputs.postal_code }}
+        run: node commerce/search-cj.mjs
