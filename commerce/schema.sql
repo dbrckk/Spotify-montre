@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS commerce_offers (
   amount_eur_cents integer NOT NULL CHECK (amount_eur_cents BETWEEN 100 AND 1000000),
   unit_cost_eur_cents integer NOT NULL CHECK (unit_cost_eur_cents >= 0),
   supplier_landed_eur_ceiling_cents integer NOT NULL DEFAULT 0 CHECK (supplier_landed_eur_ceiling_cents >= 0),
+  supplier_fx_max_eur_per_usd_bps integer NOT NULL DEFAULT 0 CHECK (supplier_fx_max_eur_per_usd_bps BETWEEN 0 AND 20000),
   vat_rate_bps integer NOT NULL DEFAULT -1 CHECK (vat_rate_bps BETWEEN -1 AND 3000),
   tax_treatment_verified boolean NOT NULL DEFAULT false,
   supplier_fx_verified boolean NOT NULL DEFAULT false,
@@ -34,6 +35,9 @@ CREATE TABLE IF NOT EXISTS commerce_offers (
 -- A zero ceiling deliberately blocks approval until an all-in EUR quote is documented.
 ALTER TABLE commerce_offers ADD COLUMN IF NOT EXISTS
   supplier_landed_eur_ceiling_cents integer NOT NULL DEFAULT 0;
+-- Old offers have no attested exchange ceiling, so must fail closed.
+ALTER TABLE commerce_offers ADD COLUMN IF NOT EXISTS
+  supplier_fx_max_eur_per_usd_bps integer NOT NULL DEFAULT 0;
 ALTER TABLE commerce_offers ADD COLUMN IF NOT EXISTS
   vat_rate_bps integer NOT NULL DEFAULT -1;
 ALTER TABLE commerce_offers ADD COLUMN IF NOT EXISTS
@@ -61,6 +65,7 @@ CREATE TABLE IF NOT EXISTS commerce_orders (
   amount_eur_cents integer NOT NULL CHECK (amount_eur_cents>0),
   vat_rate_bps_snapshot integer NOT NULL DEFAULT -1,
   supplier_landed_eur_ceiling_cents integer NOT NULL DEFAULT 0,
+  supplier_fx_max_eur_per_usd_bps integer NOT NULL DEFAULT 0,
   promised_delivery_min_business_days smallint NOT NULL DEFAULT 0,
   promised_delivery_max_business_days smallint NOT NULL DEFAULT 0,
   supplier_vid text NOT NULL,
@@ -94,6 +99,9 @@ ALTER TABLE commerce_orders ADD COLUMN IF NOT EXISTS
   vat_rate_bps_snapshot integer NOT NULL DEFAULT -1;
 ALTER TABLE commerce_orders ADD COLUMN IF NOT EXISTS
   supplier_landed_eur_ceiling_cents integer NOT NULL DEFAULT 0;
+-- Snapshot the conservative FX limit at checkout, do not use a later offer edit.
+ALTER TABLE commerce_orders ADD COLUMN IF NOT EXISTS
+  supplier_fx_max_eur_per_usd_bps integer NOT NULL DEFAULT 0;
 ALTER TABLE commerce_orders ADD COLUMN IF NOT EXISTS
   promised_delivery_min_business_days smallint NOT NULL DEFAULT 0;
 ALTER TABLE commerce_orders ADD COLUMN IF NOT EXISTS
