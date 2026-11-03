@@ -79,12 +79,15 @@ export async function searchCjWatchCandidates({
     page:'1',size:'12',keyWord:keyword,countryCode:'CN'
   }),accessToken,supplierFetcher);
   const seen=new Set();
+  const words=keyword.trim().toLowerCase().split(/\s+/);
   // This is a narrow exploratory watch shortlist, NOT a test for
   // manufacturer authenticity, unit quality or sales volumes.
   const matches=extractCatalogProducts(list).filter(p=>{
     if(seen.has(p.pid))return false;
     seen.add(p.pid);
-    return /watch|wrist|montre|digital/i.test(p.name+' '+(p.category||''))&&
+    const haystack=(p.name+' '+(p.sku||'')).toLowerCase();
+    return words.every(word=>haystack.includes(word))&&
+      /watch|wrist|montre|digital/i.test(p.name+' '+(p.category||''))&&
       !/strap|band\b|replacement|charger|battery|repair/i.test(p.name);
   });
   const findings=[];
