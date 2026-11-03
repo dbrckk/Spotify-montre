@@ -1,4 +1,4 @@
-import {usdToCents,computeCjFreightCents,computeCjLandedCents} from './landed-cost.mjs';
+import {usdToCents,computeCjFreightCents,computeCjLandedCents,checkCjFxCeiling} from './landed-cost.mjs';
 // CJdropshipping OpenAPI v2. All calls are server-side; no credentials/client data in browser.
 const ROOT='https://developers.cjdropshipping.com/api2.0/v1';
 function assertToken(token){
@@ -30,7 +30,8 @@ async function api(path,token,{method='GET',body,fetcher=fetch}={}){
 }
 // Refuse payment before an up-to-date inventory and French postage quote exists.
 export async function preflightCjDelivery({vid,originCountry='CN',postalCode,
-  logisticsName,maxSupplierUsdCents,accessToken,fetcher=fetch}){
+  logisticsName,maxSupplierUsdCents,maxSupplierEurCents,fxMaxEurPerUsdBps,
+  accessToken,fetcher=fetch}){
   if(!/^[a-zA-Z0-9_-]{3,100}$/.test(vid||'')||!/^[A-Z]{2}$/.test(originCountry||'')
     ||!/^[0-9]{5}$/.test(postalCode||'')||!/^[^\r\n]{3,50}$/.test(logisticsName||''))
     throw Error('Supplier or delivery data invalid');
@@ -59,10 +60,14 @@ export async function preflightCjDelivery({vid,originCountry='CN',postalCode,
   const landedUsdCents=computeCjLandedCents(productCostUsdCents,freightBreakdown);
   if(landedUsdCents>maxSupplierUsdCents)
     throw Error('Supplier product, freight or customs exceed total approved budget');
+  // Money guard at BOTH payment creation and irreversible supplier purchase.
+  // Use the verified upper exchange bound, not an assumed 1 USD = 1 EUR.
+  const fx=checkCjFxCeiling(landedUsdCents,fxMaxEurPerUsdBps,maxSupplierEurCents);
   const balance=await getCjBalance({accessToken,fetcher});
   if(balance<maxSupplierUsdCents)throw Error('Supplier wallet insufficient for a new sale');
   return {productUsdCents:productCostUsdCents,freightUsdCents:shippingAndTaxes,
-    landedUsdCents,balanceUsdCents:balance,freightBreakdown,
+    landedUsdCents,upperLandedEurCents:fx.upperEurCents,
+    balanceUsdCents:balance,freightBreakdown,
     logisticsName,stockConfirmed:true};
 }
 
