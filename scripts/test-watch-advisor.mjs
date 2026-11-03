@@ -133,4 +133,27 @@ assert.equal(e.diameterMm(supplement.find(x=>x.id==='skmei-1251')),null,
  'Unknown circular diameter must not be inferred from vendor metadata');
 assert.match(read('site/conseiller.js'),/discovery-catalogue\.json/,'Advisor must load common build output');
 assert.match(read('scripts/build-unified-discovery.mjs'),/loadApprovedPopularPhotos/,'Common feed must enforce exact-model photo permissions');
+// The three recommendation cards are not the whole catalogue. The adviser
+// must count exact matches over all 52 entries, including unknown case sizes.
+assert.equal(typeof e.coverage,'function');
+const noFilters=e.coverage(combined,{});
+assert.equal(noFilters.total,52);
+assert.equal(noFilters.exact,52);
+assert.equal(noFilters.selected,0);
+const impossible=e.coverage(combined,{tier:'prestige',movement:'eco-drive',style:'retro',size:'compact'});
+assert.equal(impossible.selected,4);
+assert.equal(impossible.exact,0,'Do not invent a fully matching watch');
+const known=e.coverage(combined,{tier:'prestige',movement:'automatic'});
+assert.ok(known.exact>=3);
+assert.equal(known.selected,2);
+const onlyOne=e.coverage([products.find(p=>p.id==='citizen-tsuyosa')],{movement:'automatic'});
+assert.equal(onlyOne.exact,1);
+assert.equal(onlyOne.total,1);
+const noData=e.coverage(null,{movement:'automatic'});
+assert.equal(noData.exact,0);
+assert.equal(noData.total,0);
+assert.match(ui,/engine\.coverage\(catalogue,choices\)/);
+assert.match(ui,/Aucune des /);
+assert.match(ui,/alternatives les plus proches/);
+
 console.log('Advisor: 52-model shared source, 15 legacy checks, 135 preference combinations and safe size handling — OK');
