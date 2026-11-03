@@ -65,7 +65,7 @@ export function merchantConfigurationChecks(env={},siteConfig={}){
     commerce_explicitly_enabled:env.COMMERCE_ENABLED==='true',
     mollie_live_key_configured:/^live_[a-zA-Z0-9]{12,}$/.test(env.MOLLIE_API_KEY||''),
     cj_access_token_configured:typeof env.CJ_ACCESS_TOKEN==='string'&&
-      env.CJ_ACCESS_TOKEN.length>=20&&!/\\s/.test(env.CJ_ACCESS_TOKEN),
+      env.CJ_ACCESS_TOKEN.length>=20&&!/\s/.test(env.CJ_ACCESS_TOKEN),
     address_encryption_configured:/^[a-fA-F0-9]{64}$/.test(env.ADDRESS_ENCRYPTION_KEY||''),
     idempotency_secret_configured:typeof env.IDEMPOTENCY_SECRET==='string'&&
       env.IDEMPOTENCY_SECRET.length>=40,
