@@ -209,6 +209,6 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
   ]};
   writeFileSync(join(root,path),page(pageHead({title:'52 montres homme et femme à comparer | Atelier Montres',
     description:'Explorez 52 montres Casio, SKMEI, Citizen, Seiko et autres. Comparez style, mouvement, dimensions vérifiées et liens marchands sans faux prix.',path}),main,graph)
-    .replace('</head>','<link rel="stylesheet" href="../unified-discovery.css"><link rel="stylesheet" href="../photo-zoom.css"><script defer src="../photo-zoom.js"></script><link rel="stylesheet" href="../direct-offer-links.css"><link rel="stylesheet" href="../editorial-atelier-2026.css"><script defer src="../unified-discovery.js"></script><script defer src="../direct-offer-links.js"></script></head>'));
+    .replace('</head>','<link rel="stylesheet" href="../unified-discovery.css"><link rel="stylesheet" href="../photo-zoom.css"><script defer src="../photo-zoom.js"></script><link rel="stylesheet" href="../direct-offer-links.css"><link rel="stylesheet" href="../editorial-atelier-2026.css"><script defer src="../conseiller-engine.js"></script><script defer src="../unified-discovery.js"></script><script defer src="../direct-offer-links.js"></script></head>'));
   return {path,count:normalized.length,coreCount:coreProducts.length,supplementalCount:extras.length};
 }
