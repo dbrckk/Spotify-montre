@@ -24,6 +24,10 @@ on:
       - 'site/catalogue-view.css'
       - 'site/premium-system.css'
       - 'site/affiliation.html'
+      - 'site/index.html'
+      - 'site/home-editorial.css'
+      - 'site/app.js'
+      - 'scripts/test-home-editorial-browser.mjs'
       - 'site/montre.html'
       - 'site/fiche.js'
       - 'site/photo-zoom.js'
@@ -92,6 +96,7 @@ jobs:
           WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-unified-compare-tray.mjs
           WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-intent-collections-browser.mjs
           WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-premium-readability.mjs
+          WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-home-editorial-browser.mjs
       - name: Preserve mobile and desktop screenshots
         if: always()
         uses: actions/upload-artifact@v4
