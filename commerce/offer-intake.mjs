@@ -1,3 +1,5 @@
+import {preflightCjDelivery} from './cj.mjs';
+
 /**
  * A supplier intake is a read-only CJ quote followed by an unapproved DB draft.
  * It never creates a Mollie payment, buys from CJ, or asserts legal compliance.
@@ -84,38 +86,44 @@ export function qualifyObservedCjQuote(candidate,quote){
     state:'draft_unapproved'
   };
 }
-export async function stageQualifiedOffer(pool,plan){
-  if(plan?.state!=='draft_unapproved')throw Error('Only unapproved drafts may be staged');
-  // Revalidate the supplied plan; never rely on a caller-controlled status.
-  const {candidate:c,observed:q}=plan;
-  validateOfferCandidate(c);
-  if(!Number.isSafeInteger(q?.landedUsdCents)||q.landedUsdCents<=0)
-    throw Error('Missing observed supplier cost');
+/** Staging MUST perform a new authenticated CJ read itself.
+ * A pre-computed plan/observed JSON is deliberately not a valid input.
+ * The injectable fetcher exists only for isolated CI testing; the production
+ * CLI never passes it and always calls the real CJ API with its private token.
+ */
+export async function stageQualifiedOffer(pool,candidate,{accessToken,fetcher}={}){
+  const c=validateOfferCandidate(candidate);
+  if(typeof accessToken!=='string'||accessToken.length<20)
+    throw Error('A CJ access token is required for live supplier re-verification');
+  const quote=await preflightCjDelivery({
+    vid:c.supplierVid,originCountry:c.originCountry,
+    postalCode:c.samplePostalCode,logisticsName:c.logisticsName,
+    maxSupplierUsdCents:c.supplierMaxUsdCents,
+    maxSupplierEurCents:c.supplierLandedEurCeilingCents,
+    fxMaxEurPerUsdBps:c.fxMaxEurPerUsdBps,accessToken,
+    ...(fetcher?{fetcher}:{})
+  });
+  const {observed:q}=qualifyObservedCjQuote(c,quote);
   const client=await pool.connect();
   try{
     await client.query('BEGIN');
-    const columns=await client.query(
-      "SELECT column_name FROM information_schema.columns WHERE table_schema=current_schema() AND table_name='commerce_offers' AND column_name='supplier_fx_max_eur_per_usd_bps'");
-    const hasFx=columns.rowCount===1;
-    const fxColumn=hasFx?',supplier_fx_max_eur_per_usd_bps':'';
-    const fxValue=hasFx?', $14':'';
     const params=[c.id,c.label,c.amountEurCents,c.unitCostEurCents,
       c.supplierLandedEurCeilingCents,c.vatRateBps,c.reservesEurCents,
       c.supplierMaxUsdCents,c.supplierVid,c.logisticsName,c.originCountry,
-      c.deliveryMinBusinessDays,c.deliveryMaxBusinessDays,hasFx?c.fxMaxEurPerUsdBps:null];
+      c.deliveryMinBusinessDays,c.deliveryMaxBusinessDays,c.fxMaxEurPerUsdBps];
     // Drafts must remain unapproved even if an attacker tampers with the JSON.
     const inserted=await client.query(`
       INSERT INTO commerce_offers(id,label,amount_eur_cents,unit_cost_eur_cents,
         supplier_landed_eur_ceiling_cents,vat_rate_bps,reserves_eur_cents,
         supplier_max_usd_cents,supplier_vid,logistics_name,from_country_code,
-        delivery_min_business_days,delivery_max_business_days,approved,
-        stock_confirmed,legal_verified,tax_treatment_verified,supplier_fx_verified
-        ${fxColumn})
-      VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,false,
-        false,false,false,false${fxValue})
+        delivery_min_business_days,delivery_max_business_days,
+        supplier_fx_max_eur_per_usd_bps,approved,
+        stock_confirmed,legal_verified,tax_treatment_verified,supplier_fx_verified)
+      VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,
+        false,false,false,false,false)
       ON CONFLICT(id) DO NOTHING
       RETURNING id
-    `,hasFx?params:params.slice(0,13));
+    `,params);
     if(inserted.rowCount!==1)
       throw Error('Offer id already exists; refusing to overwrite a commercial record');
     await client.query(`
@@ -126,7 +134,7 @@ export async function stageQualifiedOffer(pool,plan){
     `,[c.id,q.samplePostcodePrefix,q.productUsdCents,q.freightUsdCents,
       q.landedUsdCents,c.fxMaxEurPerUsdBps,q.observedLandedEurCents]);
     await client.query('COMMIT');
-    return {id:c.id,state:'draft_unapproved',fxCeilingPersistedOnOffer:hasFx};
+    return {id:c.id,state:'draft_unapproved',fxCeilingPersistedOnOffer:true};
   }catch(error){
     await client.query('ROLLBACK').catch(()=>{});
     throw error;
