@@ -121,7 +121,7 @@ CREATE INDEX IF NOT EXISTS commerce_events_order ON commerce_events(order_id,cre
 CREATE TABLE IF NOT EXISTS commerce_offer_preflight_quotes (
   id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   offer_id text NOT NULL REFERENCES commerce_offers(id),
-  postal_prefix char(2) NOT NULL CHECK (postal_prefix ~ '^[0-9]{2}),
+  postal_prefix char(2) NOT NULL CHECK (postal_prefix SIMILAR TO '[0-9][0-9]'),
   product_usd_cents integer NOT NULL CHECK (product_usd_cents>0),
   freight_usd_cents integer NOT NULL CHECK (freight_usd_cents>=0),
   landed_usd_cents integer NOT NULL CHECK (landed_usd_cents>0),
