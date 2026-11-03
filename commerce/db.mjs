@@ -480,14 +480,37 @@ export async function recordRecoveredSupplierOrder(pool,id,detail,encryptionKey,
   });
 }
 
-export async function ordersForSupplierReconciliation(pool){
-  const {rows}=await pool.query(`
-    SELECT id,supplier_order_id,status FROM commerce_orders
-    WHERE status IN ('SUPPLIER_SUBMITTED','SUPPLIER_PAID','SHIPPED')
-      AND supplier_order_id IS NOT NULL
-    ORDER BY updated_at LIMIT 8
-  `);
-  return rows;
+/** Bounded, multi-worker-safe read-only CJ status checks.
+ * Claimed at transaction commit so a crash or API outage resumes on the next
+ * cadence, without repeatedly hammering old SHIPPED orders every 45 seconds.
+ */
+export async function claimSupplierReconciliation(pool,limit=4){
+  if(!Number.isSafeInteger(limit)||limit<1||limit>8)
+    throw Error('Invalid supplier reconciliation batch size');
+  return transaction(pool,async client=>{
+    const {rows}=await client.query(`
+      SELECT id,supplier_order_id,status FROM commerce_orders
+      WHERE supplier_order_id IS NOT NULL
+        AND (
+          (status='SUPPLIER_SUBMITTED' AND
+            (supplier_checked_at IS NULL OR supplier_checked_at<now()-interval '10 minutes'))
+          OR
+          (status='SUPPLIER_PAID' AND
+            (supplier_checked_at IS NULL OR supplier_checked_at<now()-interval '1 hour'))
+          OR
+          (status='SHIPPED' AND
+            (supplier_checked_at IS NULL OR supplier_checked_at<now()-interval '6 hours'))
+        )
+      ORDER BY supplier_checked_at ASC NULLS FIRST,created_at ASC
+      FOR UPDATE SKIP LOCKED LIMIT $1
+    `,[limit]);
+    if(rows.length)
+      await client.query(`
+        UPDATE commerce_orders SET supplier_checked_at=now()
+        WHERE id=ANY($1::text[])
+      `,[rows.map(row=>row.id)]);
+    return rows;
+  });
 }
 export async function recordSupplierDetail(pool,id,detail,encryptionKey){
   return transaction(pool,async client=>{
