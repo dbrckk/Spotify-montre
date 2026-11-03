@@ -8,12 +8,14 @@ on:
       - 'site/acheter-direct.js'
       - '.github/workflows/commerce-check.yml'
       - '.github/workflows/discover-cj-variant.yml'
+      - '.github/workflows/search-cj-watches.yml'
   pull_request:
     paths:
       - 'commerce/**'
       - 'site/acheter-direct.js'
       - '.github/workflows/commerce-check.yml'
       - '.github/workflows/discover-cj-variant.yml'
+      - '.github/workflows/search-cj-watches.yml'
   workflow_dispatch:
 
 permissions:
