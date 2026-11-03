@@ -10,6 +10,17 @@
     if(prelaunch)prelaunch.hidden=false;
     show(message,error);
   };
+  // Bound the whole response, including JSON, to avoid an endless loading state.
+  // Aborting a POST does not prove the server stopped processing it; the
+  // persisted idempotency key below is deliberately retained on uncertainty.
+  async function requestJson(url,options={},timeoutMs=12000){
+    const controller=new AbortController();
+    const timeout=setTimeout(()=>controller.abort(),timeoutMs);
+    try{
+      const response=await fetch(url,{...options,signal:controller.signal});
+      return {response,data:await response.json()};
+    }finally{clearTimeout(timeout)}
+  }
   const euro=c=>new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR'}).format(c/100);
   let api='',list=[];
   function validHost(raw){
@@ -22,17 +33,16 @@
   async function init(){
     let config;
     try{
-      const response=await fetch('./config.json',{cache:'no-store'});
-      if(!response.ok)throw Error();
-      config=await response.json();
+      const {response,data}=await requestJson('./config.json',{cache:'no-store'},8000);
+      if(!response.ok)throw Error('Configuration unavailable');
+      config=data;
     }catch{return showPrelaunch('La disponibilité des achats directs ne peut pas être vérifiée actuellement.',true)}
     if(config.checkoutMode!=='active'||!(api=validHost(config.commerceApiUrl))){
       return showPrelaunch('Aucun paiement direct n’est actuellement ouvert. Découvrez les modèles présentés ci-dessous.');
     }
     try{
-      const response=await fetch(api+'/api/offers',{cache:'no-store'});
-      if(!response.ok)throw Error();
-      const data=await response.json();
+      const {response,data}=await requestJson(api+'/api/offers',{cache:'no-store'},20000);
+      if(!response.ok)throw Error('Offers unavailable');
       list=Array.isArray(data.offers)?data.offers.filter(x=>
         typeof x.id==='string'&&/^[a-z0-9-]{4,64}$/.test(x.id)&&
         typeof x.amountCents==='number'&&Number.isSafeInteger(x.amountCents)&&x.amountCents>0
@@ -78,9 +88,8 @@
     if(!attempt){attempt=newKey();sessionStorage.setItem(orderKey(item.id),attempt);}
     payload.idempotencyKey=attempt;
     try{
-      const response=await fetch(api+'/api/checkout',{method:'POST',
-        headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-      const result=await response.json();
+      const {response,data:result}=await requestJson(api+'/api/checkout',{method:'POST',
+        headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)},30000);
       if(!response.ok)throw Error(result.error||'La commande n’a pas pu être préparée.');
       if(!/^ord_[a-f0-9]{40}$/.test(result.orderId||'')||
         typeof result.orderToken!=='string'||result.orderToken.length<30)
@@ -106,7 +115,10 @@
       sessionStorage.removeItem(orderKey(item.id));
       window.location.assign(destination.href);
     }catch(error){
-      show(error.message||'Impossible de commencer le paiement.',true);
+      if(error?.name==='AbortError')
+        show('La réponse du paiement prend trop de temps. Votre tentative est conservée : réessayez avec le même bouton pour récupérer cette commande sans créer de deuxième paiement.',true);
+      else
+        show(error?.message||'Impossible de commencer le paiement.',true);
       button.disabled=false;
     }
   });
