@@ -113,6 +113,38 @@ Référence : [Mollie — webhooks des paiements](https://docs.mollie.com/refere
 qui recommande une relecture authentifiée du paiement et prévoit des tentatives
 de notification limitées dans le temps.
 
+## Dernière autorisation avant débit du portefeuille CJ
+
+Le contrôle de paiement initial (juste après la réservation de commande) ne
+suffit pas : les lectures CJ du stock, du transport et du portefeuille peuvent
+prendre du temps. Pendant ce délai, Mollie peut signaler un remboursement ou
+une rétrofacturation.
+
+**Règle d'achat définitive :** l'appel CJ `createOrderV2` ne peut s'exécuter
+qu'après un callback obligatoire `authorizeBeforeDebit` exécuté **après**
+la lecture du solde CJ. Ce callback relit le paiement authentifié chez Mollie,
+enregistre son état réel, puis vérifie dans une transaction PostgreSQL que la
+commande reste `SUPPLIER_SENDING`, qu'elle correspond au même paiement/montant
+et qu'aucune inversion de paiement n'a été enregistrée.
+
+Les défaillances **avant** cet appel sont mises en `EXCEPTION` avec l'événement
+`SUPPLIER_PREPOST_ABORTED` : aucun achat CJ n'a été déclenché par ce passage,
+aucune nouvelle tentative automatique n'est autorisée. Si l'appel CJ a pu
+être envoyé, la réponse peut être incertaine et le moteur utilise uniquement
+la réconciliation fournisseur en lecture, sans repayer le portefeuille.
+
+Cette séparation évite aussi d'effectuer des recherches CJ inutiles après un
+refus de devis avant envoi. L'exploitant conserve la responsabilité de décider
+du remboursement ou de la reprise après examen des preuves.
+
+**Limite :** aucun logiciel ne peut supprimer totalement le risque d'une
+rétrofacturation postérieure au débit CJ ; cette vérification réduit
+uniquement la fenêtre de risque avant l'opération irréversible.
+
+Test isolé : `commerce/final-supplier-gate-check.mjs` exécute des scénarios
+sur PostgreSQL local et un transport CJ contrôlé pour vérifier qu'un rejet
+de dernière minute ne crée aucun ordre fournisseur.
+
 ## Conditions **avant activation**
 
 - Entreprise établie, CGV, politique de confidentialité, rétractation, mentions légales
