@@ -54,6 +54,27 @@ try{
  await phone.locator('input[name="movement"][value="quartz"]').check();
  assert.equal(await cards.count(),3);
  assert.match(await phone.locator('#advisorCriteria').innerText(),/3 préférences/i);
+ // The same chosen preferences must survive the transition to comparison;
+ // they are not catalogue filters and never hide alternative recommendations.
+ const contextualLink=await compareLink.getAttribute('href');
+ const contextualUrl=new URL(contextualLink,phone.url());
+ assert.equal(contextualUrl.searchParams.get('prefTier'),'essential');
+ assert.equal(contextualUrl.searchParams.get('prefStyle'),'retro');
+ assert.equal(contextualUrl.searchParams.get('prefMovement'),'quartz');
+ assert.equal(contextualUrl.searchParams.get('compare')?.split(',').length,3);
+ const contextualPage=await browser.newPage({viewport:{width:393,height:852},
+   isMobile:true,hasTouch:true,locale:'fr-FR'});
+ try{
+   contextualPage.on('pageerror',e=>errors.push('decision: '+e.message));
+   await contextualPage.goto(contextualUrl.href,{waitUntil:'domcontentloaded',timeout:30000});
+   await contextualPage.locator('#udDecisionForm').waitFor({state:'visible'});
+   assert.equal(await contextualPage.locator('#udPrefTier').inputValue(),'essential');
+   assert.equal(await contextualPage.locator('#udPrefStyle').inputValue(),'retro');
+   assert.equal(await contextualPage.locator('#udPrefMovement').inputValue(),'quartz');
+   assert.equal(await contextualPage.locator('#udCompareTable th[scope=col]').count(),4);
+   assert.equal(await contextualPage.locator('#udCompareTable .ud-decision-score').count(),3);
+   await noOverflow(contextualPage,'Android advisor choices transferred to comparison');
+ }finally{await contextualPage.close()}
  const link=cards.first().locator('.advisor-card-actions .primary');
  assert.match(await link.getAttribute('href'),/^\.\/montres\/[a-z0-9-]+\.html$/,'Every recommendation must lead to its source-backed SEO detail page');
  await phone.screenshot({path:'artifacts/mobile-watch-advisor.png',fullPage:true});
