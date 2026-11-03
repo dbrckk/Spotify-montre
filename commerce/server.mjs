@@ -198,6 +198,9 @@ async function route(req,res){
     const order=await reserveCheckout(pool,request,{
       encryptionKey,idempotencySecret
     });
+    // Another request may have reserved this order while CJ preflight ran.
+    // Only the creator of the reservation is allowed to create a payment.
+    if(order.reused)return reply(res,200,order,cors(req));
     let payment;
     try{
       payment=await createHostedPayment({apiKey:mollieKey,orderId:order.orderId,

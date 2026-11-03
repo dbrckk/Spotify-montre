@@ -78,6 +78,13 @@
       if(!/^ord_[a-f0-9]{40}$/.test(result.orderId||'')||
         typeof result.orderToken!=='string'||result.orderToken.length<30)
         throw Error('Réponse de commande invalide');
+      if(result.kind==='status'&&result.status==='PAYMENT_CREATING'){
+        // The other concurrent request is still preparing Mollie checkout.
+        // Keep this attempt key so a manual retry can recover that payment.
+        show('Le paiement est en cours de préparation. Réessayez avec le même bouton dans quelques instants : aucun second paiement ne sera créé.');
+        button.disabled=false;
+        return;
+      }
       let destination;
       if(result.kind==='status'){
         // Never attempt another charge for an order already in progress or paid.

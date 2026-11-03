@@ -17,7 +17,8 @@ Dans l'ancien parcours, le navigateur conservait sa clé de tentative mais perda
 ## Limites et exigences de sécurité
 
 - Les tentatives créées **avant cette migration** utilisaient un jeton non dérivable : leurs réponses perdues restent en revue manuelle, sans second paiement. Aucune migration ne devine les jetons secrets historiques.
-- Deux requêtes simultanées peuvent encore produire un `409` transitoire si la seconde arrive pendant la création de la première ; il faut reprendre la même tentative ultérieurement, jamais créer une nouvelle clé automatiquement.
+- Les requêtes partageant la même clé sont désormais sérialisées par `pg_advisory_xact_lock` dans la transaction de réservation. La seconde réutilise la commande et ne doit jamais créer un second paiement. Si le paiement est encore en préparation, la page conserve la même clé et propose une reprise manuelle ; elle ne produit pas une nouvelle tentative.
+- Le contrôle sur PostgreSQL local vérifie deux réservations parallèles, une seule commande, la reprise de l'URL de paiement préexistante et le rejet d'un panier différent. Cela ne prouve **pas** un achat réellement réussi chez Mollie ou CJ.
 - La possession de la clé de tentative permet à celui qui la détient de retrouver **la même** commande ; la clé doit rester secrète et aléatoire. Aucune adresse client ne doit figurer dans les journaux, le HTML ou les paramètres d'URL.
 - Les URL de paiement autorisées sont strictement `https://www.mollie.com` et `https://checkout.mollie.com`. Une URL différente n'est jamais ouverte.
 - Aucun mode test, montant inventé ou signal webhook non vérifié ne peut déclencher l'achat fournisseur.
