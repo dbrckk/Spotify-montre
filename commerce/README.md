@@ -5,12 +5,14 @@
 ### Nouvelles conditions de publication obligatoires (novembre 2026)
 
 Un SKU ne peut apparaître dans `GET /api/offers` ni être commandé sans :
-- plafond de coût fournisseur **livré tout compris** exprimé en EUR (`supplier_landed_eur_ceiling_cents`) avec risque de change documenté (`supplier_fx_verified`) ;
+- plafond de coût fournisseur **livré tout compris** exprimé en EUR (`supplier_landed_eur_ceiling_cents`), limite USD du débit CJ (`supplier_max_usd_cents`) et taux maximal prudent EUR/USD (`supplier_fx_max_eur_per_usd_bps`) avec risque de change documenté (`supplier_fx_verified`) ;
 - régime TVA vendeur vérifié (`vat_rate_bps` et `tax_treatment_verified`) ; **marge contributive d'au moins 25 % du revenu net de TVA**, après réserves ;
 - stock, fournisseur, données produits et variante exacte, photo autorisée, dossier de conformité/traçabilité GPSR ;
 - politique retours, garanties et transferts de données fournisseur validés ;
 - délai annoncé de livraison en jours ouvrés, entre 1 et 120, avec valeur mini et maxi cohérentes ;
 - devis `verified_until` non expiré et compte/paiement fournisseur automatisable.
+
+**Nouveau garde-fou devises :** une offre reste inactive si son taux de change plafond est absent, inférieur à 0,10 EUR/USD ou supérieur à 2,00 EUR/USD. Le taux est stocké en points de base (exemple : `10500` = **1 USD au plus 1,05 EUR** selon l'hypothèse de risque validée, et non un cours live). Le montant conservateur est calculé en entiers : `ceil(plafond_USD_centimes × taux_bps / 10000)`; il doit rester **inférieur ou égal** au plafond de coût rendu en EUR. Cette comparaison est faite dans PostgreSQL avant publication, dans le calcul de marge, puis sur le devis réel CJ **avant paiement client et avant achat fournisseur**, avec une copie immuable du taux dans la commande. Requalifier le taux et la réserve avant expiration du devis ; aucun taux réel n'est inventé par le moteur. Les anciennes offres sans taux deviennent indisponibles.
 
 Le fournisseur CJ fournit les montants en USD. Quand `totalPostageFee` est disponible, il **inclut déjà les frais de dédouanement, taxes et droits** selon la documentation CJ ; ne jamais les additionner une seconde fois. En l'absence de ventilation taxes/tariff, ne pas présumer zéro. La conversion USD vers le plafond EUR et sa réserve de volatilité doivent être vérifiées avant approbation de l'offre.
 
