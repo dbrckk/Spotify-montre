@@ -156,4 +156,23 @@ assert.match(ui,/engine\.coverage\(catalogue,choices\)/);
 assert.match(ui,/Aucune des /);
 assert.match(ui,/alternatives les plus proches/);
 
+// Real buyer journey: the advisor and 52-watch comparator must share the
+// same deterministic source-backed rules and preserve four named preferences.
+const compareSource=read('site/unified-discovery.js');
+const compareBuilder=read('scripts/build-unified-discovery.mjs');
+assert.match(ui,/pref'\+key\[0\]\.toUpperCase\(\)/,
+ 'Advisor must pass preferences in distinct pref* URL keys');
+assert.match(compareSource,/decisionEngine\.recommend\(selected\.map/,
+ 'Comparator must reuse the same matching engine, not invent a new ranking');
+for(const key of ['Tier','Style','Movement','Size']){
+ assert.ok(compareBuilder.includes('id="udPref'+key+'"'),
+  'Comparison must offer '+key+' as an accessible personal criterion');
+}
+assert.match(compareBuilder,/\.\.\/conseiller-engine\.js/,
+ 'The exact advisor engine must be loaded before comparator logic');
+assert.match(compareSource,/decisionPrefs\[key\]!=='all'/,
+ 'Personal criteria must survive sharing and reload');
+assert.match(compareSource,/selected\.length&&decisionPrefs/,
+ 'Only an active comparison should expose private selection criteria in the URL');
+
 console.log('Advisor: 52-model shared source, 15 legacy checks, 135 preference combinations and safe size handling — OK');
