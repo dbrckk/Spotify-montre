@@ -30,8 +30,18 @@ export function verifyCjOrderDetail(order,detail,customer){
     normalizeAddress(detail.shippingAddress)!==normalizeAddress(customer.address1)||
     normalizeAddress(detail.shippingCity)!==normalizeAddress(customer.city))
     invalid('shipping recipient or delivery address');
-  if(detail.shippingZip&&detail.shippingZip!==customer.postalCode)
-    invalid('recipient postal code');
+  // A missing postcode is not evidence that the supplier used the correct one.
+  // This is checked again before displaying SHIPPED or DELIVERED to a buyer.
+  if(typeof detail.shippingZip!=='string'||detail.shippingZip!==customer.postalCode)
+    invalid('recipient postal code missing or mismatched');
+  // Never silently discard an apartment, building or delivery instruction.
+  // CJ must echo a supplied address complement before delivery can be trusted.
+  if(normalizeAddress(detail.shippingAddress2||'')!==
+     normalizeAddress(customer.address2||''))
+    invalid('shipping address complement');
+  if(detail.shippingProvince&&normalizeAddress(detail.shippingProvince)!==
+    normalizeAddress(customer.region))
+    invalid('shipping region');
   if(detail.isSandbox!==0)
     invalid('sandbox or unverified live order');
   if(detail.currency!=='USD')
@@ -41,7 +51,13 @@ export function verifyCjOrderDetail(order,detail,customer){
   const line=detail.productList[0];
   if(line?.vid!==order.supplier_vid||line.quantity!==1)
     invalid('variant and quantity');
-  if(line.storeLineItemId!==order.id&&line.orderNumber!==order.id&&detail.orderNum!==order.id)
+  // storeLineItemId is OUR merchant line reference. A contradictory value
+  // must never be overridden by a matching parent orderNum.
+  if(line.storeLineItemId!==undefined&&line.storeLineItemId!==null&&
+     line.storeLineItemId!==order.id)
+    invalid('contradictory merchant line reference');
+  if(line.storeLineItemId!==order.id&&line.orderNumber!==order.id&&
+    detail.orderNum!==order.id)
     invalid('original merchant order reference');
   if(typeof detail.logisticName==='string'&&detail.logisticName!==order.logistics_name)
     invalid('logistics method changed');
