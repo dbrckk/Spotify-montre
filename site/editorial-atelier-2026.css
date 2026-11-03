@@ -298,3 +298,52 @@ html{scroll-padding-top:105px}
  .ud-discovery-links a,.aff-tabs button{transition:none!important;animation:none!important}
  .am-style-card:hover,.aff-card:hover,.ud-card:hover,.ud-feature-card:hover{transform:none!important}
 }
+
+
+/* Comparison by documented customer priorities — no fabricated prices or scores. */
+.ud-decision-form[hidden]{display:none!important}
+.ud-decision-form{margin:20px 0 0;padding:clamp(17px,2.6vw,30px);
+  border:1px solid #d8c9b2;border-radius:12px;background:#f5efe5;color:#243d36}
+.ud-decision-heading{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:18px;
+  align-items:end;margin-bottom:19px}
+.ud-decision-heading h3{font:400 clamp(24px,2.8vw,36px)/1.15 Georgia,serif;
+  color:#223533;letter-spacing:-.025em;margin:0}
+.ud-decision-heading p{font:400 13px/1.65 system-ui,sans-serif;color:#445a51;margin:0}
+.ud-decision-controls{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.ud-decision-controls label{display:flex;flex-direction:column;gap:7px;
+  font:750 12px/1.45 system-ui,sans-serif;color:#304940;min-width:0}
+.ud-decision-controls select{min-width:0;width:100%;min-height:48px;
+  border:1px solid #98a79a;border-radius:6px;padding:8px 9px;
+  background:#fffefa;color:#233b33;font:600 13px/1.4 system-ui,sans-serif}
+.ud-decision-controls select:focus-visible,.ud-decision-reset:focus-visible{
+  outline:3px solid #996c32;outline-offset:3px}
+.ud-decision-reset{margin-top:15px;min-height:44px;border:1px solid #98774d;
+  border-radius:6px;padding:10px 15px;background:#fefaf3;color:#60411e;
+  font:750 13px/1.4 system-ui,sans-serif;cursor:pointer}
+.ud-decision-reset:hover{background:#e9dfd0}
+.ud-decision-result{margin:15px 0;padding:13px 17px;border-radius:8px;
+  border-left:4px solid #3e725a;background:#e8efe8;color:#294b3c;
+  font:650 13px/1.6 system-ui,sans-serif}
+.ud-decision-result[data-status=none]{background:#f7e8d4;
+  border-left-color:#a66d34;color:#68451d}
+.ud-decision-score{display:block;width:fit-content;max-width:100%;
+  margin:12px 0 6px;padding:6px 9px;border-radius:5px;
+  background:#e6eee6;border:1px solid #b8cdbb;color:#28503b;
+  font:750 12px/1.4 system-ui,sans-serif}
+.ud-decision-score[data-match=partial]{background:#f5efe3;
+  border-color:#d4c4a5;color:#624d27}
+.ud-decision-score[data-match=none]{background:#f8e7dc;
+  border-color:#d8b39d;color:#79432c}
+.ud-decision-reasons,.ud-decision-warning{display:block;font:500 12px/1.45 system-ui,sans-serif;
+  margin:5px 0;color:#37584b;white-space:normal}
+.ud-decision-warning{color:#71512b}
+@media(max-width:850px){
+ .ud-decision-heading{grid-template-columns:1fr;gap:8px}
+ .ud-decision-controls{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:370px){
+ .ud-decision-form{padding:14px}
+ .ud-decision-controls{grid-template-columns:1fr}
+ .ud-decision-controls select{font-size:14px}
+ .ud-decision-score{font-size:11px}
+}
