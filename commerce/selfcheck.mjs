@@ -4,7 +4,7 @@ import {newOrderId,newPublicToken,sealAddress,openAddress,digest,sameHash,
   validateCheckoutBody,checkoutFingerprint,readWebhookBody,recoveryToken,restoredCheckoutState} from './security.mjs';
 import {buildCjOrder,getCjBalance,submitCjBalanceOrder,fetchCjOrder,preflightCjDelivery} from './cj.mjs';
 import {verifyCjOrderDetail} from './cj-status.mjs';
-import {usdToCents,computeCjFreightCents,computeCjLandedCents,validateCommercialCeiling} from './landed-cost.mjs';
+import {usdToCents,computeCjFreightCents,computeCjLandedCents,checkCjFxCeiling,validateCommercialCeiling} from './landed-cost.mjs';
 
 const key='a1'.repeat(32);
 const customer={fullName:'Test Client',email:'test@example.fr',address1:'12 rue des Montres',
@@ -124,20 +124,35 @@ const supplierPreflight=async(url,options)=>{
 };
 const ready=await preflightCjDelivery({
   vid:order.supplier_vid,originCountry:'CN',postalCode:'75002',
-  logisticsName:'PostNL',maxSupplierUsdCents:2500,accessToken:'a'.repeat(40),
+  logisticsName:'PostNL',maxSupplierUsdCents:2500,
+  maxSupplierEurCents:2390,fxMaxEurPerUsdBps:10500,
+  accessToken:'a'.repeat(40),
   fetcher:supplierPreflight
 });
 assert.equal(ready.productUsdCents,1130);
 assert.equal(ready.freightUsdCents,440);
 assert.equal(ready.balanceUsdCents,3100);
+assert.equal(ready.upperLandedEurCents,1649);
+assert.equal(checkCjFxCeiling(1570,10500,2390).upperEurCents,1649);
+assert.equal(checkCjFxCeiling(1,10500,2).upperEurCents,2);
+assert.throws(()=>checkCjFxCeiling(1570,0,2390),/Verified USD\/EUR/);
+assert.throws(()=>checkCjFxCeiling(2500,10500,2390),/exceeds EUR landed budget/);
 await assert.rejects(preflightCjDelivery({
   vid:order.supplier_vid,originCountry:'CN',postalCode:'75002',
-  logisticsName:'NonexistentCarrier',maxSupplierUsdCents:2500,accessToken:'a'.repeat(40),
+  logisticsName:'PostNL',maxSupplierUsdCents:2500,
+  maxSupplierEurCents:1500,fxMaxEurPerUsdBps:10500,accessToken:'a'.repeat(40),
+  fetcher:supplierPreflight
+}),/exceeds EUR landed budget/);
+await assert.rejects(preflightCjDelivery({
+  vid:order.supplier_vid,originCountry:'CN',postalCode:'75002',
+  logisticsName:'NonexistentCarrier',maxSupplierUsdCents:2500,
+  maxSupplierEurCents:2390,fxMaxEurPerUsdBps:10500,accessToken:'a'.repeat(40),
   fetcher:supplierPreflight
 }),/delivery method/);
 await assert.rejects(preflightCjDelivery({
   vid:order.supplier_vid,originCountry:'CN',postalCode:'75002',
-  logisticsName:'PostNL',maxSupplierUsdCents:1200,accessToken:'a'.repeat(40),
+  logisticsName:'PostNL',maxSupplierUsdCents:1200,
+  maxSupplierEurCents:2390,fxMaxEurPerUsdBps:10500,accessToken:'a'.repeat(40),
   fetcher:supplierPreflight
 }),/exceed total/);
 
@@ -167,9 +182,15 @@ assert.throws(()=>computeCjFreightCents({
 assert.throws(()=>usdToCents('1.999'),/at most 2 decimals/);
 const approvedCosts={amount_eur_cents:5990,unit_cost_eur_cents:1100,
   supplier_landed_eur_ceiling_cents:2390,reserves_eur_cents:900,
+  supplier_max_usd_cents:2200,supplier_fx_max_eur_per_usd_bps:10500,
   vat_rate_bps:2000,tax_treatment_verified:true,supplier_fx_verified:true};
 assert.equal(validateCommercialCeiling(approvedCosts).sellerNetRevenueCents,4992);
 assert.equal(validateCommercialCeiling(approvedCosts).provisionalContributionEurCents,1702);
+assert.equal(validateCommercialCeiling(approvedCosts).supplierWorstCaseEurCents,2310);
+assert.throws(()=>validateCommercialCeiling({...approvedCosts,
+  supplier_fx_max_eur_per_usd_bps:0}),/Verified USD\/EUR/);
+assert.throws(()=>validateCommercialCeiling({...approvedCosts,
+  supplier_max_usd_cents:2500}),/exceeds EUR landed budget/);
 assert.throws(()=>validateCommercialCeiling({...approvedCosts,
   tax_treatment_verified:false}),/VAT treatment/);
 assert.throws(()=>validateCommercialCeiling({...approvedCosts,

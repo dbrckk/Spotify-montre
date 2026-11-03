@@ -141,7 +141,10 @@ async function supplierWork(){
         await preflightCjDelivery({
           vid:order.supplier_vid,originCountry:order.from_country_code,
           postalCode:customer.postalCode,logisticsName:order.logistics_name,
-          maxSupplierUsdCents:order.supplier_max_usd_cents,accessToken:cjToken
+          maxSupplierUsdCents:order.supplier_max_usd_cents,
+          maxSupplierEurCents:order.supplier_landed_eur_ceiling_cents,
+          fxMaxEurPerUsdBps:order.supplier_fx_max_eur_per_usd_bps,
+          accessToken:cjToken
         });
         const result=await submitCjBalanceOrder({order,customer,accessToken:cjToken});
         await recordSupplierAttempt(pool,order.id,result,null);
@@ -191,7 +194,9 @@ async function route(req,res){
     try{
       await preflightCjDelivery({vid:offer.supplier_vid,originCountry:offer.from_country_code,
         postalCode:request.customer.postalCode,logisticsName:offer.logistics_name,
-        maxSupplierUsdCents:offer.supplier_max_usd_cents,accessToken:cjToken});
+        maxSupplierUsdCents:offer.supplier_max_usd_cents,
+        maxSupplierEurCents:offer.supplier_landed_eur_ceiling_cents,
+        fxMaxEurPerUsdBps:offer.supplier_fx_max_eur_per_usd_bps,accessToken:cjToken});
     }catch{
       return reply(res,409,{error:'Stock, frais ou livraison non vérifiables pour cette adresse. Aucun paiement demandé.'},cors(req));
     }
