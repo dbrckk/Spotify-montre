@@ -43,10 +43,40 @@ const uri=new URL(dbUrl);
 if(!['127.0.0.1','localhost'].includes(uri.hostname)||uri.pathname!=='/commerce_ci')
   throw Error('Refusing to stage test offers outside isolated local PostgreSQL');
 const pool=createDatabase(dbUrl);
+const accessToken='a'.repeat(40);
+const supplierEndpoints=[];
+const supplierFetcher=async(url,options)=>{
+  supplierEndpoints.push(url);
+  if(url.includes('/product/variant/queryByVid'))
+    return {ok:true,json:async()=>({code:200,result:true,
+      data:{vid:candidate.supplierVid,variantSellPrice:'11.00'}})};
+  if(url.includes('/product/stock/queryByVid'))
+    return {ok:true,json:async()=>({code:200,result:true,data:[
+      {vid:candidate.supplierVid,countryCode:'CN',cjInventoryNum:4}
+    ]})};
+  if(url.endsWith('/logistic/freightCalculate')){
+    const request=JSON.parse(options.body);
+    assert.equal(request.zip,candidate.samplePostalCode);
+    assert.equal(request.products[0].vid,candidate.supplierVid);
+    return {ok:true,json:async()=>({code:200,result:true,data:[
+      {logisticName:candidate.logisticsName,totalPostageFee:'4.00',
+        taxesFee:'0.80',clearanceOperationFee:'0.20',tariff:'0.00'}
+    ]})};
+  }
+  if(url.endsWith('/shopping/pay/getBalance'))
+    return {ok:true,json:async()=>({code:200,result:true,data:{amount:'30.00'}})};
+  throw Error('Unexpected supplier endpoint in isolated CI');
+};
+const secureStage={accessToken,fetcher:supplierFetcher};
 let inserted=false;
 try{
   await initializeDatabase(pool);
-  const result=await stageQualifiedOffer(pool,plan);
+  // Caller-supplied plans must never become proof of a real CJ observation.
+  await assert.rejects(()=>stageQualifiedOffer(pool,plan,secureStage),/Exactly/);
+  await assert.rejects(()=>stageQualifiedOffer(pool,candidate,{}),/CJ access token/);
+  assert.equal(supplierEndpoints.length,0,'malformed input must not reach supplier');
+  const result=await stageQualifiedOffer(pool,candidate,secureStage);
+  assert.equal(supplierEndpoints.length,4,'staging must perform four fresh CJ reads');
   inserted=true;
   assert.equal(result.state,'draft_unapproved');
   const row=(await pool.query('SELECT * FROM commerce_offers WHERE id=$1',[candidate.id])).rows[0];
@@ -65,12 +95,31 @@ try{
   assert.equal(quoteRows.rows[0].fx_max_eur_per_usd_bps,10500);
   if(result.fxCeilingPersistedOnOffer)
     assert.equal(row.supplier_fx_max_eur_per_usd_bps,10500);
-  await assert.rejects(()=>stageQualifiedOffer(pool,plan),/Offer id already exists/);
+  await assert.rejects(()=>stageQualifiedOffer(pool,candidate,secureStage),/Offer id already exists/);
+  // A later CJ quote with missing customs data cannot be recorded or overwrite
+  // the first audited observation.
+  const missingCustoms=async(url,options)=>{
+    const response=await supplierFetcher(url,options);
+    if(url.endsWith('/logistic/freightCalculate')){
+      const data=await response.json();
+      delete data.data[0].tariff;
+      return {ok:true,json:async()=>data};
+    }
+    return response;
+  };
+  await assert.rejects(
+    ()=>stageQualifiedOffer(pool,{...candidate,id:candidate.id+'-bad'},{
+      accessToken,fetcher:missingCustoms
+    }),/CJ tariff is missing/
+  );
+  const neverAdded=await pool.query(
+    'SELECT count(*)::int AS n FROM commerce_offers WHERE id=$1',[candidate.id+'-bad']);
+  assert.equal(neverAdded.rows[0].n,0,'invalid quote must not write a supplier offer');
   const after=await pool.query(
     'SELECT count(*)::int AS n FROM commerce_offer_preflight_quotes WHERE offer_id=$1',
     [candidate.id]);
   assert.equal(after.rows[0].n,1,'duplicate insert must not record a second quote');
-  console.log('CJ offer intake OK: strict quote, verified margins, unapproved PostgreSQL draft, audit and no overwrite');
+  console.log('CJ offer intake OK: fresh CJ verification, strict customs quote, unapproved PostgreSQL draft, audit and no overwrite');
 }finally{
   if(inserted){
     await pool.query('DELETE FROM commerce_offer_preflight_quotes WHERE offer_id=$1',[candidate.id]).catch(()=>{});
