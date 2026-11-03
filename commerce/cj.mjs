@@ -105,13 +105,23 @@ export async function discoverCjVariant({vid,postalCode,originCountry='CN',
     /^(?:97|98)/.test(postalCode)||
     originCountry!=='CN')
     throw Error('Provide exact CJ VID and a metropolitan French postcode; CN warehouse pilot only');
+  // CJ account limits can be as low as 1 request/second. Synthetic CI
+  // fetchers bypass waiting; real calls are paced conservatively.
+  let lastRequestAt=0;
+  const supplierFetcher=fetcher===fetch?async(url,options)=>{
+    const remaining=1100-(Date.now()-lastRequestAt);
+    if(lastRequestAt&&remaining>0)
+      await new Promise(resolve=>setTimeout(resolve,remaining));
+    lastRequestAt=Date.now();
+    return fetcher(url,options);
+  }:fetcher;
   const v=await api('/product/variant/queryByVid?vid='+encodeURIComponent(vid),
-    accessToken,{fetcher});
+    accessToken,{fetcher:supplierFetcher});
   if(v?.vid!==vid)throw Error('CJ variant identity does not match requested VID');
   const productUsdCents=usdToCents(v.variantSellPrice);
   if(productUsdCents<=0)throw Error('CJ variant price is not available');
   const inventory=await api('/product/stock/queryByVid?vid='+encodeURIComponent(vid),
-    accessToken,{fetcher});
+    accessToken,{fetcher:supplierFetcher});
   if(!Array.isArray(inventory))throw Error('CJ inventory payload invalid');
   const warehouseRows=inventory.filter(x=>x?.countryCode===originCountry&&x?.vid===vid&&
     Number.isInteger(x.cjInventoryNum)&&x.cjInventoryNum>=0);
@@ -130,7 +140,7 @@ export async function discoverCjVariant({vid,postalCode,originCountry='CN',
   if(!stockConfirmed)return base;
   const raw=await api('/logistic/freightCalculate',accessToken,{
     method:'POST',body:{startCountryCode:originCountry,endCountryCode:'FR',
-      zip:postalCode,products:[{quantity:1,vid}]},fetcher
+      zip:postalCode,products:[{quantity:1,vid}]},fetcher:supplierFetcher
   });
   if(!Array.isArray(raw))throw Error('CJ freight payload invalid');
   const byName=new Map();
