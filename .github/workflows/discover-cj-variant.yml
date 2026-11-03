@@ -1,0 +1,40 @@
+name: Examiner une variante CJ sans achat
+
+on:
+  workflow_dispatch:
+    inputs:
+      vid:
+        description: "Identifiant exact de variante CJ (VID)"
+        required: true
+        type: string
+      postal_code:
+        description: "Code postal francais metropolitain pour devis echantillon"
+        required: true
+        default: "75002"
+        type: string
+
+permissions:
+  contents: read
+
+# No checkout or order actions: 1 VID, at most 3 supplier data lookups.
+concurrency:
+  group: cj-variant-discovery-pilot
+  cancel-in-progress: false
+
+jobs:
+  supplier-read-only:
+    if: github.repository == 'dbrckk/Spotify-montre' && github.actor == 'dbrckk'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Lire variante, stock CN et livraison FR chez CJ
+        env:
+          CJ_API_KEY: ${{ secrets.CJ_API_KEY }}
+          CJ_ACCESS_TOKEN: ${{ secrets.CJ_ACCESS_TOKEN }}
+          CJ_VID: ${{ inputs.vid }}
+          CJ_POSTAL_CODE: ${{ inputs.postal_code }}
+        run: node commerce/discover-cj.mjs
