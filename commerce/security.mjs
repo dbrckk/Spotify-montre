@@ -6,6 +6,28 @@ export class ClientError extends Error {
 const bytes=()=>randomBytes(20).toString('hex');
 export const newOrderId=()=> 'ord_'+bytes();
 export const newPublicToken=()=>randomBytes(32).toString('base64url');
+/** Recover the same private order-access token from a browser's random retry key.
+ * The secret never leaves this server; only the token digest is kept in PostgreSQL.
+ * This protects a customer who loses the initial checkout HTTP response. */
+export function recoveryToken(secret,idempotencyKey){
+  return createHmac('sha256',secret).update('atelier-montres:checkout-access:v1:')
+    .update(idempotencyKey).digest('base64url');
+}
+export function restoredCheckoutState(order,token){
+  if(!order||!sameHash(order.public_token_hash,digest(token)))
+    throw new ClientError('Cette tentative ancienne ne peut pas être récupérée : aucune nouvelle facturation',409);
+  const response={orderId:order.id,orderToken:token,amountCents:order.amount_eur_cents,reused:true};
+  if(order.status==='PAYMENT_PENDING'&&typeof order.payment_checkout_url==='string'){
+    try{
+      const url=new URL(order.payment_checkout_url);
+      if(url.protocol==='https:'&&!url.username&&!url.password&&
+         ['www.mollie.com','checkout.mollie.com'].includes(url.hostname))
+        return {...response,kind:'payment',checkoutUrl:url.href};
+    }catch{/* No unsafe provider redirect. Show the current order instead. */}
+  }
+  return {...response,kind:'status',status:order.status};
+}
+
 export const digest=v=>createHash('sha256').update(v).digest('hex');
 export const hmac=(secret,value)=>createHmac('sha256',secret).update(value).digest('hex');
 export function sameHash(a,b){

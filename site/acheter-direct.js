@@ -75,12 +75,22 @@
         headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
       const result=await response.json();
       if(!response.ok)throw Error(result.error||'La commande n’a pas pu être préparée.');
-      const url=new URL(result.checkoutUrl);
-      if(url.protocol!=='https:'||!['www.mollie.com','checkout.mollie.com'].includes(url.hostname)
-        ||typeof result.orderId!=='string'||typeof result.orderToken!=='string')throw Error('Réponse de paiement invalide');
+      if(!/^ord_[a-f0-9]{40}$/.test(result.orderId||'')||
+        typeof result.orderToken!=='string'||result.orderToken.length<30)
+        throw Error('Réponse de commande invalide');
+      let destination;
+      if(result.kind==='status'){
+        // Never attempt another charge for an order already in progress or paid.
+        destination=new URL('./commande.html?commande='+encodeURIComponent(result.orderId),location.href);
+      }else if(result.kind==='payment'||result.kind===undefined){
+        const url=new URL(result.checkoutUrl);
+        if(url.protocol!=='https:'||!['www.mollie.com','checkout.mollie.com'].includes(url.hostname)
+          ||url.username||url.password)throw Error('Lien de paiement invalide');
+        destination=url;
+      }else throw Error('Statut de commande non reconnu');
       sessionStorage.setItem('am_order_'+result.orderId,result.orderToken);
       sessionStorage.removeItem(orderKey(item.id));
-      window.location.assign(url.href);
+      window.location.assign(destination.href);
     }catch(error){
       show(error.message||'Impossible de commencer le paiement.',true);
       button.disabled=false;

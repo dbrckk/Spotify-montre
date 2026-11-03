@@ -1,7 +1,7 @@
 import {createServer} from 'node:http';
 import {createHostedPayment,verifyHostedPayment} from '../scripts/commerce-mollie.mjs';
 import {createDatabase,initializeDatabase,listApprovedOffers,reserveCheckout,saveCreatedPayment,
-  flagPaymentReview,getApprovedOffer,getOrderByPayment,getOrderForStatus,recordPaymentStatus,pendingPayments,
+  flagPaymentReview,getApprovedOffer,findExistingCheckout,getOrderByPayment,getOrderForStatus,recordPaymentStatus,pendingPayments,
   claimSupplierOrder,recordSupplierAttempt,ordersForSupplierReconciliation,recordSupplierDetail,
   quarantineStaleSupplierAttempts,quarantineStalePaymentCreation,getCommerceExceptionSummary,
   claimSupplierRecoveryProbe,recordRecoveredSupplierOrder} from './db.mjs';
@@ -182,6 +182,10 @@ async function route(req,res){
     if(req.headers.origin!==origin)return reply(res,403,{error:'Origine refusée'});
     if(!merchantReady())return reply(res,503,{error:'Achat direct temporairement indisponible'},cors(req));
     const request=validateCheckoutBody(await readJsonBody(req));
+    // Lost HTTP responses MUST reuse the first Mollie payment, never start another.
+    // Check this before a fresh stock quote: the offer may have expired since purchase.
+    const resumed=await findExistingCheckout(pool,request,{idempotencySecret});
+    if(resumed)return reply(res,200,resumed,cors(req));
     const offer=await getApprovedOffer(pool,request.offerId);
     if(!offer)return reply(res,409,{error:'Cette montre n’est pas en vente directe actuellement'},cors(req));
     try{
@@ -205,7 +209,7 @@ async function route(req,res){
       await flagPaymentReview(pool,order.orderId).catch(()=>{});
       throw new ClientError('Le paiement ne peut pas être confirmé actuellement. Aucun nouvel essai automatique.',503);
     }
-    return reply(res,201,{orderId:order.orderId,orderToken:order.token,
+    return reply(res,201,{kind:'payment',orderId:order.orderId,orderToken:order.token,
       checkoutUrl:payment.checkoutUrl,amountCents:order.amountCents},cors(req));
   }
   if(req.method==='POST'&&pathname==='/api/webhooks/mollie'){
