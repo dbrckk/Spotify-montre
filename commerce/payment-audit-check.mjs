@@ -34,7 +34,7 @@ try{
       digest(randomBytes(16).toString('hex')),offerId,status,paymentId]);
     orders.push({id,paymentId,status});
   }
-  assert.throws(()=>claimPaymentsForAudit(pool,0),/Invalid payment audit batch size/);
+  await assert.rejects(()=>claimPaymentsForAudit(pool,0),/Invalid payment audit batch size/);
   const [first,second]=await Promise.all([
     claimPaymentsForAudit(pool,2),claimPaymentsForAudit(pool,2)
   ]);
