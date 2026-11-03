@@ -4,6 +4,39 @@
 
 **Nouvel outil opérationnel :** [qualification de vraies variantes CJ, brouillons non achetables et preuves de devis](../docs/QUALIFICATION_VRAIES_OFFRES_CJ_2026-11-03.md) ; `node commerce/stage-offer.mjs inspect|stage /chemin/prive/candidat-reel.json`. Cette commande requiert des accès CJ réels. Aucun SKU ou paiement fictif n'est publié.
 
+## Diagnostic privé de lancement (une commande, aucun achat)
+
+Depuis le dossier racine, sur un poste ou environnement serveur disposant déjà
+de l'URL PostgreSQL privée, lancer :
+
+```sh
+npm --prefix commerce run readiness
+```
+
+Le script `commerce/readiness-report.mjs` lit `DATABASE_URL` et
+`site/config.json`. Il produit un **rapport JSON en lecture seule** :
+nombre d'offres et de devis CJ archivés, répartition des états des commandes
+**sans identifiant ni données de destinataire**, conditions de publication
+manquantes par montre et présence (oui/non) des paramètres du serveur.
+
+Il utilise `getApprovedOffer` pour confirmer la même décision qu'une
+demande de checkout. Un rapport favorable ne constitue **jamais** une
+attestation de vente de bout en bout : il ne contacte ni Mollie ni CJ,
+n'exécute aucun achat et conserve toujours
+`productionLaunchCertified: false`.
+
+**Sécurité :** cet outil reste un CLI opérateur, sans endpoint public.
+Il n'affiche ni contenu des variables secrètes, ni `DATABASE_URL`, ni
+adresse chiffrée, ni référence de paiement client. Ne pas publier ses
+rapports commerciaux sans les relire. Dans un environnement sans
+`DATABASE_URL`, il échoue explicitement sans essayer de télécharger
+des secrets. Les contrôles de présence des jetons ne prouvent pas leur
+validité : seul un essai fournisseur/marchand autorisé pourra le faire.
+
+Le contrôle `commerce/readiness-check.mjs` utilise uniquement une base
+PostgreSQL locale et des données synthétiques pour vérifier les explications,
+la concordance avec le vrai checkout et l'absence de secrets dans la sortie.
+
 ### Nouvelles conditions de publication obligatoires (novembre 2026)
 
 Un SKU ne peut apparaître dans `GET /api/offers` ni être commandé sans :
