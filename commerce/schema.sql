@@ -81,6 +81,7 @@ CREATE TABLE IF NOT EXISTS commerce_orders (
   payment_id text UNIQUE,
   payment_checkout_url text,
   payment_mode text CHECK (payment_mode IN ('test','live')),
+  payment_audited_at timestamptz,
   supplier_order_id text,
   supplier_reserved_usd_cents integer CHECK (supplier_reserved_usd_cents>=0),
   supplier_requested_at timestamptz,
@@ -106,6 +107,16 @@ ALTER TABLE commerce_orders ADD COLUMN IF NOT EXISTS
   promised_delivery_min_business_days smallint NOT NULL DEFAULT 0;
 ALTER TABLE commerce_orders ADD COLUMN IF NOT EXISTS
   promised_delivery_max_business_days smallint NOT NULL DEFAULT 0;
+
+-- Read-only Mollie reconciliation keeps detecting missed refund/chargeback
+-- webhooks even after dispatch. Null means this payment has never been audited.
+ALTER TABLE commerce_orders ADD COLUMN IF NOT EXISTS payment_audited_at timestamptz;
+CREATE INDEX IF NOT EXISTS commerce_orders_payment_audit
+  ON commerce_orders(payment_audited_at,created_at)
+  WHERE payment_id IS NOT NULL AND status IN (
+    'PAYMENT_PENDING','PAID','SUPPLIER_SENDING','SUPPLIER_SUBMITTED',
+    'SUPPLIER_PAID','SHIPPED','DELIVERED'
+  );
 
 -- Recovery probes never trigger a second supplier purchase.
 ALTER TABLE commerce_orders ADD COLUMN IF NOT EXISTS

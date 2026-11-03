@@ -195,6 +195,8 @@ export async function recordPaymentStatus(pool,orderId,verified){
     const {rows}=await client.query('SELECT * FROM commerce_orders WHERE id=$1 FOR UPDATE',[orderId]);
     const o=rows[0];if(!o||o.payment_id!==verified.paymentId||
       o.amount_eur_cents!==verified.amountCents)throw Error('Payment and stored order mismatch');
+    // Only an authenticated, matching provider response reaches this point.
+    await client.query('UPDATE commerce_orders SET payment_audited_at=now() WHERE id=$1',[o.id]);
     // A chargeback or refund may arrive while the original payment still
     // reports status=paid. Block dispatch and alert the operator immediately.
     if(verified.reversed===true&&
@@ -223,14 +225,36 @@ export async function recordPaymentStatus(pool,orderId,verified){
     return {changed:false,status:o.status};
   });
 }
-export async function pendingPayments(pool){
-  const {rows}=await pool.query(`
-    SELECT id,payment_id,amount_eur_cents FROM commerce_orders
-    WHERE status='PAYMENT_PENDING' AND payment_id IS NOT NULL
-      AND created_at>now()-interval '14 days'
-    ORDER BY created_at LIMIT 12
-  `);
-  return rows;
+/** Bound, multi-worker-safe Mollie GET reconciliation queue.
+ * Never creates a customer charge; in particular it revisits already shipped
+ * orders so missed reversal webhooks cannot remain invisible indefinitely.
+ */
+export async function claimPaymentsForAudit(pool,limit=4){
+  if(!Number.isSafeInteger(limit)||limit<1||limit>12)
+    throw Error('Invalid payment audit batch size');
+  return transaction(pool,async client=>{
+    const {rows}=await client.query(`
+      SELECT id,payment_id,amount_eur_cents,status
+      FROM commerce_orders
+      WHERE payment_id IS NOT NULL
+        AND (
+          (status='PAYMENT_PENDING' AND
+            (payment_audited_at IS NULL OR payment_audited_at<now()-interval '10 minutes'))
+          OR
+          (status IN ('PAID','SUPPLIER_SENDING','SUPPLIER_SUBMITTED','SUPPLIER_PAID') AND
+            (payment_audited_at IS NULL OR payment_audited_at<now()-interval '12 hours'))
+          OR
+          (status IN ('SHIPPED','DELIVERED') AND
+            (payment_audited_at IS NULL OR payment_audited_at<now()-interval '7 days'))
+        )
+      ORDER BY payment_audited_at ASC NULLS FIRST,created_at ASC
+      FOR UPDATE SKIP LOCKED LIMIT $1
+    `,[limit]);
+    if(rows.length)
+      await client.query('UPDATE commerce_orders SET payment_audited_at=now() WHERE id=ANY($1::text[])',
+        [rows.map(row=>row.id)]);
+    return rows;
+  });
 }
 export async function claimSupplierOrder(pool,{dailyCapUsdCents}){
   if(!Number.isSafeInteger(dailyCapUsdCents)||dailyCapUsdCents<=0) return null;

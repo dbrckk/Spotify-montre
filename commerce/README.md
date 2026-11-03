@@ -83,6 +83,36 @@ npm --prefix commerce start
 Les endpoints `/api/checkout`, `/api/webhooks/mollie` et
 `/api/orders/:id` exigent des vérifications effectives avant toute action.
 
+## Rapprochement Mollie après paiement
+
+Le moteur ne repose plus seulement sur les webhooks Mollie : un **contrôle GET authentifié**
+et périodique vérifie aussi les commandes déjà payées ou expédiées.
+Cela couvre les remboursements et rétrofacturations que le fournisseur pourrait
+notifier pendant une panne réseau et dont la notification ne nous parviendrait pas.
+
+- `PAYMENT_PENDING` : toutes les **10 minutes**, même au-delà de 14 jours ;
+- `PAID`, `SUPPLIER_SENDING`, `SUPPLIER_SUBMITTED`, `SUPPLIER_PAID` : toutes les **12 heures** ;
+- `SHIPPED` et `DELIVERED` : tous les **7 jours** (sans expiration automatique de l'audit).
+- `EXCEPTION`, `REFUNDED` et `PAYMENT_FAILED` : exclus de la file périodique,
+  afin de ne pas altérer un dossier déjà clôturé ou en investigation.
+
+La file conserve `payment_audited_at` dans PostgreSQL, attribue les contrôles
+sous verrou transactionnel `FOR UPDATE SKIP LOCKED`, et plafonne chaque passe à
+**quatre paiements** pour limiter les appels Mollie et les ressources Render.
+Les statuts sont mis à jour exclusivement après un GET Mollie correctement authentifié,
+et non à partir d'un webhook ou de la page de retour. Une rétrofacturation ou un
+remboursement détecté bloque les commandes fournisseur encore exécutables et place
+les dossiers livrés en `EXCEPTION` pour examen humain. Aucun remboursement ni
+débit CJ n'est déclenché par cet audit.
+
+Le remboursement contractuel et la résolution des litiges nécessitent toujours
+une intervention du marchand et des preuves fournisseur. Une reprise automatique
+de l'achat CJ est interdite.
+
+Référence : [Mollie — webhooks des paiements](https://docs.mollie.com/reference/webhooks),
+qui recommande une relecture authentifiée du paiement et prévoit des tentatives
+de notification limitées dans le temps.
+
 ## Conditions **avant activation**
 
 - Entreprise établie, CGV, politique de confidentialité, rétractation, mentions légales
