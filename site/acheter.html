@@ -23,6 +23,16 @@
 <section class="am-direct-panel" aria-labelledby="checkoutTitle">
 <h2 id="checkoutTitle">Votre commande</h2>
 <p id="amDirectStatus" role="status" aria-live="polite">Vérification des offres disponibles…</p>
+<div id="amDirectPrelaunch" class="am-direct-prelaunch" hidden>
+  <p class="am-direct-prelaunch-tag">La boutique se prépare</p>
+  <h3>Une sélection à découvrir, sans commande prématurée.</h3>
+  <p>Nous finalisons la vérification des fournisseurs, des prix TTC et des livraisons. Pour le moment, explorez nos montres documentées et comparez les modèles avant leur éventuelle mise en vente directe.</p>
+  <div class="am-direct-prelaunch-actions">
+    <a class="am-direct-prelaunch-primary" href="./montres/toutes-les-montres.html">Explorer les 52 montres <span aria-hidden="true">↗</span></a>
+    <a href="./conseiller.html">Trouver mon style</a>
+  </div>
+  <p class="am-direct-prelaunch-disclaimer">Aucun paiement ni renseignement de livraison n'est demandé à cette étape. Les achats proposés par des partenaires externes restent indépendants de notre caisse.</p>
+</div>
 <form id="amDirectForm" hidden>
 <label for="amDirectOffers">Modèle disponible</label>
 <select id="amDirectOffers" name="offerId" required></select>
@@ -52,6 +62,26 @@
 <a href="./montres/toutes-les-montres.html">Explorer la sélection complète ↗</a>
 </aside>
 </div>
+<section class="am-direct-discovery" id="inspirations" aria-labelledby="amDirectDiscoverTitle">
+  <div class="am-direct-discovery-head">
+    <div><p class="am-direct-eyebrow">INSPIRATIONS / MONTRES DOCUMENTÉES</p><h2 id="amDirectDiscoverTitle">En attendant la première collection.</h2></div>
+    <p>Trois styles à explorer parmi nos modèles présentés. Ce sont des inspirations, pas des offres d'achat direct.</p>
+  </div>
+  <div class="am-direct-discovery-grid">
+    <a class="am-direct-discovery-card" href="./montres/modeles-populaires.html">
+      <img src="./assets/watches-popular/skmei-1251.webp" width="440" height="440" alt="Montre SKMEI 1251" loading="lazy" decoding="async">
+      <span class="am-direct-discovery-copy"><small>ACCESSIBLE / DIGITAL</small><strong>SKMEI 1251</strong><span>Découvrir les modèles populaires <span aria-hidden="true">↗</span></span></span>
+    </a>
+    <a class="am-direct-discovery-card" href="./montre.html?id=citizen-tsuyosa">
+      <img src="./assets/watches/citizen-tsuyosa.webp" width="440" height="440" alt="Montre Citizen Tsuyosa" loading="lazy" decoding="async">
+      <span class="am-direct-discovery-copy"><small>CONTEMPORAIN / AUTOMATIQUE</small><strong>Citizen Tsuyosa</strong><span>Consulter la fiche <span aria-hidden="true">↗</span></span></span>
+    </a>
+    <a class="am-direct-discovery-card" href="./montre.html?id=casio-mdv107">
+      <img src="./assets/watches/casio-mdv107.webp" width="440" height="440" alt="Montre Casio MDV-107" loading="lazy" decoding="async">
+      <span class="am-direct-discovery-copy"><small>SPORT / QUARTZ</small><strong>Casio MDV-107</strong><span>Consulter la fiche <span aria-hidden="true">↗</span></span></span>
+    </a>
+  </div>
+</section>
 </main>
 <footer class="am-direct-footer"><p>Atelier Montres · Achat direct uniquement lorsque l'ensemble des contrôles marchands est activé. <a href="./informations-legales.html">Informations légales</a></p></footer>
 </body>
