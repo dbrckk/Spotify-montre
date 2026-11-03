@@ -224,12 +224,28 @@
     }
     thead.append(heading);
     const tbody=node('tbody');
+    let differingCount=0;
     for(const [label,resolve] of rows){
-      const tr=node('tr'),th=node('th',label);th.scope='row';tr.append(th);
-      for(const id of selected){const value=resolve(watches.get(id));tr.append(node('td',value||'Non documenté'))}
+      const values=selected.map(id=>resolve(watches.get(id))||'Non documenté');
+      // Never treat unavailable measurements as an actual difference.
+      const verified=values.filter(value=>value!=='Non documenté');
+      const differing=new Set(verified).size>1;
+      if(differing)differingCount++;
+      const tr=node('tr'),th=node('th',label);th.scope='row';
+      if(differing)tr.classList.add('ud-matrix-diff');
+      tr.append(th);
+      for(const value of values)tr.append(node('td',value));
       tbody.append(tr);
     }
-    table.append(caption,thead,tbody);compareTable.replaceChildren(table);compareTable.hidden=false;
+    const hint=node('p',
+      differingCount
+        ?differingCount+' caractéristique'+(differingCount>1?'s':'')+
+          ' différenciant vos montres. Les valeurs inconnues ne sont jamais considérées comme une différence.'
+        :'Aucune différence documentée entre ces modèles sur les critères présentés.',
+      'ud-matrix-hint');
+    hint.id='udCompareHint';
+    table.append(caption,thead,tbody);
+    compareTable.replaceChildren(hint,table);compareTable.hidden=false;
     persist();
   };
   root.addEventListener('click',event=>{
