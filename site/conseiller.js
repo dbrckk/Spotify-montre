@@ -68,7 +68,16 @@
      const ids=recommendations.map(item=>item.product?.id)
        .filter(id=>typeof id==='string'&&/^[a-z0-9-]{4,64}$/.test(id));
      compareLink.hidden=ids.length<2;
-     if(ids.length>=2)compareLink.href='./montres/toutes-les-montres.html?compare='+ids.map(encodeURIComponent).join(',')+'#comparer';
+     if(ids.length>=2){
+       // Preserve every explicit preference in the buyer's compare link.
+       // Dedicated pref* keys must not apply a catalogue listing filter,
+       // which could hide an alternative watch from the decision.
+       const prefs=['tier','style','movement','size'].filter(key=>choices[key]!=='all')
+         .map(key=>'&pref'+key[0].toUpperCase()+key.slice(1)+'='+encodeURIComponent(choices[key]))
+         .join('');
+       compareLink.href='./montres/toutes-les-montres.html?compare='+
+         ids.map(encodeURIComponent).join(',')+prefs+'#comparer';
+     }
    }
    status.textContent=recommendations.length+' montre'+(recommendations.length>1?'s':'')+' à explorer parmi '+catalogue.length;
    criteria.textContent=active?active+' préférence'+(active>1?'s':'')+' retenue'+(active>1?'s':''):'Sélection de départ';
