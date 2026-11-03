@@ -204,6 +204,18 @@
     title.scope='col';heading.append(title);
     for(const id of selected){
       const p=watches.get(id),th=node('th');th.scope='col';
+      // Only show an exact-model photograph already approved and stored
+      // locally. Never silently substitute a different watch or remote image.
+      const expected='./assets/'+(p.kind==='core'?'watches':'watches-popular')+'/'+p.id+'.webp';
+      if(p.photoUrl===expected){
+        const visual=node('div',null,'ud-matrix-photo');
+        const img=node('img');
+        img.src='../assets/'+(p.kind==='core'?'watches':'watches-popular')+'/'+p.id+'.webp';
+        img.alt='Photographie du modèle '+p.brand+' '+p.model;
+        img.loading='lazy';img.decoding='async';img.width=180;img.height=180;
+        img.onerror=()=>visual.remove();
+        visual.append(img);th.append(visual);
+      }
       th.append(link(p.brand+' '+p.model,'./'+id+'.html'));
       const remove=node('button','Retirer','ud-compare-remove');
       remove.type='button';remove.setAttribute('aria-label','Retirer '+p.brand+' '+p.model);
@@ -212,12 +224,28 @@
     }
     thead.append(heading);
     const tbody=node('tbody');
+    let differingCount=0;
     for(const [label,resolve] of rows){
-      const tr=node('tr'),th=node('th',label);th.scope='row';tr.append(th);
-      for(const id of selected){const value=resolve(watches.get(id));tr.append(node('td',value||'Non documenté'))}
+      const values=selected.map(id=>resolve(watches.get(id))||'Non documenté');
+      // Never treat unavailable measurements as an actual difference.
+      const verified=values.filter(value=>value!=='Non documenté');
+      const differing=new Set(verified).size>1;
+      if(differing)differingCount++;
+      const tr=node('tr'),th=node('th',label);th.scope='row';
+      if(differing)tr.classList.add('ud-matrix-diff');
+      tr.append(th);
+      for(const value of values)tr.append(node('td',value));
       tbody.append(tr);
     }
-    table.append(caption,thead,tbody);compareTable.replaceChildren(table);compareTable.hidden=false;
+    const hint=node('p',
+      differingCount
+        ?differingCount+' caractéristique'+(differingCount>1?'s':'')+
+          ' différenciant vos montres. Les valeurs inconnues ne sont jamais considérées comme une différence.'
+        :'Aucune différence documentée entre ces modèles sur les critères présentés.',
+      'ud-matrix-hint');
+    hint.id='udCompareHint';
+    table.append(caption,thead,tbody);
+    compareTable.replaceChildren(hint,table);compareTable.hidden=false;
     persist();
   };
   root.addEventListener('click',event=>{

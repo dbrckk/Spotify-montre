@@ -194,6 +194,30 @@ try{
   assert.equal(new URL(phone.url()).hash,'#comparer',
     'Opening the dock must navigate to the actual on-page table');
   assert.equal(await phone.locator('#udCompareTable th[scope=col]').count(),3);
+  // Premium visual comparison must show exact local photos, preserve original
+  // data provenance and keep criteria visible while swiping on Android.
+  const matchedPhotos=phone.locator('#udCompareTable .ud-matrix-photo img');
+  assert.equal(await matchedPhotos.count(),2,
+    'Both source-verified watches must have an exact-model comparison photo');
+  const photoSources=await matchedPhotos.evaluateAll(images=>images.map(img=>img.getAttribute('src')));
+  assert.deepEqual(photoSources,[
+    '../assets/watches-popular/skmei-2056.webp',
+    '../assets/watches/citizen-tsuyosa.webp'
+  ]);
+  for(const img of await matchedPhotos.all()){
+    assert.ok(await img.evaluate(async image=>{
+      try{await image.decode();return image.naturalWidth>100}catch{return false}
+    }),'Actual approved comparison photos must decode');
+  }
+  assert.ok(await phone.locator('#udCompareTable .ud-matrix-diff').count()>0,
+    'Differences between verified watch specifications should be emphasized');
+  assert.match(await phone.locator('#udCompareHint').innerText(),
+    /caractéristique.*différenciant|caractéristiques.*différenciant/,
+    'Never silently claim that unknown data is a documented difference');
+  const sticky=await phone.locator('#udCompareTable .ud-matrix th[scope=row]').first()
+    .evaluate(element=>getComputedStyle(element).position);
+  assert.equal(sticky,'sticky','Android comparison labels must stay visible during swipe');
+  await checkOverflow(phone,'Android source-photographed comparison matrix');
   await phone.locator('#udTrayItems button[data-tray-remove="skmei-2056"]').click();
   assert.equal(await phone.locator('#udTrayItems li').count(),1,'Chip removal updates shared selection');
   assert.equal(await phone.locator('#udCompareTable table').count(),0,
