@@ -8,8 +8,12 @@ async function main(){
   const keyword=process.env.CJ_SEARCH_KEYWORD||'SKMEI';
   const postalCode=process.env.CJ_POSTAL_CODE||'75002';
   const apiKey=process.env.CJ_API_KEY;
-  const token=typeof apiKey==='string'&&apiKey.length>=20?
-    await obtainCjAccessToken({apiKey}):process.env.CJ_ACCESS_TOKEN;
+  let token;
+  if(typeof apiKey==='string'&&apiKey.length>=20){
+    token=await obtainCjAccessToken({apiKey});
+    // Token issuance also consumes CJ account throughput.
+    await new Promise(resolve=>setTimeout(resolve,1200));
+  }else token=process.env.CJ_ACCESS_TOKEN;
   if(typeof token!=='string'||token.length<20)
     throw Error('CJ_API_KEY or CJ_ACCESS_TOKEN is required');
   const report=await searchCjWatchCandidates({
