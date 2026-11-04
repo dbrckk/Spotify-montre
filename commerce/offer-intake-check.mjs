@@ -11,13 +11,18 @@ const candidate={
   amountEurCents:8990,unitCostEurCents:1300,
   supplierLandedEurCeilingCents:2800,reservesEurCents:800,
   vatRateBps:2000,supplierMaxUsdCents:2500,fxMaxEurPerUsdBps:10500,
-  supplierVid:'test-variant-id',logisticsName:'CI Transport',
+  supplierVid:'test-variant-id',supplierPid:'test-product-id',
+  supplierVariantSku:'TEST-CJ-VID',supplierProductSku:'TEST-CJ-PRODUCT',
+  logisticsName:'CI Transport',
   originCountry:'CN',samplePostalCode:'75002',
   deliveryMinBusinessDays:7,deliveryMaxBusinessDays:20
 };
 const quote={
   productUsdCents:1100,freightUsdCents:400,landedUsdCents:1500,
-  balanceUsdCents:3000,stockConfirmed:true,logisticsName:'CI Transport'
+  balanceUsdCents:3000,stockConfirmed:true,logisticsName:'CI Transport',
+  supplierPid:candidate.supplierPid,
+  supplierVariantSku:candidate.supplierVariantSku,
+  supplierProductSku:candidate.supplierProductSku
 };
 const plan=qualifyObservedCjQuote(candidate,quote);
 assert.equal(plan.state,'draft_unapproved');
@@ -30,6 +35,8 @@ assert.throws(()=>validateOfferCandidate({...candidate,id:'BAD ID'}),/id is inva
 assert.throws(()=>validateOfferCandidate({...candidate,samplePostalCode:'97100'}),/Metropolitan/);
 assert.throws(()=>validateOfferCandidate({...candidate,fxMaxEurPerUsdBps:0}),/fxMax/);
 assert.throws(()=>qualifyObservedCjQuote(candidate,{...quote,stockConfirmed:false}),/unverified/);
+assert.throws(()=>validateOfferCandidate({...candidate,supplierPid:undefined}),/supplierPid/);
+assert.throws(()=>qualifyObservedCjQuote(candidate,{...quote,supplierVariantSku:'REPLACED'}),/canonical PID or SKU/);
 assert.throws(()=>qualifyObservedCjQuote(candidate,{...quote,landedUsdCents:1600}),/inconsistent/);
 assert.throws(()=>qualifyObservedCjQuote(candidate,{...quote,balanceUsdCents:1}),/wallet/);
 assert.throws(()=>qualifyObservedCjQuote(candidate,{...quote,productUsdCents:1450,freightUsdCents:50}),/understated/);
@@ -49,7 +56,11 @@ const supplierFetcher=async(url,options)=>{
   supplierEndpoints.push(url);
   if(url.includes('/product/variant/queryByVid'))
     return {ok:true,json:async()=>({code:200,result:true,
-      data:{vid:candidate.supplierVid,variantSellPrice:'11.00'}})};
+      data:{vid:candidate.supplierVid,pid:candidate.supplierPid,
+        variantSku:candidate.supplierVariantSku,variantSellPrice:'11.00'}})};
+  if(url.includes('/product/query?'))
+    return {ok:true,json:async()=>({code:200,result:true,
+      data:{pid:candidate.supplierPid,productSku:candidate.supplierProductSku}})};
   if(url.includes('/product/stock/queryByVid'))
     return {ok:true,json:async()=>({code:200,result:true,data:[
       {vid:candidate.supplierVid,countryCode:'CN',cjInventoryNum:4}
@@ -76,7 +87,7 @@ try{
   await assert.rejects(()=>stageQualifiedOffer(pool,candidate,{}),/CJ access token/);
   assert.equal(supplierEndpoints.length,0,'malformed input must not reach supplier');
   const result=await stageQualifiedOffer(pool,candidate,secureStage);
-  assert.equal(supplierEndpoints.length,4,'staging must perform four fresh CJ reads');
+  assert.equal(supplierEndpoints.length,5,'staging must validate parent SKU and perform five fresh CJ reads');
   inserted=true;
   assert.equal(result.state,'draft_unapproved');
   const row=(await pool.query('SELECT * FROM commerce_offers WHERE id=$1',[candidate.id])).rows[0];
@@ -87,6 +98,9 @@ try{
     assert.equal(row[flag],false,'draft must not approve '+flag);
   assert.equal(row.verified_until,null,'staged record must never be an approved live quote');
   assert.equal(row.supplier_vid,candidate.supplierVid);
+  assert.equal(row.supplier_pid,candidate.supplierPid);
+  assert.equal(row.supplier_variant_sku,candidate.supplierVariantSku);
+  assert.equal(row.supplier_product_sku,candidate.supplierProductSku);
   const quoteRows=await pool.query(
     'SELECT * FROM commerce_offer_preflight_quotes WHERE offer_id=$1',[candidate.id]);
   assert.equal(quoteRows.rows.length,1);
