@@ -124,6 +124,23 @@ try{
   assert.equal((await pool.query(
     'SELECT count(*)::integer AS n FROM commerce_offer_import_proof_history WHERE offer_id=$1',
     [id])).rows[0].n,1,'must retain exactly one immutable archive row');
+  // Concurrent admins cannot both replace one expired document.
+  await pool.query(
+    "UPDATE commerce_offer_import_proofs SET valid_until=now()-interval '1 minute' WHERE offer_id=$1",
+    [id]);
+  const [one,two]=await Promise.allSettled([
+    stageEuImportEvidence(pool,{...valid,supplierEvidenceSha256:'a'.repeat(64)}),
+    stageEuImportEvidence(pool,{...valid,supplierEvidenceSha256:'b'.repeat(64)})
+  ]);
+  assert.equal([one,two].filter(x=>x.status==='fulfilled').length,1);
+  assert.equal([one,two].filter(x=>x.status==='rejected').length,1);
+  const successfulSha=[one,two].find(x=>x.status==='fulfilled').value.sourceDocumentSha256;
+  assert.equal((await pool.query(
+    'SELECT supplier_evidence_sha256 FROM commerce_offer_import_proofs WHERE offer_id=$1',
+    [id])).rows[0].supplier_evidence_sha256,successfulSha);
+  assert.equal((await pool.query(
+    'SELECT count(*)::integer AS n FROM commerce_offer_import_proof_history WHERE offer_id=$1',
+    [id])).rows[0].n,2,'both old documents must stay in append-only history');
   await pool.query(
     'UPDATE commerce_offers SET approved=true WHERE id=$1',[id]);
   await assert.rejects(stageEuImportEvidence(pool,valid),
