@@ -25,16 +25,21 @@ async function insertOrder(status='SUPPLIER_SENDING'){
   await pool.query(`
     INSERT INTO commerce_orders (
       id,public_token_hash,idempotency_hash,request_hash,offer_id,product_label,
-      amount_eur_cents,supplier_vid,supplier_max_usd_cents,logistics_name,
+      amount_eur_cents,supplier_vid,supplier_pid,supplier_variant_sku,
+      supplier_product_sku,supplier_max_usd_cents,logistics_name,
       from_country_code,address_encrypted,status,payment_id,payment_mode
-    ) VALUES($1,$2,$3,$4,$5,'Synthetic gated order',5000,'sample-vid',2200,
+    ) VALUES($1,$2,$3,$4,$5,'Synthetic gated order',5000,'sample-vid',
+             'sample-pid','SAMPLE-VID-SKU','SAMPLE-PRODUCT-SKU',2200,
              'CI-shipping','CN','no real address data',$6,$7,'test')
   `,[id,digest(randomBytes(16).toString('hex')),
     digest(randomBytes(16).toString('hex')),
     digest(randomBytes(16).toString('hex')),offerId,status,paymentId]);
   const order={
     id,payment_id:paymentId,amount_eur_cents:5000,
-    supplier_vid:'sample-vid',supplier_max_usd_cents:2200,
+    supplier_vid:'sample-vid',supplier_pid:'sample-pid',
+    supplier_variant_sku:'SAMPLE-VID-SKU',
+    supplier_product_sku:'SAMPLE-PRODUCT-SKU',
+    supplier_max_usd_cents:2200,
     logistics_name:'CI-shipping',from_country_code:'CN'
   };
   orders.push(order);
@@ -104,6 +109,10 @@ try{
   };
   const args={order:first,customer,accessToken:'a'.repeat(40),fetcher};
   await assert.rejects(()=>submitCjBalanceOrder(args),/Final buyer payment authorization/);
+  await assert.rejects(()=>submitCjBalanceOrder({
+    ...args,order:{...first,supplier_pid:null},
+    authorizeBeforeDebit:async()=>{throw Error('must not authorize legacy unpinned order')}
+  }),/identity snapshot missing/);
   assert.equal(walletChecked,0);
   await assert.rejects(()=>submitCjBalanceOrder({
     ...args,authorizeBeforeDebit:async()=>{
