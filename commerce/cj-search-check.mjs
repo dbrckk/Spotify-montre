@@ -197,4 +197,62 @@ assert.equal(noStock.findings[0].approvedForSale,false);
 assert.equal(unavailableCalls.length,6);
 assert.ok(!unavailableCalls.some(path=>/freightCalculate|shopping/.test(path)));
 
-console.log('CJ keyword discovery OK: real API payload contract, bounded second-VID fallback, no fake availability or writes');
+// Broader discovery can revisit a later page, skip a PID already inspected
+// under another keyword and examine a third distinct VID before giving up.
+const thirdVid='third-vid-unique';
+const pageCalls=[];
+const paged=async(url,options)=>{
+  const parsed=new URL(url);
+  const path=parsed.pathname;
+  pageCalls.push(path);
+  if(path.endsWith('/product/listV2')){
+    assert.equal(parsed.searchParams.get('page'),'2');
+    assert.equal(parsed.searchParams.get('size'),'60');
+    return response({content:[{productList:[
+      {id:p1,nameEn:'SKMEI watch already checked'},
+      {id:p2,nameEn:'SKMEI new sports watch'}
+    ]}]});
+  }
+  if(path.endsWith('/product/variant/query')){
+    assert.equal(parsed.searchParams.get('pid'),p2);
+    return response([
+      {pid:p2,vid:cheaper,variantSellPrice:'5.00'},
+      {pid:p2,vid:deliverable,variantSellPrice:'7.00'},
+      {pid:p2,vid:thirdVid,variantSellPrice:'8.00'}
+    ]);
+  }
+  if(path.endsWith('/product/variant/queryByVid')){
+    const vid=parsed.searchParams.get('vid');
+    return response({vid,variantSellPrice:vid===thirdVid?'8.00':'5.00'});
+  }
+  if(path.endsWith('/product/stock/queryByVid')){
+    const vid=parsed.searchParams.get('vid');
+    return response([{vid,countryCode:'CN',cjInventoryNum:vid===thirdVid?5:0}]);
+  }
+  if(path.endsWith('/logistic/freightCalculate')){
+    assert.deepEqual(JSON.parse(options.body).products,
+      [{quantity:1,vid:thirdVid}]);
+    return response([{logisticName:'French tracked',totalPostageFee:'3.50',
+      taxesFee:'0.50',tariff:'0.00',clearanceOperationFee:'0.00'}]);
+  }
+  throw Error('Unexpected read endpoint');
+};
+const extended=await searchCjWatchCandidates({keyword:'SKMEI',page:2,
+  pageSize:60,maxVariants:3,excludePids:new Set([p1]),
+  postalCode:'75002',accessToken:token,fetcher:paged});
+assert.equal(extended.page,2);
+assert.equal(extended.pageSize,60);
+assert.equal(extended.findings.length,1);
+assert.equal(extended.findings[0].pid,p2);
+assert.equal(extended.findings[0].variantsChecked,3);
+assert.equal(extended.findings[0].vid,thirdVid);
+assert.equal(extended.findings[0].state,'sample_shipping_available');
+assert.equal(pageCalls.length,9);
+await assert.rejects(searchCjWatchCandidates({keyword:'SKMEI',page:0,
+  postalCode:'75002',accessToken:token,fetcher:paged}),/page/);
+await assert.rejects(searchCjWatchCandidates({keyword:'SKMEI',
+  pageSize:101,postalCode:'75002',accessToken:token,fetcher:paged}),/pageSize/);
+await assert.rejects(searchCjWatchCandidates({keyword:'SKMEI',
+  maxVariants:5,postalCode:'75002',accessToken:token,fetcher:paged}),/variant search limit/);
+
+console.log('CJ discovery OK: real API payloads, paginated diverse variants, bounded fallback and no writes');
