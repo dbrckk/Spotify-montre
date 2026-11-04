@@ -44,3 +44,27 @@ Le flux corrigé :
 6. Devis complet, transporteur et importation **ne sont jamais présumés** : les tarifs restent purement indicatifs sans confirmation et ne sont pas publiés comme prix achetables.
 
 Le PID ancien issu du catalogue demeure un **indice de provenance** et le rapport précise s'il correspond au parent officiel, sans imposer un rapprochement trompeur. Aucun achat, paiement ou modification du panier n'est déclenché par ce contrôle. La requête réelle reste strictement ciblée sur le VID et le code postal d'échantillon.
+
+## Vérification fournisseur du 4 novembre — audit réellement exécuté
+
+Exécution [GitHub Actions #41834688555](https://github.com/dbrckk/Spotify-montre/actions/runs/41834688555), terminée avec **success** après correction du PID canonique (PR #128).
+
+| Preuve | Valeur lue chez CJ |
+| --- | --- |
+| VID demandé | `74F64E7D-7D90-425D-AFB3-487D28B1D09F` |
+| PID officiel depuis `queryByVid` | `EC60873E-E5A2-4081-82F7-427BC84A8A3D` |
+| Ancien PID de catalogue | `7BCE6BB2-14F7-47C0-B1E1-79C50A253A3A` (incompatible) |
+| SKU variante vérifié | `CJZBNSET00031-black` |
+| Poids déclaré / poids testé | 45 g / 45 g |
+| Volume déclaré converti | 450 cm³ |
+| Propriété logistique | `BATTERY` |
+| Stock entrepôt CN au relevé | positif |
+| Routes renvoyées par `freightCalculateTip` | 13 |
+| Devis total livré avec toutes les taxes validées | **0** |
+| Problème des routes observées | `taxesFee` et `clearanceOperationFee` absents, contrairement à `tariff` qui manquait dans `freightCalculate` |
+
+**Conclusion :** le bug de jointure PID/VID a été corrigé et confirmé sur l'API réelle ; il ne faut pas confondre ce succès technique avec une validation fiscale de livraison. La tarification de vente et le checkout restent indisponibles pour cette variante.
+
+Pour débloquer un prix livré, il faut obtenir de CJ une **ventilation écrite et vérifiable** de tous les frais d'import pour l'origine CN, le VID, le transporteur et la France, avec le régime TVA/import et l'éventuelle IOSS/DDP. Les réponses partielles de deux endpoints ne doivent pas être additionnées comme si elles formaient un même devis.
+
+Le workflow détaillé a été remis en **déclenchement manuel uniquement** au commit `8c32d5b8ec6fd4b27feb8088ef1eaa3718c66d1f` afin de ne plus consommer de points API sur les mises à jour de code.
