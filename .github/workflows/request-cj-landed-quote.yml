@@ -1,0 +1,34 @@
+name: CJ written full landed-cost quote (one watch, no purchase)
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: "preview = inspect safe category; send = explicitly request one written CJ quote"
+        required: true
+        type: choice
+        options: [preview, send]
+        default: preview
+permissions:
+  contents: read
+concurrency:
+  group: cj-landed-quote-supplier-ticket
+  cancel-in-progress: false
+jobs:
+  one-watch-supplier-inquiry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      CJ_API_KEY: ${{ secrets.CJ_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check CJ API secret is configured (never print value)
+        run: |
+          if [ -z "$CJ_API_KEY" ]; then
+            echo 'Missing CJ_API_KEY repository secret. No supplier ticket submitted.'
+            exit 1
+          fi
+      - name: Request a written quote only on explicit manual send
+        run: node commerce/cj-quote-ticket.mjs "${{ inputs.operation }}"
