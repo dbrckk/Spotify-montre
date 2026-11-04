@@ -29,7 +29,13 @@ const valid={
   importVatCovered:true,carrierClearanceCovered:true,buyerExtraEurCents:0,
   landedEurQuoteCents:1700,importPayer:'SUPPLIER',
   supplierEvidenceSha256:'e'.repeat(64),validUntil:expires,
-  operatorReviewed:true
+  operatorReviewed:true,
+  merchantProductId:'STORE-CI-WATCH-1',
+  supplierNonStandardProductId:'FACTORY-CI-1251',
+  standardizedManufacturerProductId:null,
+  noStandardizedManufacturerId:true,
+  customsDeclarant:'Synthetic carrier declarant',
+  customsIdentifiersTransmissionConfirmed:true
 };
 try{
   await initializeDatabase(pool);
@@ -47,6 +53,9 @@ try{
     'SELECT count(*)::integer AS n FROM commerce_offer_import_proofs WHERE offer_id=$1',
     [id])).rows[0].n,0);
 
+  await assert.rejects(stageEuImportEvidence(pool,{
+    ...valid,customsIdentifiersTransmissionConfirmed:false
+  }),/Customs declarant must confirm/);
   const saved=await stageEuImportEvidence(pool,valid);
   assert.equal(saved.status,'recorded_not_approved');
   assert.equal(saved.checkoutEnabled,false);
@@ -54,6 +63,16 @@ try{
   assert.equal((await pool.query(
     'SELECT count(*)::integer AS n FROM commerce_offer_import_proofs WHERE offer_id=$1',
     [id])).rows[0].n,1);
+  const customs=(await pool.query(
+    'SELECT merchant_product_identifier,supplier_nonstandard_identifier,'+
+    'standardized_manufacturer_identifier,no_standardized_manufacturer_identifier,'+
+    'customs_declarant,customs_identifiers_transmission_confirmed '+
+    'FROM commerce_offer_import_proofs WHERE offer_id=$1',[id])).rows[0];
+  assert.equal(customs.merchant_product_identifier,valid.merchantProductId);
+  assert.equal(customs.supplier_nonstandard_identifier,valid.supplierNonStandardProductId);
+  assert.equal(customs.standardized_manufacturer_identifier,null);
+  assert.equal(customs.no_standardized_manufacturer_identifier,true);
+  assert.equal(customs.customs_identifiers_transmission_confirmed,true);
   await assert.rejects(stageEuImportEvidence(pool,{...valid,
     supplierEvidenceSha256:'f'.repeat(64)}),/Active import proof/);
   assert.equal((await pool.query(
@@ -113,6 +132,10 @@ try{
   assert.equal(history[0].replacement_evidence_sha256,'f'.repeat(64));
   assert.equal(history[0].previous_record.supplier_variant_sku,offer.supplier_variant_sku);
   assert.equal(history[0].previous_record.supplier_evidence_sha256,'e'.repeat(64));
+  assert.equal(history[0].previous_record.merchant_product_identifier,
+    valid.merchantProductId);
+  assert.equal(history[0].previous_record.supplier_nonstandard_identifier,
+    valid.supplierNonStandardProductId);
   const oldApproval=(await pool.query(
     'SELECT approved,stock_confirmed,verified_until FROM commerce_offers WHERE id=$1',
     [id])).rows[0];
