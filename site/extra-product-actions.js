@@ -35,8 +35,9 @@
     const saved=ids.includes(id);
     favorite.setAttribute('aria-pressed',String(saved));
     favorite.textContent=saved?'♥ Enregistrée dans mes favoris':'♡ Ajouter aux favoris';
-    favorite.setAttribute('aria-label',(saved?'Retirer ':'Ajouter ')+brand+' '+model+
-      (saved?' de mes favoris':' à mes favoris'));
+    // Keep the accessible name identical to the visible button label.
+    // Screen readers encounter the exact model in the adjacent H1.
+    favorite.removeAttribute('aria-label');
   };
   if(read()!==null){
     if(savedLink)savedLink.hidden=false;
