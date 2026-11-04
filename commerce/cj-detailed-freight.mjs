@@ -18,14 +18,14 @@ const name=value=>typeof value==='string'&&value.length>=3&&value.length<=50&&
 const absent=x=>x===undefined||x===null||x==='';
 const validWeight=x=>{
   const value=(typeof x==='number'||typeof x==='string'&&
-    /^(?:0|[1-9]\\d{0,4})(?:\\.\\d{1,3})?$/.test(x))?Number(x):NaN;
+    /^(?:0|[1-9]\d{0,4})(?:\.\d{1,3})?$/.test(x))?Number(x):NaN;
   return Number.isFinite(value)&&value>0&&value<=50000?
     {supplierGrams:value,shippingGrams:Math.ceil(value)}:null;
 };
 // CJ variantVolume is stated in mm³; freightCalculateTip takes cm³.
 const validVolume=x=>{
   const value=typeof x==='number'||typeof x==='string'&&
-    /^(?:0|[1-9]\\d{0,11})(?:\\.\\d{1,3})?$/.test(x)?Number(x):NaN;
+    /^(?:0|[1-9]\d{0,11})(?:\.\d{1,3})?$/.test(x)?Number(x):NaN;
   return Number.isFinite(value)&&value>0&&value<=1e12?value/1000:null;
 };
 async function read(path,token,fetcher,{method='GET',body}={}){
@@ -47,7 +47,7 @@ export async function examineCjDetailedFreight({
   accessToken,vid,pid,expectedVariantSku,expectedProductSku,
   postalCode='75002',fetcher=fetch
 }={}){
-  if(typeof accessToken!=='string'||accessToken.length<20||/\\s/.test(accessToken))
+  if(typeof accessToken!=='string'||accessToken.length<20||/\s/.test(accessToken))
     throw Error('CJ token unavailable');
   if(!validId(vid)||(pid!==undefined&&!validId(pid))||
     (expectedVariantSku!==undefined&&!validId(expectedVariantSku))||
@@ -131,10 +131,11 @@ export async function examineCjDetailedFreight({
   if(!inStock)return {...base,status:'stock_unavailable'};
   // Exact CJ-supplied SKU/weight/attributes/price only; merchant delivery
   // mode is not a consumer order. No customer fields or fake IOSS number.
-  const skuTrial={sku,skuQuantity:1,vid,skuWeight:weight.shippingGrams};
+  const skuTrial={sku,skuQuantity:1,vid,skuWeight:weight.shippingGrams,
+    ...(volumeCm3!==null?{skuVolume:volumeCm3}:{})};
   const row={srcAreaCode:'CN',destAreaCode:'FR',zip:postalCode,
     weight:weight.shippingGrams,productProp:metadata.supplierProperties,
-    ...(volumeCm3!==null?{volume:volumeCm3,skuVolume:volumeCm3}:{}),
+    ...(volumeCm3!==null?{volume:volumeCm3}:{}),
     skuList:[sku],
     freightTrialSkuList:[skuTrial],totalGoodsAmount:itemCostUsdCents/100};
   const productType=String(product.productType??'');
