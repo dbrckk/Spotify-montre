@@ -66,13 +66,26 @@ try{
       'supplier_product_sku,logistics_name,consignment_value_eur_cents,'+
       'flat_duty_eur_cents,union_handling_eur_cents,buyer_extra_eur_cents,'+
       'landed_eur_quote_cents,import_payer,import_vat_covered,'+
-      'carrier_clearance_covered,supplier_evidence_sha256,valid_until) '+
+      'carrier_clearance_covered,supplier_evidence_sha256,valid_until,'+
+      'merchant_product_identifier,supplier_nonstandard_identifier,'+
+      'standardized_manufacturer_identifier,no_standardized_manufacturer_identifier,'+
+      'customs_declarant,customs_identifiers_transmission_confirmed) '+
       "VALUES($1,'sample-vid','sample-pid','SAMPLE-VID-SKU',"+
       "'SAMPLE-PRODUCT-SKU','CI-shipping',5000,300,200,0,1800,"+
-      "'SELLER',true,true,$2,now()+interval '1 day')",
+      "'SELLER',true,true,$2,now()+interval '1 day',"+
+      "'STORE-SUPPLIER-WATCH','MANUFACTURER-1251',NULL,true,"+
+      "'Synthetic customs declarant',true)",
     [offerId,'c'.repeat(64)]);
   const first=await insertOrder();
   assert.equal(await authorizeSupplierSubmission(pool,first,validPayment(first)),true);
+  await pool.query(
+    'UPDATE commerce_offer_import_proofs SET merchant_product_identifier=supplier_pid WHERE offer_id=$1',
+    [offerId]);
+  assert.equal(await authorizeSupplierSubmission(pool,first,validPayment(first)),false,
+    'C127 seller identifier cannot silently reuse supplier PID at debit boundary');
+  await pool.query(
+    "UPDATE commerce_offer_import_proofs SET merchant_product_identifier='STORE-SUPPLIER-WATCH' WHERE offer_id=$1",
+    [offerId]);
   await pool.query(
     "UPDATE commerce_offer_import_proofs SET valid_until=now()-interval '1 minute' WHERE offer_id=$1",
     [offerId]);
