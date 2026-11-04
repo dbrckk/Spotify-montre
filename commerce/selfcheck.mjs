@@ -160,6 +160,32 @@ assert.equal(ready.balanceUsdCents,3100);
 assert.equal(ready.upperLandedEurCents,1649);
 assert.equal(checkCjFxCeiling(1570,10500,2390).upperEurCents,1649);
 assert.equal(checkCjFxCeiling(1,10500,2).upperEurCents,2);
+// CJ createOrderV2 selects freight by logistics name, never an individual row.
+// Even identical duplicate rows are ambiguous. A later incomplete or more
+// expensive row cannot be silently ignored by a first-match checkout.
+const quotedRoute={logisticName:'PostNL',logisticPrice:3.1,
+  totalPostageFee:4.4,taxesFee:0.85,clearanceOperationFee:0.45,tariff:0};
+for(const routes of [
+  [quotedRoute,{...quotedRoute}],
+  [quotedRoute,{...quotedRoute,totalPostageFee:5.4}],
+  [quotedRoute,{...quotedRoute,tariff:undefined}],
+  [{...quotedRoute,totalPostageFee:5.4},quotedRoute]
+]){
+  let walletReads=0;
+  const ambiguousFetcher=async(url,options)=>{
+    if(url.endsWith('/logistic/freightCalculate'))
+      return {ok:true,json:async()=>({code:200,result:true,data:routes})};
+    if(url.endsWith('/shopping/pay/getBalance'))walletReads++;
+    return supplierPreflight(url,options);
+  };
+  await assert.rejects(preflightCjDelivery({
+    vid:order.supplier_vid,originCountry:'CN',postalCode:'75002',
+    logisticsName:'PostNL',maxSupplierUsdCents:2500,
+    maxSupplierEurCents:2390,fxMaxEurPerUsdBps:10500,
+    accessToken:'a'.repeat(40),fetcher:ambiguousFetcher
+  }),/Ambiguous CJ freight quotes/);
+  assert.equal(walletReads,0,'Ambiguous route must be stopped before wallet checks');
+}
 assert.throws(()=>checkCjFxCeiling(1570,0,2390),/Verified USD\/EUR/);
 assert.throws(()=>checkCjFxCeiling(2500,10500,2390),/exceeds EUR landed budget/);
 await assert.rejects(preflightCjDelivery({

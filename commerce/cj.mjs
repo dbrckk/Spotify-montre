@@ -93,11 +93,17 @@ export async function preflightCjDelivery({vid,originCountry='CN',postalCode,
       zip:postalCode,products:[{quantity:1,vid}]},fetcher
   });
   if(!Array.isArray(freight))throw Error('Supplier freight response invalid');
-  const candidate=freight.find(x=>x.logisticName===logisticsName);
-  if(!candidate)throw Error('No confirmed delivery method to this French postcode');
+  // CJ createOrderV2 accepts only the logistics name, not a priced route id.
+  // A duplicate name cannot be tied to a unique amount at payment or debit.
+  // Never silently use Array.find(): a second row may carry different taxes,
+  // surcharges or an incomplete import breakdown.
+  const matches=freight.filter(x=>x?.logisticName===logisticsName);
+  if(!matches.length)throw Error('No confirmed delivery method to this French postcode');
+  if(matches.length!==1)
+    throw Error('Ambiguous CJ freight quotes for selected logistics name: refuse payment');
   // CJ totalPostageFee already includes duties/taxes/clearance.
   // A missing tariff or tax value is not proof that the fee is zero.
-  const freightBreakdown=computeCjFreightCents(candidate);
+  const freightBreakdown=computeCjFreightCents(matches[0]);
   const shippingAndTaxes=freightBreakdown.freightAndImportUsdCents;
   const landedUsdCents=computeCjLandedCents(productCostUsdCents,freightBreakdown);
   if(landedUsdCents>maxSupplierUsdCents)
