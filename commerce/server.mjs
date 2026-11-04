@@ -229,7 +229,7 @@ async function route(req,res){
       return reply(res,409,{error:'Stock, frais ou livraison non vérifiables pour cette adresse. Aucun paiement demandé.'},cors(req));
     }
     const order=await reserveCheckout(pool,request,{
-      encryptionKey,idempotencySecret
+      encryptionKey,idempotencySecret,verifiedOffer:offer
     });
     // Another request may have reserved this order while CJ preflight ran.
     // Only the creator of the reservation is allowed to create a payment.
