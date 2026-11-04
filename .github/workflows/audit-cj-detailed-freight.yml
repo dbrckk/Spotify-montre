@@ -1,12 +1,6 @@
 name: Estimer livraison CJ détaillée pour une variante (sans achat)
 
 on:
-  # Single diagnostic on integration. Remove this push trigger after auditing
-  # the first real result to avoid consuming CJ points on every edit.
-  push:
-    branches: [main]
-    paths:
-      - 'commerce/audit-cj-detailed-freight.mjs'
   workflow_dispatch:
 
 permissions:
