@@ -15,17 +15,17 @@ La requête porte uniquement sur la référence CJ déjà vérifiée :
 ## Procédure Android (sans copier de clé)
 
 1. Ouvrir [CJ written full landed-cost quote — Actions](https://github.com/dbrckk/Spotify-montre/actions/workflows/request-cj-landed-quote.yml).
-2. Dans **Run workflow**, choisir `main` et `preview` pour vérifier la catégorie CJ, ou directement `send` pour **envoyer explicitement une seule demande écrite**. Valider avec **Run workflow**.
+2. Dans **Run workflow**, choisir `main` et l'opération : `preview` pour vérifier la catégorie CJ sans envoi ; `status` pour chercher un ticket déjà ouvert et déterminer si une réponse nécessite lecture ; `send` pour **envoyer explicitement une seule demande écrite**. Valider avec **Run workflow**.
 3. Lire la conclusion de l'exécution. Le résultat `submitted_to_cj` signifie que CJ a accepté le dépôt du ticket par son API ; le ticket et la réponse se consultent dans **CJdropshipping > My CJ > Ticket**. Ce résultat n'est **pas** un devis obtenu ou une confirmation de vente.
 
-Le workflow utilise le secret GitHub `CJ_API_KEY` existant, jamais affiché ni copié dans les paramètres. Il n'utilise **aucune** clé de paiement, base de données client, adresse d'acheteur ni endpoint d'achat. Le mode `preview` ne crée aucun ticket.
+Le workflow utilise le secret GitHub `CJ_API_KEY` existant, jamais affiché ni copié dans les paramètres. Il n'utilise **aucune** clé de paiement, base de données client, adresse d'acheteur ni endpoint d'achat. Les modes `preview` et `status` ne créent aucun ticket. Le mode `status` ne publie dans GitHub Actions que l'état normalisé (`AWAITING_CJ_REPLY`, `AWAITING_YOUR_REPLY`, etc.) et la nécessité de consulter CJ ; **jamais le numéro privé du ticket, son texte ou la réponse fournisseur**. `ticket_found` ne signifie pas que le devis est complet ou approuvé.
 
 ## Mesures anti-doublons
 
 CJ précise que `requestNo` ne protège que les soumissions répétées sur **5 secondes**, et **n'est pas une clé d'idempotence durable**. Avant chaque envoi, le programme interroge les tickets récents et leurs contenus, à la recherche de la référence stable `AM-CJ-FR-QUOTE-20261104-CJZBNSET00031`.
 
 - Si le ticket existe déjà : `already_requested`, **aucun nouvel envoi**.
-- Si la liste est trop longue, incomplète ou illisible, ou si la catégorie commerciale ne peut être sélectionnée sans informations fictives : **échec fermé, aucun envoi**.
+- Le contrôle vérifie jusqu'à **150 tickets** sur trois pages de 50 en inspectant leurs messages initiaux. Si l'historique est plus long, incomplet, modifié entre pages ou illisible : **échec fermé, aucun envoi**. Une catégorie sans informations exigées ne doit jamais être fabriquée.
 - Si la création du ticket échoue, renvoie un délai dépassé, ou si sa réponse est incertaine : **aucun retry automatique**. Vérifier les tickets depuis le compte CJ avant de relancer manuellement. Le workflow interdit les exécutions concurrentes.
 - Le modèle de message est borné à 1000 caractères par champ et la catégorie est retrouvée par `GET /ticket/types` ; aucune catégorie numérique n'est inventée.
 

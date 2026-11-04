@@ -3,10 +3,10 @@ on:
   workflow_dispatch:
     inputs:
       operation:
-        description: "preview = inspect safe category; send = explicitly request one written CJ quote"
+        description: "preview = inspect category; status = check CJ reply; send = explicitly request written quote"
         required: true
         type: choice
-        options: [preview, send]
+        options: [preview, status, send]
         default: preview
 permissions:
   contents: read
