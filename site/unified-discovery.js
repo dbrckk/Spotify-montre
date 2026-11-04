@@ -125,6 +125,7 @@
     return terms.every(term=>source.includes(term)
       ||compactModel.includes(term)||compactReference.includes(term));
   };
+  let activeFilterSignature='';
   const updateActiveFilters=()=>{
     if(!activeFilters||!activePills||!clearActive)return;
     const items=Object.entries(filterNames).flatMap(([key,label])=>{
@@ -136,6 +137,11 @@
     });
     if(savedOnly)items.push({key:'saved',label:'Favoris',value:'uniquement'});
     activeFilters.hidden=items.length===0;
+    // Keep a pressed pill attached through blur/change. Replacing it during
+    // the pointer sequence can swallow the click on Android/mobile browsers.
+    const signature=JSON.stringify(items);
+    if(signature===activeFilterSignature)return;
+    activeFilterSignature=signature;
     const chips=items.map(({key,label,value})=>{
       const chip=node('button',label+' : '+value+' ×','ud-filter-chip');
       chip.type='button';
