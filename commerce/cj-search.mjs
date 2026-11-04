@@ -130,11 +130,16 @@ export async function searchCjWatchCandidates({
       if(distinct.length===maxVariants)break;
     }
     let choice=null,firstChecked=null,firstStocked=null;
-    let variantsChecked=0;
+    let variantsChecked=0,identityMismatches=0,firstMismatch=null;
     for(const candidate of distinct){
       const quote=await discoverCjVariant({vid:candidate.vid,
-        postalCode,accessToken,fetcher:supplierFetcher});
+        expectedPid:product.pid,postalCode,accessToken,fetcher:supplierFetcher});
       variantsChecked++;
+      if(quote.catalogPidMatched===false){
+        identityMismatches++;
+        if(!firstMismatch)firstMismatch=quote;
+        continue;
+      }
       const observed={candidate,quote};
       if(!firstChecked)firstChecked=observed;
       if(quote.stockConfirmed&&!firstStocked)firstStocked=observed;
@@ -146,10 +151,24 @@ export async function searchCjWatchCandidates({
     // If no checked VID is deliverable, retain the stocked candidate when one
     // exists, but label it NOT READY. Do not imply the entire product is
     // unavailable: only the explicitly inspected supplier variants are known.
+    if(!firstChecked){
+      // Do not mislabel an unverified parent association as out of stock.
+      // No stock or freight was queried for any mismatched VID.
+      findings.push({...product,state:'catalog_identity_mismatch',
+        canonicalPid:firstMismatch?.canonicalPid??null,
+        catalogPidMatched:false,identityMismatches,
+        stockConfirmed:false,stockChecked:false,shippingMethods:[],
+        variantsChecked,listedVariants:variants.length,
+        otherVariantsNotChecked:variants.length>variantsChecked,
+        approvedForSale:false});
+      continue;
+    }
     const {candidate:selection,quote:inspected}=choice||firstStocked||firstChecked;
     // queryByVid is authoritative for exact variant identity and current unit
     // cost: a stale variant-list label must not overwrite this evidence.
     findings.push({...product,state:choice?'sample_shipping_available':'not_ready',
+      canonicalPid:inspected.canonicalPid,catalogPidMatched:true,
+      identityMismatches,stockChecked:true,
       vid:selection.vid,
       variantSku:inspected.variantSku||selection.variantSku,
       variantName:inspected.variantName||selection.variantName,
@@ -164,7 +183,9 @@ export async function searchCjWatchCandidates({
   }
   return {kind:'cj_watch_search_read_only',keyword,postalCode,page,pageSize,
     supplierResultsInspected:matches.length,
-    maxProducts,findings,quoteIsPostcodeSampleOnly:true,
+    maxProducts,findings,
+    catalogIdentityMismatches:findings.reduce((n,x)=>n+(x.identityMismatches||0),0),
+    quoteIsPostcodeSampleOnly:true,
     merchantApproval:false,
     supplierWalletVerified:false,
     productAuthenticityVerified:false,
