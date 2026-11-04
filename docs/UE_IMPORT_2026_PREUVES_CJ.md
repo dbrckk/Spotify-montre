@@ -49,10 +49,18 @@ node commerce/record-eu-import-proof.mjs inspect /private/devis.json /private/re
 DATABASE_URL='postgresql://...' node commerce/record-eu-import-proof.mjs record /private/devis.json /private/reponse-cj.pdf
 ```
 
-Le mode `inspect` ne lit pas la base et ne fait aucun paiement. Le mode `record` vérifie l'offre existante sous verrou transactionnel et enregistre une seule preuve sans l'écraser. Il exige l'accès à la base de données de l'exploitant ; **ne jamais exposer DATABASE_URL ou un document fournisseur privé dans GitHub Actions ou une PR publique**. Il est interdit de réécrire silencieusement la preuve d'une offre active.
+Le mode `inspect` ne lit pas la base et ne fait aucun paiement. Le mode `record` vérifie l'offre existante sous verrou transactionnel et enregistre une première preuve sans activer les ventes. Après **expiration** de celle-ci, une nouvelle attestation **distincte** peut être enregistrée : l'ancienne est archivée dans `commerce_offer_import_proof_history`, la nouvelle devient la seule preuve courante et le statut de l'offre est forcé à `approved=false`, `stock_confirmed=false` et `verified_until=NULL`. La ré-approbation nécessite donc une vérification commerciale complète. L'enregistrement est refusé lorsqu'une commande de cette offre est en cours, même avec un ancien devis expiré. Le renouvellement d'une preuve encore valide, la réutilisation du même document et les mises à jour simultanées sont également rejetés. Il exige l'accès à la base de données de l'exploitant ; **ne jamais exposer DATABASE_URL ou un document fournisseur privé dans GitHub Actions ou une PR publique**. Il est interdit de réécrire silencieusement la preuve d'une offre active.
 
 L'existence de ce document **n'active pas** `approved`, `COMMERCE_ENABLED` ou `checkoutMode`, ni l'API de création de commandes CJ. Les contrôles déjà existants de marge, paiement marchand, stock, prix, conformité GPSR, garantie, photos et droits du consommateur restent obligatoires.
 
 ## Tests
 
 Le workflow commercial utilise une base PostgreSQL 16 **locale isolée**, sans paiement ni fournisseur réel, pour vérifier : absence de preuve, preuve expirée, incohérences VID/SKU, droits et frais sous-estimés, blocage d'un achat CJ après expiration et non-approbation automatique lors de l'enregistrement. Les montants synthétiques des tests ne sont jamais proposés sur la vitrine.
+
+## Identifiants obligatoires des produits depuis novembre 2026
+
+La douane française exige désormais des identifiants **M-PID** (attribué par le vendeur, code C127) et **NS-PID** (attribué par le fabricant ou le fournisseur, code C128) dans la déclaration à compter du **1er novembre 2026**. Le **S-PID** (code C129) doit être fourni lorsqu'il existe ; sinon, le code douanier `Y081` doit être renseigné. **Le PID UUID renvoyé par l'API CJ n'est pas, à lui seul, une preuve de déclaration C127/C128/C129.** Avant de vendre, demander à CJ qui prépare et soumet ces identifiants et obtenir la référence documentaire de la déclaration.
+
+Source : [Direction générale des douanes, Mesures e-commerce européennes, mise à jour du 30 octobre 2026](https://www.douane.gouv.fr/fiche/mesures-e-commerce-europeennes).
+
+Cette étape douanière distincte **n'est pas encore attestée** pour les montres du catalogue. Les ventes restent désactivées tant qu'une conformité juridique et opérationnelle réelle n'est pas vérifiée.

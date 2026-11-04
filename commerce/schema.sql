@@ -203,4 +203,22 @@ CREATE TABLE IF NOT EXISTS commerce_offer_import_proofs (
 );
 CREATE INDEX IF NOT EXISTS commerce_offer_import_proofs_expiry
   ON commerce_offer_import_proofs(valid_until);
+
+-- Append-only audit of replaced/expired supplier attestations. The live
+-- table has one current proof per offer; this table retains older versions.
+-- Do not store supplier PDFs, customer details, API tokens or wallet data.
+CREATE TABLE IF NOT EXISTS commerce_offer_import_proof_history (
+  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  offer_id text NOT NULL REFERENCES commerce_offers(id),
+  supplier_evidence_sha256 text NOT NULL
+    CHECK (supplier_evidence_sha256 ~ '^[a-f0-9]{64}$'),
+  replacement_evidence_sha256 text NOT NULL
+    CHECK (replacement_evidence_sha256 ~ '^[a-f0-9]{64}$'),
+  previous_record jsonb NOT NULL
+    CHECK (jsonb_typeof(previous_record)='object'),
+  replaced_at timestamptz NOT NULL DEFAULT now(),
+  CHECK (supplier_evidence_sha256 <> replacement_evidence_sha256)
+);
+CREATE INDEX IF NOT EXISTS commerce_import_proof_history_offer
+  ON commerce_offer_import_proof_history(offer_id,replaced_at DESC);
 COMMIT;
