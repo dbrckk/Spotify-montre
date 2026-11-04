@@ -140,6 +140,9 @@ async function supplierWork(){
         // Stock, duties, exchange ceiling and wallet can change after checkout.
         await preflightCjDelivery({
           vid:order.supplier_vid,originCountry:order.from_country_code,
+          expectedPid:order.supplier_pid,
+          expectedVariantSku:order.supplier_variant_sku,
+          expectedProductSku:order.supplier_product_sku,
           postalCode:customer.postalCode,logisticsName:order.logistics_name,
           maxSupplierUsdCents:order.supplier_max_usd_cents,
           maxSupplierEurCents:order.supplier_landed_eur_ceiling_cents,
@@ -215,6 +218,9 @@ async function route(req,res){
     if(!offer)return reply(res,409,{error:'Cette montre n’est pas en vente directe actuellement'},cors(req));
     try{
       await preflightCjDelivery({vid:offer.supplier_vid,originCountry:offer.from_country_code,
+        expectedPid:offer.supplier_pid,
+        expectedVariantSku:offer.supplier_variant_sku,
+        expectedProductSku:offer.supplier_product_sku,
         postalCode:request.customer.postalCode,logisticsName:offer.logistics_name,
         maxSupplierUsdCents:offer.supplier_max_usd_cents,
         maxSupplierEurCents:offer.supplier_landed_eur_ceiling_cents,
@@ -223,7 +229,7 @@ async function route(req,res){
       return reply(res,409,{error:'Stock, frais ou livraison non vérifiables pour cette adresse. Aucun paiement demandé.'},cors(req));
     }
     const order=await reserveCheckout(pool,request,{
-      encryptionKey,idempotencySecret
+      encryptionKey,idempotencySecret,verifiedOffer:offer
     });
     // Another request may have reserved this order while CJ preflight ran.
     // Only the creator of the reservation is allowed to create a payment.

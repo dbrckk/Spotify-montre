@@ -31,6 +31,9 @@ export async function listApprovedOffers(pool){
       AND eu_compliance_verified=true AND photo_rights_verified=true
       AND supplier_payment_verified=true AND verified_until > now()
       AND supplier_landed_eur_ceiling_cents > 0
+      AND supplier_pid ~ '^[a-zA-Z0-9_-]{3,100}$'
+      AND supplier_variant_sku ~ '^[a-zA-Z0-9_-]{3,100}$'
+      AND supplier_product_sku ~ '^[a-zA-Z0-9_-]{3,100}$'
       AND supplier_landed_eur_ceiling_cents >= unit_cost_eur_cents
       AND tax_treatment_verified=true AND supplier_fx_verified=true
       AND supplier_fx_max_eur_per_usd_bps BETWEEN 1000 AND 20000
@@ -49,7 +52,8 @@ export async function listApprovedOffers(pool){
 }
 export async function getApprovedOffer(pool,offerId){
   const {rows}=await pool.query(`
-    SELECT id,label,amount_eur_cents,supplier_vid,supplier_max_usd_cents,
+    SELECT id,label,amount_eur_cents,supplier_vid,
+      supplier_pid,supplier_variant_sku,supplier_product_sku,supplier_max_usd_cents,
       supplier_landed_eur_ceiling_cents,supplier_fx_max_eur_per_usd_bps,
       logistics_name,from_country_code,delivery_min_business_days,delivery_max_business_days
     FROM commerce_offers WHERE id=$1 AND approved=true
@@ -57,6 +61,9 @@ export async function getApprovedOffer(pool,offerId){
       AND eu_compliance_verified=true AND photo_rights_verified=true
       AND supplier_payment_verified=true AND verified_until>now()
       AND supplier_landed_eur_ceiling_cents > 0
+      AND supplier_pid ~ '^[a-zA-Z0-9_-]{3,100}$'
+      AND supplier_variant_sku ~ '^[a-zA-Z0-9_-]{3,100}$'
+      AND supplier_product_sku ~ '^[a-zA-Z0-9_-]{3,100}$'
       AND supplier_landed_eur_ceiling_cents >= unit_cost_eur_cents
       AND tax_treatment_verified=true AND supplier_fx_verified=true
       AND supplier_fx_max_eur_per_usd_bps BETWEEN 1000 AND 20000
@@ -87,7 +94,7 @@ export async function findExistingCheckout(pool,request,{idempotencySecret}){
     throw new ClientError('Cette référence est déjà utilisée avec un autre panier',409);
   return restoredCheckoutState(order,recoveryToken(idempotencySecret,request.idempotencyKey));
 }
-export async function reserveCheckout(pool,request,{encryptionKey,idempotencySecret}){
+export async function reserveCheckout(pool,request,{encryptionKey,idempotencySecret,verifiedOffer}){
   const token=recoveryToken(idempotencySecret,request.idempotencyKey);
   const idempotencyHash=hmac(idempotencySecret,request.idempotencyKey);
   const requestHash=checkoutFingerprint(request);
@@ -109,6 +116,9 @@ export async function reserveCheckout(pool,request,{encryptionKey,idempotencySec
       AND photo_rights_verified=true AND supplier_payment_verified=true
       AND verified_until>now()
       AND supplier_landed_eur_ceiling_cents > 0
+      AND supplier_pid ~ '^[a-zA-Z0-9_-]{3,100}$'
+      AND supplier_variant_sku ~ '^[a-zA-Z0-9_-]{3,100}$'
+      AND supplier_product_sku ~ '^[a-zA-Z0-9_-]{3,100}$'
       AND supplier_landed_eur_ceiling_cents >= unit_cost_eur_cents
       AND tax_treatment_verified=true AND supplier_fx_verified=true
       AND supplier_fx_max_eur_per_usd_bps BETWEEN 1000 AND 20000
@@ -125,6 +135,18 @@ export async function reserveCheckout(pool,request,{encryptionKey,idempotencySec
     `,[request.offerId]);
     const offer=result.rows[0];
     if(!offer)throw new ClientError('Cette montre n’est pas disponible pour un achat direct',409);
+    // One authenticated provider quote was obtained for verifiedOffer BEFORE
+    // entering this transaction. A concurrent offer edit invalidates that
+    // observation: do not reserve a payment for a changed SKU, price or rate.
+    const quotedFields=[
+      'id','label','amount_eur_cents','supplier_vid','supplier_pid',
+      'supplier_variant_sku','supplier_product_sku','supplier_max_usd_cents',
+      'logistics_name','from_country_code','supplier_landed_eur_ceiling_cents',
+      'supplier_fx_max_eur_per_usd_bps','delivery_min_business_days',
+      'delivery_max_business_days'
+    ];
+    if(!verifiedOffer||quotedFields.some(field=>offer[field]!==verifiedOffer[field]))
+      throw new ClientError('Offre modifiée depuis le devis fournisseur. Nouveau contrôle requis.',409);
     try{validateCommercialCeiling(offer)}
     catch{throw new ClientError('Offre commercialement indisponible',409)}
     // A single pilot purchase at a time per supplier SKU prevents overselling
@@ -139,14 +161,17 @@ export async function reserveCheckout(pool,request,{encryptionKey,idempotencySec
     await client.query(`
       INSERT INTO commerce_orders (
         id,public_token_hash,idempotency_hash,request_hash,offer_id,product_label,
-        amount_eur_cents,supplier_vid,supplier_max_usd_cents,logistics_name,
+        amount_eur_cents,supplier_vid,supplier_pid,supplier_variant_sku,
+        supplier_product_sku,supplier_max_usd_cents,logistics_name,
         from_country_code,address_encrypted,vat_rate_bps_snapshot,
         supplier_landed_eur_ceiling_cents,supplier_fx_max_eur_per_usd_bps,
         promised_delivery_min_business_days,promised_delivery_max_business_days,status
-      ) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,'PAYMENT_CREATING')
+      ) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,'PAYMENT_CREATING')
     `,[orderId,digest(token),idempotencyHash,requestHash,offer.id,offer.label,
-       offer.amount_eur_cents,offer.supplier_vid,offer.supplier_max_usd_cents,
-       offer.logistics_name,offer.from_country_code,sealAddress(request.customer,encryptionKey),
+       offer.amount_eur_cents,offer.supplier_vid,
+       offer.supplier_pid,offer.supplier_variant_sku,offer.supplier_product_sku,
+       offer.supplier_max_usd_cents,offer.logistics_name,offer.from_country_code,
+       sealAddress(request.customer,encryptionKey),
        offer.vat_rate_bps,offer.supplier_landed_eur_ceiling_cents,
        offer.supplier_fx_max_eur_per_usd_bps,offer.delivery_min_business_days,
        offer.delivery_max_business_days]);

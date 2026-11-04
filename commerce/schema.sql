@@ -19,6 +19,9 @@ CREATE TABLE IF NOT EXISTS commerce_offers (
   reserves_eur_cents integer NOT NULL CHECK (reserves_eur_cents >= 0),
   supplier_max_usd_cents integer NOT NULL CHECK (supplier_max_usd_cents > 0),
   supplier_vid text NOT NULL CHECK (length(supplier_vid) BETWEEN 3 AND 100),
+  supplier_pid text CHECK (supplier_pid ~ '^[a-zA-Z0-9_-]{3,100}$'),
+  supplier_variant_sku text CHECK (supplier_variant_sku ~ '^[a-zA-Z0-9_-]{3,100}$'),
+  supplier_product_sku text CHECK (supplier_product_sku ~ '^[a-zA-Z0-9_-]{3,100}$'),
   logistics_name text NOT NULL CHECK (length(logistics_name) BETWEEN 3 AND 100),
   from_country_code char(2) NOT NULL DEFAULT 'CN',
   approved boolean NOT NULL DEFAULT false,
@@ -54,6 +57,10 @@ ALTER TABLE commerce_offers ADD COLUMN IF NOT EXISTS
   delivery_min_business_days smallint NOT NULL DEFAULT 0;
 ALTER TABLE commerce_offers ADD COLUMN IF NOT EXISTS
   delivery_max_business_days smallint NOT NULL DEFAULT 0;
+-- Legacy offers without verified canonical supplier identity stay unapproved.
+ALTER TABLE commerce_offers ADD COLUMN IF NOT EXISTS supplier_pid text;
+ALTER TABLE commerce_offers ADD COLUMN IF NOT EXISTS supplier_variant_sku text;
+ALTER TABLE commerce_offers ADD COLUMN IF NOT EXISTS supplier_product_sku text;
 
 CREATE TABLE IF NOT EXISTS commerce_orders (
   id text PRIMARY KEY CHECK (id ~ '^ord_[a-z0-9_-]{12,80}$'),
@@ -69,6 +76,9 @@ CREATE TABLE IF NOT EXISTS commerce_orders (
   promised_delivery_min_business_days smallint NOT NULL DEFAULT 0,
   promised_delivery_max_business_days smallint NOT NULL DEFAULT 0,
   supplier_vid text NOT NULL,
+  supplier_pid text CHECK (supplier_pid ~ '^[a-zA-Z0-9_-]{3,100}$'),
+  supplier_variant_sku text CHECK (supplier_variant_sku ~ '^[a-zA-Z0-9_-]{3,100}$'),
+  supplier_product_sku text CHECK (supplier_product_sku ~ '^[a-zA-Z0-9_-]{3,100}$'),
   supplier_max_usd_cents integer NOT NULL CHECK (supplier_max_usd_cents>0),
   logistics_name text NOT NULL,
   from_country_code char(2) NOT NULL,
@@ -108,6 +118,10 @@ ALTER TABLE commerce_orders ADD COLUMN IF NOT EXISTS
   promised_delivery_min_business_days smallint NOT NULL DEFAULT 0;
 ALTER TABLE commerce_orders ADD COLUMN IF NOT EXISTS
   promised_delivery_max_business_days smallint NOT NULL DEFAULT 0;
+-- Order-level identity snapshots must not change if the offer is edited later.
+ALTER TABLE commerce_orders ADD COLUMN IF NOT EXISTS supplier_pid text;
+ALTER TABLE commerce_orders ADD COLUMN IF NOT EXISTS supplier_variant_sku text;
+ALTER TABLE commerce_orders ADD COLUMN IF NOT EXISTS supplier_product_sku text;
 
 -- Read-only Mollie reconciliation keeps detecting missed refund/chargeback
 -- webhooks even after dispatch. Null means this payment has never been audited.

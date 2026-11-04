@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {randomBytes} from 'node:crypto';
 import {createDatabase,initializeDatabase,reserveCheckout,saveCreatedPayment,
-  findExistingCheckout} from './db.mjs';
+  findExistingCheckout,getApprovedOffer} from './db.mjs';
 import {validateCheckoutBody} from './security.mjs';
 
 // An isolated, ephemeral local PostgreSQL database is mandatory. No supplier
@@ -30,14 +30,16 @@ try{
     INSERT INTO commerce_offers
       (id,label,amount_eur_cents,unit_cost_eur_cents,
        supplier_landed_eur_ceiling_cents,vat_rate_bps,reserves_eur_cents,
-       supplier_max_usd_cents,supplier_vid,logistics_name,from_country_code,
+       supplier_max_usd_cents,supplier_vid,supplier_pid,supplier_variant_sku,
+       supplier_product_sku,logistics_name,from_country_code,
        approved,stock_confirmed,legal_verified,eu_compliance_verified,
        photo_rights_verified,supplier_payment_verified,tax_treatment_verified,
        supplier_fx_verified,return_policy_verified,gpsr_traceability_verified,
        data_transfer_verified,verified_until,delivery_min_business_days,
        delivery_max_business_days)
     VALUES ($1,'Synthetic CI watch — never for sale',8000,1200,
-      2200,2000,900,2000,'ci-supplier-sku','ci-shipping','CN',
+      2200,2000,900,2000,'ci-supplier-sku',
+      'ci-parent-pid','CI-VARIANT-SKU','CI-PRODUCT-SKU','ci-shipping','CN',
       true,true,true,true,true,true,true,true,true,true,true,
       now()+interval '1 day',7,20)
   `,[offerId]);
@@ -47,11 +49,25 @@ try{
     "SELECT 1 FROM information_schema.columns WHERE table_schema=current_schema() AND table_name='commerce_offers' AND column_name='supplier_fx_max_eur_per_usd_bps'");
   if(fxColumn.rowCount)
     await pool.query('UPDATE commerce_offers SET supplier_fx_max_eur_per_usd_bps=10500 WHERE id=$1',[offerId]);
+  const verifiedOffer=await getApprovedOffer(pool,offerId);
+  assert.ok(verifiedOffer,'the test offer must pass the real purchase predicate');
+  const verifiedOptions={...opts,verifiedOffer};
+  // A supplier quote must never authorize a checkout for an offer edited
+  // concurrently after that quote was fetched.
+  await pool.query('UPDATE commerce_offers SET supplier_variant_sku=$2 WHERE id=$1',
+    [offerId,'CI-SUBSTITUTED-SKU']);
+  await assert.rejects(()=>reserveCheckout(pool,request,verifiedOptions),
+    e=>e.status===409,'stale supplier quote must not create a payment/order');
+  assert.equal((await pool.query(
+    'SELECT count(*)::int AS n FROM commerce_orders WHERE offer_id=$1',
+    [offerId])).rows[0].n,0);
+  await pool.query('UPDATE commerce_offers SET supplier_variant_sku=$2 WHERE id=$1',
+    [offerId,'CI-VARIANT-SKU']);
   // Two clients can both find no prior order before either transaction commits.
   // The DB lock must let exactly one reserve and the other reuse it.
   const [a,b]=await Promise.all([
-    reserveCheckout(pool,request,opts),
-    reserveCheckout(pool,request,opts)
+    reserveCheckout(pool,request,verifiedOptions),
+    reserveCheckout(pool,request,verifiedOptions)
   ]);
   assert.equal(a.orderId,b.orderId,'both attempts must refer to one order');
   assert.equal(Boolean(a.reused)+Boolean(b.reused),1,'exactly one attempt creates an order');
@@ -61,6 +77,11 @@ try{
   assert.equal(retry.status,'PAYMENT_CREATING');
   assert.equal(retry.orderToken,winner.token);
   assert.equal((await pool.query('SELECT count(*)::int AS n FROM commerce_orders WHERE offer_id=$1',[offerId])).rows[0].n,1);
+  const snapshot=(await pool.query(
+    'SELECT supplier_pid,supplier_variant_sku,supplier_product_sku FROM commerce_orders WHERE id=$1',
+    [winner.orderId])).rows[0];
+  assert.deepEqual(snapshot,{supplier_pid:'ci-parent-pid',
+    supplier_variant_sku:'CI-VARIANT-SKU',supplier_product_sku:'CI-PRODUCT-SKU'});
 
   // Simulate persisting a provider result, without calling any provider.
   const checkoutUrl='https://www.mollie.com/checkout/select-method/CI123';
@@ -75,7 +96,7 @@ try{
 
   // The same key cannot be repurposed for a different customer or basket.
   await assert.rejects(
-    ()=>reserveCheckout(pool,{...request,customer:{...request.customer,city:'Lyon'}},opts),
+    ()=>reserveCheckout(pool,{...request,customer:{...request.customer,city:'Lyon'}},verifiedOptions),
     error=>error.status===409
   );
   console.log('Checkout concurrency OK: one order, one payment, safe retry and fingerprint rejection');
