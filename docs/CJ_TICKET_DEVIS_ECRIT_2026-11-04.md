@@ -52,3 +52,13 @@ La correction suivante introduit le mode `diagnose`, strictement **en lecture se
 Les journaux ne présentent que : `ticket_found` / `not_requested`, l'état normalisé éventuel du ticket, `eligible` ou un code technique fixe (`CJ_TICKET_CATEGORY_NEEDS_REVIEW`, `CJ_TICKET_LIST_REJECTED`, `CJ_TICKET_RATE_LIMIT`, etc.). En cas de sélection impossible, quelques noms *sanitisés* de catégories de support peuvent être visibles pour aider à corriger le routage. Ils ne comprennent ni secrets, ni texte des tickets, ni contenu de réponse, ni identité d'acheteur. Un diagnostic vert signifie seulement que les points API en lecture seule sont utilisables, **pas** qu'un devis TTC ou un ticket ait été validé.
 
 **Décision suivante :** si `ticket_found`, consulter la demande dans CJ plutôt que d'en créer une nouvelle. Si `not_requested` et `eligible`, un nouvel essai de `send` peut être envisagé après vérification de la cause précédente. Si l'authentification, l'historique ou la catégorie échoue, corriger la source de l'échec ; ne jamais forcer `send` ni activer le checkout.
+
+## Diagnostic du fournisseur exécuté après la PR #140
+
+Exécution [41930583672](https://github.com/dbrckk/Spotify-montre/actions/runs/41930583672), en lecture seule : la clé GitHub `CJ_API_KEY` a permis de contacter CJ ; l'historique accessible ne contient pas la référence attendue (`historyCheck: not_requested`) ; CJ renvoie **13 catégories et 66 rubriques**, mais le système a répondu `CJ_TICKET_CATEGORY_NEEDS_REVIEW`. Le fournisseur expose bien **Service Consultation → Fulfillment Service Consultation** avec aucun champ obligatoire dans cette rubrique. Le ticket n'a pas été envoyé.
+
+Cause probable du refus : le code de la PR #139 imposait par erreur `Number.isSafeInteger` aux `ticketTypeId` et `questionTypeId`, alors que CJ les définit comme des entiers `long` pouvant dépasser la précision exacte de `Number` en JavaScript.
+
+**Correction :** validation des chaînes entières positives sur 64 bits, conservation des chiffres exacts avec `BigInt` pour la borne supérieure, et encodage de ces deux seuls identifiants comme littéraux JSON numériques sans conversion arrondie. Les IDs mal formés, hors plage ou retournés déjà arrondis par un fournisseur sont refusés. Les autres champs restent encodés par `JSON.stringify`. Des tests couvrent la borne `9223372036854775807`, la non-perte de précision et le rejet d'un ID invalide.
+
+**Critère d'acceptation :** un nouveau diagnostic réel doit afficher `historyCheck: not_requested` et `categoryCheck: eligible` avant une nouvelle tentative manuelle `send`. Si le diagnostic reste en échec, **ne pas envoyer**, analyser la cause ; aucun mécanisme d'achat n'est modifié.
