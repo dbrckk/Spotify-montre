@@ -64,7 +64,8 @@ function extractCatalogProducts(data){
  * Everything is explicitly a sample, NOT an approved ecommerce offer.
  */
 export async function searchCjWatchCandidates({
-  keyword='SKMEI',postalCode='75002',accessToken,fetcher=fetch,maxProducts=2
+  keyword='SKMEI',postalCode='75002',accessToken,fetcher=fetch,maxProducts=2,
+  page=1,pageSize=12,maxVariants=2,excludePids=new Set()
 }={}){
   if(typeof keyword!=='string'||!/^[a-zA-Z0-9][a-zA-Z0-9 _-]{2,49}$/.test(keyword))
     throw Error('CJ search keyword must be 3-50 plain characters');
@@ -73,18 +74,25 @@ export async function searchCjWatchCandidates({
     throw Error('CJ sample postcode must be in metropolitan France');
   if(!Number.isInteger(maxProducts)||maxProducts<1||maxProducts>2)
     throw Error('CJ product search limit must be one or two');
+  if(!Number.isInteger(page)||page<1||page>1000||
+    !Number.isInteger(pageSize)||pageSize<1||pageSize>100)
+    throw Error('CJ search page or pageSize invalid');
+  if(!Number.isInteger(maxVariants)||maxVariants<1||maxVariants>4)
+    throw Error('CJ variant search limit must be one to four');
+  if(!(excludePids instanceof Set)||[...excludePids].some(id=>!validId(id)))
+    throw Error('CJ excluded product identifiers invalid');
   if(typeof accessToken!=='string'||accessToken.length<20||/\s/.test(accessToken))
     throw Error('CJ-Access-Token unavailable');
   const supplierFetcher=paceCjReads(fetcher);
   const list=await readCjJson('/product/listV2?'+new URLSearchParams({
-    page:'1',size:'12',keyWord:keyword,countryCode:'CN'
+    page:String(page),size:String(pageSize),keyWord:keyword,countryCode:'CN'
   }),accessToken,supplierFetcher);
   const seen=new Set();
   const words=keyword.trim().toLowerCase().split(/\s+/);
   // This is a narrow exploratory watch shortlist, NOT a test for
   // manufacturer authenticity, unit quality or sales volumes.
   const matches=extractCatalogProducts(list).filter(p=>{
-    if(seen.has(p.pid))return false;
+    if(seen.has(p.pid)||excludePids.has(p.pid))return false;
     seen.add(p.pid);
     const haystack=(p.name+' '+(p.sku||'')).toLowerCase();
     return words.every(word=>haystack.includes(word))&&
@@ -119,7 +127,7 @@ export async function searchCjWatchCandidates({
       if(seenVids.has(candidate.vid))continue;
       seenVids.add(candidate.vid);
       distinct.push(candidate);
-      if(distinct.length===2)break;
+      if(distinct.length===maxVariants)break;
     }
     let choice=null,firstChecked=null,firstStocked=null;
     let variantsChecked=0;
@@ -154,7 +162,7 @@ export async function searchCjWatchCandidates({
       otherVariantsNotChecked:variants.length>variantsChecked,
       approvedForSale:false});
   }
-  return {kind:'cj_watch_search_read_only',keyword,postalCode,
+  return {kind:'cj_watch_search_read_only',keyword,postalCode,page,pageSize,
     supplierResultsInspected:matches.length,
     maxProducts,findings,quoteIsPostcodeSampleOnly:true,
     merchantApproval:false,
@@ -162,5 +170,5 @@ export async function searchCjWatchCandidates({
     productAuthenticityVerified:false,
     gpsrComplianceVerified:false,
     noCustomerOrders:true,
-    note:'Supplier query only: at most two variants per product for one postcode. Other variants may exist. No merchant price, legal approval, sales rank, availability guarantee or checkout activation.'};
+    note:`Supplier query only: at most ${maxVariants} variants per product for one postcode. Other variants may exist. No merchant price, legal approval, sales rank, availability guarantee or checkout activation.`};
 }
