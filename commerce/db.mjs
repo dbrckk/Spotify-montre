@@ -211,10 +211,22 @@ export async function reserveCheckout(pool,request,{encryptionKey,idempotencySec
     catch{throw new ClientError('Offre commercialement indisponible',409)}
     const proof=await client.query(`
       SELECT supplier_evidence_sha256 FROM commerce_offer_import_proofs
-      WHERE offer_id=$1 AND valid_until>now()
+      WHERE offer_id=$1
+        AND supplier_vid=$2 AND supplier_pid=$3
+        AND supplier_variant_sku=$4 AND supplier_product_sku=$5
+        AND logistics_name=$6
+        AND flat_duty_eur_cents>=300
+        AND union_handling_eur_cents>=200
+        AND import_vat_covered=true
+        AND carrier_clearance_covered=true
+        AND buyer_extra_eur_cents=0
+        AND landed_eur_quote_cents<=$7
+        AND valid_until>now()
         AND recorded_at>now()-interval '7 days'
       FOR SHARE
-    `,[offer.id]);
+    `,[offer.id,offer.supplier_vid,offer.supplier_pid,
+      offer.supplier_variant_sku,offer.supplier_product_sku,
+      offer.logistics_name,offer.supplier_landed_eur_ceiling_cents]);
     if(proof.rowCount!==1)
       throw new ClientError('Preuve fiscale importation expirée ou absente',409);
 
@@ -395,6 +407,12 @@ export async function authorizeSupplierSubmission(pool,order,verified){
         AND ip.supplier_variant_sku=o.supplier_variant_sku
         AND ip.supplier_product_sku=o.supplier_product_sku
         AND ip.logistics_name=o.logistics_name
+        AND ip.flat_duty_eur_cents>=300
+        AND ip.union_handling_eur_cents>=200
+        AND ip.import_vat_covered=true
+        AND ip.carrier_clearance_covered=true
+        AND ip.buyer_extra_eur_cents=0
+        AND ip.landed_eur_quote_cents<=o.supplier_landed_eur_ceiling_cents
         AND ip.valid_until>now()
         AND ip.recorded_at>now()-interval '7 days'
       WHERE o.id=$1 FOR UPDATE OF o
