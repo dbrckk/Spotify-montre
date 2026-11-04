@@ -93,4 +93,42 @@ await assert.rejects(examineCjDetailedFreight({accessToken,vid:'invalid!',pid,fe
   /variant/);
 await assert.rejects(examineCjDetailedFreight({accessToken:'short',vid,pid,fetcher:fake}),
   /token/);
+// Regression from production 2026-11-04: GET /product/query may not
+// include the exact VID, even though queryByVid and stock/queryByVid do.
+const fallbackCalls=[];
+const fallback=async(url,options)=>{
+  const path=new URL(url).pathname;
+  fallbackCalls.push(path);
+  assert.equal(options.headers['CJ-Access-Token'],accessToken);
+  if(path.endsWith('/product/query'))
+    return answer({...product,variants:[]});
+  if(path.endsWith('/product/variant/queryByVid'))
+    return answer({...product.variants[0]});
+  if(path.endsWith('/product/stock/queryByVid'))
+    return answer([{vid,countryCode:'CN',cjInventoryNum:5}]);
+  if(path.endsWith('/logistic/freightCalculateTip'))
+    return answer([{option:{enName:'France valid carrier'},
+      totalPostageFee:'3.50',taxesFee:'0.50',
+      clearanceOperationFee:'0.00',tariff:'0.00'}]);
+  throw Error('Unexpected fallback endpoint');
+};
+const fallbackReport=await examineCjDetailedFreight({
+  accessToken,pid,vid,fetcher:fallback
+});
+assert.equal(fallbackReport.status,'detailed_quotes_observed');
+assert.equal(fallbackReport.completeSupplierQuotes[0].landedUsdCents,400);
+assert.equal(fallbackCalls.length,4);
+assert.ok(fallbackCalls[1].endsWith('/product/variant/queryByVid'));
+assert.equal(fallbackReport.approvedForSale,false);
+const mismatch=async(url,options)=>{
+  const path=new URL(url).pathname;
+  if(path.endsWith('/product/query'))return answer({...product,variants:[]});
+  if(path.endsWith('/product/variant/queryByVid'))
+    return answer({...product.variants[0],pid:'different-product'});
+  throw Error('Must never request shipping on mismatched variant');
+};
+await assert.rejects(examineCjDetailedFreight({
+  accessToken,pid,vid,fetcher:mismatch
+}),/CJ_DETAIL_VARIANT_ID_MISMATCH/);
+
 console.log('CJ detailed freight audit OK: exact supplier weight/properties, all-in quotes only, no orders');
