@@ -123,6 +123,11 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       +'<p class="am-extra-approval">À vérifier auprès du vendeur : référence exacte, variante, prix, disponibilité, garantie et conditions de retour. Nous ne vendons pas directement ce produit.</p>'
       +(affiliates.enabled?'<p class="am-extra-link-status '+(direct?'am-extra-link-direct':'am-extra-link-search')+'"><strong>'+(direct?'Fiche Amazon.fr correspondant au code modèle':'Recherche Amazon.fr — modèle non garanti')+'</strong><span>'+(direct?(comparator?'ASIN recoupé via un comparateur et une source indépendante ; fiche Amazon.fr non consultée directement. Vérifiez la variante, le vendeur et le stock.':'Lien associé à un ASIN documenté. Contrôlez la variante, le vendeur et le stock.'):'Les résultats peuvent contenir d’autres montres. Vérifiez le code affiché ci-dessus avant l’achat.')+'</span>'+(direct?.marketplaceVariant?'<span class="am-extra-merchant-variant"><strong>Variante de la fiche Amazon :</strong> '+e(direct.marketplaceVariant)+'</span>':'')+'</p>':'')
       +'<div class="am-extra-actions">'+actions+'</div>'
+      +'<div class="am-extra-local-tools" role="group" aria-label="Conserver ou partager cette montre" hidden>'
+      +'<button type="button" class="am-extra-favorite" data-extra-favorite="'+e(p.id)+'" aria-pressed="false" hidden>♡ Ajouter aux favoris</button>'
+      +'<button type="button" class="am-extra-share" data-extra-share="'+e(p.id)+'" hidden>Partager cette montre</button>'
+      +'<a class="am-extra-saved-link" href="./toutes-les-montres.html?saved=1" hidden>Voir mes favoris</a>'
+      +'<p class="am-extra-action-status" data-extra-action-status role="status" aria-live="polite"></p></div>'
       +'<a class="am-extra-compare-cta" href="'+e(compareUrl)+'" data-compare-source="'+e(p.id)+'">Comparer avec '+e(suggestions[0].brand+' '+suggestions[0].model)+' et '+e(suggestions[1].brand+' '+suggestions[1].model)+'</a>'
       +(affiliates.enabled
         ?'<p class="am-extra-disclosure">Lien rémunéré Amazon.fr : une commission peut nous être versée pour un achat éligible. '
@@ -178,7 +183,7 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       description,path,type:'product'}),main,graph)
       .replace('</head>','<link rel="stylesheet" href="../popular-picks.css">'
         +(photo?'<link rel="stylesheet" href="../photo-zoom.css"><script defer src="../photo-zoom.js"></script><script defer src="../extra-product-viewer.js"></script>':'')
-        +'<link rel="stylesheet" href="../extra-factual-comparison.css"></head>');
+        +'<link rel="stylesheet" href="../extra-factual-comparison.css"><script defer src="../extra-product-actions.js"></script></head>');
     writeFileSync(join(root,path),html);
     paths.push(path);
   }
