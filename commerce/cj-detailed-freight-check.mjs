@@ -80,8 +80,9 @@ assert.equal(result.completeSupplierQuotes[0].landedUsdCents,500);
 assert.equal(result.approvedForSale,false);
 assert.equal(result.noCustomerOrder,true);
 assert.equal(calls.length,4,'query VID, canonical product, stock and freight');
-assert.deepEqual(calls.slice(0,2).map(x=>x.path.slice(-25)),
-  ['/product/variant/queryByVid','/api2.0/v1/product/query'.slice(-25)]);
+assert.deepEqual(calls.slice(0,2).map(x=>x.path),[
+  '/api2.0/v1/product/variant/queryByVid','/api2.0/v1/product/query'
+]);
 assert.ok(calls.every(x=>!/shopping|createOrder|listed|wallet/.test(x.path)));
 assert.ok(!JSON.stringify(result).includes(accessToken));
 
