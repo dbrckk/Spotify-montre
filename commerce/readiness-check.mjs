@@ -55,6 +55,7 @@ try{
   assert.ok(!current.blockers.includes('supplier_identity_proof_missing'));
   assert.ok(current.blockers.includes('supplier_quote_expired_or_missing'));
   assert.ok(current.blockers.includes('eu_2026_import_proof_missing_or_expired'));
+  assert.ok(current.blockers.includes('customs_c127_c128_c129_or_y081_proof_missing'));
   assert.ok(current.warnings.includes('supplier_quote_audit_missing'));
   assert.ok(report.launchBlockers.includes('no_purchase_eligible_supplier_offer'),
     'unapproved products cannot authorize a sale');
@@ -74,21 +75,39 @@ try{
   assert.equal(current.purchaseGateEligible,false,
     'merchant flags alone cannot prove EU customs or handling costs');
   assert.ok(current.blockers.includes('eu_2026_import_proof_missing_or_expired'));
+  assert.ok(current.blockers.includes('customs_c127_c128_c129_or_y081_proof_missing'));
   await pool.query(
     'INSERT INTO commerce_offer_import_proofs ('+
       'offer_id,supplier_vid,supplier_pid,supplier_variant_sku,'+
       'supplier_product_sku,logistics_name,consignment_value_eur_cents,'+
       'flat_duty_eur_cents,union_handling_eur_cents,buyer_extra_eur_cents,'+
       'landed_eur_quote_cents,import_payer,import_vat_covered,'+
-      'carrier_clearance_covered,supplier_evidence_sha256,valid_until) '+
+      'carrier_clearance_covered,supplier_evidence_sha256,valid_until,'+
+      'merchant_product_identifier,supplier_nonstandard_identifier,'+
+      'standardized_manufacturer_identifier,no_standardized_manufacturer_identifier,'+
+      'customs_declarant,customs_identifiers_transmission_confirmed) '+
       "VALUES($1,'ci-vid','ci-parent','CI-VAR-SKU','CI-PRODUCT-SKU',"+
       "'CI delivery',8990,300,200,0,1900,'SUPPLIER',true,true,$2,"+
-      "now()+interval '1 day')",
+      "now()+interval '1 day','STORE-READINESS-WATCH',"+
+      "'MANUFACTURER-1251',NULL,true,'Synthetic customs declarant',true)",
     [offerId,'b'.repeat(64)]);
   report=await commercialReadinessReport(pool,{env,siteConfig});
   current=report.offers.find(x=>x.id===offerId);
   assert.equal(current.purchaseGateEligible,true,
     'authoritative checkout gate and readiness report must agree');
+  await pool.query(
+    'UPDATE commerce_offer_import_proofs SET merchant_product_identifier=supplier_pid WHERE offer_id=$1',
+    [offerId]);
+  report=await commercialReadinessReport(pool,{env,siteConfig});
+  current=report.offers.find(x=>x.id===offerId);
+  assert.equal(current.purchaseGateEligible,false);
+  assert.ok(current.blockers.includes('customs_c127_c128_c129_or_y081_proof_missing'));
+  await pool.query(
+    "UPDATE commerce_offer_import_proofs SET merchant_product_identifier='STORE-READINESS-WATCH' WHERE offer_id=$1",
+    [offerId]);
+  report=await commercialReadinessReport(pool,{env,siteConfig});
+  current=report.offers.find(x=>x.id===offerId);
+  assert.equal(current.purchaseGateEligible,true);
   assert.deepEqual(current.blockers,[]);
   assert.ok(report.totals.purchaseGateEligibleOffers>=1);
   await pool.query('UPDATE commerce_offers SET supplier_pid=NULL WHERE id=$1',[offerId]);
@@ -108,6 +127,7 @@ try{
   current=report.offers.find(x=>x.id===offerId);
   assert.equal(current.purchaseGateEligible,false);
   assert.ok(current.blockers.includes('eu_2026_import_proof_missing_or_expired'));
+  assert.ok(current.blockers.includes('customs_c127_c128_c129_or_y081_proof_missing'));
   await pool.query(
     "UPDATE commerce_offer_import_proofs SET valid_until=now()+interval '1 day' WHERE offer_id=$1",
     [offerId]);
