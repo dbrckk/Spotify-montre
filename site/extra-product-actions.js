@@ -11,6 +11,7 @@
   const favorite=tools?.querySelector('[data-extra-favorite]');
   const share=tools?.querySelector('[data-extra-share]');
   const status=tools?.querySelector('[data-extra-action-status]');
+  const savedLink=tools?.querySelector('.am-extra-saved-link');
   if(!tools||!favorite||!share||!status||
     typeof id!=='string'||!/^[a-z0-9-]{4,64}$/.test(id)||
     favorite.dataset.extraFavorite!==id||share.dataset.extraShare!==id||
@@ -38,6 +39,7 @@
       (saved?' de mes favoris':' à mes favoris'));
   };
   if(read()!==null){
+    if(savedLink)savedLink.hidden=false;
     favorite.addEventListener('click',()=>{
       const ids=read();
       if(!ids){favorite.hidden=true;announce('Favoris indisponibles sur cet appareil.');return}
@@ -64,6 +66,7 @@
   });
 
   const canonical=new URL('./'+id+'.html',location.href).href;
+  tools.hidden=false;
   share.hidden=false;
   share.addEventListener('click',async()=>{
     const title=brand+' '+model+' — Atelier Montres';
