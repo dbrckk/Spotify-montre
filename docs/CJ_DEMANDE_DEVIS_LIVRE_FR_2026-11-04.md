@@ -1,5 +1,7 @@
 # CJdropshipping — demande de devis livré France, variante vérifiée
 
+**Nouveau :** pour déposer cette demande via l'API officielle CJ sans copier la clé depuis Android, suivre [le workflow manuel de ticket sécurisé](CJ_TICKET_DEVIS_ECRIT_2026-11-04.md). Le texte ci-dessous reste la version longue de référence ; l'API Ticket limite chacun des deux champs du message à 1 000 caractères, d'où la version résumée dans le script. Aucun ticket n'est envoyé par le seul fait de créer le workflow.
+
 **Statut :** message prêt à transmettre au support CJ ; **non envoyé**. Aucun paiement ni commande fournisseur ne doit être lancé en attendant une réponse vérifiable.
 
 ## Message à CJdropshipping (anglais)
