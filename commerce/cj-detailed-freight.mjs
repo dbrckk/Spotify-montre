@@ -17,9 +17,16 @@ const name=value=>typeof value==='string'&&value.length>=3&&value.length<=50&&
   !/[\x00-\x1f\x7f]/.test(value)?value:null;
 const absent=x=>x===undefined||x===null||x==='';
 const validWeight=x=>{
-  const value=typeof x==='string'&&/^\d+(?:\.0+)?$/.test(x)?
-    Number(x):x;
-  return Number.isSafeInteger(value)&&value>=1&&value<=50000?value:null;
+  const value=(typeof x==='number'||typeof x==='string'&&
+    /^(?:0|[1-9]\\d{0,4})(?:\\.\\d{1,3})?$/.test(x))?Number(x):NaN;
+  return Number.isFinite(value)&&value>0&&value<=50000?
+    {supplierGrams:value,shippingGrams:Math.ceil(value)}:null;
+};
+// CJ variantVolume is stated in mm³; freightCalculateTip takes cm³.
+const validVolume=x=>{
+  const value=typeof x==='number'||typeof x==='string'&&
+    /^(?:0|[1-9]\\d{0,11})(?:\\.\\d{1,3})?$/.test(x)?Number(x):NaN;
+  return Number.isFinite(value)&&value>0&&value<=1e12?value/1000:null;
 };
 async function read(path,token,fetcher,{method='GET',body}={}){
   const response=await fetcher(ROOT+path,{
@@ -37,49 +44,75 @@ async function read(path,token,fetcher,{method='GET',body}={}){
 }
 // No input URL, provider raw data or secrets are ever written to output.
 export async function examineCjDetailedFreight({
-  accessToken,vid,pid,postalCode='75002',fetcher=fetch
+  accessToken,vid,pid,expectedVariantSku,expectedProductSku,
+  postalCode='75002',fetcher=fetch
 }={}){
-  if(typeof accessToken!=='string'||accessToken.length<20||/\s/.test(accessToken))
+  if(typeof accessToken!=='string'||accessToken.length<20||/\\s/.test(accessToken))
     throw Error('CJ token unavailable');
-  if(!validId(vid)||!validId(pid)||!/^[0-9]{5}$/.test(postalCode)||
-    /^(97|98)/.test(postalCode))
+  if(!validId(vid)||(pid!==undefined&&!validId(pid))||
+    (expectedVariantSku!==undefined&&!validId(expectedVariantSku))||
+    (expectedProductSku!==undefined&&!validId(expectedProductSku))||
+    !/^[0-9]{5}$/.test(postalCode)||/^(97|98)/.test(postalCode))
     throw Error('CJ exact variant or French sample postcode invalid');
   if(typeof fetcher!=='function')throw Error('CJ fetch unavailable');
-  // Product Details GET is authoritative for the exact variant's shipping
-  // properties and weight. NEVER substitute a generic assumed watch weight.
+  // Pace REAL network traffic across variant, product, stock and freight. The
+  // test fetcher is deliberately unpaced.
+  let lastCall=0;
+  const supplierFetch=fetcher===fetch?async(url,options)=>{
+    const delay=1250-(Date.now()-lastCall);
+    if(lastCall&&delay>0)await new Promise(resolve=>setTimeout(resolve,delay));
+    lastCall=Date.now();
+    return fetcher(url,options);
+  }:fetcher;
+
+  // A search-result PID is not the identity authority for this exact VID.
+  // Resolve the supplier's canonical parent from queryByVid FIRST.
+  let variant;
+  try{
+    variant=await read('/product/variant/queryByVid?vid='+
+      encodeURIComponent(vid),accessToken,supplierFetch);
+  }catch{throw Error('CJ_DETAIL_VARIANT_READ_FAILED')}
+  if(variant?.vid!==vid||!validId(variant?.pid))
+    throw Error('CJ_DETAIL_VARIANT_ID_MISMATCH');
+  if(expectedVariantSku!==undefined&&variant.variantSku!==expectedVariantSku)
+    throw Error('CJ_DETAIL_VARIANT_SKU_MISMATCH');
+  const canonicalPid=variant.pid;
+
   let product;
   try{
-    product=await read('/product/query?pid='+encodeURIComponent(pid),
-      accessToken,fetcher);
+    product=await read('/product/query?pid='+encodeURIComponent(canonicalPid),
+      accessToken,supplierFetch);
   }catch{throw Error('CJ_DETAIL_PRODUCT_READ_FAILED')}
-  if(product?.pid!==pid)throw Error('CJ_DETAIL_PRODUCT_ID_MISMATCH');
-  if(!Array.isArray(product.variants))throw Error('CJ_DETAIL_VARIANTS_UNAVAILABLE');
-  let variant=product.variants.find(item=>item?.vid===vid&&
-    (item?.pid===undefined||item?.pid===pid));
-  if(!variant){
-    // Some CJ product-detail replies omit an otherwise valid VID from their
-    // summary array. Query the exact variant by VID, not by color/price/name.
-    try{
-      variant=await read('/product/variant/queryByVid?vid='+
-        encodeURIComponent(vid),accessToken,fetcher);
-    }catch{throw Error('CJ_DETAIL_VARIANT_READ_FAILED')}
-    if(variant?.vid!==vid||variant?.pid!==pid)
-      throw Error('CJ_DETAIL_VARIANT_ID_MISMATCH');
-  }
+  if(product?.pid!==canonicalPid)
+    throw Error('CJ_DETAIL_PRODUCT_ID_MISMATCH');
+  if(expectedProductSku!==undefined&&product?.productSku!==expectedProductSku)
+    throw Error('CJ_DETAIL_PRODUCT_SKU_MISMATCH');
+  // A product may omit variants in its summary. If it DOES include this VID,
+  // the entries must not contradict the dedicated exact-variant endpoint.
+  const duplicate=Array.isArray(product.variants)?
+    product.variants.filter(v=>v?.vid===vid):[];
+  if(duplicate.some(v=>(v.pid!==undefined&&v.pid!==canonicalPid)||
+    (v.variantSku!==undefined&&v.variantSku!==variant.variantSku)))
+    throw Error('CJ_DETAIL_PRODUCT_VARIANT_CONTRADICTION');
   const sku=variant.variantSku;
   const weight=validWeight(variant.variantWeight);
+  const volumeCm3=validVolume(variant.variantVolume);
   const properties=product.productProEnSet;
   let itemCostUsdCents=null;
   try{itemCostUsdCents=usdToCents(variant.variantSellPrice)}catch{}
   const metadata={
-    weightGrams:weight,
+    supplierWeightGrams:weight?.supplierGrams??null,
+    weightGrams:weight?.shippingGrams??null,
+    volumeCm3,
     supplierProperties:Array.isArray(properties)&&properties.length<=10&&
       properties.every(p=>typeof p==='string'&&VALID_PROPERTIES.has(p))?
       properties:null,
     skuConfirmed:validId(sku),
     priceConfirmed:Number.isSafeInteger(itemCostUsdCents)&&itemCostUsdCents>0
   };
-  const base={kind:'cj_detailed_shipping_audit_read_only',pid,vid,postalCode,
+  const base={kind:'cj_detailed_shipping_audit_read_only',
+    pid:canonicalPid,catalogPid:pid??null,catalogPidMatched:pid===undefined?
+      null:pid===canonicalPid,vid,postalCode,
     metadata,stockConfirmed:false,detailedOptionsReturned:0,
     completeSupplierQuotes:[],unpricedRoutes:[],
     possibleImportGaps:0,approvedForSale:false,
@@ -98,9 +131,11 @@ export async function examineCjDetailedFreight({
   if(!inStock)return {...base,status:'stock_unavailable'};
   // Exact CJ-supplied SKU/weight/attributes/price only; merchant delivery
   // mode is not a consumer order. No customer fields or fake IOSS number.
-  const skuTrial={sku,skuQuantity:1,vid,skuWeight:weight};
+  const skuTrial={sku,skuQuantity:1,vid,skuWeight:weight.shippingGrams};
   const row={srcAreaCode:'CN',destAreaCode:'FR',zip:postalCode,
-    weight,productProp:metadata.supplierProperties,skuList:[sku],
+    weight:weight.shippingGrams,productProp:metadata.supplierProperties,
+    ...(volumeCm3!==null?{volume:volumeCm3,skuVolume:volumeCm3}:{}),
+    skuList:[sku],
     freightTrialSkuList:[skuTrial],totalGoodsAmount:itemCostUsdCents/100};
   const productType=String(product.productType??'');
   if(productType==='5')row.trialCalculationType='1';
