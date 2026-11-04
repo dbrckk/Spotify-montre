@@ -174,4 +174,34 @@ CREATE TABLE IF NOT EXISTS commerce_offer_preflight_quotes (
 );
 CREATE INDEX IF NOT EXISTS commerce_offer_quotes_by_offer
   ON commerce_offer_preflight_quotes(offer_id,checked_at DESC);
+
+-- An operator-verified, exact-SKU customs/handling/landed-cost record.
+-- Recording a document digest cannot establish its truth: the operator is
+-- responsible for validating the written supplier/carrier statement.
+-- No historic offers are given an implicit customs exemption.
+CREATE TABLE IF NOT EXISTS commerce_offer_import_proofs (
+  offer_id text PRIMARY KEY REFERENCES commerce_offers(id),
+  supplier_vid text NOT NULL,
+  supplier_pid text NOT NULL,
+  supplier_variant_sku text NOT NULL,
+  supplier_product_sku text NOT NULL,
+  logistics_name text NOT NULL,
+  consignment_value_eur_cents integer NOT NULL
+    CHECK (consignment_value_eur_cents BETWEEN 1 AND 15000),
+  flat_duty_eur_cents integer NOT NULL CHECK (flat_duty_eur_cents >= 300),
+  union_handling_eur_cents integer NOT NULL CHECK (union_handling_eur_cents >= 200),
+  buyer_extra_eur_cents integer NOT NULL CHECK (buyer_extra_eur_cents = 0),
+  landed_eur_quote_cents integer NOT NULL CHECK (landed_eur_quote_cents >= 500),
+  import_payer text NOT NULL CHECK (import_payer IN ('SELLER','SUPPLIER')),
+  import_vat_covered boolean NOT NULL CHECK (import_vat_covered = true),
+  carrier_clearance_covered boolean NOT NULL CHECK (carrier_clearance_covered = true),
+  supplier_evidence_sha256 text NOT NULL
+    CHECK (supplier_evidence_sha256 ~ '^[a-f0-9]{64}
+),
+  valid_until timestamptz NOT NULL,
+  recorded_at timestamptz NOT NULL DEFAULT now(),
+  CHECK (landed_eur_quote_cents >= flat_duty_eur_cents + union_handling_eur_cents)
+);
+CREATE INDEX IF NOT EXISTS commerce_offer_import_proofs_expiry
+  ON commerce_offer_import_proofs(valid_until);
 COMMIT;
