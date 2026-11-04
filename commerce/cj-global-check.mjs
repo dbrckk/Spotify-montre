@@ -113,7 +113,8 @@ const partial=await scanCjWatchCatalog({
     if(keyword==='quartz watch')throw Error('CJ read-only API did not confirm success');
     return {findings:[{pid:keyword==='watch'?'safeproduct1':'safeproduct2',
       name:'Sports watch',state:'sample_shipping_available',
-      stockConfirmed:true,shippingMethods:[{landedUsdCents:1200}]}]};
+      catalogPidMatched:true,stockConfirmed:true,
+      shippingMethods:[{landedUsdCents:1200}]}]};
   },
   onProgress:message=>progress.push(message)
 });
@@ -143,5 +144,18 @@ const throttled=await scanCjWatchCatalog({
 });
 assert.equal(throttled.failedSearches[0].reason,'supplier_rate_limit');
 assert.equal(throttled.searchesAttempted,1);
+
+// A stale list/search PID must never reach the apparently shippable shortlist.
+const unverified=await scanCjWatchCatalog({
+  accessToken,fetcher:fake,maxPoints:250,
+  plan:[{keyword:'watch',page:1}],
+  searcher:async()=>({findings:[{pid:'staleproduct',canonicalPid:'canonicalproduct',
+    state:'sample_shipping_available',catalogPidMatched:false,
+    identityMismatches:1,stockConfirmed:true,
+    shippingMethods:[{landedUsdCents:1}]}]})
+});
+assert.equal(unverified.status,'no_confirmed_shipping_sample');
+assert.equal(unverified.shippableSamples.length,0);
+assert.equal(unverified.catalogIdentityMismatches,1);
 
 console.log('CJ global scan OK: multi-segment sample, hard point cap, no credential leak, no write endpoints');
