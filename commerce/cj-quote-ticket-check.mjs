@@ -191,4 +191,55 @@ assert.equal(rateLimited.categoryCheck,'eligible');
 assert.equal(rateLimited.quoteApproved,false);
 assert.ok(!JSON.stringify(rateLimited).includes(token));
 
+// CJ describes ticketTypeId/questionTypeId as 64-bit longs. Many live
+// provider IDs exceed Number.MAX_SAFE_INTEGER. The POST must retain every
+// decimal digit as a JSON NUMBER, not an imprecise JS Number or a quoted string.
+const hugeType='9223372036854775807';
+const hugeQuestion='9223372036854775806';
+const bigCategory={ticketTypeId:hugeType,
+  ticketTypeName:'Service Consultation',questionTypes:[{
+    questionTypeId:hugeQuestion,
+    questionTypeName:'Fulfillment Service Consultation',formFields:[]}]};
+let exactPayload=null;
+const hugeFetcher=async(url,options)=>{
+  const path=new URL(url).pathname;
+  if(path.endsWith('/ticket/types'))return ok([bigCategory]);
+  if(path.endsWith('/ticket/list'))return ok({total:0,list:[]});
+  if(path.endsWith('/ticket/create')){
+    exactPayload=options.body;
+    return ok({estimatedHandleTime:null});
+  }
+  throw Error('Unknown ticket endpoint');
+};
+const exact=await requestWrittenCjQuote({
+  accessToken:token,send:true,fetcher:hugeFetcher
+});
+assert.equal(exact.status,'submitted_to_cj');
+assert.ok(exactPayload);
+assert.ok(exactPayload.includes('"ticketTypeId":'+hugeType+','));
+assert.ok(exactPayload.includes('"questionTypeId":'+hugeQuestion+','));
+assert.ok(!exactPayload.includes('"ticketTypeId":"'));
+assert.ok(!exactPayload.includes('"questionTypeId":"'));
+const liveQualified=await diagnoseWrittenCjQuote({
+  accessToken:token,fetcher:hugeFetcher
+});
+assert.equal(liveQualified.categoryCheck,'eligible');
+
+// Reject IDs beyond signed 64-bit and unsafe JSON numeric values.
+// Never round or guess supplier category IDs.
+for(const badId of ['9223372036854775808',Number(hugeType)]){
+  exactPayload=null;
+  const badTypes=async(url,options)=>{
+    if(url.endsWith('/ticket/types'))return ok([{
+      ...bigCategory,ticketTypeId:badId
+    }]);
+    if(url.endsWith('/ticket/list'))return ok({total:0,list:[]});
+    throw Error('No CJ create for invalid ID');
+  };
+  await assert.rejects(requestWrittenCjQuote({
+    accessToken:token,send:true,fetcher:badTypes
+  }),/CJ_TICKET_CATEGORY_NEEDS_REVIEW/);
+  assert.equal(exactPayload,null);
+}
+
 console.log('CJ written quote workflow OK: multi-page dedupe, status only, safe category, no order or wallet');
