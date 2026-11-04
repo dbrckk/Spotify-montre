@@ -160,7 +160,7 @@ export async function checkWrittenCjQuote({accessToken,fetcher=fetch}={}){
 // Only publish short, validated menu labels: not raw CJ responses, private
 // tickets, access tokens, customer information or request URLs.
 const safeMenuLabel=value=>typeof value==='string'&&value.length<=100&&
-  /^[\\p{L}\\p{N}\\p{Zs}.,:&()\\/+-]+$/u.test(value)?
+  /^[\p{L}\p{N}\p{Zs}.,:&()\/+-]+$/u.test(value)?
   value.slice(0,65):null;
 const safeErrorCode=error=>{
   const message=typeof error?.message==='string'?error.message:'';
