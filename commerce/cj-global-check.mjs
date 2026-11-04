@@ -33,7 +33,7 @@ const fake=async(url,options)=>{
   if(path==='/product/variant/queryByVid'){
     const vid=parsed.searchParams.get('vid');
     assert.ok(vid.startsWith('VID-sampleproduct'));
-    return response({vid,variantSku:'SKU-'+vid,
+    return response({vid,pid:vid.slice(4),variantSku:'SKU-'+vid,
       variantNameEn:'Black dial',variantSellPrice:'8.50'});
   }
   if(path==='/product/stock/queryByVid'){
@@ -55,6 +55,8 @@ assert.equal(report.status,'shipping_samples_found');
 assert.equal(report.searchesCompleted,5,'Search must include different segments before stopping');
 assert.equal(report.shippableSamples.length,5);
 assert.equal(report.distinctProductsChecked,5);
+assert.equal(report.shippableSamples[0].catalogPidMatched,true);
+assert.equal(report.catalogIdentityMismatches??0,0);
 assert.equal(report.pointsAttempted,450,'5 real sample searches with 90 CJ points each');
 assert.equal(report.apiCallsAttempted,calls.length);
 assert.equal(report.maxPoints,2500);
