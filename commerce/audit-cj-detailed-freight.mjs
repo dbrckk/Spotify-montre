@@ -41,7 +41,21 @@ async function main(){
     appendFileSync(process.env.GITHUB_STEP_SUMMARY,lines.join('\n')+'\n');
   }
 }
-main().catch(()=>{
-  console.error('CJ detailed freight estimate not available; credentials or provider data incomplete');
+main().catch(error=>{
+  // The detailed reader emits only these fixed stage codes. Never print
+  // arbitrary provider messages, response bodies, request URLs or tokens.
+  const code=error?.message;
+  const allowed=new Set([
+    'CJ_DETAIL_PRODUCT_READ_FAILED',
+    'CJ_DETAIL_PRODUCT_ID_MISMATCH',
+    'CJ_DETAIL_VARIANTS_UNAVAILABLE',
+    'CJ_DETAIL_EXACT_VARIANT_ABSENT',
+    'CJ_DETAIL_STOCK_READ_FAILED',
+    'CJ_DETAIL_STOCK_FORMAT_INVALID',
+    'CJ_DETAIL_FREIGHT_READ_FAILED',
+    'CJ_DETAIL_FREIGHT_FORMAT_INVALID'
+  ]);
+  console.error(allowed.has(code)?code:
+    'CJ_DETAIL_SUPPLIER_OR_AUTH_UNAVAILABLE');
   process.exitCode=1;
 });
