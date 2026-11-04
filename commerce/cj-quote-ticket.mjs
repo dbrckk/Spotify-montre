@@ -35,9 +35,13 @@ function assertTicketPayload(){
   if(QUOTE_REFERENCE.length>64||QUOTE_SKU.length>100)
     throw Error('CJ ticket reference outside documented limits');
 }
-// CJ documents long numeric IDs; JSON must carry an exact safe integer.
-const id=value=>/^[1-9][0-9]{0,15}$/.test(String(value??''))&&
-  Number.isSafeInteger(Number(value));
+// CJ Ticket Types can contain signed-64-bit identifiers larger than the
+// JavaScript Number safe range. Preserve their exact decimal digits.
+const id=value=>{
+  if(typeof value==='number')return Number.isSafeInteger(value)&&value>0;
+  return typeof value==='string'&&/^[1-9][0-9]{0,18}$/.test(value)&&
+    BigInt(value)<=9223372036854775807n;
+};
 const ticketId=value=>/^[a-zA-Z0-9_-]{1,64}$/.test(String(value||''));
 function selectConsultationCategory(types){
   if(!Array.isArray(types))throw Error('CJ_TICKET_TYPES_UNAVAILABLE');
@@ -57,8 +61,8 @@ function selectConsultationCategory(types){
       const score= (/^service consultation$/i.test(category)?100:0)+
         (/^fulfill?ment service consultation$/i.test(subject)?80:0)+
         (/fulfil|logistic|shipping|import|customs/i.test(subject)?30:0);
-      qualified.push({ticketTypeId:Number(type.ticketTypeId),
-        questionTypeId:Number(question.questionTypeId),
+      qualified.push({ticketTypeId:String(type.ticketTypeId),
+        questionTypeId:String(question.questionTypeId),
         category,subject,score});
     }
   }
@@ -69,6 +73,20 @@ function selectConsultationCategory(types){
      qualified[0].score===qualified[1].score)
     throw Error('CJ_TICKET_CATEGORY_NEEDS_REVIEW');
   return qualified[0];
+}
+// Encode only validated CJ category IDs as exact JSON integer literals.
+// JSON.stringify(Number(18-digit-id)) silently rounds; sending a quoted
+// string may violate CJ's documented 'long' parameter type.
+function encodeCreateTicket(body){
+  if(!body||!id(body.ticketTypeId)||!id(body.questionTypeId))
+    throw Error('CJ_TICKET_CATEGORY_NEEDS_REVIEW');
+  const {ticketTypeId,questionTypeId,...fields}=body;
+  if(typeof fields.message!=='string'||typeof fields.expectResult!=='string'||
+    !Array.isArray(fields.formList))
+    throw Error('CJ_TICKET_INVALID_CREATE_PAYLOAD');
+  const suffix=JSON.stringify(fields);
+  return '{"ticketTypeId":'+String(ticketTypeId)+
+    ',"questionTypeId":'+String(questionTypeId)+','+suffix.slice(1);
 }
 function createCaller(accessToken,fetcher){
   if(typeof accessToken!=='string'||accessToken.length<20||/\s/.test(accessToken))
@@ -89,7 +107,8 @@ function createCaller(accessToken,fetcher){
       method,redirect:'error',
       headers:{'CJ-Access-Token':accessToken,'Content-Type':'application/json',
         'Accept':'application/json'},
-      ...(body?{body:JSON.stringify(body)}:{}),
+      ...(body?{body:path==='/ticket/create'?
+        encodeCreateTicket(body):JSON.stringify(body)}:{}),
       signal:AbortSignal.timeout(12000)
     });
     const stage=path==='/ticket/types'?'TYPES':
