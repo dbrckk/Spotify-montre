@@ -27,13 +27,15 @@ async function insertOrder(status='SUPPLIER_SENDING'){
       id,public_token_hash,idempotency_hash,request_hash,offer_id,product_label,
       amount_eur_cents,supplier_vid,supplier_pid,supplier_variant_sku,
       supplier_product_sku,supplier_max_usd_cents,logistics_name,
-      from_country_code,address_encrypted,status,payment_id,payment_mode
+      from_country_code,address_encrypted,import_proof_sha256,
+      status,payment_id,payment_mode
     ) VALUES($1,$2,$3,$4,$5,'Synthetic gated order',5000,'sample-vid',
              'sample-pid','SAMPLE-VID-SKU','SAMPLE-PRODUCT-SKU',2200,
-             'CI-shipping','CN','no real address data',$6,$7,'test')
+             'CI-shipping','CN','no real address data',$6,$7,$8,'test')
   `,[id,digest(randomBytes(16).toString('hex')),
     digest(randomBytes(16).toString('hex')),
-    digest(randomBytes(16).toString('hex')),offerId,status,paymentId]);
+    digest(randomBytes(16).toString('hex')),offerId,
+    'c'.repeat(64),status,paymentId]);
   const order={
     id,payment_id:paymentId,amount_eur_cents:5000,
     supplier_vid:'sample-vid',supplier_pid:'sample-pid',
@@ -50,12 +52,34 @@ try{
   await pool.query(`
     INSERT INTO commerce_offers(
       id,label,amount_eur_cents,unit_cost_eur_cents,reserves_eur_cents,
-      supplier_max_usd_cents,supplier_vid,logistics_name)
+      supplier_max_usd_cents,supplier_vid,supplier_pid,
+      supplier_variant_sku,supplier_product_sku,logistics_name)
     VALUES($1,'Synthetic pre-supplier gate check',5000,1000,500,2200,
-           'sample-vid','CI-shipping')
+           'sample-vid','sample-pid','SAMPLE-VID-SKU',
+           'SAMPLE-PRODUCT-SKU','CI-shipping')
   `,[offerId]);
 
+  await pool.query(
+    'INSERT INTO commerce_offer_import_proofs ('+
+      'offer_id,supplier_vid,supplier_pid,supplier_variant_sku,'+
+      'supplier_product_sku,logistics_name,consignment_value_eur_cents,'+
+      'flat_duty_eur_cents,union_handling_eur_cents,buyer_extra_eur_cents,'+
+      'landed_eur_quote_cents,import_payer,import_vat_covered,'+
+      'carrier_clearance_covered,supplier_evidence_sha256,valid_until) '+
+      "VALUES($1,'sample-vid','sample-pid','SAMPLE-VID-SKU',"+
+      "'SAMPLE-PRODUCT-SKU','CI-shipping',5000,300,200,0,1800,"+
+      "'SELLER',true,true,$2,now()+interval '1 day')",
+    [offerId,'c'.repeat(64)]);
   const first=await insertOrder();
+  assert.equal(await authorizeSupplierSubmission(pool,first,validPayment(first)),true);
+  await pool.query(
+    "UPDATE commerce_offer_import_proofs SET valid_until=now()-interval '1 minute' WHERE offer_id=$1",
+    [offerId]);
+  assert.equal(await authorizeSupplierSubmission(pool,first,validPayment(first)),false,
+    'CJ debit must fail when the written import proof expires after payment');
+  await pool.query(
+    "UPDATE commerce_offer_import_proofs SET valid_until=now()+interval '1 day' WHERE offer_id=$1",
+    [offerId]);
   assert.equal(await authorizeSupplierSubmission(pool,first,validPayment(first)),true);
   assert.equal(await authorizeSupplierSubmission(pool,first,{
     ...validPayment(first),status:'pending',paid:false
@@ -128,6 +152,8 @@ try{
   await pool.query('DELETE FROM commerce_events WHERE order_id=ANY($1::text[])',
     [orders.map(o=>o.id)]).catch(()=>{});
   await pool.query('DELETE FROM commerce_orders WHERE offer_id=$1',[offerId]).catch(()=>{});
+  await pool.query('DELETE FROM commerce_offer_import_proofs WHERE offer_id=$1',
+    [offerId]).catch(()=>{});
   await pool.query('DELETE FROM commerce_offers WHERE id=$1',[offerId]).catch(()=>{});
   await pool.end();
 }
