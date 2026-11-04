@@ -120,8 +120,8 @@
     if(!terms.length)return true;
     const source=normalized([p.brand,p.model,p.id,p.description,p.lead,
       p.caseText,p.glass,p.water].filter(Boolean).join(' '));
-    const compactModel=normalized([p.brand,p.model].join(' ')).replace(/\\s+/g,'');
-    const compactReference=normalized([p.model,p.id].join(' ')).replace(/\\s+/g,'');
+    const compactModel=normalized([p.brand,p.model].join(' ')).replace(/\s+/g,'');
+    const compactReference=normalized([p.model,p.id].join(' ')).replace(/\s+/g,'');
     return terms.every(term=>source.includes(term)
       ||compactModel.includes(term)||compactReference.includes(term));
   };
