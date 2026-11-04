@@ -34,7 +34,7 @@ export function buildAffordableComparisons({root,affiliates,amazonPartnerTag,pag
   const photo=p=>{
     const record=photos.get(p.id);
     return record
-      ?'<img class="am-duel-product-photo" src="../'+e(record.url)+'" alt="Photographie du modèle '+e(names(p))+'" width="440" height="440" loading="lazy" decoding="async">'
+      ?'<img class="am-duel-product-photo" style="display:block;width:100%;max-width:390px;min-width:0;object-fit:contain" src="../'+e(record.url)+'" alt="Photographie du modèle '+e(names(p))+'" width="440" height="440" loading="lazy" decoding="async">'
       :'<span class="am-duel-photo-fallback"><strong>'+e(p.brand)+'</strong><small>Photographie exacte à consulter chez le fabricant</small></span>';
   };
   const merchant=p=>{

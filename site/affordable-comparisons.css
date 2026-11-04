@@ -135,6 +135,9 @@
 }
 .am-duel-product-stage{
   display:grid;
+  min-width:0;
+  max-width:100%;
+  overflow:hidden;
   place-items:center;
   background:radial-gradient(circle at 50% 42%,#fffdf8,#e7eae0);
   padding:25px;
@@ -142,6 +145,7 @@
 }
 .am-duel-product-photo{
   display:block;
+  min-width:0;
   max-width:100%;
   width:min(100%,390px);
   height:330px;

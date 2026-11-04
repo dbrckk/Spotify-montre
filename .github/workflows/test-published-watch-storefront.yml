@@ -155,6 +155,9 @@ jobs:
                 elif ! grep -Fq "data-affordable-duel=\"$slug\"" "$RUNNER_TEMP/live-duel-$slug.html"; then
                   ready=0
                   reason="$reason [stale: affordable comparison $slug]"
+                elif ! grep -Fq 'href="../affordable-comparisons.css"' "$RUNNER_TEMP/live-duel-$slug.html"; then
+                  ready=0
+                  reason="$reason [missing: responsive comparison stylesheet on $slug]"
                 fi
               done
             fi

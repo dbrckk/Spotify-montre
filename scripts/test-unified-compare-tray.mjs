@@ -362,6 +362,12 @@ try{
   await duelPage.locator('[data-duel-promo="addiesdive-ad2030-vs-pagani-pd1701"] a').click();
   assert.equal(new URL(duelPage.url()).pathname,
     '/montres/comparer-addiesdive-ad2030-vs-pagani-pd1701.html');
+  await duelPage.waitForLoadState('load');
+  assert.equal(await duelPage.locator('link[rel="stylesheet"][href="../affordable-comparisons.css"]').count(),1,
+    'The editorial duel must reference its dedicated mobile stylesheet');
+  assert.equal(await duelPage.locator('.am-duel-product-stage').first().evaluate(
+    node=>getComputedStyle(node).display),'grid',
+    'The duel stylesheet must load before measuring responsive product photos');
   assert.equal(await duelPage.locator('.am-duel-model').count(),2);
   assert.equal(await duelPage.locator('.am-duel-model img').count(),2,
     'Both exact-model photos in the steel-watch duel must be locally hosted');
