@@ -91,7 +91,8 @@ export function validateEuImportEvidence(value,offer,{now=new Date()}={}){
   ];
   for(const [field,col] of matches){
     validString(v[field],field,field==='logisticsName'?50:100,
-      field==='logisticsName'?/^[^\r\n\x00-\x1f\x7f]{3,50}$/:ID);
+      field==='logisticsName'?/^[^\r\n\x00-\x1f\x7f]{3,50}$/:
+        field==='fromCountryCode'?/^[A-Z]{2}$/:ID);
     if(v[field]!==offer[col])throw Error('Import evidence does not match pinned offer');
   }
   if(v.fromCountryCode!=='CN'||v.destinationCountry!=='FR')
