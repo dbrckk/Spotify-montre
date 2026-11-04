@@ -1,0 +1,36 @@
+name: Recherche globale des montres CJ (sans achat)
+
+on:
+  workflow_dispatch:
+    inputs:
+      postal_code:
+        description: "Code postal de France metropolitaine pour devis echantillon"
+        required: true
+        default: "75002"
+        type: string
+
+permissions:
+  contents: read
+
+# Strictly manual, read-only and budgeted. Avoid supplier points consumption
+# on every merge or push. Never include merchant DB/payment/order secrets.
+concurrency:
+  group: cj-global-watch-discovery
+  cancel-in-progress: false
+
+jobs:
+  supplier-global-read-only:
+    if: github.repository == 'dbrckk/Spotify-montre' && github.actor == 'dbrckk'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Scanner plusieurs segments, pages et variantes CJ vers la France
+        env:
+          CJ_API_KEY: ${{ secrets.CJ_API_KEY }}
+          CJ_ACCESS_TOKEN: ${{ secrets.CJ_ACCESS_TOKEN }}
+          CJ_POSTAL_CODE: ${{ inputs.postal_code }}
+        run: node commerce/global-cj-search.mjs
