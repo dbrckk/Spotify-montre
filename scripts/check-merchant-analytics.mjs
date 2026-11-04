@@ -61,6 +61,10 @@ assert.equal(events.at(-1),'amazon-search:skmei-2056','Old Amazon search event n
 trigger({url:'https://www.amazon.fr/dp/B0DNK5TT6D?tag=drackk04-21',id:'addiesdive-ad2030',kind:'direct'});
 assert.equal(events.at(-1),'amazon:addiesdive-ad2030:popular','Old Amazon product event names must remain unchanged');
 
+trigger({url:'https://www.amazon.fr/dp/B0BG7VD5YL?tag=drackk04-21',
+  kind:'direct',placement:'showroom',id:'citizen-tsuyosa'});
+assert.equal(events.at(-1),'amazon:citizen-tsuyosa:showroom',
+  'Real exact-ASIN storefront referral needs a separate showroom event');
 trigger({url:'https://www.amazon.fr/dp/B07B6ML1VJ?tag=drackk04-21',kind:'direct',
   placement:'showroom',id:'skmei-1257'});
 assert.equal(events.at(-1),'amazon:skmei-1257:showroom',
