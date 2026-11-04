@@ -18,7 +18,7 @@ const DUTY_START='2026-07-01';
 const DUTY_END='2028-07-01';
 
 export function computeEuImport2026Baseline({
-  onDate='2026-11-04',originCountry='CN',destinationCountry='FR',
+  onDate=new Date().toISOString().slice(0,10),originCountry='CN',destinationCountry='FR',
   consignmentValueEurCents,tariffCategories=1
 }={}){
   if(!ISO.test(onDate)||new Date(onDate+'T00:00:00Z').toISOString().slice(0,10)!==onDate)
