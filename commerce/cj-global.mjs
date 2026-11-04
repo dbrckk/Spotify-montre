@@ -158,16 +158,16 @@ export async function scanCjWatchCatalog({
     }
     onProgress({event:'search_complete',keyword:step.keyword,page:step.page,
       inspectedProducts:result.findings.length,pointsAttempted,
-      shippableCount:findings.filter(x=>x.state==='sample_shipping_available'&&
+      shippableCount:findings.filter(x=>x.state==='sample_shipping_available'&&x.catalogPidMatched===true&&
         x.stockConfirmed&&Array.isArray(x.shippingMethods)&&x.shippingMethods.length).length});
     // Cover several segments before stopping, even if the very first search
     // happens to return shippable watches.
     if(searches.length>=5&&findings.filter(x=>
-      x.state==='sample_shipping_available'&&x.stockConfirmed&&
+      x.state==='sample_shipping_available'&&x.catalogPidMatched===true&&x.stockConfirmed&&
       Array.isArray(x.shippingMethods)&&x.shippingMethods.length).length>=targetShippable)
       break;
   }
-  const shippable=findings.filter(x=>x.state==='sample_shipping_available'&&
+  const shippable=findings.filter(x=>x.state==='sample_shipping_available'&&x.catalogPidMatched===true&&
     x.stockConfirmed&&Array.isArray(x.shippingMethods)&&x.shippingMethods.length)
     .sort((a,b)=>a.shippingMethods[0].landedUsdCents-
       b.shippingMethods[0].landedUsdCents);
@@ -180,6 +180,8 @@ export async function scanCjWatchCatalog({
     searchesCompleted:searches.length,
     searchesPlanned:plan.length,
     distinctProductsChecked:findings.length,
+    catalogIdentityMismatches:findings.reduce((n,x)=>n+(x.identityMismatches||0),0),
+    quarantinedCatalogProducts:findings.filter(x=>x.state==='catalog_identity_mismatch').length,
     shippableSamples:shippable,
     otherSamples:findings.filter(x=>!shippable.includes(x)).slice(0,5),
     pointsAttempted,apiCallsAttempted,maxPoints,
@@ -189,6 +191,6 @@ export async function scanCjWatchCatalog({
     merchantApproval:false,supplierWalletVerified:false,
     productAuthenticityVerified:false,gpsrComplianceVerified:false,
     noCustomerOrders:true,
-    note:'Broad, bounded CJ sample; incomplete coverage is NOT proof that watches are unavailable. Listing counts are not sales. No order, customer payment, supplier debit or product publication.'
+    note:'Broad, bounded CJ sample; incomplete coverage is NOT proof that watches are unavailable. Stale catalog PID/VID pairs are not offers. Listing counts are not sales. No order, customer payment, supplier debit or product publication.'
   };
 }
