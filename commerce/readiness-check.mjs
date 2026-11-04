@@ -39,16 +39,20 @@ try{
       id,label,amount_eur_cents,unit_cost_eur_cents,
       supplier_landed_eur_ceiling_cents,supplier_fx_max_eur_per_usd_bps,
       reserves_eur_cents,vat_rate_bps,supplier_max_usd_cents,
-      supplier_vid,logistics_name,from_country_code,
+      supplier_vid,supplier_pid,supplier_variant_sku,supplier_product_sku,
+      logistics_name,from_country_code,
       delivery_min_business_days,delivery_max_business_days
     ) VALUES($1,'Synthetic private readiness watch',8990,1300,
-       2800,10500,800,2000,2500,'ci-vid','CI delivery','CN',7,20)
+       2800,10500,800,2000,2500,'ci-vid',
+       'ci-parent','CI-VAR-SKU','CI-PRODUCT-SKU',
+       'CI delivery','CN',7,20)
   `,[offerId]);
   let report=await commercialReadinessReport(pool,{env,siteConfig});
   let current=report.offers.find(x=>x.id===offerId);
   assert.ok(current);
   assert.equal(current.purchaseGateEligible,false);
   assert.ok(current.blockers.includes('merchant_approval_missing'));
+  assert.ok(!current.blockers.includes('supplier_identity_proof_missing'));
   assert.ok(current.blockers.includes('supplier_quote_expired_or_missing'));
   assert.ok(current.warnings.includes('supplier_quote_audit_missing'));
   assert.ok(report.launchBlockers.includes('no_purchase_eligible_supplier_offer'),
@@ -70,6 +74,16 @@ try{
     'authoritative checkout gate and readiness report must agree');
   assert.deepEqual(current.blockers,[]);
   assert.ok(report.totals.purchaseGateEligibleOffers>=1);
+  await pool.query('UPDATE commerce_offers SET supplier_pid=NULL WHERE id=$1',[offerId]);
+  report=await commercialReadinessReport(pool,{env,siteConfig});
+  current=report.offers.find(x=>x.id===offerId);
+  assert.equal(current.purchaseGateEligible,false);
+  assert.ok(current.blockers.includes('supplier_identity_proof_missing'));
+  await pool.query('UPDATE commerce_offers SET supplier_pid=$2 WHERE id=$1',
+    [offerId,'ci-parent']);
+  report=await commercialReadinessReport(pool,{env,siteConfig});
+  current=report.offers.find(x=>x.id===offerId);
+  assert.equal(current.purchaseGateEligible,true);
   assert.equal(report.productionLaunchCertified,false,
     'no CI simulation may certify a real customer/supplier purchase');
 
