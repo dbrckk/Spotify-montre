@@ -8,7 +8,7 @@ const tmp=mkdtempSync(join(tmpdir(),'atelier-affiliate-integration-'));
 try {
   const target=join(tmp,'site');
   mkdirSync(target,{recursive:true});
-  for(const name of ['selection-affiliation.json','selection-populaires.json','popular-photo-rights.json','popular-ai-visuals.json','affiliation.html','confidentialite.html','affiliate-links.json','comparaisons-montres.json','comparaisons-accessibles.json','editorial-insights.json']){
+  for(const name of ['selection-affiliation.json','selection-populaires.json','popular-photo-rights.json','popular-ai-visuals.json','affiliation.html','confidentialite.html','affiliate-links.json','comparaisons-montres.json','comparaisons-accessibles.json','editorial-insights.json','acheter.html']){
     cpSync(join(repository,'site',name),join(target,name));
   }
   // Keep source image files in the temporary integration build so the
@@ -99,6 +99,13 @@ try {
   assert.ok(trackedHome.includes('cloud.umami.is/script.js'));
   assert.ok(trackedHome.includes('data-website-id="'+umamiId+'"'));
   assert.ok(trackedHome.includes('src="./analytics.js"'));
+  const purchaseText=()=>readFileSync(join(target,'acheter.html'),'utf8');
+  assert.equal((purchaseText().match(/cloud\.umami\.is\/script\.js/g)||[]).length,1,
+    'Verified partner-purchase page must load Umami once when explicitly opted in');
+  assert.equal((purchaseText().match(/src="\.\/analytics\.js"/g)||[]).length,1,
+    'Partner cards need the delegated click tracker for showroom events');
+  assert.match(purchaseText(),new RegExp('data-website-id="'+umamiId+'"'));
+  assert.match(purchaseText(),/data-do-not-track="true"/);
   assert.ok(trackedProduct.includes('src="../analytics.js"'));
   assert.ok(trackedProduct.includes('data-amazon-product="citizen-tsuyosa"'));
   assert.match(privacyText(),/Les visites et clics sortants vers Amazon\.fr et les fiches des marques ou vendeurs documentés sont mesurés avec Umami Cloud/);
@@ -110,8 +117,15 @@ try {
   assert.ok(!trackedSupplement.includes('href="https://www.amazon.fr/dp/B0C7W5NNX2?'),
     'Unavailable exact Amazon.fr listing must never replace current SKMEI search');
   build({UMAMI_WEBSITE_ID:umamiId}); // repeat deploy must be idempotent
+  assert.equal((purchaseText().match(/cloud\.umami\.is\/script\.js/g)||[]).length,1);
+  assert.equal((purchaseText().match(/src="\.\/analytics\.js"/g)||[]).length,1);
+  assert.equal((purchaseText().match(/AM_PARTNER_ANALYTICS_START/g)||[]).length,1);
   build({UMAMI_WEBSITE_ID:''}); // turning metrics off restores the privacy notice
   assert.ok(!readFileSync(join(target,'index.html'),'utf8').includes('cloud.umami.is'));
+  assert.ok(!purchaseText().includes('cloud.umami.is'),
+    'No external analytics request on partner landing page without Umami configuration');
+  assert.ok(!purchaseText().includes('src="./analytics.js"'),
+    'The event tracker must also be removed when Umami is disabled');
   assert.doesNotMatch(privacyText(),/Les visites et clics sortants vers Amazon\.fr et les fiches des marques ou vendeurs documentés sont mesurés avec Umami Cloud/);
   let invalidAnalyticsIdBlocked=false;
   try {build({UMAMI_WEBSITE_ID:'"><img src=x onerror=alert(1)>'})}catch{invalidAnalyticsIdBlocked=true}
