@@ -197,12 +197,44 @@ CREATE TABLE IF NOT EXISTS commerce_offer_import_proofs (
   carrier_clearance_covered boolean NOT NULL CHECK (carrier_clearance_covered = true),
   supplier_evidence_sha256 text NOT NULL
     CHECK (supplier_evidence_sha256 ~ '^[a-f0-9]{64}$'),
+  -- C127 seller M-PID and C128 supplier/manufacturer NS-PID.
+  merchant_product_identifier text NOT NULL
+    CHECK (merchant_product_identifier ~ '^[A-Za-z0-9][A-Za-z0-9._:/-]{2,99}$'),
+  supplier_nonstandard_identifier text NOT NULL
+    CHECK (supplier_nonstandard_identifier ~ '^[A-Za-z0-9][A-Za-z0-9._:/-]{2,99}$'),
+  -- Either C129 (international standard) or documented Y081 absence.
+  standardized_manufacturer_identifier text
+    CHECK (standardized_manufacturer_identifier IS NULL OR
+      standardized_manufacturer_identifier ~ '^[A-Za-z0-9][A-Za-z0-9._:/-]{2,99}$'),
+  no_standardized_manufacturer_identifier boolean NOT NULL,
+  customs_declarant text NOT NULL
+    CHECK (char_length(customs_declarant) BETWEEN 3 AND 100),
+  customs_identifiers_transmission_confirmed boolean NOT NULL
+    CHECK (customs_identifiers_transmission_confirmed=true),
+  CHECK ((standardized_manufacturer_identifier IS NULL AND
+           no_standardized_manufacturer_identifier=true) OR
+         (standardized_manufacturer_identifier IS NOT NULL AND
+           no_standardized_manufacturer_identifier=false)),
   valid_until timestamptz NOT NULL,
   recorded_at timestamptz NOT NULL DEFAULT now(),
   CHECK (landed_eur_quote_cents >= flat_duty_eur_cents + union_handling_eur_cents)
 );
 CREATE INDEX IF NOT EXISTS commerce_offer_import_proofs_expiry
   ON commerce_offer_import_proofs(valid_until);
+-- Existing proof rows lack the 2026 customs declaration identifier evidence.
+-- NULL migration values intentionally fail the purchase gate until reviewed.
+ALTER TABLE commerce_offer_import_proofs
+  ADD COLUMN IF NOT EXISTS merchant_product_identifier text;
+ALTER TABLE commerce_offer_import_proofs
+  ADD COLUMN IF NOT EXISTS supplier_nonstandard_identifier text;
+ALTER TABLE commerce_offer_import_proofs
+  ADD COLUMN IF NOT EXISTS standardized_manufacturer_identifier text;
+ALTER TABLE commerce_offer_import_proofs
+  ADD COLUMN IF NOT EXISTS no_standardized_manufacturer_identifier boolean;
+ALTER TABLE commerce_offer_import_proofs
+  ADD COLUMN IF NOT EXISTS customs_declarant text;
+ALTER TABLE commerce_offer_import_proofs
+  ADD COLUMN IF NOT EXISTS customs_identifiers_transmission_confirmed boolean;
 
 -- Append-only audit of replaced/expired supplier attestations. The live
 -- table has one current proof per offer; this table retains older versions.
