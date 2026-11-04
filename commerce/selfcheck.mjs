@@ -52,6 +52,8 @@ assert.equal(await readWebhookBody(Object.assign(Readable.from(['id=tr_5B8cwPMGn
 await assert.rejects(readWebhookBody(Object.assign(Readable.from(['id=tr_one123456789&id=tr_two123456789']),{headers:{}})));
 
 const order={id:newOrderId(),supplier_vid:'92511400-C758-4474-93CA-66D442F5F787',
+  supplier_pid:'CJ-PRODUCT-ID',supplier_variant_sku:'CJ-VERIFIED-VARIANT',
+  supplier_product_sku:'CJ-VERIFIED-PRODUCT',
   logistics_name:'PostNL',from_country_code:'CN',supplier_max_usd_cents:2500};
 const payload=buildCjOrder(order,customer);
 assert.equal(payload.payType,2);
@@ -122,6 +124,29 @@ const supplierPreflight=async(url,options)=>{
   })};
   throw Error('unexpected preflight endpoint');
 };
+let badPinsRejectedBeforeStock=0;
+const badIdentityFetcher=async(url,options)=>{
+  badPinsRejectedBeforeStock++;
+  assert.ok(url.includes('/product/variant/queryByVid'),
+    'identity mismatch must not reach stock or shipping');
+  return {ok:true,json:async()=>({code:200,result:true,data:{
+    vid:order.supplier_vid,pid:'other-product',variantSku:'OTHER-SKU',
+    variantSellPrice:'11.30'
+  }})};
+};
+await assert.rejects(preflightCjDelivery({
+  vid:order.supplier_vid,originCountry:'CN',postalCode:'75002',
+  logisticsName:'PostNL',maxSupplierUsdCents:2500,
+  maxSupplierEurCents:2390,fxMaxEurPerUsdBps:10500,
+  expectedPid:order.supplier_pid,
+  expectedVariantSku:order.supplier_variant_sku,
+  expectedProductSku:order.supplier_product_sku,
+  accessToken:'a'.repeat(40),fetcher:badIdentityFetcher
+}),/PID or variant SKU changed/);
+assert.equal(badPinsRejectedBeforeStock,1);
+assert.throws(()=>buildCjOrder({...order,supplier_variant_sku:null},customer),
+  /identity snapshot missing/);
+
 const ready=await preflightCjDelivery({
   vid:order.supplier_vid,originCountry:'CN',postalCode:'75002',
   logisticsName:'PostNL',maxSupplierUsdCents:2500,
