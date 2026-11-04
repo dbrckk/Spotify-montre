@@ -21,6 +21,11 @@ const requiredFlags = [
 
 export function offerReadinessBlockers(offer, now=new Date()){
   const reasons=requiredFlags.filter(([field])=>offer?.[field]!==true).map(([,reason])=>reason);
+  // Match the SQL purchase predicate. A legacy unpinned supplier identity
+  // must produce a concrete blocker instead of an optimistic readiness report.
+  if(!['supplier_pid','supplier_variant_sku','supplier_product_sku'].every(
+    field=>typeof offer?.[field]==='string'&&/^[a-zA-Z0-9_-]{3,100}$/.test(offer[field])
+  ))reasons.push('supplier_identity_proof_missing');
   const cents=['amount_eur_cents','unit_cost_eur_cents',
     'supplier_landed_eur_ceiling_cents','reserves_eur_cents','supplier_max_usd_cents'];
   const allCentsValid=cents.every(field=>Number.isSafeInteger(offer?.[field]));
