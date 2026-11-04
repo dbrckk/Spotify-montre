@@ -90,4 +90,41 @@ await assert.rejects(discoverCjVariant({
   vid,postalCode:'75002',accessToken:'invalid',fetcher:fake
 }),/CJ-Access-Token unavailable/);
 assert.equal(calls.length,3,'Bad user inputs cannot call supplier');
+// Real CJ freightCalculate documents a simplified route response that may
+// supply logisticPrice without taxes/clearance/tariff. It must be visible in
+// diagnostics, NEVER accepted as fully landed cost or a purchasable route.
+const simpleCalls=[];
+const baseOnly=async(url,options)=>{
+  simpleCalls.push({url,method:options.method});
+  if(url.includes('/variant/queryByVid'))
+    return reply({vid,variantSellPrice:'0.50'});
+  if(url.includes('/stock/queryByVid'))
+    return reply([{vid,countryCode:'CN',cjInventoryNum:12}]);
+  if(url.endsWith('/logistic/freightCalculate'))
+    return reply(Array.from({length:13},(_,i)=>({
+      logisticName:'Carrier '+i,logisticPrice:'3.25',
+      logisticAging:'7-15'
+    })));
+  throw Error('Unexpected supplier endpoint');
+};
+const baseOnlyAudit=await discoverCjVariant({
+  vid,postalCode:'75002',accessToken:token,fetcher:baseOnly
+});
+assert.equal(baseOnlyAudit.stockConfirmed,true);
+assert.equal(baseOnlyAudit.shippingMethods.length,0,
+  'Simple carriage is not a valid paid checkout quote');
+assert.equal(baseOnlyAudit.excludedIncompleteShippingOptions,13);
+assert.deepEqual(baseOnlyAudit.shippingQuoteDiagnostics,{
+  optionsReturned:13,missingImportFields:13,missingShippingRate:0,
+  invalidCarrier:0,invalidAmounts:0,conflictingCarrierRates:0
+});
+assert.equal(baseOnlyAudit.shippingRouteSamples.length,8);
+assert.equal(baseOnlyAudit.shippingRouteSamples[0].baseShippingUsdCents,325);
+assert.deepEqual(baseOnlyAudit.shippingRouteSamples[0].missingImportFields,
+  ['taxesFee','clearanceOperationFee','tariff']);
+assert.equal(simpleCalls.length,3);
+assert.ok(!simpleCalls.some(x=>/shopping|createOrderV2/.test(x.url)));
+assert.equal(result.shippingQuoteDiagnostics.optionsReturned,5);
+assert.equal(result.shippingMethods.length,2,'Existing complete routes must still work');
+
 console.log('CJ discovery OK: real-API read shapes, safe tax-inclusive shipping, stock, no order writes and early reject');
