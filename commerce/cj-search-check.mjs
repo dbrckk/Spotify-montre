@@ -39,7 +39,8 @@ const fake=async(url,options)=>{
   }
   if(url.includes('/product/variant/queryByVid?')){
     const vid=new URL(url).searchParams.get('vid');
-    return response({vid,variantSku:'SKU-'+vid,variantNameEn:'Watch '+vid,
+    return response({vid,pid:vid===v1?p1:p2,
+      variantSku:'SKU-'+vid,variantNameEn:'Watch '+vid,
       variantSellPrice:vid===v1?'7.50':'10.50'});
   }
   if(url.includes('/product/stock/queryByVid?')){
@@ -134,7 +135,8 @@ const fallbackSupplier=async(url,options)=>{
   ]);
   if(path.endsWith('/product/variant/queryByVid')){
     const vid=new URL(url).searchParams.get('vid');
-    return response({vid,variantSku:vid===deliverable?'SK-1251-B':'SK-1251-A',
+    return response({vid,pid:p1,
+      variantSku:vid===deliverable?'SK-1251-B':'SK-1251-A',
       variantNameEn:vid===deliverable?'Black watch':'Blue watch',
       variantSellPrice:vid===deliverable?'7.00':'5.00'});
   }
@@ -178,7 +180,7 @@ const noInventory=async(url,options)=>{
   ]);
   if(path.endsWith('/product/variant/queryByVid')){
     const vid=new URL(url).searchParams.get('vid');
-    return response({vid,variantSellPrice:vid===cheaper?'5.00':'7.00'});
+    return response({vid,pid:p1,variantSellPrice:vid===cheaper?'5.00':'7.00'});
   }
   if(path.endsWith('/product/stock/queryByVid')){
     const vid=new URL(url).searchParams.get('vid');
@@ -223,7 +225,7 @@ const paged=async(url,options)=>{
   }
   if(path.endsWith('/product/variant/queryByVid')){
     const vid=parsed.searchParams.get('vid');
-    return response({vid,variantSellPrice:vid===thirdVid?'8.00':'5.00'});
+    return response({vid,pid:p2,variantSellPrice:vid===thirdVid?'8.00':'5.00'});
   }
   if(path.endsWith('/product/stock/queryByVid')){
     const vid=parsed.searchParams.get('vid');
@@ -254,5 +256,83 @@ await assert.rejects(searchCjWatchCandidates({keyword:'SKMEI',
   pageSize:101,postalCode:'75002',accessToken:token,fetcher:paged}),/pageSize/);
 await assert.rejects(searchCjWatchCandidates({keyword:'SKMEI',
   maxVariants:5,postalCode:'75002',accessToken:token,fetcher:paged}),/variant search limit/);
+
+// Real 2026-11-04 regression: listV2 PID and exact queryByVid PID
+// differed. Never attach the discovered VID to the wrong catalog product.
+const mismatchCalls=[];
+const mismatchFetcher=async(url,options)=>{
+  const path=new URL(url).pathname;
+  mismatchCalls.push(path);
+  if(path.endsWith('/product/listV2'))return response({content:[{productList:[
+    {id:p1,nameEn:'SKMEI sport watch',sku:'SKMEI-SAMPLE'}
+  ]}]});
+  if(path.endsWith('/product/variant/query'))return response([
+    {pid:p1,vid:v1,variantSku:'SAMPLE-BLACK',variantSellPrice:'3.00'}
+  ]);
+  if(path.endsWith('/product/variant/queryByVid'))return response({
+    vid:v1,pid:p2,variantSku:'SAMPLE-BLACK',variantSellPrice:'3.00'
+  });
+  throw Error('Stock/freight must never be requested for a mismatched PID');
+};
+const quarantined=await searchCjWatchCandidates({
+  keyword:'SKMEI',postalCode:'75002',accessToken:token,
+  fetcher:mismatchFetcher,maxProducts:1
+});
+assert.equal(quarantined.findings.length,1);
+assert.equal(quarantined.findings[0].state,'catalog_identity_mismatch');
+assert.equal(quarantined.findings[0].pid,p1);
+assert.equal(quarantined.findings[0].canonicalPid,p2);
+assert.equal(quarantined.findings[0].stockChecked,false);
+assert.equal(quarantined.findings[0].stockConfirmed,false);
+assert.equal(quarantined.findings[0].identityMismatches,1);
+assert.equal(quarantined.catalogIdentityMismatches,1);
+assert.equal(quarantined.findings[0].approvedForSale,false);
+assert.deepEqual(mismatchCalls.map(x=>x.split('/').slice(-2).join('/')),[
+  'product/listV2','variant/query','variant/queryByVid'
+]);
+assert.ok(mismatchCalls.every(x=>!/stock|freight|shopping/.test(x)));
+
+const mixedCalls=[];
+const mixed=async(url,options)=>{
+  const path=new URL(url).pathname;
+  mixedCalls.push(path);
+  if(path.endsWith('/product/listV2'))return response({content:[{productList:[
+    {id:p1,nameEn:'SKMEI digital watch',sku:'SKMEI-SAMPLE'}
+  ]}]});
+  if(path.endsWith('/product/variant/query'))return response([
+    {pid:p1,vid:v1,variantSellPrice:'1.00'},
+    {pid:p1,vid:v2,variantSellPrice:'2.00'}
+  ]);
+  if(path.endsWith('/product/variant/queryByVid')){
+    const vid=new URL(url).searchParams.get('vid');
+    return response({vid,pid:vid===v1?p2:p1,
+      variantSellPrice:vid===v1?'1.00':'2.00'});
+  }
+  if(path.endsWith('/product/stock/queryByVid')){
+    const vid=new URL(url).searchParams.get('vid');
+    assert.equal(vid,v2);
+    return response([{vid,countryCode:'CN',cjInventoryNum:4}]);
+  }
+  if(path.endsWith('/logistic/freightCalculate'))return response([
+    {logisticName:'Tracked FR',totalPostageFee:'4.50',
+      taxesFee:'0.50',clearanceOperationFee:'0.00',tariff:'0.00'}
+  ]);
+  throw Error('Unexpected endpoint during mixed identity test');
+};
+const recovered=await searchCjWatchCandidates({
+  keyword:'SKMEI',postalCode:'75002',accessToken:token,
+  fetcher:mixed,maxProducts:1,maxVariants:2
+});
+assert.equal(recovered.findings.length,1);
+assert.equal(recovered.findings[0].state,'sample_shipping_available');
+assert.equal(recovered.findings[0].vid,v2);
+assert.equal(recovered.findings[0].canonicalPid,p1);
+assert.equal(recovered.findings[0].catalogPidMatched,true);
+assert.equal(recovered.findings[0].identityMismatches,1);
+assert.equal(recovered.findings[0].productUsdCents,200);
+assert.equal(recovered.findings[0].shippingMethods[0].landedUsdCents,650);
+assert.equal(recovered.findings[0].approvedForSale,false);
+assert.equal(mixedCalls.length,7);
+assert.ok(mixedCalls.every(x=>!x.includes('/shopping/')));
 
 console.log('CJ discovery OK: real API payloads, paginated diverse variants, bounded fallback and no writes');
