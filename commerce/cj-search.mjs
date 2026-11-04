@@ -58,9 +58,9 @@ function extractCatalogProducts(data){
 }
 /**
  * Bounded, read-only, from-account CJ shortlist, designed for Android.
- * 1 listV2 + up to 2 variant/query + up to 4*(variant/stock/freight) = 15
- * provider requests in the worst case. A second VID is inspected only when
- * the cheaper one is not deliverable to the pilot French postcode.
+ * Default: one listing, two products and at most two VIDs per product.
+ * The separate global scanner can request deeper but bounded variant checks
+ * and reserves the maximum possible CJ API points before each page.
  * Everything is explicitly a sample, NOT an approved ecommerce offer.
  */
 export async function searchCjWatchCandidates({
@@ -118,9 +118,9 @@ export async function searchCjWatchCandidates({
         listedVariants:0,variantsChecked:0,approvedForSale:false});
       continue;
     }
-    // Cheapest does not mean deliverable. Check the next *distinct* affordable
-    // VID only if the first has no CN stock or complete French freight. Never
-    // inspect more than two VIDs for one product; conserve CJ points.
+    // Cheapest does not mean deliverable. Check further distinct affordable
+    // VIDs only while previous variants lack CN stock or complete French
+    // freight. The caller hard-caps depth at four VIDs (two by default).
     const distinct=[];
     const seenVids=new Set();
     for(const candidate of variants){
@@ -143,9 +143,9 @@ export async function searchCjWatchCandidates({
         break;
       }
     }
-    // If neither VID is deliverable, retain the stocked candidate when one
+    // If no checked VID is deliverable, retain the stocked candidate when one
     // exists, but label it NOT READY. Do not imply the entire product is
-    // unavailable: only these two supplier variants were inspected.
+    // unavailable: only the explicitly inspected supplier variants are known.
     const {candidate:selection,quote:inspected}=choice||firstStocked||firstChecked;
     // queryByVid is authoritative for exact variant identity and current unit
     // cost: a stale variant-list label must not overwrite this evidence.
