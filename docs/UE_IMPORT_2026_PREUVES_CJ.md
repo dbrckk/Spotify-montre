@@ -38,7 +38,7 @@ Le verrou s'applique au **pilote mono-montre, origine CN, France, prix TTC ≤ 1
 
 ## Mode opérateur privé
 
-Après réception et vérification **manuelle** d'une confirmation écrite CJ couvrant toutes les conditions, créer hors du dépôt un JSON contenant **exactement** les champs suivants : `offerId`, `supplierVid`, `supplierPid`, `supplierVariantSku`, `supplierProductSku`, `logisticsName`, `fromCountryCode` (`CN`), `destinationCountry` (`FR`), `consignmentValueEurCents`, `tariffCategories` (1), `flatDutyEurCents`, `unionHandlingEurCents`, `importVatCovered` (vrai uniquement si justifié), `carrierClearanceCovered`, `buyerExtraEurCents` (0), `landedEurQuoteCents`, `importPayer` (`SELLER` ou `SUPPLIER`), `validUntil` (horodatage UTC, maximum 7 jours) et `operatorReviewed` (vrai après vérification effective).
+Après réception et vérification **manuelle** d'une confirmation écrite CJ couvrant toutes les conditions, créer hors du dépôt un JSON contenant **exactement** les champs suivants : `offerId`, `supplierVid`, `supplierPid`, `supplierVariantSku`, `supplierProductSku`, `logisticsName`, `fromCountryCode` (`CN`), `destinationCountry` (`FR`), `consignmentValueEurCents`, `tariffCategories` (1), `flatDutyEurCents`, `unionHandlingEurCents`, `importVatCovered` (vrai uniquement si justifié), `carrierClearanceCovered`, `buyerExtraEurCents` (0), `landedEurQuoteCents`, `importPayer` (`SELLER` ou `SUPPLIER`), `validUntil` (horodatage UTC, maximum 7 jours), `operatorReviewed` (vrai après vérification effective), `merchantProductId` (M-PID C127 attribué par notre boutique), `supplierNonStandardProductId` (NS-PID C128 provenant réellement du fabricant/fournisseur), `standardizedManufacturerProductId` (S-PID C129 s’il existe, sinon `null`), `noStandardizedManufacturerId` (`true` uniquement si le fournisseur a confirmé l'absence de S-PID et la déclaration Y081 ; sinon `false`), `customsDeclarant` (opérateur douanier identifié) et `customsIdentifiersTransmissionConfirmed` (`true` seulement si la transmission C127/C128/C129 ou Y081 est confirmée par écrit).
 
 Ne pas saisir soi-même des valeurs manquantes du fournisseur ni déclarer `operatorReviewed=true` tant que le document n'a pas été authentifié. Le programme calcule l'empreinte SHA-256 du document ; ne pas introduire de champ `supplierEvidenceSha256` dans le JSON.
 
@@ -64,3 +64,15 @@ La douane française exige désormais des identifiants **M-PID** (attribué par 
 Source : [Direction générale des douanes, Mesures e-commerce européennes, mise à jour du 30 octobre 2026](https://www.douane.gouv.fr/fiche/mesures-e-commerce-europeennes).
 
 Cette étape douanière distincte **n'est pas encore attestée** pour les montres du catalogue. Les ventes restent désactivées tant qu'une conformité juridique et opérationnelle réelle n'est pas vérifiée.
+
+## Traçabilité produit obligatoire depuis le 1er novembre 2026
+
+La [DGDDI](https://www.douane.gouv.fr/fiche/mesures-e-commerce-europeennes) demande maintenant dans les déclarations d'importation e-commerce l'**identifiant marchand M-PID (C127)**, l'**identifiant fabricant/fournisseur non standardisé NS-PID (C128)** et l'**identifiant fabricant standardisé S-PID (C129)** lorsqu'il existe. Si ce dernier n'existe pas, le déclarant doit renseigner **Y081**. Le VID/PID interne de l'API CJ **ne se substitue pas** automatiquement à ces identifiants.
+
+Chaque attestation préalable à la vente doit désormais contenir les **six informations d'identité supplémentaires** décrites dans le mode opérateur. Aucune de ces informations ne peut être créée fictivement : le commerçant attribue son véritable M-PID à la montre ; le NS-PID vient du fournisseur ; le S-PID, ou son absence et Y081, sont confirmés par écrit. Le nom de l'opérateur qui déposera la déclaration et sa capacité à transmettre ces champs doivent également être attestés.
+
+Les données sont archivées dans la même chaîne de preuves SHA-256 que les frais d'import. Les anciennes attestations dont ces champs sont inconnus restent automatiquement **non éligibles**. Leur renouvellement passe par la procédure normale après expiration ; il ne réactive pas l'approbation de la montre.
+
+**Portée du contrôle :** il vérifie une *attestation préalable* décrivant la procédure de déclaration. Cela ne démontre pas qu'une déclaration douanière a réellement été déposée ou acceptée pour une commande future. Après expédition, le suivi devra conserver la référence de la déclaration réelle et sa conformité aux codes C127, C128 et C129/Y081. Ce contrôle ne doit jamais être présenté comme une attestation d'importation déjà réalisée.
+
+La preuve et les documents sources doivent rester hors du dépôt GitHub public. Aucun paiement, aucune commande fournisseur et aucune publication marchande n'est déclenché par leur enregistrement.
