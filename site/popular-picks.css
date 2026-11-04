@@ -453,3 +453,37 @@
   outline:3px solid #b9852b;
   outline-offset:3px;
 }
+
+
+/* Source-backed actions for the 37 supplemental watch product pages.
+   Real merchant links remain primary; this is an optional local-only tool. */
+.am-extra-local-tools[hidden],.am-extra-local-tools [hidden]{display:none!important}
+.am-extra-local-tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;margin:14px 0 0;padding:13px;
+  border:1px solid #d7dfd2;border-radius:10px;background:#f3f6f0}
+.am-extra-local-tools button{display:inline-flex;align-items:center;justify-content:center;
+  min-width:0;min-height:48px;padding:10px 12px;
+  border:1px solid #789482;border-radius:7px;background:#fffefa;color:#214b33;
+  font:750 13px/1.5 system-ui,sans-serif;text-align:center;cursor:pointer}
+.am-extra-local-tools button:hover{background:#e2eee1}
+.am-extra-local-tools .am-extra-favorite[aria-pressed=true]{
+  border-color:#28513a;background:#28513a;color:#fff}
+.am-extra-local-tools .am-extra-favorite[aria-pressed=true]:hover{
+  background:#1e412e}
+.am-extra-saved-link{grid-column:1/-1;justify-self:center;
+  color:#28513a;text-underline-offset:4px;font:650 12px/1.5 system-ui,sans-serif}
+.am-extra-action-status{grid-column:1/-1;margin:0;
+  font:650 12px/1.6 system-ui,sans-serif;color:#315b40}
+.am-extra-action-status:empty{display:none}
+.am-extra-copy-link{grid-column:1/-1;min-width:0;width:100%;box-sizing:border-box;
+  padding:10px;border:1px solid #819b87;border-radius:6px;color:#274532;
+  background:#fff;font:500 12px/1.5 system-ui,sans-serif}
+.am-extra-local-tools button:focus-visible,.am-extra-local-tools a:focus-visible,
+.am-extra-copy-link:focus-visible{outline:3px solid #b78b46;outline-offset:3px}
+@media(max-width:540px){
+  .am-extra-local-tools{grid-template-columns:1fr}
+  .am-extra-saved-link,.am-extra-action-status,.am-extra-copy-link{grid-column:1}
+}
+@media(prefers-reduced-motion:reduce){
+  .am-extra-local-tools button{transition:none!important}
+}
