@@ -5,14 +5,15 @@ Ce flux est réservé à l'exploitant. Il fonctionne **sans boutique Shopify** e
 ## Deux opérations disponibles
 
 1. `node commerce/stage-offer.mjs inspect /chemin/prive/candidat-reel.json` : le serveur interroge l'API CJ sur la variante précise, le stock du pays d'expédition, le transport vers le code postal échantillon et le solde disponible. Il affiche une simulation financière, sans écrire en base.
-2. `node commerce/stage-offer.mjs stage /chemin/prive/candidat-reel.json` : **relit obligatoirement le fournisseur CJ au moment précis de l'enregistrement** (variante, stock, frais de port/import et solde) puis ajoute une référence **brouillon et non vendable** dans PostgreSQL, accompagnée d'une ligne d'audit du devis. Une référence existante n'est jamais remplacée. La fonction de staging refuse un « plan » JSON de montants pré-calculés : elle doit obtenir un nouveau devis via l'API.
+2. `node commerce/stage-offer.mjs stage /chemin/prive/candidat-reel.json` : **relit obligatoirement le fournisseur CJ au moment précis de l'enregistrement** (variante, identité PID + deux SKU, stock, frais de port/import et solde) puis ajoute une référence **brouillon et non vendable** dans PostgreSQL, accompagnée d'une ligne d'audit du devis. Une référence existante n'est jamais remplacée. La fonction de staging refuse un « plan » JSON de montants pré-calculés : elle doit obtenir un nouveau devis via l'API.
 
 Le fichier privé contient **uniquement les données réelles provenant du fournisseur et du vendeur** :
 
 | Champ JSON | Justificatif et format attendu |
 | --- | --- |
 | `id`, `label` | Identifiant interne stable et désignation de la montre, sans informations personnelles |
-| `supplierVid`, `logisticsName`, `originCountry` | VID exact CJ, transporteur exact du devis CJ, code origine ISO à deux lettres |
+| `supplierVid`, `supplierPid`, `supplierVariantSku`, `supplierProductSku` | Identifiants CJ **exacts** : VID, PID parent officiel, SKU variante et SKU produit (vérifiés par `queryByVid` et `product/query`) |
+| `logisticsName`, `originCountry` | Transporteur exact du devis CJ, code origine ISO à deux lettres |
 | `samplePostalCode` | Code postal métropolitain utilisé **uniquement pour la simulation** ; ne vaut pas validation nationale |
 | `amountEurCents` | Prix de vente envisagé, TTC, en centimes |
 | `unitCostEurCents` | Borne prudente du coût unitaire fournisseur converti en EUR |
@@ -23,7 +24,7 @@ Le fichier privé contient **uniquement les données réelles provenant du fourn
 | `reservesEurCents` | Réserve pour frais de paiement, retours, SAV, chargebacks et charges variables non incluses |
 | `deliveryMinBusinessDays`, `deliveryMaxBusinessDays` | Délai fournisseur annoncé pour ce canal de livraison, en jours ouvrés |
 
-La structure exige ces **15 champs exactement**. Aucun numéro de compte, mot de passe, jeton d'API ni adresse client ne doit figurer dans le JSON. Le fichier réel doit rester **hors GitHub**.
+La structure exige ces **18 champs exactement**. Aucun numéro de compte, mot de passe, jeton d'API ni adresse client ne doit figurer dans le JSON. Le fichier réel doit rester **hors GitHub**.
 
 L'environnement du processus doit disposer de `CJ_ACCESS_TOKEN` pour les deux modes ; le mode `stage` exige aussi `DATABASE_URL`. Le jeton CJ sert uniquement aux appels de lecture, de devis de transport et de consultation de solde ; **aucun appel `createOrderV2` n'est effectué**. Le compte CJ doit disposer d'un solde suffisant même pour être qualifié à l'étape actuelle, puisqu'il s'agit d'un prérequis du parcours réel.
 
@@ -31,7 +32,7 @@ L'environnement du processus doit disposer de `CJ_ACCESS_TOKEN` pour les deux mo
 
 - Les prix fournisseur sont obtenus via les appels authentifiés déjà utilisés par le backend ; le coût rendu et son plafond sont comparés en USD **et** après taux maximum EUR/USD. Le prix de l'article lui-même ne doit pas être sous-évalué dans le dossier.
 - La marge estimée après TVA, plafond fournisseur et réserves doit représenter au moins **25 % du revenu vendeur net de TVA**. Une valeur manquante, incohérente ou non entière échoue immédiatement.
-- Aucun statut `approved`, `stock_confirmed`, `legal_verified`, `tax_treatment_verified` ou `supplier_fx_verified` n'est octroyé par l'importateur. Aucun `verified_until` n'est créé. Les autres contrôles de droit à l'image, conformité GPSR, retours, douane et transfert de données restent également non vérifiés.
+- Aucun statut `approved`, `stock_confirmed`, `legal_verified`, `tax_treatment_verified` ou `supplier_fx_verified` n'est octroyé par l'importateur. Aucun `verified_until` n'est créé. Les identifiants du produit parent et de sa variante sont conservés dans le brouillon puis figés sur chaque commande. Les anciennes offres dépourvues de ces preuves restent inéligibles. Leur simple approbation manuelle ne suffit pas. Les autres contrôles de droit à l'image, conformité GPSR, retours, douane et transfert de données restent également non vérifiés.
 - Le détail de la lecture CJ est consigné dans `commerce_offer_preflight_quotes` : montant du produit et du port en USD, total, taux plafond déclaré, plafond EUR calculé et **préfixe de deux chiffres** du code postal échantillon. Aucun secret ni adresse personnelle n'est enregistré.
 - La migration SQL est effectuée avant la qualification. Le plafond de change `supplier_fx_max_eur_per_usd_bps` est **obligatoirement** enregistré avec la référence et ne peut plus être écarté silencieusement sous prétexte d'une ancienne structure de base. L'échec d'écriture annule intégralement la transaction.
 - Le même identifiant d'offre ne peut jamais écraser une offre précédemment saisie ou déjà liée à des commandes.
@@ -63,3 +64,13 @@ Le pipeline `.github/workflows/commerce-check.yml` lance des validations réelle
 Avant de rendre une offre achetable, il reste indispensable d'apporter les documents de conformité et de livraison, la preuve du régime fiscal applicable, l'identité du vendeur, le droit aux images, les conditions de retour, une vérification du taux plafond et du prix fournisseur pour les régions réellement desservies, la trésorerie et une transaction de bout en bout contrôlée. Les comptes Mollie/CJ ne sont pas connectés ici ; aucune activation de `checkoutMode` n'est autorisée.
 
 **État actuel :** infrastructure d'intégration fournisseur préparée, mais **zéro modèle prétendument qualifié en production** tant que les API et justificatifs réels ne sont pas disponibles.
+
+## Contrôle d’identité fournisseur à chaque vente
+
+Le paiement Mollie ne peut pas être créé sans un nouvel appel CJ confirmant le VID, le PID officiel, le SKU variante et le SKU produit stockés dans l'offre. Le prix, le stock CN, le transport vers le vrai code postal français, les coûts d'import et le plafond EUR/USD doivent également être confirmés.
+
+Lors de la réservation, PostgreSQL copie les trois identifiants fournisseur dans la commande (snapshot). **Même si la fiche offre est modifiée ensuite**, l'expédition automatique relit la variante et le parent chez CJ et compare leurs identifiants à ceux de cette commande. Une divergence entraîne une exception ; jamais une commande fournisseur.
+
+Les enregistrements historiques dont `supplier_pid`, `supplier_variant_sku` ou `supplier_product_sku` sont absents restent inéligibles à l'achat et la soumission fournisseur. Aucun ancien produit ne reçoit automatiquement les identifiants d'un autre.
+
+**Attention :** cette preuve technique confirme les identifiants fournisseur, pas la propriété de la marque, la conformité GPSR, le paiement des taxes, les droits photographiques ni les garanties légales. Toutes ces vérifications restent indépendantes.
