@@ -123,7 +123,8 @@ assert.equal(missingWeightCalls.length,2);
 
 const missingTariff=await examineCjDetailedFreight({
   accessToken,vid,fetcher:async(url)=>{
-    if(url.includes('queryByVid'))return reply(variant);
+    if(new URL(url).pathname.endsWith('/product/variant/queryByVid'))
+      return reply(variant);
     if(url.includes('/product/query'))return reply(product);
     if(url.includes('/stock/'))return reply([{vid,countryCode:'CN',cjInventoryNum:1}]);
     if(url.includes('/freightCalculateTip'))return reply([
