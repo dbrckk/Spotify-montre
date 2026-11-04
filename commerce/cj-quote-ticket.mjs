@@ -35,7 +35,9 @@ function assertTicketPayload(){
   if(QUOTE_REFERENCE.length>64||QUOTE_SKU.length>100)
     throw Error('CJ ticket reference outside documented limits');
 }
-const id=value=>/^[1-9][0-9]{0,17}$/.test(String(value||''));
+// CJ documents long numeric IDs; JSON must carry an exact safe integer.
+const id=value=>/^[1-9][0-9]{0,15}$/.test(String(value??''))&&
+  Number.isSafeInteger(Number(value));
 const ticketId=value=>/^[a-zA-Z0-9_-]{1,64}$/.test(String(value||''));
 function selectConsultationCategory(types){
   if(!Array.isArray(types))throw Error('CJ_TICKET_TYPES_UNAVAILABLE');
@@ -50,15 +52,22 @@ function selectConsultationCategory(types){
       if(!Array.isArray(question.formFields))continue;
       // No fake order number or made-up mandatory form value.
       if(question.formFields.some(f=>f?.required===true))continue;
-      qualified.push({ticketTypeId:String(type.ticketTypeId),
-        questionTypeId:String(question.questionTypeId),
-        category:type.ticketTypeName.slice(0,75),
-        subject:question.questionTypeName.slice(0,75)});
+      const category=type.ticketTypeName.slice(0,75);
+      const subject=question.questionTypeName.slice(0,75);
+      const score= (/^service consultation$/i.test(category)?100:0)+
+        (/^fulfill?ment service consultation$/i.test(subject)?80:0)+
+        (/fulfil|logistic|shipping|import|customs/i.test(subject)?30:0);
+      qualified.push({ticketTypeId:Number(type.ticketTypeId),
+        questionTypeId:Number(question.questionTypeId),
+        category,subject,score});
     }
   }
-  // If two equally suitable categories exist, choose none rather than
-  // sending to a random supplier support queue.
-  if(qualified.length!==1)throw Error('CJ_TICKET_CATEGORY_NEEDS_REVIEW');
+  // Prefer the uniquely identified consultation workflow. Never guess
+  // numeric IDs, and never submit to tied/unknown supplier support queues.
+  qualified.sort((a,b)=>b.score-a.score);
+  if(!qualified.length||qualified.length>1&&
+     qualified[0].score===qualified[1].score)
+    throw Error('CJ_TICKET_CATEGORY_NEEDS_REVIEW');
   return qualified[0];
 }
 function createCaller(accessToken,fetcher){
@@ -91,10 +100,60 @@ function createCaller(accessToken,fetcher){
   };
 }
 
+// CJ ticket list supports pageSize<=100. Searching one page of 30 tickets
+// incorrectly treats a normal, active account as unserviceable. We inspect
+// at most 150 tickets in the selected account, never assume older history is
+// empty, and abort if pagination or the reported total is inconsistent.
+const HISTORY_PAGE_SIZE=50;
+const HISTORY_MAX=150;
+const CJ_STATES=new Set([
+  'AWAITING_CJ_REPLY','AWAITING_YOUR_REPLY','COMPLETED','EXPIRED',
+  'REVIEWED','ON_HOLD','COLLABORATING'
+]);
+async function findExistingQuoteTicket(call){
+  let total=null;
+  for(let pageNum=1;pageNum<=HISTORY_MAX/HISTORY_PAGE_SIZE;pageNum++){
+    const page=await call('/ticket/list',{method:'POST',body:{
+      pageNum,pageSize:HISTORY_PAGE_SIZE
+    }});
+    if(!page||!Array.isArray(page.list)||!Number.isSafeInteger(page.total)||
+      page.total<0||page.total>HISTORY_MAX||
+      (total!==null&&total!==page.total))
+      throw Error('CJ_TICKET_HISTORY_UNVERIFIED');
+    total=page.total;
+    const expected=Math.max(0,Math.min(HISTORY_PAGE_SIZE,
+      total-(pageNum-1)*HISTORY_PAGE_SIZE));
+    if(page.list.length!==expected)
+      throw Error('CJ_TICKET_HISTORY_UNVERIFIED');
+    for(const entry of page.list){
+      if(!ticketId(entry?.ticketId))throw Error('CJ_TICKET_HISTORY_UNVERIFIED');
+      const detail=await call('/ticket/detail?ticketId='+encodeURIComponent(entry.ticketId));
+      if(typeof detail?.message!=='string')
+        throw Error('CJ_TICKET_HISTORY_UNVERIFIED');
+      if(detail.message.includes(QUOTE_REFERENCE))
+        return {state:CJ_STATES.has(detail.status)?detail.status:
+          CJ_STATES.has(entry.status)?entry.status:'UNKNOWN'};
+    }
+    if(pageNum*HISTORY_PAGE_SIZE>=total)return null;
+  }
+  throw Error('CJ_TICKET_HISTORY_UNVERIFIED');
+}
+// Print only the supplier's normalized state; supplier replies, ticket IDs
+// and account details are never published in public GitHub Actions logs.
+export async function checkWrittenCjQuote({accessToken,fetcher=fetch}={}){
+  const call=createCaller(accessToken,fetcher);
+  const found=await findExistingQuoteTicket(call);
+  return {reference:QUOTE_REFERENCE,sku:QUOTE_SKU,
+    status:found?'ticket_found':'not_requested',
+    supplierStatus:found?.state??null,
+    operatorReviewRequired:Boolean(found&&found.state!=='AWAITING_CJ_REPLY'),
+    orderPlaced:false,walletDebited:false,
+    quoteApproved:false};
+}
 /**
  * Explicit manual support inquiry. Previews only read ticket types.
- * Sending first scans recent tickets and their bodies for our stable marker,
- * because CJ requestNo is a ~5-second guard, not a durable idempotency key.
+ * Sending scans paginated account history for our stable marker,
+ * because CJ requestNo is only a 5-second duplicate guard.
  * Never automatically retry a failed/timeout POST.
  */
 export async function requestWrittenCjQuote({accessToken,send=false,fetcher=fetch}={}){
@@ -106,18 +165,8 @@ export async function requestWrittenCjQuote({accessToken,send=false,fetcher=fetc
     category:category.category,subject:category.subject,
     orderPlaced:false,walletDebited:false};
   if(!send)return {...safe,status:'preview_only'};
-  const list=await call('/ticket/list',{method:'POST',body:{pageNum:1,pageSize:30}});
-  // A truncated list cannot rule out a previous request: no duplicate ticket.
-  if(!list||!Array.isArray(list.list)||!Number.isSafeInteger(list.total)||
-    list.total>30||list.total<list.list.length)
-    throw Error('CJ_TICKET_HISTORY_UNVERIFIED');
-  for(const entry of list.list){
-    if(!ticketId(entry?.ticketId))throw Error('CJ_TICKET_HISTORY_UNVERIFIED');
-    const detail=await call('/ticket/detail?ticketId='+encodeURIComponent(entry.ticketId));
-    if(typeof detail?.message!=='string')throw Error('CJ_TICKET_HISTORY_UNVERIFIED');
-    if(detail.message.includes(QUOTE_REFERENCE))
-      return {...safe,status:'already_requested'};
-  }
+  const existing=await findExistingQuoteTicket(call);
+  if(existing)return {...safe,status:'already_requested'};
   // The only POST with a side effect. No retries, even on timeout or 5xx.
   // Do not log the raw response or credentials in public GitHub Actions.
   const payload={ticketTypeId:category.ticketTypeId,
@@ -128,14 +177,16 @@ export async function requestWrittenCjQuote({accessToken,send=false,fetcher=fetc
 
 async function main(){
   const mode=process.argv[2]||'preview';
-  if(!['preview','send'].includes(mode)||process.argv.length>3)
-    throw Error('Use preview or send');
+  if(!['preview','send','status'].includes(mode)||process.argv.length>3)
+    throw Error('Use preview, send or status');
   const apiKey=process.env.CJ_API_KEY;
   if(!apiKey)throw Error('CJ_API_KEY_GITHUB_SECRET_MISSING');
   const token=await obtainCjAccessToken({apiKey});
   // CJ authentication also has a 1 req/s cap; allow it to settle.
   await new Promise(resolve=>setTimeout(resolve,1250));
-  const result=await requestWrittenCjQuote({accessToken:token,send:mode==='send'});
+  const result=mode==='status'?
+    await checkWrittenCjQuote({accessToken:token}):
+    await requestWrittenCjQuote({accessToken:token,send:mode==='send'});
   console.log(JSON.stringify(result));
 }
 if(process.argv[1]&&import.meta.url===new URL('file://'+process.argv[1]).href){
