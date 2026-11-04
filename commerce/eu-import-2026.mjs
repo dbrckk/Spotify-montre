@@ -13,6 +13,8 @@
 const ISO=/^\d{4}-\d{2}-\d{2}$/;
 const ID=/^[A-Za-z0-9_-]{3,100}$/;
 const HASH=/^[a-f0-9]{64}$/;
+const CUSTOMS_PID=/^[A-Za-z0-9][A-Za-z0-9._:/-]{2,99}$/;
+const DECLARANT=/^[^\r\n\x00-\x1f\x7f<>]{3,100}$/;
 const FEE_START='2026-11-01';
 const DUTY_START='2026-07-01';
 const DUTY_END='2028-07-01';
@@ -78,7 +80,10 @@ export function validateEuImportEvidence(value,offer,{now=new Date()}={}){
     'flatDutyEurCents','unionHandlingEurCents',
     'importVatCovered','carrierClearanceCovered','buyerExtraEurCents',
     'landedEurQuoteCents','importPayer',
-    'supplierEvidenceSha256','validUntil','operatorReviewed'
+    'supplierEvidenceSha256','validUntil','operatorReviewed',
+    'merchantProductId','supplierNonStandardProductId',
+    'standardizedManufacturerProductId','noStandardizedManufacturerId',
+    'customsDeclarant','customsIdentifiersTransmissionConfirmed'
   ];
   if(Object.keys(value).some(x=>!keys.includes(x))||
     keys.some(x=>!Object.hasOwn(value,x)))
@@ -114,7 +119,25 @@ export function validateEuImportEvidence(value,offer,{now=new Date()}={}){
     throw Error('Import VAT, carrier clearance and manual review unverified');
   if(v.importPayer!=='SELLER'&&v.importPayer!=='SUPPLIER')
     throw Error('Buyer cannot be import payer for all-in checkout');
-  validString(v.supplierEvidenceSha256,'Source digest',64,HASH);
+  // The 2026 customs declaration requires merchant C127, supplier C128
+  // and either manufacturer C129 or its documented absence Y081.
+  // These are NOT interchangeable with CJ's internal product UUIDs.
+  validString(v.merchantProductId,'Merchant customs product identifier',100,CUSTOMS_PID);
+  validString(v.supplierNonStandardProductId,
+    'Manufacturer/supplier non-standard identifier',100,CUSTOMS_PID);
+  validString(v.customsDeclarant,'Customs declarant',100,DECLARANT);
+  if(v.merchantProductId===v.supplierPid||
+    v.merchantProductId===v.supplierVid)
+    throw Error('Merchant customs product identifier cannot be a CJ internal ID');
+  const hasStandard=v.standardizedManufacturerProductId!==null;
+  if(hasStandard)validString(v.standardizedManufacturerProductId,
+    'Standardised manufacturer product identifier',100,CUSTOMS_PID);
+  if(typeof v.noStandardizedManufacturerId!=='boolean'||
+    v.noStandardizedManufacturerId===hasStandard)
+    throw Error('C129 manufacturer identifier or explicit Y081 absence required');
+  if(v.customsIdentifiersTransmissionConfirmed!==true)
+    throw Error('Customs declarant must confirm C127, C128 and C129/Y081 submission');
+    validString(v.supplierEvidenceSha256,'Source digest',64,HASH);
   const expires=timestamp(v.validUntil);
   const current=now instanceof Date?now:new Date(now);
   if(!Number.isFinite(current.getTime())||expires<=current||
@@ -143,6 +166,12 @@ export function validateEuImportEvidence(value,offer,{now=new Date()}={}){
     importPayer:v.importPayer,
     supplierEvidenceSha256:v.supplierEvidenceSha256,
     validUntil:v.validUntil,
+    merchantProductId:v.merchantProductId,
+    supplierNonStandardProductId:v.supplierNonStandardProductId,
+    standardizedManufacturerProductId:v.standardizedManufacturerProductId,
+    noStandardizedManufacturerId:v.noStandardizedManufacturerId,
+    customsDeclarant:v.customsDeclarant,
+    customsIdentifiersTransmissionConfirmed:true,
     sourceNotCryptographicallyAuthenticated:true,
     checkoutApproved:false
   };

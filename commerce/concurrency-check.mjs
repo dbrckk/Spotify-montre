@@ -57,11 +57,23 @@ try{
       'supplier_product_sku,logistics_name,consignment_value_eur_cents,'+
       'flat_duty_eur_cents,union_handling_eur_cents,buyer_extra_eur_cents,'+
       'landed_eur_quote_cents,import_payer,import_vat_covered,'+
-      'carrier_clearance_covered,supplier_evidence_sha256,valid_until) '+
+      'carrier_clearance_covered,supplier_evidence_sha256,valid_until,'+
+      'merchant_product_identifier,supplier_nonstandard_identifier,'+
+      'standardized_manufacturer_identifier,no_standardized_manufacturer_identifier,'+
+      'customs_declarant,customs_identifiers_transmission_confirmed) '+
       "VALUES($1,'ci-supplier-sku','ci-parent-pid','CI-VARIANT-SKU',"+
       "'CI-PRODUCT-SKU','ci-shipping',8000,300,200,0,1700,'SELLER',"+
-      "true,true,$2,now()+interval '1 day')",
+      "true,true,$2,now()+interval '1 day',"+
+      "'STORE-CONCURRENT-WATCH','MANUFACTURER-1251',NULL,true,'Synthetic customs declarant',true)",
     [offerId,'a'.repeat(64)]);
+  await pool.query(
+    'UPDATE commerce_offer_import_proofs SET merchant_product_identifier=supplier_pid '+
+    'WHERE offer_id=$1',[offerId]);
+  assert.equal(await getApprovedOffer(pool,offerId),null,
+    'CJ internal PID cannot substitute for seller M-PID C127');
+  await pool.query(
+    "UPDATE commerce_offer_import_proofs SET merchant_product_identifier='STORE-CONCURRENT-WATCH' "+
+    'WHERE offer_id=$1',[offerId]);
   const verifiedOffer=await getApprovedOffer(pool,offerId);
   assert.ok(verifiedOffer,'the test offer must pass the real purchase predicate');
   const verifiedOptions={...opts,verifiedOffer};

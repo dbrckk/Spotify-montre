@@ -46,7 +46,11 @@ export async function stageEuImportEvidence(pool,evidence,{now=new Date()}={}){
       result.logisticsName,result.consignmentValueEurCents,
       result.flatDutyEurCents,result.unionHandlingEurCents,
       result.buyerExtraEurCents,result.landedEurQuoteCents,
-      result.importPayer,result.supplierEvidenceSha256,result.validUntil
+      result.importPayer,result.supplierEvidenceSha256,result.validUntil,
+      result.merchantProductId,result.supplierNonStandardProductId,
+      result.standardizedManufacturerProductId,
+      result.noStandardizedManufacturerId,result.customsDeclarant,
+      result.customsIdentifiersTransmissionConfirmed
     ];
     let state='recorded_not_approved';
     if(previous){
@@ -57,7 +61,11 @@ export async function stageEuImportEvidence(pool,evidence,{now=new Date()}={}){
         'flat_duty_eur_cents','union_handling_eur_cents','buyer_extra_eur_cents',
         'landed_eur_quote_cents','import_payer','import_vat_covered',
         'carrier_clearance_covered','supplier_evidence_sha256',
-        'valid_until','recorded_at'
+        'valid_until','recorded_at',
+        'merchant_product_identifier','supplier_nonstandard_identifier',
+        'standardized_manufacturer_identifier',
+        'no_standardized_manufacturer_identifier','customs_declarant',
+        'customs_identifiers_transmission_confirmed'
       ];
       const archive=Object.fromEntries(archiveFields.map(field=>
         [field,previous[field]]));
@@ -76,8 +84,13 @@ export async function stageEuImportEvidence(pool,evidence,{now=new Date()}={}){
           'union_handling_eur_cents=$9,buyer_extra_eur_cents=$10,'+
           'landed_eur_quote_cents=$11,import_payer=$12,'+
           'import_vat_covered=true,carrier_clearance_covered=true,'+
-          'supplier_evidence_sha256=$13,valid_until=$14,recorded_at=now() '+
-          'WHERE offer_id=$1 AND supplier_evidence_sha256=$15 '+
+          'supplier_evidence_sha256=$13,valid_until=$14,'+
+          'merchant_product_identifier=$15,supplier_nonstandard_identifier=$16,'+
+          'standardized_manufacturer_identifier=$17,'+
+          'no_standardized_manufacturer_identifier=$18,'+
+          'customs_declarant=$19,customs_identifiers_transmission_confirmed=$20,'+
+          'recorded_at=now() '+
+          'WHERE offer_id=$1 AND supplier_evidence_sha256=$21 '+
           'AND valid_until<=now() RETURNING offer_id',
         [...fields,previous.supplier_evidence_sha256]
       );
@@ -98,8 +111,13 @@ export async function stageEuImportEvidence(pool,evidence,{now=new Date()}={}){
           'supplier_product_sku,logistics_name,consignment_value_eur_cents,'+
           'flat_duty_eur_cents,union_handling_eur_cents,buyer_extra_eur_cents,'+
           'landed_eur_quote_cents,import_payer,import_vat_covered,'+
-          'carrier_clearance_covered,supplier_evidence_sha256,valid_until) '+
-          'VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,true,true,$13,$14) '+
+          'carrier_clearance_covered,supplier_evidence_sha256,valid_until,'+
+          'merchant_product_identifier,supplier_nonstandard_identifier,'+
+          'standardized_manufacturer_identifier,'+
+          'no_standardized_manufacturer_identifier,customs_declarant,'+
+          'customs_identifiers_transmission_confirmed) '+
+          'VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,true,true,'+
+          '$13,$14,$15,$16,$17,$18,$19,$20) '+
           'ON CONFLICT(offer_id) DO NOTHING RETURNING offer_id',
         fields
       );

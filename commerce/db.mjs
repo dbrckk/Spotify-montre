@@ -45,6 +45,15 @@ export async function listApprovedOffers(pool){
           AND ip.supplier_variant_sku=commerce_offers.supplier_variant_sku
           AND ip.supplier_product_sku=commerce_offers.supplier_product_sku
           AND ip.logistics_name=commerce_offers.logistics_name
+          AND ip.merchant_product_identifier ~ '^[A-Za-z0-9][A-Za-z0-9._:/-]{2,99}$'
+          AND ip.merchant_product_identifier<>commerce_offers.supplier_pid
+          AND ip.merchant_product_identifier<>commerce_offers.supplier_vid
+          AND ip.supplier_nonstandard_identifier ~ '^[A-Za-z0-9][A-Za-z0-9._:/-]{2,99}$'
+          AND ((ip.standardized_manufacturer_identifier IS NULL AND ip.no_standardized_manufacturer_identifier=true)
+              OR (ip.standardized_manufacturer_identifier ~ '^[A-Za-z0-9][A-Za-z0-9._:/-]{2,99}$'
+                AND ip.no_standardized_manufacturer_identifier=false))
+          AND char_length(trim(ip.customs_declarant)) BETWEEN 3 AND 100
+          AND ip.customs_identifiers_transmission_confirmed=true
           AND ip.flat_duty_eur_cents>=300
           AND ip.union_handling_eur_cents>=200
           AND ip.import_vat_covered=true
@@ -95,6 +104,15 @@ export async function getApprovedOffer(pool,offerId){
           AND ip.supplier_variant_sku=commerce_offers.supplier_variant_sku
           AND ip.supplier_product_sku=commerce_offers.supplier_product_sku
           AND ip.logistics_name=commerce_offers.logistics_name
+          AND ip.merchant_product_identifier ~ '^[A-Za-z0-9][A-Za-z0-9._:/-]{2,99}$'
+          AND ip.merchant_product_identifier<>commerce_offers.supplier_pid
+          AND ip.merchant_product_identifier<>commerce_offers.supplier_vid
+          AND ip.supplier_nonstandard_identifier ~ '^[A-Za-z0-9][A-Za-z0-9._:/-]{2,99}$'
+          AND ((ip.standardized_manufacturer_identifier IS NULL AND ip.no_standardized_manufacturer_identifier=true)
+              OR (ip.standardized_manufacturer_identifier ~ '^[A-Za-z0-9][A-Za-z0-9._:/-]{2,99}$'
+                AND ip.no_standardized_manufacturer_identifier=false))
+          AND char_length(trim(ip.customs_declarant)) BETWEEN 3 AND 100
+          AND ip.customs_identifiers_transmission_confirmed=true
           AND ip.flat_duty_eur_cents>=300
           AND ip.union_handling_eur_cents>=200
           AND ip.import_vat_covered=true
@@ -170,6 +188,15 @@ export async function reserveCheckout(pool,request,{encryptionKey,idempotencySec
           AND ip.supplier_variant_sku=commerce_offers.supplier_variant_sku
           AND ip.supplier_product_sku=commerce_offers.supplier_product_sku
           AND ip.logistics_name=commerce_offers.logistics_name
+          AND ip.merchant_product_identifier ~ '^[A-Za-z0-9][A-Za-z0-9._:/-]{2,99}$'
+          AND ip.merchant_product_identifier<>commerce_offers.supplier_pid
+          AND ip.merchant_product_identifier<>commerce_offers.supplier_vid
+          AND ip.supplier_nonstandard_identifier ~ '^[A-Za-z0-9][A-Za-z0-9._:/-]{2,99}$'
+          AND ((ip.standardized_manufacturer_identifier IS NULL AND ip.no_standardized_manufacturer_identifier=true)
+              OR (ip.standardized_manufacturer_identifier ~ '^[A-Za-z0-9][A-Za-z0-9._:/-]{2,99}$'
+                AND ip.no_standardized_manufacturer_identifier=false))
+          AND char_length(trim(ip.customs_declarant)) BETWEEN 3 AND 100
+          AND ip.customs_identifiers_transmission_confirmed=true
           AND ip.flat_duty_eur_cents>=300
           AND ip.union_handling_eur_cents>=200
           AND ip.import_vat_covered=true
@@ -215,6 +242,13 @@ export async function reserveCheckout(pool,request,{encryptionKey,idempotencySec
         AND supplier_vid=$2 AND supplier_pid=$3
         AND supplier_variant_sku=$4 AND supplier_product_sku=$5
         AND logistics_name=$6
+        AND merchant_product_identifier ~ '^[A-Za-z0-9][A-Za-z0-9._:/-]{2,99}$'
+        AND merchant_product_identifier<>$3
+        AND merchant_product_identifier<>$2
+        AND supplier_nonstandard_identifier ~ '^[A-Za-z0-9][A-Za-z0-9._:/-]{2,99}$'
+        AND ((standardized_manufacturer_identifier IS NULL AND no_standardized_manufacturer_identifier=true) OR (standardized_manufacturer_identifier ~ '^[A-Za-z0-9][A-Za-z0-9._:/-]{2,99}$' AND no_standardized_manufacturer_identifier=false))
+        AND char_length(trim(customs_declarant)) BETWEEN 3 AND 100
+        AND customs_identifiers_transmission_confirmed=true
         AND flat_duty_eur_cents>=300
         AND union_handling_eur_cents>=200
         AND import_vat_covered=true
@@ -407,6 +441,15 @@ export async function authorizeSupplierSubmission(pool,order,verified){
         AND ip.supplier_variant_sku=o.supplier_variant_sku
         AND ip.supplier_product_sku=o.supplier_product_sku
         AND ip.logistics_name=o.logistics_name
+        AND ip.merchant_product_identifier ~ '^[A-Za-z0-9][A-Za-z0-9._:/-]{2,99}$'
+        AND ip.merchant_product_identifier<>o.supplier_pid
+        AND ip.merchant_product_identifier<>o.supplier_vid
+        AND ip.supplier_nonstandard_identifier ~ '^[A-Za-z0-9][A-Za-z0-9._:/-]{2,99}$'
+        AND ((ip.standardized_manufacturer_identifier IS NULL AND ip.no_standardized_manufacturer_identifier=true)
+            OR (ip.standardized_manufacturer_identifier ~ '^[A-Za-z0-9][A-Za-z0-9._:/-]{2,99}$'
+              AND ip.no_standardized_manufacturer_identifier=false))
+        AND char_length(trim(ip.customs_declarant)) BETWEEN 3 AND 100
+        AND ip.customs_identifiers_transmission_confirmed=true
         AND ip.flat_duty_eur_cents>=300
         AND ip.union_handling_eur_cents>=200
         AND ip.import_vat_covered=true

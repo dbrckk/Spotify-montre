@@ -52,13 +52,27 @@ const evidence={
   importVatCovered:true,carrierClearanceCovered:true,
   buyerExtraEurCents:0,landedEurQuoteCents:1700,importPayer:'SUPPLIER',
   supplierEvidenceSha256:'a'.repeat(64),validUntil:'2026-11-06T12:00:00Z',
-  operatorReviewed:true
+  operatorReviewed:true,
+  merchantProductId:'STORE-WATCH-001',
+  supplierNonStandardProductId:'FACTORY-MODEL-1251',
+  standardizedManufacturerProductId:null,
+  noStandardizedManufacturerId:true,
+  customsDeclarant:'Synthetic declarations provider',
+  customsIdentifiersTransmissionConfirmed:true
 };
 const now=new Date('2026-11-04T12:00:00Z');
 const reviewed=validateEuImportEvidence(evidence,offer,{now});
 assert.equal(reviewed.checkoutApproved,false);
 assert.equal(reviewed.sourceNotCryptographicallyAuthenticated,true);
 assert.equal(reviewed.flatDutyEurCents,300);
+assert.equal(reviewed.merchantProductId,'STORE-WATCH-001');
+assert.equal(reviewed.supplierNonStandardProductId,'FACTORY-MODEL-1251');
+assert.equal(reviewed.noStandardizedManufacturerId,true);
+const spid=validateEuImportEvidence({
+  ...evidence,standardizedManufacturerProductId:'GTIN-123456789',
+  noStandardizedManufacturerId:false
+},offer,{now});
+assert.equal(spid.standardizedManufacturerProductId,'GTIN-123456789');
 for(const change of [
   {supplierPid:'other-parent'},{supplierVid:'fake-variant'},
   {supplierProductSku:'other-sku'},{logisticsName:'Unquoted transport'},
@@ -70,11 +84,20 @@ for(const change of [
   {supplierEvidenceSha256:'not a checksum'},
   {validUntil:'2026-11-04T11:59:59Z'},
   {validUntil:'2026-12-01T12:00:00Z'},
-  {tariffCategories:2}
+  {tariffCategories:2},
+  {merchantProductId:offer.supplier_pid},
+  {merchantProductId:offer.supplier_vid},
+  {merchantProductId:'bad ID'},
+  {supplierNonStandardProductId:null},
+  {standardizedManufacturerProductId:null,noStandardizedManufacturerId:false},
+  {standardizedManufacturerProductId:'GTIN-123',noStandardizedManufacturerId:true},
+  {noStandardizedManufacturerId:'Y081'},
+  {customsDeclarant:'unknown\ncontact'},
+  {customsIdentifiersTransmissionConfirmed:false}
 ]){
   assert.throws(()=>validateEuImportEvidence({...evidence,...change},offer,{now}));
 }
 assert.throws(()=>validateEuImportEvidence(
   {...evidence,secretCJKey:'never accepted'},offer,{now}
 ),/Exact import evidence fields/);
-console.log('EU import 2026 OK: €3 flat duty, €2 handling, 1 watch category and strict source review');
+console.log('EU import 2026 OK: €3 duty, €2 handling and strict C127/C128/C129-or-Y081 documentary review');
