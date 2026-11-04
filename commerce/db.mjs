@@ -94,7 +94,7 @@ export async function findExistingCheckout(pool,request,{idempotencySecret}){
     throw new ClientError('Cette référence est déjà utilisée avec un autre panier',409);
   return restoredCheckoutState(order,recoveryToken(idempotencySecret,request.idempotencyKey));
 }
-export async function reserveCheckout(pool,request,{encryptionKey,idempotencySecret}){
+export async function reserveCheckout(pool,request,{encryptionKey,idempotencySecret,verifiedOffer}){
   const token=recoveryToken(idempotencySecret,request.idempotencyKey);
   const idempotencyHash=hmac(idempotencySecret,request.idempotencyKey);
   const requestHash=checkoutFingerprint(request);
@@ -135,6 +135,18 @@ export async function reserveCheckout(pool,request,{encryptionKey,idempotencySec
     `,[request.offerId]);
     const offer=result.rows[0];
     if(!offer)throw new ClientError('Cette montre n’est pas disponible pour un achat direct',409);
+    // One authenticated provider quote was obtained for verifiedOffer BEFORE
+    // entering this transaction. A concurrent offer edit invalidates that
+    // observation: do not reserve a payment for a changed SKU, price or rate.
+    const quotedFields=[
+      'id','label','amount_eur_cents','supplier_vid','supplier_pid',
+      'supplier_variant_sku','supplier_product_sku','supplier_max_usd_cents',
+      'logistics_name','from_country_code','supplier_landed_eur_ceiling_cents',
+      'supplier_fx_max_eur_per_usd_bps','delivery_min_business_days',
+      'delivery_max_business_days'
+    ];
+    if(!verifiedOffer||quotedFields.some(field=>offer[field]!==verifiedOffer[field]))
+      throw new ClientError('Offre modifiée depuis le devis fournisseur. Nouveau contrôle requis.',409);
     try{validateCommercialCeiling(offer)}
     catch{throw new ClientError('Offre commercialement indisponible',409)}
     // A single pilot purchase at a time per supplier SKU prevents overselling
