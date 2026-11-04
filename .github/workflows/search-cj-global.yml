@@ -1,12 +1,6 @@
 name: Recherche globale des montres CJ (sans achat)
 
 on:
-  # One recovery run when this scanner fix lands on main.
-  # Remove this trigger after the real supplier report is inspected.
-  push:
-    branches: [main]
-    paths:
-      - 'commerce/cj-global.mjs'
   workflow_dispatch:
     inputs:
       postal_code:
