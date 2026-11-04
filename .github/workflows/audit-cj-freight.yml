@@ -1,0 +1,33 @@
+name: Diagnostiquer un devis CJ ciblé (sans achat)
+
+on:
+  # One-time audit after integration. This push trigger will be removed
+  # after the supplier result has been inspected.
+  push:
+    branches: [main]
+    paths:
+      - 'commerce/audit-cj-freight.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cj-single-freight-audit
+  cancel-in-progress: false
+
+jobs:
+  target-freight-read-only:
+    if: github.repository == 'dbrckk/Spotify-montre' && (github.actor == 'dbrckk' || github.event_name == 'push')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Lire seulement variante, stock CN et devis FR (3 requetes maximum)
+        env:
+          CJ_API_KEY: ${{ secrets.CJ_API_KEY }}
+          CJ_ACCESS_TOKEN: ${{ secrets.CJ_ACCESS_TOKEN }}
+        run: node commerce/audit-cj-freight.mjs
