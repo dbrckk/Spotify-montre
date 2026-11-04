@@ -18,7 +18,8 @@ const text=(v,name,min,max,re)=>{
 const required=[
   'id','label','amountEurCents','unitCostEurCents','supplierLandedEurCeilingCents',
   'reservesEurCents','vatRateBps','supplierMaxUsdCents','fxMaxEurPerUsdBps',
-  'supplierVid','logisticsName','originCountry','samplePostalCode',
+  'supplierVid','supplierPid','supplierVariantSku','supplierProductSku',
+  'logisticsName','originCountry','samplePostalCode',
   'deliveryMinBusinessDays','deliveryMaxBusinessDays'
 ];
 export function validateOfferCandidate(value){
@@ -29,6 +30,9 @@ export function validateOfferCandidate(value){
   text(c.id,'id',4,64,/^[a-z0-9-]+$/);
   text(c.label,'label',4,180,/^[^\r\n]+$/);
   text(c.supplierVid,'supplierVid',3,100,/^[a-zA-Z0-9_-]+$/);
+  text(c.supplierPid,'supplierPid',3,100,/^[a-zA-Z0-9_-]+$/);
+  text(c.supplierVariantSku,'supplierVariantSku',3,100,/^[a-zA-Z0-9_-]+$/);
+  text(c.supplierProductSku,'supplierProductSku',3,100,/^[a-zA-Z0-9_-]+$/);
   text(c.logisticsName,'logisticsName',3,50,/^[^\r\n]+$/);
   text(c.originCountry,'originCountry',2,2,/^[A-Z]{2}$/);
   text(c.samplePostalCode,'samplePostalCode',5,5,/^[0-9]{5}$/);
@@ -55,6 +59,10 @@ export function qualifyObservedCjQuote(candidate,quote){
   if(!quote||typeof quote!=='object')throw Error('A real CJ API quote is required');
   for(const field of ['productUsdCents','freightUsdCents','landedUsdCents','balanceUsdCents'])
     integer(quote[field],'CJ '+field,0,1_000_000_000);
+  if(quote.supplierPid!==c.supplierPid||
+    quote.supplierVariantSku!==c.supplierVariantSku||
+    quote.supplierProductSku!==c.supplierProductSku)
+    throw Error('Supplier canonical PID or SKU identity changed');
   if(quote.productUsdCents<=0||quote.stockConfirmed!==true||
     quote.logisticsName!==c.logisticsName||
     quote.productUsdCents+quote.freightUsdCents!==quote.landedUsdCents)
@@ -97,6 +105,9 @@ export async function stageQualifiedOffer(pool,candidate,{accessToken,fetcher}={
     throw Error('A CJ access token is required for live supplier re-verification');
   const quote=await preflightCjDelivery({
     vid:c.supplierVid,originCountry:c.originCountry,
+    expectedPid:c.supplierPid,
+    expectedVariantSku:c.supplierVariantSku,
+    expectedProductSku:c.supplierProductSku,
     postalCode:c.samplePostalCode,logisticsName:c.logisticsName,
     maxSupplierUsdCents:c.supplierMaxUsdCents,
     maxSupplierEurCents:c.supplierLandedEurCeilingCents,
@@ -109,17 +120,20 @@ export async function stageQualifiedOffer(pool,candidate,{accessToken,fetcher}={
     await client.query('BEGIN');
     const params=[c.id,c.label,c.amountEurCents,c.unitCostEurCents,
       c.supplierLandedEurCeilingCents,c.vatRateBps,c.reservesEurCents,
-      c.supplierMaxUsdCents,c.supplierVid,c.logisticsName,c.originCountry,
+      c.supplierMaxUsdCents,c.supplierVid,c.supplierPid,
+      c.supplierVariantSku,c.supplierProductSku,
+      c.logisticsName,c.originCountry,
       c.deliveryMinBusinessDays,c.deliveryMaxBusinessDays,c.fxMaxEurPerUsdBps];
     // Drafts must remain unapproved even if an attacker tampers with the JSON.
     const inserted=await client.query(`
       INSERT INTO commerce_offers(id,label,amount_eur_cents,unit_cost_eur_cents,
         supplier_landed_eur_ceiling_cents,vat_rate_bps,reserves_eur_cents,
-        supplier_max_usd_cents,supplier_vid,logistics_name,from_country_code,
-        delivery_min_business_days,delivery_max_business_days,
+        supplier_max_usd_cents,supplier_vid,supplier_pid,
+        supplier_variant_sku,supplier_product_sku,logistics_name,
+        from_country_code,delivery_min_business_days,delivery_max_business_days,
         supplier_fx_max_eur_per_usd_bps,approved,
         stock_confirmed,legal_verified,tax_treatment_verified,supplier_fx_verified)
-      VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,
+      VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,
         false,false,false,false,false)
       ON CONFLICT(id) DO NOTHING
       RETURNING id
