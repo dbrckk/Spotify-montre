@@ -30,6 +30,12 @@ function validOrder(order,customer){
   if(!/^ord_[a-f0-9]{40}$/.test(order?.id||''))throw Error('Invalid internal supplier order reference');
   if(typeof order.supplier_vid!=='string'||!/^[\w-]{3,100}$/.test(order.supplier_vid))
     throw Error('CJ variant not verified');
+  // Never allow a supplier purchase from a legacy order with no identity
+  // snapshots, even if somebody skips the earlier checkout preflight.
+  for(const key of ['supplier_pid','supplier_variant_sku','supplier_product_sku']){
+    if(typeof order[key]!=='string'||!/^[a-zA-Z0-9_-]{3,100}$/.test(order[key]))
+      throw Error('CJ supplier identity snapshot missing');
+  }
   if(typeof order.logistics_name!=='string'||order.logistics_name.length<3||order.logistics_name.length>50)
     throw Error('CJ logistics method not verified');
   if(!/^[A-Z]{2}$/.test(order.from_country_code))throw Error('Shipping origin not verified');
@@ -52,14 +58,29 @@ async function api(path,token,{method='GET',body,fetcher=fetch}={}){
 // Refuse payment before an up-to-date inventory and French postage quote exists.
 export async function preflightCjDelivery({vid,originCountry='CN',postalCode,
   logisticsName,maxSupplierUsdCents,maxSupplierEurCents,fxMaxEurPerUsdBps,
-  accessToken,fetcher=fetch}){
+  expectedPid,expectedVariantSku,expectedProductSku,accessToken,fetcher=fetch}){
   if(!/^[a-zA-Z0-9_-]{3,100}$/.test(vid||'')||!/^[A-Z]{2}$/.test(originCountry||'')
     ||!/^[0-9]{5}$/.test(postalCode||'')||!/^[^\r\n]{3,50}$/.test(logisticsName||''))
     throw Error('Supplier or delivery data invalid');
   if(!Number.isSafeInteger(maxSupplierUsdCents)||maxSupplierUsdCents<=0)throw Error('Supplier limit absent');
+  // Legacy tests may omit identity pins. The live checkout and supplier worker
+  // always pass all three pins from the offer/order snapshots.
+  const pins=[expectedPid,expectedVariantSku,expectedProductSku];
+  const pinned=pins.some(x=>x!==undefined);
+  if(pinned&&!pins.every(x=>typeof x==='string'&&
+    /^[a-zA-Z0-9_-]{3,100}$/.test(x)))
+    throw Error('Complete pinned CJ parent and SKU identity required');
   const variant=await api('/product/variant/queryByVid?vid='+encodeURIComponent(vid),
     accessToken,{fetcher});
   if(variant?.vid!==vid)throw Error('Supplier variant identity mismatch');
+  if(pinned){
+    if(variant.pid!==expectedPid||variant.variantSku!==expectedVariantSku)
+      throw Error('Supplier PID or variant SKU changed: refuse payment');
+    const parent=await api('/product/query?pid='+encodeURIComponent(expectedPid),
+      accessToken,{fetcher});
+    if(parent?.pid!==expectedPid||parent?.productSku!==expectedProductSku)
+      throw Error('Supplier parent product SKU changed: refuse payment');
+  }
   const productCostUsdCents=usdToCents(variant.variantSellPrice);
   if(productCostUsdCents<=0)throw Error('Supplier product price unavailable');
   const stock=await api('/product/stock/queryByVid?vid='+encodeURIComponent(vid),
@@ -89,6 +110,9 @@ export async function preflightCjDelivery({vid,originCountry='CN',postalCode,
   return {productUsdCents:productCostUsdCents,freightUsdCents:shippingAndTaxes,
     landedUsdCents,upperLandedEurCents:fx.upperEurCents,
     balanceUsdCents:balance,freightBreakdown,
+    supplierPid:pinned?expectedPid:null,
+    supplierVariantSku:pinned?expectedVariantSku:null,
+    supplierProductSku:pinned?expectedProductSku:null,
     logisticsName,stockConfirmed:true};
 }
 
