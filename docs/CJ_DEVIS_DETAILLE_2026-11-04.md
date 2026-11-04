@@ -29,3 +29,18 @@ Documentation CJ :
 - https://developers.cjdropshipping.com/en/api/api2/standard/ps-product-property.html
 
 Après le premier résultat fournisseur, le déclenchement automatique ponctuel sera supprimé. Ne jamais recommencer une recherche globale coûteuse pour examiner une seule référence.
+
+## Correction : identité officielle de la variante (PR suivante)
+
+L'essai [41825878114](https://github.com/dbrckk/Spotify-montre/actions/runs/41825878114) a échoué sur `CJ_DETAIL_VARIANT_ID_MISMATCH` : le PID fourni par le listing global divergeait du PID de l'endpoint de variante exacte. **Ce décalage ne valide pas une autre montre.**
+
+Le flux corrigé :
+
+1. `GET /product/variant/queryByVid?vid=...` retrouve le **PID parent officiel** et le SKU/poids/prix du VID demandé. Un VID inattendu entraîne un arrêt.
+2. Le SKU de la variante doit être exactement `CJZBNSET00031-black` pour cet audit ; sinon arrêt.
+3. `GET /product/query?pid=<PID officiel>` récupère les caractéristiques logistiques du parent officiel. Son `productSku` doit être exactement `CJZBNSET00031`, sinon arrêt.
+4. Si la liste des variantes dans la fiche contredit le VID ou SKU officiel, le calcul est refusé ; si elle omet simplement le VID, la réponse `queryByVid` fait foi pour cette variante exacte.
+5. Contrôle de stock CN, puis calcul de transport détaillé avec poids **déclaré par CJ**, arrondi conservativement au gramme supérieur pour le calcul ; les volumes ne sont convertis de mm³ en cm³ que s'ils sont présents.
+6. Devis complet, transporteur et importation **ne sont jamais présumés** : les tarifs restent purement indicatifs sans confirmation et ne sont pas publiés comme prix achetables.
+
+Le PID ancien issu du catalogue demeure un **indice de provenance** et le rapport précise s'il correspond au parent officiel, sans imposer un rapprochement trompeur. Aucun achat, paiement ou modification du panier n'est déclenché par ce contrôle. La requête réelle reste strictement ciblée sur le VID et le code postal d'échantillon.
