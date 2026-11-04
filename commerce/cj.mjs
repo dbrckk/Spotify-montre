@@ -134,6 +134,7 @@ export async function discoverCjVariant({vid,postalCode,originCountry='CN',
     stockConfirmed,warehouseRows:warehouseRows.length,
     sampleOnly:true,approvedForSale:false,requiresLegalReview:true,
     shippingMethods:[],excludedIncompleteShippingOptions:0,
+    shippingQuoteDiagnostics:null,shippingRouteSamples:[],
     notice:'Read-only CJ estimate for one postcode: not a verified watch, seller offer, tax conclusion or checkout approval.'
   };
   // Avoid spending further CJ API points on transport when supplier has no stock.
@@ -145,10 +146,39 @@ export async function discoverCjVariant({vid,postalCode,originCountry='CN',
   if(!Array.isArray(raw))throw Error('CJ freight payload invalid');
   const byName=new Map();
   let incomplete=0;
+  // Only fixed diagnostic keys and public courier names are reported. Never
+  // serialize raw CJ objects: unknown fields may contain private data.
+  const diagnostics={optionsReturned:raw.length,missingImportFields:0,
+    missingShippingRate:0,invalidCarrier:0,invalidAmounts:0,
+    conflictingCarrierRates:0};
+  const routeSamples=[];
+  const absent=value=>value===undefined||value===null||value==='';
   for(const method of raw){
     const name=method?.logisticName;
     if(typeof name!=='string'||name.length<3||name.length>50||
       /[\u0000-\u001f\u007f]/.test(name)){
+      diagnostics.invalidCarrier++;
+      incomplete++;continue;
+    }
+    const missingImport=['taxesFee','clearanceOperationFee','tariff']
+      .filter(key=>absent(method?.[key]));
+    const noRate=absent(method?.totalPostageFee)&&absent(method?.logisticPrice);
+    let baseShippingUsdCents=null;
+    if(!absent(method?.logisticPrice)){
+      try{baseShippingUsdCents=usdToCents(method.logisticPrice)}catch{}
+    }
+    // baseShippingUsdCents is NOT an all-in postage/tax quote.
+    const sample={carrier:name,baseShippingUsdCents,
+      missingImportFields:missingImport,
+      validation:missingImport.length?'missing_import_fields':
+        noRate?'missing_shipping_rate':'needs_validation'};
+    if(routeSamples.length<8)routeSamples.push(sample);
+    if(missingImport.length){
+      diagnostics.missingImportFields++;
+      incomplete++;continue;
+    }
+    if(noRate){
+      diagnostics.missingShippingRate++;
       incomplete++;continue;
     }
     try{
@@ -166,17 +196,24 @@ export async function discoverCjVariant({vid,postalCode,originCountry='CN',
         const old=byName.get(name);
         if(old&&old.landedUsdCents!==entry.landedUsdCents){
           byName.set(name,null);
+          diagnostics.conflictingCarrierRates++;
           incomplete++;
         }
       }else byName.set(name,entry);
-    }catch{incomplete++;}
+    }catch{
+      diagnostics.invalidAmounts++;
+      incomplete++;
+      if(routeSamples.length&&routeSamples[routeSamples.length-1]===sample)
+        sample.validation='invalid_or_inconsistent_amounts';
+    }
   }
   const methods=[...byName.values()].filter(Boolean);
   methods.sort((a,b)=>a.landedUsdCents-b.landedUsdCents||
     a.logisticsName.localeCompare(b.logisticsName));
   return {...base,shippingMethods:methods.slice(0,12),
     shippingMethodsAvailable:methods.length,
-    excludedIncompleteShippingOptions:incomplete};
+    excludedIncompleteShippingOptions:incomplete,
+    shippingQuoteDiagnostics:diagnostics,shippingRouteSamples:routeSamples};
 }
 
 export async function getCjBalance({accessToken,fetcher=fetch}){
