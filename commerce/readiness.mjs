@@ -26,6 +26,8 @@ export function offerReadinessBlockers(offer, now=new Date()){
   if(!['supplier_pid','supplier_variant_sku','supplier_product_sku'].every(
     field=>typeof offer?.[field]==='string'&&/^[a-zA-Z0-9_-]{3,100}$/.test(offer[field])
   ))reasons.push('supplier_identity_proof_missing');
+  if(offer?.eu_import_proof_ready!==true)
+    reasons.push('eu_2026_import_proof_missing_or_expired');
   const cents=['amount_eur_cents','unit_cost_eur_cents',
     'supplier_landed_eur_ceiling_cents','reserves_eur_cents','supplier_max_usd_cents'];
   const allCentsValid=cents.every(field=>Number.isSafeInteger(offer?.[field]));
@@ -83,8 +85,26 @@ export function merchantConfigurationChecks(env={},siteConfig={}){
 export async function commercialReadinessReport(pool,{env={},siteConfig={},now=new Date()}={}){
   const {rows}=await pool.query(`
     SELECT o.*,coalesce(q.quote_count,0)::integer AS quote_count,
-      q.last_checked_at
+      q.last_checked_at,
+      (ip.offer_id IS NOT NULL
+        AND o.from_country_code='CN'
+        AND o.amount_eur_cents<=15000
+        AND ip.supplier_vid=o.supplier_vid
+        AND ip.supplier_pid=o.supplier_pid
+        AND ip.supplier_variant_sku=o.supplier_variant_sku
+        AND ip.supplier_product_sku=o.supplier_product_sku
+        AND ip.logistics_name=o.logistics_name
+        AND ip.flat_duty_eur_cents>=300
+        AND ip.union_handling_eur_cents>=200
+        AND ip.import_vat_covered=true
+        AND ip.carrier_clearance_covered=true
+        AND ip.buyer_extra_eur_cents=0
+        AND ip.landed_eur_quote_cents<=o.supplier_landed_eur_ceiling_cents
+        AND ip.valid_until>now()
+        AND ip.recorded_at>now()-interval '7 days'
+      ) AS eu_import_proof_ready
     FROM commerce_offers o
+    LEFT JOIN commerce_offer_import_proofs ip ON ip.offer_id=o.id
     LEFT JOIN (
       SELECT offer_id,count(*) AS quote_count,max(checked_at) AS last_checked_at
       FROM commerce_offer_preflight_quotes GROUP BY offer_id

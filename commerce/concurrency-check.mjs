@@ -49,6 +49,19 @@ try{
     "SELECT 1 FROM information_schema.columns WHERE table_schema=current_schema() AND table_name='commerce_offers' AND column_name='supplier_fx_max_eur_per_usd_bps'");
   if(fxColumn.rowCount)
     await pool.query('UPDATE commerce_offers SET supplier_fx_max_eur_per_usd_bps=10500 WHERE id=$1',[offerId]);
+  assert.equal(await getApprovedOffer(pool,offerId),null,
+    'An approved offer must be hidden before customs/handling evidence exists');
+  await pool.query(
+    'INSERT INTO commerce_offer_import_proofs ('+
+      'offer_id,supplier_vid,supplier_pid,supplier_variant_sku,'+
+      'supplier_product_sku,logistics_name,consignment_value_eur_cents,'+
+      'flat_duty_eur_cents,union_handling_eur_cents,buyer_extra_eur_cents,'+
+      'landed_eur_quote_cents,import_payer,import_vat_covered,'+
+      'carrier_clearance_covered,supplier_evidence_sha256,valid_until) '+
+      "VALUES($1,'ci-supplier-sku','ci-parent-pid','CI-VARIANT-SKU',"+
+      "'CI-PRODUCT-SKU','ci-shipping',8000,300,200,0,1700,'SELLER',"+
+      "true,true,$2,now()+interval '1 day')",
+    [offerId,'a'.repeat(64)]);
   const verifiedOffer=await getApprovedOffer(pool,offerId);
   assert.ok(verifiedOffer,'the test offer must pass the real purchase predicate');
   const verifiedOptions={...opts,verifiedOffer};
@@ -78,10 +91,11 @@ try{
   assert.equal(retry.orderToken,winner.token);
   assert.equal((await pool.query('SELECT count(*)::int AS n FROM commerce_orders WHERE offer_id=$1',[offerId])).rows[0].n,1);
   const snapshot=(await pool.query(
-    'SELECT supplier_pid,supplier_variant_sku,supplier_product_sku FROM commerce_orders WHERE id=$1',
+    'SELECT supplier_pid,supplier_variant_sku,supplier_product_sku,import_proof_sha256 FROM commerce_orders WHERE id=$1',
     [winner.orderId])).rows[0];
   assert.deepEqual(snapshot,{supplier_pid:'ci-parent-pid',
-    supplier_variant_sku:'CI-VARIANT-SKU',supplier_product_sku:'CI-PRODUCT-SKU'});
+    supplier_variant_sku:'CI-VARIANT-SKU',supplier_product_sku:'CI-PRODUCT-SKU',
+    import_proof_sha256:'a'.repeat(64)});
 
   // Simulate persisting a provider result, without calling any provider.
   const checkoutUrl='https://www.mollie.com/checkout/select-method/CI123';
@@ -104,6 +118,8 @@ try{
   if(inserted){
     await pool.query('DELETE FROM commerce_events WHERE order_id IN (SELECT id FROM commerce_orders WHERE offer_id=$1)',[offerId]).catch(()=>{});
     await pool.query('DELETE FROM commerce_orders WHERE offer_id=$1',[offerId]).catch(()=>{});
+    await pool.query('DELETE FROM commerce_offer_import_proofs WHERE offer_id=$1',
+      [offerId]).catch(()=>{});
     await pool.query('DELETE FROM commerce_offers WHERE id=$1',[offerId]).catch(()=>{});
   }
   await pool.end();

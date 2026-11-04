@@ -34,6 +34,26 @@ export async function listApprovedOffers(pool){
       AND supplier_pid ~ '^[a-zA-Z0-9_-]{3,100}$'
       AND supplier_variant_sku ~ '^[a-zA-Z0-9_-]{3,100}$'
       AND supplier_product_sku ~ '^[a-zA-Z0-9_-]{3,100}$'
+      -- A verified and still-valid written proof must bind all customs,
+      -- EU handling, import VAT and carrier charges to THIS exact offer.
+      AND from_country_code='CN' AND amount_eur_cents<=15000
+      AND EXISTS (
+        SELECT 1 FROM commerce_offer_import_proofs ip
+        WHERE ip.offer_id=commerce_offers.id
+          AND ip.supplier_vid=commerce_offers.supplier_vid
+          AND ip.supplier_pid=commerce_offers.supplier_pid
+          AND ip.supplier_variant_sku=commerce_offers.supplier_variant_sku
+          AND ip.supplier_product_sku=commerce_offers.supplier_product_sku
+          AND ip.logistics_name=commerce_offers.logistics_name
+          AND ip.flat_duty_eur_cents>=300
+          AND ip.union_handling_eur_cents>=200
+          AND ip.import_vat_covered=true
+          AND ip.carrier_clearance_covered=true
+          AND ip.buyer_extra_eur_cents=0
+          AND ip.landed_eur_quote_cents<=commerce_offers.supplier_landed_eur_ceiling_cents
+          AND ip.valid_until>now()
+          AND ip.recorded_at>now()-interval '7 days'
+      )
       AND supplier_landed_eur_ceiling_cents >= unit_cost_eur_cents
       AND tax_treatment_verified=true AND supplier_fx_verified=true
       AND supplier_fx_max_eur_per_usd_bps BETWEEN 1000 AND 20000
@@ -64,6 +84,26 @@ export async function getApprovedOffer(pool,offerId){
       AND supplier_pid ~ '^[a-zA-Z0-9_-]{3,100}$'
       AND supplier_variant_sku ~ '^[a-zA-Z0-9_-]{3,100}$'
       AND supplier_product_sku ~ '^[a-zA-Z0-9_-]{3,100}$'
+      -- A verified and still-valid written proof must bind all customs,
+      -- EU handling, import VAT and carrier charges to THIS exact offer.
+      AND from_country_code='CN' AND amount_eur_cents<=15000
+      AND EXISTS (
+        SELECT 1 FROM commerce_offer_import_proofs ip
+        WHERE ip.offer_id=commerce_offers.id
+          AND ip.supplier_vid=commerce_offers.supplier_vid
+          AND ip.supplier_pid=commerce_offers.supplier_pid
+          AND ip.supplier_variant_sku=commerce_offers.supplier_variant_sku
+          AND ip.supplier_product_sku=commerce_offers.supplier_product_sku
+          AND ip.logistics_name=commerce_offers.logistics_name
+          AND ip.flat_duty_eur_cents>=300
+          AND ip.union_handling_eur_cents>=200
+          AND ip.import_vat_covered=true
+          AND ip.carrier_clearance_covered=true
+          AND ip.buyer_extra_eur_cents=0
+          AND ip.landed_eur_quote_cents<=commerce_offers.supplier_landed_eur_ceiling_cents
+          AND ip.valid_until>now()
+          AND ip.recorded_at>now()-interval '7 days'
+      )
       AND supplier_landed_eur_ceiling_cents >= unit_cost_eur_cents
       AND tax_treatment_verified=true AND supplier_fx_verified=true
       AND supplier_fx_max_eur_per_usd_bps BETWEEN 1000 AND 20000
@@ -119,6 +159,26 @@ export async function reserveCheckout(pool,request,{encryptionKey,idempotencySec
       AND supplier_pid ~ '^[a-zA-Z0-9_-]{3,100}$'
       AND supplier_variant_sku ~ '^[a-zA-Z0-9_-]{3,100}$'
       AND supplier_product_sku ~ '^[a-zA-Z0-9_-]{3,100}$'
+      -- A verified and still-valid written proof must bind all customs,
+      -- EU handling, import VAT and carrier charges to THIS exact offer.
+      AND from_country_code='CN' AND amount_eur_cents<=15000
+      AND EXISTS (
+        SELECT 1 FROM commerce_offer_import_proofs ip
+        WHERE ip.offer_id=commerce_offers.id
+          AND ip.supplier_vid=commerce_offers.supplier_vid
+          AND ip.supplier_pid=commerce_offers.supplier_pid
+          AND ip.supplier_variant_sku=commerce_offers.supplier_variant_sku
+          AND ip.supplier_product_sku=commerce_offers.supplier_product_sku
+          AND ip.logistics_name=commerce_offers.logistics_name
+          AND ip.flat_duty_eur_cents>=300
+          AND ip.union_handling_eur_cents>=200
+          AND ip.import_vat_covered=true
+          AND ip.carrier_clearance_covered=true
+          AND ip.buyer_extra_eur_cents=0
+          AND ip.landed_eur_quote_cents<=commerce_offers.supplier_landed_eur_ceiling_cents
+          AND ip.valid_until>now()
+          AND ip.recorded_at>now()-interval '7 days'
+      )
       AND supplier_landed_eur_ceiling_cents >= unit_cost_eur_cents
       AND tax_treatment_verified=true AND supplier_fx_verified=true
       AND supplier_fx_max_eur_per_usd_bps BETWEEN 1000 AND 20000
@@ -149,6 +209,27 @@ export async function reserveCheckout(pool,request,{encryptionKey,idempotencySec
       throw new ClientError('Offre modifiée depuis le devis fournisseur. Nouveau contrôle requis.',409);
     try{validateCommercialCeiling(offer)}
     catch{throw new ClientError('Offre commercialement indisponible',409)}
+    const proof=await client.query(`
+      SELECT supplier_evidence_sha256 FROM commerce_offer_import_proofs
+      WHERE offer_id=$1
+        AND supplier_vid=$2 AND supplier_pid=$3
+        AND supplier_variant_sku=$4 AND supplier_product_sku=$5
+        AND logistics_name=$6
+        AND flat_duty_eur_cents>=300
+        AND union_handling_eur_cents>=200
+        AND import_vat_covered=true
+        AND carrier_clearance_covered=true
+        AND buyer_extra_eur_cents=0
+        AND landed_eur_quote_cents<=$7
+        AND valid_until>now()
+        AND recorded_at>now()-interval '7 days'
+      FOR SHARE
+    `,[offer.id,offer.supplier_vid,offer.supplier_pid,
+      offer.supplier_variant_sku,offer.supplier_product_sku,
+      offer.logistics_name,offer.supplier_landed_eur_ceiling_cents]);
+    if(proof.rowCount!==1)
+      throw new ClientError('Preuve fiscale importation expirée ou absente',409);
+
     // A single pilot purchase at a time per supplier SKU prevents overselling
     // during payment and fulfillment. The row lock on commerce_offers serializes reservations.
     const active=await client.query(`
@@ -165,8 +246,9 @@ export async function reserveCheckout(pool,request,{encryptionKey,idempotencySec
         supplier_product_sku,supplier_max_usd_cents,logistics_name,
         from_country_code,address_encrypted,vat_rate_bps_snapshot,
         supplier_landed_eur_ceiling_cents,supplier_fx_max_eur_per_usd_bps,
-        promised_delivery_min_business_days,promised_delivery_max_business_days,status
-      ) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,'PAYMENT_CREATING')
+        promised_delivery_min_business_days,promised_delivery_max_business_days,
+        import_proof_sha256,status
+      ) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,'PAYMENT_CREATING')
     `,[orderId,digest(token),idempotencyHash,requestHash,offer.id,offer.label,
        offer.amount_eur_cents,offer.supplier_vid,
        offer.supplier_pid,offer.supplier_variant_sku,offer.supplier_product_sku,
@@ -174,7 +256,8 @@ export async function reserveCheckout(pool,request,{encryptionKey,idempotencySec
        sealAddress(request.customer,encryptionKey),
        offer.vat_rate_bps,offer.supplier_landed_eur_ceiling_cents,
        offer.supplier_fx_max_eur_per_usd_bps,offer.delivery_min_business_days,
-       offer.delivery_max_business_days]);
+       offer.delivery_max_business_days,
+       proof.rows[0].supplier_evidence_sha256]);
     await client.query('INSERT INTO commerce_events(order_id,event_type) VALUES($1,$2)',[orderId,'ORDER_RESERVED']);
     return {orderId,token,amountCents:offer.amount_eur_cents,description:offer.label};
   });
@@ -314,8 +397,25 @@ export async function authorizeSupplierSubmission(pool,order,verified){
     return false;
   return transaction(pool,async client=>{
     const {rows}=await client.query(`
-      SELECT id,status,payment_id,amount_eur_cents FROM commerce_orders
-      WHERE id=$1 FOR UPDATE
+      SELECT o.id,o.status,o.payment_id,o.amount_eur_cents
+      FROM commerce_orders o
+      JOIN commerce_offer_import_proofs ip
+        ON ip.offer_id=o.offer_id
+        AND ip.supplier_evidence_sha256=o.import_proof_sha256
+        AND ip.supplier_vid=o.supplier_vid
+        AND ip.supplier_pid=o.supplier_pid
+        AND ip.supplier_variant_sku=o.supplier_variant_sku
+        AND ip.supplier_product_sku=o.supplier_product_sku
+        AND ip.logistics_name=o.logistics_name
+        AND ip.flat_duty_eur_cents>=300
+        AND ip.union_handling_eur_cents>=200
+        AND ip.import_vat_covered=true
+        AND ip.carrier_clearance_covered=true
+        AND ip.buyer_extra_eur_cents=0
+        AND ip.landed_eur_quote_cents<=o.supplier_landed_eur_ceiling_cents
+        AND ip.valid_until>now()
+        AND ip.recorded_at>now()-interval '7 days'
+      WHERE o.id=$1 FOR UPDATE OF o
     `,[order.id]);
     const current=rows[0];
     if(!current||current.status!=='SUPPLIER_SENDING'||

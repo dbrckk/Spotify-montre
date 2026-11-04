@@ -70,5 +70,8 @@ jobs:
       - name: Verify CJ shipping reconciliation cadence with PostgreSQL
         working-directory: commerce
         run: node supplier-reconciliation-check.mjs
+      - name: Verify private EU import proof ingestion (PostgreSQL, no payments)
+        working-directory: commerce
+        run: node import-proof-check.mjs
       - name: Verify browser purchase script syntax
         run: node --check site/acheter-direct.js

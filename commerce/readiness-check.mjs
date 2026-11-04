@@ -54,6 +54,7 @@ try{
   assert.ok(current.blockers.includes('merchant_approval_missing'));
   assert.ok(!current.blockers.includes('supplier_identity_proof_missing'));
   assert.ok(current.blockers.includes('supplier_quote_expired_or_missing'));
+  assert.ok(current.blockers.includes('eu_2026_import_proof_missing_or_expired'));
   assert.ok(current.warnings.includes('supplier_quote_audit_missing'));
   assert.ok(report.launchBlockers.includes('no_purchase_eligible_supplier_offer'),
     'unapproved products cannot authorize a sale');
@@ -70,6 +71,22 @@ try{
   `,[offerId]);
   report=await commercialReadinessReport(pool,{env,siteConfig});
   current=report.offers.find(x=>x.id===offerId);
+  assert.equal(current.purchaseGateEligible,false,
+    'merchant flags alone cannot prove EU customs or handling costs');
+  assert.ok(current.blockers.includes('eu_2026_import_proof_missing_or_expired'));
+  await pool.query(
+    'INSERT INTO commerce_offer_import_proofs ('+
+      'offer_id,supplier_vid,supplier_pid,supplier_variant_sku,'+
+      'supplier_product_sku,logistics_name,consignment_value_eur_cents,'+
+      'flat_duty_eur_cents,union_handling_eur_cents,buyer_extra_eur_cents,'+
+      'landed_eur_quote_cents,import_payer,import_vat_covered,'+
+      'carrier_clearance_covered,supplier_evidence_sha256,valid_until) '+
+      "VALUES($1,'ci-vid','ci-parent','CI-VAR-SKU','CI-PRODUCT-SKU',"+
+      "'CI delivery',8990,300,200,0,1900,'SUPPLIER',true,true,$2,"+
+      "now()+interval '1 day')",
+    [offerId,'b'.repeat(64)]);
+  report=await commercialReadinessReport(pool,{env,siteConfig});
+  current=report.offers.find(x=>x.id===offerId);
   assert.equal(current.purchaseGateEligible,true,
     'authoritative checkout gate and readiness report must agree');
   assert.deepEqual(current.blockers,[]);
@@ -84,6 +101,18 @@ try{
   report=await commercialReadinessReport(pool,{env,siteConfig});
   current=report.offers.find(x=>x.id===offerId);
   assert.equal(current.purchaseGateEligible,true);
+  await pool.query(
+    "UPDATE commerce_offer_import_proofs SET valid_until=now()-interval '1 minute' WHERE offer_id=$1",
+    [offerId]);
+  report=await commercialReadinessReport(pool,{env,siteConfig});
+  current=report.offers.find(x=>x.id===offerId);
+  assert.equal(current.purchaseGateEligible,false);
+  assert.ok(current.blockers.includes('eu_2026_import_proof_missing_or_expired'));
+  await pool.query(
+    "UPDATE commerce_offer_import_proofs SET valid_until=now()+interval '1 day' WHERE offer_id=$1",
+    [offerId]);
+  report=await commercialReadinessReport(pool,{env,siteConfig});
+  assert.equal(report.offers.find(x=>x.id===offerId).purchaseGateEligible,true);
   assert.equal(report.productionLaunchCertified,false,
     'no CI simulation may certify a real customer/supplier purchase');
 
@@ -116,6 +145,8 @@ try{
   console.log('Readiness report OK: live purchase predicate, missing evidence, FX risk and no credentials exposed');
 }finally{
   await pool.query('DELETE FROM commerce_offer_preflight_quotes WHERE offer_id=$1',
+    [offerId]).catch(()=>{});
+  await pool.query('DELETE FROM commerce_offer_import_proofs WHERE offer_id=$1',
     [offerId]).catch(()=>{});
   await pool.query('DELETE FROM commerce_offers WHERE id=$1',[offerId]).catch(()=>{});
   await pool.end();
