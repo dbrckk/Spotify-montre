@@ -17,6 +17,9 @@ async function main(){
   if(mode==='inspect'){
     const quote=await preflightCjDelivery({
       vid:candidate.supplierVid,
+      expectedPid:candidate.supplierPid,
+      expectedVariantSku:candidate.supplierVariantSku,
+      expectedProductSku:candidate.supplierProductSku,
       originCountry:candidate.originCountry,
       postalCode:candidate.samplePostalCode,
       logisticsName:candidate.logisticsName,
