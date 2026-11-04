@@ -66,3 +66,36 @@ body{background:var(--am-cream);color:var(--am-ink);margin:0}
 @media(max-width:760px){.am-direct-discovery-head{display:block}.am-direct-discovery-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.am-direct-discovery-card:last-child{grid-column:1/-1;flex-direction:row}.am-direct-discovery-card:last-child img{width:42%;aspect-ratio:1}.am-direct-discovery-card:last-child .am-direct-discovery-copy{justify-content:center}}
 @media(max-width:480px){.am-direct-discovery-copy{padding:13px;gap:8px}.am-direct-discovery-copy strong{font-size:21px}.am-direct-discovery-copy small{font-size:9px}.am-direct-prelaunch-actions{align-items:stretch;flex-direction:column}.am-direct-prelaunch-actions a{text-align:center}.am-direct-discovery-card:last-child .am-direct-discovery-copy{padding:13px}}
 @media(prefers-reduced-motion:reduce){.am-direct-discovery-card{transition:none}}
+
+
+/* Actual partner purchase path while independent checkout remains inactive.
+ * No network fonts or JavaScript-driven animation; works on low-end Android. */
+.am-partner-market{margin-top:clamp(48px,7vw,88px);border-top:1px solid #d8d0c1;padding-top:clamp(34px,5vw,64px)}
+.am-partner-heading{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(240px,.65fr);gap:24px;align-items:end;margin-bottom:19px}
+.am-partner-heading h2{font:400 clamp(30px,4vw,46px)/1.13 Georgia,serif;letter-spacing:-.028em;margin:12px 0}
+.am-partner-heading h2 em{color:#66836b}
+.am-partner-heading>p{color:#4b6051;line-height:1.65;max-width:350px;margin:0 0 7px}
+.am-partner-disclosure{background:#eaf0e6;border-left:3px solid #346749;border-radius:0 8px 8px 0;padding:15px 19px;color:#294735;line-height:1.65;font-size:13px;margin:0 0 24px}
+.am-partner-filters{display:flex;gap:9px;flex-wrap:wrap;margin:0 0 16px}
+.am-partner-filters[hidden]{display:none}
+.am-partner-filters button{min-height:44px;border:1px solid #c5c6b7;background:#fffdf9;color:#31503a;border-radius:999px;padding:10px 17px;font:650 13px/1.2 system-ui,sans-serif;cursor:pointer}
+.am-partner-filters button[aria-pressed=true]{background:#183e2b;color:#fff;border-color:#183e2b}
+.am-partner-filters button:focus-visible,.am-partner-actions a:focus-visible,.am-partner-cover:focus-visible{outline:3px solid #a57629;outline-offset:3px}
+.am-partner-status{color:#455b4d;line-height:1.55;font-size:14px;margin:8px 0 22px}
+.am-partner-status a{color:#225940}
+.am-partner-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.am-partner-card{min-width:0;display:flex;flex-direction:column;background:#fffdf8;border:1px solid #dcd5c6;border-radius:15px;overflow:hidden;box-shadow:0 9px 26px rgba(22,46,29,.055)}
+.am-partner-cover{display:block;position:relative;background:radial-gradient(circle at 50% 45%,#f4f3ec,#e7e6dc);line-height:0}
+.am-partner-cover img{display:block;width:100%;height:auto;aspect-ratio:1/1;object-fit:contain}
+.am-partner-card-content{display:flex;flex-direction:column;flex:1;gap:12px;padding:18px 19px 21px}
+.am-partner-tier{font-size:11px;line-height:1.4;letter-spacing:.12em;text-transform:uppercase;font-weight:750;color:#657966}
+.am-partner-name{font:400 clamp(22px,2.4vw,29px)/1.18 Georgia,serif;color:#203b2d;letter-spacing:-.02em;overflow-wrap:anywhere;margin:0}
+.am-partner-actions{margin-top:auto;display:flex;flex-direction:column;gap:10px}
+.am-partner-buy{display:flex;align-items:center;justify-content:center;min-height:48px;text-align:center;background:#204f35;color:#fff;text-decoration:none;padding:10px;border-radius:8px;box-sizing:border-box;font:700 14px/1.35 system-ui,sans-serif}
+.am-partner-buy:hover{background:#113b26}
+.am-partner-detail{display:block;text-align:center;padding:5px;font:650 13px/1.45 system-ui,sans-serif;text-decoration:underline;text-underline-offset:4px;color:#286044}
+.am-partner-card-note{font-size:12px;color:#5b6c5e;line-height:1.55;margin:0}
+.am-partner-fine{border-top:1px solid #ddd4c4;margin:24px 0 0;padding:19px 0 0;font-size:13px;line-height:1.7;color:#526454}
+@media(max-width:860px){.am-partner-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.am-partner-heading{grid-template-columns:1fr}.am-partner-heading>p{max-width:720px}}
+@media(max-width:480px){.am-partner-cards{grid-template-columns:1fr;gap:15px}.am-partner-card{display:grid;grid-template-columns:minmax(0,.72fr) minmax(0,1fr)}.am-partner-cover img{height:100%;aspect-ratio:1;object-fit:contain}.am-partner-card-content{padding:14px 12px;gap:10px}.am-partner-name{font-size:20px}.am-partner-buy{min-height:44px;font-size:12px;padding:8px}.am-partner-detail,.am-partner-card-note{font-size:11px}.am-partner-disclosure{font-size:12px;padding:13px}.am-partner-tier{font-size:10px}.am-partner-filters button{padding-inline:13px}}
+@media(max-width:350px){.am-partner-card{grid-template-columns:1fr}.am-partner-cover img{max-height:210px}.am-partner-card-content{padding:15px}.am-partner-buy{font-size:13px}}
