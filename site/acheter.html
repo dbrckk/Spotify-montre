@@ -5,30 +5,32 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,follow">
 <meta name="theme-color" content="#172d24">
-<title>Achat direct sécurisé | Atelier Montres</title>
-<meta name="description" content="Commander une montre sur Atelier Montres uniquement lorsqu'une offre fournisseur et sa livraison sont vérifiées.">
+<title>Acheter une montre : comparer les partenaires | Atelier Montres</title>
+<meta name="description" content="Comparer des montres et ouvrir leurs fiches exactes chez nos partenaires. Le paiement direct Atelier Montres reste soumis à des contrôles fournisseur et livraison.">
 <link rel="icon" href="./favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="./base.css">
 <link rel="stylesheet" href="./direct-commerce.css">
 <script defer src="./acheter-direct.js"></script>
+<script defer src="./achat-partenaires.js"></script>
 </head>
 <body>
 <a class="am-direct-skip" href="#contenu">Aller au contenu</a>
 <header class="am-direct-top"><a href="./index.html">✦ Atelier Montres</a><a href="./montres/toutes-les-montres.html">Les 52 montres</a></header>
 <main id="contenu" class="am-direct-wrap">
-<p class="am-direct-eyebrow">ATELIER MONTRES / ACHAT DIRECT</p>
-<h1>Choisir une montre. <em>Une livraison réelle.</em></h1>
-<p class="am-direct-lead">Seules les références dont nous avons vérifié le fournisseur, la variante, les frais et la livraison peuvent être achetées directement. Les autres restent accessibles dans le catalogue de comparaison.</p>
+<p class="am-direct-eyebrow">ATELIER MONTRES / OÙ ACHETER</p>
+<h1>Choisir une montre. <em>Savoir où l’acheter.</em></h1>
+<p class="am-direct-lead">Découvrez nos montres et leurs fiches vérifiées chez les vendeurs partenaires. Le paiement et la livraison d’un achat partenaire ont lieu chez ce marchand. La vente directement sur Atelier Montres reste fermée tant que ses obligations commerciales ne sont pas validées.</p>
 <div class="am-direct-grid">
 <section class="am-direct-panel" aria-labelledby="checkoutTitle">
 <h2 id="checkoutTitle">Votre commande</h2>
 <p id="amDirectStatus" role="status" aria-live="polite">Le paiement direct nécessite une vérification des offres. Découvrez les montres ci-dessous.</p>
 <div id="amDirectPrelaunch" class="am-direct-prelaunch">
   <p class="am-direct-prelaunch-tag">La boutique se prépare</p>
-  <h3>Une sélection à découvrir, sans commande prématurée.</h3>
-  <p>Nous finalisons la vérification des fournisseurs, des prix TTC et des livraisons. Pour le moment, explorez nos montres documentées et comparez les modèles avant leur éventuelle mise en vente directe.</p>
+  <h3>Notre paiement direct se prépare. Les vendeurs partenaires restent accessibles.</h3>
+  <p>Nous vérifions toujours les coûts d’importation, les fournisseurs et les conditions de vente sur notre propre site. Vous pouvez néanmoins consulter les références documentées sur Amazon.fr, puis vérifier directement auprès du marchand le prix, le stock et la variante avant votre achat.</p>
   <div class="am-direct-prelaunch-actions">
     <a class="am-direct-prelaunch-primary" href="./montres/toutes-les-montres.html">Explorer les 52 montres <span aria-hidden="true">↗</span></a>
+    <a href="#amPartnerSelection">Voir les fiches d’achat partenaires</a>
     <a href="./conseiller.html">Trouver mon style</a>
   </div>
   <p class="am-direct-prelaunch-disclaimer">Aucun paiement ni renseignement de livraison n'est demandé à cette étape. Les achats proposés par des partenaires externes restent indépendants de notre caisse.</p>
@@ -62,6 +64,25 @@
 <a href="./montres/toutes-les-montres.html">Explorer la sélection complète ↗</a>
 </aside>
 </div>
+<section class="am-partner-market" id="amPartnerSelection" aria-labelledby="amPartnerTitle">
+  <div class="am-partner-heading">
+    <div>
+      <p class="am-direct-eyebrow">MODÈLES EXACTS / ACHAT CHEZ UN VENDEUR</p>
+      <h2 id="amPartnerTitle">Des références à retrouver <em>chez Amazon.fr.</em></h2>
+    </div>
+    <p>Des fiches de modèles précis, sans prix ou disponibilité inventés. Vous quittez Atelier Montres pour consulter l’offre du vendeur.</p>
+  </div>
+  <p class="am-partner-disclosure">En tant que Partenaire Amazon, je réalise un bénéfice sur les achats remplissant les conditions requises. Les liens concernés sont signalés « lien rémunéré ». Paiement, livraison, garanties et retours relèvent du marchand indiqué.</p>
+  <div class="am-partner-filters" id="amPartnerFilters" role="group" aria-label="Filtrer les références partenaires" hidden>
+    <button type="button" data-tier="all" aria-pressed="true">Toutes les montres</button>
+    <button type="button" data-tier="essential" aria-pressed="false">Essentielle</button>
+    <button type="button" data-tier="signature" aria-pressed="false">Signature</button>
+    <button type="button" data-tier="prestige" aria-pressed="false">Prestige</button>
+  </div>
+  <p class="am-partner-status" id="amPartnerStatus" role="status" aria-live="polite">Vérification des correspondances de modèles partenaires… Si les liens ne se chargent pas, <a href="./affiliation.html#montres">explorez les 15 fiches comparatives</a>.</p>
+  <div class="am-partner-cards" id="amPartnerCards" aria-label="Montres avec fiche Amazon.fr vérifiée"></div>
+  <p class="am-partner-fine">Les références ont été documentées lors de notre sélection. Vérifiez sur Amazon.fr le modèle exact, la variante, le vendeur, le prix actuel, les frais de livraison et les conditions de retour. Une fiche Amazon.fr ne garantit ni disponibilité ni commission effectivement versée.</p>
+</section>
 <section class="am-direct-discovery" id="inspirations" aria-labelledby="amDirectDiscoverTitle">
   <div class="am-direct-discovery-head">
     <div><p class="am-direct-eyebrow">INSPIRATIONS / MONTRES DOCUMENTÉES</p><h2 id="amDirectDiscoverTitle">En attendant la première collection.</h2></div>
