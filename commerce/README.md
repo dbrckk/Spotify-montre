@@ -55,6 +55,8 @@ Le fournisseur CJ fournit les montants en USD. Quand `totalPostageFee` est dispo
 
 Ces champs arrivent sur Neon via une migration SQL **sans perte** exécutée au prochain démarrage de l'API ; les offres existantes non qualifiées deviennent non achetables, même si le drapeau marchand est actif. Le prix, taux TVA et délai de livraison sont enregistrés dans chaque commande au moment de la vente, indépendamment des évolutions du catalogue.
 
+**Blocage des devis CJ ambigus :** le paiement et la commande fournisseur sont refusés si `freightCalculate` renvoie plusieurs lignes portant exactement le même `logisticName`, même avec des montants identiques. L’API de commande ne transmet que ce nom de transporteur et ne peut pas désigner une ligne tarifaire particulière ; choisir arbitrairement la première ligne risquerait de sous-estimer frais, taxes ou délai. Le contrôle est exécuté à chaque préflight avant lecture du portefeuille CJ. Les réponses incomplètes restent refusées ; aucun tarif fournisseur n'est présumé TTC ou garanti.
+
 **Une base initialisée sans offre = fonctionnement attendu.** Ne créer ni SKU, ni prix ou droits fictifs pour « débloquer » l'achat. Une commande client ne doit pas être autorisée pendant l'attente de CGV validées ou d'un prestataire marchand réel.
 
 
