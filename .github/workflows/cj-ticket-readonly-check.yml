@@ -1,0 +1,35 @@
+name: CJ ticket supplier read-only live diagnosis
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'commerce/cj-quote-ticket.mjs'
+      - '.github/workflows/cj-ticket-readonly-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Share CJ's one-request-per-second account limit with the manual send workflow.
+concurrency:
+  group: cj-landed-quote-supplier-ticket
+  cancel-in-progress: false
+
+jobs:
+  diagnose-cj-tickets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Diagnose supplier account and previous ticket without creating anything
+        env:
+          CJ_API_KEY: ${{ secrets.CJ_API_KEY }}
+        run: |
+          if [ -z "$CJ_API_KEY" ]; then
+            echo 'CJ_API_KEY_GITHUB_SECRET_MISSING (no supplier write performed)'
+            exit 1
+          fi
+          node commerce/cj-quote-ticket.mjs diagnose
