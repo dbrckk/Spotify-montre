@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {
-  requestWrittenCjQuote,checkWrittenCjQuote,
+  requestWrittenCjQuote,checkWrittenCjQuote,diagnoseWrittenCjQuote,
   QUOTE_REFERENCE,QUOTE_SKU,QUOTE_TICKET
 } from './cj-quote-ticket.mjs';
 
@@ -151,4 +151,44 @@ await assert.rejects(requestWrittenCjQuote({
 assert.equal(createCount(send),1);
 assert.ok(!JSON.stringify(s).includes(token));
 assert.ok(!JSON.stringify(p).includes(token));
+// The real manual submission may fail before the ticket POST. A subsequent
+// read-only CI probe must identify the failure stage without logging tokens,
+// ticket numbers, supplier messages or the customer's private records.
+const healthyProbe=fakeTicketApi({total:1,existingTicket:9001,status:'AWAITING_CJ_REPLY'});
+const healthy=await diagnoseWrittenCjQuote({accessToken:token,fetcher:healthyProbe.fetcher});
+assert.equal(healthy.kind,'cj_supplier_ticket_readonly_diagnostic');
+assert.equal(healthy.historyCheck,'ticket_found');
+assert.equal(healthy.supplierState,'AWAITING_CJ_REPLY');
+assert.equal(healthy.categoryCheck,'eligible');
+assert.equal(healthy.quoteApproved,false);
+assert.equal(createCount(healthyProbe),0);
+assert.ok(!JSON.stringify(healthy).includes(token));
+assert.ok(!JSON.stringify(healthy).includes('9001'));
+assert.ok(!JSON.stringify(healthy).includes(QUOTE_TICKET.message));
+
+const missingProbe=fakeTicketApi({total:0,types:[{
+  ticketTypeId:'12',ticketTypeName:'General',
+  questionTypes:[{questionTypeId:'123',questionTypeName:'Other question',formFields:[]}]
+}]});
+const noCategory=await diagnoseWrittenCjQuote({accessToken:token,fetcher:missingProbe.fetcher});
+assert.equal(noCategory.historyCheck,'not_requested');
+assert.equal(noCategory.categoryCheck,'CJ_TICKET_CATEGORY_NEEDS_REVIEW');
+assert.deepEqual(noCategory.menuHints,[{
+  type:'General',question:'Other question',mandatoryFields:0
+}]);
+assert.equal(createCount(missingProbe),0);
+
+const failedSupplier=async(url,options)=>{
+  if(new URL(url).pathname.endsWith('/ticket/list'))
+    return {ok:true,json:async()=>({code:1600200,result:false,success:false})};
+  return ok([category]);
+};
+const rateLimited=await diagnoseWrittenCjQuote({
+  accessToken:token,fetcher:failedSupplier
+});
+assert.equal(rateLimited.historyCheck,'CJ_TICKET_RATE_LIMIT');
+assert.equal(rateLimited.categoryCheck,'eligible');
+assert.equal(rateLimited.quoteApproved,false);
+assert.ok(!JSON.stringify(rateLimited).includes(token));
+
 console.log('CJ written quote workflow OK: multi-page dedupe, status only, safe category, no order or wallet');

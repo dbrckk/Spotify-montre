@@ -42,3 +42,13 @@ Si CJ répond « frais applicables » sans prix global, le devis **reste incompl
 - [Diagnostic de la variante](CJ_DEVIS_DETAILLE_2026-11-04.md) et [demande de devis complète initialement rédigée](CJ_DEMANDE_DEVIS_LIVRE_FR_2026-11-04.md).
 
 **Statut au moment de la livraison du workflow : demande prête, non envoyée.** Aucune réponse ni facture CJ n'est présumée.
+
+## Diagnostic réel de la tentative du 4 novembre
+
+La demande GitHub Actions [41916356364](https://github.com/dbrckk/Spotify-montre/actions/runs/41916356364) a exécuté le mode `send`, puis **échoué** avec un message auparavant trop générique. Ce résultat ne prouve ni la création du ticket ni son absence ; **ne pas relancer `send` sans vérifier d'abord l'historique CJ**.
+
+La correction suivante introduit le mode `diagnose`, strictement **en lecture seule**. Le workflow [CJ ticket supplier read-only live diagnosis](https://github.com/dbrckk/Spotify-montre/actions/workflows/cj-ticket-readonly-check.yml) le lance lors d'une mise à jour de la logique de tickets sur `main`. Il cherche dans l'historique du compte la référence exacte, puis valide la catégorie de consultation actuellement proposée par CJ. Aucun POST de création, aucune commande, aucun débit CJ et aucun accès aux paiements ne sont possibles. Le mode manuel `status` demeure disponible dans l'autre workflow.
+
+Les journaux ne présentent que : `ticket_found` / `not_requested`, l'état normalisé éventuel du ticket, `eligible` ou un code technique fixe (`CJ_TICKET_CATEGORY_NEEDS_REVIEW`, `CJ_TICKET_LIST_REJECTED`, `CJ_TICKET_RATE_LIMIT`, etc.). En cas de sélection impossible, quelques noms *sanitisés* de catégories de support peuvent être visibles pour aider à corriger le routage. Ils ne comprennent ni secrets, ni texte des tickets, ni contenu de réponse, ni identité d'acheteur. Un diagnostic vert signifie seulement que les points API en lecture seule sont utilisables, **pas** qu'un devis TTC ou un ticket ait été validé.
+
+**Décision suivante :** si `ticket_found`, consulter la demande dans CJ plutôt que d'en créer une nouvelle. Si `not_requested` et `eligible`, un nouvel essai de `send` peut être envisagé après vérification de la cause précédente. Si l'authentification, l'historique ou la catégorie échoue, corriger la source de l'échec ; ne jamais forcer `send` ni activer le checkout.

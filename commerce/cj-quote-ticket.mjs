@@ -92,10 +92,15 @@ function createCaller(accessToken,fetcher){
       ...(body?{body:JSON.stringify(body)}:{}),
       signal:AbortSignal.timeout(12000)
     });
-    if(!response?.ok)throw Error('CJ_TICKET_HTTP_FAILURE');
+    const stage=path==='/ticket/types'?'TYPES':
+      path==='/ticket/list'?'LIST':
+      path==='/ticket/create'?'CREATE':'DETAIL';
+    if(!response?.ok)
+      throw Error('CJ_TICKET_'+stage+'_HTTP_FAILURE');
     const result=await response.json();
+    if(result?.code===1600200)throw Error('CJ_TICKET_RATE_LIMIT');
     if(result?.code!==200||result?.success===false||result?.result===false)
-      throw Error('CJ_TICKET_API_REJECTED');
+      throw Error('CJ_TICKET_'+stage+'_REJECTED');
     return result.data;
   };
 }
@@ -150,6 +155,74 @@ export async function checkWrittenCjQuote({accessToken,fetcher=fetch}={}){
     orderPlaced:false,walletDebited:false,
     quoteApproved:false};
 }
+// Read-only, supplier-backed health report. It never creates or replies to
+// tickets, never places orders and never writes supplier-facing state.
+// Only publish short, validated menu labels: not raw CJ responses, private
+// tickets, access tokens, customer information or request URLs.
+const safeMenuLabel=value=>typeof value==='string'&&value.length<=100&&
+  /^[\p{L}\p{N}\p{Zs}.,:&()\/+-]+$/u.test(value)?
+  value.slice(0,65):null;
+const safeErrorCode=error=>{
+  const message=typeof error?.message==='string'?error.message:'';
+  const allowed=new Set([
+    'CJ_TICKET_HISTORY_UNVERIFIED','CJ_TICKET_TYPES_UNAVAILABLE',
+    'CJ_TICKET_CATEGORY_NEEDS_REVIEW','CJ_TICKET_TYPES_HTTP_FAILURE',
+    'CJ_TICKET_TYPES_REJECTED','CJ_TICKET_LIST_HTTP_FAILURE',
+    'CJ_TICKET_LIST_REJECTED','CJ_TICKET_DETAIL_HTTP_FAILURE',
+    'CJ_TICKET_DETAIL_REJECTED','CJ_TICKET_CREATE_HTTP_FAILURE',
+    'CJ_TICKET_CREATE_REJECTED','CJ_TICKET_RATE_LIMIT',
+    'CJ_API_KEY_GITHUB_SECRET_MISSING','CJ_ACCESS_TOKEN_MISSING'
+  ]);
+  if(allowed.has(message))return message;
+  if(message==='CJ authentication HTTP error')return 'CJ_AUTH_HTTP_FAILURE';
+  if(message==='CJ account did not authorize access')return 'CJ_AUTH_REJECTED';
+  if(message==='CJ API key unavailable')return 'CJ_AUTH_KEY_REJECTED';
+  if(message==='CJ-Access-Token unavailable')return 'CJ_AUTH_TOKEN_REJECTED';
+  if(error?.name==='TimeoutError'||error?.name==='AbortError')
+    return 'CJ_SUPPLIER_TIMEOUT';
+  if(error?.name==='TypeError'&&/fetch failed/.test(message))
+    return 'CJ_SUPPLIER_NETWORK';
+  return 'CJ_TICKET_UNKNOWN_FAILURE';
+};
+export async function diagnoseWrittenCjQuote({accessToken,fetcher=fetch}={}){
+  const call=createCaller(accessToken,fetcher);
+  const report={kind:'cj_supplier_ticket_readonly_diagnostic',
+    reference:QUOTE_REFERENCE,sku:QUOTE_SKU,
+    historyCheck:'not_checked',categoryCheck:'not_checked',
+    supplierState:null,quoteApproved:false,
+    orderPlaced:false,walletDebited:false};
+  try{
+    const existing=await findExistingQuoteTicket(call);
+    report.historyCheck=existing?'ticket_found':'not_requested';
+    if(existing)report.supplierState=existing.state;
+  }catch(error){report.historyCheck=safeErrorCode(error);}
+  try{
+    const types=await call('/ticket/types');
+    if(!Array.isArray(types))throw Error('CJ_TICKET_TYPES_UNAVAILABLE');
+    report.ticketTypeCount=types.length;
+    report.questionTypeCount=types.reduce((n,t)=>n+(
+      Array.isArray(t?.questionTypes)?t.questionTypes.length:0),0);
+    try{
+      const selected=selectConsultationCategory(types);
+      report.categoryCheck='eligible';
+      report.category=selected.category;
+      report.question=selected.subject;
+    }catch(error){
+      report.categoryCheck=safeErrorCode(error);
+      report.menuHints=types.slice(0,12).flatMap(t=>{
+        const group=safeMenuLabel(t?.ticketTypeName);
+        if(!group||!Array.isArray(t?.questionTypes))return [];
+        return t.questionTypes.slice(0,10).flatMap(q=>{
+          const subject=safeMenuLabel(q?.questionTypeName);
+          return subject?[{type:group,question:subject,
+            mandatoryFields:Array.isArray(q.formFields)?
+              q.formFields.filter(x=>x?.required===true).length:null}]:[];
+        });
+      }).slice(0,25);
+    }
+  }catch(error){report.categoryCheck=safeErrorCode(error);}
+  return report;
+}
 /**
  * Explicit manual support inquiry. Previews only read ticket types.
  * Sending scans paginated account history for our stable marker,
@@ -177,8 +250,8 @@ export async function requestWrittenCjQuote({accessToken,send=false,fetcher=fetc
 
 async function main(){
   const mode=process.argv[2]||'preview';
-  if(!['preview','send','status'].includes(mode)||process.argv.length>3)
-    throw Error('Use preview, send or status');
+  if(!['preview','send','status','diagnose'].includes(mode)||process.argv.length>3)
+    throw Error('Use preview, send, status or diagnose');
   const apiKey=process.env.CJ_API_KEY;
   if(!apiKey)throw Error('CJ_API_KEY_GITHUB_SECRET_MISSING');
   const token=await obtainCjAccessToken({apiKey});
@@ -186,12 +259,18 @@ async function main(){
   await new Promise(resolve=>setTimeout(resolve,1250));
   const result=mode==='status'?
     await checkWrittenCjQuote({accessToken:token}):
-    await requestWrittenCjQuote({accessToken:token,send:mode==='send'});
+    mode==='diagnose'?
+      await diagnoseWrittenCjQuote({accessToken:token}):
+      await requestWrittenCjQuote({accessToken:token,send:mode==='send'});
   console.log(JSON.stringify(result));
+  if(mode==='diagnose'&&(result.historyCheck!=='not_requested'&&
+    result.historyCheck!=='ticket_found'||result.categoryCheck!=='eligible'))
+    process.exitCode=1;
 }
 if(process.argv[1]&&import.meta.url===new URL('file://'+process.argv[1]).href){
-  main().catch(()=>{
-    console.error('CJ ticket request not confirmed. Check existing CJ tickets before any retry; no checkout was enabled.');
+  main().catch(error=>{
+    console.error('CJ quote workflow failed at '+safeErrorCode(error)+
+      '. Check existing CJ tickets before any send retry. No checkout enabled.');
     process.exitCode=1;
   });
 }
