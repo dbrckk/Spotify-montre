@@ -99,8 +99,10 @@ export async function preflightCjDelivery({vid,originCountry='CN',postalCode,
  * A single metropolitan French postcode is only a sample, not national coverage.
  */
 export async function discoverCjVariant({vid,postalCode,originCountry='CN',
-  accessToken,fetcher=fetch}){
+  accessToken,expectedPid,fetcher=fetch}){
   if(typeof vid!=='string'||!/^[a-zA-Z0-9_-]{3,100}$/.test(vid)||
+    (expectedPid!==undefined&&
+      (typeof expectedPid!=='string'||!/^[a-zA-Z0-9_-]{3,100}$/.test(expectedPid)))||
     typeof postalCode!=='string'||!/^[0-9]{5}$/.test(postalCode)||
     /^(?:97|98)/.test(postalCode)||
     originCountry!=='CN')
@@ -120,6 +122,22 @@ export async function discoverCjVariant({vid,postalCode,originCountry='CN',
   if(v?.vid!==vid)throw Error('CJ variant identity does not match requested VID');
   const productUsdCents=usdToCents(v.variantSellPrice);
   if(productUsdCents<=0)throw Error('CJ variant price is not available');
+  // The catalog listing can be stale or refer to a different parent product.
+  // The dedicated VID endpoint is authoritative for the exact variant.
+  // Refuse to spend more points on stock/freight for mismatched pairings.
+  const canonicalPid=typeof v.pid==='string'&&/^[a-zA-Z0-9_-]{3,100}$/.test(v.pid)?
+    v.pid:null;
+  const catalogPidMatched=expectedPid===undefined?null:canonicalPid===expectedPid;
+  if(catalogPidMatched===false){
+    return {vid,canonicalPid,catalogPid:expectedPid,catalogPidMatched:false,
+      variantSku:typeof v.variantSku==='string'&&v.variantSku.length<=100?
+        v.variantSku:null,
+      productUsdCents,stockConfirmed:false,stockChecked:false,
+      shippingMethods:[],excludedIncompleteShippingOptions:0,
+      state:'catalog_identity_mismatch',sampleOnly:true,approvedForSale:false,
+      requiresLegalReview:true,
+      notice:'Supplier VID belongs to another or an unknown parent. Stock and freight were intentionally not checked.'};
+  }
   const inventory=await api('/product/stock/queryByVid?vid='+encodeURIComponent(vid),
     accessToken,{fetcher:supplierFetcher});
   if(!Array.isArray(inventory))throw Error('CJ inventory payload invalid');
@@ -131,7 +149,8 @@ export async function discoverCjVariant({vid,postalCode,originCountry='CN',
     variantName:typeof v.variantNameEn==='string'&&v.variantNameEn.length<=120&&
       !/[\u0000-\u001f\u007f]/.test(v.variantNameEn)?v.variantNameEn:null,
     originCountry,postalCode,productUsdCents,
-    stockConfirmed,warehouseRows:warehouseRows.length,
+    canonicalPid,catalogPid:expectedPid??null,catalogPidMatched,
+    stockChecked:true,stockConfirmed,warehouseRows:warehouseRows.length,
     sampleOnly:true,approvedForSale:false,requiresLegalReview:true,
     shippingMethods:[],excludedIncompleteShippingOptions:0,
     shippingQuoteDiagnostics:null,shippingRouteSamples:[],
