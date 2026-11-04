@@ -220,6 +220,21 @@ assert.ok(!home.includes('Non, pas actuellement. Si nous rejoignons un programme
 assert.match(home,/id="affGrid"/);
 assert.equal(home.includes('cloud.umami.is/script.js'),analyticsConfigured,'Homepage Umami opt-in only');
 assert.equal(home.includes('./analytics.js'),analyticsConfigured,'Homepage click instrumentation opt-in only');
+const partnerPurchase=read('acheter.html');
+assert.match(partnerPurchase,/id="amPartnerSelection"/,
+  'Purchase page must keep its exact-model partner section');
+assert.equal(partnerPurchase.includes('cloud.umami.is/script.js'),analyticsConfigured,
+  'Showroom analytics must use the same optional configuration as the homepage');
+assert.equal(partnerPurchase.includes('src="./analytics.js"'),analyticsConfigured,
+  'Showroom outbound events are not measurable if the delegated tracker is absent');
+assert.equal((partnerPurchase.match(/AM_PARTNER_ANALYTICS_START/g)||[]).length,1,
+  'Rebuilt partner page must contain exactly one analytics guard marker');
+if(analyticsConfigured){
+  assert.match(partnerPurchase,/data-do-not-track="true"/);
+  assert.equal((partnerPurchase.match(/cloud\.umami\.is\/script\.js/g)||[]).length,1,
+    'Rebuilt partner page must never register the Umami script twice');
+}
+
 assert.match(home,/rel="canonical"/);
 assert.match(home,/application\/ld\+json/);
 assert.match(home,/Les 15 montres, modèle par modèle/);
