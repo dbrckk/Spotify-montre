@@ -331,6 +331,22 @@ import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
   }
   writeFileSync(join(root,'index.html'),collection);
   writeFileSync(join(root,'affiliation.html'),collection);
+  // The dedicated partner purchase page is static HTML, not a generated
+  // product/SEO article. Wire exactly the same optional and DNT-aware tracker
+  // as the homepage; otherwise showroom clicks are silently absent.
+  // Rebuilding or disabling Umami must also remove stale generated scripts.
+  const purchasePath=join(root,'acheter.html');
+  if(existsSync(purchasePath)){
+    let purchase=readFileSync(purchasePath,'utf8');
+    const marker=/<!-- AM_PARTNER_ANALYTICS_START -->[\s\S]*?<!-- AM_PARTNER_ANALYTICS_END -->/g;
+    purchase=purchase.replace(marker,'');
+    if(!purchase.includes('</head>')||!purchase.includes('id="amPartnerSelection"'))
+      throw Error('Partner purchase page analytics insertion point missing');
+    purchase=purchase.replace('</head>',
+      '<!-- AM_PARTNER_ANALYTICS_START -->'+umamiScripts('./')+
+      '<!-- AM_PARTNER_ANALYTICS_END --></head>');
+    writeFileSync(purchasePath,purchase);
+  }
   const paths=['','conseiller.html',unified.path,editorialPolicy.path,popularPicks.path,...popularPicks.shopperPaths,...popularPicks.detailPaths,guidePath,...editorialPaths,...collections.paths,...comparisons.comparisonPaths,...affordableComparisons.paths,...products.map(p=>'montres/'+p.id+'.html')];
   const xml=`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${paths.map(path=>`  <url><loc>${e(u(path))}</loc></url>`).join('\n')}\n</urlset>\n`;
   writeFileSync(join(root,'sitemap.xml'),xml);
