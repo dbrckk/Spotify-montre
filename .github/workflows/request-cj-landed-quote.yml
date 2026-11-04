@@ -17,18 +17,17 @@ jobs:
   one-watch-supplier-inquiry:
     runs-on: ubuntu-latest
     timeout-minutes: 8
-    env:
-      CJ_API_KEY: ${{ secrets.CJ_API_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Check CJ API secret is configured (never print value)
+      - name: Request a written quote only on explicit manual send
+        env:
+          CJ_API_KEY: ${{ secrets.CJ_API_KEY }}
         run: |
           if [ -z "$CJ_API_KEY" ]; then
             echo 'Missing CJ_API_KEY repository secret. No supplier ticket submitted.'
             exit 1
           fi
-      - name: Request a written quote only on explicit manual send
-        run: node commerce/cj-quote-ticket.mjs "${{ inputs.operation }}"
+          node commerce/cj-quote-ticket.mjs "${{ inputs.operation }}"
