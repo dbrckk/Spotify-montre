@@ -153,12 +153,15 @@
     else if(Object.hasOwn(filterNames,key))
       controls[key].value=key==='q'?'':'all';
     render();
+    // Removing the pressed chip must not strand keyboard focus on <body>.
+    (key==='saved'?savedToggle:controls[key])?.focus({preventScroll:true});
   });
   clearActive?.addEventListener('click',()=>{
     for(const key of Object.keys(filterNames))
       controls[key].value=key==='q'?'':'all';
     savedOnly=false;
     render();
+    controls.q.focus({preventScroll:true});
   });
   const updateSavedUI=()=>{
     const count=cards.filter(card=>saved.has(card.dataset.id)).length;
