@@ -25,7 +25,7 @@ try{
   assert.equal(await page.locator('#amDirectForm').isVisible(),false,
     'Affiliate gateway must never activate the own-site merchant checkout');
   assert.equal(await page.locator('#amDirectPrelaunch').isVisible(),true);
-  assert.equal(await page.locator('.am-partner-filters').count(),0);
+  assert.equal(await page.locator('#amPartnerFilters').isVisible(),true);
   const cards=page.locator('.am-partner-card');
   for(let i=0;i<ids.length;i++){
     const card=cards.nth(i);
