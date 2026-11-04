@@ -26,11 +26,12 @@ async function insertOrder(status='SUPPLIER_SENDING'){
     INSERT INTO commerce_orders (
       id,public_token_hash,idempotency_hash,request_hash,offer_id,product_label,
       amount_eur_cents,supplier_vid,supplier_pid,supplier_variant_sku,
-      supplier_product_sku,supplier_max_usd_cents,logistics_name,
+      supplier_product_sku,supplier_max_usd_cents,
+      supplier_landed_eur_ceiling_cents,logistics_name,
       from_country_code,address_encrypted,import_proof_sha256,
       status,payment_id,payment_mode
     ) VALUES($1,$2,$3,$4,$5,'Synthetic gated order',5000,'sample-vid',
-             'sample-pid','SAMPLE-VID-SKU','SAMPLE-PRODUCT-SKU',2200,
+             'sample-pid','SAMPLE-VID-SKU','SAMPLE-PRODUCT-SKU',2200,2200,
              'CI-shipping','CN','no real address data',$6,$7,$8,'test')
   `,[id,digest(randomBytes(16).toString('hex')),
     digest(randomBytes(16).toString('hex')),
