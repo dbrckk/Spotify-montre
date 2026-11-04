@@ -332,7 +332,7 @@ assert.equal(recovered.findings[0].identityMismatches,1);
 assert.equal(recovered.findings[0].productUsdCents,200);
 assert.equal(recovered.findings[0].shippingMethods[0].landedUsdCents,650);
 assert.equal(recovered.findings[0].approvedForSale,false);
-assert.equal(mixedCalls.length,7);
+assert.equal(mixedCalls.length,6,'one list, one variant list, two exact VIDs, one stock and one freight');
 assert.ok(mixedCalls.every(x=>!x.includes('/shopping/')));
 
 console.log('CJ discovery OK: real API payloads, paginated diverse variants, bounded fallback and no writes');
