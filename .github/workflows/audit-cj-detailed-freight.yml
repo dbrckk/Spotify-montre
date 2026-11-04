@@ -1,11 +1,6 @@
 name: Estimer livraison CJ détaillée pour une variante (sans achat)
 
 on:
-  # One exact-VID retry after correcting the missing product-summary variant.
-  push:
-    branches: [main]
-    paths:
-      - 'commerce/audit-cj-detailed-freight.mjs'
   workflow_dispatch:
 
 permissions:
