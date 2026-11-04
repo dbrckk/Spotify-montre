@@ -100,4 +100,46 @@ for(const maxPoints of [0,2511,NaN]){
 }
 await assert.rejects(scanCjWatchCatalog({accessToken:'invalid',fetcher:fake}),
   /CJ-Access-Token/);
+// Provider errors must preserve already discovered products and disclose only
+// fixed, public-safe diagnostics. Unsafe endpoint errors must still be fatal.
+const progress=[];
+const partial=await scanCjWatchCatalog({
+  accessToken,fetcher:fake,
+  plan:[{keyword:'watch',page:1},{keyword:'quartz watch',page:1},
+    {keyword:'digital watch',page:1}],
+  searcher:async({keyword})=>{
+    if(keyword==='quartz watch')throw Error('CJ read-only API did not confirm success');
+    return {findings:[{pid:keyword==='watch'?'safeproduct1':'safeproduct2',
+      name:'Sports watch',state:'sample_shipping_available',
+      stockConfirmed:true,shippingMethods:[{landedUsdCents:1200}]}]};
+  },
+  onProgress:message=>progress.push(message)
+});
+assert.equal(partial.status,'partial_supplier_errors');
+assert.equal(partial.searchesCompleted,2);
+assert.equal(partial.searchesAttempted,3);
+assert.equal(partial.shippableSamples.length,2);
+assert.equal(partial.failedSearches[0].reason,'supplier_rejected');
+assert.equal(partial.failedSearches[0].keyword,'quartz watch');
+assert.equal(partial.failedSearches[0].endpoint,null);
+assert.equal(progress.filter(x=>x.event==='supplier_failure').length,1);
+assert.ok(!JSON.stringify(partial).includes(accessToken));
+
+const authenticated=await scanCjWatchCatalog({
+  accessToken,fetcher:fake,
+  plan:[{keyword:'watch',page:1},{keyword:'digital watch',page:1}],
+  searcher:async()=>{throw Error('CJ supplier HTTP 401');}
+});
+assert.equal(authenticated.stoppedBySupplier,true);
+assert.equal(authenticated.searchesAttempted,1);
+assert.equal(authenticated.failedSearches[0].reason,'supplier_auth');
+assert.equal(authenticated.shippableSamples.length,0);
+const throttled=await scanCjWatchCatalog({
+  accessToken,fetcher:fake,
+  plan:[{keyword:'watch',page:1},{keyword:'digital watch',page:1}],
+  searcher:async()=>{throw Error('CJ supplier HTTP 429');}
+});
+assert.equal(throttled.failedSearches[0].reason,'supplier_rate_limit');
+assert.equal(throttled.searchesAttempted,1);
+
 console.log('CJ global scan OK: multi-segment sample, hard point cap, no credential leak, no write endpoints');
