@@ -297,3 +297,35 @@
  .ud-matrix th:first-child{min-width:114px;max-width:125px}
  .ud-matrix-hint{font-size:12px}
 }
+
+
+/* A visible, reversible summary of current catalogue criteria. The 52
+   editorial cards still render without JavaScript or this enhancement. */
+.ud-active-filters[hidden]{display:none!important}
+.ud-active-filters{display:flex;align-items:center;gap:10px 16px;flex-wrap:wrap;
+  margin:12px 0 8px;padding:13px 16px;background:#f7f5ee;
+  border:1px solid #ded8c9;border-radius:10px}
+.ud-active-filters>strong{font:750 12px/1.5 system-ui,sans-serif;
+  color:#33513c;letter-spacing:.015em}
+.ud-active-filter-pills{display:flex;align-items:center;flex:1 1 260px;
+  gap:8px;flex-wrap:wrap;min-width:0}
+.ud-filter-chip{display:inline-flex;align-items:center;justify-content:center;
+  max-width:100%;min-height:38px;padding:8px 12px;border-radius:999px;
+  border:1px solid #b9c9b5;background:#ebf2e8;color:#23452f;
+  font:700 12px/1.4 system-ui,sans-serif;overflow-wrap:anywhere;
+  text-align:left;cursor:pointer}
+.ud-filter-chip:hover{border-color:#416b4d;background:#dcebd8}
+.ud-clear-active{min-height:38px;background:transparent;color:#375b3f;
+  border:0;text-decoration:underline;text-underline-offset:3px;
+  font:750 12px/1.4 system-ui,sans-serif;cursor:pointer}
+.ud-filter-chip:focus-visible,.ud-clear-active:focus-visible{
+  outline:3px solid #b78b46;outline-offset:3px}
+@media(max-width:580px){
+ .ud-active-filters{padding:12px;gap:9px}
+ .ud-active-filters>strong{width:100%}
+ .ud-active-filter-pills{flex-basis:100%}
+ .ud-clear-active{margin-left:auto}
+}
+@media(prefers-reduced-motion:reduce){
+ .ud-filter-chip{transition:none!important}
+}

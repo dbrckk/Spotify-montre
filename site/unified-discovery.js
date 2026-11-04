@@ -27,6 +27,10 @@
   const controls={q:$('udSearch'),brand:$('udBrand'),style:$('udStyle'),
     movement:$('udMovement'),tier:$('udTier'),size:$('udSize'),visual:$('udVisual'),
     merchant:$('udMerchant'),sort:$('udSort')};
+  const activeFilters=$('udActiveFilters'),activePills=$('udActiveFilterPills'),
+    clearActive=$('udClearActiveFilters');
+  const filterNames={q:'Recherche',brand:'Marque',style:'Style',movement:'Mouvement',
+    tier:'Gamme',size:'Taille',visual:'Photo',merchant:'Marchand'};
   let watches=new Map(),selected=[],view='grid',currentSort=null,saved=new Set(),savedOnly=false;
   const validId=x=>typeof x==='string'&&/^[a-z0-9-]{4,64}$/.test(x);
   // Shared with the 15-watch comparison gallery: a watch saved on either
@@ -110,6 +114,61 @@
     root.replaceChildren(...ordered);
     currentSort=mode;
   };
+  // The visible query must find exact references typed without punctuation,
+  // e.g. "MDV107", "PD1701" or "skmei1251", as well as normal French text.
+  const matchesText=(p,terms)=>{
+    if(!terms.length)return true;
+    const source=normalized([p.brand,p.model,p.id,p.description,p.lead,
+      p.caseText,p.glass,p.water].filter(Boolean).join(' '));
+    const compactModel=normalized([p.brand,p.model].join(' ')).replace(/\s+/g,'');
+    const compactReference=normalized([p.model,p.id].join(' ')).replace(/\s+/g,'');
+    return terms.every(term=>source.includes(term)
+      ||compactModel.includes(term)||compactReference.includes(term));
+  };
+  let activeFilterSignature='';
+  const updateActiveFilters=()=>{
+    if(!activeFilters||!activePills||!clearActive)return;
+    const items=Object.entries(filterNames).flatMap(([key,label])=>{
+      const control=controls[key],value=control.value.trim();
+      if(!value||value==='all')return [];
+      const selected=control.tagName==='SELECT'
+        ?control.selectedOptions[0]?.textContent||value:value;
+      return [{key,label,value:selected}];
+    });
+    if(savedOnly)items.push({key:'saved',label:'Favoris',value:'uniquement'});
+    activeFilters.hidden=items.length===0;
+    // Keep a pressed pill attached through blur/change. Replacing it during
+    // the pointer sequence can swallow the click on Android/mobile browsers.
+    const signature=JSON.stringify(items);
+    if(signature===activeFilterSignature)return;
+    activeFilterSignature=signature;
+    const chips=items.map(({key,label,value})=>{
+      const chip=node('button',label+' : '+value+' ×','ud-filter-chip');
+      chip.type='button';
+      chip.dataset.removeFilter=key;
+      chip.setAttribute('aria-label','Retirer le filtre '+label+' : '+value);
+      return chip;
+    });
+    activePills.replaceChildren(...chips);
+  };
+  activePills?.addEventListener('click',event=>{
+    const chip=event.target.closest('button[data-remove-filter]');
+    if(!chip)return;
+    const key=chip.dataset.removeFilter;
+    if(key==='saved')savedOnly=false;
+    else if(Object.hasOwn(filterNames,key))
+      controls[key].value=key==='q'?'':'all';
+    render();
+    // Removing the pressed chip must not strand keyboard focus on <body>.
+    (key==='saved'?savedToggle:controls[key])?.focus({preventScroll:true});
+  });
+  clearActive?.addEventListener('click',()=>{
+    for(const key of Object.keys(filterNames))
+      controls[key].value=key==='q'?'':'all';
+    savedOnly=false;
+    render();
+    controls.q.focus({preventScroll:true});
+  });
   const updateSavedUI=()=>{
     const count=cards.filter(card=>saved.has(card.dataset.id)).length;
     savedCount.textContent=String(count);
@@ -147,7 +206,7 @@
         &&(merchant==='all'||(p.merchantKind||'official')===merchant)
         &&(visual==='all'||(visual==='photo'&&Boolean(p.photoUrl))
           ||(visual==='no-photo'&&!p.photoUrl))
-        &&tokens.every(term=>normalized([p.brand,p.model,p.description,p.lead,p.caseText,p.glass,p.water].join(' ')).includes(term));
+        &&matchesText(p,tokens);
       card.hidden=!ok;
       if(ok)visible++;
     }
@@ -158,6 +217,7 @@
       :'Aucun résultat. Essayez une autre marque, un style différent ou effacez les filtres.';
     empty.hidden=visible!==0;
     updateSavedUI();
+    updateActiveFilters();
     persist();
   };
   const changeView=mode=>{
