@@ -28,6 +28,8 @@ export function offerReadinessBlockers(offer, now=new Date()){
   ))reasons.push('supplier_identity_proof_missing');
   if(offer?.eu_import_proof_ready!==true)
     reasons.push('eu_2026_import_proof_missing_or_expired');
+  if(offer?.customs_identifiers_proof_ready!==true)
+    reasons.push('customs_c127_c128_c129_or_y081_proof_missing');
   const cents=['amount_eur_cents','unit_cost_eur_cents',
     'supplier_landed_eur_ceiling_cents','reserves_eur_cents','supplier_max_usd_cents'];
   const allCentsValid=cents.every(field=>Number.isSafeInteger(offer?.[field]));
@@ -102,7 +104,26 @@ export async function commercialReadinessReport(pool,{env={},siteConfig={},now=n
         AND ip.landed_eur_quote_cents<=o.supplier_landed_eur_ceiling_cents
         AND ip.valid_until>now()
         AND ip.recorded_at>now()-interval '7 days'
-      ) AS eu_import_proof_ready
+      ) AS eu_import_proof_ready,
+      (ip.offer_id IS NOT NULL
+        AND ip.supplier_vid=o.supplier_vid
+        AND ip.supplier_pid=o.supplier_pid
+        AND ip.supplier_variant_sku=o.supplier_variant_sku
+        AND ip.supplier_product_sku=o.supplier_product_sku
+        AND ip.logistics_name=o.logistics_name
+        AND ip.merchant_product_identifier ~ '^[A-Za-z0-9][A-Za-z0-9._:/-]{2,99}$'
+        AND ip.merchant_product_identifier<>o.supplier_pid
+        AND ip.merchant_product_identifier<>o.supplier_vid
+        AND ip.supplier_nonstandard_identifier ~ '^[A-Za-z0-9][A-Za-z0-9._:/-]{2,99}$'
+        AND ((ip.standardized_manufacturer_identifier IS NULL
+              AND ip.no_standardized_manufacturer_identifier=true)
+          OR (ip.standardized_manufacturer_identifier ~ '^[A-Za-z0-9][A-Za-z0-9._:/-]{2,99}$'
+              AND ip.no_standardized_manufacturer_identifier=false))
+        AND char_length(trim(ip.customs_declarant)) BETWEEN 3 AND 100
+        AND ip.customs_identifiers_transmission_confirmed=true
+        AND ip.valid_until>now()
+        AND ip.recorded_at>now()-interval '7 days'
+      ) AS customs_identifiers_proof_ready
     FROM commerce_offers o
     LEFT JOIN commerce_offer_import_proofs ip ON ip.offer_id=o.id
     LEFT JOIN (
