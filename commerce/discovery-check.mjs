@@ -127,4 +127,31 @@ assert.ok(!simpleCalls.some(x=>/shopping|createOrderV2/.test(x.url)));
 assert.equal(result.shippingQuoteDiagnostics.optionsReturned,5);
 assert.equal(result.shippingMethods.length,2,'Existing complete routes must still work');
 
+// A catalog PID may be stale even when queryByVid resolves the exact VID.
+// Its canonical parent is authoritative: never query inventory or rates when
+// the requested catalog association differs.
+const mismatchReads=[];
+const parentMismatch=await discoverCjVariant({
+  vid,expectedPid:'wrong-catalog-pid',postalCode:'75002',accessToken:token,
+  fetcher:async(url,options)=>{
+    mismatchReads.push(new URL(url).pathname);
+    assert.equal(options.method,'GET');
+    assert.ok(url.includes('/product/variant/queryByVid'));
+    return reply({vid,pid:'canonical-supplier-pid',variantSellPrice:'2.15',
+      variantSku:'CJZBNSET00031-black'});
+  }
+});
+assert.equal(parentMismatch.state,'catalog_identity_mismatch');
+assert.equal(parentMismatch.catalogPidMatched,false);
+assert.equal(parentMismatch.canonicalPid,'canonical-supplier-pid');
+assert.equal(parentMismatch.stockChecked,false);
+assert.equal(parentMismatch.stockConfirmed,false);
+assert.deepEqual(parentMismatch.shippingMethods,[]);
+assert.equal(parentMismatch.approvedForSale,false);
+assert.equal(mismatchReads.length,1,'Bad parent pairing must not spend CJ stock/freight points');
+await assert.rejects(discoverCjVariant({
+  vid,expectedPid:'bad pid!',postalCode:'75002',accessToken:token,fetcher:fake
+}),/exact CJ VID/);
+assert.equal(mismatchReads.length,1);
+
 console.log('CJ discovery OK: real-API read shapes, safe tax-inclusive shipping, stock, no order writes and early reject');
