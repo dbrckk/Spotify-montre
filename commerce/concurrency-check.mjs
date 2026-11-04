@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {randomBytes} from 'node:crypto';
 import {createDatabase,initializeDatabase,reserveCheckout,saveCreatedPayment,
-  findExistingCheckout} from './db.mjs';
+  findExistingCheckout,getApprovedOffer} from './db.mjs';
 import {validateCheckoutBody} from './security.mjs';
 
 // An isolated, ephemeral local PostgreSQL database is mandatory. No supplier
@@ -49,11 +49,25 @@ try{
     "SELECT 1 FROM information_schema.columns WHERE table_schema=current_schema() AND table_name='commerce_offers' AND column_name='supplier_fx_max_eur_per_usd_bps'");
   if(fxColumn.rowCount)
     await pool.query('UPDATE commerce_offers SET supplier_fx_max_eur_per_usd_bps=10500 WHERE id=$1',[offerId]);
+  const verifiedOffer=await getApprovedOffer(pool,offerId);
+  assert.ok(verifiedOffer,'the test offer must pass the real purchase predicate');
+  const verifiedOptions={...opts,verifiedOffer};
+  // A supplier quote must never authorize a checkout for an offer edited
+  // concurrently after that quote was fetched.
+  await pool.query('UPDATE commerce_offers SET supplier_variant_sku=$2 WHERE id=$1',
+    [offerId,'CI-SUBSTITUTED-SKU']);
+  await assert.rejects(()=>reserveCheckout(pool,request,verifiedOptions),
+    e=>e.status===409,'stale supplier quote must not create a payment/order');
+  assert.equal((await pool.query(
+    'SELECT count(*)::int AS n FROM commerce_orders WHERE offer_id=$1',
+    [offerId])).rows[0].n,0);
+  await pool.query('UPDATE commerce_offers SET supplier_variant_sku=$2 WHERE id=$1',
+    [offerId,'CI-VARIANT-SKU']);
   // Two clients can both find no prior order before either transaction commits.
   // The DB lock must let exactly one reserve and the other reuse it.
   const [a,b]=await Promise.all([
-    reserveCheckout(pool,request,opts),
-    reserveCheckout(pool,request,opts)
+    reserveCheckout(pool,request,verifiedOptions),
+    reserveCheckout(pool,request,verifiedOptions)
   ]);
   assert.equal(a.orderId,b.orderId,'both attempts must refer to one order');
   assert.equal(Boolean(a.reused)+Boolean(b.reused),1,'exactly one attempt creates an order');
@@ -82,7 +96,7 @@ try{
 
   // The same key cannot be repurposed for a different customer or basket.
   await assert.rejects(
-    ()=>reserveCheckout(pool,{...request,customer:{...request.customer,city:'Lyon'}},opts),
+    ()=>reserveCheckout(pool,{...request,customer:{...request.customer,city:'Lyon'}},verifiedOptions),
     error=>error.status===409
   );
   console.log('Checkout concurrency OK: one order, one payment, safe retry and fingerprint rejection');
