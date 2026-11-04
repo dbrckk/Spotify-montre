@@ -54,9 +54,18 @@ export async function examineCjDetailedFreight({
   }catch{throw Error('CJ_DETAIL_PRODUCT_READ_FAILED')}
   if(product?.pid!==pid)throw Error('CJ_DETAIL_PRODUCT_ID_MISMATCH');
   if(!Array.isArray(product.variants))throw Error('CJ_DETAIL_VARIANTS_UNAVAILABLE');
-  const variant=product.variants.find(item=>item?.vid===vid&&
+  let variant=product.variants.find(item=>item?.vid===vid&&
     (item?.pid===undefined||item?.pid===pid));
-  if(!variant)throw Error('CJ_DETAIL_EXACT_VARIANT_ABSENT');
+  if(!variant){
+    // Some CJ product-detail replies omit an otherwise valid VID from their
+    // summary array. Query the exact variant by VID, not by color/price/name.
+    try{
+      variant=await read('/product/variant/queryByVid?vid='+
+        encodeURIComponent(vid),accessToken,fetcher);
+    }catch{throw Error('CJ_DETAIL_VARIANT_READ_FAILED')}
+    if(variant?.vid!==vid||variant?.pid!==pid)
+      throw Error('CJ_DETAIL_VARIANT_ID_MISMATCH');
+  }
   const sku=variant.variantSku;
   const weight=validWeight(variant.variantWeight);
   const properties=product.productProEnSet;
