@@ -1,12 +1,6 @@
 name: Diagnostiquer un devis CJ ciblé (sans achat)
 
 on:
-  # One-time audit after integration. This push trigger will be removed
-  # after the supplier result has been inspected.
-  push:
-    branches: [main]
-    paths:
-      - 'commerce/audit-cj-freight.mjs'
   workflow_dispatch:
 
 permissions:
