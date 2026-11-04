@@ -209,6 +209,15 @@ export async function reserveCheckout(pool,request,{encryptionKey,idempotencySec
       throw new ClientError('Offre modifiée depuis le devis fournisseur. Nouveau contrôle requis.',409);
     try{validateCommercialCeiling(offer)}
     catch{throw new ClientError('Offre commercialement indisponible',409)}
+    const proof=await client.query(`
+      SELECT supplier_evidence_sha256 FROM commerce_offer_import_proofs
+      WHERE offer_id=$1 AND valid_until>now()
+        AND recorded_at>now()-interval '7 days'
+      FOR SHARE
+    `,[offer.id]);
+    if(proof.rowCount!==1)
+      throw new ClientError('Preuve fiscale importation expirée ou absente',409);
+
     // A single pilot purchase at a time per supplier SKU prevents overselling
     // during payment and fulfillment. The row lock on commerce_offers serializes reservations.
     const active=await client.query(`
@@ -225,8 +234,9 @@ export async function reserveCheckout(pool,request,{encryptionKey,idempotencySec
         supplier_product_sku,supplier_max_usd_cents,logistics_name,
         from_country_code,address_encrypted,vat_rate_bps_snapshot,
         supplier_landed_eur_ceiling_cents,supplier_fx_max_eur_per_usd_bps,
-        promised_delivery_min_business_days,promised_delivery_max_business_days,status
-      ) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,'PAYMENT_CREATING')
+        promised_delivery_min_business_days,promised_delivery_max_business_days,
+        import_proof_sha256,status
+      ) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,'PAYMENT_CREATING')
     `,[orderId,digest(token),idempotencyHash,requestHash,offer.id,offer.label,
        offer.amount_eur_cents,offer.supplier_vid,
        offer.supplier_pid,offer.supplier_variant_sku,offer.supplier_product_sku,
@@ -234,7 +244,8 @@ export async function reserveCheckout(pool,request,{encryptionKey,idempotencySec
        sealAddress(request.customer,encryptionKey),
        offer.vat_rate_bps,offer.supplier_landed_eur_ceiling_cents,
        offer.supplier_fx_max_eur_per_usd_bps,offer.delivery_min_business_days,
-       offer.delivery_max_business_days]);
+       offer.delivery_max_business_days,
+       proof.rows[0].supplier_evidence_sha256]);
     await client.query('INSERT INTO commerce_events(order_id,event_type) VALUES($1,$2)',[orderId,'ORDER_RESERVED']);
     return {orderId,token,amountCents:offer.amount_eur_cents,description:offer.label};
   });
