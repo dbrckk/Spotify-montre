@@ -1,0 +1,33 @@
+name: Estimer livraison CJ détaillée pour une variante (sans achat)
+
+on:
+  # Single diagnostic on integration. Remove this push trigger after auditing
+  # the first real result to avoid consuming CJ points on every edit.
+  push:
+    branches: [main]
+    paths:
+      - 'commerce/audit-cj-detailed-freight.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cj-one-detailed-freight-trial
+  cancel-in-progress: false
+
+jobs:
+  detailed-france-quote:
+    if: github.repository == 'dbrckk/Spotify-montre' && (github.actor == 'dbrckk' || github.event_name == 'push')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Lire profil exact, stock CN et estimation logistique FR
+        env:
+          CJ_API_KEY: ${{ secrets.CJ_API_KEY }}
+          CJ_ACCESS_TOKEN: ${{ secrets.CJ_ACCESS_TOKEN }}
+        run: node commerce/audit-cj-detailed-freight.mjs
