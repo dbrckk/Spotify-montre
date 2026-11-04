@@ -2,7 +2,7 @@
 
 **Plan directeur :** [vente directe entièrement automatisée](../docs/ROADMAP_VENTE_DIRECTE_AUTOMATISEE_2026-11-02.md).
 
-**Nouveau parcours Android :** [découvrir une variante CJ depuis GitHub Actions avec une seule clé enregistrée dans Secrets](../docs/DECOUVERTE_CJ_ANDROID_2026-11-03.md). L'opérateur entre un VID et un code postal : l'exploration affiche les stock et coûts fournisseur/transport **sans solde CJ requis, sans base de données et sans commande**. Les résultats de CI sont publics si le dépôt GitHub est public ; ne jamais saisir de secret dans les paramètres du workflow.
+**Scanner élargi CJ depuis Android :** [recherche globale multimarques et multi-pages, sans achat](../docs/RECHERCHE_GLOBALE_CJ_2026-11-04.md), démarrable avec le seul secret `CJ_API_KEY`. Le scanner reste manuel, avec un plafond de 2 500 points, un rapport lisible dans GitHub Actions et aucune validation de vente.\n\n**Nouveau parcours Android :** [découvrir une variante CJ depuis GitHub Actions avec une seule clé enregistrée dans Secrets](../docs/DECOUVERTE_CJ_ANDROID_2026-11-03.md). L'opérateur entre un VID et un code postal : l'exploration affiche les stock et coûts fournisseur/transport **sans solde CJ requis, sans base de données et sans commande**. Les résultats de CI sont publics si le dépôt GitHub est public ; ne jamais saisir de secret dans les paramètres du workflow.
 
 **Nouvel outil opérationnel :** [qualification de vraies variantes CJ, brouillons non achetables et preuves de devis](../docs/QUALIFICATION_VRAIES_OFFRES_CJ_2026-11-03.md) ; `node commerce/stage-offer.mjs inspect|stage /chemin/prive/candidat-reel.json`. Cette commande requiert des accès CJ réels. Aucun SKU ou paiement fictif n'est publié.
 
