@@ -30,14 +30,16 @@ try{
     INSERT INTO commerce_offers
       (id,label,amount_eur_cents,unit_cost_eur_cents,
        supplier_landed_eur_ceiling_cents,vat_rate_bps,reserves_eur_cents,
-       supplier_max_usd_cents,supplier_vid,logistics_name,from_country_code,
+       supplier_max_usd_cents,supplier_vid,supplier_pid,supplier_variant_sku,
+       supplier_product_sku,logistics_name,from_country_code,
        approved,stock_confirmed,legal_verified,eu_compliance_verified,
        photo_rights_verified,supplier_payment_verified,tax_treatment_verified,
        supplier_fx_verified,return_policy_verified,gpsr_traceability_verified,
        data_transfer_verified,verified_until,delivery_min_business_days,
        delivery_max_business_days)
     VALUES ($1,'Synthetic CI watch — never for sale',8000,1200,
-      2200,2000,900,2000,'ci-supplier-sku','ci-shipping','CN',
+      2200,2000,900,2000,'ci-supplier-sku',
+      'ci-parent-pid','CI-VARIANT-SKU','CI-PRODUCT-SKU','ci-shipping','CN',
       true,true,true,true,true,true,true,true,true,true,true,
       now()+interval '1 day',7,20)
   `,[offerId]);
@@ -61,6 +63,11 @@ try{
   assert.equal(retry.status,'PAYMENT_CREATING');
   assert.equal(retry.orderToken,winner.token);
   assert.equal((await pool.query('SELECT count(*)::int AS n FROM commerce_orders WHERE offer_id=$1',[offerId])).rows[0].n,1);
+  const snapshot=(await pool.query(
+    'SELECT supplier_pid,supplier_variant_sku,supplier_product_sku FROM commerce_orders WHERE id=$1',
+    [winner.orderId])).rows[0];
+  assert.deepEqual(snapshot,{supplier_pid:'ci-parent-pid',
+    supplier_variant_sku:'CI-VARIANT-SKU',supplier_product_sku:'CI-PRODUCT-SKU'});
 
   // Simulate persisting a provider result, without calling any provider.
   const checkoutUrl='https://www.mollie.com/checkout/select-method/CI123';
