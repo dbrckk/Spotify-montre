@@ -42,6 +42,8 @@ try{
     assert.match(await img.getAttribute('src'),new RegExp('^\\./assets/watches/'+id+'\\.webp\\?v=[a-f0-9]{12}$'));
   }
   const first=cards.first().locator('img');
+  // Native lazy loading must be activated before waiting for image.onload.
+  await first.scrollIntoViewIfNeeded();
   await first.evaluate(async img=>{
     if(!img.complete)await new Promise(resolve=>{img.addEventListener('load',resolve,{once:true});img.addEventListener('error',resolve,{once:true})});
   });
