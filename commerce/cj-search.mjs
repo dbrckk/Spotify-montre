@@ -58,8 +58,9 @@ function extractCatalogProducts(data){
 }
 /**
  * Bounded, read-only, from-account CJ shortlist, designed for Android.
- * 1 listV2 + up to 2 variant/query + up to 2*(variant/stock/freight) = 9
- * provider requests; up to 130 CJ points per complete run.
+ * 1 listV2 + up to 2 variant/query + up to 4*(variant/stock/freight) = 15
+ * provider requests in the worst case. A second VID is inspected only when
+ * the cheaper one is not deliverable to the pilot French postcode.
  * Everything is explicitly a sample, NOT an approved ecommerce offer.
  */
 export async function searchCjWatchCandidates({
@@ -105,22 +106,52 @@ export async function searchCjWatchCandidates({
         variantName:safeLabel(row.variantNameEn,180),price}];
     }).sort((a,b)=>a.price-b.price||a.vid.localeCompare(b.vid));
     if(!variants.length){
-      findings.push({...product,state:'no_usable_variant',approvedForSale:false});
+      findings.push({...product,state:'no_usable_variant',
+        listedVariants:0,variantsChecked:0,approvedForSale:false});
       continue;
     }
-    const selection=variants[0];
-    const inspected=await discoverCjVariant({vid:selection.vid,
-      postalCode,accessToken,fetcher:supplierFetcher});
-    // Supplier sometimes changes its variant price between two reads.
-    // The authenticated queryByVid and shipping data are authoritative.
-    findings.push({...product,state:inspected.stockConfirmed&&
-      inspected.shippingMethods.length?'sample_shipping_available':'not_ready',
-      vid:selection.vid,variantSku:selection.variantSku,
-      variantName:selection.variantName,
+    // Cheapest does not mean deliverable. Check the next *distinct* affordable
+    // VID only if the first has no CN stock or complete French freight. Never
+    // inspect more than two VIDs for one product; conserve CJ points.
+    const distinct=[];
+    const seenVids=new Set();
+    for(const candidate of variants){
+      if(seenVids.has(candidate.vid))continue;
+      seenVids.add(candidate.vid);
+      distinct.push(candidate);
+      if(distinct.length===2)break;
+    }
+    let choice=null,firstChecked=null,firstStocked=null;
+    let variantsChecked=0;
+    for(const candidate of distinct){
+      const quote=await discoverCjVariant({vid:candidate.vid,
+        postalCode,accessToken,fetcher:supplierFetcher});
+      variantsChecked++;
+      const observed={candidate,quote};
+      if(!firstChecked)firstChecked=observed;
+      if(quote.stockConfirmed&&!firstStocked)firstStocked=observed;
+      if(quote.stockConfirmed&&quote.shippingMethods.length){
+        choice=observed;
+        break;
+      }
+    }
+    // If neither VID is deliverable, retain the stocked candidate when one
+    // exists, but label it NOT READY. Do not imply the entire product is
+    // unavailable: only these two supplier variants were inspected.
+    const {candidate:selection,quote:inspected}=choice||firstStocked||firstChecked;
+    // queryByVid is authoritative for exact variant identity and current unit
+    // cost: a stale variant-list label must not overwrite this evidence.
+    findings.push({...product,state:choice?'sample_shipping_available':'not_ready',
+      vid:selection.vid,
+      variantSku:inspected.variantSku||selection.variantSku,
+      variantName:inspected.variantName||selection.variantName,
       productUsdCents:inspected.productUsdCents,
       stockConfirmed:inspected.stockConfirmed,
       shippingMethods:inspected.shippingMethods,
       excludedIncompleteShippingOptions:inspected.excludedIncompleteShippingOptions,
+      listedVariants:variants.length,
+      variantsChecked,
+      otherVariantsNotChecked:variants.length>variantsChecked,
       approvedForSale:false});
   }
   return {kind:'cj_watch_search_read_only',keyword,postalCode,
@@ -131,5 +162,5 @@ export async function searchCjWatchCandidates({
     productAuthenticityVerified:false,
     gpsrComplianceVerified:false,
     noCustomerOrders:true,
-    note:'Supplier query only: no merchant price, legal approval, sales rank, availability guarantee or checkout activation.'};
+    note:'Supplier query only: at most two variants per product for one postcode. Other variants may exist. No merchant price, legal approval, sales rank, availability guarantee or checkout activation.'};
 }

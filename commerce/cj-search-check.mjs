@@ -113,4 +113,88 @@ assert.equal(missing.findings.length,0);
 assert.equal(missing.merchantApproval,false);
 const printed=JSON.stringify(report);
 assert.ok(!printed.includes(token));
-console.log('CJ keyword discovery OK: authentic API shape, cost/stock/French freight, 8 bounded reads, no order writes, no secrets');
+// Regression: the cheapest price can refer to a variant with NO CN stock,
+// while the second cheapest exact VID is genuinely shippable to France.
+const cheaper='firstvid88990000',deliverable='secondvid88990000';
+const fallbackCalls=[];
+const fallbackSupplier=async(url,options)=>{
+  const path=new URL(url).pathname;
+  fallbackCalls.push({path,method:options.method});
+  assert.equal(options.headers['CJ-Access-Token'],token);
+  assert.equal(options.redirect,'error');
+  if(path.endsWith('/product/listV2'))return response({content:[{productList:[{
+    id:p1,nameEn:'SKMEI wrist watch',sku:'SKMEI-1251',threeCategoryName:'Watches'
+  }]}]});
+  if(path.endsWith('/product/variant/query'))return response([
+    {pid:p1,vid:cheaper,variantSku:'SK-1251-A',variantSellPrice:'5.00'},
+    {pid:p1,vid:deliverable,variantSku:'SK-1251-B',variantSellPrice:'7.00'},
+    // The same VID appears twice in some supplier catalogs: do not spend
+    // an extra CJ lookup for this duplicate.
+    {pid:p1,vid:deliverable,variantSku:'SK-1251-B',variantSellPrice:'7.00'}
+  ]);
+  if(path.endsWith('/product/variant/queryByVid')){
+    const vid=new URL(url).searchParams.get('vid');
+    return response({vid,variantSku:vid===deliverable?'SK-1251-B':'SK-1251-A',
+      variantNameEn:vid===deliverable?'Black watch':'Blue watch',
+      variantSellPrice:vid===deliverable?'7.00':'5.00'});
+  }
+  if(path.endsWith('/product/stock/queryByVid')){
+    const vid=new URL(url).searchParams.get('vid');
+    return response([{vid,countryCode:'CN',cjInventoryNum:vid===deliverable?14:0}]);
+  }
+  if(path.endsWith('/logistic/freightCalculate')){
+    assert.equal(options.method,'POST');
+    assert.deepEqual(JSON.parse(options.body).products,[{vid:deliverable,quantity:1}]);
+    return response([{logisticName:'France Tracked',totalPostageFee:'3.50',
+      taxesFee:'0.50',tariff:'0.00',clearanceOperationFee:'0.00'}]);
+  }
+  throw Error('Unexpected search endpoint: '+path);
+};
+const rescued=await searchCjWatchCandidates({
+  keyword:'SKMEI',postalCode:'75002',accessToken:token,
+  fetcher:fallbackSupplier,maxProducts:1
+});
+assert.equal(rescued.findings.length,1);
+assert.equal(rescued.findings[0].state,'sample_shipping_available');
+assert.equal(rescued.findings[0].vid,deliverable);
+assert.equal(rescued.findings[0].listedVariants,3);
+assert.equal(rescued.findings[0].variantsChecked,2);
+assert.equal(rescued.findings[0].otherVariantsNotChecked,true);
+assert.equal(rescued.findings[0].productUsdCents,700);
+assert.equal(rescued.findings[0].shippingMethods[0].landedUsdCents,1050);
+assert.equal(rescued.findings[0].approvedForSale,false);
+assert.equal(fallbackCalls.length,7,'one list, one variants, first VID 2 reads, second VID 3 reads');
+assert.ok(fallbackCalls.every(c=>!/shopping|createOrderV2/.test(c.path)));
+
+const unavailableCalls=[];
+const noInventory=async(url,options)=>{
+  const path=new URL(url).pathname;unavailableCalls.push(path);
+  if(path.endsWith('/product/listV2'))return response({content:[{productList:[{
+    id:p1,nameEn:'SKMEI wrist watch',sku:'SKMEI-1251',threeCategoryName:'Watches'
+  }]}]});
+  if(path.endsWith('/product/variant/query'))return response([
+    {pid:p1,vid:cheaper,variantSellPrice:'5.00'},
+    {pid:p1,vid:deliverable,variantSellPrice:'7.00'}
+  ]);
+  if(path.endsWith('/product/variant/queryByVid')){
+    const vid=new URL(url).searchParams.get('vid');
+    return response({vid,variantSellPrice:vid===cheaper?'5.00':'7.00'});
+  }
+  if(path.endsWith('/product/stock/queryByVid')){
+    const vid=new URL(url).searchParams.get('vid');
+    return response([{vid,countryCode:'CN',cjInventoryNum:0}]);
+  }
+  throw Error('No-stock search must never request freight or orders');
+};
+const noStock=await searchCjWatchCandidates({
+  keyword:'SKMEI',postalCode:'75002',accessToken:token,
+  fetcher:noInventory,maxProducts:1
+});
+assert.equal(noStock.findings[0].state,'not_ready');
+assert.equal(noStock.findings[0].stockConfirmed,false);
+assert.equal(noStock.findings[0].variantsChecked,2);
+assert.equal(noStock.findings[0].approvedForSale,false);
+assert.equal(unavailableCalls.length,6);
+assert.ok(!unavailableCalls.some(path=>/freightCalculate|shopping/.test(path)));
+
+console.log('CJ keyword discovery OK: real API payload contract, bounded second-VID fallback, no fake availability or writes');

@@ -37,20 +37,30 @@ Le script `commerce/search-cj.mjs` :
    `/product/listV2`, filtrée sur les entrepôts CN ;
 2. retient au maximum **deux fiches** qui décrivent des montres plutôt
    que des bracelets ou accessoires ;
-3. récupère les **VID réels** via `/product/variant/query` et choisit
-   une variante clairement identifiée ;
-4. recontrôle son prix via `variant/queryByVid`, le stock CJ CN et,
+3. récupère les **VID réels** via `/product/variant/query` et classe
+   les variantes par coût fournisseur annoncé (sans prétendre que c'est
+   le prix final ou un classement de meilleures ventes) ;
+4. vérifie d'abord la variante la moins chère. **Si elle est épuisée en
+   entrepôt CN ou sans transport français exploitable**, examine au maximum
+   une seconde variante distincte de ce même produit ; la première
+   variante avec stock et livraison cohérents est retenue ;
+5. recontrôle son prix via `variant/queryByVid`, le stock CJ CN et,
    uniquement si du stock existe, les frais d'envoi et d'importation
-   vers le code postal de référence ;
-5. affiche les **VID et méthodes de transport acceptables** dans le
-   journal du workflow. Les frais en USD ne sont pas convertis en EUR
-   avant une validation explicite du taux et du régime TVA.
+   vers le code postal de référence. Le prix et le nom remontés par
+   `queryByVid` priment sur les informations de la liste ;
+6. affiche le **VID sélectionné, le nombre de variantes examinées** et les
+   méthodes de transport recevables dans les journaux. Le statut
+   `not_ready` signifie seulement que les variantes effectivement
+   examinées n'ont pas permis de conclure ; il n'exclut pas les autres
+   variantes non interrogées.
 
-Coût API plafonné : **une requête de liste à 50 points**, puis au plus
-**deux fois 40 points** (liste des variantes 10, détail VID 10,
-stock 10, transport 10) = **130 points CJ par exécution au maximum**,
-hors appel d'authentification. Le workflow est **manuel**, pas
-quotidien, pour ne pas consommer les points fournisseur inutilement.
+**Budget maximal conservateur : 190 points CJ** pour une exécution
+(une recherche `listV2` à 50 points, deux listes de variantes à 10 points
+chacune, jusqu'à quatre contrôles à 30 points) et **15 requêtes API**
+au maximum, hors authentification. Habituellement, moins de lectures
+suffisent : la seconde variante n'est interrogée que si la première
+n'a pas de stock ou de livraison complète pour le code postal choisi.
+Le workflow reste **manuel**, pas quotidien, pour limiter les appels.
 Une sélection vide ou un devis incomplet ne déclenche aucune vente.
 
 Le compteur `listedNum` de CJ représente des annonces/listings,
