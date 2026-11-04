@@ -1,6 +1,12 @@
 name: Recherche globale des montres CJ (sans achat)
 
 on:
+  # One recovery run when this scanner fix lands on main.
+  # Remove this trigger after the real supplier report is inspected.
+  push:
+    branches: [main]
+    paths:
+      - 'commerce/cj-global.mjs'
   workflow_dispatch:
     inputs:
       postal_code:
@@ -20,7 +26,7 @@ concurrency:
 
 jobs:
   supplier-global-read-only:
-    if: github.repository == 'dbrckk/Spotify-montre' && github.actor == 'dbrckk'
+    if: github.repository == 'dbrckk/Spotify-montre' && (github.actor == 'dbrckk' || github.event_name == 'push')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:

@@ -16,7 +16,8 @@ async function main(){
   // CJ authentications can be subject to the same frequency limits as reads.
   await new Promise(resolve=>setTimeout(resolve,1200));
   const report=await scanCjWatchCatalog({
-    accessToken:token,postalCode:process.env.CJ_POSTAL_CODE||'75002'
+    accessToken:token,postalCode:process.env.CJ_POSTAL_CODE||'75002',
+    onProgress:step=>process.stdout.write(JSON.stringify({kind:'cj_scan_progress',...step})+'\n')
   });
   process.stdout.write(JSON.stringify(report,null,2)+'\n');
   if(process.env.GITHUB_STEP_SUMMARY){
@@ -24,6 +25,8 @@ async function main(){
       '## Recherche élargie CJ — échantillons sans achat',
       '',
       `- Recherches terminées : **${report.searchesCompleted}/${report.searchesPlanned}**`,
+      `- Recherches interrompues : **${report.failedSearches.length}**`,
+      `- Statut : **${report.status}**`,
       `- Produits distincts vérifiés : **${report.distinctProductsChecked}**`,
       `- Variantes avec stock et transport FR : **${report.shippableSamples.length}**`,
       `- Points CJ potentiellement consommés : **${report.pointsAttempted}/${report.maxPoints}**`,
@@ -31,6 +34,14 @@ async function main(){
       '> Recherche non exhaustive ; prix fournisseur en USD, sans homologation ni prix client. Aucun paiement, commande ou publication.',
       ''
     ];
+    if(report.failedSearches.length){
+      lines.push('### Échecs fournisseurs (sans secrets)',
+        '| Recherche | Page | API | Type de problème |',
+        '| --- | ---: | --- | --- |');
+      for(const failure of report.failedSearches){
+        lines.push(`| ${escapeCell(failure.keyword)} | ${failure.page} | ${escapeCell(failure.endpoint)} | ${escapeCell(failure.reason)} |`);
+      }
+    }
     if(report.shippableSamples.length){
       lines.push('| Produit | VID | Coût fournisseur + port/import USD |',
         '| --- | --- | ---: |');
@@ -42,7 +53,8 @@ async function main(){
     }
     appendFileSync(process.env.GITHUB_STEP_SUMMARY,lines.join('\n')+'\n','utf8');
   }
-  // No shippable sample is a normal supplier outcome, not a broken integration.
+  // No stock is a normal supplier outcome; provider faults must remain visible.
+  if(report.failedSearches.length)process.exitCode=2;
 }
 main().catch(error=>{
   // Hide CJ request/response bodies, API key and token in the public log.
