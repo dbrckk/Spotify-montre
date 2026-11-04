@@ -28,6 +28,8 @@ async function main(){
       `- Recherches interrompues : **${report.failedSearches.length}**`,
       `- Statut : **${report.status}**`,
       `- Produits distincts vérifiés : **${report.distinctProductsChecked}**`,
+      `- Variantes à PID contradictoire (écartées) : **${report.catalogIdentityMismatches}**`,
+      `- Produits entièrement écartés pour identité : **${report.quarantinedCatalogProducts}**`,
       `- Variantes avec stock et transport FR : **${report.shippableSamples.length}**`,
       `- Points CJ potentiellement consommés : **${report.pointsAttempted}/${report.maxPoints}**`,
       '',
