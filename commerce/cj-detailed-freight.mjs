@@ -47,12 +47,16 @@ export async function examineCjDetailedFreight({
   if(typeof fetcher!=='function')throw Error('CJ fetch unavailable');
   // Product Details GET is authoritative for the exact variant's shipping
   // properties and weight. NEVER substitute a generic assumed watch weight.
-  const product=await read('/product/query?pid='+encodeURIComponent(pid),
-    accessToken,fetcher);
-  if(product?.pid!==pid||!Array.isArray(product?.variants))
-    throw Error('CJ product identity or variants unavailable');
-  const variant=product.variants.find(item=>item?.vid===vid&&item?.pid===pid);
-  if(!variant)throw Error('CJ exact variant not found in supplier product');
+  let product;
+  try{
+    product=await read('/product/query?pid='+encodeURIComponent(pid),
+      accessToken,fetcher);
+  }catch{throw Error('CJ_DETAIL_PRODUCT_READ_FAILED')}
+  if(product?.pid!==pid)throw Error('CJ_DETAIL_PRODUCT_ID_MISMATCH');
+  if(!Array.isArray(product.variants))throw Error('CJ_DETAIL_VARIANTS_UNAVAILABLE');
+  const variant=product.variants.find(item=>item?.vid===vid&&
+    (item?.pid===undefined||item?.pid===pid));
+  if(!variant)throw Error('CJ_DETAIL_EXACT_VARIANT_ABSENT');
   const sku=variant.variantSku;
   const weight=validWeight(variant.variantWeight);
   const properties=product.productProEnSet;
@@ -74,9 +78,12 @@ export async function examineCjDetailedFreight({
   if(!metadata.supplierProperties?.length||!metadata.skuConfirmed||
     !weight||!metadata.priceConfirmed)
     return {...base,status:'missing_supplier_metadata'};
-  const inventory=await read('/product/stock/queryByVid?vid='+
-    encodeURIComponent(vid),accessToken,fetcher);
-  if(!Array.isArray(inventory))throw Error('CJ inventory format unavailable');
+  let inventory;
+  try{
+    inventory=await read('/product/stock/queryByVid?vid='+
+      encodeURIComponent(vid),accessToken,fetcher);
+  }catch{throw Error('CJ_DETAIL_STOCK_READ_FAILED')}
+  if(!Array.isArray(inventory))throw Error('CJ_DETAIL_STOCK_FORMAT_INVALID');
   const inStock=inventory.some(x=>x?.vid===vid&&x?.countryCode==='CN'&&
     Number.isInteger(x.cjInventoryNum)&&x.cjInventoryNum>=1);
   if(!inStock)return {...base,status:'stock_unavailable'};
@@ -88,10 +95,13 @@ export async function examineCjDetailedFreight({
     freightTrialSkuList:[skuTrial],totalGoodsAmount:itemCostUsdCents/100};
   const productType=String(product.productType??'');
   if(productType==='5')row.trialCalculationType='1';
-  const detailed=await read('/logistic/freightCalculateTip',accessToken,fetcher,{
-    method:'POST',body:{reqDTOS:[row]}
-  });
-  if(!Array.isArray(detailed))throw Error('CJ detailed freight format unsupported');
+  let detailed;
+  try{
+    detailed=await read('/logistic/freightCalculateTip',accessToken,fetcher,{
+      method:'POST',body:{reqDTOS:[row]}
+    });
+  }catch{throw Error('CJ_DETAIL_FREIGHT_READ_FAILED')}
+  if(!Array.isArray(detailed))throw Error('CJ_DETAIL_FREIGHT_FORMAT_INVALID');
   const complete=[],unpriced=[];
   let possibleImportGaps=0;
   const seen=new Map();
