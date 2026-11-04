@@ -34,6 +34,26 @@ export async function listApprovedOffers(pool){
       AND supplier_pid ~ '^[a-zA-Z0-9_-]{3,100}$'
       AND supplier_variant_sku ~ '^[a-zA-Z0-9_-]{3,100}$'
       AND supplier_product_sku ~ '^[a-zA-Z0-9_-]{3,100}$'
+      -- A verified and still-valid written proof must bind all customs,
+      -- EU handling, import VAT and carrier charges to THIS exact offer.
+      AND from_country_code='CN' AND amount_eur_cents<=15000
+      AND EXISTS (
+        SELECT 1 FROM commerce_offer_import_proofs ip
+        WHERE ip.offer_id=commerce_offers.id
+          AND ip.supplier_vid=commerce_offers.supplier_vid
+          AND ip.supplier_pid=commerce_offers.supplier_pid
+          AND ip.supplier_variant_sku=commerce_offers.supplier_variant_sku
+          AND ip.supplier_product_sku=commerce_offers.supplier_product_sku
+          AND ip.logistics_name=commerce_offers.logistics_name
+          AND ip.flat_duty_eur_cents>=300
+          AND ip.union_handling_eur_cents>=200
+          AND ip.import_vat_covered=true
+          AND ip.carrier_clearance_covered=true
+          AND ip.buyer_extra_eur_cents=0
+          AND ip.landed_eur_quote_cents<=commerce_offers.supplier_landed_eur_ceiling_cents
+          AND ip.valid_until>now()
+          AND ip.recorded_at>now()-interval '7 days'
+      )
       AND supplier_landed_eur_ceiling_cents >= unit_cost_eur_cents
       AND tax_treatment_verified=true AND supplier_fx_verified=true
       AND supplier_fx_max_eur_per_usd_bps BETWEEN 1000 AND 20000
@@ -64,6 +84,26 @@ export async function getApprovedOffer(pool,offerId){
       AND supplier_pid ~ '^[a-zA-Z0-9_-]{3,100}$'
       AND supplier_variant_sku ~ '^[a-zA-Z0-9_-]{3,100}$'
       AND supplier_product_sku ~ '^[a-zA-Z0-9_-]{3,100}$'
+      -- A verified and still-valid written proof must bind all customs,
+      -- EU handling, import VAT and carrier charges to THIS exact offer.
+      AND from_country_code='CN' AND amount_eur_cents<=15000
+      AND EXISTS (
+        SELECT 1 FROM commerce_offer_import_proofs ip
+        WHERE ip.offer_id=commerce_offers.id
+          AND ip.supplier_vid=commerce_offers.supplier_vid
+          AND ip.supplier_pid=commerce_offers.supplier_pid
+          AND ip.supplier_variant_sku=commerce_offers.supplier_variant_sku
+          AND ip.supplier_product_sku=commerce_offers.supplier_product_sku
+          AND ip.logistics_name=commerce_offers.logistics_name
+          AND ip.flat_duty_eur_cents>=300
+          AND ip.union_handling_eur_cents>=200
+          AND ip.import_vat_covered=true
+          AND ip.carrier_clearance_covered=true
+          AND ip.buyer_extra_eur_cents=0
+          AND ip.landed_eur_quote_cents<=commerce_offers.supplier_landed_eur_ceiling_cents
+          AND ip.valid_until>now()
+          AND ip.recorded_at>now()-interval '7 days'
+      )
       AND supplier_landed_eur_ceiling_cents >= unit_cost_eur_cents
       AND tax_treatment_verified=true AND supplier_fx_verified=true
       AND supplier_fx_max_eur_per_usd_bps BETWEEN 1000 AND 20000
@@ -119,6 +159,26 @@ export async function reserveCheckout(pool,request,{encryptionKey,idempotencySec
       AND supplier_pid ~ '^[a-zA-Z0-9_-]{3,100}$'
       AND supplier_variant_sku ~ '^[a-zA-Z0-9_-]{3,100}$'
       AND supplier_product_sku ~ '^[a-zA-Z0-9_-]{3,100}$'
+      -- A verified and still-valid written proof must bind all customs,
+      -- EU handling, import VAT and carrier charges to THIS exact offer.
+      AND from_country_code='CN' AND amount_eur_cents<=15000
+      AND EXISTS (
+        SELECT 1 FROM commerce_offer_import_proofs ip
+        WHERE ip.offer_id=commerce_offers.id
+          AND ip.supplier_vid=commerce_offers.supplier_vid
+          AND ip.supplier_pid=commerce_offers.supplier_pid
+          AND ip.supplier_variant_sku=commerce_offers.supplier_variant_sku
+          AND ip.supplier_product_sku=commerce_offers.supplier_product_sku
+          AND ip.logistics_name=commerce_offers.logistics_name
+          AND ip.flat_duty_eur_cents>=300
+          AND ip.union_handling_eur_cents>=200
+          AND ip.import_vat_covered=true
+          AND ip.carrier_clearance_covered=true
+          AND ip.buyer_extra_eur_cents=0
+          AND ip.landed_eur_quote_cents<=commerce_offers.supplier_landed_eur_ceiling_cents
+          AND ip.valid_until>now()
+          AND ip.recorded_at>now()-interval '7 days'
+      )
       AND supplier_landed_eur_ceiling_cents >= unit_cost_eur_cents
       AND tax_treatment_verified=true AND supplier_fx_verified=true
       AND supplier_fx_max_eur_per_usd_bps BETWEEN 1000 AND 20000
