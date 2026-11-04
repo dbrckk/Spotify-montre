@@ -65,6 +65,15 @@ for(const [id,item] of all){
  assert.equal(link.provider,'amazon.fr');
  assert.equal(link.linkApproved,true,'Site-owner approved for publication, not Amazon final account approval');
 }
+// Both Render SEO generation and standalone static package publication must
+// ship the exact same public ASIN map. The client never guesses this file.
+const publicRegistry=load('site/amazon-product-links.json');
+const expectedRegistry={version:1,checkedOn:research.checkedOn,
+  links:Object.fromEntries(all.filter(([,item])=>
+    item.status==='matched_on_amazon_fr').map(([id,item])=>
+    [id,{asin:item.asin,url:item.productUrl}]))};
+assert.deepEqual(publicRegistry,expectedRegistry,
+  'Static deployment registry must match the 13 source-confirmed Amazon.fr models');
 if(process.argv.includes('--markdown')){
  console.log('# Montres Amazon.fr vérifiées le '+research.checkedOn+'\n');
  console.log('Tag confirmé par le propriétaire : `'+research.amazonPartnerTag+'`. 13 liens créés par le site pour commencer la période de ventes éligibles, sans preuve d’approbation finale ni de revenus.\n');
