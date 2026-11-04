@@ -40,6 +40,8 @@ try{
     assert.equal(await page.locator('#udActiveFilterPills button').count(),2);
     await page.locator('[data-remove-filter="brand"]').click();
     assert.equal(await page.locator('#udBrand').inputValue(),'all');
+    assert.equal(await page.locator('#udBrand').evaluate(el=>el===document.activeElement),true,
+      'Removing a chip restores focus to the original form control');
     assert.equal(await page.locator('#modele-casio-mdv107').isVisible(),true);
     assert.equal(new URL(page.url()).searchParams.get('q'),'mdv107');
     await page.locator('[data-remove-filter="q"]').click();
@@ -54,6 +56,8 @@ try{
     assert.equal(await page.locator('#modele-skmei-1251').isVisible(),true);
     assert.equal(await page.locator('#udActiveFilterPills button').count(),1);
     await page.locator('#udClearActiveFilters').click();
+    assert.equal(await page.locator('#udSearch').evaluate(el=>el===document.activeElement),true,
+      'Clearing all filters returns keyboard focus to the search field');
     assert.equal(await page.locator('.ud-card:visible').count(),52);
     assert.equal(new URL(page.url()).searchParams.has('q'),false);
 
