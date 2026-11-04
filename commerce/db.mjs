@@ -385,8 +385,19 @@ export async function authorizeSupplierSubmission(pool,order,verified){
     return false;
   return transaction(pool,async client=>{
     const {rows}=await client.query(`
-      SELECT id,status,payment_id,amount_eur_cents FROM commerce_orders
-      WHERE id=$1 FOR UPDATE
+      SELECT o.id,o.status,o.payment_id,o.amount_eur_cents
+      FROM commerce_orders o
+      JOIN commerce_offer_import_proofs ip
+        ON ip.offer_id=o.offer_id
+        AND ip.supplier_evidence_sha256=o.import_proof_sha256
+        AND ip.supplier_vid=o.supplier_vid
+        AND ip.supplier_pid=o.supplier_pid
+        AND ip.supplier_variant_sku=o.supplier_variant_sku
+        AND ip.supplier_product_sku=o.supplier_product_sku
+        AND ip.logistics_name=o.logistics_name
+        AND ip.valid_until>now()
+        AND ip.recorded_at>now()-interval '7 days'
+      WHERE o.id=$1 FOR UPDATE OF o
     `,[order.id]);
     const current=rows[0];
     if(!current||current.status!=='SUPPLIER_SENDING'||
