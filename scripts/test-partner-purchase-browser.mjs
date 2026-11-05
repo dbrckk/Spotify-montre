@@ -184,6 +184,12 @@ try{
     /Disponibilité non vérifiée au 30\/10\/2026/);
   assert.equal(await gallery.locator('.aff-card .am-affiliate-cta').count(),13,
     'The main 15-watch gallery should publish exactly the 13 documented ASINs');
+  assert.match(await unavailableCard.locator('.aff-card-foot').innerText(),
+    /ASIN documenté · lien rémunéré/,
+    'A documented ASIN is not a verified live Amazon offer');
+  assert.doesNotMatch(await gallery.locator('#affGrid').innerText(),
+    /Fiche Amazon vérifiée/,
+    'Gallery must not imply a live stock verification from historic ASIN evidence');
   await gallery.close();
 
   const detail=await browser.newPage({viewport:{width:390,height:840},locale:'fr-FR'});
