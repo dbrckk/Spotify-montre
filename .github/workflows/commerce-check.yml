@@ -9,6 +9,7 @@ on:
       - '.github/workflows/commerce-check.yml'
       - '.github/workflows/discover-cj-variant.yml'
       - '.github/workflows/search-cj-watches.yml'
+      - '.github/workflows/request-cj-landed-quote.yml'
   pull_request:
     paths:
       - 'commerce/**'
@@ -16,6 +17,7 @@ on:
       - '.github/workflows/commerce-check.yml'
       - '.github/workflows/discover-cj-variant.yml'
       - '.github/workflows/search-cj-watches.yml'
+      - '.github/workflows/request-cj-landed-quote.yml'
   workflow_dispatch:
 
 permissions:
