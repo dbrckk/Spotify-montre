@@ -19,7 +19,9 @@ const exactNumericDiameter=(p)=>{
   return mm>=18&&mm<=65?mm:null;
 };
 
-export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartnerTag,pageHead,page,e,u}){
+export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartnerTag,pageHead,page,e,u,commercialRegistry}){
+  if(!(commercialRegistry instanceof Map)||commercialRegistry.size!==52)
+    throw Error('Unified catalogue requires a complete commercial proof registry');
   const extras=JSON.parse(readFileSync(join(root,'selection-populaires.json'),'utf8')).products;
   if(coreProducts.length!==15||extras.length!==37)throw Error('Unified discovery: unexpected source catalogue coverage');
   const approvedPhotos=loadApprovedPopularPhotos({root,picks:extras});
@@ -43,18 +45,34 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
     const d=/^(\d{1,2}(?:[,.]\d{1,2})?)\s*mm$/i.exec(p.specs?.diameter?.trim()||'');
     const diameter=d?Number(d[1].replace(',','.')):null;
     const paid=affiliates.links.get(p.id);
+    const evidence=commercialRegistry.get(p.id);
+    if(!evidence||evidence.collection!=='core'||
+       (evidence.amazon.referralUrl||null)!==(paid?.url||null)||
+       evidence.photo.published!==Boolean(photo)||
+       evidence.directSale.eligible!==false)
+      throw Error('Core commercial proof mismatch: '+p.id);
     add({
       id:p.id,kind:'core',brand:p.brand,model:p.model,tier:p.tier,style:p.style,
       movement:p.movement,diameterMm:diameter,caseText:p.specs?.diameter||p.specs?.caseSize||'Dimensions non documentées',
       glass:p.specs?.glass||'Non documenté',water:p.specs?.waterResistance||'Non documenté',
       description:p.description,lead:p.story||p.description,caution:null,officialUrl:p.officialUrl,
       photoUrl:photo,detailUrl:'./montres/'+p.id+'.html',
-      merchantUrl:paid?.url||null,merchantKind:paid?'direct':null,marketplaceVariant:null,merchantEvidenceType:null
+      merchantUrl:evidence.amazon.referralUrl,merchantKind:evidence.amazon.referralActive?'direct':null,
+      marketplaceVariant:null,merchantEvidenceType:null,
+      commercialStatus:evidence.purchasePath,observedAvailability:evidence.amazon.observedAvailability,
+      sourceCheckedOn:evidence.amazon.sourceCheckedOn
     });
   }
   for(const p of extras){
     const photo=approvedPhotos.get(p.id);
     const verified=directLinks.get(p.id);
+    const evidence=commercialRegistry.get(p.id);
+    if(!evidence||evidence.collection!=='supplemental'||
+       evidence.photo.published!==Boolean(photo)||
+       evidence.amazon.referralActive!==Boolean(verified)||
+       evidence.amazon.asin!==(verified?.asin||(!affiliates.enabled?evidence.amazon.asin:null))||
+       evidence.directSale.eligible!==false)
+      throw Error('Supplemental commercial proof mismatch: '+p.id);
     const movement=/automatique/i.test(p.movement)?'automatic':/solaire/i.test(p.movement)?'eco-drive':'quartz';
     add({
       id:p.id,kind:'supplemental',brand:p.brand,model:p.model,tier:p.tier,
@@ -63,10 +81,12 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
       lead:p.lead,caution:p.caution,officialUrl:p.officialUrl,
       photoUrl:photo?safePath(p.id,'watches-popular'):null,
       detailUrl:'./montres/'+p.id+'.html',
-      merchantUrl:affiliates.enabled?(verified?.url||'https://www.amazon.fr/s?k='+encodeURIComponent((p.brand+' '+p.model).slice(0,130))+'&tag='+encodeURIComponent(amazonPartnerTag)):null,
-      merchantKind:!affiliates.enabled?null:verified?'direct':'search',
+      merchantUrl:affiliates.enabled?(evidence.amazon.referralUrl||'https://www.amazon.fr/s?k='+encodeURIComponent((p.brand+' '+p.model).slice(0,130))+'&tag='+encodeURIComponent(amazonPartnerTag)):null,
+      merchantKind:!affiliates.enabled?null:evidence.amazon.referralActive?'direct':'search',
       marketplaceVariant:verified?.marketplaceVariant||null,
-      merchantEvidenceType:verified?.evidenceType||null
+      merchantEvidenceType:verified?.evidenceType||null,
+      commercialStatus:evidence.purchasePath,observedAvailability:evidence.amazon.observedAvailability,
+      sourceCheckedOn:evidence.amazon.sourceCheckedOn
     });
   }
   if(normalized.length!==52||new Set(normalized.map(p=>p.id)).size!==52)
@@ -85,6 +105,14 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
     :'<span class="ud-art-fallback"><span class="ud-art-fallback-kicker">Fiche produit documentée</span><span class="ud-art-fallback-brand">'+e(p.brand)+'</span><strong>'+e(p.model)+'</strong><small>Aucune photographie publiée pour cette référence</small></span>';
   const card=p=>{
     const merchantType=p.merchantKind||'official';
+    const observedDate=p.sourceCheckedOn?p.sourceCheckedOn.split('-').reverse().join('/'):null;
+    const evidenceMessage=p.observedAvailability==='unavailable_at_check'
+      ?'Indisponible lors du contrôle du '+observedDate+' · stock actuel inconnu'
+      :p.commercialStatus==='documented_amazon_referral'
+        ?'ASIN Amazon.fr documenté'+(observedDate?' le '+observedDate:'')+' · stock actuel non vérifié'
+        :p.commercialStatus==='documented_awin_referral'
+          ?'Lien partenaire documenté · stock actuel non vérifié'
+          :'Référence vendeur · aucune offre exacte rémunérée active';
     const merchantLabel=p.merchantEvidenceType==='amazon_fr_comparator_redirect'
       ?'Référence et ASIN recoupés via comparateur'
       :{direct:'Fiche du modèle identifiée',search:'Recherche marchande · variante à confirmer',official:'Source externe · sans lien d’achat vérifié'}[merchantType];
@@ -107,7 +135,7 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
 
     return '<article class="ud-card" id="modele-'+e(p.id)+'" data-id="'+e(p.id)+'"'
       +' data-brand="'+e(p.brand)+'" data-tier="'+e(p.tier)+'" data-style="'+e(p.style)+'"'
-      +' data-movement="'+e(p.movement)+'" data-merchant="'+merchantType+'" data-visual="'+(p.photoUrl?'photo':'no-photo')+'" data-search="'+e([p.brand,p.model,p.description,p.lead,p.caseText,p.movement].join(' '))+'">'
+      +' data-movement="'+e(p.movement)+'" data-merchant="'+merchantType+'" data-commerce-status="'+e(p.commercialStatus)+'" data-visual="'+(p.photoUrl?'photo':'no-photo')+'" data-search="'+e([p.brand,p.model,p.description,p.lead,p.caseText,p.movement].join(' '))+'">'
       +'<div class="ud-media '+(p.photoUrl?'ud-media-verified':'ud-media-no-photo')+'">'
       +'<a class="ud-photo" href="'+e(p.detailUrl.replace('./montres/','./'))+'">'+photoMarkup(p)+'</a>'
       +'<button type="button" class="ud-save" data-save-id="'+e(p.id)+'" aria-pressed="false" aria-label="Favoris : ajouter '+e(p.brand+' '+p.model)+'" hidden><span class="ud-save-heart" aria-hidden="true">♡</span><span class="ud-save-word">Favoris</span></button>'
@@ -115,6 +143,7 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
       +'<span class="ud-visual-label">'+(p.photoUrl?'Photo du modèle':'Sans photo publiée')+'</span></div>'
       +'<div class="ud-card-main"><p class="ud-kicker">'+e(tierLabels[p.tier])+' · '+e(styleLabels[p.style])+'</p>'
       +'<p class="ud-merchant-kind">'+e(merchantLabel)+'</p>'
+      +'<p class="ud-commercial-proof">'+e(evidenceMessage)+'</p>'
       +variant+redirectProof
       +'<h2><a href="'+e(p.detailUrl.replace('./montres/','./'))+'">'+e(p.brand+' '+p.model)+'</a></h2>'
       +'<p class="ud-description">'+e(p.lead)+'</p>'

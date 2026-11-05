@@ -21,8 +21,10 @@ export const commercialShortlist=Object.freeze([
  * Render an accessible crawlable, internal-link-only priority list.
  * Every member must exist in the model source. Availability is never inferred.
  */
-export function buildCommercialShortlist({picks,verifiedLinks,partnerOffers,partnerLink,approvedPhotos,affiliatesEnabled,link,e}){
+export function buildCommercialShortlist({picks,verifiedLinks,partnerOffers,partnerLink,approvedPhotos,affiliatesEnabled,link,e,commercialRegistry}){
   if(!(partnerOffers instanceof Map)||typeof partnerLink!=='function')throw Error('Partner links require approved registry and validated renderer');
+  if(!(commercialRegistry instanceof Map)||commercialRegistry.size!==52)
+    throw Error('Shortlist requires the common 52-watch commercial registry');
   if(typeof link!=='function')throw Error('A validated outbound merchant link renderer is required');
   if(!Array.isArray(picks)||picks.length!==37)throw Error('Commercial shortlist requires the 37 documented supplemental watches');
   const byId=new Map(picks.map(p=>[p.id,p]));
@@ -43,6 +45,12 @@ export function buildCommercialShortlist({picks,verifiedLinks,partnerOffers,part
     const photo=approvedPhotos.get(item.id);
     const direct=verifiedLinks.get(item.id);
     const partner=partnerOffers.get(item.id);
+    const evidence=commercialRegistry.get(item.id);
+    if(!evidence||evidence.amazon.referralActive!==Boolean(direct)||
+      evidence.photo.published!==Boolean(photo)||
+      (evidence.partner?.referralUrl||null)!==(partner?.url||null)||
+      (evidence.amazon.documented&&evidence.amazon.asin!==direct?.asin&&direct))
+      throw Error('Shortlist merchant/photo status disagrees with unified evidence: '+item.id);
     const proofLevel=direct?'documented-asin':partner?'partner-source':'manufacturer-source';
     const proofLabel=direct
       ?'ASIN Amazon.fr documenté · variante et stock actuel non confirmés'

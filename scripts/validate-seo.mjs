@@ -431,6 +431,53 @@ const approvedPopularPhotos=loadApprovedPopularPhotos({root,picks:popularFeed.pr
 
 // Universal discovery must be source-backed, useful without JS and complete.
 const unified=JSON.parse(read('discovery-catalogue.json'));
+const commercial=JSON.parse(read('commercial-registry.json'));
+assert.equal(commercial.version,1);
+assert.equal(commercial.scope,'editorial_watch_purchase_evidence_not_live_offers');
+assert.equal(commercial.counts.total,52);
+assert.equal(commercial.counts.core,15);
+assert.equal(commercial.counts.supplemental,37);
+assert.equal(commercial.counts.documentedAmazonAsins,23);
+assert.equal(commercial.counts.historicallyUnavailable,4);
+assert.equal(commercial.counts.activeExactAmazonReferrals,manifest.affiliateActive?23:0);
+assert.equal(commercial.counts.directSaleEligible,0);
+assert.equal(commercial.products.length,52);
+assert.deepEqual(commercial.products.map(p=>p.id),unified.products.map(p=>p.id),
+  'Every editorial watch must share exactly one commercial evidence record and order');
+const commercialById=new Map(commercial.products.map(p=>[p.id,p]));
+assert.equal(commercialById.size,52,'Commercial registry may not duplicate product IDs');
+for(const record of commercial.products){
+  const source=unified.products.find(p=>p.id===record.id);
+  assert.ok(source,'Commercial status cannot exist without an editorial watch: '+record.id);
+  assert.equal(record.vendorSourceUrl,source.officialUrl,'Vendor identity cannot drift: '+record.id);
+  assert.equal(record.photo.published,Boolean(source.photoUrl),
+    'Photo permission must agree with actual published WebP: '+record.id);
+  assert.equal(record.amazon.currentAvailability,'not_verified');
+  assert.equal(record.commission.confirmed,false,'Click intent does not prove paid commission');
+  assert.equal(record.directSale.eligible,false,'A verified CJ quote and checkout are still absent');
+  assert.equal(record.purchasePath,source.commercialStatus,
+    'Every catalog card must reuse the same commercial proof: '+record.id);
+  assert.equal(record.amazon.observedAvailability,source.observedAvailability);
+  assert.equal(record.amazon.sourceCheckedOn,source.sourceCheckedOn);
+  if(record.amazon.documented){
+    const expected=record.collection==='core'?
+      amazon.links[record.id]?.asin:exactPopular.verifiedProducts[record.id]?.asin;
+    assert.equal(record.amazon.asin,expected,'ASIN must come from actual dated research: '+record.id);
+    assert.ok(record.amazon.sourceCheckedOn,'Documented ASIN cannot lack its source date');
+  }else{
+    assert.equal(record.amazon.asin,null,'Unknown ASIN must not be substituted: '+record.id);
+    assert.equal(record.amazon.referralActive,false);
+  }
+  if(record.amazon.referralActive){
+    assert.equal(record.amazon.referralUrl,source.merchantKind==='direct'?source.merchantUrl:undefined,
+      'Paid direct links may only target the researched model: '+record.id);
+    assert.ok(record.amazon.referralUrl.includes('/dp/'+record.amazon.asin+'?tag='),
+      'Exact ASIN and disclosed affiliate link must stay together: '+record.id);
+    assert.equal(record.purchasePath,'documented_amazon_referral');
+  }else{
+    assert.equal(record.amazon.referralUrl,null);
+  }
+}
 assert.equal(unified.version,1);
 assert.equal(unified.total,52);
 assert.equal(unified.coreCount,15);
@@ -488,6 +535,18 @@ for(const watch of unified.products){
     'Card must reflect verified merchant destination type: '+watch.id);
   assert.ok(card.includes('class="ud-merchant-kind"'),
     'Card must explain its merchant-link confidence: '+watch.id);
+  const commerceState=commercialById.get(watch.id);
+  assert.ok(card.includes('data-commerce-status="'+commerceState.purchasePath+'"'),
+    'Rendered watch card must match the unified commercial registry: '+watch.id);
+  assert.ok(card.includes('class="ud-commercial-proof"'),
+    'Commercial proof must be visible on all 52 cards without JavaScript: '+watch.id);
+  if(commerceState.amazon.observedAvailability==='unavailable_at_check'){
+    assert.ok(card.includes('Indisponible lors du contrôle du'),
+      'Historic unavailability must be visible on full catalogue: '+watch.id);
+  }else if(commerceState.amazon.referralActive){
+    assert.ok(card.includes('stock actuel non vérifié'),
+      'A documented ASIN is not a live offer: '+watch.id);
+  }
   assert.equal((card.match(/class="ud-source"/g)||[]).length,1,
     'Exactly one documented vendor/manufacturer source on every unified card: '+watch.id);
   assert.ok(card.includes('data-merchant-official-id="'+watch.id+'" data-merchant-placement="popular"'),

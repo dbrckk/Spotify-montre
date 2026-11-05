@@ -11,9 +11,12 @@ import {buildCommercialShortlist,commercialShortlist} from './build-commercial-s
 // Curated discovery intentionally stays outside the 15-watch comparator until
 // individual Amazon ASINs and licensed exact-model images are validated.
 // This prevents an invented product match or silently unlicensed photograph.
-export function buildPopularPicks({root,existingProducts,affiliates,amazonPartnerTag,pageHead,page,e,u,comparisonLinks=new Map()}){
+export function buildPopularPicks({root,existingProducts,affiliates,amazonPartnerTag,pageHead,page,e,u,comparisonLinks=new Map(),commercialRegistry}){
   const source=JSON.parse(readFileSync(join(root,'selection-populaires.json'),'utf8'));
   const picks=source.products;
+  if(!(commercialRegistry instanceof Map)||commercialRegistry.size!==52||
+    picks.some(p=>!commercialRegistry.has(p.id)))
+    throw Error('Supplemental pages require validated commercial model evidence');
   const known=new Set(existingProducts.map(p=>p.id));
   const tiers=['essential','signature','prestige'];
   const tierNames={essential:'Essentielle',signature:'Signature',prestige:'Prestige'};
@@ -64,7 +67,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     const offer=partnerOffers.get(p.id);
     return offer?link(offer.url,'Voir cette référence via Awin · lien rémunéré',true,p.id,'partner'):'';
   };
-  const commercialFocus=buildCommercialShortlist({picks,verifiedLinks,partnerOffers,partnerLink,approvedPhotos,affiliatesEnabled:affiliates.enabled,link,e});
+  const commercialFocus=buildCommercialShortlist({picks,verifiedLinks,partnerOffers,partnerLink,approvedPhotos,affiliatesEnabled:affiliates.enabled,link,e,commercialRegistry});
   const affiliateLink=p=>{
     if(!affiliates.enabled)return '';
     const direct=verifiedLinks.get(p.id);
