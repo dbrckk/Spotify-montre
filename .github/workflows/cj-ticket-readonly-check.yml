@@ -40,5 +40,9 @@ jobs:
             # GitHub may notify maintainers according to their Actions settings.
             node commerce/cj-quote-ticket.mjs watch
           else
+            # Also exercise the live Messages endpoint in read-only mode
+            # after ticket integration updates. No supplier response contents
+            # or private IDs are logged.
             node commerce/cj-quote-ticket.mjs diagnose
+            node commerce/cj-quote-ticket.mjs status
           fi
