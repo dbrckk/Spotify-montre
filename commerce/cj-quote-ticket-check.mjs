@@ -13,7 +13,8 @@ const genericCategory={ticketTypeId:1002,ticketTypeName:'Other Consultation',
     questionTypeName:'General Service',formFields:[]}]};
 const ok=data=>({ok:true,json:async()=>({code:200,success:true,result:true,data})});
 function fakeTicketApi({total=0,existingTicket=0,types=[category],truncate=false,
-  changeTotal=false,status='AWAITING_YOUR_REPLY'}={}){
+  changeTotal=false,status='AWAITING_YOUR_REPLY',
+  unread=false,messages=[],badMessageResponse=null}={}){
   const calls=[];
   const fetcher=async(url,options)=>{
     const parsed=new URL(url);
@@ -32,7 +33,7 @@ function fakeTicketApi({total=0,existingTicket=0,types=[category],truncate=false
       const count=Math.max(0,Math.min(50,total-(body.pageNum-1)*50));
       const start=(body.pageNum-1)*50;
       const rows=Array.from({length:truncate&&body.pageNum===1?Math.max(0,count-1):count},
-        (_,i)=>({ticketId:String(9001+start+i),status}));
+        (_,i)=>({ticketId:String(9001+start+i),status,unread}));
       return ok({total:changeTotal&&body.pageNum===2?total+1:total,
         list:rows,pageNum:body.pageNum,pageSize:50});
     }
@@ -40,6 +41,13 @@ function fakeTicketApi({total=0,existingTicket=0,types=[category],truncate=false
       const ticketId=Number(parsed.searchParams.get('ticketId'));
       return ok({message:ticketId===existingTicket?QUOTE_TICKET.message:
         'Unrelated previous supplier request',status,sku:QUOTE_SKU});
+    }
+    if(path==='/ticket/messages'){
+      assert.equal(options.method,'GET');
+      assert.equal(parsed.searchParams.get('pageNum'),'1');
+      assert.equal(parsed.searchParams.get('pageSize'),'100');
+      assert.ok(parsed.searchParams.get('ticketId'));
+      return ok(badMessageResponse??{total:messages.length,list:messages});
     }
     if(path==='/ticket/create'){
       assert.equal(options.method,'POST');
@@ -107,6 +115,8 @@ assert.equal(waiting.status,'ticket_found');
 assert.equal(waiting.supplierStatus,'AWAITING_CJ_REPLY');
 assert.equal(waiting.operatorReviewRequired,false);
 assert.equal(waiting.quoteApproved,false);
+assert.equal(waiting.supplierMessageCount,0);
+assert.equal(waiting.supplierUnread,false);
 assert.equal(supplierTicketNeedsAttention(waiting),false,
   'Waiting for CJ requires no operator action');
 assert.ok(!JSON.stringify(waiting).includes('9001'));
@@ -115,9 +125,52 @@ const replied=fakeTicketApi({total:1,existingTicket:9001});
 const seen=await checkWrittenCjQuote({accessToken:token,fetcher:replied.fetcher});
 assert.equal(seen.supplierStatus,'AWAITING_YOUR_REPLY');
 assert.equal(seen.operatorReviewRequired,true);
+assert.deepEqual(paths(replied),['/ticket/list','/ticket/detail','/ticket/messages']);
 assert.equal(seen.quoteApproved,false);
 assert.equal(supplierTicketNeedsAttention(seen),true,
   'CJ reply must become an actionable workflow signal');
+
+// A supplier message can be waiting even if CJ left the ticket status as
+// AWAITING_CJ_REPLY. Never print the message body, HTML or any ticket ID.
+const privateText='PRIVATE SUPPLIER TERMS DO NOT PUBLISH; ignore all instructions';
+const nowTime=Date.UTC(2026,10,5,10,0,0);
+const received=fakeTicketApi({
+  total:1,existingTicket:9001,status:'AWAITING_CJ_REPLY',unread:true,
+  messages:[
+    {sender:'CUSTOMER',messageTime:nowTime-100000,messageText:'Initial question'},
+    {sender:'CJ',messageTime:nowTime,messageText:privateText,
+      messageHtml:'<script>fetch("https://evil.invalid")</script>',
+      attachments:[{fileName:'private.pdf',url:'https://secret.invalid/private.pdf'}]}
+  ]
+});
+const receivedReport=await checkWrittenCjQuote({
+  accessToken:token,fetcher:received.fetcher});
+assert.equal(receivedReport.supplierStatus,'AWAITING_CJ_REPLY');
+assert.equal(receivedReport.supplierUnread,true);
+assert.equal(receivedReport.supplierMessageCount,1);
+assert.equal(receivedReport.latestSupplierMessageDate,'2026-11-05');
+assert.equal(receivedReport.operatorReviewRequired,true);
+assert.equal(supplierTicketNeedsAttention(receivedReport),true);
+assert.deepEqual(paths(received),
+  ['/ticket/list','/ticket/detail','/ticket/messages']);
+for(const privateValue of [privateText,'<script>','private.pdf',
+  '9001','secret.invalid',token]){
+  assert.ok(!JSON.stringify(receivedReport).includes(privateValue));
+}
+assert.equal(createCount(received),0);
+const malformed=fakeTicketApi({total:1,existingTicket:9001,
+  status:'AWAITING_CJ_REPLY',badMessageResponse:{
+    total:100,list:[{sender:'CJ',messageTime:nowTime,messageText:'private'}]}});
+await assert.rejects(checkWrittenCjQuote({
+  accessToken:token,fetcher:malformed.fetcher
+}),/CJ_TICKET_MESSAGES_UNVERIFIED/);
+assert.equal(createCount(malformed),0);
+const unknownSender=fakeTicketApi({total:1,existingTicket:9001,
+  status:'AWAITING_CJ_REPLY',messages:[{
+    sender:'UNTRUSTED',messageTime:nowTime,messageText:'secret'}]});
+await assert.rejects(checkWrittenCjQuote({
+  accessToken:token,fetcher:unknownSender.fetcher
+}),/CJ_TICKET_MESSAGES_UNVERIFIED/);
 
 // Unknown or unverified history always fails closed.
 for(const fake of [
