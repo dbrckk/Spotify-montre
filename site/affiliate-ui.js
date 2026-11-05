@@ -96,8 +96,8 @@
         actions.append(makeLink(url,compensated,'am-affiliate-cta',id,'catalogue'));
         const foot=card.querySelector('.aff-card-foot');
         if(foot)foot.textContent=compensated?
-          'Fiche Amazon vérifiée · lien rémunéré':
-          'Fiche Amazon vérifiée · lien non rémunéré';
+          'ASIN documenté · lien rémunéré':
+          'ASIN documenté · lien non rémunéré';
         const note=document.createElement('small');note.className='am-affiliate-note';
         note.textContent=(compensated
           ?'Lien rémunéré · Achat et retours chez le marchand. '
