@@ -133,7 +133,44 @@ try{
   assert.equal(await bad.locator('.am-partner-card').count(),0);
   assert.equal(await bad.locator('#amPartnerFilters').isVisible(),false);
   assert.equal(await bad.locator('#amDirectForm').isVisible(),false);
+  assert.equal(await bad.locator('#amPartnerRetry').isVisible(),true);
   await bad.close();
+
+  // A second tag parameter is an ambiguous affiliate destination; reject
+  // the whole compensated batch, rather than presenting an unsafe link.
+  const duplicateTag=structuredClone(config);
+  duplicateTag.links[id].url+='&tag='+config.amazonPartnerTag;
+  const duplicate=await browser.newPage();
+  await duplicate.route('**/affiliate-links.json',route=>route.fulfill({
+    status:200,contentType:'application/json',body:JSON.stringify(duplicateTag)
+  }));
+  await duplicate.goto(new URL('acheter.html',base).href,{waitUntil:'domcontentloaded'});
+  await duplicate.locator('#amPartnerRetry').waitFor({state:'visible'});
+  assert.equal(await duplicate.locator('.am-partner-card').count(),0);
+  await duplicate.close();
+
+  // Transient mobile network failures must be recoverable without refreshing
+  // the page, duplicating filter handlers or enabling the internal checkout.
+  const recover=await browser.newPage({viewport:{width:390,height:840}});
+  let attempts=0;
+  await recover.route('**/affiliate-links.json',route=>
+    ++attempts===1?route.abort('failed'):route.continue());
+  await recover.goto(new URL('acheter.html?modele=seiko-sharp',base).href,
+    {waitUntil:'domcontentloaded'});
+  await recover.locator('#amPartnerRetry').waitFor({state:'visible'});
+  assert.equal(await recover.locator('.am-partner-card').count(),0);
+  await recover.locator('#amPartnerRetry').click();
+  await recover.locator('.am-partner-card').first().waitFor();
+  assert.equal(await recover.locator('.am-partner-card').count(),13);
+  assert.equal(await recover.locator('.am-partner-card').first().getAttribute('data-watch-id'),
+    'seiko-sharp');
+  assert.equal(await recover.locator('#amPartnerRetry').isVisible(),false);
+  await recover.locator('#amPartnerFilters button[data-tier=essential]').click();
+  assert.equal(await recover.locator('.am-partner-card').count(),essential);
+  await recover.locator('#amPartnerFilters button[data-tier=all]').click();
+  assert.equal(await recover.locator('.am-partner-card').count(),13);
+  assert.equal(await recover.locator('#amDirectForm').isVisible(),false);
+  await recover.close();
 
   // A revoked image right must never result in a compensated product
   // presentation based on that photograph.
@@ -191,6 +228,20 @@ try{
     /Fiche Amazon vérifiée/,
     'Gallery must not imply a live stock verification from historic ASIN evidence');
   await gallery.close();
+
+  // An unavailable independent ASIN registry must fail closed without an
+  // unhandled exception or any commissionable product button in the gallery.
+  const noEvidence=await browser.newPage({viewport:{width:390,height:840}});
+  const pageErrors=[];
+  noEvidence.on('pageerror',error=>pageErrors.push(error.message));
+  await noEvidence.route('**/amazon-product-links.json',route=>route.abort('failed'));
+  await noEvidence.goto(new URL('affiliation.html',base).href,{waitUntil:'domcontentloaded'});
+  await noEvidence.locator('.aff-card').first().waitFor();
+  await noEvidence.waitForTimeout(250);
+  assert.equal(await noEvidence.locator('.aff-card .am-affiliate-cta').count(),0,
+    'A missing evidence registry must not publish paid Amazon exits');
+  assert.deepEqual(pageErrors,[],'Missing affiliate evidence must not crash the product page');
+  await noEvidence.close();
 
   const detail=await browser.newPage({viewport:{width:390,height:840},locale:'fr-FR'});
   await detail.goto(new URL('montre.html?id=casio-mtp-1302',base).href,
