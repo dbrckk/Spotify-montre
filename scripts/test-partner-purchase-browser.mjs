@@ -10,7 +10,12 @@ if(base.protocol!=='http:'||!['localhost','127.0.0.1'].includes(base.hostname))
 const root=new URL('../site/',import.meta.url);
 const config=JSON.parse(readFileSync(new URL('affiliate-links.json',root),'utf8'));
 const feed=JSON.parse(readFileSync(new URL('selection-affiliation.json',root),'utf8'));
+const evidence=JSON.parse(readFileSync(new URL('amazon-product-links.json',root),'utf8'));
+const evidenceDate=evidence.checkedOn.split('-').reverse().join('/');
 const ids=Object.keys(config.links);
+assert.equal(Object.values(evidence.links).filter(x=>
+  x.availabilityAtCheck==='unavailable_at_check').length,4,
+  'Four historically unavailable exact ASINs must remain visibly qualified');
 assert.equal(ids.length,13,'The real catalog must have 13 exact Amazon.fr matches');
 const browser=await chromium.launch({headless:true});
 try{
@@ -40,6 +45,13 @@ try{
       'Do not display stale/imaginary prices');
     const img=card.locator('img');
     assert.match(await img.getAttribute('src'),new RegExp('^\\./assets/watches/'+id+'\\.webp\\?v=[a-f0-9]{12}$'));
+    const unavailable=evidence.links[id].availabilityAtCheck==='unavailable_at_check';
+    const note=await card.locator('.am-partner-card-note').innerText();
+    assert.ok(note.includes(evidenceDate),'All historical stock observations need an explicit date');
+    assert.match(note,unavailable?/Indisponible lors du contrôle/:/Disponibilité non vérifiée/,
+      'Never imply a live stock check or buyable offer');
+    if(unavailable)assert.match(await a.innerText(),/stock à vérifier/,
+      'Historically unavailable products must not use the normal buy CTA label');
   }
   const first=cards.first().locator('img');
   // Native lazy loading must be activated before waiting for image.onload.
@@ -69,6 +81,43 @@ try{
   await page.screenshot({path:'artifacts/verified-partner-purchase-desktop.png',fullPage:true});
   assert.deepEqual(issues,[]);
   await page.close();
+
+  // Deep-linked discovery must preserve the exact watch instead of forcing
+  // Android shoppers to search again through all 13 partner offers.
+  const referredId='seiko-sharp'; // Historically unavailable at last check.
+  const referred=await browser.newPage({viewport:{width:390,height:840}});
+  await referred.goto(new URL('acheter.html?modele='+referredId,base).href,
+    {waitUntil:'domcontentloaded'});
+  await referred.locator('.am-partner-card').first().waitFor();
+  assert.equal(await referred.locator('.am-partner-card').count(),13);
+  assert.equal(await referred.locator('.am-partner-card').first().getAttribute('data-watch-id'),
+    referredId);
+  assert.equal(await referred.locator('.am-partner-card').first().getAttribute('data-featured'),
+    'true');
+  assert.match(await referred.locator('.am-partner-card').first().innerText(),
+    /Votre modèle recherché/);
+  assert.match(await referred.locator('.am-partner-card').first().innerText(),
+    /Indisponible lors du contrôle/);
+  assert.equal(await referred.locator('#amDirectForm').isVisible(),false);
+  await referred.locator('#amPartnerFilters button[data-tier=essential]').click();
+  assert.equal(await referred.locator('.am-partner-card').count(),essential);
+  await referred.locator('#amPartnerFilters button[data-tier=all]').click();
+  assert.equal(await referred.locator('.am-partner-card').first().getAttribute('data-watch-id'),
+    referredId);
+  await referred.close();
+
+  // An invented "in stock" value is tampered evidence: fail closed.
+  const stockForgery=structuredClone(evidence);
+  stockForgery.links[referredId].availabilityAtCheck='in_stock';
+  const forgedStock=await browser.newPage();
+  await forgedStock.route('**/amazon-product-links.json',route=>route.fulfill({
+    status:200,contentType:'application/json',body:JSON.stringify(stockForgery)
+  }));
+  await forgedStock.goto(new URL('acheter.html',base).href,{waitUntil:'domcontentloaded'});
+  await forgedStock.waitForFunction(()=>document.getElementById('amPartnerStatus')?.
+    textContent.includes('ne sont pas vérifiables'));
+  assert.equal(await forgedStock.locator('.am-partner-card').count(),0);
+  await forgedStock.close();
 
   // Fail closed when a tracked link is modified to the wrong ASIN while the
   // independent generated product registry still points to the old ASIN.
