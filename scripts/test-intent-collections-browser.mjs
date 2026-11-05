@@ -29,6 +29,29 @@ try {
     assert.equal(await nav.count(),1,'Home must link to the distinct targeted collection: '+selection.slug);
   }
   await phone.goto(new URL('/montres/modeles-populaires.html',base).href,{waitUntil:'domcontentloaded'});
+  const focus=phone.locator('#selection-10-montres');
+  assert.equal(await focus.locator('.am-focus-item').count(),10,
+    'The commercial curation must keep all ten genuine catalogue models');
+  const matched=focus.locator('#selection-avec-asin .am-focus-item');
+  const sourceOnly=focus.locator('#selection-sources-marchandes .am-focus-item');
+  assert.equal(await matched.count(),6,'Six documented ASIN models must lead the buyer shortlist');
+  assert.equal(await sourceOnly.count(),4,'Four source-only models must be labeled separately');
+  assert.equal(await matched.first().getAttribute('data-focus-id'),'addiesdive-ad2030');
+  assert.equal(await sourceOnly.first().getAttribute('data-focus-id'),'skmei-2056');
+  assert.equal(await matched.first().getAttribute('data-evidence'),'documented-asin');
+  assert.equal(await sourceOnly.first().getAttribute('data-evidence'),'manufacturer-source');
+  assert.match(await matched.first().locator('.am-focus-proof-label').innerText(),
+    /stock actuel non confirmés/);
+  assert.match(await sourceOnly.first().locator('.am-focus-proof-label').innerText(),
+    /aucun ASIN exact établi/);
+  assert.equal(await focus.locator('.am-focus-jump a').count(),2,
+    'Both source categories must remain reachable by touch and keyboard');
+  await focus.locator('.am-focus-jump a[href="#selection-sources-marchandes"]').click();
+  assert.equal(new URL(phone.url()).hash,'#selection-sources-marchandes');
+  await noOverflow(phone,'Android 393px commercial evidence groups');
+  await focus.locator('.am-focus-group-heading').first().screenshot({
+    path:'artifacts/mobile-am05-evidence-groups.png'
+  });
   for(const selection of selections)
     assert.equal(await phone.locator('.am-shopper-nav a[href="./'+selection.slug+'.html"]').count(),1,
       'All supplementary watch cards must give a direct path to category: '+selection.slug);
@@ -80,6 +103,10 @@ try {
   await verySmall.goto(new URL('/montres/montres-numeriques.html',base).href,{waitUntil:'domcontentloaded'});
   assert.equal(await verySmall.locator('.am-shopper-card').count(),12);
   await noOverflow(verySmall,'Narrow Android 320px digital collection');
+  await verySmall.goto(new URL('/montres/modeles-populaires.html',base).href,
+    {waitUntil:'domcontentloaded'});
+  assert.equal(await verySmall.locator('.am-focus-group .am-focus-item').count(),10);
+  await noOverflow(verySmall,'Narrow Android 320px grouped watch shortlist');
   await verySmall.close();
 
   const withoutJs=await browser.newPage({viewport:{width:393,height:852},isMobile:true,hasTouch:true,javaScriptEnabled:false});
@@ -88,6 +115,12 @@ try {
     'All SKMEI references must remain browsable with JavaScript disabled');
   assert.equal(await withoutJs.locator('.am-shopper-matrix tbody tr').count(),10);
   await noOverflow(withoutJs,'SKMEI page without JS');
+  await withoutJs.goto(new URL('/montres/modeles-populaires.html',base).href,
+    {waitUntil:'domcontentloaded'});
+  assert.equal(await withoutJs.locator('.am-focus-item:visible').count(),10,
+    'All 10 source-backed choices remain visible without JavaScript');
+  assert.equal(await withoutJs.locator('.am-focus-jump a').count(),2);
+  await noOverflow(withoutJs,'Shortlist without JavaScript');
   await withoutJs.close();
 
   const desktop=await browser.newPage({viewport:{width:1366,height:900},locale:'fr-FR'});
