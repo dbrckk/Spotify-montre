@@ -81,19 +81,19 @@
     }
     if(!asinPattern.test(target.pathname)||keys.length!==new Set(keys).size||
       keys.some(key=>!['tag','th','psc'].includes(key)))return;
-    let event;
+    let trackingName;
     if(hasTag){
       // Only our own affiliate tag with an explicit "sponsored" disclosure
       // is counted as a paid exit. Wrong tags are ignored rather than counted
       // under a misleading monetization metric.
       if(tags.length!==1||tags[0]!==ownerAmazonTag||!sponsored)return;
-      event='amazon:'+id+':'+placement; // preserve historical paid series
+      trackingName='amazon:'+id+':'+placement; // preserve historical paid series
     }else{
       if(sponsored)return; // inconsistent link attribution
       // Unpaid product exits remain useful but cannot inflate paid activity.
-      event='amazon-unpaid:'+id+':'+placement;
+      trackingName='amazon-unpaid:'+id+':'+placement;
     }
-    if(event.length>55)return;
-    try {window.umami.track(event)}catch{/* Navigation cannot depend on analytics. */}
+    if(trackingName.length>55)return;
+    try {window.umami.track(trackingName)catch{/* Navigation cannot depend on analytics. */}
   },{capture:true,passive:true});
 })();
