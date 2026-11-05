@@ -6,6 +6,9 @@ on:
       - 'commerce/cj-quote-ticket.mjs'
       - '.github/workflows/cj-ticket-readonly-check.yml'
   workflow_dispatch:
+  schedule:
+    # 08:34 CET / 09:34 CEST; GitHub may delay scheduled runs.
+    - cron: '34 7 * * *'
 
 permissions:
   contents: read
@@ -24,7 +27,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Diagnose supplier account and previous ticket without creating anything
+      - name: Check CJ ticket without purchase or supplier write
         env:
           CJ_API_KEY: ${{ secrets.CJ_API_KEY }}
         run: |
@@ -32,4 +35,10 @@ jobs:
             echo 'CJ_API_KEY_GITHUB_SECRET_MISSING (no supplier write performed)'
             exit 1
           fi
-          node commerce/cj-quote-ticket.mjs diagnose
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            # A failed scheduled job indicates a reply or abnormal ticket state.
+            # GitHub may notify maintainers according to their Actions settings.
+            node commerce/cj-quote-ticket.mjs watch
+          else
+            node commerce/cj-quote-ticket.mjs diagnose
+          fi

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {
   requestWrittenCjQuote,checkWrittenCjQuote,diagnoseWrittenCjQuote,
-  QUOTE_REFERENCE,QUOTE_SKU,QUOTE_TICKET
+  supplierTicketNeedsAttention,QUOTE_REFERENCE,QUOTE_SKU,QUOTE_TICKET
 } from './cj-quote-ticket.mjs';
 
 const token='t'.repeat(40);
@@ -94,6 +94,11 @@ const none=fakeTicketApi();
 const missing=await checkWrittenCjQuote({accessToken:token,fetcher:none.fetcher});
 assert.equal(missing.status,'not_requested');
 assert.equal(missing.quoteApproved,false);
+assert.equal(supplierTicketNeedsAttention(missing),true,
+  'Missing supplier ticket requires attention after confirmed submission');
+assert.equal(supplierTicketNeedsAttention({status:'ticket_found',
+  supplierStatus:'UNKNOWN',operatorReviewRequired:true}),true);
+assert.equal(supplierTicketNeedsAttention(null),true);
 assert.deepEqual(paths(none),['/ticket/list']);
 
 const pending=fakeTicketApi({total:1,existingTicket:9001,status:'AWAITING_CJ_REPLY'});
@@ -102,6 +107,8 @@ assert.equal(waiting.status,'ticket_found');
 assert.equal(waiting.supplierStatus,'AWAITING_CJ_REPLY');
 assert.equal(waiting.operatorReviewRequired,false);
 assert.equal(waiting.quoteApproved,false);
+assert.equal(supplierTicketNeedsAttention(waiting),false,
+  'Waiting for CJ requires no operator action');
 assert.ok(!JSON.stringify(waiting).includes('9001'));
 assert.ok(!JSON.stringify(waiting).includes(token));
 const replied=fakeTicketApi({total:1,existingTicket:9001});
@@ -109,6 +116,8 @@ const seen=await checkWrittenCjQuote({accessToken:token,fetcher:replied.fetcher}
 assert.equal(seen.supplierStatus,'AWAITING_YOUR_REPLY');
 assert.equal(seen.operatorReviewRequired,true);
 assert.equal(seen.quoteApproved,false);
+assert.equal(supplierTicketNeedsAttention(seen),true,
+  'CJ reply must become an actionable workflow signal');
 
 // Unknown or unverified history always fails closed.
 for(const fake of [

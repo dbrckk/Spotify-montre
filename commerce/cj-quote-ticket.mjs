@@ -267,21 +267,33 @@ export async function requestWrittenCjQuote({accessToken,send=false,fetcher=fetc
   return {...safe,status:'submitted_to_cj'};
 }
 
+// Alert on any transition away from "waiting for CJ", including unknown
+// supplier states and a missing ticket. No supplier action is taken here.
+export function supplierTicketNeedsAttention(result){
+  return !result||result.status!=='ticket_found'||
+    result.supplierStatus!=='AWAITING_CJ_REPLY'||
+    result.operatorReviewRequired!==false;
+}
 async function main(){
   const mode=process.argv[2]||'preview';
-  if(!['preview','send','status','diagnose'].includes(mode)||process.argv.length>3)
-    throw Error('Use preview, send, status or diagnose');
+  if(!['preview','send','status','diagnose','watch'].includes(mode)||
+    process.argv.length>3)
+    throw Error('Use preview, send, status, diagnose or watch');
   const apiKey=process.env.CJ_API_KEY;
   if(!apiKey)throw Error('CJ_API_KEY_GITHUB_SECRET_MISSING');
   const token=await obtainCjAccessToken({apiKey});
   // CJ authentication also has a 1 req/s cap; allow it to settle.
   await new Promise(resolve=>setTimeout(resolve,1250));
-  const result=mode==='status'?
+  const result=mode==='status'||mode==='watch'?
     await checkWrittenCjQuote({accessToken:token}):
     mode==='diagnose'?
       await diagnoseWrittenCjQuote({accessToken:token}):
       await requestWrittenCjQuote({accessToken:token,send:mode==='send'});
   console.log(JSON.stringify(result));
+  if(mode==='watch'&&supplierTicketNeedsAttention(result)){
+    console.error('CJ_TICKET_OPERATOR_REVIEW_REQUIRED');
+    process.exitCode=1;
+  }
   if(mode==='diagnose'&&(result.historyCheck!=='not_requested'&&
     result.historyCheck!=='ticket_found'||result.categoryCheck!=='eligible'))
     process.exitCode=1;
