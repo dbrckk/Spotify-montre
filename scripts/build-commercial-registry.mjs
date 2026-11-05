@@ -134,7 +134,7 @@ export function buildCommercialRegistry({root,coreProducts,affiliates,coreAmazon
   };
   if(counts.total!==52||counts.documentedAmazonAsins!==23||
      counts.historicallyUnavailable!==4||
-     counts.activeExactAmazonReferrals!==(affiliates.enabled?23:0)||
+     counts.activeExactAmazonReferrals!==affiliates.links.size+exactSupplemental.size||
      counts.activeAwinReferrals!==awin.size||counts.directSaleEligible!==0)
     throw Error('Commercial status counts contradict the two documented source catalogues');
   const registry={
