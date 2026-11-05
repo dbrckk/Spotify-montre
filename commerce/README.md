@@ -291,3 +291,14 @@ statuts publics ne révèlent jamais l'adresse.
 - [Mollie Payments : création et webhook, contrôle GET serveur](https://docs.mollie.com/docs/accepting-payments).
 - [CJ OpenAPI : `createOrderV2` `payType=2`, balance, détail](https://developers.cjdropshipping.com/en/api/api2/api/shopping.html).
 - [DGCCRF : obligations du vendeur en dropshipping](https://www.economie.gouv.fr/dgccrf/les-fiches-pratiques/dropshipping-comment-respecter-la-reglementation).
+
+## Fiabilité des vérifications CJ : cadence API (5 novembre 2026)
+
+Les lectures de vérification pré-achat `preflightCjDelivery` comportent jusqu'à cinq appels CJ consécutifs : variante, fiche parent, stock, fret et solde du portefeuille. Le fournisseur peut limiter le compte à environ **une requête par seconde**. Sans cadence, la même offre valable pouvait être refusée pour une limite de débit momentanée avant tout paiement.
+
+- `commerce/cj-request-pacer.mjs` applique un espacement **d'au moins 1 250 ms entre les débuts de requête**, sérialise les appels concurrents transitant par un même contrôleur et ne réessaie **jamais** une requête échouée.
+- `preflightCjDelivery`, `discoverCjVariant` et `examineCjDetailedFreight` passent toutes leurs lectures successives par ce contrôleur. Cela couvre explicitement le stock et les devis de transport détaillés qui contournaient auparavant le délai.
+- Les transports simulés des contrôles CI restent instantanés ; un test dédié vérifie précisément les horaires, la concurrence et l'absence de retry après erreur du fournisseur.
+- Ce contrôleur protège **une série d'appels dans un processus**, sans prétendre coordonner différents serveurs Render et workflows GitHub indépendants. Une limite globale de compte reste possible : les opérations intensives devront être centralisées si l'activité s'accroît.
+
+La fiabilité accrue du précontrôle fournisseur ne constitue **aucun devis complet**, aucune approbation juridique et aucune commande de vente : `checkoutMode` demeure inactif tant que les preuves requises manquent.
