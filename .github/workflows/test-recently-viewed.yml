@@ -28,7 +28,7 @@ jobs:
           node --check scripts/test-recently-viewed.mjs
       - name: Install Chromium
         run: |
-          npm install --no-save --no-audit --no-fund playwright
+          npm install --no-save --no-audit --no-fund playwright@1.64.1
           npx playwright install --with-deps chromium
       - name: Exercise local watch history at Android viewport
         run: |
