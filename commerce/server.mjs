@@ -8,6 +8,7 @@ import {createDatabase,initializeDatabase,listApprovedOffers,reserveCheckout,sav
   claimSupplierRecoveryProbe,recordRecoveredSupplierOrder} from './db.mjs';
 import {ClientError,validateCheckoutBody,readJsonBody,readWebhookBody,openAddress} from './security.mjs';
 import {submitCjBalanceOrder,fetchCjOrder,preflightCjDelivery} from './cj.mjs';
+import {readStorefrontCheckoutPermit} from './merchant-gate.mjs';
 
 const origin=process.env.STOREFRONT_ORIGIN||'https://atelier-montres-selection-fr.onrender.com';
 const enabled=process.env.COMMERCE_ENABLED==='true';
@@ -41,7 +42,8 @@ function safeHttps(u){
   try{const p=new URL(u);return p.protocol==='https:'&&!p.username&&!p.password&&!p.hash&&p.pathname==='/'&&p.search==='' }
   catch{return false}
 }
-const merchantReady=()=>enabled&&dbReady&&pool&&
+const merchantReady=()=>enabled&&readStorefrontCheckoutPermit(backendUrl)&&
+  dbReady&&pool&&
   /^live_[a-zA-Z0-9]{12,}$/.test(mollieKey)&&cjToken.length>=20&&
   /^[a-fA-F0-9]{64}$/.test(encryptionKey)&&idempotencySecret.length>=40&&
   safeHttps(backendUrl)&&safeHttps(origin)&&dailyCap>0;
@@ -154,6 +156,9 @@ async function supplierWork(){
           // This callback executes AFTER CJ wallet read, immediately before
           // its irreversible createOrderV2 POST. Never use an earlier proof.
           authorizeBeforeDebit:async()=>{
+            // Recheck after slow supplier reads, immediately before any CJ
+            // POST. A newly disabled storefront is a hard merchant freeze.
+            if(!merchantReady())throw Error('Storefront checkout freeze before supplier debit');
             const latest=await verifyHostedPayment({
               apiKey:mollieKey,paymentId:order.payment_id,
               orderId:order.id,amountCents:order.amount_eur_cents
@@ -236,6 +241,11 @@ async function route(req,res){
     if(order.reused)return reply(res,200,order,cors(req));
     let payment;
     try{
+      // Recheck after the supplier preflight and database reservation. A
+      // disabled public site must never allow a new hosted payment through a
+      // direct HTTP request with a forged Origin header.
+      if(!merchantReady())
+        throw new ClientError('Vente directe désactivée. Aucun paiement créé.',503);
       payment=await createHostedPayment({apiKey:mollieKey,orderId:order.orderId,
         amountCents:order.amountCents,description:order.description,
         returnUrl:origin+'/commande.html?commande='+encodeURIComponent(order.orderId),
