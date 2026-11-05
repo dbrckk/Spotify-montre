@@ -7,6 +7,7 @@ import {buildSearchCollections} from './build-search-collections.mjs';
 import {buildEditorialPolicy} from './build-editorial-policy.mjs';
 import {buildPopularPicks} from './build-popular-picks.mjs';
 import {buildUnifiedDiscovery} from './build-unified-discovery.mjs';
+import {buildCommercialRegistry} from './build-commercial-registry.mjs';
 import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
 
 (function buildSeo() {
@@ -66,6 +67,10 @@ import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
     const model=products.find(p=>p.id===id);
     if (model?.photoReview?.publicUsageApproved!==true) throw Error('Publication affiliée bloquée : droits commerciaux de la photographie à vérifier pour '+id);
   }
+  // The 52-watch source of truth is regenerated from documented supplier,
+  // ASIN and image-rights registries before any shopper-facing page renders.
+  const commercialRegistry=buildCommercialRegistry({root,coreProducts:products,
+    affiliates:partners,coreAmazonLinks:amazonLinks});
   const amazonStatement = 'En tant que Partenaire Amazon, je réalise un bénéfice sur les achats remplissant les conditions requises';
   const umamiId=(process.env.UMAMI_WEBSITE_ID||'').trim();
   if(umamiId&&!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(umamiId)) {
@@ -94,8 +99,8 @@ import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
   const collections=buildSearchCollections({root,products,amazonLinks,partners,pageHead,page,e,u});
   const editorialPolicy=buildEditorialPolicy({root,data,products,amazonLinks,partners,pageHead,page,e,u});
   const affordableComparisons=buildAffordableComparisons({root,affiliates:partners,amazonPartnerTag:JSON.parse(readFileSync(join(root,'affiliate-links.json'),'utf8')).amazonPartnerTag,pageHead,page,e,u});
-  const popularPicks=buildPopularPicks({root,existingProducts:products,affiliates:partners,amazonPartnerTag:JSON.parse(readFileSync(join(root,'affiliate-links.json'),'utf8')).amazonPartnerTag,pageHead,page,e,u,comparisonLinks:affordableComparisons.byModel});
-  const unified=buildUnifiedDiscovery({root,coreProducts:products,affiliates:partners,amazonPartnerTag:JSON.parse(readFileSync(join(root,'affiliate-links.json'),'utf8')).amazonPartnerTag,pageHead,page,e,u});
+  const popularPicks=buildPopularPicks({root,existingProducts:products,affiliates:partners,amazonPartnerTag:JSON.parse(readFileSync(join(root,'affiliate-links.json'),'utf8')).amazonPartnerTag,pageHead,page,e,u,comparisonLinks:affordableComparisons.byModel,commercialRegistry});
+  const unified=buildUnifiedDiscovery({root,coreProducts:products,affiliates:partners,amazonPartnerTag:JSON.parse(readFileSync(join(root,'affiliate-links.json'),'utf8')).amazonPartnerTag,pageHead,page,e,u,commercialRegistry});
   for (const p of products) {
     if (!/^[a-z0-9-]{4,64}$/.test(p.id) || !/^https:\/\//.test(p.officialUrl)) throw Error('Référence ou lien fabricant invalide');
     const rel = 'montres/' + p.id + '.html';
