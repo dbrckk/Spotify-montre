@@ -94,6 +94,6 @@
       trackingName='amazon-unpaid:'+id+':'+placement;
     }
     if(trackingName.length>55)return;
-    try {window.umami.track(trackingName)catch{/* Navigation cannot depend on analytics. */}
+    try {window.umami.track(trackingName)}catch{/* Navigation cannot depend on analytics. */}
   },{capture:true,passive:true});
 })();
