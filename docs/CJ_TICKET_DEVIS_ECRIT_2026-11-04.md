@@ -41,7 +41,7 @@ Si CJ répond « frais applicables » sans prix global, le devis **reste incompl
 - [API CJ Freight](https://developers.cjdropshipping.com/en/api/api2/api/logistic.html) : calcul logistique simplifié, puis `freightCalculateTip`.
 - [Diagnostic de la variante](CJ_DEVIS_DETAILLE_2026-11-04.md) et [demande de devis complète initialement rédigée](CJ_DEMANDE_DEVIS_LIVRE_FR_2026-11-04.md).
 
-**Statut au moment de la livraison du workflow : demande prête, non envoyée.** Aucune réponse ni facture CJ n'est présumée.
+**Historique :** à la livraison initiale du workflow, la demande était prête mais non envoyée. Le 5 novembre, son enregistrement a été confirmé ; voir l'état vérifié ci-dessous.
 
 ## Diagnostic réel de la tentative du 4 novembre
 
@@ -62,3 +62,27 @@ Cause probable du refus : le code de la PR #139 imposait par erreur `Number.isSa
 **Correction :** validation des chaînes entières positives sur 64 bits, conservation des chiffres exacts avec `BigInt` pour la borne supérieure, et encodage de ces deux seuls identifiants comme littéraux JSON numériques sans conversion arrondie. Les IDs mal formés, hors plage ou retournés déjà arrondis par un fournisseur sont refusés. Les autres champs restent encodés par `JSON.stringify`. Des tests couvrent la borne `9223372036854775807`, la non-perte de précision et le rejet d'un ID invalide.
 
 **Critère d'acceptation :** un nouveau diagnostic réel doit afficher `historyCheck: not_requested` et `categoryCheck: eligible` avant une nouvelle tentative manuelle `send`. Si le diagnostic reste en échec, **ne pas envoyer**, analyser la cause ; aucun mécanisme d'achat n'est modifié.
+
+## État fournisseur vérifié le 5 novembre 2026
+
+La tentative manuelle du 4 novembre [41916356364](https://github.com/dbrckk/Spotify-montre/actions/runs/41916356364) avait échoué avant confirmation. La correction des identifiants de catégorie CJ sur 64 bits a été validée en direct, puis un nouvel examen du fournisseur n'a détecté **aucun ticket préexistant** pour cette référence.
+
+À la suite de l'autorisation déjà donnée par le propriétaire du dépôt, **un unique dépôt de demande** a été exécuté depuis GitHub Actions :
+
+- [Exécution fournisseur réelle 41984237373](https://github.com/dbrckk/Spotify-montre/actions/runs/41984237373) : réponse de l'API CJ `submitted_to_cj`, sans commande ni débit.
+- Référence interne non sensible : `AM-CJ-FR-QUOTE-20261104-CJZBNSET00031`.
+- [Diagnostic fournisseur indépendant 41931382381 — tentative 3](https://github.com/dbrckk/Spotify-montre/actions/runs/41931382381) : `historyCheck=ticket_found`, `supplierState=AWAITING_CJ_REPLY`, `categoryCheck=eligible` ; CJ attend sa propre réponse.
+- Le déclencheur de soumission automatique à usage unique est supprimé dans le changement de suivi. L'envoi `send` redevient exclusivement manuel.
+
+**IMPORTANT :** `submitted_to_cj` et `AWAITING_CJ_REPLY` ne sont pas des confirmations du coût complet, des délais, de la conformité, ni de la capacité à commander. Le devis détaillé, le prix TTC vendeur, la marge et les conditions de SAV restent à vérifier. Aucun changement de `checkoutMode=inactive`.
+
+## Surveillance sans frais et sans manipulation quotidienne
+
+Le workflow [CJ ticket supplier read-only live diagnosis](https://github.com/dbrckk/Spotify-montre/actions/workflows/cj-ticket-readonly-check.yml) exécute `watch` chaque jour à **07 h 34 UTC** (08 h 34 heure d'hiver française ; 09 h 34 heure d'été). Le planificateur GitHub peut retarder ou ne pas lancer certaines exécutions.
+
+- Tant que la réponse CJ est `AWAITING_CJ_REPLY`, le suivi termine **vert**, sans action.
+- Si CJ demande une réponse, ferme le ticket, change son état ou si le ticket n'est plus trouvable, il affiche le signal fixe `CJ_TICKET_OPERATOR_REVIEW_REQUIRED` et termine **en échec** ; les notifications GitHub Actions dépendent des réglages de ton compte.
+- Le workflow ne lit que la liste et le détail du ticket, avec une clé temporaire en mémoire ; il ne crée **aucun ticket**, ne répond pas à CJ, ne commande rien et ne débite rien. Les contenus privés des tickets ne sont pas publiés.
+- Lorsqu'une réponse doit être examinée, ouvrir **CJdropshipping > My CJ > Ticket** et lire le ticket correspondant. Ne pas coller la clé API, les données d'acheteurs ou le contenu privé dans une issue GitHub publique.
+
+La bonne prochaine action commerciale n'est plus de rechercher des dizaines de montres : c'est de **qualifier ce devis écrit unique**, en gardant la preuve fournisseur privée et les coûts/conditions vérifiés, puis de valider les marges et les exigences légales avant la moindre vente directe.
