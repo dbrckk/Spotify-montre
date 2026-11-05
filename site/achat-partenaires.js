@@ -22,6 +22,7 @@
       return u.protocol==='https:'&&u.hostname==='www.amazon.fr'&&
         u.pathname==='/dp/'+asin&&!u.username&&!u.password&&!u.port&&!u.hash&&
         u.searchParams.getAll('tag').length===1&&u.searchParams.get('tag')===tag&&
+        [...u.searchParams.keys()].length===new Set(u.searchParams.keys()).size&&
         [...u.searchParams.keys()].every(k=>['tag','th','psc'].includes(k));
     }catch{return false}
   };
