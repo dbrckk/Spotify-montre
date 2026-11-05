@@ -94,7 +94,7 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
       partnerVariant:partner?.variant||null,
       merchantEvidenceType:verified?.evidenceType||null,
       commercialStatus:evidence.purchasePath,observedAvailability:evidence.amazon.observedAvailability,
-      sourceCheckedOn:evidence.amazon.sourceCheckedOn||partner?.verifiedAt||null
+      sourceCheckedOn:partner&&!evidence.amazon.referralActive?partner.verifiedAt:evidence.amazon.sourceCheckedOn
     });
   }
   if(normalized.length!==52||new Set(normalized.map(p=>p.id)).size!==52)
