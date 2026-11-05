@@ -339,3 +339,32 @@ d'identité vendeur, de justificatifs CJ, de compte marchand ou de financement.
 Le fichier reste actuellement à `"inactive"`. Les vérifications
 `merchant-gate-check.mjs` et `readiness-check.mjs` gardent cette
 invariant sous CI avant la prochaine mise en production.
+
+## Webhooks de paiement et gel des nouvelles ventes
+
+**Suspendre les nouvelles ventes n'annule pas les obligations liées aux
+paiements déjà créés.** Un client peut terminer un paiement Mollie après
+`checkoutMode=inactive` ou `COMMERCE_ENABLED=false`.
+
+- Le webhook `POST /api/webhooks/mollie` reste accepté lorsque la base de
+  données est disponible, **même si de nouvelles ventes sont interdites**.
+  L'identifiant reçu ne vaut jamais preuve de paiement : la commande doit
+  déjà exister en PostgreSQL et le statut est revérifié par un **GET Mollie
+  authentifié** avant tout changement financier.
+- Un identifiant de paiement inexistant est acquitté sans appel au prestataire
+  et sans créer de commande. Si PostgreSQL est indisponible, le webhook reçoit
+  un **503** afin de permettre la reprise par le prestataire.
+- `merchantReady()` reste nécessaire pour tout **nouveau** checkout, lien
+  Mollie et achat fournisseur CJ. Lors d'un gel, les nouvelles commandes CJ
+  restent bloquées, mais le rapprochement et la surveillance des commandes
+  déjà créées continuent en lecture seule.
+- Une commande client déjà payée dont l'expédition n'a pas été engagée au
+  moment du gel doit faire l'objet d'une intervention exploitant
+  (livraison conforme, information client ou remboursement vérifié). Un
+  webhook reçu ne prouve ni livraison ni remboursement.
+
+Le scénario `commerce/frozen-payment-webhook-check.mjs` démarre un vrai
+serveur HTTP, **sans aucun jeton réel Mollie/CJ**, sur la base PostgreSQL CI
+locale. Il vérifie que le checkout renvoie 503, que la liste d'offres est
+vide et qu'une notification valide mais inconnue renvoie 200 sans créer une
+commande. Les tests ne contactent aucun marchand ni compte fournisseur.
