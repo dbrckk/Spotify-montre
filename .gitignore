@@ -5,3 +5,9 @@ artifacts/search-console-local/
 # Python bytecode from offline analysis
 __pycache__/
 *.pyc
+
+# Private supplier quotes, source evidence and merchant pricing assumptions.
+# Do not commit raw CJ support messages, customs documents or PSP terms.
+commerce/private/
+private/cj-quotes/
+*.cj-private-quote.json

@@ -302,3 +302,15 @@ Les lectures de vérification pré-achat `preflightCjDelivery` comportent jusqu'
 - Ce contrôleur protège **une série d'appels dans un processus**, sans prétendre coordonner différents serveurs Render et workflows GitHub indépendants. Une limite globale de compte reste possible : les opérations intensives devront être centralisées si l'activité s'accroît.
 
 La fiabilité accrue du précontrôle fournisseur ne constitue **aucun devis complet**, aucune approbation juridique et aucune commande de vente : `checkoutMode` demeure inactif tant que les preuves requises manquent.
+
+## Plancher de prix privé pour le pilote CJ (pas de vente autorisée)
+
+Une fois reçue une **réponse CJ écrite, vérifiée, chiffrée et datée**, utiliser
+`node commerce/price-cj-pilot.mjs /chemin/prive/devis.json` sur un poste
+privé. Voir [le format exact des preuves et le calcul de prix TTC](../docs/CJ_PRIX_MINIMUM_AVANT_VENTE_2026-11-05.md).
+
+L'outil compte les taxes et frais d'importation une seule fois, distingue ce que
+CJ inclut de ce que le vendeur doit payer en plus, et calcule un seuil de prix
+au centime avec une réserve commerciale et les frais de paiement. Il refuse
+les devis manquants, incohérents ou périmés. **Jamais de prix public ni de
+checkout approuvé** sans les preuves du vendeur et de son PSP.
