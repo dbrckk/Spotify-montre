@@ -329,3 +329,12 @@
 @media(prefers-reduced-motion:reduce){
  .ud-filter-chip{transition:none!important}
 }
+
+
+/* Single 52-reference commercial proof registry: source identity, not live stock. */
+.ud-commercial-proof{margin:0;padding:8px 10px;background:#f1f4ec;
+  border-left:3px solid #79987b;color:#36583c;font:650 11px/1.55 system-ui,sans-serif;
+  overflow-wrap:anywhere}
+.ud-card[data-commerce-status="external_source_only"] .ud-commercial-proof{
+  background:#f8f4ea;border-left-color:#b29a6d;color:#634f33}
+.ud-card .ud-commercial-proof:first-letter{text-transform:uppercase}
