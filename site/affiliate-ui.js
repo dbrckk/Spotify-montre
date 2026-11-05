@@ -12,14 +12,23 @@
       if(u.protocol!=='https:'||u.hostname!=='www.amazon.fr'||u.username||u.password||u.port||u.hash||
          u.pathname!=='/dp/'+asin)return false;
       if(tag===null)return u.search==='';
+      const keys=[...u.searchParams.keys()];
       return u.searchParams.getAll('tag').length===1 &&
         u.searchParams.get('tag')===tag &&
-        [...u.searchParams.keys()].every(k=>k==='tag'||k==='th'||k==='psc');
+        keys.length===new Set(keys).size &&
+        keys.every(k=>k==='tag'||k==='th'||k==='psc');
     } catch {return false}
   };
+  // A stalled JSON request must not leave Android product links permanently
+  // pending; preserve the editorial catalogue when a registry is unavailable.
   const get=async(path)=>{
-    try {const r=await fetch(path,{cache:'no-store'});return r.ok?await r.json():null}
-    catch {return null}
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),9000);
+    try {
+      const r=await fetch(path,{cache:'no-store',signal:controller.signal});
+      return r.ok?await r.json():null;
+    }catch{return null}
+    finally{clearTimeout(timer)}
   };
   async function init() {
     const home=document.getElementById('affGrid'),detail=document.getElementById('detailShell');
@@ -65,9 +74,11 @@
       const entries=Object.entries(config.links);
       if(entries.length&&entries.every(([id,item])=>
           models.get(id)?.photoReview?.publicUsageApproved===true &&
+          models.get(id)?.photoReview?.localUrl==='./assets/watches/'+id+'.webp' &&
+          /^[a-f0-9]{64}$/.test(models.get(id)?.photoReview?.localSha256||'') &&
           item?.provider==='amazon.fr'&&item.productMatchConfirmed===true&&item.linkApproved===true &&
           code.test(item.asin||'')&&isAmazon(item.url,item.asin,config.amazonPartnerTag)&&
-          item.verifiedAt===catalog.checkedOn&&
+          typeof catalog?.checkedOn==='string'&&item.verifiedAt===catalog.checkedOn&&
           observed.has(id)&&plain.get(id)==='https://www.amazon.fr/dp/'+item.asin)) {
         for(const [id,item] of entries)paid.set(id,item.url);
       }

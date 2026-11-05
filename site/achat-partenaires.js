@@ -10,7 +10,8 @@
   const grid=document.getElementById('amPartnerCards');
   const status=document.getElementById('amPartnerStatus');
   const filters=document.getElementById('amPartnerFilters');
-  if(!root||!grid||!status||!filters)return;
+  const retry=document.getElementById('amPartnerRetry');
+  if(!root||!grid||!status||!filters||!retry)return;
 
   const idPattern=/^[a-z0-9-]{4,64}$/;
   const asinPattern=/^[A-Z0-9]{10}$/;
@@ -85,7 +86,7 @@
       checkedOn:known.checkedOn
     }));
   };
-  let catalog=[],selected='all',featured=null;
+  let catalog=[],selected='all',featured=null,loading=false;
   function render(){
     const shown=selected==='all'?catalog:catalog.filter(({product})=>product.tier===selected);
     // Preserve exact product intent from /acheter.html?modele=..., but keep
@@ -144,32 +145,49 @@
       button.setAttribute('aria-pressed',String(button.dataset.tier===selected));
     }
   }
+  // Install handlers once. Retrying a failed network request must never
+  // attach a second filter listener or reuse stale paid destinations.
+  filters.addEventListener('click',event=>{
+    const button=event.target.closest?.('button[data-tier]');
+    if(!button||!Object.hasOwn({...tierLabel,all:'Toutes'},button.dataset.tier))return;
+    selected=button.dataset.tier;
+    render();
+  });
+  retry.addEventListener('click',()=>{void init()});
   async function init(){
+    if(loading)return;
+    loading=true;
+    retry.hidden=true;
+    retry.disabled=true;
+    status.textContent='Vérification des références partenaires…';
     try{
       const [config,known,feed]=await Promise.all([
         readJson('./affiliate-links.json'),
         readJson('./amazon-product-links.json'),
         readJson('./selection-affiliation.json')
       ]);
-      catalog=entries(config,known,feed);
-      if(!catalog.length)throw Error('Aucune correspondance partenaire validée');
+      const verified=entries(config,known,feed);
+      if(!verified.length)throw Error('Aucune correspondance partenaire validée');
+      catalog=verified;
       const requested=new URLSearchParams(location.search).get('modele');
-      if(idPattern.test(requested||'')&&catalog.some(x=>x.product.id===requested))
-        featured=requested;
+      featured=idPattern.test(requested||'')&&catalog.some(x=>x.product.id===requested)
+        ?requested:null;
       filters.hidden=false;
-      filters.addEventListener('click',event=>{
-        const button=event.target.closest?.('button[data-tier]');
-        if(!button||!Object.hasOwn({...tierLabel,all:'Toutes'},button.dataset.tier))return;
-        selected=button.dataset.tier;
-        render();
-      });
       render();
       if(featured)root.scrollIntoView({block:'start',behavior:'auto'});
     }catch{
+      // Fail closed: no previously displayed checkout exits may survive
+      // a failed refresh or a tampered source.
+      catalog=[];
+      featured=null;
       grid.replaceChildren();
       filters.hidden=true;
-      status.textContent='Les liens d’achat partenaires ne sont pas vérifiables actuellement. Vous pouvez toujours comparer les modèles dans le catalogue.';
+      status.textContent='Les références partenaires ne sont pas vérifiables actuellement. Réessayez ou consultez les fiches du catalogue.';
+      retry.hidden=false;
+    }finally{
+      loading=false;
+      retry.disabled=false;
     }
   }
-  init();
+  void init();
 })();
