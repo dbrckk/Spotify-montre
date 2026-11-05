@@ -1,4 +1,5 @@
 import {usdToCents,computeCjFreightCents,computeCjLandedCents} from './landed-cost.mjs';
+import {createCjPacedFetch} from './cj-request-pacer.mjs';
 
 const ROOT='https://developers.cjdropshipping.com/api2.0/v1';
 const VALID_PROPERTIES=new Set([
@@ -55,15 +56,9 @@ export async function examineCjDetailedFreight({
     !/^[0-9]{5}$/.test(postalCode)||/^(97|98)/.test(postalCode))
     throw Error('CJ exact variant or French sample postcode invalid');
   if(typeof fetcher!=='function')throw Error('CJ fetch unavailable');
-  // Pace REAL network traffic across variant, product, stock and freight. The
-  // test fetcher is deliberately unpaced.
-  let lastCall=0;
-  const supplierFetch=fetcher===fetch?async(url,options)=>{
-    const delay=1250-(Date.now()-lastCall);
-    if(lastCall&&delay>0)await new Promise(resolve=>setTimeout(resolve,delay));
-    lastCall=Date.now();
-    return fetcher(url,options);
-  }:fetcher;
+  // All four reads share the same pacing queue. Previously, stock and
+  // freight bypassed the limiter and could trigger CJ account throttling.
+  const supplierFetch=createCjPacedFetch(fetcher);
 
   // A search-result PID is not the identity authority for this exact VID.
   // Resolve the supplier's canonical parent from queryByVid FIRST.
@@ -123,7 +118,7 @@ export async function examineCjDetailedFreight({
   let inventory;
   try{
     inventory=await read('/product/stock/queryByVid?vid='+
-      encodeURIComponent(vid),accessToken,fetcher);
+      encodeURIComponent(vid),accessToken,supplierFetch);
   }catch{throw Error('CJ_DETAIL_STOCK_READ_FAILED')}
   if(!Array.isArray(inventory))throw Error('CJ_DETAIL_STOCK_FORMAT_INVALID');
   const inStock=inventory.some(x=>x?.vid===vid&&x?.countryCode==='CN'&&
@@ -142,7 +137,7 @@ export async function examineCjDetailedFreight({
   if(productType==='5')row.trialCalculationType='1';
   let detailed;
   try{
-    detailed=await read('/logistic/freightCalculateTip',accessToken,fetcher,{
+    detailed=await read('/logistic/freightCalculateTip',accessToken,supplierFetch,{
       method:'POST',body:{reqDTOS:[row]}
     });
   }catch{throw Error('CJ_DETAIL_FREIGHT_READ_FAILED')}
