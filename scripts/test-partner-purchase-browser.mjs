@@ -50,7 +50,7 @@ try{
     assert.ok(note.includes(evidenceDate),'All historical stock observations need an explicit date');
     assert.match(note,unavailable?/Indisponible lors du contrôle/:/Disponibilité non vérifiée/,
       'Never imply a live stock check or buyable offer');
-    if(unavailable)assert.match(await a.innerText(),/stock à vérifier/,
+    if(unavailable)assert.match(await a.innerText(),/stock à vérifier/i,
       'Historically unavailable products must not use the normal buy CTA label');
   }
   const first=cards.first().locator('img');
@@ -165,7 +165,57 @@ try{
   assert.match(await noJS.locator('#amPartnerStatus').innerText(),/explorez les 15 fiches comparatives/);
   assert.equal(await noJS.locator('#amDirectPrelaunch').isVisible(),true);
   await noJS.close();
-  console.log('Partner purchase gateway OK: 13 exact ASINs, mobile filters/photos, fail-closed links and no merchant payments');
+
+  // All the real shopping entrypoints must display the same dated source
+  // limitations, not only the dedicated acheter.html gateway.
+  const gallery=await browser.newPage({viewport:{width:390,height:840},locale:'fr-FR'});
+  await gallery.goto(new URL('affiliation.html',base).href,{waitUntil:'domcontentloaded'});
+  const unavailableCard=gallery.locator('.aff-card[data-watch-id="casio-mtp-1302"]');
+  await unavailableCard.locator('.am-affiliate-cta').waitFor();
+  assert.match(await unavailableCard.locator('.am-affiliate-note').innerText(),
+    /Indisponible lors du contrôle du 30\/10\/2026/);
+  assert.match(await unavailableCard.locator('.am-affiliate-cta').innerText(),
+    /stock à vérifier/i);
+  assert.equal(await unavailableCard.locator('.am-affiliate-cta').getAttribute('href'),
+    config.links['casio-mtp-1302'].url);
+  const uncheckedCard=gallery.locator('.aff-card[data-watch-id="citizen-tsuyosa"]');
+  await uncheckedCard.locator('.am-affiliate-cta').waitFor();
+  assert.match(await uncheckedCard.locator('.am-affiliate-note').innerText(),
+    /Disponibilité non vérifiée au 30\/10\/2026/);
+  assert.equal(await gallery.locator('.aff-card .am-affiliate-cta').count(),13,
+    'The main 15-watch gallery should publish exactly the 13 documented ASINs');
+  await gallery.close();
+
+  const detail=await browser.newPage({viewport:{width:390,height:840},locale:'fr-FR'});
+  await detail.goto(new URL('montre.html?id=casio-mtp-1302',base).href,
+    {waitUntil:'domcontentloaded'});
+  await detail.locator('.am-affiliate-detail').waitFor();
+  assert.match(await detail.locator('.detail-sub').innerText(),
+    /Indisponible lors du contrôle du 30\/10\/2026/);
+  assert.match(await detail.locator('.am-affiliate-detail').innerText(),/stock à vérifier/i);
+  assert.equal(await detail.locator('.am-affiliate-detail').getAttribute('href'),
+    config.links['casio-mtp-1302'].url);
+  assert.equal(await detail.locator('#detailAmazon').isVisible(),false,
+    'Paid Amazon product should have one prominent affiliate CTA, no duplicate link');
+  const detailWidth=await detail.evaluate(()=>({
+    client:document.documentElement.clientWidth,
+    scroll:document.documentElement.scrollWidth
+  }));
+  assert.ok(detailWidth.scroll<=detailWidth.client+2,
+    'Watch detail must not overflow small Android viewports');
+  await detail.close();
+
+  const missing=await browser.newPage({viewport:{width:390,height:840}});
+  await missing.goto(new URL('montre.html?id=citizen-eco',base).href,
+    {waitUntil:'domcontentloaded'});
+  await missing.locator('#detailShell').waitFor({state:'visible'});
+  assert.equal(await missing.locator('.am-affiliate-detail').count(),0,
+    'A model without an exact Amazon ASIN must not receive a compensated link');
+  assert.match(await missing.locator('#detailAmazon').getAttribute('href'),/^https:\/\/www\.amazon\.fr\/s\?k=/,
+    'Unknown ASIN must remain an explicit generic search, not a substituted product');
+  await missing.close();
+
+  console.log('Partner routes OK: showroom, 15-watch catalogue, interactive details, exact ASIN, documented stock and no internal charge');
 }finally{
   await browser.close();
 }

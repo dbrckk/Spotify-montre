@@ -318,3 +318,8 @@
  .watch-decision-evidence{padding:15px 14px}
  .watch-decision-evidence li{flex:1 1 calc(50% - 8px);min-width:0}
 }
+
+
+/* Manufacturer/documentary ASIN evidence, not an Amazon live stock feed. */
+.watch-product .amazon-evidence-note{max-width:680px;margin:13px 0 0;padding:11px 15px;border-left:3px solid #879b81;background:#edf0e9;color:#344d3b;font:500 12px/1.7 system-ui,sans-serif}
+.watch-product .amazon-evidence-note[data-amazon-evidence-status="unavailable_at_check"]{border-left-color:#a57c3a;background:#f6f0e4;color:#634b2f}

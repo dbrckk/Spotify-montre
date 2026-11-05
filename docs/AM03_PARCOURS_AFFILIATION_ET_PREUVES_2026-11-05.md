@@ -44,3 +44,40 @@ La recherche web publique de ce jour ne remplace pas une consultation authentifi
 Amazon Partenaires indique qu'une fiche produit peut cesser de fonctionner lorsque le produit devient indisponible ou qu'une nouvelle édition reçoit un nouvel ASIN : https://partenaires.amazon.fr/help/node/topic/G28H2J7TRSU445JY
 
 Les prix et stocks ne doivent jamais être extrapolés à partir du seul ASIN.
+
+
+## Harmonisation des fiches et de la collection — 5 novembre, deuxième lot
+
+Une nouvelle revue des parcours a révélé une divergence après la PR #150 :
+`acheter.html` signalait le statut du contrôle Amazon du 30/10/2026,
+mais les liens de `affiliation.html`, `montre.html?id=...` et les
+**15 fiches indexables** générées sous `montres/` n'affichaient pas tous
+la même information.
+
+Correctifs réalisés sur les vraies entrées commercialement visibles :
+
+- Le composant `site/affiliate-ui.js` exige désormais le même registre
+  `amazon-product-links.json` daté que la page d'achat. Un enregistrement
+  sans état explicite `not_checked` ou `unavailable_at_check` ne devient
+  pas un lien rémunéré. La date du lien suivi doit coïncider avec la date
+  du relevé source. **Aucun contrôle Amazon en direct n'est revendiqué.**
+- Les cartes des 15 modèles et les fiches interactives reprennent
+  l'avertissement historique daté ; les quatre références précédemment
+  signalées indisponibles possèdent un libellé `stock à vérifier`.
+  Les autres n'affichent pas de disponibilité imaginée.
+- Le générateur `scripts/build-seo.mjs` ajoute le même état, la même date
+  et le bon ASIN aux **13 pages produits indexables concernées**. Les deux
+  références sans ASIN restent uniquement éditoriales/fabricant, sans
+  substitution commerciale.
+- Les tests `scripts/validate-seo.mjs` et
+  `scripts/test-partner-purchase-browser.mjs` couvrent les
+  15 pages indexables, la collection Android, un modèle historiquement
+  indisponible, une disponibilité non vérifiée, l'ASIN exact et l'absence
+  de lien rémunéré pour un modèle sans correspondance.
+
+**Condition de clôture non encore satisfaite :** une vérification indépendante
+et récente, modèle par modèle, des destinations Amazon.fr, des variantes et
+des conditions réelles de livraison. Un lien `/dp/<ASIN>` correct sur le plan
+technique n'implique pas une disponibilité commerciale. L'accord définitif
+Amazon Partenaires et les commissions réelles doivent être vérifiés dans
+le tableau de bord du marchand ; aucun revenu n'est affirmé ici.
