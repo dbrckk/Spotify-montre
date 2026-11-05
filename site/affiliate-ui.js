@@ -48,8 +48,8 @@
       if(!finding)return '';
       const date=reviewedDate(catalog.checkedOn);
       return finding==='unavailable_at_check'
-        ?'Indisponible lors du contrôle du '+date+'. Disponibilité actuelle inconnue : vérifiez auprès du vendeur.'
-        :'Disponibilité non vérifiée au '+date+'. Prix, variante et stock à contrôler chez Amazon.fr.';
+        ?'Indisponible lors du contrôle du '+date+'. Stock actuel à vérifier sur Amazon.fr.'
+        :'Disponibilité non vérifiée au '+date+'. Prix, variante et stock à contrôler.';
     };
     const paid=new Map();
     if(config?.version===1&&config.enabled===true&&
@@ -100,8 +100,8 @@
           'Fiche Amazon vérifiée · lien non rémunéré';
         const note=document.createElement('small');note.className='am-affiliate-note';
         note.textContent=(compensated
-          ?'Lien rémunéré · Une commission peut nous être versée. Achat et retours chez le marchand indiqué. '
-          :'Lien non rémunéré · Aucun paiement n’est encaissé ici. ')+observation(id);
+          ?'Lien rémunéré · Achat et retours chez le marchand. '
+          :'Lien non rémunéré · Achat et retours chez le marchand. ')+observation(id);
         actions.after(note);
       }
     }
