@@ -1,4 +1,7 @@
 # Atelier Montres — audit de production, objectif final et feuille de route
+
+> **Audit historique du 1er novembre 2026.** L'objectif du produit a évolué vers une boutique-guide à double mode (affiliation + future vente directe). Voir le [plan directeur actuel, vérifié le 5 novembre 2026](OBJECTIF_GLOBAL_ET_PLAN_DIRECTEUR_2026-11-05.md) avant de lancer un nouveau chantier.
+
 **État contrôlé : 1er novembre 2026 · `dbrckk/Spotify-montre` · `main` à `d3511f374e9b86723ca27d0f7e0b082ff6dd49c8`**
 
 > **Périmètre et limites.** Audit du dépôt GitHub, de ses scripts, de son README, des configurations publiques et des pages de production. Un crawl effectué via navigateur distant a interrogé **70/70 URL présentes dans `sitemap.xml`**, sans échec ; toutes étaient associées à un titre, une description et une canonical cohérente. Cela **ne valide ni l'indexation Google ni les classements**, ni l'absence de bugs interactifs sur chaque appareil. Aucune mesure Lighthouse de laboratoire, aucun relevé de Core Web Vitals terrain, aucune capture d'écran comparative ni tableau de bord Amazon/Search Console n'ont été récupérés pendant cet audit. Les scores suivants sont des **estimations qualitatives de maturité**, pas des statistiques d'audience ou de performance.
