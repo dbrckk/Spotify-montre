@@ -1,4 +1,5 @@
 import {usdToCents,computeCjFreightCents,computeCjLandedCents,checkCjFxCeiling} from './landed-cost.mjs';
+import {createCjPacedFetch} from './cj-request-pacer.mjs';
 // CJdropshipping OpenAPI v2. All calls are server-side; no credentials/client data in browser.
 const ROOT='https://developers.cjdropshipping.com/api2.0/v1';
 function assertToken(token){
@@ -70,27 +71,30 @@ export async function preflightCjDelivery({vid,originCountry='CN',postalCode,
   if(pinned&&!pins.every(x=>typeof x==='string'&&
     /^[a-zA-Z0-9_-]{3,100}$/.test(x)))
     throw Error('Complete pinned CJ parent and SKU identity required');
+  // Includes variant, parent SKU, inventory, shipping AND wallet balance.
+  // The previous implementation sent up to five back-to-back CJ API requests.
+  const supplierFetcher=createCjPacedFetch(fetcher);
   const variant=await api('/product/variant/queryByVid?vid='+encodeURIComponent(vid),
-    accessToken,{fetcher});
+    accessToken,{fetcher:supplierFetcher});
   if(variant?.vid!==vid)throw Error('Supplier variant identity mismatch');
   if(pinned){
     if(variant.pid!==expectedPid||variant.variantSku!==expectedVariantSku)
       throw Error('Supplier PID or variant SKU changed: refuse payment');
     const parent=await api('/product/query?pid='+encodeURIComponent(expectedPid),
-      accessToken,{fetcher});
+      accessToken,{fetcher:supplierFetcher});
     if(parent?.pid!==expectedPid||parent?.productSku!==expectedProductSku)
       throw Error('Supplier parent product SKU changed: refuse payment');
   }
   const productCostUsdCents=usdToCents(variant.variantSellPrice);
   if(productCostUsdCents<=0)throw Error('Supplier product price unavailable');
   const stock=await api('/product/stock/queryByVid?vid='+encodeURIComponent(vid),
-    accessToken,{fetcher});
+    accessToken,{fetcher:supplierFetcher});
   if(!Array.isArray(stock)||!stock.some(row=>row?.countryCode===originCountry&&
     row?.vid===vid&&Number.isInteger(row.cjInventoryNum)&&row.cjInventoryNum>=1))
     throw Error('Supplier warehouse inventory unavailable: do not accept payment');
   const freight=await api('/logistic/freightCalculate',accessToken,{
     method:'POST',body:{startCountryCode:originCountry,endCountryCode:'FR',
-      zip:postalCode,products:[{quantity:1,vid}]},fetcher
+      zip:postalCode,products:[{quantity:1,vid}]},fetcher:supplierFetcher
   });
   if(!Array.isArray(freight))throw Error('Supplier freight response invalid');
   // CJ createOrderV2 accepts only the logistics name, not a priced route id.
@@ -111,7 +115,7 @@ export async function preflightCjDelivery({vid,originCountry='CN',postalCode,
   // Money guard at BOTH payment creation and irreversible supplier purchase.
   // Use the verified upper exchange bound, not an assumed 1 USD = 1 EUR.
   const fx=checkCjFxCeiling(landedUsdCents,fxMaxEurPerUsdBps,maxSupplierEurCents);
-  const balance=await getCjBalance({accessToken,fetcher});
+  const balance=await getCjBalance({accessToken,fetcher:supplierFetcher});
   if(balance<maxSupplierUsdCents)throw Error('Supplier wallet insufficient for a new sale');
   return {productUsdCents:productCostUsdCents,freightUsdCents:shippingAndTaxes,
     landedUsdCents,upperLandedEurCents:fx.upperEurCents,
@@ -137,16 +141,9 @@ export async function discoverCjVariant({vid,postalCode,originCountry='CN',
     /^(?:97|98)/.test(postalCode)||
     originCountry!=='CN')
     throw Error('Provide exact CJ VID and a metropolitan French postcode; CN warehouse pilot only');
-  // CJ account limits can be as low as 1 request/second. Synthetic CI
-  // fetchers bypass waiting; real calls are paced conservatively.
-  let lastRequestAt=0;
-  const supplierFetcher=fetcher===fetch?async(url,options)=>{
-    const remaining=1100-(Date.now()-lastRequestAt);
-    if(lastRequestAt&&remaining>0)
-      await new Promise(resolve=>setTimeout(resolve,remaining));
-    lastRequestAt=Date.now();
-    return fetcher(url,options);
-  }:fetcher;
+  // Shared pacing implementation, including consecutive inventory/freight
+  // calls. Injected test transports remain instantaneous.
+  const supplierFetcher=createCjPacedFetch(fetcher);
   const v=await api('/product/variant/queryByVid?vid='+encodeURIComponent(vid),
     accessToken,{fetcher:supplierFetcher});
   if(v?.vid!==vid)throw Error('CJ variant identity does not match requested VID');
