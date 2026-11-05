@@ -12,6 +12,18 @@ assert.equal(report.totals.configuredSpecialLinks,Object.keys(input.links).lengt
 assert.equal(report.totals.linksActivated,input.enabled);
 assert.equal(report.totals.accountApprovalDeclared,input.approved);
 assert.equal(report.totals.purchaseCheckoutOnSite,false);
+const source=JSON.parse(readFileSync(join(root,'research/amazon-fr-exact-products.json'),'utf8'));
+assert.equal(report.totals.amazonListingResearchCheckedOn,source.checkedOn);
+assert.equal(report.totals.previouslyUnavailableListings,4);
+assert.equal(report.totals.listingAvailabilityNotChecked,9);
+assert.equal(report.totals.exactAsinNotConfirmed,2);
+assert.equal(report.totals.applicationStartDate,null,
+  'GitHub cannot establish the actual Amazon.fr application start date');
+assert.equal(report.totals.qualifyingSalesCount,null,
+  'No Amazon.fr account data, so never invent the number of eligible sales');
+assert.equal(report.totals.commissionActuallyPaid,null,
+  'Clicks must never be presented as paid commissions');
+assert.equal(report.totals.independentAccountApprovalConfirmed,false);
 assert.equal(report.products.length,15);
 assert.equal(new Set(report.products.map(p=>p.id)).size,15);
 for(const p of report.products){
@@ -28,5 +40,8 @@ const human=command();
 assert.match(human,/préparation affiliation Amazon\.fr/);
 assert.match(human,/droit image|Droit image/i);
 assert.match(human,/15/);
+assert.match(human,/3 ventes éligibles dans les 180 premiers jours/);
+assert.match(human,/Date de candidature et ventes éligibles inconnues/);
+assert.match(human,/amazon-unpaid:/,'Separate noncommissioned clicks from sponsor referrals');
 assert.doesNotMatch(human,/example-21|B012345678/,'Do not leak synthetic activation records into the report');
 console.log('Affiliate launch report functional checks OK: 15 exact watches and honest blocker statuses');

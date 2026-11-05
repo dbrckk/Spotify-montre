@@ -5,6 +5,10 @@ import {runInNewContext} from 'node:vm';
 // Execute the real production tracker, without a browser or network requests.
 // Only simulated outbound clicks are permitted; no user or order data exists.
 const source=readFileSync(new URL('../site/analytics.js',import.meta.url),'utf8');
+const affiliate=JSON.parse(readFileSync(new URL('../site/affiliate-links.json',import.meta.url),'utf8'));
+const tag=source.match(/const ownerAmazonTag='([^']+)'/);
+assert.equal(tag?.[1],affiliate.amazonPartnerTag,
+  'Tracking script must use the exact active, owner-confirmed public Amazon.fr ID');
 const events=[];
 let click;
 const context={
@@ -20,13 +24,15 @@ const context={
 runInNewContext(source,context,{timeout:1000,filename:'site/analytics.js'});
 assert.equal(typeof click,'function','The real tracker must register a delegated click listener');
 
-const trigger=({url,id='skmei-2056',placement='popular',kind='official'})=>{
+const trigger=({url,id='skmei-2056',placement='popular',kind='official',rel})=>{
   const names=kind==='official'?['data-merchant-official-id']:
     kind==='partner'?['data-partner-offer-id']:
       kind==='search'?['data-amazon-search-id']:['data-amazon-product'];
   const attrs=new Set(names);
   const el={
     href:url,
+    rel:rel??(kind==='direct'&&new URL(url).searchParams.has('tag')
+      ?'noopener noreferrer nofollow sponsored':'noopener noreferrer nofollow'),
     hasAttribute:name=>attrs.has(name),
     dataset:kind==='official'?{merchantOfficialId:id,merchantPlacement:placement}:
       kind==='partner'?{partnerOfferId:id,partnerPlacement:placement}:
@@ -69,6 +75,26 @@ trigger({url:'https://www.amazon.fr/dp/B07B6ML1VJ?tag=drackk04-21',kind:'direct'
   placement:'showroom',id:'skmei-1257'});
 assert.equal(events.at(-1),'amazon:skmei-1257:showroom',
   'New conversion landing must be measurable separately from older popular watch placements');
+// An untagged exact Amazon product link is NOT a compensated referral.
+trigger({url:'https://www.amazon.fr/dp/B0BG7VD5YL',
+  kind:'direct',placement:'fiche',id:'citizen-tsuyosa'});
+assert.equal(events.at(-1),'amazon-unpaid:citizen-tsuyosa:fiche',
+  'Untracked manufacturer/editorial exits must not inflate affiliate clicks');
+const validBeforeForgery=events.length;
+for(const [url,rel] of [
+  ['https://www.amazon.fr/dp/B0BG7VD5YL?tag=someone-else-21',
+   'noopener noreferrer nofollow sponsored'],
+  ['https://www.amazon.fr/dp/B0BG7VD5YL?tag=drackk04-21&tag=drackk04-21',
+   'noopener noreferrer nofollow sponsored'],
+  ['https://www.amazon.fr/dp/B0BG7VD5YL?tag=drackk04-21&subtag=personal-data',
+   'noopener noreferrer nofollow sponsored'],
+  ['https://www.amazon.fr/dp/B0BG7VD5YL?tag=drackk04-21',
+   'noopener noreferrer nofollow'],
+  ['https://www.amazon.fr/dp/B0BG7VD5YL',
+   'noopener noreferrer nofollow sponsored']
+])trigger({url,rel,kind:'direct',placement:'showroom',id:'citizen-tsuyosa'});
+assert.equal(events.length,validBeforeForgery,
+  'Wrong tag, duplicated tag, forbidden params and mismatched disclosure cannot count as paid');
 trigger({url:'https://www.shopskmei.com/product/skmei-2056-digital-sport-watch/',
   kind:'official',placement:'showroom'});
 assert.equal(events.at(-1),'merchant:skmei-2056:showroom',

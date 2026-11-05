@@ -7,6 +7,9 @@
 (() => {
   const idPattern=/^[a-z0-9-]{4,64}$/;
   const asinPattern=/^\/dp\/[A-Z0-9]{10}$/;
+  // Public tracking ID, never a credential. CI enforces its consistency with
+  // the owner-confirmed Amazon.fr registry. Unrelated IDs are not our clicks.
+  const ownerAmazonTag='drackk04-21';
   const placements=new Set(['catalogue','fiche','seo','popular','showroom']);
   // An exact host allowlist prevents counting arbitrary destinations as
   // approved watch merchants; tracking still never proves an affiliate sale.
@@ -61,16 +64,36 @@
       return;
     }
     if(target.hostname!=='www.amazon.fr')return;
+    const keys=[...target.searchParams.keys()];
+    const sponsored=el.rel?.split(/\s+/).includes('sponsored')===true;
+    const tags=target.searchParams.getAll('tag');
+    const hasTag=tags.length>0;
     if(search){
-      // Results-list referrals must never be confused with verified ASINs.
-      if(placement!=='popular'||target.pathname!=='/s'||target.searchParams.getAll('k').length!==1
-        ||target.searchParams.getAll('tag').length!==1
-        ||!/^[a-z0-9][a-z0-9-]{1,48}-21$/i.test(target.searchParams.get('tag')||'')
-        ||[...target.searchParams.keys()].some(key=>!['k','tag'].includes(key)))return;
-    }else if(!asinPattern.test(target.pathname))return;
-    // Aggregated event name only; no visitor IDs, order data or search terms.
-    const name=search?'amazon-search:'+id:'amazon:'+id+':'+placement;
-    if(name.length>55)return;
-    try {window.umami.track(name)}catch{/* Analytics failure never blocks an outbound click. */}
+      // Amazon searches are separate from exact product exits and never
+      // constitute proof of a commission or of an Amazon product match.
+      if(placement!=='popular'||target.pathname!=='/s'||
+        target.searchParams.getAll('k').length!==1||
+        tags.length!==1||tags[0]!==ownerAmazonTag||
+        keys.length!==new Set(keys).size||
+        keys.some(key=>!['k','tag'].includes(key)))return;
+      try {window.umami.track('amazon-search:'+id)}catch{/* best effort */}
+      return;
+    }
+    if(!asinPattern.test(target.pathname)||keys.length!==new Set(keys).size||
+      keys.some(key=>!['tag','th','psc'].includes(key)))return;
+    let trackingName;
+    if(hasTag){
+      // Only our own affiliate tag with an explicit "sponsored" disclosure
+      // is counted as a paid exit. Wrong tags are ignored rather than counted
+      // under a misleading monetization metric.
+      if(tags.length!==1||tags[0]!==ownerAmazonTag||!sponsored)return;
+      trackingName='amazon:'+id+':'+placement; // preserve historical paid series
+    }else{
+      if(sponsored)return; // inconsistent link attribution
+      // Unpaid product exits remain useful but cannot inflate paid activity.
+      trackingName='amazon-unpaid:'+id+':'+placement;
+    }
+    if(trackingName.length>55)return;
+    try {window.umami.track(trackingName)}catch{/* Navigation cannot depend on analytics. */}
   },{capture:true,passive:true});
 })();

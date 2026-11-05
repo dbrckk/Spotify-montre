@@ -10,6 +10,7 @@ const root=resolve(import.meta.dirname,'..');
 const read=path=>JSON.parse(readFileSync(join(root,path),'utf8'));
 const catalog=read('site/selection-affiliation.json');
 const config=read('site/affiliate-links.json');
+const amazonEvidence=read('research/amazon-fr-exact-products.json');
 if(!Array.isArray(catalog.products)||catalog.products.length!==15)throw Error('Catalogue incomplet');
 const validated=validateAffiliateConfig(config,catalog.products.map(p=>p.id));
 const entries=catalog.products.map(p=>{
@@ -40,7 +41,18 @@ const totals={
   ownerConfirmedSiteListed:config.ownerConfirmedSiteListed===true,
   siteCreatedSpecialLinks:config.specialLinksCreatedOnSite===true,
   linksActivated:validated.enabled,
-  purchaseCheckoutOnSite:false
+  purchaseCheckoutOnSite:false,
+  amazonListingResearchCheckedOn:amazonEvidence.checkedOn,
+  previouslyUnavailableListings:Object.values(amazonEvidence.products)
+    .filter(x=>x.availabilityAtCheck==='unavailable_at_check').length,
+  listingAvailabilityNotChecked:Object.values(amazonEvidence.products)
+    .filter(x=>x.availabilityAtCheck==='not_checked').length,
+  exactAsinNotConfirmed:Object.values(amazonEvidence.products)
+    .filter(x=>x.status==='not_confirmed_on_amazon_fr').length,
+  applicationStartDate:null, // cannot derive the 180-day deadline from Git
+  qualifyingSalesCount:null, // only the official Amazon reports are proof
+  commissionActuallyPaid:null, // do not infer revenue from outbound clicks
+  independentAccountApprovalConfirmed:false
 };
 const esc=value=>String(value).replace(/\|/g,'\\|').replace(/\r?\n/g,' ');
 const icon=state=>state?'Oui':'Non';
@@ -53,19 +65,23 @@ const lines=[
  `- **${totals.configuredSpecialLinks} / ${totals.models}** liens spéciaux déclarés ; **${totals.declaredPhotoRights} / ${totals.models}** permissions d'image déclarées par le responsable ; **${totals.independentlyVerifiedPhotoRights} / ${totals.models}** justificatifs vérifiés indépendamment ; **${totals.commerciallyReady} / ${totals.models}** modèles techniquement configurés.`,
  '- Identifiant de suivi confirmé par le propriétaire : **'+icon(totals.ownerConfirmedTrackingId)+'** ; site inscrit déclaré : **'+icon(totals.ownerConfirmedSiteListed)+'** ; liens créés directement par le site : **'+icon(totals.siteCreatedSpecialLinks)+'**. Le statut d’examen Amazon et l’attribution des commissions demeurent non vérifiés.',
  '- Paiement direct sur ce site : **désactivé**. Une commission ne peut être prouvée que dans les rapports officiels du programme Partenaires.',
+ '- Les **'+totals.configuredSpecialLinks+'** liens spéciaux sont de simples sorties vers Amazon.fr. Relevé ASIN du **'+totals.amazonListingResearchCheckedOn+'** : **'+totals.previouslyUnavailableListings+'** références indisponibles lors du contrôle, **'+totals.listingAvailabilityNotChecked+'** sans stock contrôlé, **'+totals.exactAsinNotConfirmed+'** sans ASIN exact. Aucun stock actuel ni prix courant établi.',
+ '- Règle officielle Amazon Partenaires : **3 ventes éligibles dans les 180 premiers jours** de la candidature avant examen. Les propres achats du partenaire ne sont pas éligibles. **Date de candidature et ventes éligibles inconnues** ici : délai restant non calculable.',
+ '- Amazon examine notamment le contenu original (au moins 10 publications), la propriété du site et sa fraîcheur habituelle (moins de 60 jours). Le nombre de pages SEO générées n’est pas une preuve d’originalité ni d’acceptation.',
+ '- Mesure (si Umami est configuré) : **amazon:** = clics vers des produits avec notre tag et lien signalé sponsorisé ; **amazon-unpaid:** = sortie non rémunérée ; **amazon-search:** = recherche Amazon balisée. Aucun de ces événements ne représente un achat ou une commission.',
  '',
  '| Référence | Lien spécial | Droit image déclaré | Preuve vérifiée | Prochaine action |',
  '|---|:---:|:---:|:---:|---|',
  ...entries.map(x=>`| ${esc(x.label)} (${x.id}) | ${icon(x.specialLinkConfigured)} | ${icon(x.photoRightsDeclared)} | ${icon(x.photoProofVerified)} | ${esc(x.next)} |`),
  '',
  '## Actions restantes',
- ...(!config.approved?['- Identifiant et site confirmés par le propriétaire. Contrôler désormais dans Amazon le statut réel du compte (non vérifiable par ce script), les 3 ventes éligibles et l’éventuelle décision finale.']:[]),
+ ...(!config.approved?['- Depuis le compte officiel Amazon Partenaires, relever **sans publier d’identifiants privés** : date initiale de candidature, nombre de commandes éligibles, décision d’examen, statut fiscal/paiement et rémunérations réellement payées. Ces champs sont inconnus du dépôt.']:[]),
  ...(!config.enabled?['- Renseigner un vrai tag Amazon.fr et au moins un lien spécial de produit exact, puis activer la configuration.']:['- Liens actifs créés par le site : utiliser le Vérificateur de liens Amazon Partenaires pour confirmer l’attribution sur le compte avant de considérer les revenus comme acquis.']),
  ...entries.some(x=>!x.photoProofVerified)?['- Archiver les autorisations écrites des marques / ayants droit pour les 15 photos. Le responsable du site a déclaré disposer de ces droits ; ce rapport ne vérifie pas ses pièces justificatives.']:[],
  '- Vérifier chaque lien et la correspondance du produit dans un navigateur, puis comparer les revenus réellement attribués dans les rapports Amazon.',
  '- Soumettre le sitemap dans Google Search Console et inspecter les pages produits réellement indexées.',
  '',
- '[Documentation opérationnelle](../docs/commerce-affiliation-marque-propre.md)'
+ '[Conditions officielles des candidatures](https://partenaires.amazon.fr/help/node/topic/G8TW5AE9XL2VX9VM) · [Compte inactif, délai de 180 jours](https://partenaires.amazon.fr/help/node/topic/G7MJTPEP9NC3YKMG) · [Documentation opérationnelle](../docs/commerce-affiliation-marque-propre.md)'
 ];
 const markdown=lines.join('\n')+'\n';
 if(process.argv.includes('--json'))console.log(JSON.stringify({totals,products:entries},null,2));
