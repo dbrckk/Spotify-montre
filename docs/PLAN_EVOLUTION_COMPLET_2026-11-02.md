@@ -1,3 +1,5 @@
+> **Archive de stratégie du 2 novembre 2026 :** la [roadmap active du 5 novembre](OBJECTIF_GLOBAL_ET_PLAN_DIRECTEUR_2026-11-05.md) prévaut pour l'état des services, les liens partenaires et le pilote CJ. Les étapes historiques ci-dessous restent utiles comme arguments et options, pas comme liste actuelle des blocages.
+
 > **Architecture commerciale mise à jour le 02/11/2026 :** le site public reste notre propre site statique Render ; toute vente directe éventuelle passe par un backend indépendant et un prestataire de paiement, sans plateforme de boutique externe. [Source commerciale active](COMMERCE_INDEPENDANT_ATELIER_MONTRES_2026-11-02.md). Les descriptions historiques de modules tiers dans ce plan ne doivent pas être interprétées comme une dépendance actuelle.
 
 # Atelier Montres — Plan directeur d'évolution produit, acquisition et rentabilité
