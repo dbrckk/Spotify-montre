@@ -332,8 +332,8 @@ try {
     assert.equal(watch.merchantUrl,fakeLink.href);
     assert.equal(watch.partnerVariant,fakeVariant);
     const unified=readFileSync(join(target,'montres/toutes-les-montres.html'),'utf8');
-    const card=unified.match(/<article class="ud-card" id="modele-skmei-2056"[\\s\\S]*?<\\/article>/)?.[0];
-    const featured=unified.match(/<article class="ud-feature-card" data-feature-id="skmei-2056"[\\s\\S]*?<\\/article>/)?.[0];
+    const card=unified.match(/<article class="ud-card" id="modele-skmei-2056"[\s\S]*?<\/article>/)?.[0];
+    const featured=unified.match(/<article class="ud-feature-card" data-feature-id="skmei-2056"[\s\S]*?<\/article>/)?.[0];
     for(const [name,section] of [['catalogue',card],['showcase',featured]]){
       assert.ok(section&&section.includes('data-partner-offer-id="skmei-2056"'),
         'Approved Awin route must be visible in '+name);
