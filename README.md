@@ -1,5 +1,10 @@
 # Atelier Montres — boutique de montres indépendante
 
+> **Plan directeur courant (5 novembre 2026) :** [objectif global, état factuel, roadmap complète et ordre d'exécution AM-00 → AM-18](docs/OBJECTIF_GLOBAL_ET_PLAN_DIRECTEUR_2026-11-05.md).
+>
+> **État opérationnel :** vitrine et API commerciale indépendantes déployées sur Render ; 52 références éditoriales ; parcours partenaires avec 13 liens Amazon.fr documentés, sans confirmation de commissions acquises. Le ticket CJ est ouvert mais le devis complet manque. **Paiement direct désactivé côté site et serveur** : aucune vente automatisée n'est encore attestée. Les plans précédents sont des archives de conception et des guides spécialisés ; ce plan fait foi pour la suite.
+
+
 **Nouveau — fiches et conseiller premium :** [refonte photographique, choix rapides par style, fiches interactives et indexables, tests Android et WCAG](docs/REFONTE_FICHES_CONSEILLER_STAR_LIST_2026-11-03.md). Cette mise à jour complète la [refonte de l’accueil et du catalogue](docs/REFONTE_UX_UI_STAR_LIST_2026-11-02.md) ; aucun encaissement n’est activé.
 
 **Refonte visuelle :** [nouvelle direction graphite/cuivre, photographies locales, accès rapides par style, UX Android et sources du dépôt `star-list`](docs/REFONTE_UX_UI_STAR_LIST_2026-11-02.md). Les données produit, le catalogue de 52 montres, les liens partenaires et la désactivation de la vente directe restent inchangés.
@@ -13,7 +18,7 @@
 
 Les premiers composants sont intégrés au dépôt : **audit de marge TTC et de disponibilité fournisseur**, contrat de devis réel, appels API serveur pour créer et vérifier un paiement Mollie. Le moteur exige désormais des preuves du **backend indépendant**, du **paiement confirmé**, de la **sécurité des adresses** et de la **correspondance exacte des variantes**.
 
-**Aucun paiement public n'est actuellement activé** (`site/config.json` → `checkoutMode: "inactive"`) : pas de backend transactionnel déployé, de compte marchand validé ni de référence fournisseur prête à commander. L'affiliation Amazon et les 52 fiches restent utilisables.
+**Aucun paiement public n'est actuellement activé** (`site/config.json` → `checkoutMode: "inactive"`) : **l'API transactionnelle existe et est déployée sur Render**, mais le checkout est délibérément bloqué côté serveur ; il manque toujours le devis fournisseur complet, la validation marchand/légale et un pilote réel de commande livrée. L'affiliation Amazon et les 52 références éditoriales restent accessibles ; aucune commission acquise n'est attestée par le seul code.
 
 **[Architecture, état réel et étapes pour encaisser et commander automatiquement](docs/COMMERCE_INDEPENDANT_ATELIER_MONTRES_2026-11-02.md)** · Vérifier un devis réel : `npm run commerce:quote -- chemin/devis-reel.json`. Aucune donnée personnelle ni clé fournisseur ne doit figurer dans le dépôt public.
 
