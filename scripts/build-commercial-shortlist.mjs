@@ -29,7 +29,7 @@ export function buildCommercialShortlist({picks,verifiedLinks,partnerOffers,part
   if(byId.size!==37||commercialShortlist.length!==10||
      new Set(commercialShortlist.map(p=>p.id)).size!==10)
     throw Error('Commercial shortlist ids are duplicate or malformed');
-  const entries=commercialShortlist.map((item,index)=>{
+  const entries=commercialShortlist.map(item=>{
     const watch=byId.get(item.id);
     if(!watch)throw Error('Commercial shortlist model missing from catalog: '+item.id);
     for(const field of ['intent','reason','caution']){
@@ -89,7 +89,7 @@ export function buildCommercialShortlist({picks,verifiedLinks,partnerOffers,part
       +'<div class="am-focus-visual'+(photo?' am-focus-with-photo':'')+'">'
       +(photo?'<img src="../'+e(photo.url)+'" alt="Montre '+e(watch.brand+' '+watch.model)+'" loading="lazy" decoding="async" width="380" height="260">':
         '<span class="am-focus-text-placeholder">Photographie du modèle sur la fiche de référence</span>')
-      +'</div><div class="am-focus-body"><span class="am-focus-order">Sélection '+String(index+1).padStart(2,'0')+' / 10 · '+e(watch.tier==='essential'?'Gamme essentielle':'Gamme signature')+'</span>'
+      +'</div><div class="am-focus-body"><span class="am-focus-order">+e(watch.tier==='essential'?'Gamme essentielle':'Gamme signature')+'</span>'
       +'<p class="am-focus-proof-label">'+e(proofLabel)+'</p>'
       +'<h3><a href="./'+e(item.id)+'.html">'+e(watch.brand+' '+watch.model)+'</a></h3>'
       +'<p class="am-focus-intent">'+e(item.intent)+'</p>'
@@ -120,7 +120,7 @@ export function buildCommercialShortlist({picks,verifiedLinks,partnerOffers,part
     +'<ol class="am-focus-list">'+directEntries.join('')+'</ol></section>':'';
   const sourceGroup=sourceEntries.length?
     '<section class="am-focus-group am-focus-source" id="selection-sources-marchandes" aria-labelledby="am-focus-source-title">'
-    +'<div class="am-focus-group-heading"><p>02 / Références éditoriales</p>'
+    +'<div class="am-focus-group-heading"><p>'+(directEntries.length?'02':'01')+' / Références éditoriales</p>'
     +'<h3 id="am-focus-source-title">Comparer les autres modèles chez les vendeurs.</h3>'
     +'<p>'+sourceEntries.length+' modèles sans sortie Amazon.fr exacte active dans cette configuration. '
     +'Les sources fabricants ou liens partenaires éventuels sont identifiés, sans prétendre avoir confirmé une offre achetable.</p></div>'
