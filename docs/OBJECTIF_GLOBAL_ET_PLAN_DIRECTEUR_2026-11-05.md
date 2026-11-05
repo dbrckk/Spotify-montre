@@ -89,9 +89,10 @@ Statuts : **[FAIT]** confirmé par code+contrôle décrit ; **[À FAIRE]** exéc
 - Livraison : parcours complet `accueil → sélection/conseiller → fiche/comparaison → destination du produit exact`, sans perdre le contexte sur Android. Contrôles Android/CI et vérification externe ciblée des liens dans les limites autorisées.
 - Fin : 100 % des CTA commerciaux affichés ont une source et une nature exactes ; zéro mauvais SKU/ASIN détecté ; aucun utilisateur dirigé vers un paiement prétendument interne non actif.
 
-**AM-04 · [BLOQUÉ partiellement] Validation des revenus d'affiliation**
+**AM-04 · [MESURE CORRIGÉE / PREUVE DE COMPTE MANQUANTE] Validation des revenus d'affiliation**
 - Lire les contrats/statuts Amazon Partenaires et, seulement après compte accepté, Awin/fournisseurs compatibles ; confirmer les identifiants de suivi, rapports des commandes éligibles, remboursements et **commissions réellement réglées**.
 - Ne pas considérer `ownerConfirmedEnrollment=true` comme preuve de validation définitive ni les clics comme revenus. Ne jamais enregistrer des mots de passe ou clés dans Git.
+- Amélioration du 05/11 : `site/analytics.js` différencie strictement `amazon:` (lien balisé du propriétaire), `amazon-unpaid:` (ASIN non rémunéré) et `amazon-search:` (recherche balisée). Contrôles CI contre les mauvais tags ; le rapport `npm run affiliate:status` affiche désormais les ventes, commissions et date de candidature comme **inconnues**, avec les règles officielles Amazon. Dossier : [AM04](AM04_PREUVES_REVENUS_AFFILIATION_2026-11-05.md).
 - Fin : au moins une commission réelle identifiable dans le rapport officiel, ou diagnostic documenté « aucune vente confirmée » sans extrapolation.
 
 **AM-05 · [À FAIRE] Rationaliser la sélection commerciale**
