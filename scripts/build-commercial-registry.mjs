@@ -68,7 +68,7 @@ export function buildCommercialRegistry({root,coreProducts,affiliates,coreAmazon
     const asin=core?(primary?.asin||null):(research?.asin||null);
     const affiliate=core?affiliates.links.get(p.id):additional;
     if((core?Boolean(primary):Boolean(research))!==Boolean(asin)||
-      (affiliate&&(!asin||affiliate.asin!==asin&&new URL(affiliate.url).pathname!=='/dp/'+asin)))
+      (affiliate&&(!asin||new URL(affiliate.url).pathname!=='/dp/'+asin)))
       throw Error('Commercial evidence ASIN/attribution mismatch: '+p.id);
     if(core&&primary&&(
       research.asin!==primary.asin||
@@ -114,7 +114,7 @@ export function buildCommercialRegistry({root,coreProducts,affiliates,coreAmazon
       },
       photo:{
         published:photo,
-        permission:'owner_or_source_attested_not_independently_verified',
+        permission:photo?'declared_by_owner_or_rights_source':'no_published_photo',
         independentlyVerified:photo&&photoIndependentlyVerified
       },
       partner:partner?{program:'awin',referralUrl:partner.url,sourceCheckedOn:partner.verifiedAt}:null,
