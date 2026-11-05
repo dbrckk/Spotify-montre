@@ -6,7 +6,7 @@ import {loadApprovedPartnerOffers} from './approved-partner-offers.mjs';
 import {loadApprovedPopularPhotos} from './popular-photo-rights.mjs';
 import {loadPopularAiVisuals} from './popular-ai-visuals.mjs';
 import {buildShopperSelections} from './build-shopper-selections.mjs';
-import {buildCommercialShortlist} from './build-commercial-shortlist.mjs';
+import {buildCommercialShortlist,commercialShortlist} from './build-commercial-shortlist.mjs';
 
 // Curated discovery intentionally stays outside the 15-watch comparator until
 // individual Amazon ASINs and licensed exact-model images are validated.
@@ -181,7 +181,13 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     +'<div class="am-picks-heading"><p class="overline kicker">01 · MODÈLES COMPLÉMENTAIRES</p>'
     +'<h2 id="am-picks-title">Des références remarquées, au-delà des 15 montres comparées.</h2>'
     +'<p>SKMEI, Curren et ADDIESDIVE à petit budget, Casio et Pagani Design : huit pistes pour explorer nos '+picks.length+' montres documentées, dont des Casio, ADDIESDIVE et Pagani Design avec fiche Amazon.fr correspondant à la référence documentée (variante à vérifier). Aucun prix ni stock annoncé.</p>'
-    +'</div>'+shopper.navHome+'<p class="am-focus-promo">Dix références aux styles distincts, avec une explication de l’intérêt et des limites de chaque fiche : <a href="./montres/modeles-populaires.html#selection-10-montres">Consulter notre sélection éditoriale de 10 montres</a>. Aucun classement de ventes revendiqué.</p><div class="am-picks-grid">'+featured.map(p=>card(p,true)).join('')+'</div>'
+    +'</div>'+shopper.navHome+'<p class="am-focus-promo">10 montres pour choisir sans confusion : '
+    +(affiliates.enabled?commercialShortlist.filter(x=>verifiedLinks.has(x.id)).length+' références avec ASIN Amazon.fr documenté et '
+      +(commercialShortlist.length-commercialShortlist.filter(x=>verifiedLinks.has(x.id)).length)+' alternatives à explorer chez le vendeur. '
+      :'sources fabricant et fiches documentaires accessibles, sans liens Amazon rémunérés actifs. ')
+    +'<a href="./montres/modeles-populaires.html#selection-10-montres">Comparer les 10 modèles selon les preuves disponibles</a>. '
+    +'Ni stock actuel, ni classement de ventes, ni commission garantie.</p><div class="am-picks-grid">'
+    +featured.map(p=>card(p,true)).join('')+'</div>'
     +'<p class="am-picks-disclaimer">'+e(globalDisclaimer)+' '+e(affiliateNote)+'</p>'
     +'<a class="am-picks-more" href="./montres/modeles-populaires.html">Voir les '+picks.length+' modèles supplémentaires, par gamme →</a>'
     +'</div></section>';
