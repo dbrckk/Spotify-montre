@@ -95,6 +95,17 @@ trigger({url:'https://www.amazon.fr/dp/B0BG7VD5YL',
   kind:'direct',placement:'fiche',id:'citizen-tsuyosa'});
 assert.equal(events.at(-1),'amazon-unpaid:citizen-tsuyosa:fiche',
   'Untracked manufacturer/editorial exits must not inflate affiliate clicks');
+// Every source-backed Amazon ASIN must still generate exactly the right
+// product-intent event with a correctly tagged, clearly disclosed link.
+const beforeAll=events.length;
+for(const [modelId,asin] of Object.entries(approvedAsins)){
+  trigger({url:'https://www.amazon.fr/dp/'+asin+'?tag=drackk04-21',
+    kind:'direct',placement:'seo',id:modelId});
+  assert.equal(events.at(-1),'amazon:'+modelId+':seo',
+    'Documented ASIN must track only its own product ID: '+modelId);
+}
+assert.equal(events.length,beforeAll+23,'Exactly the 23 approved ASINs must be attributable');
+
 // An ASIN exists, but it belongs to a DIFFERENT watch. Ignore the event
 // rather than misreport a qualified affiliate exit to the wrong product.
 const mappedBefore=events.length;
