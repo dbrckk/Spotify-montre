@@ -96,7 +96,8 @@ function createCaller(accessToken,fetcher){
   return async(path,{method='GET',body}={})=>{
     // Strict endpoint allowlist: never touch order, wallet or product writes.
     if(!['/ticket/types','/ticket/list','/ticket/create'].includes(path)&&
-      !/^\/ticket\/detail\?ticketId=[a-zA-Z0-9_-]{1,64}$/.test(path))
+      !/^\/ticket\/detail\?ticketId=[a-zA-Z0-9_-]{1,64}$/.test(path)&&
+      !/^\/ticket\/messages\?ticketId=[a-zA-Z0-9_-]{1,64}&pageNum=1&pageSize=100$/.test(path))
       throw Error('CJ_TICKET_ENDPOINT_DENIED');
     if(fetcher===fetch){
       const delay=1200-(Date.now()-last);
@@ -113,7 +114,8 @@ function createCaller(accessToken,fetcher){
     });
     const stage=path==='/ticket/types'?'TYPES':
       path==='/ticket/list'?'LIST':
-      path==='/ticket/create'?'CREATE':'DETAIL';
+      path==='/ticket/create'?'CREATE':
+      path.startsWith('/ticket/messages?')?'MESSAGES':'DETAIL';
     if(!response?.ok)
       throw Error('CJ_TICKET_'+stage+'_HTTP_FAILURE');
     const result=await response.json();
@@ -156,21 +158,57 @@ async function findExistingQuoteTicket(call){
         throw Error('CJ_TICKET_HISTORY_UNVERIFIED');
       if(detail.message.includes(QUOTE_REFERENCE))
         return {state:CJ_STATES.has(detail.status)?detail.status:
-          CJ_STATES.has(entry.status)?entry.status:'UNKNOWN'};
+          CJ_STATES.has(entry.status)?entry.status:'UNKNOWN',
+          // Private ticket ID must never be returned from any public report.
+          id:entry.ticketId,
+          unread:detail.unread===true||entry.unread===true};
     }
     if(pageNum*HISTORY_PAGE_SIZE>=total)return null;
   }
   throw Error('CJ_TICKET_HISTORY_UNVERIFIED');
 }
-// Print only the supplier's normalized state; supplier replies, ticket IDs
-// and account details are never published in public GitHub Actions logs.
+// CJ exposes support messages separately from Ticket Detail. Only inspect
+// sender and timestamps, never copy HTML/text, attachments or account details.
+async function readSupplierMessageMetadata(call,privateTicketId){
+  const path='/ticket/messages?ticketId='+encodeURIComponent(privateTicketId)+
+    '&pageNum=1&pageSize=100';
+  const data=await call(path);
+  if(!data||!Array.isArray(data.list)||
+    !Number.isSafeInteger(data.total)||data.total<0||
+    data.total!==data.list.length||data.total>100)
+    throw Error('CJ_TICKET_MESSAGES_UNVERIFIED');
+  let supplierMessageCount=0,latestSupplierMessageUtc=null;
+  for(const item of data.list){
+    if(!item||!['CJ','CUSTOMER'].includes(item.sender)||
+      !Number.isSafeInteger(item.messageTime)||
+      item.messageTime<1577836800000||
+      item.messageTime>Date.now()+86400000)
+      throw Error('CJ_TICKET_MESSAGES_UNVERIFIED');
+    if(item.sender==='CJ'){
+      supplierMessageCount++;
+      latestSupplierMessageUtc=latestSupplierMessageUtc===null?
+        item.messageTime:Math.max(latestSupplierMessageUtc,item.messageTime);
+    }
+  }
+  return {supplierMessageCount,
+    latestSupplierMessageDate:latestSupplierMessageUtc===null?null:
+      new Date(latestSupplierMessageUtc).toISOString().slice(0,10)};
+}
+// Never expose the private supplier message, ticket ID, agent identity,
+// HTML, attachments or access credentials to GitHub Actions output.
 export async function checkWrittenCjQuote({accessToken,fetcher=fetch}={}){
   const call=createCaller(accessToken,fetcher);
   const found=await findExistingQuoteTicket(call);
+  const messageMetadata=found?
+    await readSupplierMessageMetadata(call,found.id):
+    {supplierMessageCount:0,latestSupplierMessageDate:null};
+  const unread=found?.unread===true;
   return {reference:QUOTE_REFERENCE,sku:QUOTE_SKU,
     status:found?'ticket_found':'not_requested',
     supplierStatus:found?.state??null,
-    operatorReviewRequired:Boolean(found&&found.state!=='AWAITING_CJ_REPLY'),
+    supplierUnread:unread,...messageMetadata,
+    operatorReviewRequired:Boolean(found&&
+      (found.state!=='AWAITING_CJ_REPLY'||unread)),
     orderPlaced:false,walletDebited:false,
     quoteApproved:false};
 }
@@ -188,7 +226,9 @@ const safeErrorCode=error=>{
     'CJ_TICKET_CATEGORY_NEEDS_REVIEW','CJ_TICKET_TYPES_HTTP_FAILURE',
     'CJ_TICKET_TYPES_REJECTED','CJ_TICKET_LIST_HTTP_FAILURE',
     'CJ_TICKET_LIST_REJECTED','CJ_TICKET_DETAIL_HTTP_FAILURE',
-    'CJ_TICKET_DETAIL_REJECTED','CJ_TICKET_CREATE_HTTP_FAILURE',
+    'CJ_TICKET_DETAIL_REJECTED','CJ_TICKET_MESSAGES_HTTP_FAILURE',
+    'CJ_TICKET_MESSAGES_REJECTED','CJ_TICKET_MESSAGES_UNVERIFIED',
+    'CJ_TICKET_CREATE_HTTP_FAILURE',
     'CJ_TICKET_CREATE_REJECTED','CJ_TICKET_RATE_LIMIT',
     'CJ_API_KEY_GITHUB_SECRET_MISSING','CJ_ACCESS_TOKEN_MISSING'
   ]);
