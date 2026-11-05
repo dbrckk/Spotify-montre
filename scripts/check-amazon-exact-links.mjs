@@ -40,6 +40,8 @@ for(const [id,item] of all){
   assert.equal(url.searchParams.getAll('tag').length,1);
   assert.deepEqual([...url.searchParams.keys()],['tag']);
   assert.equal(item.checkedOn,research.checkedOn);
+  assert.ok(['unavailable_at_check','not_checked'].includes(item.availabilityAtCheck),
+    'No false live stock claim for '+id);
   assert.ok(['exact','match_regional_suffix'].includes(item.modelRelation),id);
   const modelCode=p.model.match(/\b(?=[A-Z0-9-]*\d)[A-Z0-9]{2,}(?:-[A-Z0-9]+)*\b/g)?.filter(code=>code.length>=6)||[];
   assert.ok(modelCode.some(code=>item.amazonModel.toUpperCase().startsWith(code)),'Référence Amazon différente du catalogue : '+id);
@@ -71,7 +73,8 @@ const publicRegistry=load('site/amazon-product-links.json');
 const expectedRegistry={version:1,checkedOn:research.checkedOn,
   links:Object.fromEntries(all.filter(([,item])=>
     item.status==='matched_on_amazon_fr').map(([id,item])=>
-    [id,{asin:item.asin,url:item.productUrl}]))};
+    [id,{asin:item.asin,url:item.productUrl,
+      availabilityAtCheck:item.availabilityAtCheck}]))};
 assert.deepEqual(publicRegistry,expectedRegistry,
   'Static deployment registry must match the 13 source-confirmed Amazon.fr models');
 if(process.argv.includes('--markdown')){

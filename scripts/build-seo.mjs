@@ -47,8 +47,11 @@ import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
     if (item.status !== 'matched_on_amazon_fr' || !/^[A-Z0-9]{10}$/.test(item.asin || '') ||
         item.productUrl !== 'https://www.amazon.fr/dp/'+item.asin ||
         item.affiliateUrl !== item.productUrl+'?tag='+research.amazonPartnerTag ||
-        item.commercialActivationApproved !== false) throw Error('Lien Amazon invalide: '+id);
-    amazonLinks.set(id,{asin:item.asin,url:item.productUrl});
+        item.commercialActivationApproved !== false ||
+        !['unavailable_at_check','not_checked'].includes(item.availabilityAtCheck))
+      throw Error('Lien Amazon ou état de disponibilité non documenté : '+id);
+    amazonLinks.set(id,{asin:item.asin,url:item.productUrl,
+      availabilityAtCheck:item.availabilityAtCheck});
   }
   writeFileSync(join(root,'amazon-product-links.json'),JSON.stringify({
     version:1,checkedOn:research.checkedOn,

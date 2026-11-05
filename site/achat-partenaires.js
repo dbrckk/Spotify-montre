@@ -56,6 +56,7 @@
       !/^[a-z0-9][a-z0-9-]{1,48}-21$/i.test(config.amazonPartnerTag||'')||
       !config.links||Array.isArray(config.links)||typeof config.links!=='object'||
       known?.version!==1||!known.links||Array.isArray(known.links)||
+      typeof known.checkedOn!=='string'||!/^[0-9]{4}-(0[1-9]|1[0-2])-([0-2][0-9]|3[01])$/.test(known.checkedOn)||
       !Array.isArray(feed?.products)||feed.products.length!==15)return [];
     const models=new Map(feed.products.filter(p=>idPattern.test(p?.id||'')).map(p=>[p.id,p]));
     const links=Object.entries(config.links);
@@ -69,19 +70,31 @@
         item?.provider==='amazon.fr'&&item.productMatchConfirmed===true&&
         item.linkApproved===true&&asinPattern.test(item.asin||'')&&
         validUrl(item.url,item.asin,config.amazonPartnerTag)&&
+        item.verifiedAt===known.checkedOn&&
         known.links[id]?.asin===item.asin&&
-        known.links[id]?.url==='https://www.amazon.fr/dp/'+item.asin;
+        known.links[id]?.url==='https://www.amazon.fr/dp/'+item.asin&&
+        ['not_checked','unavailable_at_check'].includes(known.links[id]?.availabilityAtCheck);
     });
     // One forged or contradictory commercial reference invalidates the set.
     if(!valid)return [];
     const paid=new Map(links.map(([id,item])=>[id,item]));
-    return feed.products.filter(p=>paid.has(p.id)).map(p=>({product:p,offer:paid.get(p.id)}));
+    return feed.products.filter(p=>paid.has(p.id)).map(p=>({
+      product:p,offer:paid.get(p.id),
+      availabilityAtCheck:known.links[p.id].availabilityAtCheck,
+      checkedOn:known.checkedOn
+    }));
   };
-  let catalog=[],selected='all';
+  let catalog=[],selected='all',featured=null;
   function render(){
     const shown=selected==='all'?catalog:catalog.filter(({product})=>product.tier===selected);
-    const cards=shown.map(({product:p,offer})=>{
+    // Preserve exact product intent from /acheter.html?modele=..., but keep
+    // other independently verified references available for comparison.
+    const ordered=featured&&selected==='all'?[...shown].sort((a,b)=>
+      Number(b.product.id===featured)-Number(a.product.id===featured)):shown;
+    const cards=ordered.map(({product:p,offer,availabilityAtCheck,checkedOn})=>{
       const card=element('article','am-partner-card');
+      card.dataset.watchId=p.id;
+      if(p.id===featured)card.dataset.featured='true';
       const cover=element('a','am-partner-cover');
       cover.href='./montre.html?id='+encodeURIComponent(p.id);
       cover.setAttribute('aria-label','Découvrir '+p.brand+' '+p.model);
@@ -95,8 +108,13 @@
       content.append(element('span','am-partner-tier',tierLabel[p.tier]+' / '+p.brand));
       const title=element('h3','am-partner-name',p.model);
       content.append(title);
+      if(p.id===featured)content.append(element('span','am-partner-featured',
+        'Votre modèle recherché'));
       const actions=element('div','am-partner-actions');
-      const purchase=link(offer.url,'Voir la référence sur Amazon.fr','am-partner-buy');
+      const previousUnavailable=availabilityAtCheck==='unavailable_at_check';
+      const purchase=link(offer.url,previousUnavailable
+        ? 'Consulter la fiche Amazon.fr · stock à vérifier'
+        : 'Voir la référence sur Amazon.fr','am-partner-buy');
       purchase.target='_blank';
       purchase.rel='noopener noreferrer nofollow sponsored';
       purchase.dataset.amazonProduct=p.id;
@@ -105,15 +123,22 @@
         'Comparer la montre','am-partner-detail');
       actions.append(purchase,detail);
       content.append(actions);
-      content.append(element('p','am-partner-card-note',
-        'Lien rémunéré · Prix, variante, vendeur et disponibilité à vérifier sur Amazon.fr.'));
+      const date=checkedOn.split('-').reverse().join('/');
+      content.append(element('p','am-partner-card-note',previousUnavailable
+        ? 'Lien rémunéré · Indisponible lors du contrôle du '+date+
+          '. Situation actuelle inconnue : vérifiez auprès du vendeur.'
+        : 'Lien rémunéré · Disponibilité non vérifiée au '+date+
+          '. Prix, variante, vendeur et stock à contrôler chez Amazon.fr.'));
       card.append(cover,content);
       return card;
     });
     grid.replaceChildren(...cards);
+    const focusVisible=featured&&shown.some(x=>x.product.id===featured);
+    const selectedProduct=focusVisible?catalog.find(x=>x.product.id===featured)?.product:null;
     status.textContent=shown.length+' modèle'+(shown.length===1?'':'s')+
-      ' avec fiche Amazon.fr exacte documentée'+(shown.length===1?'':'s')+
-      ' · aucune commande encaissée par Atelier Montres.';
+      ' avec référence Amazon.fr documentée'+(shown.length===1?'':'s')+
+      ' · disponibilité actuelle non garantie'+
+      (selectedProduct?' · '+selectedProduct.brand+' '+selectedProduct.model+' affiché en premier.':'.');
     for(const button of filters.querySelectorAll('button[data-tier]')){
       button.setAttribute('aria-pressed',String(button.dataset.tier===selected));
     }
@@ -127,6 +152,9 @@
       ]);
       catalog=entries(config,known,feed);
       if(!catalog.length)throw Error('Aucune correspondance partenaire validée');
+      const requested=new URLSearchParams(location.search).get('modele');
+      if(idPattern.test(requested||'')&&catalog.some(x=>x.product.id===requested))
+        featured=requested;
       filters.hidden=false;
       filters.addEventListener('click',event=>{
         const button=event.target.closest?.('button[data-tier]');
@@ -135,6 +163,7 @@
         render();
       });
       render();
+      if(featured)root.scrollIntoView({block:'start',behavior:'auto'});
     }catch{
       grid.replaceChildren();
       filters.hidden=true;
