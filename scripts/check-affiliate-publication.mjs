@@ -51,6 +51,16 @@ try {
 
   const verifiedPopularOriginal=readFileSync(verifiedPopularPath,'utf8');
   build({GOOGLE_SITE_VERIFICATION:'Valid_Example_Token_123456'});
+  const disabledRegistry=JSON.parse(readFileSync(join(target,'commercial-registry.json'),'utf8'));
+  assert.equal(disabledRegistry.products.length,52,
+    'Disabled affiliate fixture must keep all 52 source documents');
+  assert.equal(disabledRegistry.counts.documentedAmazonAsins,23,
+    'Disabling attribution never erases researched ASIN identity');
+  assert.equal(disabledRegistry.counts.activeExactAmazonReferrals,0,
+    'No paid Amazon referral is published from disabled account state');
+  assert.ok(disabledRegistry.products.every(p=>!p.amazon.referralActive&&
+    p.amazon.referralUrl===null&&p.directSale.eligible===false&&p.commission.confirmed===false),
+    'Affiliate-disabled build must fail closed for every editorial model');
   const disabledDuel=readFileSync(join(target,'montres/comparer-skmei-1257-vs-casio-f91w.html'),'utf8');
   assert.ok(disabledDuel.includes('data-merchant-official-id="skmei-1257"')
     &&disabledDuel.includes('data-merchant-official-id="casio-f91w-1"'),
@@ -198,6 +208,17 @@ try {
   // Final real publication, not a synthetic mock.
   writeFileSync(join(target,'affiliate-links.json'),JSON.stringify(enabledSourceConfig));
   build();
+  const liveRegistry=JSON.parse(readFileSync(join(target,'commercial-registry.json'),'utf8'));
+  assert.equal(liveRegistry.counts.total,52);
+  assert.equal(liveRegistry.counts.documentedAmazonAsins,23);
+  assert.equal(liveRegistry.counts.activeExactAmazonReferrals,23);
+  assert.equal(liveRegistry.counts.historicallyUnavailable,4);
+  assert.equal(liveRegistry.counts.directSaleEligible,0);
+  assert.equal(liveRegistry.counts.activeAwinReferrals,0,
+    'Awin must remain disabled until publisher approval and issued URLs');
+  assert.equal(liveRegistry.products.filter(p=>p.amazon.referralActive).length,23);
+  assert.ok(liveRegistry.products.every(p=>p.amazon.currentAvailability==='not_verified'),
+    'Published source research cannot become a fictitious live-stock guarantee');
   const manifest=JSON.parse(readFileSync(join(target,'seo-manifest.json'),'utf8'));
   assert.equal(manifest.affiliateActive,true);
   assert.equal(manifest.affiliateCount,13,'Publish the 13 owner-tagged core product matches');
