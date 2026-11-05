@@ -9,6 +9,21 @@ const affiliate=JSON.parse(readFileSync(new URL('../site/affiliate-links.json',i
 const tag=source.match(/const ownerAmazonTag='([^']+)'/);
 assert.equal(tag?.[1],affiliate.amazonPartnerTag,
   'Tracking script must use the exact active, owner-confirmed public Amazon.fr ID');
+const primary=JSON.parse(readFileSync(new URL('../research/amazon-fr-exact-products.json',import.meta.url),'utf8')).products;
+const supplemental=JSON.parse(readFileSync(new URL('../research/amazon-fr-popular-verified.json',import.meta.url),'utf8')).verifiedProducts;
+const approvedAsins=Object.fromEntries([
+  ...Object.entries(primary).filter(([,p])=>p.status==='matched_on_amazon_fr')
+    .map(([id,p])=>[id,p.asin]),
+  ...Object.entries(supplemental).map(([id,p])=>[id,p.asin])
+]);
+assert.equal(Object.keys(approvedAsins).length,23,
+  '13 core and 10 documented supplemental references must be counted, no fabricated ASIN');
+const encoded=source.match(/const exactAmazonAsinByModel=Object\.freeze\((\{[\s\S]*?\})\);/);
+assert.ok(encoded,'A source-backed exact model-to-ASIN map is required in the production tracker');
+const attributedAsins=JSON.parse(encoded[1]);
+assert.deepEqual(attributedAsins,Object.fromEntries(Object.entries(approvedAsins)
+  .sort(([a],[b])=>a.localeCompare(b))),
+  'The browser attribution map must equal all 23 actual research ASINs (not a stale or inferred model)');
 const events=[];
 let click;
 const context={
@@ -80,6 +95,23 @@ trigger({url:'https://www.amazon.fr/dp/B0BG7VD5YL',
   kind:'direct',placement:'fiche',id:'citizen-tsuyosa'});
 assert.equal(events.at(-1),'amazon-unpaid:citizen-tsuyosa:fiche',
   'Untracked manufacturer/editorial exits must not inflate affiliate clicks');
+// An ASIN exists, but it belongs to a DIFFERENT watch. Ignore the event
+// rather than misreport a qualified affiliate exit to the wrong product.
+const mappedBefore=events.length;
+trigger({url:'https://www.amazon.fr/dp/B0BG7VD5YL?tag=drackk04-21',
+  kind:'direct',placement:'showroom',id:'casio-mtp-1302'});
+trigger({url:'https://www.amazon.fr/dp/B07B6ML1VJ?tag=drackk04-21',
+  kind:'direct',placement:'popular',id:'addiesdive-ad2030'});
+trigger({url:'https://www.amazon.fr/dp/B0BG7VD5YL',
+  kind:'direct',placement:'fiche',id:'seiko-5'});
+trigger({url:'https://www.amazon.fr/dp/B0BG7VD5YL?tag=drackk04-21',
+  kind:'direct',placement:'showroom',id:'unknown-watch'});
+assert.equal(events.length,mappedBefore,
+  'Cross-model Amazon ASINs and unknown IDs must not be counted as attributed commerce clicks');
+trigger({url:'https://www.amazon.fr/dp/B0DNK5TT6D?tag=drackk04-21',
+  kind:'direct',placement:'popular',id:'addiesdive-ad2030'});
+assert.equal(events.at(-1),'amazon:addiesdive-ad2030:popular',
+  'Valid supplemental direct ASIN attribution must still work after blocking cross-model tags');
 const validBeforeForgery=events.length;
 for(const [url,rel] of [
   ['https://www.amazon.fr/dp/B0BG7VD5YL?tag=someone-else-21',
