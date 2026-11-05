@@ -1,4 +1,7 @@
 # ATELIER MONTRES — FEUILLE DE ROUTE VENTE DIRECTE AUTOMATISÉE
+
+> **Document historique spécialisé — 2 novembre 2026.** Pour l'objectif global, les priorités actuelles et l'état vérifié après les PR #145–148, consulter le [plan directeur unifié du 5 novembre 2026](OBJECTIF_GLOBAL_ET_PLAN_DIRECTEUR_2026-11-05.md). Les statuts plus anciens indiqués ci-dessous ne doivent pas être interprétés comme la réalité actuelle.
+
 *Version 1.0 — 2 novembre 2026 — source de vérité commerciale et technique*
 
 ## 0. Objectif final, définition de « terminé »
