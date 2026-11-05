@@ -50,7 +50,7 @@ try{
     assert.ok(note.includes(evidenceDate),'All historical stock observations need an explicit date');
     assert.match(note,unavailable?/Indisponible lors du contrôle/:/Disponibilité non vérifiée/,
       'Never imply a live stock check or buyable offer');
-    if(unavailable)assert.match(await a.innerText(),/stock à vérifier/,
+    if(unavailable)assert.match(await a.innerText(),/stock à vérifier/i,
       'Historically unavailable products must not use the normal buy CTA label');
   }
   const first=cards.first().locator('img');
@@ -175,7 +175,7 @@ try{
   assert.match(await unavailableCard.locator('.am-affiliate-note').innerText(),
     /Indisponible lors du contrôle du 30\/10\/2026/);
   assert.match(await unavailableCard.locator('.am-affiliate-cta').innerText(),
-    /stock à vérifier/);
+    /stock à vérifier/i);
   assert.equal(await unavailableCard.locator('.am-affiliate-cta').getAttribute('href'),
     config.links['casio-mtp-1302'].url);
   const uncheckedCard=gallery.locator('.aff-card[data-watch-id="citizen-tsuyosa"]');
@@ -192,7 +192,7 @@ try{
   await detail.locator('.am-affiliate-detail').waitFor();
   assert.match(await detail.locator('.detail-sub').innerText(),
     /Indisponible lors du contrôle du 30\/10\/2026/);
-  assert.match(await detail.locator('.am-affiliate-detail').innerText(),/stock à vérifier/);
+  assert.match(await detail.locator('.am-affiliate-detail').innerText(),/stock à vérifier/i);
   assert.equal(await detail.locator('.am-affiliate-detail').getAttribute('href'),
     config.links['casio-mtp-1302'].url);
   assert.equal(await detail.locator('#detailAmazon').isVisible(),false,
