@@ -89,7 +89,7 @@ export function buildCommercialShortlist({picks,verifiedLinks,partnerOffers,part
       +'<div class="am-focus-visual'+(photo?' am-focus-with-photo':'')+'">'
       +(photo?'<img src="../'+e(photo.url)+'" alt="Montre '+e(watch.brand+' '+watch.model)+'" loading="lazy" decoding="async" width="380" height="260">':
         '<span class="am-focus-text-placeholder">Photographie du modèle sur la fiche de référence</span>')
-      +'</div><div class="am-focus-body"><span class="am-focus-order">+e(watch.tier==='essential'?'Gamme essentielle':'Gamme signature')+'</span>'
+      +'</div><div class="am-focus-body"><span class="am-focus-order">'+e(watch.tier==='essential'?'Gamme essentielle':'Gamme signature')+'</span>'
       +'<p class="am-focus-proof-label">'+e(proofLabel)+'</p>'
       +'<h3><a href="./'+e(item.id)+'.html">'+e(watch.brand+' '+watch.model)+'</a></h3>'
       +'<p class="am-focus-intent">'+e(item.intent)+'</p>'
