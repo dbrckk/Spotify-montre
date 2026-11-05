@@ -715,12 +715,15 @@ for(const item of commercialShortlist){
     'Comparison needs the real alternative model label: '+item.id);
   assert.ok(html.includes('class="am-focus-evidence"'),
     'Source proof must be in static HTML without requiring JavaScript: '+item.id);
-  const expectedEvidence=exactPopularLinks[item.id]?'documented-asin':'manufacturer-source';
+  const expectedEvidence=exactPopularLinks[item.id]?'documented-asin':
+    approvedPartnerOffers.has(item.id)?'partner-source':'manufacturer-source';
   assert.ok(html.includes('data-evidence="'+expectedEvidence+'"'),
     'Commercial grouping must be derived from the verified Amazon map: '+item.id);
   assert.ok(html.includes(exactPopularLinks[item.id]?
     'ASIN Amazon.fr documenté · variante et stock actuel non confirmés':
-    'Source vendeur ou fabricant · aucun ASIN exact établi pour cette offre'),
+    approvedPartnerOffers.has(item.id)?
+      'Lien partenaire documenté · variante et stock actuel non confirmés':
+      'Source vendeur ou fabricant · aucun ASIN exact établi pour cette offre'),
     'Visible model-specific label must never invent live availability: '+item.id);
   assert.ok(html.includes('Source constructeur ou vendeur')||html.includes('ASIN recoupé')||html.includes('Comparateur + seconde source'),
     'No unverified sale or invented proof may appear on shortlist: '+item.id);
