@@ -95,11 +95,12 @@ Statuts : **[FAIT]** confirmé par code+contrôle décrit ; **[À FAIRE]** exéc
 - Amélioration du 05/11 : `site/analytics.js` différencie strictement `amazon:` (lien balisé du propriétaire), `amazon-unpaid:` (ASIN non rémunéré) et `amazon-search:` (recherche balisée). Contrôles CI contre les mauvais tags ; le rapport `npm run affiliate:status` affiche désormais les ventes, commissions et date de candidature comme **inconnues**, avec les règles officielles Amazon. Dossier : [AM04](AM04_PREUVES_REVENUS_AFFILIATION_2026-11-05.md).
 - Fin : au moins une commission réelle identifiable dans le rapport officiel, ou diagnostic documenté « aucune vente confirmée » sans extrapolation.
 
-**AM-05 · [EN COURS — 1er lot codé] Rationaliser la sélection commerciale**
+**AM-05 · [EN COURS — 2 lots codés] Rationaliser la sélection commerciale**
 - Conserver les 52 références éditoriales consultables ; construire un groupe de 6–10 montres mises en avant, choisi selon **preuve d'offre/variante, utilité, qualité photo, intention d'achat et diversité de budgets** (pas des « meilleures ventes » fictives).
 - Pour chaque modèle : statut `editorial-only / supplier-unverified / exact-affiliate / direct-approved`, preuves photo, liens, dernière révision et contraintes. Le `products:[]` du registre `site/catalogue.json` ne doit pas être confondu avec les 52 sélections existantes.
 - Fin : une source de vérité exploitable par la fiche, le conseiller et les liens commerciaux ; aucun modèle ajouté sans référence, droit image et voie d'achat honnête.
 - Premier lot du 05/11 : les **10 références existantes** sont organisées par niveau de preuve dans une seule page accessible : **6 ASIN Amazon.fr documentés** devant **4 sources vendeurs/fabricants sans ASIN publié**, avec dates/variantes et limites conservées. La page d'accueil annonce cette distinction et pointe vers les deux groupes. Tests SEO et Playwright Android vérifient les comptes et les parcours ; voir [AM05](AM05_SELECTION_COMMERCIALE_PREUVES_2026-11-05.md). **La preuve d'achat réel, l'approbation partenaire et les droits image indépendants restent à obtenir**.
+- Deuxième lot : registre commercial dérivé des 52 modèles, 23 ASIN documentés et 0 vente directe qualifiée. La grille complète et la sélection de 10 montres utilisent ou recoupent cette même source ; tests de source, photographies, destination et affiliation désactivée. Voir [le rapport](AM05_REGISTRE_COMMERCIAL_UNIFIE_52_MONTRES_2026-11-05.md).
 
 ### Axe 2 — Produit premium et référencement (P1, en parallèle du fournisseur)
 
