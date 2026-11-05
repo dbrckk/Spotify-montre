@@ -314,3 +314,28 @@ CJ inclut de ce que le vendeur doit payer en plus, et calcule un seuil de prix
 au centime avec une réserve commerciale et les frais de paiement. Il refuse
 les devis manquants, incohérents ou périmés. **Jamais de prix public ni de
 checkout approuvé** sans les preuves du vendeur et de son PSP.
+
+## Verrou de vente côté serveur — activation indépendante de Render
+
+La simple présence d'une clé de paiement Mollie valide, d'un solde CJ ou
+de `COMMERCE_ENABLED=true` **n'active jamais les ventes**. Le backend relit
+`site/config.json` et exige, **en plus** de ses propres contrôles :
+
+- `checkoutMode: "active"`, explicitement publié dans notre dépôt ;
+- `commerceApiUrl` en HTTPS, sans chemin, identifiant ni redirection, égal à
+  la même origine que le `COMMERCE_PUBLIC_URL` du backend ;
+- `COMMERCE_PUBLIC_URL` terminé par `/`, afin que les webhooks et liens
+  de statut soient construits sans erreur.
+
+Le verrou est revérifié lorsque le serveur décide d'afficher les offres,
+avant de créer un lien de paiement et **immédiatement avant un POST CJ**
+susceptible de payer le fournisseur. Si le fichier est absent, corrompu ou
+si les URL divergent, il refuse l'achat côté serveur même avec un en-tête
+`Origin` forgé. La désactivation des nouveaux achats n'empêche pas le
+suivi en lecture seule des commandes déjà existantes.
+
+Ce verrou ne remplace **aucune** des conditions de conformité, de marge,
+d'identité vendeur, de justificatifs CJ, de compte marchand ou de financement.
+Le fichier reste actuellement à `"inactive"`. Les vérifications
+`merchant-gate-check.mjs` et `readiness-check.mjs` gardent cette
+invariant sous CI avant la prochaine mise en production.
