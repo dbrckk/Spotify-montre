@@ -69,6 +69,9 @@ try {
     'No paid link may leak into the new buyer guide when Amazon attribution is disabled');
   const disabledShortlist=readFileSync(join(target,'montres/modeles-populaires.html'),'utf8');
   const disabledFocus=(disabledShortlist.split('<section id="selection-10-montres"')[1]||'').split('</section>')[0];
+  const disabledUnified=readFileSync(join(target,'montres/toutes-les-montres.html'),'utf8');
+  assert.equal((disabledUnified.match(/data-partner-offer-id=/g)||[]).length,0,
+    'No unapproved Awin exit may appear in the 52-watch catalogue');
   assert.equal((disabledShortlist.match(/data-partner-offer-id=/g)||[]).length,0,
     'No Awin paid link may leak into the production-disabled affiliate fixture');
   assert.equal((disabledFocus.match(/data-amazon-product=/g)||[]).length,0,
@@ -320,6 +323,40 @@ try {
     'The catalogue and the priority shortlist must both expose the same verified item');
   assert.equal(JSON.parse(readFileSync(join(target,'seo-manifest.json'),'utf8')).popularPartnerAffiliateLinks,1,
     'Manifest must count approved Awin models, not the number of duplicated CTA placements');
+  // Real catalogue contract: an approved exact Awin deep link must replace
+  // the generic Amazon search, including on the six-watch showcase.
+  const assertUnifiedPartner=()=>{
+    const catalogue=JSON.parse(readFileSync(join(target,'discovery-catalogue.json'),'utf8'));
+    const watch=catalogue.products.find(p=>p.id==='skmei-2056');
+    assert.equal(watch.merchantKind,'awin');
+    assert.equal(watch.merchantUrl,fakeLink.href);
+    assert.equal(watch.partnerVariant,fakeVariant);
+    const unified=readFileSync(join(target,'montres/toutes-les-montres.html'),'utf8');
+    const card=unified.match(/<article class="ud-card" id="modele-skmei-2056"[\s\S]*?<\/article>/)?.[0];
+    const featured=unified.match(/<article class="ud-feature-card" data-feature-id="skmei-2056"[\s\S]*?<\/article>/)?.[0];
+    for(const [name,section] of [['catalogue',card],['showcase',featured]]){
+      assert.ok(section&&section.includes('data-partner-offer-id="skmei-2056"'),
+        'Approved Awin route must be visible in '+name);
+      assert.ok(section.includes('href="'+fakeLink.href.replace(/&/g,'&amp;')+'"'),
+        'The issued exact deep link, not an Amazon search, must be used in '+name);
+      assert.ok(!section.includes('data-amazon-search-id="skmei-2056"'),
+        'Generic marketplace search must not displace the Awin purchase route in '+name);
+    }
+    assert.ok(card.includes(fakeVariant),'Exact partner variant must be disclosed on the catalogue card');
+    assert.match(unified,/option value="awin">Variante partenaire Awin identifiée/,
+      'Mobile catalogue must expose a dedicated validated-Awin filter');
+  };
+  assertUnifiedPartner();
+  // Awin may be active even with Amazon disabled; no Amazon affiliate tag
+  // should be required for an independently reviewed partner item.
+  writeFileSync(join(target,'affiliate-links.json'),JSON.stringify({
+    version:1,enabled:false,approved:false,amazonPartnerTag:null,links:{}
+  }));
+  build();
+  assertUnifiedPartner();
+  const awinOnly=readFileSync(join(target,'montres/toutes-les-montres.html'),'utf8');
+  assert.ok(!awinOnly.includes('data-amazon-search-id="skmei-2056"'),
+    'Amazon-disabled builds must keep the exact Awin item without a paid search');
 
   console.log('Affiliate publication functional check OK: Amazon intact, Awin disabled in production, isolated approved deep-link test and idempotent build');
 } finally {

@@ -96,7 +96,8 @@
   const reorderCards=mode=>{
     if(currentSort===mode)return;
     const tiers={essential:0,signature:1,prestige:2};
-    const merchants={direct:0,search:1,official:2};
+    // A verified deep link should always rank ahead of a generic search.
+    const merchants={direct:0,awin:1,search:2,official:3};
     const rank=(p)=>merchants[p.merchantKind||'official'];
     const ordered=[...cards].sort((a,b)=>{
       const left=watches.get(a.dataset.id),right=watches.get(b.dataset.id);

@@ -81,3 +81,32 @@ des conditions réelles de livraison. Un lien `/dp/<ASIN>` correct sur le plan
 technique n'implique pas une disponibilité commerciale. L'accord définitif
 Amazon Partenaires et les commissions réelles doivent être vérifiés dans
 le tableau de bord du marchand ; aucun revenu n'est affirmé ici.
+
+## Priorité des offres Awin vérifiées dans les 52 montres — lot supplémentaire
+
+Un écart de parcours a été identifié entre les fiches de référence et le catalogue unifié :
+les pages produit et la sélection de dix montres savaient publier un **lien Awin de variante exacte**,
+mais la grille des 52 modèles et sa sélection photographique privilégiaient encore
+une **recherche Amazon générique**, même lorsque l'offre Awin était approuvée.
+
+La correction dans `scripts/build-unified-discovery.mjs` applique une priorité déterministe
+pour les 37 références supplémentaires : **ASIN Amazon exact actif → lien Awin exact
+autorisé → recherche Amazon balisée si active → source fabricant uniquement**.
+Le lien Awin est contrôlé contre le registre commercial et la source d'approbation
+indépendamment validée ; un désaccord interrompt la génération. La variante approuvée,
+la date du contrôle et la distinction entre offre identifiée et stock courant inconnu
+restent visibles. Un bouton vers Awin est annoncé comme un lien rémunéré, avec les
+attributs `rel="nofollow sponsored"` et un suivi analytique distinct.
+
+La vitrine de six montres, les filtres mobiles `Accès marchand` et le tri par
+qualification de l'offre reconnaissent désormais également le cas Awin.
+Le contrôle `node scripts/check-affiliate-publication.mjs` reconstruit de vrais
+HTML et JSON dans un dossier de test isolé, avec une **offre Awin fictive utilisée
+uniquement pour la vérification** : il exige le lien exact sur la carte et la vitrine,
+refuse la recherche Amazon concurrente et reproduit le cas Amazon désactivé.
+
+**État commercial actuel inchangé :** le registre réel Awin est désactivé,
+aucune offre Awin de production n'est publiée, les liens Amazon existants restent
+soumis à leur statut de preuve et la vente directe reste fermée. Ce lot corrige
+un défaut de routage pour de futures offres réellement approuvées ; il ne constitue
+ni approbation commerciale, ni preuve de commission, ni activation d'encaissement.
