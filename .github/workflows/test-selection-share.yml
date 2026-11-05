@@ -30,7 +30,7 @@ jobs:
           node --check scripts/test-selection-share.mjs
       - name: Install Chromium for mobile browser tests
         run: |
-          npm install --no-save --no-audit --no-fund playwright
+          npm install --no-save --no-audit --no-fund playwright@1.64.1
           npx playwright install --with-deps chromium
       - name: Verify native share and URL roundtrip on Android viewport
         run: |
