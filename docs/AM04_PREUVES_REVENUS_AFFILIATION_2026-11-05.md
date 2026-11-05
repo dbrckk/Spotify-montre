@@ -57,3 +57,37 @@ La commande locale `npm run affiliate:status` produit un rapport limité aux fic
 ## Critère de clôture d'AM-04
 
 Dossier de vente/commission constaté dans le **compte officiel**, avec vente éligible, remboursement/retour considéré et, pour conclure à des **revenus encaissés**, historique de paiement positif réellement versé. Tant que cette preuve n'existe pas, AM-04 demeure **en attente de preuve de compte**, même si la CI et les liens affichés sont valides.
+
+
+## Correctif de sécurité des métriques — correspondance modèle/ASIN (suite AM-04)
+
+**Constat après audit du dépôt :** la collecte des clics sortants `site/analytics.js`
+distinguait déjà les liens balisés, non rémunérés et les recherches, mais acceptait
+encore un événement `amazon:<id>:<placement>` quand la destination `/dp/<ASIN>`
+correspondait à **une autre montre**. Le domaine et le tag étaient vérifiés,
+pas la correspondance entre modèle affiché et ASIN cliqué. Un lien erroné
+pouvait donc polluer les statistiques commerciales sans être détecté par la
+télémétrie elle-même.
+
+**Correction :** l'événement `amazon:` et son équivalent `amazon-unpaid:`
+sont désormais bloqués si l'ASIN de l'URL ne correspond pas au modèle,
+à partir d'une table publique, non personnelle, qui reprend exactement
+les **13 références historiques** de `research/amazon-fr-exact-products.json`
+et les **10 références supplémentaires** de
+`research/amazon-fr-popular-verified.json`. Cette table est **comparée aux
+deux registres dans la CI** : en cas d'ajout/retrait d'une montre ou de
+changement d'ASIN, les tests échouent au lieu de publier une métrique
+silencieusement fausse. Les tests exécutent chaque association réelle et
+vérifient aussi les identifiants inconnus, les ASIN échangés, les balises
+invalides et les liens non rémunérés.
+
+Le contrôle ne charge aucun script tiers supplémentaire et n'enregistre
+aucun cookie, acheteur, donnée personnelle ni prix. Les liens sortants
+restent inchangés : il s'agit exclusivement de **mesure des intentions
+de visite**, pas de preuve de ventes, d'éligibilité des commandes, de
+commission ni de disponibilité en stock.
+
+**À vérifier hors GitHub :** activer/contrôler l'instance Umami uniquement
+avec consentement/configuration conforme, puis consulter les rapports
+Amazon Partenaires pour les ventes, frais, annulations et commissions
+réellement versées. Aucune statistique de compte n'est inventée.

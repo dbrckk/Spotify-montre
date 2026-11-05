@@ -10,6 +10,34 @@
   // Public tracking ID, never a credential. CI enforces its consistency with
   // the owner-confirmed Amazon.fr registry. Unrelated IDs are not our clicks.
   const ownerAmazonTag='drackk04-21';
+  // Public, source-backed model-to-ASIN allowlist. It is checked against both
+  // independent research registries in CI. Do not credit clicks for a product
+  // whose destination differs from the model identified in the event.
+  const exactAmazonAsinByModel=Object.freeze({
+    "addiesdive-ad2030": "B0DNK5TT6D",
+    "casio-a158wea-1": "B000GAYQJ0",
+    "casio-a168wa": "B01D6XLV5A",
+    "casio-a168wg-9": "B002LAS086",
+    "casio-ae1200wh-1av": "B0099M2IWI",
+    "casio-f91w-1": "B000J34HN4",
+    "casio-ga-2100-1a1": "B07WGJ1JNW",
+    "casio-gw-m5610u-1": "B09BCPP68Q",
+    "casio-ltp1302": "B0039UT5HC",
+    "casio-mdv107": "B09TV2TZY9",
+    "casio-mtp-1302": "B0BRPD1FTX",
+    "casio-mtp-b145": "B0CJRNV2XS",
+    "citizen-openheart": "B0CSPHFBY4",
+    "citizen-tsuyosa": "B0BG7VD5YL",
+    "hamilton-khaki": "B001QT1LWK",
+    "orient-bambino": "B0DR39WLP9",
+    "pagani-pd1701": "B0C7QC653D",
+    "seiko-5": "B07WGML3VN",
+    "seiko-sharp": "B08HR9PC4K",
+    "skmei-1251": "B072JTCP5H",
+    "skmei-1257": "B07B6ML1VJ",
+    "swatch-clearly": "B0C3WQ8YXJ",
+    "tissot-prx-quartz": "B08TB1MF6F"
+  });
   const placements=new Set(['catalogue','fiche','seo','popular','showroom']);
   // An exact host allowlist prevents counting arbitrary destinations as
   // approved watch merchants; tracking still never proves an affiliate sale.
@@ -81,6 +109,8 @@
     }
     if(!asinPattern.test(target.pathname)||keys.length!==new Set(keys).size||
       keys.some(key=>!['tag','th','psc'].includes(key)))return;
+    if(!Object.hasOwn(exactAmazonAsinByModel,id)||
+       target.pathname!=='/dp/'+exactAmazonAsinByModel[id])return;
     let trackingName;
     if(hasTag){
       // Only our own affiliate tag with an explicit "sponsored" disclosure
