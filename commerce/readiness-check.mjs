@@ -20,9 +20,13 @@ const env={
   STOREFRONT_ORIGIN:'https://atelier-montres-selection-fr.onrender.com',
   COMMERCE_PUBLIC_URL:'https://atelier-montres-commerce-api.onrender.com/'
 };
-const siteConfig={checkoutMode:'active'};
+const siteConfig={checkoutMode:'active',commerceApiUrl:env.COMMERCE_PUBLIC_URL};
 const flags=merchantConfigurationChecks(env,siteConfig);
 assert.ok(Object.values(flags).every(Boolean),'configured synthetic pilot should pass checks');
+assert.equal(merchantConfigurationChecks(env,{...siteConfig,
+  commerceApiUrl:'https://wrong-payment-api.onrender.com/'})
+  .storefront_checkout_targets_this_backend,false);
+
 assert.equal(merchantConfigurationChecks({...env,CJ_ACCESS_TOKEN:'z'.repeat(20)+' '},
   siteConfig).cj_access_token_configured,false);
 assert.equal(merchantConfigurationChecks({...env,MOLLIE_API_KEY:'test_'+'A'.repeat(24)},
