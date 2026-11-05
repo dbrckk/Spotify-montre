@@ -93,7 +93,7 @@ export function buildCommercialShortlist({picks,verifiedLinks,partnerOffers,part
     const compareUrl='./toutes-les-montres.html?compare='+encodeURIComponent(item.id+','+alternative.id)+'#comparer';
     const compareAction='<a class="am-focus-compare" href="'+e(compareUrl)+'" data-focus-compare="'+e(item.id)+'">'
       +'Comparer avec '+e(alternative.brand+' '+alternative.model)+'</a>';
-    return '<li class="am-focus-item" data-focus-id="'+e(item.id)+'" data-evidence="'+proofLevel+'" data-commercial-path="'+e(evidence.purchasePath)+'">'
+    return '<li class="am-focus-item" data-focus-id="'+e(item.id)+'" data-evidence="'+proofLevel+'">'
       +'<div class="am-focus-visual'+(photo?' am-focus-with-photo':'')+'">'
       +(photo?'<img src="../'+e(photo.url)+'" alt="Montre '+e(watch.brand+' '+watch.model)+'" loading="lazy" decoding="async" width="380" height="260">':
         '<span class="am-focus-text-placeholder">Photographie du modèle sur la fiche de référence</span>')
