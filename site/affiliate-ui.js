@@ -4,6 +4,8 @@
   const statement='En tant que Partenaire Amazon, je réalise un bénéfice sur les achats remplissant les conditions requises';
   const code=/^[A-Z0-9]{10}$/;
   const watchId=/^[a-z0-9-]{4,64}$/;
+  const evidenceDate=/^20\d{2}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
+  const reviewedDate=iso=>iso.slice(8,10)+'/'+iso.slice(5,7)+'/'+iso.slice(0,4);
   const isAmazon=(url,asin,tag)=>{
     try {
       const u=new URL(url);
@@ -27,13 +29,28 @@
     ]);
     if(!Array.isArray(feed?.products)||feed.products.length!==15)return;
     const models=new Map(feed.products.filter(p=>watchId.test(p?.id||'')).map(p=>[p.id,p]));
-    const plain=new Map();
-    if(catalog?.version===1&&catalog.links&&!Array.isArray(catalog.links)) {
-      for(const [id,entry] of Object.entries(catalog.links)) {
-        if(!models.has(id)||!code.test(entry?.asin||'')||!isAmazon(entry.url,entry.asin,null))continue;
+    const plain=new Map(),observed=new Map();
+    // The purchase gateway and the editorial catalogue must use the same
+    // dated ASIN evidence. Never turn a 30/10 observation into live stock.
+    if(catalog?.version===1&&evidenceDate.test(catalog.checkedOn||'')&&
+       catalog.links&&typeof catalog.links==='object'&&!Array.isArray(catalog.links)) {
+      const all=Object.entries(catalog.links);
+      const valid=all.length>0&&all.every(([id,entry])=>
+        models.has(id)&&code.test(entry?.asin||'')&&isAmazon(entry.url,entry.asin,null)&&
+        ['not_checked','unavailable_at_check'].includes(entry.availabilityAtCheck));
+      if(valid)for(const [id,entry] of all) {
         plain.set(id,entry.url);
+        observed.set(id,entry.availabilityAtCheck);
       }
     }
+    const observation=id=>{
+      const finding=observed.get(id);
+      if(!finding)return '';
+      const date=reviewedDate(catalog.checkedOn);
+      return finding==='unavailable_at_check'
+        ?'Indisponible lors du contrôle du '+date+'. Disponibilité actuelle inconnue : vérifiez auprès du vendeur.'
+        :'Disponibilité non vérifiée au '+date+'. Prix, variante et stock à contrôler chez Amazon.fr.';
+    };
     const paid=new Map();
     if(config?.version===1&&config.enabled===true&&
        (config.approved===true&&(!config.enrollmentStatus||config.enrollmentStatus==='approved')||
@@ -50,7 +67,8 @@
           models.get(id)?.photoReview?.publicUsageApproved===true &&
           item?.provider==='amazon.fr'&&item.productMatchConfirmed===true&&item.linkApproved===true &&
           code.test(item.asin||'')&&isAmazon(item.url,item.asin,config.amazonPartnerTag)&&
-          plain.get(id)==='https://www.amazon.fr/dp/'+item.asin)) {
+          item.verifiedAt===catalog.checkedOn&&
+          observed.has(id)&&plain.get(id)==='https://www.amazon.fr/dp/'+item.asin)) {
         for(const [id,item] of entries)paid.set(id,item.url);
       }
     }
@@ -60,7 +78,10 @@
       a.dataset.amazonProduct=id;
       a.dataset.amazonPlacement=placement;
       a.rel=compensated?'noopener noreferrer nofollow sponsored':'noopener noreferrer nofollow';
-      a.textContent=compensated?'Voir sur Amazon.fr · lien rémunéré ↗':'Voir sur Amazon.fr · lien non rémunéré ↗';
+      const previousUnavailable=observed.get(id)==='unavailable_at_check';
+      a.textContent=(compensated?'Voir sur Amazon.fr · lien rémunéré':
+        'Voir sur Amazon.fr · lien non rémunéré')+
+        (previousUnavailable?' · stock à vérifier ↗':' ↗');
       return a;
     };
     function hydrateGrid() {
@@ -78,9 +99,9 @@
           'Fiche Amazon vérifiée · lien rémunéré':
           'Fiche Amazon vérifiée · lien non rémunéré';
         const note=document.createElement('small');note.className='am-affiliate-note';
-        note.textContent=compensated?
-          'Lien rémunéré · Une commission peut nous être versée. Achat et retours chez le marchand indiqué.':
-          'Prix et disponibilité à vérifier sur Amazon.fr. Aucun paiement n’est encaissé ici.';
+        note.textContent=(compensated
+          ?'Lien rémunéré · Une commission peut nous être versée. Achat et retours chez le marchand indiqué. '
+          :'Lien non rémunéré · Aucun paiement n’est encaissé ici. ')+observation(id);
         actions.after(note);
       }
     }
@@ -113,12 +134,14 @@
         amazon.dataset.amazonProduct=id;
         amazon.dataset.amazonPlacement='fiche';
         amazon.rel=compensated?'noopener noreferrer nofollow sponsored':'noopener noreferrer nofollow';
-        amazon.textContent=compensated?'Voir sur Amazon.fr · lien rémunéré ↗':'Voir ce modèle sur Amazon.fr ↗';
+        amazon.textContent=(compensated?'Voir sur Amazon.fr · lien rémunéré':
+          'Voir ce modèle sur Amazon.fr')+
+          (observed.get(id)==='unavailable_at_check'?' · stock à vérifier ↗':' ↗');
       }
       const sub=detail.querySelector('.detail-sub');
-      if(sub)sub.textContent=compensated?
-        'Lien Amazon rémunéré. Consultez prix, disponibilité et vendeur chez Amazon.':
-        'Fiche Amazon vérifiée, lien non rémunéré. Vérifiez le prix, la disponibilité et le vendeur.';
+      if(sub)sub.textContent=(compensated
+        ?'Lien Amazon rémunéré. Le paiement, la livraison et les retours relèvent du vendeur. '
+        :'Lien Amazon non rémunéré. Achat et retours chez le vendeur. ')+observation(id);
       if(compensated) {
         const official=document.getElementById('detailOfficial');
         if(official)official.before(makeLink(url,true,'button detail-cta am-affiliate-detail',id,'fiche'));
