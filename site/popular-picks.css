@@ -487,3 +487,39 @@
 @media(prefers-reduced-motion:reduce){
   .am-extra-local-tools button{transition:none!important}
 }
+
+
+/* AM-05: two distinct proof paths, not a popularity or stock ranking. */
+.am-focus-jump{display:flex;flex-wrap:wrap;gap:11px;margin:0 0 26px}
+.am-focus-jump a{display:inline-flex;align-items:center;justify-content:center;
+  min-height:46px;padding:10px 17px;border:1px solid #8eaa96;border-radius:6px;
+  color:#214933;background:#f1f6ee;text-align:center;text-decoration:none;
+  font:750 12px/1.45 system-ui,sans-serif}
+.am-focus-jump a:hover{background:#e4eee1}
+.am-focus-jump a:focus-visible{outline:3px solid #ba9150;outline-offset:3px}
+.am-focus-group{scroll-margin-top:95px;margin:0 0 32px;padding:22px;
+  border:1px solid #d7ddcd;border-radius:9px;background:#f5f7f1}
+.am-focus-exact{border-color:#b9cbb8;background:#eef3ec}
+.am-focus-source{background:#f7f4ed;border-color:#ded4c2}
+.am-focus-group-heading{max-width:900px;margin:0 0 20px}
+.am-focus-group-heading>p:first-child{font:800 11px/1.5 system-ui,sans-serif;
+  letter-spacing:.12em;text-transform:uppercase;color:#6d704d;margin:0 0 5px}
+.am-focus-group-heading h3{font:400 clamp(24px,3.3vw,36px)/1.24 Georgia,serif;
+  color:#224333;letter-spacing:-.02em;margin:7px 0 12px}
+.am-focus-group-heading>p:last-child{max-width:80ch;color:#4a6151;
+  font:400 14px/1.75 system-ui,sans-serif;margin:0}
+.am-focus-item[data-evidence="documented-asin"]{border-top:3px solid #64876d}
+.am-focus-item[data-evidence="manufacturer-source"],
+.am-focus-item[data-evidence="partner-source"]{border-top:3px solid #a89167}
+.am-focus-proof-label{align-self:flex-start;padding:5px 10px!important;
+  border-radius:4px;background:#eaf0e7;color:#285139!important;
+  font:750 11px/1.45 system-ui,sans-serif!important}
+.am-focus-item[data-evidence="manufacturer-source"] .am-focus-proof-label,
+.am-focus-item[data-evidence="partner-source"] .am-focus-proof-label{
+  background:#f2ebdd;color:#72552f!important}
+@media(max-width:620px){
+  .am-focus-jump{display:grid;grid-template-columns:1fr;gap:8px}
+  .am-focus-group{padding:12px;margin-bottom:25px}
+  .am-focus-group-heading{padding:4px 4px 0}
+  .am-focus-group-heading h3{font-size:27px}
+}
