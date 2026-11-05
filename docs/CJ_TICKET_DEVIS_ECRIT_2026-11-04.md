@@ -86,3 +86,15 @@ Le workflow [CJ ticket supplier read-only live diagnosis](https://github.com/dbr
 - Lorsqu'une réponse doit être examinée, ouvrir **CJdropshipping > My CJ > Ticket** et lire le ticket correspondant. Ne pas coller la clé API, les données d'acheteurs ou le contenu privé dans une issue GitHub publique.
 
 La bonne prochaine action commerciale n'est plus de rechercher des dizaines de montres : c'est de **qualifier ce devis écrit unique**, en gardant la preuve fournisseur privée et les coûts/conditions vérifiés, puis de valider les marges et les exigences légales avant la moindre vente directe.
+
+## Suivi des messages CJ sans exposition des échanges (5 novembre)
+
+L'API officielle propose `GET /ticket/messages` en complément de `/ticket/detail`. Le suivi exploite désormais **seulement les métadonnées** des messages liés au ticket déjà identifié : expéditeur `CJ` ou `CUSTOMER`, horodatage, nombre de messages CJ et indicateur `unread`.
+
+- Une réponse CJ non lue peut déclencher `operatorReviewRequired=true` **même si CJ n'a pas encore changé `AWAITING_CJ_REPLY`**.
+- Aucune réponse `messageText` ou `messageHtml`, pièce jointe, nom d'agent, URL d'attachement ou numéro privé de ticket n'est écrit dans GitHub Actions ou dans le site public.
+- Les résultats publiés sont uniquement : statut, indicateur de lecture, nombre de messages CJ et date UTC du plus récent (sans contenu). Ces métadonnées **ne prouvent aucune garantie** sur les coûts rendus, la TVA, la conformité ou la marge.
+- Si la structure retournée est inconnue, mal formée ou paginée au-delà de 100 messages, la lecture **échoue fermée** : le système ne doit pas annoncer par erreur une absence de réponse.
+- Le suivi quotidien continue à utiliser la clé secrète CJ côté Actions, en lecture seule, sans réponse fournisseur, paiement ni commande.
+
+Les réponses écrites doivent toujours être examinées dans **CJdropshipping > My CJ > Ticket**. La qualification financière et juridique doit ensuite être faite avec des montants et justificatifs réels, hors dépôt public et sans forcer une vente.
