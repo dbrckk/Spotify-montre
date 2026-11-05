@@ -62,10 +62,16 @@ const amazon=JSON.parse(read('amazon-product-links.json'));
 assert.equal(amazon.version,1);
 assert.equal(Object.keys(amazon.links).length,13,'13 exact, untracked Amazon.fr listings in build');
 assert.deepEqual(new Set(Object.keys(amazon.links)).size,13);
+assert.match(amazon.checkedOn,/^20\d{2}-\d{2}-\d{2}$/);
+assert.equal(Object.values(amazon.links).filter(x=>
+  x.availabilityAtCheck==='unavailable_at_check').length,4,
+  'Four historically unavailable listings must not be falsely marked buyable');
 for(const [id,entry] of Object.entries(amazon.links)){
  assert.ok(feed.products.some(p=>p.id===id),'Unknown Amazon reference');
  assert.match(entry.asin,/^[A-Z0-9]{10}$/);
  assert.equal(entry.url,'https://www.amazon.fr/dp/'+entry.asin);
+ assert.ok(['not_checked','unavailable_at_check'].includes(entry.availabilityAtCheck),
+   'Amazon source status must be preserved without a fabricated live stock claim');
  assert.ok(!entry.url.includes('?tag='),'Unapproved affiliate tracking cannot be published');
 }
 
