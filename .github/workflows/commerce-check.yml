@@ -54,6 +54,9 @@ jobs:
       - name: Verify syntax and commerce safety checks
         working-directory: commerce
         run: npm run check
+      - name: Verify frozen commerce acknowledges legacy Mollie webhooks without new sales
+        working-directory: commerce
+        run: node frozen-payment-webhook-check.mjs
       - name: Verify concurrent checkout and recovery using PostgreSQL
         working-directory: commerce
         run: node concurrency-check.mjs

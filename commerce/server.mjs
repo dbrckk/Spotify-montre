@@ -259,7 +259,11 @@ async function route(req,res){
       checkoutUrl:payment.checkoutUrl,amountCents:order.amountCents},cors(req));
   }
   if(req.method==='POST'&&pathname==='/api/webhooks/mollie'){
-    if(!dbReady||!pool||!enabled)return reply(res,503,{error:'Service de paiement indisponible'});
+    // A freeze on NEW sales cannot block callbacks for existing purchases.
+    // This endpoint never trusts the webhook payload as proof of payment:
+    // it looks up a stored Mollie payment and performs an authenticated GET.
+    // Supplier creation remains independently disabled by merchantReady().
+    if(!dbReady||!pool)return reply(res,503,{error:'Suivi du paiement indisponible'});
     const paymentId=await readWebhookBody(req);
     const result=await reconcilePayment(paymentId);
     // Legacy Mollie webhook uses a payment ID, NOT an authenticated success assertion.
