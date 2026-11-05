@@ -28,7 +28,7 @@ jobs:
           node-version: '22'
       - name: Install open-source browser and accessibility engine
         run: |
-          npm install --no-save --no-audit --no-fund playwright @axe-core/playwright
+          npm install --no-save --no-audit --no-fund playwright@1.64.1 @axe-core/playwright
           npx playwright install --with-deps chromium
       - name: Build complete storefront
         run: |
