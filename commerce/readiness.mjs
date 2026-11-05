@@ -1,4 +1,5 @@
 import {getApprovedOffer} from './db.mjs';
+import {storefrontCheckoutPermitted} from './merchant-gate.mjs';
 
 /**
  * Operator-only, read-only launch diagnostics. Never exposes credentials,
@@ -71,6 +72,8 @@ export function merchantConfigurationChecks(env={},siteConfig={}){
   const cap=Number(env.CJ_DAILY_CAP_USD_CENTS||0);
   return {
     storefront_checkout_active:siteConfig.checkoutMode==='active',
+    storefront_checkout_targets_this_backend:storefrontCheckoutPermitted(
+      siteConfig,env.COMMERCE_PUBLIC_URL),
     commerce_explicitly_enabled:env.COMMERCE_ENABLED==='true',
     mollie_live_key_configured:/^live_[a-zA-Z0-9]{12,}$/.test(env.MOLLIE_API_KEY||''),
     cj_access_token_configured:typeof env.CJ_ACCESS_TOKEN==='string'&&
