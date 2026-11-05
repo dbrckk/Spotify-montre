@@ -643,6 +643,32 @@ assert.deepEqual(focusMatches,commercialShortlist.map(item=>item.id),
   'Commercial shortlist must follow the reviewed source file and never substitute products');
 assert.equal(new Set(focusMatches).size,10,'Shortlist cannot repeat a product');
 assert.ok(popularHtml.includes('id="selection-10-montres"'),'Priorities must be reachable via a stable accessible anchor');
+// Prioritise product identity evidence, not unverified popularity or invented stock.
+const focusedWithAsin=[...popularHtml.matchAll(
+  /<li class="am-focus-item" data-focus-id="([^"]+)" data-evidence="documented-asin">/g
+)].map(m=>m[1]);
+const focusedSourceOnly=[...popularHtml.matchAll(
+  /<li class="am-focus-item" data-focus-id="([^"]+)" data-evidence="(?:manufacturer-source|partner-source)">/g
+)].map(m=>m[1]);
+const expectedExact=commercialShortlist.filter(x=>Boolean(exactPopularLinks[x.id])).map(x=>x.id);
+assert.deepEqual(focusedWithAsin,expectedExact,
+  'Only exact source-backed ASIN matches belong in the Amazon-ready-to-verify group');
+assert.deepEqual(focusedSourceOnly,commercialShortlist.filter(x=>!exactPopularLinks[x.id]).map(x=>x.id),
+  'Watch sources without exact Amazon ASINs must remain in the clearly labeled editorial group');
+assert.equal(focusedWithAsin.length,6,'Six exact ASIN references supported by existing independent source research');
+assert.equal(focusedSourceOnly.length,4,'Four complementary watches without an exact published Amazon exit');
+assert.ok(popularHtml.includes('id="selection-avec-asin"')&&
+  popularHtml.includes('id="selection-sources-marchandes"')&&
+  popularHtml.includes('aria-label="Accès par niveau de preuve"'),
+  'Two visible, keyboard-navigable proof-level groups must be present without JavaScript');
+assert.ok(popularHtml.indexOf('id="selection-avec-asin"')<
+  popularHtml.indexOf('id="selection-sources-marchandes"'),
+  'Source-confirmed ASIN models must be visible before incomplete merchant sources');
+assert.ok(popularHtml.includes('6 références avec ASIN documenté')&&
+  popularHtml.includes('4 sources vendeur à explorer'),
+  'The proof navigation must show actual model counts instead of unverifiable bestseller claims');
+assert.ok(home.includes('6 références avec ASIN Amazon.fr documenté et 4 alternatives'),
+  'Homepage must show truthful evidence counts and link to the comparative shortlist');
 
 assert.ok(home.includes('id="duels-accessibles"'),'Four affordable buyer guides must be promoted from the homepage');
 assert.equal((home.match(/class="am-duel-promo-card" data-duel-promo="/g)||[]).length,4,
@@ -689,6 +715,13 @@ for(const item of commercialShortlist){
     'Comparison needs the real alternative model label: '+item.id);
   assert.ok(html.includes('class="am-focus-evidence"'),
     'Source proof must be in static HTML without requiring JavaScript: '+item.id);
+  const expectedEvidence=exactPopularLinks[item.id]?'documented-asin':'manufacturer-source';
+  assert.ok(html.includes('data-evidence="'+expectedEvidence+'"'),
+    'Commercial grouping must be derived from the verified Amazon map: '+item.id);
+  assert.ok(html.includes(exactPopularLinks[item.id]?
+    'ASIN Amazon.fr documenté · variante et stock actuel non confirmés':
+    'Source vendeur ou fabricant · aucun ASIN exact établi pour cette offre'),
+    'Visible model-specific label must never invent live availability: '+item.id);
   assert.ok(html.includes('Source constructeur ou vendeur')||html.includes('ASIN recoupé')||html.includes('Comparateur + seconde source'),
     'No unverified sale or invented proof may appear on shortlist: '+item.id);
 
