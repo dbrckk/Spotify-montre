@@ -73,6 +73,25 @@ for(const [id,entry] of Object.entries(amazon.links)){
  assert.ok(['not_checked','unavailable_at_check'].includes(entry.availabilityAtCheck),
    'Amazon source status must be preserved without a fabricated live stock claim');
  assert.ok(!entry.url.includes('?tag='),'Unapproved affiliate tracking cannot be published');
+ const indexedProduct=read('montres/'+id+'.html');
+ assert.ok(indexedProduct.includes('data-amazon-evidence-status="'+entry.availabilityAtCheck+'"'),
+   'Indexed watch page must disclose the same dated stock evidence as the purchase gateway: '+id);
+ assert.ok(indexedProduct.includes(amazon.checkedOn.split('-').reverse().join('/')),
+   'Indexed watch page must show the actual observation date: '+id);
+ if(entry.availabilityAtCheck==='unavailable_at_check'){
+   assert.ok(indexedProduct.includes('stock à vérifier'),
+     'Previously unavailable product must not be advertised as a live buyable offer: '+id);
+   assert.ok(indexedProduct.includes('Indisponible lors du contrôle'),
+     'Historically unavailable observation must be labeled and dated: '+id);
+ }else{
+   assert.ok(indexedProduct.includes('Disponibilité non vérifiée au'),
+     'Unobserved stock status must be disclosed on product page: '+id);
+ }
+}
+for(const id of ['citizen-eco','tissot-prx-auto']){
+ const indexedProduct=read('montres/'+id+'.html');
+ assert.ok(!indexedProduct.includes('data-amazon-evidence-status='),
+   'Unknown exact ASIN must not inherit another model’s stock evidence: '+id);
 }
 
 assert.equal(manifest.paths.length,78,'Existing 74 SEO URLs plus four original affordable duels');
