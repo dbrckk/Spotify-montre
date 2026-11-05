@@ -1,5 +1,12 @@
 name: CJ written full landed-cost quote (one watch, no purchase)
+# One-time owner-approved support request after a live read-only account check.
+# The push event only runs for the unique, audited merge subject below.
+# Remove this temporary push trigger after checking CJ's acknowledgement.
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/request-cj-landed-quote.yml'
   workflow_dispatch:
     inputs:
       operation:
@@ -15,6 +22,11 @@ concurrency:
   cancel-in-progress: false
 jobs:
   one-watch-supplier-inquiry:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' &&
+       startsWith(github.event.head_commit.message,
+       'ops(cj): submit one verified written quote 20261105'))
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
@@ -30,4 +42,4 @@ jobs:
             echo 'Missing CJ_API_KEY repository secret. No supplier ticket submitted.'
             exit 1
           fi
-          node commerce/cj-quote-ticket.mjs "${{ inputs.operation }}"
+          node commerce/cj-quote-ticket.mjs "${{ github.event_name == 'push' && 'send' || inputs.operation }}"
