@@ -77,6 +77,15 @@
         typeof o.label==='string'&&o.label.length>3&&
         Number.isSafeInteger(o.deliveryMinDays)&&o.deliveryMinDays>=1&&
         Number.isSafeInteger(o.deliveryMaxDays)&&o.deliveryMaxDays>=o.deliveryMinDays&&o.deliveryMaxDays<=120).map(o=>[o.id,o]));
+      if(offerMap.size){
+        const navigation=document.querySelector('.home-nav-buy');
+        if(navigation){
+          navigation.href=staticLink.href;
+          navigation.textContent='Acheter sur notre site';
+        }
+        const note=document.querySelector('.home-hero-note');
+        if(note)note.textContent='Certaines références sont vendues directement par Atelier Montres. Les autres achats ont lieu chez les vendeurs indiqués sur les fiches.';
+      }
       enrich();
       const gallery=document.getElementById('affGrid');
       if(gallery)new MutationObserver(enrich).observe(gallery,{childList:true});
