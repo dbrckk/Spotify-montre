@@ -135,3 +135,13 @@
 
 /* HTML hidden attribute must win over author display:inline-flex on fast links. */
 .detail-fast-nav #detailAdviceShortcut[hidden]{display:none}
+
+/* Clear purchase checks instead of an internal launch-status block. */
+.detail-buyer-guide{margin-top:24px;padding:19px 22px 20px;border:1px solid #cbd6c8;border-radius:9px;background:#edf2e9;color:#243e2c}
+.detail-info .detail-buyer-guide h3{font:400 24px/1.25 Georgia,serif;color:#1b3f29;margin:0 0 14px}
+.detail-buyer-guide ol{padding:0 0 0 21px;margin:0;display:grid;gap:12px}
+.detail-buyer-guide li{font:400 14px/1.65 system-ui,sans-serif;color:#334e39;padding-left:3px}
+.detail-buyer-guide li::marker{color:#6c804e;font-weight:700}
+.detail-buyer-guide strong{font-weight:750;color:#1a3826}
+.detail-buyer-guide p{font:400 12px/1.7 system-ui,sans-serif;color:#4a6051;margin:18px 0 0;border-top:1px solid #d2ddcf;padding-top:12px}
+@media(max-width:620px){.detail-buyer-guide{padding:18px 16px 19px}.detail-info .detail-buyer-guide h3{font-size:23px}}
