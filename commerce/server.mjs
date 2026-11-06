@@ -215,12 +215,18 @@ async function route(req,res){
   }
   if(req.method==='POST'&&pathname==='/api/checkout'){
     if(req.headers.origin!==origin)return reply(res,403,{error:'Origine refusée'});
-    if(!merchantReady())return reply(res,503,{error:'Achat direct temporairement indisponible'},cors(req));
+    // Merchant freezes stop NEW charges, not authenticated recovery of an
+    // already-reserved checkout. A mobile browser may have lost its original
+    // response before the freeze. Reuse the same server-side order and token
+    // without any Mollie or CJ write. Never create a new order while frozen.
+    const acceptingNewOrders=merchantReady();
+    if(!acceptingNewOrders&&(!dbReady||!pool||idempotencySecret.length<40))
+      return reply(res,503,{error:'Achat direct temporairement indisponible'},cors(req));
     const request=validateCheckoutBody(await readJsonBody(req));
-    // Lost HTTP responses MUST reuse the first Mollie payment, never start another.
-    // Check this before a fresh stock quote: the offer may have expired since purchase.
     const resumed=await findExistingCheckout(pool,request,{idempotencySecret});
     if(resumed)return reply(res,200,resumed,cors(req));
+    if(!acceptingNewOrders||!merchantReady())
+      return reply(res,503,{error:'Achat direct temporairement indisponible'},cors(req));
     const offer=await getApprovedOffer(pool,request.offerId);
     if(!offer)return reply(res,409,{error:'Cette montre n’est pas en vente directe actuellement'},cors(req));
     try{

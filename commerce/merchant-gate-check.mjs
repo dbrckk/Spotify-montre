@@ -54,4 +54,20 @@ assert.match(server,/readStorefrontCheckoutPermit\(backendUrl\)&&\s+merchantPubl
   'A seller must publish and version-pin verified legal documents before charging anyone');
 assert.match(server,/if\(!merchantReady\(\)\)[\s\S]{0,200}throw new ClientError\('Vente directe désactivée/);
 assert.match(server,/authorizeBeforeDebit:async\(\)=>\{[\s\S]{0,350}if\(!merchantReady\(\)\)/);
+// Recovery is read-only even during an emergency merchant freeze. A lost
+// checkout response must never force the customer to generate a new key.
+const routeSource=server.slice(server.indexOf("if(req.method==='POST'&&pathname==='/api/checkout')"),
+  server.indexOf("if(req.method==='POST'&&pathname==='/api/webhooks/mollie')"));
+const resumedAt=routeSource.indexOf('const resumed=await findExistingCheckout(');
+const freezeAt=routeSource.indexOf("if(!acceptingNewOrders||!merchantReady())");
+const reserveAt=routeSource.indexOf('const order=await reserveCheckout(');
+const paymentAt=routeSource.indexOf('payment=await createHostedPayment(');
+assert.ok(resumedAt>0&&freezeAt>resumedAt&&reserveAt>freezeAt&&paymentAt>reserveAt,
+  'Existing checkout recovery must precede the freeze, reservation and Mollie payment');
+assert.match(routeSource,/if\(resumed\)return reply\(res,200,resumed,cors\(req\)\)/,
+  'Only an authenticated matching existing order may be returned while frozen');
+assert.match(routeSource,/if\(!acceptingNewOrders&&\(!dbReady\|\|!pool\|\|idempotencySecret.length<40\)\)/,
+  'Recovery must not query an unavailable database or with an unconfigured HMAC key');
+assert.match(routeSource,/if\(!acceptingNewOrders\|\|!merchantReady\(\)\)\s+return reply\(res,503/,
+  'New checkouts must still fail closed during a sales freeze');
 console.log('Storefront/backend checkout interlock OK: prelaunch refuses all payments and CJ orders');
