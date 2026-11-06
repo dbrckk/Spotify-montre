@@ -102,6 +102,9 @@ try{
   assert.equal(await page.locator('.home-product-card[data-watch-id="seiko-5"] .am-direct-card-link').count(),0);
   assert.equal((await page.locator('.home-nav-buy').textContent()).trim(),'Acheter sur notre site',
     'The navigation label is correct even when CSS renders it in uppercase');
+  assert.match(await page.locator('#homePurchaseAnswer').innerText(),
+    /commande[z]? auprès de notre boutique|commandez auprès de notre boutique/i,
+    'The public FAQ must explain own-site ordering when qualified watches exist');
   assert.equal(new URL(await page.locator('.home-product-card[data-watch-id="citizen-tsuyosa"] .am-direct-card-link').getAttribute('href')).searchParams.get('modele'),'citizen-tsuyosa');
 
   await page.goto(new URL('montres/citizen-tsuyosa.html',base).href,
@@ -111,6 +114,8 @@ try{
   assert.equal(new URL(await page.locator('.watch-product .am-direct-card-link').getAttribute('href')).searchParams.get('modele'),'citizen-tsuyosa');
   assert.doesNotMatch(await page.locator('.watch-product .disclosure').innerText(),
     /Atelier Montres ne vend pas ce modèle/);
+  assert.equal(await page.locator('footer p').filter({hasText:/Aucun achat ni paiement/}).count(),0,
+    'Product-page footer must not deny checkout when a valid direct offer exists');
 
   await page.goto(new URL('montres/skmei-1257.html',base).href,
     {waitUntil:'domcontentloaded'});
