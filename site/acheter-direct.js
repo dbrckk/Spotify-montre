@@ -13,8 +13,12 @@
     // The checkout form stays closed, but the customer must actually SEE
     // why payment is unavailable and where to continue browsing.
     form.hidden=true;
-    if(prelaunch)prelaunch.hidden=false;
-    if(commerce){commerce.hidden=false;commerce.dataset.mode='prelaunch'}
+    // The public partner showroom is the primary shopping experience while
+    // own-site checkout is inactive. Do not lead with an operational warning.
+    // Keep a visible recovery/error panel only when availability cannot be
+    // checked (or an earlier payment attempt must be recovered separately).
+    if(prelaunch)prelaunch.hidden=!error;
+    if(commerce){commerce.hidden=!error;commerce.dataset.mode=error?'prelaunch':'partners'}
     const steps=$('amDirectPurchaseSteps');
     if(steps)steps.hidden=true;
     const title=$('checkoutTitle');
