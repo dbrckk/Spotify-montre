@@ -17,6 +17,10 @@ assert.deepEqual(
 const unread={...base,supplierUnread:true,operatorReviewRequired:true,
   supplierMessageCount:1,latestSupplierMessageDate:'2026-11-06'};
 assert.equal(evaluateQuoteWatchSignal(unread).state,'supplier_review_required');
+// An already-read supplier reply must still open the single operator task.
+const readReply={...unread,supplierUnread:false};
+assert.equal(evaluateQuoteWatchSignal(readReply).state,'supplier_review_required');
+assert.equal(evaluateQuoteWatchSignal(readReply).attention,true);
 for(const state of ['AWAITING_YOUR_REPLY','COMPLETED','EXPIRED','REVIEWED',
   'ON_HOLD','COLLABORATING','UNKNOWN']){
   const v={...unread,supplierUnread:false,supplierStatus:state};
