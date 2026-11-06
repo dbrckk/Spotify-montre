@@ -50,6 +50,8 @@ assert.equal(readStorefrontCheckoutPermit(backend,{
 // succeed solely on env configuration while the website remains inactive.
 const server=readFileSync(new URL('./server.mjs',import.meta.url),'utf8');
 assert.match(server,/const merchantReady=\(\)=>enabled&&readStorefrontCheckoutPermit\(backendUrl\)/);
+assert.match(server,/readStorefrontCheckoutPermit\(backendUrl\)&&\s+merchantPublicationPermitted\(\)/,
+  'A seller must publish and version-pin verified legal documents before charging anyone');
 assert.match(server,/if\(!merchantReady\(\)\)[\s\S]{0,200}throw new ClientError\('Vente directe désactivée/);
 assert.match(server,/authorizeBeforeDebit:async\(\)=>\{[\s\S]{0,350}if\(!merchantReady\(\)\)/);
 console.log('Storefront/backend checkout interlock OK: prelaunch refuses all payments and CJ orders');
