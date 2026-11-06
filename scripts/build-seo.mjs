@@ -357,7 +357,7 @@ import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
   if(!publicHome.includes('<link rel="stylesheet" href="./public-home.css">')||
      !publicHome.includes('id="collection"')||!publicHome.includes('id="faq"'))
     throw Error('Public homepage template missing: refusing to publish an outdated prelaunch page');
-  publicHome=publicHome.replace(/<!-- AM_PUBLIC_SEO_START -->[\\s\\S]*?<!-- AM_PUBLIC_SEO_END -->/g,'');
+  publicHome=publicHome.replace(/<!-- AM_PUBLIC_SEO_START -->[\s\S]*?<!-- AM_PUBLIC_SEO_END -->/g,'');
   const publicSchema=schema({'@context':'https://schema.org','@graph':[
     {'@type':'WebSite',name:'Atelier Montres',url:homepage,inLanguage:'fr-FR'},
     {'@type':'WebPage',name:'Atelier Montres — 52 montres à découvrir et comparer',
