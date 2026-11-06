@@ -158,6 +158,23 @@ for(const privateValue of [privateText,'<script>','private.pdf',
   assert.ok(!JSON.stringify(receivedReport).includes(privateValue));
 }
 assert.equal(createCount(received),0);
+// A support reply may be marked read while CJ leaves the ticket in the
+// old waiting state. The existence of supplier correspondence is still an
+// actionable signal and must never be mistaken for "no response".
+const readReply=fakeTicketApi({
+  total:1,existingTicket:9001,status:'AWAITING_CJ_REPLY',unread:false,
+  messages:[{sender:'CJ',messageTime:nowTime,messageText:privateText}]
+});
+const readReplyReport=await checkWrittenCjQuote({
+  accessToken:token,fetcher:readReply.fetcher
+});
+assert.equal(readReplyReport.supplierUnread,false);
+assert.equal(readReplyReport.supplierStatus,'AWAITING_CJ_REPLY');
+assert.equal(readReplyReport.supplierMessageCount,1);
+assert.equal(readReplyReport.operatorReviewRequired,true);
+assert.equal(supplierTicketNeedsAttention(readReplyReport),true);
+assert.ok(!JSON.stringify(readReplyReport).includes(privateText));
+assert.equal(createCount(readReply),0);
 const malformed=fakeTicketApi({total:1,existingTicket:9001,
   status:'AWAITING_CJ_REPLY',badMessageResponse:{
     total:100,list:[{sender:'CJ',messageTime:nowTime,messageText:'private'}]}});
