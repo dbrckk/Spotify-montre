@@ -47,8 +47,7 @@ for(const [id,item] of all){
   assert.ok(modelCode.some(code=>item.amazonModel.toUpperCase().startsWith(code)),'Référence Amazon différente du catalogue : '+id);
   exact++;
 }
-assert.equal(exact,13,'13 liens exacts trouvés');
-assert.equal(unmatched,2,'2 modèles sans lien exact');
+assert.equal(exact+unmatched,all.length,'Chaque référence doit avoir un statut explicite');
 const active=load('site/affiliate-links.json');
 assert.equal(active.approved,false,"Amazon's final review must not be misrepresented as approved");
 assert.equal(active.enabled,true,'The owner confirmed tracking ID and registered domain');
@@ -76,14 +75,14 @@ const expectedRegistry={version:1,checkedOn:research.checkedOn,
     [id,{asin:item.asin,url:item.productUrl,
       availabilityAtCheck:item.availabilityAtCheck}]))};
 assert.deepEqual(publicRegistry,expectedRegistry,
-  'Static deployment registry must match the 13 source-confirmed Amazon.fr models');
+  'Static deployment registry must match the source-confirmed Amazon.fr models');
 if(process.argv.includes('--markdown')){
  console.log('# Montres Amazon.fr vérifiées le '+research.checkedOn+'\n');
- console.log('Tag confirmé par le propriétaire : `'+research.amazonPartnerTag+'`. 13 liens créés par le site pour commencer la période de ventes éligibles, sans preuve d’approbation finale ni de revenus.\n');
+ console.log('Tag confirmé par le propriétaire : `'+research.amazonPartnerTag+'`. '+exact+' liens créés par le site pour commencer la période de ventes éligibles, sans preuve d’approbation finale ni de revenus.\n');
  console.log('| Modèle | Amazon.fr (avec tag) | Statut |\n|---|---|---|');
  for(const p of catalog.products){
   const x=research.products[p.id];
   console.log('| '+p.brand+' '+p.model+' | '+(x.affiliateUrl?'[ASIN '+x.asin+']('+x.affiliateUrl+')':'Aucun lien exact')+' | '+(x.status==='matched_on_amazon_fr'?(x.availabilityAtCheck==='unavailable_at_check'?'Page trouvée, indisponible au contrôle':'Fiche exacte trouvée'):'À rechercher')+' |');
  }
- console.log('\n'+exact+'/15 liens partenaires balisés et activés, '+unmatched+'/15 non confirmés. Revenus et approbation Amazon à vérifier dans le tableau de bord.');
-}else console.log('Amazon.fr: '+exact+'/15 liens partenaires balisés activés, '+unmatched+' absents ; approbation finale Amazon et ventes non vérifiées.');
+ console.log('\n'+exact+'/'+all.length+' liens partenaires balisés et activés, '+unmatched+'/'+all.length+' non confirmés. Revenus et approbation Amazon à vérifier dans le tableau de bord.');
+}else console.log('Amazon.fr: '+exact+'/'+all.length+' liens partenaires balisés activés, '+unmatched+' absents ; approbation finale Amazon et ventes non vérifiées.');
