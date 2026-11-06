@@ -287,6 +287,26 @@ try{
   assert.equal(recoverCount,1);
   assert.equal(postCount,2,'Frozen storefront must not create a third checkout POST');
   await frozenTab.close();
+
+  // Two different pending SKUs must remain individually recoverable. The
+  // absence of ?modele must not make both attempts inaccessible on Android.
+  const multiTab=await recoveryContext.newPage();
+  await multiTab.addInitScript(()=>{
+    localStorage.setItem('am_checkout_pending_v1_ci-watch-extra','c'.repeat(32));
+  });
+  await multiTab.goto(new URL('acheter.html',base).href,
+    {waitUntil:'domcontentloaded'});
+  await multiTab.locator('#amDirectForm').waitFor({state:'visible'});
+  assert.equal(await multiTab.locator('#amDirectOffers option').count(),2);
+  assert.equal(await multiTab.locator('#amDirectOffers').isEnabled(),true);
+  await multiTab.locator('#amDirectOffers').selectOption('ci-watch-only');
+  await enterCheckout(multiTab);
+  await multiTab.locator('#amDirectSubmit').click();
+  await multiTab.waitForFunction(()=>document.querySelector('#amDirectStatus')
+    ?.textContent?.includes('en cours de préparation'));
+  assert.equal(recoverCount,2);
+  assert.equal(postCount,2,'Multi-attempt recovery must never create a new payment');
+  await multiTab.close();
   await recoveryContext.close();
 
   // Storage denied by Android privacy/browser settings must fail BEFORE any
