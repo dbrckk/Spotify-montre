@@ -11,7 +11,9 @@
   const status=document.getElementById('amPartnerStatus');
   const filters=document.getElementById('amPartnerFilters');
   const retry=document.getElementById('amPartnerRetry');
-  if(!root||!grid||!status||!filters||!retry)return;
+  const unmatched=document.getElementById('amPartnerUnmatched');
+  const unmatchedLink=document.getElementById('amPartnerUnmatchedLink');
+  if(!root||!grid||!status||!filters||!retry||!unmatched||!unmatchedLink)return;
 
   const idPattern=/^[a-z0-9-]{4,64}$/;
   const asinPattern=/^[A-Z0-9]{10}$/;
@@ -143,7 +145,7 @@
       evidenceType:p.merchantEvidenceType,variant:p.marketplaceVariant||null
     }));
   };
-  let catalog=[],selected='all',featured=null,loading=false;
+  let catalog=[],selected='all',featured=null,loading=false,expanded=false;
   function render(){
     const shown=selected==='all'?catalog:catalog.filter(({product})=>product.tier===selected);
     // Preserve exact product intent from /acheter.html?modele=..., but keep
@@ -219,6 +221,11 @@
     grid.replaceChildren(...cards);
     const focusVisible=featured&&shown.some(x=>x.product.id===featured);
     const selectedProduct=focusVisible?catalog.find(x=>x.product.id===featured)?.product:null;
+    const unmatchedRequested=Boolean(expanded&&featured&&
+      !catalog.some(x=>x.product.id===featured));
+    unmatched.hidden=!unmatchedRequested;
+    if(unmatchedRequested)unmatchedLink.href=
+      './montres/toutes-les-montres.html?q='+encodeURIComponent(featured);
     status.textContent=shown.length+' modèle'+(shown.length===1?'':'s')+
       ' avec référence Amazon.fr documentée'+(shown.length===1?'':'s')+
       ' · disponibilité actuelle non garantie'+
@@ -239,6 +246,8 @@
   async function init(){
     if(loading)return;
     loading=true;
+    expanded=false;
+    unmatched.hidden=true;
     retry.hidden=true;
     retry.disabled=true;
     status.textContent='Vérification des références partenaires…';
@@ -273,6 +282,8 @@
             root.scrollIntoView({block:'start',behavior:'auto'});
         }
       }catch{/* Keep the thirteen validated models; never invent a product exit. */}
+      expanded=true;
+      render();
     }catch{
       // Fail closed: no previously displayed checkout exits may survive
       // a failed refresh or a tampered source.
@@ -280,6 +291,7 @@
       featured=null;
       grid.replaceChildren();
       filters.hidden=true;
+      unmatched.hidden=true;
       status.textContent='Les références partenaires ne sont pas vérifiables actuellement. Réessayez ou consultez les fiches du catalogue.';
       retry.hidden=false;
     }finally{
