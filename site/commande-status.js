@@ -31,22 +31,32 @@
     status.textContent='Suivi disponible uniquement depuis le navigateur qui a initié l’achat. Aucune confirmation de paiement n’est présumée.';
     return;
   }
-  let api;
+  // Existing customer orders must remain traceable when the merchant pauses
+  // NEW checkout. Status access is independently authenticated by the
+  // backend with the order ID and private order token.
+  async function requestJson(url,options={},timeoutMs=15000){
+    const controller=new AbortController();
+    const timeout=setTimeout(()=>controller.abort(),timeoutMs);
+    try{
+      const response=await fetch(url,{...options,signal:controller.signal});
+      return {response,data:await response.json()};
+    }finally{clearTimeout(timeout)}
+  }
   async function load(){
     refresh.disabled=true;
     try{
-      const configResponse=await fetch('./config.json',{cache:'no-store'});
+      const {response:configResponse,data:config}=await requestJson(
+        './config.json',{cache:'no-store'},8000);
       if(!configResponse.ok)throw Error();
-      const config=await configResponse.json();
-      if(config.checkoutMode!=='active')throw Error();
+      // Sale mode is deliberately NOT checked here. An emergency checkout
+      // shutdown must never revoke a customer's existing order-tracking path.
       const url=new URL(config.commerceApiUrl);
       if(url.protocol!=='https:'||url.username||url.password||url.pathname!=='/'||
         !url.hostname.endsWith('.onrender.com'))throw Error();
-      api=url.origin;
-      const result=await fetch(api+'/api/orders/'+orderId,{
-        headers:{'X-Order-Token':token},cache:'no-store'});
+      const {response:result,data}=await requestJson(
+        url.origin+'/api/orders/'+orderId,
+        {headers:{'X-Order-Token':token},cache:'no-store'},15000);
       if(!result.ok)throw Error();
-      const data=await result.json();
       if(data.orderId!==orderId||!Object.hasOwn(stateNames,data.status))throw Error();
       status.textContent=stateNames[data.status];
       output('amOrderProduct').textContent=String(data.product||'Modèle non disponible').slice(0,180);
@@ -75,7 +85,10 @@
       details.hidden=false;
       refresh.hidden=false;
     }catch{
-      status.textContent='Suivi temporairement indisponible. Aucun paiement ou envoi n’est considéré comme confirmé.';
+      // Do not leave previous tracking details visible as if they had just
+      // been confirmed during an API outage or a failed authentication.
+      details.hidden=true;
+      status.textContent='Suivi temporairement indisponible. Aucun nouvel état de paiement ou d’envoi n’est confirmé. Réessayez ou contactez Atelier Montres.';
       refresh.hidden=false;
     }finally{refresh.disabled=false;}
   }
