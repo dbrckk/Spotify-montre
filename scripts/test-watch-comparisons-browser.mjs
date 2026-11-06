@@ -17,7 +17,7 @@ const checkWidth=async(page,name)=>{
 try{
   const page=await browser.newPage({viewport:{width:393,height:852},isMobile:true,hasTouch:true,locale:'fr-FR'});
   page.on('pageerror',e=>errors.push('mobile: '+e.message));
-  const home=await page.goto(new URL('/',origin).href,{waitUntil:'domcontentloaded',timeout:30000});
+  const home=await page.goto(new URL('/affiliation.html',origin).href,{waitUntil:'domcontentloaded',timeout:30000});
   assert.ok(home?.ok(),'Built homepage should be available');
   await page.locator('#comparaisons').waitFor({state:'visible'});
   assert.equal(await page.locator('#comparaisons .seo-guide-grid article').count(),4,'Four comparison choices');
