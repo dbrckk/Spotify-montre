@@ -84,5 +84,5 @@ if(process.argv.includes('--markdown')){
   const x=research.products[p.id];
   console.log('| '+p.brand+' '+p.model+' | '+(x.affiliateUrl?'[ASIN '+x.asin+']('+x.affiliateUrl+')':'Aucun lien exact')+' | '+(x.status==='matched_on_amazon_fr'?(x.availabilityAtCheck==='unavailable_at_check'?'Page trouvée, indisponible au contrôle':'Fiche exacte trouvée'):'À rechercher')+' |');
  }
- console.log('\n'+exact+'/15 liens partenaires balisés et activés, '+unmatched+'/15 non confirmés. Revenus et approbation Amazon à vérifier dans le tableau de bord.');
+ console.log('\n'+exact+'/'+all.length+' liens partenaires balisés et activés, '+unmatched+'/'+all.length+' non confirmés. Revenus et approbation Amazon à vérifier dans le tableau de bord.');
 }else console.log('Amazon.fr: '+exact+'/'+all.length+' liens partenaires balisés activés, '+unmatched+' absents ; approbation finale Amazon et ventes non vérifiées.');
