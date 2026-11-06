@@ -28,7 +28,7 @@
     }finally{clearTimeout(timeout)}
   }
   const euro=c=>new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR'}).format(c/100);
-  let api='',list=[];
+  let api='',list=[],recoveryOnly=false;
   function validHost(raw){
     try{const u=new URL(raw);return u.protocol==='https:'&&u.pathname==='/'&&!u.search&&!u.hash
       &&!u.username&&!u.password&&u.port===''&&u.hostname.endsWith('.onrender.com')?u.origin:null}
@@ -62,6 +62,45 @@
     try{sessionStorage.removeItem(orderKey(id))}catch{}
     try{localStorage.removeItem(persistentKey(id))}catch{}
   }
+  function recoverableOffer(){
+    try{
+      const params=new URLSearchParams(location.search);
+      const requested=params.get('modele');
+      const prefix='am_checkout_pending_v1_';
+      const ids=[];
+      for(let i=0;i<localStorage.length;i++){
+        const key=localStorage.key(i);
+        if(key?.startsWith(prefix)){
+          const id=key.slice(prefix.length);
+          if(/^[a-z0-9-]{4,64}$/.test(id)&&
+            /^[A-Za-z0-9_-]{16,90}$/.test(localStorage.getItem(key)||''))ids.push(id);
+        }
+      }
+      if(requested)return ids.includes(requested)?requested:null;
+      return ids.length===1?ids[0]:null;
+    }catch{return null}
+  }
+  function showRecovery(){
+    const id=recoverableOffer();
+    if(!id||!api)return false;
+    recoveryOnly=true;
+    list=[{id,label:'Tentative de commande précédente'}];
+    const option=document.createElement('option');
+    option.value=id;option.textContent='Référence de tentative : '+id;
+    offers.replaceChildren(option);offers.disabled=true;
+    if(prelaunch)prelaunch.hidden=true;
+    if(commerce)commerce.hidden=false;
+    if(unavailable)unavailable.hidden=true;
+    if(heading)heading.replaceChildren('Retrouver une tentative précédente');
+    if(lead)lead.textContent='Les nouvelles ventes sont suspendues. Si vous avez déjà tenté un paiement, ressaisissez les mêmes informations de livraison pour retrouver cette tentative. Aucun nouveau paiement ne sera créé.';
+    if(price)price.textContent='Aucun nouveau prix ni achat proposé';
+    if(delivery)delivery.textContent='Récupération d’une tentative existante uniquement.';
+    const button=$('amDirectSubmit');
+    if(button)button.textContent='Retrouver ma tentative (sans nouvel achat)';
+    form.hidden=false;
+    show('Cette opération recherche uniquement une commande déjà enregistrée.');
+    return true;
+  }
   async function init(){
     let config;
     try{
@@ -69,7 +108,9 @@
       if(!response.ok)throw Error('Configuration unavailable');
       config=data;
     }catch{return showPrelaunch('La disponibilité des achats directs ne peut pas être vérifiée actuellement.',true)}
-    if(config.checkoutMode!=='active'||!(api=validHost(config.commerceApiUrl))){
+    api=validHost(config.commerceApiUrl)||'';
+    if(config.checkoutMode!=='active'||!api){
+      if(showRecovery())return;
       return showPrelaunch('Aucun paiement direct n’est actuellement ouvert. Découvrez les modèles présentés ci-dessous.');
     }
     try{
@@ -81,7 +122,10 @@
         &&typeof x.label==='string'&&
         Number.isSafeInteger(x.deliveryMinDays)&&x.deliveryMinDays>=1&&
         Number.isSafeInteger(x.deliveryMaxDays)&&x.deliveryMaxDays>=x.deliveryMinDays&&x.deliveryMaxDays<=120):[];
-      if(!data.checkoutEnabled||!list.length)return showPrelaunch('Aucune montre n’est actuellement disponible en achat direct. Découvrez notre sélection de modèles documentés.');
+      if(!data.checkoutEnabled||!list.length){
+        if(showRecovery())return;
+        return showPrelaunch('Aucune montre n’est actuellement disponible en achat direct. Découvrez notre sélection de modèles documentés.');
+      }
       const params=new URLSearchParams(location.search);
       const selected=params.get('modele');
       // An exact product deep link must never silently select another watch.
@@ -111,12 +155,16 @@
       if(lead)lead.textContent='Votre commande est passée auprès d’Atelier Montres. Choisissez une offre vérifiée, renseignez l’adresse de livraison et consultez le prix TTC avant le paiement sécurisé. Le suivi de votre commande restera disponible ici.';
       form.hidden=false;show('Le prix TTC de la montre sélectionnée est indiqué ci-dessous. Les frais et délais sont précisés avant validation.');
       updatePrice();
-    }catch{return showPrelaunch('Le service marchand ne répond pas. Aucun paiement n’a été demandé.',true)}
+    }catch{
+      if(showRecovery())return;
+      return showPrelaunch('Le service marchand ne répond pas. Aucun paiement n’a été demandé.',true);
+    }
   }
   const price=$('amDirectPrice');
   const delivery=$('amDirectDelivery');
   function updatePrice(){
     const item=list.find(x=>x.id===offers.value);
+    if(recoveryOnly)return;
     if(item&&price)price.textContent=euro(item.amountCents)+' TTC';
     if(delivery)delivery.textContent=item?
       'Délai de livraison annoncé : '+item.deliveryMinDays+' à '+item.deliveryMaxDays+
@@ -135,9 +183,9 @@
     payload.countryCode='FR';
     try{
       payload.idempotencyKey=preserveAttempt(item.id);
-      const {response,data:result}=await requestJson(api+'/api/checkout',{method:'POST',
+      const {response,data:result}=await requestJson(api+(recoveryOnly?'/api/checkout/recover':'/api/checkout'),{method:'POST',
         headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)},30000);
-      if(!response.ok)throw Error(result.error||'La commande n’a pas pu être préparée.');
+      if(!response.ok)throw Error(result.error||(recoveryOnly?'Cette tentative n’a pas pu être retrouvée.':'La commande n’a pas pu être préparée.'));
       if(!/^ord_[a-f0-9]{40}$/.test(result.orderId||'')||
         typeof result.orderToken!=='string'||result.orderToken.length<30)
         throw Error('Réponse de commande invalide');
