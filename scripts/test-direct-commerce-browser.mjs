@@ -69,9 +69,14 @@ try{
     'Prelaunch must not overflow a narrow Android screen');
   await page.goto(new URL('acheter.html?modele=citizen-tsuyosa',base).href,
     {waitUntil:'domcontentloaded'});
-  await page.locator('#amDirectUnavailable').waitFor({state:'visible'});
+  await page.waitForFunction(()=>
+    document.getElementById('amDirectStatus')?.textContent.includes('Aucun paiement direct')
+  );
+  assert.equal(await page.locator('#amDirectUnavailable').isVisible(),false,
+    'An inactive checkout is not proof that an exact partner watch is unavailable');
+  assert.equal(await page.locator('#amPartnerSelection').isVisible(),true);
   assert.equal(await page.locator('#amDirectForm').isVisible(),false,
-    'An unavailable deep-linked model must never open the payment form');
+    'A partner deep link must never open the direct payment form');
   await page.unroute('**/config.json');
 
   // CI fake storefront gate: exercise the future valid state but NEVER submit
