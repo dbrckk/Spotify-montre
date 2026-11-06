@@ -1,0 +1,81 @@
+name: CJ pilot written quote — read-only watch
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '23 8 * * *'
+  # Run once when first merged; subsequent supplier checks are daily only.
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/cj-pilot-written-quote-watch.yml'
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: cj-pilot-quote-readonly
+  cancel-in-progress: false
+
+jobs:
+  supplier-written-quote:
+    name: CJ supplier reply for first watch (no purchase)
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check if CJ credential is available without revealing it
+        id: credentials
+        shell: bash
+        env:
+          CJ_API_KEY: ${{ secrets.CJ_API_KEY }}
+        run: |
+          if [[ -n "$CJ_API_KEY" ]]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Read existing CJ ticket status, never submit an order or ticket
+        if: steps.credentials.outputs.ready == 'true'
+        id: quote
+        shell: bash
+        env:
+          CJ_API_KEY: ${{ secrets.CJ_API_KEY }}
+        run: |
+          set -euo pipefail
+          node commerce/cj-quote-ticket.mjs status > "$RUNNER_TEMP/cj-ticket-readonly.json"
+          node commerce/cj-quote-watch-signal.mjs "$RUNNER_TEMP/cj-ticket-readonly.json"
+      - name: Create a single operator follow-up issue for CJ response
+        if: steps.quote.outputs.attention == 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          MARKER='AM-CJ-FR-QUOTE-20261104-CJZBNSET00031'
+          EXISTING="$(gh issue list --state all --search "$MARKER in:title" --json number --jq '.[0].number // empty' --limit 100)"
+          if [[ -z "$EXISTING" ]]; then
+            gh issue create \
+              --title "CJ supplier reply needs review — $MARKER" \
+              --body "A read-only CJ ticket check found new supplier correspondence or a status requiring review for the single pilot watch CJZBNSET00031-black. Open the CJdropshipping support portal and inspect the signed reply privately. Confirm full delivered price, import VAT, customs and handling, DDP/DAP, delivery, watch/battery safety, and exact VID/SKU before staging any offer. This is not evidence of an approved quote, paid order, stocked item or permission to activate payments. No customer checkout, supplier purchase, wallet debit or ticket submission was performed by this workflow."
+          else
+            echo "Existing supplier follow-up issue #$EXISTING retained; no duplicate created."
+          fi
+      - name: Block automatic approval when supplier needs review
+        if: steps.quote.outputs.attention == 'true'
+        shell: bash
+        run: |
+          echo "::error::CJ supplier reply needs human source review; never activate checkout from ticket status."
+          exit 1
+      - name: Report an unconfigured GitHub secret
+        if: steps.credentials.outputs.ready == 'false'
+        shell: bash
+        run: |
+          echo "CJ_API_KEY is not available to this workflow. The supplier ticket has not been checked." >> "$GITHUB_STEP_SUMMARY"
+          echo "::error::CJ pilot quote cannot be checked until its existing private GitHub secret is connected."
+          exit 1

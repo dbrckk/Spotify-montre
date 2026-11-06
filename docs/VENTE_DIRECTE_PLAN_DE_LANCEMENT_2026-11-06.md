@@ -18,6 +18,19 @@
 - Un ticket CJ de devis livraison/conformité est ouvert pour le candidat `CJZBNSET00031-black` : réponse écrite et coût final livré non encore attestés dans le contexte disponible. Ne pas interpréter le ticket comme une offre approuvée.
 - Identité légale du vendeur, CGV complètes, médiateur, garantie, retour, importation, TVA, preuve de droits image, compte Mollie live/KYC, financement du portefeuille CJ, devis et identité variante exacts : preuves d'activation **non toutes constatées**.
 
+## Surveillance concrète du premier fournisseur
+
+Le code versionné comprend le contrôle **en lecture seule** de la demande écrite déjà ouverte pour `CJZBNSET00031-black` (marqueur `AM-CJ-FR-QUOTE-20261104-CJZBNSET00031`). La consultation automatique est définie dans `.github/workflows/cj-pilot-written-quote-watch.yml` : une exécution à l'intégration initiale, puis chaque jour à 08:23 UTC, et déclenchement manuel possible dans GitHub Actions.
+
+- Le job utilise uniquement le secret GitHub `CJ_API_KEY`, jamais un jeton public. Sans secret ou en cas de panne API, **le contrôle échoue** : il ne prétend pas avoir reçu une réponse.
+- Seuls la date, l'état et le nombre de messages fournisseurs **sanitisés** sont traités ; ni correspondance privée, ni identifiant de ticket privé ne sont publiés.
+- Une nouvelle réponse, un message non lu ou un état demandant intervention ouvre **au maximum une issue GitHub** associée à la référence du devis. Une répétition du contrôle ne crée pas de doublon. L'issue signale un contrôle humain nécessaire, **pas** un accord commercial.
+- Le workflow n'appelle jamais la création de commande CJ, le portefeuille, l'API de caisse, ni la création d'un nouveau ticket fournisseur.
+- Le seul chemin vers une mise en vente reste la **preuve écrite** du coût rendu en France (TVA, transport, droits, dédouanement, frais), des identifiants fournisseur (PID + VID + SKU), de l'importateur et de la conformité, suivie des contrôles documentés ci-dessous.
+- Sur Android : GitHub → `dbrckk/Spotify-montre` → **Actions** → **CJ pilot written quote — read-only watch** → **Run workflow** ; le résultat figure dans le résumé du job. Si le fournisseur a répondu, ouvrir l'issue créée et consulter son portail CJ pour examiner le document de façon privée.
+
+**Ne pas interpréter un job « vert » comme une approbation du devis** : cela signifie seulement que le ticket est encore en attente et que la récupération des métadonnées n'a pas échoué.
+
 ## Ordre de lancement (pilote : une seule référence)
 
 1. **Vendeur responsable** : immatriculation et identité légale réelles, contact SAV, CGV, livraison, rétractation, garanties et politique de données ; ni adresses fictives ni clauses inventées.
