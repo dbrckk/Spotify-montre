@@ -117,6 +117,21 @@ try{
   });
   assert.equal(await heroPhoto.evaluate(img=>img.naturalWidth>0),true,
     'Real photograph must load in the public homepage hero');
+  for(const photo of await home.locator('.home-product-card img').all()){
+    await photo.scrollIntoViewIfNeeded();
+    await photo.evaluate(async img=>{
+      if(!img.complete)await new Promise(resolve=>{
+        img.addEventListener('load',resolve,{once:true});
+        img.addEventListener('error',resolve,{once:true});
+      });
+    });
+    assert.ok(await photo.evaluate(img=>img.naturalWidth>100),
+      'Every featured public watch must have a real, decodable local photograph');
+  }
+  assert.equal(await home.locator('.home-choice[href="./affiliation.html#selection-accessible"]').count(),1,
+    'Budget shoppers must land on the photographed affordable collection');
+  assert.equal(await home.getByRole('button',{name:/Une question \?/}).count(),1,
+    'Visible question button must have a matching accessible name');
   assert.deepEqual(homeErrors,[]);
   await home.close();
 
