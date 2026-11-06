@@ -37,7 +37,14 @@
       // Direct merchant purchases take priority over external referrals, but
       // only when an actual qualified offer was returned by the live API.
       // All other watches retain their pre-existing editorial/partner links.
-      anchor.prepend(offerLink(id,offerMap.get(id)));
+      const buy=offerLink(id,offerMap.get(id));
+      if(card.classList.contains('home-product-card')){
+        // Keep the model name, photo and short description at the top;
+        // place the real buy action immediately before editorial details.
+        const details=anchor.querySelector('a[href*="montre.html?id="]');
+        if(details)anchor.insertBefore(buy,details);
+        else anchor.append(buy);
+      }else anchor.prepend(buy);
       if(card.classList.contains('watch-product')){
         const notice=card.querySelector('.disclosure');
         if(notice)notice.textContent=notice.textContent.replace(
