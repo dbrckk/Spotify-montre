@@ -172,7 +172,9 @@
       const cover=element('a','am-partner-cover');
       const productDetail=detailUrl||'./montre.html?id='+encodeURIComponent(p.id);
       cover.href=productDetail;
-      cover.setAttribute('aria-label','Découvrir '+p.brand+' '+p.model);
+      // Let the real photo alt text or the honest no-photo caption become
+      // the accessible name. A shorter aria-label would hide visible text
+      // from speech input and violate WCAG label-in-name.
       const picture=photoUrl===undefined
         ?p.photoReview.localUrl+'?v='+p.photoReview.localSha256.slice(0,12)
         :photoUrl;
