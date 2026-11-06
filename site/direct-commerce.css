@@ -120,3 +120,12 @@ body{background:var(--am-cream);color:var(--am-ink);margin:0}
 .am-partner-unmatched a{display:inline-flex;align-items:center;min-height:44px;font-size:13px}
 .am-partner-unmatched a:focus-visible,.am-partner-fine a:focus-visible{outline:3px solid #a57629;outline-offset:3px}
 @media(max-width:480px){.am-partner-no-photo{min-height:156px;padding:11px;gap:7px}.am-partner-no-photo strong{font-size:22px}.am-partner-no-photo small{font-size:10px}}
+
+/* Find a specific verified model before scrolling through merchant referrals. */
+.am-partner-search{display:flex;flex-direction:column;flex-basis:100%;max-width:620px;gap:8px;margin-bottom:6px}
+.am-partner-search label{font:750 13px/1.4 system-ui,sans-serif;color:#284933}
+.am-partner-search input{box-sizing:border-box;width:100%;min-height:50px;border:1px solid #9cac99;border-radius:9px;background:#fffdf9;color:#203e2c;padding:12px 15px;font:500 15px/1.45 system-ui,sans-serif}
+.am-partner-search input:focus-visible{outline:3px solid #a57629;outline-offset:3px}
+.am-partner-empty{border:1px solid #c7d7c2;border-radius:9px;background:#f4f8f2;padding:17px;color:#36543e;font:500 14px/1.65 system-ui,sans-serif}
+.am-partner-empty[hidden]{display:none}
+.am-partner-empty a{color:#1b5133;font-weight:750;text-underline-offset:4px}
