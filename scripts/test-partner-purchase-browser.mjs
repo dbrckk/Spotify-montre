@@ -29,7 +29,8 @@ try{
   assert.equal(await page.locator('.am-partner-card').count(),13);
   assert.equal(await page.locator('#amDirectForm').isVisible(),false,
     'Affiliate gateway must never activate the own-site merchant checkout');
-  assert.equal(await page.locator('#amDirectPrelaunch').isVisible(),true);
+  assert.equal(await page.locator('#amDirectCommerce').isVisible(),false,
+    'The inactive merchant checkout must not occupy customer-facing screen space');
   assert.equal(await page.locator('#amPartnerFilters').isVisible(),true);
   const cards=page.locator('.am-partner-card');
   for(let i=0;i<ids.length;i++){
@@ -200,7 +201,8 @@ try{
   const noJS=await browser.newPage({javaScriptEnabled:false});
   await noJS.goto(new URL('acheter.html',base).href,{waitUntil:'domcontentloaded'});
   assert.match(await noJS.locator('#amPartnerStatus').innerText(),/explorez les 15 fiches comparatives/);
-  assert.equal(await noJS.locator('#amDirectPrelaunch').isVisible(),true);
+  assert.equal(await noJS.locator('#amDirectCommerce').isVisible(),false,
+    'A disabled direct checkout must remain hidden even without JavaScript');
   await noJS.close();
 
   // All the real shopping entrypoints must display the same dated source
