@@ -308,6 +308,17 @@ try{
     config.links['casio-mtp-1302'].url);
   assert.equal(await detail.locator('#detailAmazon').isVisible(),false,
     'Paid Amazon product should have one prominent affiliate CTA, no duplicate link');
+  assert.equal(await detail.locator('.detail-buyer-guide li').count(),3,
+    'Every detail needs three concrete checks before placing a merchant order');
+  assert.match(await detail.locator('.detail-disclosure').innerText(),/Lien rémunéré/i,
+    'Paid seller link must carry an explicit consumer disclosure');
+  assert.match(await detail.locator('.detail-buyer-guide').innerText(),/prix total/i);
+  assert.equal(new URL(await detail.locator('#detailBackToResults').getAttribute('href'),detail.url()).pathname,
+    '/montres/toutes-les-montres.html',
+    'Visitors coming from the public home must return to the 52-watch catalogue');
+  assert.equal(new URL(await detail.locator('#detailCompare').getAttribute('href'),detail.url()).pathname,
+    '/affiliation.html',
+    'The detailed compare action must open the real 15-watch comparison interface');
   const detailWidth=await detail.evaluate(()=>({
     client:document.documentElement.clientWidth,
     scroll:document.documentElement.scrollWidth
@@ -324,7 +335,35 @@ try{
     'A model without an exact Amazon ASIN must not receive a compensated link');
   assert.match(await missing.locator('#detailAmazon').getAttribute('href'),/^https:\/\/www\.amazon\.fr\/s\?k=/,
     'Unknown ASIN must remain an explicit generic search, not a substituted product');
+  assert.match(await missing.locator('.detail-sub').innerText(),/recherche.*offre vérifiée/i,
+    'Generic merchant search must never look like a verified product offer');
+  assert.doesNotMatch(await missing.locator('.detail-disclosure').innerText(),
+    /aucune commission d'affiliation active/i,
+    'Unpaid fallback must not falsely deny active affiliate commissions elsewhere');
   await missing.close();
+
+  // Shoppers must always have a useful path if their browser disables scripts.
+  const noscript=await browser.newPage({javaScriptEnabled:false,viewport:{width:320,height:740}});
+  await noscript.goto(new URL('montre.html?id=casio-mtp-1302',base).href,{waitUntil:'load'});
+  assert.equal(await noscript.locator('.detail-nojs').isVisible(),true);
+  assert.equal(await noscript.locator('.detail-nojs .button').getAttribute('href'),
+    './montres/toutes-les-montres.html');
+  assert.equal(await noscript.locator('#detailStatus').isVisible(),false);
+  await noscript.close();
+
+  // An unavailable editorial feed must never trap buyers on a loading screen.
+  const failedFeed=await browser.newPage({viewport:{width:390,height:840}});
+  const failures=[];
+  failedFeed.on('pageerror',e=>failures.push(e.message));
+  await failedFeed.route('**/selection-affiliation.json',route=>route.abort('failed'));
+  await failedFeed.goto(new URL('montre.html?id=casio-mtp-1302',base).href,
+    {waitUntil:'domcontentloaded'});
+  await failedFeed.locator('#detailError').waitFor({state:'visible'});
+  assert.equal(await failedFeed.locator('#detailShell').isVisible(),false);
+  assert.equal(await failedFeed.locator('#detailError a').getAttribute('href'),
+    './montres/toutes-les-montres.html');
+  assert.deepEqual(failures,[]);
+  await failedFeed.close();
 
   console.log('Partner routes OK: showroom, 15-watch catalogue, interactive details, exact ASIN, documented stock and no internal charge');
 }finally{
