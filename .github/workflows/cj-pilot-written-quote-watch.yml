@@ -49,8 +49,8 @@ jobs:
           set -euo pipefail
           node commerce/cj-quote-ticket.mjs status > "$RUNNER_TEMP/cj-ticket-readonly.json"
           node commerce/cj-quote-watch-signal.mjs "$RUNNER_TEMP/cj-ticket-readonly.json"
-      - name: Create a single operator follow-up issue for CJ response
-        if: steps.quote.outputs.attention == 'true'
+      - name: Create a single operator issue if CJ replied or the ticket disappeared
+        if: ${{ always() && (steps.quote.outputs.attention == 'true' || steps.quote.outputs.blocked == 'true') }}
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -61,8 +61,8 @@ jobs:
           EXISTING="$(gh issue list --state all --search "$MARKER in:title" --json number --jq '.[0].number // empty' --limit 100)"
           if [[ -z "$EXISTING" ]]; then
             gh issue create \
-              --title "CJ supplier reply needs review — $MARKER" \
-              --body "A read-only CJ ticket check found new supplier correspondence or a status requiring review for the single pilot watch CJZBNSET00031-black. Open the CJdropshipping support portal and inspect the signed reply privately. Confirm full delivered price, import VAT, customs and handling, DDP/DAP, delivery, watch/battery safety, and exact VID/SKU before staging any offer. This is not evidence of an approved quote, paid order, stocked item or permission to activate payments. No customer checkout, supplier purchase, wallet debit or ticket submission was performed by this workflow."
+              --title "CJ pilot quote requires review — $MARKER" \
+              --body "Le contrôle en lecture seule du ticket CJ pour CJZBNSET00031-black a détecté une réponse fournisseur nécessitant vérification OU un ticket introuvable. Examiner le portail CJdropshipping et le ticket portant la référence $MARKER, sans publier les échanges privés. Vérifier le prix complet livré en France, transport, TVA, douane, dédouanement, DDP/DAP, sécurité de la montre à pile et correspondance VID/PID/SKU. Si aucun ticket n'existe, contrôler le compte CJ avant toute demande manuelle. Aucun devis n'est approuvé ; ne pas ouvrir l'encaissement. Le workflow n'a créé ni commande, ni paiement, ni débit du portefeuille CJ."
           else
             echo "Existing supplier follow-up issue #$EXISTING retained; no duplicate created."
           fi
