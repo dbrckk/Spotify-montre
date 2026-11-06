@@ -216,6 +216,8 @@ try{
   assert.match(await referred.locator('.am-partner-card').first().innerText(),
     /Indisponible lors du contrôle/);
   assert.equal(await referred.locator('#amDirectForm').isVisible(),false);
+  assert.equal(await referred.locator('#amDirectUnavailable').isVisible(),false,
+    'The requested Amazon watch must not be incorrectly labeled unavailable for purchase');
   await referred.locator('#amPartnerFilters button[data-tier=essential]').click();
   assert.equal(await referred.locator('.am-partner-card').count(),essential);
   await referred.locator('#amPartnerFilters button[data-tier=all]').click();
