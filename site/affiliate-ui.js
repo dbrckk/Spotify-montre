@@ -36,7 +36,8 @@
     const [catalog,config,feed]=await Promise.all([
       get('./amazon-product-links.json'),get('./affiliate-links.json'),get('./selection-affiliation.json')
     ]);
-    if(!Array.isArray(feed?.products)||feed.products.length!==15)return;
+    if(!Array.isArray(feed?.products)||feed.products.length===0||
+       new Set(feed.products.map(p=>p?.id)).size!==feed.products.length)return;
     const models=new Map(feed.products.filter(p=>watchId.test(p?.id||'')).map(p=>[p.id,p]));
     const plain=new Map(),observed=new Map();
     // The purchase gateway and the editorial catalogue must use the same
