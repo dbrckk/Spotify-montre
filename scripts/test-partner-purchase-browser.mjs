@@ -149,12 +149,12 @@ try{
   home.on('pageerror',error=>homeErrors.push(error.message));
   await home.goto(new URL('index.html',base).href,{waitUntil:'domcontentloaded'});
   assert.match(await home.locator('h1').innerText(),/Trouvez la montre/);
-  assert.equal(await home.locator('.home-product-card').count(),3);
+  assert.equal(await home.locator('.home-product-card').count(),6,'The public boutique presents two verified photos per budget tier');
   assert.equal(await home.locator('#siteStatus').count(),0,
     'Internal prelaunch status must not appear in the public site');
   assert.equal(await home.locator('#emptyState').count(),0,
     'The homepage must not present an empty catalog when real references exist');
-  assert.equal(await home.locator('.home-product-card a[href*="montre.html?id="]').count(),6);
+  assert.equal(await home.locator('.home-product-card a[href*="montre.html?id="]').count(),12,'Every featured watch offers image and detail navigation');
   for(const width of [320,390,1280]){
     await home.setViewportSize({width,height:width===1280?900:760});
     const sizes=await home.evaluate(()=>({
