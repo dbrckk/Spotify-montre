@@ -16,7 +16,8 @@ assert.match(baseCss, /prefers-reduced-motion/, 'Reduced motion rules required')
 assert.match(baseCss, /\[hidden\]\{display:none!important\}/, 'Hidden state CSS required');
 assert.match(markup, /href="\.\/affiliation\.html#montres"/, 'Main site must link to the 15 actual watch listings');
 assert.doesNotMatch(markup, /squareLink|storeState|Square Online/, 'No outbound checkout in current customer experience');
-assert.match(markup, /Aucune commande n'est encore acceptée/, 'Prelaunch should state no orders');
+assert.match(markup, /Achat, paiement et livraison chez le vendeur/, 'The public homepage must identify who sells');
+assert.doesNotMatch(markup, /Aucune commande n'est encore acceptée|Projet en préparation|Notre sélection se prépare|Stock et préparation des commandes en France à l'ouverture/, 'Do not expose obsolete launch banners or unverified delivery promises');
 assert.equal(typeof config,'object');
 assert.ok(['prelaunch','open'].includes(config.status), 'Valid commerce status');
 assert.ok(['inactive','embedded'].includes(config.checkoutMode), 'Offsite checkout is prohibited');
@@ -65,7 +66,7 @@ if (config.newsletterUrl !== null) {
 const selector = readFileSync(resolve(root, 'selection.html'), 'utf8');
 const selectorCss = readFileSync(resolve(root, 'selection.css'), 'utf8');
 const selectorJs = readFileSync(resolve(root, 'selection.js'), 'utf8');
-assert.match(markup, /href="\.\/selection\.html"/, 'Main site must link to watch selector');
+assert.match(markup, /href="\.\/conseiller\.html"/, 'Main site must link to the real multi-model advisor');
 assert.match(selector, /id="styleGrid"/, 'Style selector is missing its grid');
 assert.match(selector, /id="copyFav"/, 'Style shortlist must be shareable');
 assert.match(selector, /VISUELS?/i, 'Concept nature should be disclosed in selector');
@@ -78,4 +79,4 @@ assert.doesNotMatch(selectorJs, /innerHTML\s*=/, 'Never interpolate HTML from pr
 assert.doesNotMatch(selectorJs, /fetch\s*\(/, 'Concept selector should not send data anywhere');
 assert.doesNotMatch(selector, /type="submit"|paiement sécurisé|Ajouter au panier/, 'Do not present an unavailable checkout');
 
-console.log('Free storefront checks OK: prelaunch safety, layout, Square checkout gating, config.');
+console.log('Public storefront checks OK: real models, merchant transparency, responsive UI and disabled unverified checkout.');
