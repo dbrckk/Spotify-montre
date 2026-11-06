@@ -22,7 +22,10 @@ const env={
 };
 const siteConfig={checkoutMode:'active',commerceApiUrl:env.COMMERCE_PUBLIC_URL};
 const flags=merchantConfigurationChecks(env,siteConfig);
-assert.ok(Object.values(flags).every(Boolean),'configured synthetic pilot should pass checks');
+assert.equal(flags.merchant_publication_pinned_and_verified,false,
+  'A verified CJ quote and provider credentials cannot substitute for signed seller terms');
+assert.ok(Object.entries(flags).filter(([name])=>name!=='merchant_publication_pinned_and_verified')
+  .every(([,ok])=>ok),'Other synthetic merchant configuration checks should pass');
 assert.equal(merchantConfigurationChecks(env,{...siteConfig,
   commerceApiUrl:'https://wrong-payment-api.onrender.com/'})
   .storefront_checkout_targets_this_backend,false);

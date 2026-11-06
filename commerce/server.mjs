@@ -9,6 +9,7 @@ import {createDatabase,initializeDatabase,listApprovedOffers,reserveCheckout,sav
 import {ClientError,validateCheckoutBody,readJsonBody,readWebhookBody,openAddress} from './security.mjs';
 import {submitCjBalanceOrder,fetchCjOrder,preflightCjDelivery} from './cj.mjs';
 import {readStorefrontCheckoutPermit} from './merchant-gate.mjs';
+import {merchantPublicationPermitted} from './merchant-publication.mjs';
 
 const origin=process.env.STOREFRONT_ORIGIN||'https://atelier-montres-selection-fr.onrender.com';
 const enabled=process.env.COMMERCE_ENABLED==='true';
@@ -43,6 +44,7 @@ function safeHttps(u){
   catch{return false}
 }
 const merchantReady=()=>enabled&&readStorefrontCheckoutPermit(backendUrl)&&
+  merchantPublicationPermitted()&&
   dbReady&&pool&&
   /^live_[a-zA-Z0-9]{12,}$/.test(mollieKey)&&cjToken.length>=20&&
   /^[a-fA-F0-9]{64}$/.test(encryptionKey)&&idempotencySecret.length>=40&&
