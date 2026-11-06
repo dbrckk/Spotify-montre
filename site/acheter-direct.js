@@ -44,9 +44,10 @@
   }
   const euro=c=>new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR'}).format(c/100);
   let api='',list=[],recoveryOnly=false;
+  const EXPECTED_COMMERCE_ORIGIN='https://atelier-montres-commerce-api.onrender.com';
   function validHost(raw){
     try{const u=new URL(raw);return u.protocol==='https:'&&u.pathname==='/'&&!u.search&&!u.hash
-      &&!u.username&&!u.password&&u.port===''&&u.hostname.endsWith('.onrender.com')?u.origin:null}
+      &&!u.username&&!u.password&&u.port===''&&u.origin===EXPECTED_COMMERCE_ORIGIN?u.origin:null}
     catch{return null}
   }
   const orderKey=id=>'am_checkout_key_'+id;
