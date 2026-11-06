@@ -92,7 +92,13 @@
     if(commerce)commerce.hidden=false;
     if(unavailable)unavailable.hidden=true;
     if(heading)heading.replaceChildren('Retrouver une tentative précédente');
-    if(lead)lead.textContent='Les nouvelles ventes sont suspendues. Si vous avez déjà tenté un paiement, ressaisissez les mêmes informations de livraison pour retrouver cette tentative. Aucun nouveau paiement ne sera créé.';
+    if(lead)lead.textContent='Les nouvelles ventes sont suspendues. Si vous avez déjà tenté un paiement, ressaisissez exactement les mêmes informations pour retrouver cette tentative. Aucun nouveau paiement ne sera créé.';
+    // A recovery-only form must not show purchase promises, checkout terms
+    // or a four-step guide suggesting the customer will pay again.
+    for(const name of ['amDirectPurchaseHint','amDirectPaymentHint',
+      'amDirectPurchaseSteps']){
+      const element=$(name);if(element)element.hidden=true;
+    }
     if(price)price.textContent='Aucun nouveau prix ni achat proposé';
     if(delivery)delivery.textContent='Récupération d’une tentative existante uniquement.';
     const button=$('amDirectSubmit');
