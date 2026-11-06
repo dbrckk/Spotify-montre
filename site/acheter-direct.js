@@ -168,6 +168,8 @@
     }catch(error){
       if(error?.name==='AbortError')
         show('La réponse du paiement prend trop de temps. Votre tentative est conservée : réessayez avec le même bouton pour récupérer cette commande sans créer de deuxième paiement.',true);
+      else if(error instanceof TypeError)
+        show('Connexion interrompue : votre référence de paiement est conservée. Réessayez avec ce même modèle pour reprendre la tentative sans créer un deuxième paiement.',true);
       else
         show(error?.message||'Impossible de commencer le paiement. Votre référence reste conservée pour éviter une double facturation.',true);
       button.disabled=false;
