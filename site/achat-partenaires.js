@@ -13,7 +13,10 @@
   const retry=document.getElementById('amPartnerRetry');
   const unmatched=document.getElementById('amPartnerUnmatched');
   const unmatchedLink=document.getElementById('amPartnerUnmatchedLink');
-  if(!root||!grid||!status||!filters||!retry||!unmatched||!unmatchedLink)return;
+  const search=document.getElementById('amPartnerSearch');
+  const empty=document.getElementById('amPartnerEmpty');
+  if(!root||!grid||!status||!filters||!retry||!unmatched||!unmatchedLink||
+     !search||!empty)return;
 
   const idPattern=/^[a-z0-9-]{4,64}$/;
   const asinPattern=/^[A-Z0-9]{10}$/;
@@ -145,9 +148,18 @@
       evidenceType:p.merchantEvidenceType,variant:p.marketplaceVariant||null
     }));
   };
-  let catalog=[],selected='all',featured=null,loading=false,expanded=false;
+  let catalog=[],selected='all',query='',featured=null,loading=false,expanded=false;
+  const normalize=value=>String(value??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
   function render(){
-    const shown=selected==='all'?catalog:catalog.filter(({product})=>product.tier===selected);
+    const terms=normalize(query).split(' ').filter(Boolean);
+    const shown=catalog.filter(({product})=>{
+      if(selected!=='all'&&product.tier!==selected)return false;
+      if(!terms.length)return true;
+      const label=normalize([product.brand,product.model,product.id].join(' '));
+      const compact=label.replace(/\s+/g,'');
+      return terms.every(term=>label.includes(term)||compact.includes(term));
+    });
     // Preserve exact product intent from /acheter.html?modele=..., but keep
     // other independently verified references available for comparison.
     const ordered=featured&&selected==='all'?[...shown].sort((a,b)=>
@@ -219,6 +231,7 @@
       return card;
     });
     grid.replaceChildren(...cards);
+    empty.hidden=shown.length!==0;
     const focusVisible=featured&&shown.some(x=>x.product.id===featured);
     const selectedProduct=focusVisible?catalog.find(x=>x.product.id===featured)?.product:null;
     const unmatchedRequested=Boolean(expanded&&featured&&
@@ -240,6 +253,10 @@
     const button=event.target.closest?.('button[data-tier]');
     if(!button||!Object.hasOwn({...tierLabel,all:'Toutes'},button.dataset.tier))return;
     selected=button.dataset.tier;
+    render();
+  });
+  search.addEventListener('input',()=>{
+    query=search.value.slice(0,70);
     render();
   });
   retry.addEventListener('click',()=>{void init()});
@@ -291,6 +308,7 @@
       featured=null;
       grid.replaceChildren();
       filters.hidden=true;
+      empty.hidden=true;
       unmatched.hidden=true;
       status.textContent='Les références partenaires ne sont pas vérifiables actuellement. Réessayez ou consultez les fiches du catalogue.';
       retry.hidden=false;
