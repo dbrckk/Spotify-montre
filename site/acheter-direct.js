@@ -131,6 +131,9 @@
       // An exact product deep link must never silently select another watch.
       // A valid global offer list alone does not authorize this requested SKU.
       if(params.has('modele')&&!list.some(x=>x.id===selected)){
+        // The exact model may have been delisted while its earlier checkout
+        // is still recoverable. Never silently switch to another offer.
+        if(showRecovery())return;
         if(commerce)commerce.hidden=true;
         form.hidden=true;
         if(unavailable)unavailable.hidden=false;
