@@ -338,3 +338,34 @@
 .ud-card[data-commerce-status="external_source_only"] .ud-commercial-proof{
   background:#f8f4ea;border-left-color:#b29a6d;color:#634f33}
 .ud-card .ud-commercial-proof:first-letter{text-transform:uppercase}
+
+/* Public collection refresh | coordinated with the three-budget showroom. 
+   The 37 editorial-only watches retain their honest typographic fallback. */
+.ud-page{background:#faf7f0;color:#203528}
+.ud-page .ud-heading{max-width:1080px;margin-block:clamp(33px,5vw,70px) 36px}
+.ud-page .ud-heading .eyebrow{letter-spacing:.19em;color:#8c6d45}
+.ud-page .ud-heading h1{font-size:clamp(44px,6vw,80px);line-height:1.04;letter-spacing:-.055em;color:#20382a}
+.ud-page .ud-heading>p{color:#506559;line-height:1.8}
+.ud-page .ud-heading .ud-disclosure{background:#f3eadc;border-left-color:#b08c59;border-radius:3px;color:#4a5d4e}
+.ud-page .ud-filters{background:#f0eadd;border:1px solid #dbcfbd;border-radius:5px;padding:clamp(14px,2.2vw,26px);box-shadow:0 10px 28px rgba(32,39,25,.04)}
+.ud-page .ud-filters label{color:#3d523f}
+.ud-page .ud-filters input,.ud-page .ud-filters select{border-color:#b9b8aa;border-radius:3px;background:#fffefa;color:#1b3626}
+.ud-page .ud-filters>button{border-color:#35563e;border-radius:3px}
+.ud-page .ud-grid{gap:clamp(14px,2vw,23px)}
+.ud-page .ud-card{background:#fffdf8;border:1px solid #ded5c9;border-radius:6px;box-shadow:0 12px 32px rgba(23,37,26,.06);transition:transform .2s ease,border-color .2s,box-shadow .2s}
+.ud-page .ud-card:hover{transform:translateY(-3px);border-color:#b39a77;box-shadow:0 21px 42px rgba(23,37,26,.11)}
+.ud-page .ud-photo{background:radial-gradient(circle at 50% 40%,#f5f4ef,#deded4 68%,#d0cec3);height:clamp(210px,21vw,300px);padding:16px}
+.ud-page .ud-photo img{filter:drop-shadow(8px 13px 13px rgba(33,37,29,.13));transition:transform .28s ease}
+.ud-page .ud-card:hover .ud-photo img{transform:scale(1.035)}
+.ud-page .ud-card-main{padding:clamp(17px,1.8vw,25px);gap:12px}
+.ud-page .ud-kicker{letter-spacing:.12em;color:#886b47}
+.ud-page .ud-card h2{font:400 clamp(23px,2.3vw,32px)/1.15 Georgia,serif;letter-spacing:-.03em;color:#243d2e}
+.ud-page .ud-description{line-height:1.75}
+.ud-page .ud-details{background:#254a34;border-radius:3px;min-height:46px}
+.ud-page .ud-merchant,.ud-page .ud-source{border-radius:3px;min-height:44px}
+.ud-page .ud-art-fallback{background:radial-gradient(ellipse at 40% 18%,#496c56,#21392c 75%);color:#e3e8dd}
+.ud-page .ud-art-fallback strong{font-family:Georgia,serif;letter-spacing:-.02em}
+.ud-page .ud-count{margin-block:24px 18px;color:#3d5947;letter-spacing:.02em}
+@media(max-width:650px){.ud-page .ud-card-main{padding:13px;gap:9px}.ud-page .ud-photo{height:195px;padding:9px}.ud-page .ud-card h2{font-size:21px}.ud-page .ud-heading h1{font-size:clamp(40px,10vw,55px)}}
+@media(max-width:390px){.ud-page .ud-photo{height:230px}.ud-page .ud-card-main{padding:18px}}
+@media(prefers-reduced-motion:reduce){.ud-page .ud-card,.ud-page .ud-photo img{transition:none}.ud-page .ud-card:hover,.ud-page .ud-card:hover .ud-photo img{transform:none}}
