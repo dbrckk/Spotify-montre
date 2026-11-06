@@ -96,7 +96,7 @@
     // A recovery-only form must not show purchase promises, checkout terms
     // or a four-step guide suggesting the customer will pay again.
     for(const name of ['amDirectPurchaseHint','amDirectPaymentHint',
-      'amDirectPurchaseSteps','amDirectTerms']){
+      'amDirectPurchaseSteps']){
       const element=$(name);if(element)element.hidden=true;
     }
     if(price)price.textContent='Aucun nouveau prix ni achat proposé';
