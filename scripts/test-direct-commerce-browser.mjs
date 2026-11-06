@@ -79,6 +79,32 @@ try{
     'A partner deep link must never open the direct payment form');
   await page.unroute('**/config.json');
 
+  // A compromised or misconfigured static config must not send buyers'
+  // addresses or checkout requests to another tenant on Render.
+  const foreignApi='https://untrusted-watch-commerce.onrender.com';
+  let foreignRequests=0;
+  await page.route(foreignApi+'/**',route=>{
+    foreignRequests++;
+    return route.abort('failed'); // Never contact a third-party API in CI.
+  });
+  await page.route('**/config.json',route=>route.fulfill({
+    status:200,contentType:'application/json',
+    body:JSON.stringify({checkoutMode:'active',commerceApiUrl:foreignApi+'/'})
+  }));
+  await page.goto(url,{waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>document.getElementById('amDirectStatus')
+    ?.textContent.includes('Aucun paiement direct'));
+  assert.equal(await page.locator('#amDirectForm').isVisible(),false,
+    'An unknown Render tenant must never receive a customer checkout');
+  assert.equal(foreignRequests,0,'No request may reach an unpinned merchant API');
+  await page.goto(new URL('index.html',base).href,{waitUntil:'domcontentloaded'});
+  await page.waitForResponse(response=>response.url().endsWith('/config.json'))
+    .catch(()=>{}); // The page may have completed its config load before this line.
+  assert.equal(await page.locator('.am-direct-card-link').count(),0,
+    'An unpinned merchant API must not create own-site purchase CTAs');
+  assert.equal(foreignRequests,0,'No offer discovery may reach an unknown Render API');
+  await page.unroute('**/config.json');
+
   // CI fake storefront gate: exercise the future valid state but NEVER submit
   // to a provider, create an order or modify a live production setting.
   await page.route('**/config.json',route=>route.fulfill({
