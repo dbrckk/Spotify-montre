@@ -11,6 +11,9 @@ body{background:var(--am-cream);color:var(--am-ink);margin:0}
 .am-direct-wrap h1 em{color:#6d866d}
 .am-direct-lead{line-height:1.7;max-width:800px;color:#44594d;font-size:17px}
 .am-direct-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(250px,1fr);gap:24px;margin-top:36px;align-items:start}
+/* A paused shop and the read-only recovery flow have no second column. */
+.am-direct-grid[data-mode="prelaunch"],.am-direct-grid[data-mode="recovery"]{grid-template-columns:minmax(0,1fr);max-width:960px}
+
 .am-direct-panel,.am-direct-aside{background:#fffdf9;border:1px solid #ddd5c7;border-radius:16px;padding:clamp(20px,3.3vw,36px);box-shadow:0 9px 30px rgba(22,46,29,.04)}
 .am-direct-grid h2{font:400 clamp(25px,3vw,36px)/1.2 Georgia,serif;margin:0 0 23px}
 .am-direct-panel>p{line-height:1.55}
