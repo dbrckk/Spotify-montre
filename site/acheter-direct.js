@@ -76,23 +76,27 @@
             /^[A-Za-z0-9_-]{16,90}$/.test(localStorage.getItem(key)||''))ids.push(id);
         }
       }
-      if(requested)return ids.includes(requested)?requested:null;
-      return ids.length===1?ids[0]:null;
+      if(requested)return ids.includes(requested)?[requested]:[];
+      return ids;
+
     }catch{return null}
   }
   function showRecovery(){
-    const id=recoverableOffer();
-    if(!id||!api)return false;
+    const ids=recoverableOffer();
+    if(!ids?.length||!api)return false;
     recoveryOnly=true;
-    list=[{id,label:'Tentative de commande précédente'}];
-    const option=document.createElement('option');
-    option.value=id;option.textContent='Référence de tentative : '+id;
-    offers.replaceChildren(option);offers.disabled=true;
+    list=ids.map(id=>({id,label:'Tentative de commande précédente'}));
+    offers.replaceChildren(...ids.map(id=>{
+      const option=document.createElement('option');
+      option.value=id;option.textContent='Tentative précédente : '+id;
+      return option;
+    }));
+    offers.disabled=ids.length===1;
     if(prelaunch)prelaunch.hidden=true;
     if(commerce)commerce.hidden=false;
     if(unavailable)unavailable.hidden=true;
     if(heading)heading.replaceChildren('Retrouver une tentative précédente');
-    if(lead)lead.textContent='Les nouvelles ventes sont suspendues. Si vous avez déjà tenté un paiement, ressaisissez exactement les mêmes informations pour retrouver cette tentative. Aucun nouveau paiement ne sera créé.';
+    if(lead)lead.textContent='Les nouvelles ventes sont suspendues. Sélectionnez votre ancienne référence si plusieurs tentatives existent, puis ressaisissez exactement les mêmes informations. Aucun nouveau paiement ne sera créé.';
     // A recovery-only form must not show purchase promises, checkout terms
     // or a four-step guide suggesting the customer will pay again.
     for(const name of ['amDirectPurchaseHint','amDirectPaymentHint',
