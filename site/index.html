@@ -8,7 +8,7 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="robots" content="index,follow">
 <title>Atelier Montres — 52 montres à découvrir et comparer</title>
-<meta name="description" content="Découvrez 52 montres Casio, Citizen, Seiko, SKMEI et d'autres marques. Photos des modèles, conseils pour choisir et liens vers les vendeurs.">
+<meta name="description" content="52 montres soigneusement sélectionnées : accessibles, milieu de gamme et haut de gamme accessible. Comparez Casio, Citizen, Tissot, Hamilton, SKMEI et nos conseils pour choisir.">
 <link rel="canonical" href="https://atelier-montres-selection-fr.onrender.com/">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="fr_FR">
@@ -21,18 +21,19 @@
 <link rel="stylesheet" href="./features.css">
 <link rel="stylesheet" href="./public-home.css">
 <link rel="stylesheet" href="./direct-offer-links.css">
+<link rel="stylesheet" href="./premium-showroom.css">
 <script defer src="./direct-offer-links.js"></script>
 </head>
-<body data-experience="affiliate">
+<body data-experience="affiliate" class="am-showroom-home">
 <a class="sr-only" href="#contenu">Aller au contenu</a>
 <header class="header">
   <div class="wrap header-inner home-header">
     <a href="./index.html" class="brand" aria-label="Atelier Montres, accueil"><span class="star" aria-hidden="true">✦</span>Atelier Montres</a>
     <nav class="navigation home-nav" aria-label="Navigation principale">
-      <a href="./montres/toutes-les-montres.html">Toutes les montres</a>
-      <a href="./montres/modeles-populaires.html">À découvrir</a>
+      <a href="#gammes">Par budget</a>
+      <a href="./montres/toutes-les-montres.html">Les 52 montres</a>
       <a href="./conseiller.html">Conseils</a>
-      <a href="./acheter.html#amPartnerSelection" class="home-nav-buy">Où acheter ?</a>
+      <a href="#achat-direct" class="home-nav-buy">Commander</a>
     </nav>
   </div>
 </header>
@@ -40,58 +41,89 @@
   <section class="hero home-hero" id="accueil" aria-labelledby="titre-principal">
     <div class="wrap home-hero-grid">
       <div class="home-hero-copy">
-        <p class="overline">La sélection Atelier Montres</p>
-        <h1 id="titre-principal">Trouvez la montre<br><em>qui vous ressemble.</em></h1>
-        <p class="hero-lead">Classique, sportive ou contemporaine : explorez 52 montres, comparez les modèles et trouvez celle qui correspond à votre style.</p>
+        <p class="overline">LE GOÛT DES BELLES MONTRES, À TOUS LES PRIX</p>
+        <h1 id="titre-principal">Le temps a<br><em>de l’allure.</em></h1>
+        <p class="hero-lead">Une montre remarquable ne se mesure pas seulement à son prix. Découvrez des pièces élégantes à petit budget, des valeurs sûres et des modèles d’exception accessibles.</p>
         <div class="home-actions">
-          <a class="button" href="./montres/toutes-les-montres.html">Voir les 52 montres <span aria-hidden="true">↗</span></a>
-          <a class="home-text-link" href="./conseiller.html">Besoin d’un conseil ?</a>
+          <a class="button" href="#gammes">Choisir mon budget <span aria-hidden="true">↗</span></a>
+          <a class="home-text-link" href="./montres/toutes-les-montres.html">Explorer les 52 modèles</a>
         </div>
-        <p class="home-hero-note">Choix et informations sur Atelier Montres. Achat, paiement et livraison chez le vendeur.</p>
+        <p class="home-hero-note">Une sélection indépendante. La vente directe est en préparation ; seuls les modèles affichant un prix TTC et un bouton « Acheter sur Atelier Montres » pourront être commandés ici.</p>
       </div>
       <a class="home-hero-visual" href="./montre.html?id=citizen-tsuyosa">
         <img src="./assets/watches/citizen-tsuyosa.webp" alt="Citizen Tsuyosa, montre à cadran vert" width="680" height="680" fetchpriority="high" decoding="async">
-        <span class="home-hero-visual-caption"><span>CITIZEN / TSUYOSA</span><strong>Voir la montre <span aria-hidden="true">↗</span></strong></span>
+        <span class="home-hero-visual-caption"><span>LA PIÈCE SIGNATURE · CITIZEN TSUYOSA</span><strong>Découvrir <span aria-hidden="true">↗</span></strong></span>
       </a>
     </div>
   </section>
   <section class="home-promise" aria-label="Ce que vous trouverez ici">
     <div class="wrap home-promise-items">
-      <p><strong>52 références</strong><span>Pour différents styles et budgets</span></p>
-      <p><strong>Des fiches détaillées</strong><span>Photos, mouvements et dimensions connues</span></p>
-      <p><strong>Des liens utiles</strong><span>Retrouvez les modèles chez leurs vendeurs</span></p>
+      <p><strong>Trois univers</strong><span>Du premier achat à la belle pièce</span></p>
+      <p><strong>52 références choisies</strong><span>Des modèles précis, pas de montres génériques</span></p>
+      <p><strong>Achat direct encadré</strong><span>Ouverture uniquement après validation de l’offre</span></p>
     </div>
   </section>
-  <section class="home-products" id="collection" aria-labelledby="titre-collection">
-    <div class="wrap" id="montres">
-      <div class="home-section-head">
-        <div><p class="overline kicker">Notre sélection</p><h2 id="titre-collection">Trois montres, trois personnalités.</h2></div>
-        <a class="home-section-more" href="./montres/toutes-les-montres.html">Explorer toute la collection <span aria-hidden="true">↗</span></a>
-      </div>
-      <div class="home-product-grid">
-        <article class="home-product-card" data-watch-id="casio-mdv107">
-          <a class="home-product-image" href="./montre.html?id=casio-mdv107" aria-label="Découvrir Casio MDV-107">
-            <img src="./assets/watches/casio-mdv107.webp" alt="Montre Casio MDV-107, cadran noir et lunette de plongée" width="440" height="440" loading="lazy" decoding="async">
-          </a>
-          <div class="home-product-body"><span class="home-product-type">Sportive · Quartz</span><h3>Casio MDV-107</h3><p>Un style plongée facile à porter au quotidien.</p><a href="./montre.html?id=casio-mdv107">Découvrir ce modèle <span aria-hidden="true">↗</span></a></div>
-        </article>
-        <article class="home-product-card" data-watch-id="citizen-tsuyosa">
-          <a class="home-product-image" href="./montre.html?id=citizen-tsuyosa" aria-label="Découvrir Citizen Tsuyosa">
-            <img src="./assets/watches/citizen-tsuyosa.webp" alt="Montre Citizen Tsuyosa à cadran vert" width="440" height="440" loading="lazy" decoding="async">
-          </a>
-          <div class="home-product-body"><span class="home-product-type">Contemporaine · Automatique</span><h3>Citizen Tsuyosa</h3><p>Un cadran affirmé et une silhouette épurée.</p><a href="./montre.html?id=citizen-tsuyosa">Découvrir ce modèle <span aria-hidden="true">↗</span></a></div>
-        </article>
-        <article class="home-product-card" data-watch-id="seiko-5">
-          <a class="home-product-image" href="./montre.html?id=seiko-5" aria-label="Découvrir Seiko 5 Sports">
-            <img src="./assets/watches/seiko-5.webp" alt="Montre Seiko 5 Sports automatique" width="440" height="440" loading="lazy" decoding="async">
-          </a>
-          <div class="home-product-body"><span class="home-product-type">Polyvalente · Automatique</span><h3>Seiko 5 Sports</h3><p>Une allure sportive et des détails horlogers soignés.</p><a href="./montre.html?id=seiko-5">Découvrir ce modèle <span aria-hidden="true">↗</span></a></div>
-        </article>
-      </div>
-      <p class="home-disclosure">Les photographies sont associées aux références présentées. Les prix, stocks et variantes sont à vérifier chez le vendeur avant tout achat.</p>
+  <section class="am-budget-section" id="gammes" aria-labelledby="am-budget-title">
+  <div class="wrap">
+    <div class="am-budget-heading"><div><p class="overline kicker">LA SÉLECTION · TROIS GAMMES</p><h2 id="am-budget-title">Le beau n’a pas<br><em>qu’un seul prix.</em></h2></div><p>Pour un budget proche du SMIC, choisissez d’abord ce que vous souhaitez consacrer à votre montre. Nos repères aident à explorer, sans pousser à dépenser davantage.</p></div>
+    <div class="am-budget-grid">
+      <a class="am-budget-card" href="#collection-accessible" aria-label="Accessible, budget indicatif 20–120 € : voir les modèles">
+        <div class="am-budget-art"><img loading="lazy" decoding="async" width="500" height="500" src="./assets/watches/casio-mtp-1302.webp" alt="Casio MTP-1302 à cadran bleu, montre élégante accessible"></div>
+        <div class="am-budget-copy"><span class="am-budget-kicker">01 / Accessible</span><strong>Le style, sans excès.</strong><span class="am-budget-range">Budget repère : 20–120 €</span><p>Un vrai coup de cœur n’exige pas un gros salaire. Casio, SKMEI et designs bien pensés.</p><span class="am-budget-action">Voir les modèles <span aria-hidden="true">↗</span></span></div>
+      </a>
+<a class="am-budget-card" href="#collection-intermediaire" aria-label="Intermédiaire, budget indicatif 150–450 € : voir les modèles">
+        <div class="am-budget-art"><img loading="lazy" decoding="async" width="500" height="500" src="./assets/watches/citizen-tsuyosa.webp" alt="Citizen Tsuyosa verte, montre automatique à bracelet acier"></div>
+        <div class="am-budget-copy"><span class="am-budget-kicker">02 / Intermédiaire</span><strong>Le plaisir du détail.</strong><span class="am-budget-range">Budget repère : 150–450 €</span><p>Citizen, Seiko, Orient : de belles finitions et des mouvements à découvrir.</p><span class="am-budget-action">Voir les modèles <span aria-hidden="true">↗</span></span></div>
+      </a>
+<a class="am-budget-card" href="#collection-prestige" aria-label="Haut de gamme accessible, budget indicatif 500–1 200 € : voir les modèles">
+        <div class="am-budget-art"><img loading="lazy" decoding="async" width="500" height="500" src="./assets/watches/tissot-prx-auto.webp" alt="Tissot PRX Powermatic 80 bleue, montre automatique suisse"></div>
+        <div class="am-budget-copy"><span class="am-budget-kicker">03 / Haut de gamme accessible</span><strong>Une pièce à garder.</strong><span class="am-budget-range">Budget repère : 500–1 200 €</span><p>Une Tissot ou une Hamilton pour marquer un moment important, sans viser le luxe inaccessible.</p><span class="am-budget-action">Voir les modèles <span aria-hidden="true">↗</span></span></div>
+      </a>
     </div>
+    <p class="am-budget-disclaimer">Budgets d’orientation, non prix de vente ni promesses de disponibilité. Prix, stock et livraison sont à confirmer pour chaque référence.</p>
+  </div>
+</section>
+<section class="home-products" id="collection" aria-labelledby="titre-collection"><div class="wrap" id="montres">
+  <div class="home-section-head"><div><p class="overline kicker">LE SHOWROOM</p><h2 id="titre-collection">Six montres qui ont du caractère.</h2></div><a class="home-section-more" href="./montres/toutes-les-montres.html">Voir les 52 références <span aria-hidden="true">↗</span></a></div>
+  <section class="am-edit-tier" id="collection-accessible" aria-labelledby="am-accessible-title">
+    <div class="am-edit-tier-head"><div><p>Accessible</p><h3 id="am-accessible-title">Petits budgets, grand style.</h3></div><span>Une sélection à considérer avant de dépasser 120 €.</span></div>
+    <div class="home-product-grid"><article class="home-product-card" data-watch-id="casio-mtp-1302">
+  <a class="home-product-image" href="./montre.html?id=casio-mtp-1302" aria-label="Découvrir Casio MTP-1302"><img src="./assets/watches/casio-mtp-1302.webp" alt="Casio MTP-1302 avec cadran bleu" width="500" height="500" loading="lazy" decoding="async"></a>
+  <div class="home-product-body"><span class="home-product-type">L’élégance simple</span><h4>Casio MTP-1302</h4><p>Un cadran bleu et un bracelet acier : une allure nette pour un budget contenu.</p><a href="./montre.html?id=casio-mtp-1302">Voir la fiche <span aria-hidden="true">↗</span></a></div>
+</article>
+<article class="home-product-card" data-watch-id="casio-mdv107">
+  <a class="home-product-image" href="./montre.html?id=casio-mdv107" aria-label="Découvrir Casio MDV-107"><img src="./assets/watches/casio-mdv107.webp" alt="Casio MDV-107 noire, style montre de plongée" width="500" height="500" loading="lazy" decoding="async"></a>
+  <div class="home-product-body"><span class="home-product-type">Esprit plongée</span><h4>Casio MDV-107</h4><p>Lunette noire, allure sportive et lisibilité au quotidien.</p><a href="./montre.html?id=casio-mdv107">Voir la fiche <span aria-hidden="true">↗</span></a></div>
+</article></div>
+    <p class="am-tier-footnote">Et pour des budgets encore plus serrés : découvrez aussi les modèles SKMEI et ADDIESDIVE dans le catalogue.</p>
   </section>
-  <section class="home-guidance" id="inspirations" aria-labelledby="styles-title">
+<section class="am-edit-tier" id="collection-intermediaire" aria-labelledby="am-intermediaire-title">
+    <div class="am-edit-tier-head"><div><p>Intermédiaire</p><h3 id="am-intermediaire-title">La gamme plaisir.</h3></div><span>Des pièces à explorer autour de 150–450 €.</span></div>
+    <div class="home-product-grid"><article class="home-product-card" data-watch-id="citizen-tsuyosa">
+  <a class="home-product-image" href="./montre.html?id=citizen-tsuyosa" aria-label="Découvrir Citizen Tsuyosa"><img src="./assets/watches/citizen-tsuyosa.webp" alt="Citizen Tsuyosa verte à bracelet acier" width="500" height="500" loading="lazy" decoding="async"></a>
+  <div class="home-product-body"><span class="home-product-type">Automatique · sport chic</span><h4>Citizen Tsuyosa</h4><p>Un cadran vert profond et un bracelet intégré au dessin contemporain.</p><a href="./montre.html?id=citizen-tsuyosa">Voir la fiche <span aria-hidden="true">↗</span></a></div>
+</article>
+<article class="home-product-card" data-watch-id="seiko-5">
+  <a class="home-product-image" href="./montre.html?id=seiko-5" aria-label="Découvrir Seiko 5 Sports"><img src="./assets/watches/seiko-5.webp" alt="Seiko 5 Sports à cadran noir" width="500" height="500" loading="lazy" decoding="async"></a>
+  <div class="home-product-body"><span class="home-product-type">Automatique · polyvalente</span><h4>Seiko 5 Sports</h4><p>Une mécanique accessible à l’expression sportive affirmée.</p><a href="./montre.html?id=seiko-5">Voir la fiche <span aria-hidden="true">↗</span></a></div>
+</article></div>
+    <p class="am-tier-footnote">Des montres que l’on choisit pour leur design autant que pour leur mouvement.</p>
+  </section>
+<section class="am-edit-tier" id="collection-prestige" aria-labelledby="am-prestige-title">
+    <div class="am-edit-tier-head"><div><p>Haut de gamme accessible</p><h3 id="am-prestige-title">Une belle pièce, longtemps.</h3></div><span>Des choix à envisager autour de 500–1 200 €.</span></div>
+    <div class="home-product-grid"><article class="home-product-card" data-watch-id="tissot-prx-auto">
+  <a class="home-product-image" href="./montre.html?id=tissot-prx-auto" aria-label="Découvrir Tissot PRX Powermatic 80"><img src="./assets/watches/tissot-prx-auto.webp" alt="Tissot PRX Powermatic 80 à cadran bleu" width="500" height="500" loading="lazy" decoding="async"></a>
+  <div class="home-product-body"><span class="home-product-type">Automatique suisse</span><h4>Tissot PRX Powermatic 80</h4><p>Acier intégré et cadran bleu texturé : une belle pièce à forte présence.</p><a href="./montre.html?id=tissot-prx-auto">Voir la fiche <span aria-hidden="true">↗</span></a></div>
+</article>
+<article class="home-product-card" data-watch-id="hamilton-khaki">
+  <a class="home-product-image" href="./montre.html?id=hamilton-khaki" aria-label="Découvrir Hamilton Khaki Field Auto"><img src="./assets/watches/hamilton-khaki.webp" alt="Hamilton Khaki Field automatique à cadran noir" width="500" height="500" loading="lazy" decoding="async"></a>
+  <div class="home-product-body"><span class="home-product-type">Esprit field · 38 mm</span><h4>Hamilton Khaki Field Auto</h4><p>Une esthétique militaire raffinée et une mécanique suisse.</p><a href="./montre.html?id=hamilton-khaki">Voir la fiche <span aria-hidden="true">↗</span></a></div>
+</article></div>
+    <p class="am-tier-footnote">Une sélection ambitieuse, sans faire croire qu’un prix élevé est indispensable.</p>
+  </section>
+  <p class="home-disclosure">Les photos montrent les références exactes documentées dans le catalogue. Cette galerie présente des idées de choix : les gammes indiquées ne constituent ni des offres au prix fixe, ni une promesse de stock. Un achat direct sur Atelier Montres ne s’affiche que lorsque l’offre et son prix TTC sont vérifiés.</p>
+</div></section>
+<section class="home-guidance" id="inspirations" aria-labelledby="styles-title">
     <div class="wrap">
       <div class="home-section-head">
         <div><p class="overline kicker">Un choix plus simple</p><h2 id="styles-title">Commencez par vos envies.</h2></div>
@@ -99,12 +131,22 @@
       </div>
       <div class="home-choices">
         <a href="./conseiller.html" class="home-choice"><span>01</span><strong>Je ne sais pas quoi choisir</strong><small>Un conseiller pour affiner vos préférences.</small><b aria-hidden="true">↗</b></a>
-        <a href="./affiliation.html#selection-accessible" class="home-choice"><span>02</span><strong>Je cherche un petit budget</strong><small>Explorez des modèles accessibles et variés.</small><b aria-hidden="true">↗</b></a>
-        <a href="./affiliation.html#montres" class="home-choice"><span>03</span><strong>Je veux comparer des marques</strong><small>15 modèles analysés plus en détail.</small><b aria-hidden="true">↗</b></a>
+        <a href="#collection-accessible" class="home-choice"><span>02</span><strong>Je cherche un petit budget</strong><small>Explorez des modèles accessibles et variés.</small><b aria-hidden="true">↗</b></a>
+        <a href="#gammes" class="home-choice"><span>03</span><strong>Je veux comparer des marques</strong><small>15 modèles analysés plus en détail.</small><b aria-hidden="true">↗</b></a>
       </div>
     </div>
   </section>
-  <section class="home-method" id="approche" aria-labelledby="titre-approche">
+  <section class="am-order-story" id="achat-direct" aria-labelledby="am-order-story-title"><div class="wrap">
+  <div class="am-order-story-intro"><p class="overline">L’EXPÉRIENCE ATELIER MONTRES</p><h2 id="am-order-story-title">Choisir ici. Commander ici.<br><em>Recevoir chez vous.</em></h2>
+  <p>Notre objectif est simple : lorsque la vente d’un modèle est ouverte, vous commandez auprès d’Atelier Montres. Nous gérons le paiement, le suivi et le service client ; notre fournisseur prépare ensuite l’expédition vers votre adresse.</p></div>
+  <div class="am-order-story-grid">
+    <div><span>01</span><h3>La bonne référence</h3><p>Vous choisissez la montre exacte, sa variante et son prix total TTC affiché.</p></div>
+    <div><span>02</span><h3>Un règlement sécurisé</h3><p>Vous passez commande auprès d’Atelier Montres ; le paiement est traité par notre prestataire sécurisé.</p></div>
+    <div><span>03</span><h3>Expédiée par notre fournisseur</h3><p>Après confirmation du paiement, le fournisseur reçoit la commande et livre à votre adresse. Vous retrouvez le suivi sur notre site.</p></div>
+  </div>
+  <p class="am-order-story-status"><strong>Ouverture progressive :</strong> la caisse directe n’est pas encore active. Aucune montre n’est proposée au paiement sans vérification complète du fournisseur, du prix livré et des conditions de vente. <a href="./acheter.html">Consulter les modalités d’achat <span aria-hidden="true">↗</span></a></p>
+</div></section>
+<section class="home-method" id="approche" aria-labelledby="titre-approche">
     <div class="wrap home-method-inner">
       <div><p class="overline kicker">Notre approche</p><h2 id="titre-approche">Choisir avec les bonnes informations.</h2></div>
       <div>
@@ -116,14 +158,14 @@
   <section class="home-faq" id="faq" aria-labelledby="faq-title"><div class="wrap home-faq-inner">
     <div><p class="overline kicker">Questions fréquentes</p><h2 id="faq-title">Avant de choisir.</h2></div>
     <div class="home-faq-questions">
-      <details><summary>Comment acheter une montre présentée ici ?</summary><p id="homePurchaseAnswer">Ouvrez la fiche du modèle, puis consultez le lien vers le vendeur lorsqu'il existe. Le règlement, les frais de livraison et les retours dépendent du marchand. Atelier Montres ne prélève aucun paiement sur ce parcours.</p></details>
+      <details><summary>Comment acheter une montre présentée ici ?</summary><p id="homePurchaseAnswer">Pour le moment, les nouvelles commandes directement sur Atelier Montres ne sont pas ouvertes. Vous pouvez consulter les fiches et, pour certains modèles, acheter séparément chez un vendeur partenaire. Seule une fiche portant un prix TTC vérifié et le bouton « Acheter sur Atelier Montres » permettra de commander auprès de nous.</p></details>
       <details><summary>Les montres sont-elles en stock ?</summary><p>Nous présentons des références de montres, pas un stock en temps réel. Vérifiez auprès du vendeur la disponibilité, la couleur, le prix final et le délai de livraison.</p></details>
       <details><summary>Comment trouver la bonne taille de boîtier ?</summary><p>Notre <a href="./conseiller.html">conseiller de montres</a> permet de filtrer selon la taille, le mouvement et votre style. Les dimensions absentes des sources ne sont pas inventées.</p></details>
       <details><summary>Les liens vers les vendeurs sont-ils rémunérés ?</summary><p>Certains liens, notamment vers Amazon.fr, sont des liens d'affiliation signalés. Cela ne change pas votre prix. En tant que Partenaire Amazon, je réalise un bénéfice sur les achats remplissant les conditions requises.</p></details>
     </div>
   </div></section>
   <section class="home-last" id="informations" aria-labelledby="titre-informations">
-    <div class="wrap home-last-inner"><div><p class="overline">À vous de choisir</p><h2 id="titre-informations">Votre prochaine montre est peut-être ici.</h2></div><a class="button" href="./montres/toutes-les-montres.html">Voir toutes les montres <span aria-hidden="true">↗</span></a></div>
+    <div class="wrap home-last-inner"><div><p class="overline">À vous de choisir</p><h2 id="titre-informations">Votre style. Votre rythme. Votre montre.</h2></div><a class="button" href="./montres/toutes-les-montres.html">Voir toutes les montres <span aria-hidden="true">↗</span></a></div>
   </section>
   <section id="newsletter" hidden aria-labelledby="newsletter-title">
     <h2 id="newsletter-title">Actualités Atelier Montres</h2>
