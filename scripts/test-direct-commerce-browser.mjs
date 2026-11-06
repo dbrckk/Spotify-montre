@@ -137,9 +137,80 @@ try{
   await page.waitForFunction(()=>document.readyState==='complete');
   await page.waitForTimeout(200);
   assert.equal(await page.locator('.watch-product .am-direct-card-link').count(),0);
+  // An existing customer must still track an order after an emergency
+  // freeze of NEW checkout. All order data below is localhost browser-only;
+  // no payment, vendor API, customer address or real shipment is involved.
+  const orderId='ord_'+ 'a'.repeat(40);
+  const orderToken='t'.repeat(43);
+  const orderPage=await browser.newPage({
+    viewport:{width:360,height:740},locale:'fr-FR'
+  });
+  orderPage.on('pageerror',error=>errors.push(error.message));
+  let trackingRequests=0;
+  let state='SHIPPED',backendFailure=false;
+  const trackingEndpoint='https://atelier-montres-commerce-api.onrender.com/api/orders/'+orderId;
+  await orderPage.route('**/config.json',route=>route.fulfill({
+    status:200,contentType:'application/json',
+    body:JSON.stringify({checkoutMode:'inactive',status:'prelaunch',
+      commerceApiUrl:'https://atelier-montres-commerce-api.onrender.com/'})
+  }));
+  await orderPage.route(trackingEndpoint,route=>{
+    trackingRequests++;
+    assert.equal(route.request().headers()['x-order-token'],orderToken,
+      'Order tracking must carry the original private customer token');
+    if(backendFailure)return route.abort('failed');
+    return route.fulfill({
+      status:200,contentType:'application/json',
+      headers:{'Access-Control-Allow-Origin':base.origin},
+      body:JSON.stringify({
+        orderId,status:state,product:'Montre CJ — essai navigateur uniquement',
+        amountCents:3490,deliveryMinDays:7,deliveryMaxDays:14,
+        trackingNumber:'CI-TRACK-ONLY-0001',
+        trackingUrl:'https://www.laposte.fr/outils/suivre-vos-envois?code=CI-TRACK-ONLY-0001'
+      })
+    });
+  });
+  const orderUrl=new URL('commande.html?commande='+orderId,base).href;
+  await orderPage.goto(orderUrl,{waitUntil:'domcontentloaded'});
+  assert.match(await orderPage.locator('#amOrderStatus').innerText(),
+    /Suivi disponible uniquement depuis le navigateur/,
+    'No stored order token must never expose another customer order');
+  assert.equal(trackingRequests,0,'An unauthenticated customer must not query the order API');
+  await orderPage.evaluate(({id,token})=>{
+    sessionStorage.setItem('am_order_'+id,token);
+  },{id:orderId,token:orderToken});
+  await orderPage.reload({waitUntil:'domcontentloaded'});
+  await orderPage.waitForFunction(()=>document.querySelector('#amOrderStatus')
+    ?.textContent?.includes('expédiée'));
+  assert.equal(await orderPage.locator('#amOrderDetails').isVisible(),true,
+    'Existing shipments remain visible after new-sales checkout is disabled');
+  assert.match(await orderPage.locator('#amOrderAmount').innerText(),/34,90/);
+  assert.match(await orderPage.locator('#amOrderProduct').innerText(),/Montre CJ/);
+  assert.equal(await orderPage.locator('#amOrderShipping a').getAttribute('rel'),
+    'noopener noreferrer');
+  assert.equal(trackingRequests,1);
+  state='DELIVERED';
+  await orderPage.locator('#amOrderRefresh').click();
+  await orderPage.waitForFunction(()=>document.querySelector('#amOrderStatus')
+    ?.textContent?.includes('effectuée'));
+  backendFailure=true;
+  await orderPage.locator('#amOrderRefresh').click();
+  await orderPage.waitForFunction(()=>document.querySelector('#amOrderStatus')
+    ?.textContent?.includes('temporairement indisponible'));
+  assert.equal(await orderPage.locator('#amOrderDetails').isVisible(),false,
+    'A failed status refresh must not pretend stale shipment details are current');
+  assert.equal(await orderPage.locator('#amOrderRefresh').isEnabled(),true);
+  await orderPage.close();
+  const noScriptTracking=await browser.newPage({
+    javaScriptEnabled:false,viewport:{width:320,height:740},locale:'fr-FR'
+  });
+  await noScriptTracking.goto(orderUrl,{waitUntil:'domcontentloaded'});
+  assert.equal(await noScriptTracking.locator('noscript a[href="./informations-legales.html"]').isVisible(),true,
+    'A customer without scripts must find a way to contact the seller');
+  await noScriptTracking.close();
   assert.deepEqual(errors,[]);
   await page.close();
-  console.log('Purchase page OK: scripts disabled, API offline, mobile CSS, synthetic eligible purchase gate; no payments');
+  console.log('Purchase and historical order tracking OK: live-sale gate off, token required, refresh and API failure; no payments');
 }finally{
   await browser.close();
 }
