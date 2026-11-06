@@ -95,7 +95,9 @@ try{
           amountCents:2990,deliveryMinDays:7,deliveryMaxDays:14}
       ]})
     }));
-  await page.reload({waitUntil:'domcontentloaded'});
+  // Return to the generic purchase URL after the preceding SKU deep link.
+  // Reloading that deep link would correctly select Citizen, not the first offer.
+  await page.goto(url,{waitUntil:'domcontentloaded'});
   await page.locator('#amDirectForm').waitFor({state:'visible'});
   assert.equal(await page.locator('#amDirectCommerce').isVisible(),true);
   assert.equal(await page.locator('#amDirectPrelaunch').isVisible(),false);
