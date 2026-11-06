@@ -343,7 +343,7 @@
    The 37 editorial-only watches retain their honest typographic fallback. */
 .ud-page{background:#faf7f0;color:#203528}
 .ud-page .ud-heading{max-width:1080px;margin-block:clamp(33px,5vw,70px) 36px}
-.ud-page .ud-heading .eyebrow{letter-spacing:.19em;color:#8c6d45}
+.ud-page .ud-heading .eyebrow{letter-spacing:.19em;color:#563914}
 .ud-page .ud-heading h1{font-size:clamp(44px,6vw,80px);line-height:1.04;letter-spacing:-.055em;color:#20382a}
 .ud-page .ud-heading>p{color:#506559;line-height:1.8}
 .ud-page .ud-heading .ud-disclosure{background:#f3eadc;border-left-color:#b08c59;border-radius:3px;color:#4a5d4e}
