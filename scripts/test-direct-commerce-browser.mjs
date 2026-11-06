@@ -160,6 +160,15 @@ try{
     }));
   await recoveryContext.route('https://atelier-montres-commerce-api.onrender.com/api/checkout',
     route=>{
+      // Browsers may preflight the cross-origin JSON POST. This is still an
+      // isolated localhost test and must never reach the real provider.
+      if(route.request().method()==='OPTIONS')return route.fulfill({
+        status:204,headers:{
+          'Access-Control-Allow-Origin':base.origin,
+          'Access-Control-Allow-Methods':'POST, OPTIONS',
+          'Access-Control-Allow-Headers':'Content-Type'
+        }
+      });
       postCount++;
       const sent=route.request().postDataJSON();
       assert.equal(sent.offerId,'ci-watch-only');
@@ -258,7 +267,17 @@ try{
     }));
   await blockedContext.route(
     'https://atelier-montres-commerce-api.onrender.com/api/checkout',
-    route=>{blockedCheckoutPosts++;return route.abort('failed')});
+    route=>{
+      if(route.request().method()==='OPTIONS')return route.fulfill({
+        status:204,headers:{
+          'Access-Control-Allow-Origin':base.origin,
+          'Access-Control-Allow-Methods':'POST, OPTIONS',
+          'Access-Control-Allow-Headers':'Content-Type'
+        }
+      });
+      blockedCheckoutPosts++;
+      return route.abort('failed');
+    });
   const blockedPage=await blockedContext.newPage();
   await blockedPage.goto(new URL('acheter.html?modele=ci-watch-only',base).href,
     {waitUntil:'domcontentloaded'});
