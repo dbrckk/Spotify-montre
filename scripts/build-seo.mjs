@@ -349,7 +349,32 @@ import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
   advisor=advisor.replace('</head>',advisorSeo+'</head>');
   writeFileSync(advisorFile,advisor);
   }
-  writeFileSync(join(root,'index.html'),collection);
+  // The public homepage is a real product-discovery landing page. Never
+  // replace it with the deep editorial comparison page during SEO builds.
+  // Keep generated script markers idempotent across repeated builds.
+  const publicHomeFile=join(root,'index.html');
+  let publicHome=readFileSync(publicHomeFile,'utf8');
+  if(!publicHome.includes('<link rel="stylesheet" href="./public-home.css">')||
+     !publicHome.includes('id="collection"')||!publicHome.includes('id="faq"'))
+    throw Error('Public homepage template missing: refusing to publish an outdated prelaunch page');
+  publicHome=publicHome.replace(/<!-- AM_PUBLIC_SEO_START -->[\\s\\S]*?<!-- AM_PUBLIC_SEO_END -->/g,'');
+  const publicSchema=schema({'@context':'https://schema.org','@graph':[
+    {'@type':'WebSite',name:'Atelier Montres',url:homepage,inLanguage:'fr-FR'},
+    {'@type':'WebPage',name:'Atelier Montres — 52 montres à découvrir et comparer',
+      url:homepage,inLanguage:'fr-FR',isPartOf:{'@type':'WebSite',name:'Atelier Montres',url:homepage}}
+  ]});
+  publicHome=publicHome.replace('</head>','<!-- AM_PUBLIC_SEO_START -->'
+    +searchConsoleMeta+umamiScripts('./')
+    +'<script type="application/ld+json">'+publicSchema+'</script>'
+    +'<!-- AM_PUBLIC_SEO_END --></head>');
+  writeFileSync(publicHomeFile,publicHome);
+  // The editorial comparison is a separate, indexable page with its own
+  // canonical, rather than a duplicate of the storefront homepage.
+  const editorialUrl=u('affiliation.html');
+  collection=collection.replace('<link rel="canonical" href="'+e(homepage)+'">',
+    '<link rel="canonical" href="'+e(editorialUrl)+'">');
+  collection=collection.replace('<meta property="og:url" content="'+e(homepage)+'">',
+    '<meta property="og:url" content="'+e(editorialUrl)+'">');
   writeFileSync(join(root,'affiliation.html'),collection);
   // The dedicated partner purchase page is static HTML, not a generated
   // product/SEO article. Wire exactly the same optional and DNT-aware tracker
