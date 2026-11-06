@@ -490,6 +490,25 @@ try{
   assert.equal(await orderPage.locator('#amOrderDetails').isVisible(),false,
     'A failed status refresh must not pretend stale shipment details are current');
   assert.equal(await orderPage.locator('#amOrderRefresh').isEnabled(),true);
+  // Never send the private order token to another Render tenant, even if a
+  // modified storefront config points at that tenant.
+  let foreignTrackingRequests=0;
+  await orderPage.route(foreignApi+'/**',route=>{
+    foreignTrackingRequests++;
+    return route.abort('failed');
+  });
+  await orderPage.route('**/config.json',route=>route.fulfill({
+    status:200,contentType:'application/json',
+    body:JSON.stringify({checkoutMode:'inactive',commerceApiUrl:foreignApi+'/'})
+  }));
+  const trackingBeforeTamper=trackingRequests;
+  await orderPage.reload({waitUntil:'domcontentloaded'});
+  await orderPage.waitForFunction(()=>document.querySelector('#amOrderStatus')
+    ?.textContent?.includes('temporairement indisponible'));
+  assert.equal(await orderPage.locator('#amOrderDetails').isVisible(),false);
+  assert.equal(foreignTrackingRequests,0,
+    'Private order status and token must never go to an unknown Render tenant');
+  assert.equal(trackingRequests,trackingBeforeTamper);
   await orderPage.close();
   const noScriptTracking=await browser.newPage({
     javaScriptEnabled:false,viewport:{width:320,height:740},locale:'fr-FR'
