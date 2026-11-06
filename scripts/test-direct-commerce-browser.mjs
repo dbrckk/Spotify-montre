@@ -36,10 +36,41 @@ try{
   await page.waitForFunction(()=>
     document.getElementById('amDirectStatus')?.textContent.includes('ne peut pas être vérifiée')
   );
-  assert.equal(await page.locator('#amDirectCommerce').isVisible(),false);
+  assert.equal(await page.locator('#amDirectCommerce').isVisible(),true);
+  assert.equal(await page.locator('#amDirectPrelaunch').isVisible(),true,
+    'The customer-facing unavailable notice must not be hidden with checkout');
+  assert.equal(await page.locator('#amDirectStatus').isVisible(),true);
+  assert.equal(await page.locator('#amDirectPurchaseSteps').isVisible(),false,
+    'Do not advertise live-payment steps during an API failure');
   assert.equal(await page.locator('#amPartnerSelection').isVisible(),true);
   assert.equal(await page.locator('#amDirectForm').isVisible(),false);
   assert.equal(await page.locator('#amDirectUnavailable').isVisible(),false);
+  await page.unroute('**/config.json');
+
+  // The actual public prelaunch state must explain the sales freeze visibly,
+  // keep every payment field hidden, and preserve shopping alternatives.
+  await page.route('**/config.json',route=>route.fulfill({
+    status:200,contentType:'application/json',
+    body:JSON.stringify({checkoutMode:'inactive',status:'prelaunch',
+      commerceApiUrl:'https://atelier-montres-commerce-api.onrender.com/'})
+  }));
+  await page.goto(url,{waitUntil:'domcontentloaded'});
+  await page.locator('#amDirectPrelaunch').waitFor({state:'visible'});
+  assert.match(await page.locator('#amDirectStatus').innerText(),/Aucun paiement direct/);
+  assert.equal(await page.locator('#amDirectForm').isVisible(),false);
+  assert.equal(await page.locator('#amDirectPurchaseSteps').isVisible(),false);
+  assert.equal(await page.locator('#amDirectPrelaunch a[href="#amPartnerSelection"]').isVisible(),true);
+  const prelaunchLayout=await page.evaluate(()=>({
+    width:document.documentElement.clientWidth,
+    scroll:document.documentElement.scrollWidth
+  }));
+  assert.ok(prelaunchLayout.scroll<=prelaunchLayout.width+2,
+    'Prelaunch must not overflow a narrow Android screen');
+  await page.goto(new URL('acheter.html?modele=citizen-tsuyosa',base).href,
+    {waitUntil:'domcontentloaded'});
+  await page.locator('#amDirectUnavailable').waitFor({state:'visible'});
+  assert.equal(await page.locator('#amDirectForm').isVisible(),false,
+    'An unavailable deep-linked model must never open the payment form');
   await page.unroute('**/config.json');
 
   // CI fake storefront gate: exercise the future valid state but NEVER submit
@@ -64,7 +95,9 @@ try{
           amountCents:2990,deliveryMinDays:7,deliveryMaxDays:14}
       ]})
     }));
-  await page.reload({waitUntil:'domcontentloaded'});
+  // Return to the generic purchase URL after the preceding SKU deep link.
+  // Reloading that deep link would correctly select Citizen, not the first offer.
+  await page.goto(url,{waitUntil:'domcontentloaded'});
   await page.locator('#amDirectForm').waitFor({state:'visible'});
   assert.equal(await page.locator('#amDirectCommerce').isVisible(),true);
   assert.equal(await page.locator('#amDirectPrelaunch').isVisible(),false);
