@@ -36,7 +36,9 @@ export function evaluateQuoteWatchSignal(value){
   if(value.supplierMessageCount===0&&value.latestSupplierMessageDate!==null||
      value.supplierMessageCount>0&&value.latestSupplierMessageDate===null)
     throw Error('CJ_WATCH_INCONSISTENT_MESSAGE_METADATA');
-  const expectedReview=value.supplierUnread||
+  // A real CJ response requires review even when the ticket is marked read
+  // or its status was left as AWAITING_CJ_REPLY by supplier support.
+  const expectedReview=value.supplierUnread||value.supplierMessageCount>0||
     value.supplierStatus!=='AWAITING_CJ_REPLY';
   if(value.operatorReviewRequired!==expectedReview)
     throw Error('CJ_WATCH_INCONSISTENT_REVIEW_FLAG');
