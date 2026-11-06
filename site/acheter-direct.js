@@ -35,7 +35,33 @@
     catch{return null}
   }
   const orderKey=id=>'am_checkout_key_'+id;
+  const persistentKey=id=>'am_checkout_pending_v1_'+id;
   const newKey=()=>crypto.randomUUID().replaceAll('-','');
+  // Preserve only a random retry reference when Android closes a tab.
+  // Names, delivery addresses, payment information and private order tokens
+  // never enter persistent storage. Server-side idempotency remains decisive.
+  function preserveAttempt(id){
+    try{
+      const persistent=localStorage.getItem(persistentKey(id));
+      const inTab=sessionStorage.getItem(orderKey(id));
+      const valid=value=>!value||/^[A-Za-z0-9_-]{16,90}$/.test(value);
+      if(!valid(persistent)||!valid(inTab)||(persistent&&inTab&&persistent!==inTab))
+        throw Error('Références de commande incohérentes.');
+      const attempt=persistent||inTab||newKey();
+      localStorage.setItem(persistentKey(id),attempt);
+      sessionStorage.setItem(orderKey(id),attempt);
+      if(localStorage.getItem(persistentKey(id))!==attempt||
+         sessionStorage.getItem(orderKey(id))!==attempt)
+        throw Error('La référence ne peut pas être conservée.');
+      return attempt;
+    }catch{
+      throw Error('Le navigateur ne peut pas conserver la référence de votre tentative. Autorisez le stockage local pour reprendre le paiement sans risque de doublon.');
+    }
+  }
+  function clearAttempt(id){
+    try{sessionStorage.removeItem(orderKey(id))}catch{}
+    try{localStorage.removeItem(persistentKey(id))}catch{}
+  }
   async function init(){
     let config;
     try{
@@ -107,10 +133,8 @@
     for(const key of ['fullName','email','address1','address2','postalCode','city','region','phone'])
       payload[key]=String(form.elements[key]?.value||'');
     payload.countryCode='FR';
-    let attempt=sessionStorage.getItem(orderKey(item.id));
-    if(!attempt){attempt=newKey();sessionStorage.setItem(orderKey(item.id),attempt);}
-    payload.idempotencyKey=attempt;
     try{
+      payload.idempotencyKey=preserveAttempt(item.id);
       const {response,data:result}=await requestJson(api+'/api/checkout',{method:'POST',
         headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)},30000);
       if(!response.ok)throw Error(result.error||'La commande n’a pas pu être préparée.');
@@ -134,14 +158,18 @@
           ||url.username||url.password)throw Error('Lien de paiement invalide');
         destination=url;
       }else throw Error('Statut de commande non reconnu');
+      // A charge may already exist at Mollie. Verify private tracking
+      // access can be recovered before navigating to the payment provider.
       sessionStorage.setItem('am_order_'+result.orderId,result.orderToken);
-      sessionStorage.removeItem(orderKey(item.id));
+      if(sessionStorage.getItem('am_order_'+result.orderId)!==result.orderToken)
+        throw Error('Impossible de conserver le suivi. Réessayez avec la même référence.');
+      clearAttempt(item.id);
       window.location.assign(destination.href);
     }catch(error){
       if(error?.name==='AbortError')
         show('La réponse du paiement prend trop de temps. Votre tentative est conservée : réessayez avec le même bouton pour récupérer cette commande sans créer de deuxième paiement.',true);
       else
-        show(error?.message||'Impossible de commencer le paiement.',true);
+        show(error?.message||'Impossible de commencer le paiement. Votre référence reste conservée pour éviter une double facturation.',true);
       button.disabled=false;
     }
   });
