@@ -272,6 +272,14 @@ try{
     /Retrouver ma tentative/);
   assert.equal(await frozenTab.locator('#amDirectOffers').inputValue(),'ci-watch-only');
   assert.equal(await frozenTab.locator('#amDirectOffers').isDisabled(),true);
+  assert.equal(await frozenTab.locator('#amDirectPurchaseHint').isVisible(),false,
+    'Read-only recovery must not promise a new TTC sale');
+  assert.equal(await frozenTab.locator('#amDirectPaymentHint').isVisible(),false,
+    'Read-only recovery must not ask the customer to pay again');
+  assert.equal(await frozenTab.locator('#amDirectPurchaseSteps').isVisible(),false,
+    'Read-only recovery must not show a new-purchase funnel');
+  assert.equal(await frozenTab.locator('#amDirectTerms').isVisible(),true,
+    'The existing verified checkout request still requires accepted terms');
   await enterCheckout(frozenTab);
   await frozenTab.locator('#amDirectSubmit').click();
   await frozenTab.waitForFunction(()=>document.querySelector('#amDirectStatus')
