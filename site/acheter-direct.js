@@ -5,11 +5,15 @@
   if(!status||!offers||!form)return;
   const prelaunch=$('amDirectPrelaunch');
   const commerce=$('amDirectCommerce');
+  const heading=$('amDirectHeading');
+  const lead=$('amDirectLead');
+  const unavailable=$('amDirectUnavailable');
   const show=(message,error=false)=>{status.textContent=message;status.dataset.error=String(error)};
   const showPrelaunch=(message,error=false)=>{
     form.hidden=true;
     if(prelaunch)prelaunch.hidden=true;
     if(commerce)commerce.hidden=true;
+    if(unavailable)unavailable.hidden=true;
     show(message,error);
   };
   // Bound the whole response, including JSON, to avoid an endless loading state.
@@ -52,7 +56,16 @@
         Number.isSafeInteger(x.deliveryMinDays)&&x.deliveryMinDays>=1&&
         Number.isSafeInteger(x.deliveryMaxDays)&&x.deliveryMaxDays>=x.deliveryMinDays&&x.deliveryMaxDays<=120):[];
       if(!data.checkoutEnabled||!list.length)return showPrelaunch('Aucune montre n’est actuellement disponible en achat direct. Découvrez notre sélection de modèles documentés.');
-      const selected=new URLSearchParams(location.search).get('modele');
+      const params=new URLSearchParams(location.search);
+      const selected=params.get('modele');
+      // An exact product deep link must never silently select another watch.
+      // A valid global offer list alone does not authorize this requested SKU.
+      if(params.has('modele')&&!list.some(x=>x.id===selected)){
+        if(commerce)commerce.hidden=true;
+        form.hidden=true;
+        if(unavailable)unavailable.hidden=false;
+        return show('Cette référence n’est pas disponible en achat direct.',true);
+      }
       const elements=list.map(item=>{
         const el=document.createElement('option');
         el.value=item.id;
@@ -62,7 +75,14 @@
       offers.replaceChildren(...elements);
       if(list.some(x=>x.id===selected))offers.value=selected;
       if(prelaunch)prelaunch.hidden=true;
+      if(unavailable)unavailable.hidden=true;
       if(commerce)commerce.hidden=false;
+      if(heading){
+        const emphasis=document.createElement('em');
+        emphasis.textContent='chez Atelier Montres.';
+        heading.replaceChildren('Achetez votre montre ',emphasis);
+      }
+      if(lead)lead.textContent='Votre commande est passée auprès d’Atelier Montres. Choisissez une offre vérifiée, renseignez l’adresse de livraison et consultez le prix TTC avant le paiement sécurisé. Le suivi de votre commande restera disponible ici.';
       form.hidden=false;show('Le prix TTC de la montre sélectionnée est indiqué ci-dessous. Les frais et délais sont précisés avant validation.');
       updatePrice();
     }catch{return showPrelaunch('Le service marchand ne répond pas. Aucun paiement n’a été demandé.',true)}
