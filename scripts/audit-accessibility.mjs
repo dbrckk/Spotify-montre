@@ -125,7 +125,7 @@ try{
       try{
         response=await page.goto(url.href,{waitUntil:'load',timeout:20000});
         if(!response?.ok()){unresolved.push({page:path,status:response?.status()});continue}
-        if(path==='/'||path==='/index.html'||path==='/affiliation.html')await page.locator('#affGrid .aff-card').first().waitFor({state:'visible'});
+        if(path==='/affiliation.html')await page.locator('#affGrid .aff-card').first().waitFor({state:'visible'});
         if(path.includes('montre.html?id='))await page.locator('#detailShell').waitFor({state:'visible'});
         await scan(page,viewport.label+' '+path);
         if(path==='/'){
@@ -135,7 +135,10 @@ try{
             const rect=el.getBoundingClientRect();return {focused:document.activeElement===el,width:rect.width,height:rect.height}
           });
           assert.ok(skip.focused&&skip.width>=100&&skip.height>=30,'Keyboard skip-link must be visibly accessible: '+JSON.stringify(skip));
-          // Audit modal content and real Tab / Enter / Escape journeys.
+          record(viewport.label,'public homepage skip link visible with keyboard');
+        }
+        if(path==='/affiliation.html'){
+          // Audit the interactive comparison on its actual editorial URL.
           await checkKeyboardJourney(page,viewport.label);
           if(viewport.label==='mobile'){
             const menu=page.locator('details.am-mobile-nav').first();
