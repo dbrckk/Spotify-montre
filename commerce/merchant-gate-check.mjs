@@ -70,4 +70,18 @@ assert.match(routeSource,/if\(!acceptingNewOrders&&\(!dbReady\|\|!pool\|\|idempo
   'Recovery must not query an unavailable database or with an unconfigured HMAC key');
 assert.match(routeSource,/if\(!acceptingNewOrders\|\|!merchantReady\(\)\)\s+return reply\(res,503/,
   'New checkouts must still fail closed during a sales freeze');
+const recoveryRoute=server.slice(
+  server.indexOf("if(req.method==='POST'&&pathname==='/api/checkout/recover')"),
+  server.indexOf("if(req.method==='POST'&&pathname==='/api/checkout'){")
+);
+assert.ok(recoveryRoute.length>200,'Dedicated read-only recovery endpoint must exist');
+assert.match(recoveryRoute,/findExistingCheckout\(pool,request,\{idempotencySecret\}\)/);
+assert.match(recoveryRoute,/if\(!resumed\)return reply\(res,404/,
+  'Unknown retry keys must not create a new order');
+assert.doesNotMatch(recoveryRoute,/reserveCheckout|createHostedPayment|preflightCjDelivery|createCjOrder/,
+  'Recovery endpoint must never create a payment or supplier order');
+assert.match(recoveryRoute,/req.headers.origin!==origin/,
+  'Private order recovery requires the authorized storefront origin');
+assert.match(recoveryRoute,/!dbReady\|\|!pool\|\|idempotencySecret.length<40/,
+  'Recovery requires the database and authenticated idempotency secret');
 console.log('Storefront/backend checkout interlock OK: prelaunch refuses all payments and CJ orders');

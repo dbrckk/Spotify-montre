@@ -143,10 +143,10 @@ try{
   const recoveryContext=await browser.newContext({
     viewport:{width:393,height:852},locale:'fr-FR'
   });
-  let postCount=0,firstAttempt=null;
+  let postCount=0,firstAttempt=null,storeFrozen=false;
   await recoveryContext.route('**/config.json',route=>route.fulfill({
     status:200,contentType:'application/json',
-    body:JSON.stringify({checkoutMode:'active',
+    body:JSON.stringify({checkoutMode:storeFrozen?'inactive':'active',
       commerceApiUrl:'https://atelier-montres-commerce-api.onrender.com/'})
   }));
   await recoveryContext.route('https://atelier-montres-commerce-api.onrender.com/api/offers',
@@ -236,6 +236,49 @@ try{
     localStorage.getItem('am_checkout_pending_v1_ci-watch-only')),firstAttempt,
     'An unresolved payment keeps its original retry key');
   await tabTwo.close();
+
+  // The storefront has now frozen NEW sales while the customer's original
+  // attempt remains unresolved. Only the read-only recovery route is legal.
+  storeFrozen=true;
+  let recoverCount=0;
+  await recoveryContext.route(
+    'https://atelier-montres-commerce-api.onrender.com/api/checkout/recover',
+    route=>{
+      if(route.request().method()==='OPTIONS')return route.fulfill({
+        status:204,headers:{
+          'Access-Control-Allow-Origin':base.origin,
+          'Access-Control-Allow-Methods':'POST, OPTIONS',
+          'Access-Control-Allow-Headers':'Content-Type'
+        }
+      });
+      recoverCount++;
+      const sent=route.request().postDataJSON();
+      assert.equal(sent.idempotencyKey,firstAttempt);
+      assert.equal(sent.offerId,'ci-watch-only');
+      return route.fulfill({
+        status:200,contentType:'application/json',
+        headers:{'Access-Control-Allow-Origin':base.origin},
+        body:JSON.stringify({
+          kind:'status',status:'PAYMENT_CREATING',
+          orderId:'ord_'+'b'.repeat(40),orderToken:'t'.repeat(43)
+        })
+      });
+    });
+  const frozenTab=await recoveryContext.newPage();
+  await frozenTab.goto(new URL('acheter.html?modele=ci-watch-only',base).href,
+    {waitUntil:'domcontentloaded'});
+  await frozenTab.locator('#amDirectForm').waitFor({state:'visible'});
+  assert.match(await frozenTab.locator('#amDirectSubmit').textContent(),
+    /Retrouver ma tentative/);
+  assert.equal(await frozenTab.locator('#amDirectOffers').inputValue(),'ci-watch-only');
+  assert.equal(await frozenTab.locator('#amDirectOffers').isDisabled(),true);
+  await enterCheckout(frozenTab);
+  await frozenTab.locator('#amDirectSubmit').click();
+  await frozenTab.waitForFunction(()=>document.querySelector('#amDirectStatus')
+    ?.textContent?.includes('en cours de préparation'));
+  assert.equal(recoverCount,1);
+  assert.equal(postCount,2,'Frozen storefront must not create a third checkout POST');
+  await frozenTab.close();
   await recoveryContext.close();
 
   // Storage denied by Android privacy/browser settings must fail BEFORE any

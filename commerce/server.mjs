@@ -213,6 +213,17 @@ async function route(req,res){
     if(req.headers.origin!==origin)return reply(res,403,{error:'Origine refusée'});
     res.writeHead(204,cors(req));res.end();return;
   }
+  if(req.method==='POST'&&pathname==='/api/checkout/recover'){
+    if(req.headers.origin!==origin)return reply(res,403,{error:'Origine refusée'});
+    // Dedicated read-only recovery endpoint: no supplier quote, database
+    // reservation, Mollie charge or CJ order, even when checkout is live.
+    if(!dbReady||!pool||idempotencySecret.length<40)
+      return reply(res,503,{error:'Suivi de commande temporairement indisponible'},cors(req));
+    const request=validateCheckoutBody(await readJsonBody(req));
+    const resumed=await findExistingCheckout(pool,request,{idempotencySecret});
+    if(!resumed)return reply(res,404,{error:'Aucune tentative correspondante. Aucun paiement créé.'},cors(req));
+    return reply(res,200,resumed,cors(req));
+  }
   if(req.method==='POST'&&pathname==='/api/checkout'){
     if(req.headers.origin!==origin)return reply(res,403,{error:'Origine refusée'});
     // Merchant freezes stop NEW charges, not authenticated recovery of an
