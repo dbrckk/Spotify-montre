@@ -5,8 +5,9 @@
   if(!script?.src)return;
   const base=new URL('./',script.src);
   const staticLink=new URL('acheter.html',base);
+  const EXPECTED_COMMERCE_ORIGIN='https://atelier-montres-commerce-api.onrender.com';
   const acceptedHost=u=>u.protocol==='https:'&&u.pathname==='/'&&!u.search&&!u.hash&&
-    !u.username&&!u.password&&!u.port&&u.hostname.endsWith('.onrender.com');
+    !u.username&&!u.password&&!u.port&&u.origin===EXPECTED_COMMERCE_ORIGIN;
   let offerMap=null;
   const euro=c=>new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR'}).format(c/100);
   const offerLink=(id,item)=>{
