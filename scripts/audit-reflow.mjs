@@ -61,7 +61,7 @@ async function control(page,selector,label,{min=24}={}){
 async function navigation(page,path){
   const res=await page.goto(new URL(path,origin).href,{waitUntil:'domcontentloaded',timeout:25000});
   if(!res?.ok())throw Error('HTTP '+res?.status()+' '+path);
-  if(path==='/'||path==='/index.html'||path==='/affiliation.html'){
+  if(path==='/affiliation.html'){
     await page.locator('#affGrid .aff-card').first().waitFor({state:'visible',timeout:20000});
   }
   if(path.includes('montre.html?id='))await page.locator('#detailShell').waitFor({state:'visible'});
@@ -89,7 +89,7 @@ try{
     }catch(err){report.failures.push({label:'320 '+path,reason:String(err).slice(0,380)})}
   }
   // Exercise difficult overlays at the 320px layout (not only static pages).
-  await navigation(page,'/');
+  await navigation(page,'/affiliation.html');
   await control(page,'.am-mobile-nav>summary','320 mobile navigation button');
   const menu=page.locator('details.am-mobile-nav').first();
   await menu.locator('summary').click();
