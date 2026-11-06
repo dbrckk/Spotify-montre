@@ -36,8 +36,12 @@ try{
   assert.equal(await page.locator('.am-partner-card').count(),total);
   assert.equal(await page.locator('#amDirectForm').isVisible(),false,
     'Affiliate gateway must never activate the own-site merchant checkout');
-  assert.equal(await page.locator('#amDirectCommerce').isVisible(),false,
-    'The inactive merchant checkout must not occupy customer-facing screen space');
+  assert.equal(await page.locator('#amDirectCommerce').isVisible(),true,
+    'The customer must see why direct purchase is unavailable');
+  assert.equal(await page.locator('#amDirectPrelaunch').isVisible(),true,
+    'Show public shopping alternatives without a checkout form');
+  assert.equal(await page.locator('#amDirectPurchaseSteps').isVisible(),false,
+    'Inactive purchase instructions must not imply a new order can be placed');
   assert.equal(await page.locator('#amPartnerFilters').isVisible(),true);
   const cards=page.locator('.am-partner-card');
   for(let i=0;i<ids.length;i++){
