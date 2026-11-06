@@ -129,3 +129,9 @@ body{background:var(--am-cream);color:var(--am-ink);margin:0}
 .am-partner-empty{border:1px solid #c7d7c2;border-radius:9px;background:#f4f8f2;padding:17px;color:#36543e;font:500 14px/1.65 system-ui,sans-serif}
 .am-partner-empty[hidden]{display:none}
 .am-partner-empty a{color:#1b5133;font-weight:750;text-underline-offset:4px}
+
+/* An exact-model request must never fall back to a different purchasable SKU. */
+.am-direct-unavailable{margin:20px 0 26px;border-left:4px solid #8c6330;border-radius:8px;background:#fff8e9;color:#4e3d26;padding:17px 20px;font:500 14px/1.7 system-ui,sans-serif}
+.am-direct-unavailable[hidden]{display:none}
+.am-direct-unavailable a{color:#27573a;font-weight:750;text-underline-offset:4px}
+.am-direct-unavailable a:focus-visible{outline:3px solid #9a7936;outline-offset:3px}
