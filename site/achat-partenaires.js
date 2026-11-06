@@ -64,7 +64,8 @@
       !config.links||Array.isArray(config.links)||typeof config.links!=='object'||
       known?.version!==1||!known.links||Array.isArray(known.links)||
       typeof known.checkedOn!=='string'||!/^[0-9]{4}-(0[1-9]|1[0-2])-([0-2][0-9]|3[01])$/.test(known.checkedOn)||
-      !Array.isArray(feed?.products)||feed.products.length!==15)return [];
+      !Array.isArray(feed?.products)||feed.products.length===0||
+       new Set(feed.products.map(p=>p?.id)).size!==feed.products.length)return [];
     const models=new Map(feed.products.filter(p=>idPattern.test(p?.id||'')).map(p=>[p.id,p]));
     const links=Object.entries(config.links);
     if(!links.length||links.length>models.size)return [];
