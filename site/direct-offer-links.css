@@ -3,3 +3,9 @@
 .am-direct-card-link:focus-visible{outline:3px solid #b48036;outline-offset:3px}
 .ud-actions .am-direct-card-link,.aff-card-actions .am-direct-card-link{flex:1 1 100%;width:100%}
 @media(prefers-reduced-motion:reduce){.am-direct-card-link{transition:none}}
+
+/* Own-site checkout is the first purchase choice only for eligible live offers. */
+.watch-actions>.am-direct-card-link,.am-extra-actions>.am-direct-card-link,
+.detail-shops>.am-direct-card-link{flex:1 1 100%;width:100%}
+.home-product-body>.am-direct-card-link{width:100%;margin:8px 0 5px}
+.detail-shops>.am-direct-card-link{font-size:14px}
