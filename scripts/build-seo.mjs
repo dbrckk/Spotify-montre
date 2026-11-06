@@ -353,7 +353,10 @@ import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
   // replace it with the deep editorial comparison page during SEO builds.
   // Keep generated script markers idempotent across repeated builds.
   const publicHomeFile=join(root,'index.html');
-  if(existsSync(publicHomeFile)){
+  // Test fixtures run with a different working directory and deliberately
+  // regenerate a comparison-only index. Only the production repository owns
+  // the separate customer homepage.
+  if(root===resolve(import.meta.dirname,'..','site')){
   let publicHome=readFileSync(publicHomeFile,'utf8');
   if(!publicHome.includes('<link rel="stylesheet" href="./public-home.css">')||
      !publicHome.includes('id="collection"')||!publicHome.includes('id="faq"'))
