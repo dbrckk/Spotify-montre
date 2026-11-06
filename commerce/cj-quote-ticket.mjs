@@ -208,7 +208,8 @@ export async function checkWrittenCjQuote({accessToken,fetcher=fetch}={}){
     supplierStatus:found?.state??null,
     supplierUnread:unread,...messageMetadata,
     operatorReviewRequired:Boolean(found&&
-      (found.state!=='AWAITING_CJ_REPLY'||unread)),
+      (found.state!=='AWAITING_CJ_REPLY'||unread||
+       messageMetadata.supplierMessageCount>0)),
     orderPlaced:false,walletDebited:false,
     quoteApproved:false};
 }

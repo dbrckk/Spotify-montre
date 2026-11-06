@@ -17,6 +17,10 @@ assert.deepEqual(
 const unread={...base,supplierUnread:true,operatorReviewRequired:true,
   supplierMessageCount:1,latestSupplierMessageDate:'2026-11-06'};
 assert.equal(evaluateQuoteWatchSignal(unread).state,'supplier_review_required');
+// An already-read supplier reply must still open the single operator task.
+const readReply={...unread,supplierUnread:false};
+assert.equal(evaluateQuoteWatchSignal(readReply).state,'supplier_review_required');
+assert.equal(evaluateQuoteWatchSignal(readReply).attention,true);
 for(const state of ['AWAITING_YOUR_REPLY','COMPLETED','EXPIRED','REVIEWED',
   'ON_HOLD','COLLABORATING','UNKNOWN']){
   const v={...unread,supplierUnread:false,supplierStatus:state};
@@ -56,8 +60,12 @@ for(const required of [
   'issues: write',
   'node commerce/cj-quote-ticket.mjs status',
   'node commerce/cj-quote-watch-signal.mjs',
-  "if: steps.quote.outputs.attention == 'true'"
+  "if: ${{ always() && (steps.quote.outputs.attention == 'true' || steps.quote.outputs.blocked == 'true') }}"
 ])assert.ok(workflow.includes(required),'CJ watch needs '+required);
+assert.match(workflow,/gh issue list --state all/,
+  'Supplier alerts and missing-ticket alerts must reuse the same issue');
+assert.match(workflow,/steps.quote.outputs.blocked == 'true'/,
+  'A missing CJ ticket must generate operator action despite a nonzero prior step');
 assert.ok(!workflow.includes('node commerce/cj-quote-ticket.mjs send'),
   'Automated monitoring must never submit supplier tickets');
 assert.ok(!workflow.includes('/api/checkout'),

@@ -24,7 +24,8 @@ Le code versionné comprend le contrôle **en lecture seule** de la demande écr
 
 - Le job utilise uniquement le secret GitHub `CJ_API_KEY`, jamais un jeton public. Sans secret ou en cas de panne API, **le contrôle échoue** : il ne prétend pas avoir reçu une réponse.
 - Seuls la date, l'état et le nombre de messages fournisseurs **sanitisés** sont traités ; ni correspondance privée, ni identifiant de ticket privé ne sont publiés.
-- Une nouvelle réponse, un message non lu ou un état demandant intervention ouvre **au maximum une issue GitHub** associée à la référence du devis. Une répétition du contrôle ne crée pas de doublon. L'issue signale un contrôle humain nécessaire, **pas** un accord commercial.
+- Une réponse fournisseur, **même déjà marquée « lue »** alors que le statut reste `AWAITING_CJ_REPLY`, déclenche une intervention : l'existence d'un message de CJ ne prouve jamais que le devis est approuvé. L'absence inexpliquée du ticket existant est également signalée.
+- Une réponse ou un ticket introuvable ouvre **au maximum une issue GitHub** associée à la référence du devis. Une répétition du contrôle ne crée pas de doublon. L'issue signale un contrôle humain nécessaire, **pas** un accord commercial.
 - Le workflow n'appelle jamais la création de commande CJ, le portefeuille, l'API de caisse, ni la création d'un nouveau ticket fournisseur.
 - Le seul chemin vers une mise en vente reste la **preuve écrite** du coût rendu en France (TVA, transport, droits, dédouanement, frais), des identifiants fournisseur (PID + VID + SKU), de l'importateur et de la conformité, suivie des contrôles documentés ci-dessous.
 - Sur Android : GitHub → `dbrckk/Spotify-montre` → **Actions** → **CJ pilot written quote — read-only watch** → **Run workflow** ; le résultat figure dans le résumé du job. Si le fournisseur a répondu, ouvrir l'issue créée et consulter son portail CJ pour examiner le document de façon privée.
