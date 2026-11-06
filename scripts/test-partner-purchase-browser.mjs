@@ -36,10 +36,12 @@ try{
   assert.equal(await page.locator('.am-partner-card').count(),total);
   assert.equal(await page.locator('#amDirectForm').isVisible(),false,
     'Affiliate gateway must never activate the own-site merchant checkout');
-  assert.equal(await page.locator('#amDirectCommerce').isVisible(),true,
-    'The customer must see why direct purchase is unavailable');
-  assert.equal(await page.locator('#amDirectPrelaunch').isVisible(),true,
-    'Show public shopping alternatives without a checkout form');
+  assert.equal(await page.locator('#amDirectCommerce').isVisible(),false,
+    'A public partner showroom must not lead with an inactive checkout panel');
+  assert.equal(await page.locator('#amDirectPrelaunch').isVisible(),false,
+    'Do not expose a development-style prelaunch panel to shoppers');
+  assert.equal(await page.locator('#amPartnerSelection').isVisible(),true,
+    'Verified merchant listings remain the primary purchase experience');
   assert.equal(await page.locator('#amDirectPurchaseSteps').isVisible(),false,
     'Inactive purchase instructions must not imply a new order can be placed');
   assert.equal(await page.locator('#amPartnerFilters').isVisible(),true);
