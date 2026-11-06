@@ -353,6 +353,7 @@ import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
   // replace it with the deep editorial comparison page during SEO builds.
   // Keep generated script markers idempotent across repeated builds.
   const publicHomeFile=join(root,'index.html');
+  if(existsSync(publicHomeFile)){
   let publicHome=readFileSync(publicHomeFile,'utf8');
   if(!publicHome.includes('<link rel="stylesheet" href="./public-home.css">')||
      !publicHome.includes('id="collection"')||!publicHome.includes('id="faq"'))
@@ -368,6 +369,11 @@ import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
     +'<script type="application/ld+json">'+publicSchema+'</script>'
     +'<!-- AM_PUBLIC_SEO_END --></head>');
   writeFileSync(publicHomeFile,publicHome);
+  }else{
+    // Isolated affiliate test fixtures intentionally omit the public index.
+    // Retain their historical generated alias without touching production.
+    writeFileSync(publicHomeFile,collection);
+  }
   // The editorial comparison is a separate, indexable page with its own
   // canonical, rather than a duplicate of the storefront homepage.
   const editorialUrl=u('affiliation.html');
