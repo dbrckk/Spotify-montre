@@ -21,6 +21,10 @@ assert.doesNotMatch(markup, /class="home-hero-visual"[^>]*aria-label=/, 'Product
 assert.match(markup, /id="chatLauncher"[^>]*aria-label="Une question \? Ouvrir le guide de montres"/, 'Visible chat button label must be part of its accessible name');
 assert.match(markup, /href="\.\/affiliation\.html#selection-accessible" class="home-choice"/, 'Budget shopping entry must target budget watches, not the complete popular range');
 assert.doesNotMatch(markup, /Aucune commande n'est encore acceptée|Projet en préparation|Notre sélection se prépare|Stock et préparation des commandes en France à l'ouverture/, 'Do not expose obsolete launch banners or unverified delivery promises');
+assert.match(markup, /id="homePurchaseAnswer"/, 'Public FAQ needs to stay synchronized with conditional direct checkout');
+const editorialPurchase=readFileSync(resolve(root,'affiliation.html'),'utf8');
+assert.match(editorialPurchase, /ACHAT DIRECT · QUAND DISPONIBLE/, 'Editorial purchase guidance must focus on shopper options');
+assert.doesNotMatch(editorialPurchase, /LA VENTE DIRECTE À VENIR|Suivre la préparation de la vente directe/, 'Do not expose unfinished merchant implementation to customers');
 assert.equal(typeof config,'object');
 assert.ok(['prelaunch','open'].includes(config.status), 'Valid commerce status');
 assert.ok(['inactive','embedded'].includes(config.checkoutMode), 'Offsite checkout is prohibited');
