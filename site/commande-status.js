@@ -5,6 +5,7 @@
   const refresh=document.getElementById('amOrderRefresh');
   const output=id=>document.getElementById(id);
   if(!status||!details||!refresh)return;
+  const EXPECTED_COMMERCE_ORIGIN='https://atelier-montres-commerce-api.onrender.com';
   const stateNames={
     PAYMENT_CREATING:'Préparation du paiement — aucune confirmation reçue.',
     PAYMENT_PENDING:'Paiement en cours de validation par le prestataire.',
@@ -52,7 +53,7 @@
       // shutdown must never revoke a customer's existing order-tracking path.
       const url=new URL(config.commerceApiUrl);
       if(url.protocol!=='https:'||url.username||url.password||url.pathname!=='/'||
-        !url.hostname.endsWith('.onrender.com'))throw Error();
+        url.origin!==EXPECTED_COMMERCE_ORIGIN||url.search||url.hash||url.port)throw Error();
       const {response:result,data}=await requestJson(
         url.origin+'/api/orders/'+orderId,
         {headers:{'X-Order-Token':token},cache:'no-store'},15000);

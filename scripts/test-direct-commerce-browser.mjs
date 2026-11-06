@@ -79,6 +79,33 @@ try{
     'A partner deep link must never open the direct payment form');
   await page.unroute('**/config.json');
 
+  // A compromised or misconfigured static config must not send buyers'
+  // addresses or checkout requests to another tenant on Render.
+  const foreignApi='https://untrusted-watch-commerce.onrender.com';
+  let foreignRequests=0;
+  await page.route(foreignApi+'/**',route=>{
+    foreignRequests++;
+    return route.abort('failed'); // Never contact a third-party API in CI.
+  });
+  await page.route('**/config.json',route=>route.fulfill({
+    status:200,contentType:'application/json',
+    body:JSON.stringify({checkoutMode:'active',commerceApiUrl:foreignApi+'/'})
+  }));
+  await page.goto(url,{waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>document.getElementById('amDirectStatus')
+    ?.textContent.includes('Aucun paiement direct'));
+  assert.equal(await page.locator('#amDirectForm').isVisible(),false,
+    'An unknown Render tenant must never receive a customer checkout');
+  assert.equal(foreignRequests,0,'No request may reach an unpinned merchant API');
+  const configObserved=page.waitForResponse(response=>response.url().endsWith('/config.json'));
+  await page.goto(new URL('index.html',base).href,{waitUntil:'domcontentloaded'});
+  await configObserved;
+  await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+  assert.equal(await page.locator('.am-direct-card-link').count(),0,
+    'An unpinned merchant API must not create own-site purchase CTAs');
+  assert.equal(foreignRequests,0,'No offer discovery may reach an unknown Render API');
+  await page.unroute('**/config.json');
+
   // CI fake storefront gate: exercise the future valid state but NEVER submit
   // to a provider, create an order or modify a live production setting.
   await page.route('**/config.json',route=>route.fulfill({
@@ -463,6 +490,25 @@ try{
   assert.equal(await orderPage.locator('#amOrderDetails').isVisible(),false,
     'A failed status refresh must not pretend stale shipment details are current');
   assert.equal(await orderPage.locator('#amOrderRefresh').isEnabled(),true);
+  // Never send the private order token to another Render tenant, even if a
+  // modified storefront config points at that tenant.
+  let foreignTrackingRequests=0;
+  await orderPage.route(foreignApi+'/**',route=>{
+    foreignTrackingRequests++;
+    return route.abort('failed');
+  });
+  await orderPage.route('**/config.json',route=>route.fulfill({
+    status:200,contentType:'application/json',
+    body:JSON.stringify({checkoutMode:'inactive',commerceApiUrl:foreignApi+'/'})
+  }));
+  const trackingBeforeTamper=trackingRequests;
+  await orderPage.reload({waitUntil:'domcontentloaded'});
+  await orderPage.waitForFunction(()=>document.querySelector('#amOrderStatus')
+    ?.textContent?.includes('temporairement indisponible'));
+  assert.equal(await orderPage.locator('#amOrderDetails').isVisible(),false);
+  assert.equal(foreignTrackingRequests,0,
+    'Private order status and token must never go to an unknown Render tenant');
+  assert.equal(trackingRequests,trackingBeforeTamper);
   await orderPage.close();
   const noScriptTracking=await browser.newPage({
     javaScriptEnabled:false,viewport:{width:320,height:740},locale:'fr-FR'
