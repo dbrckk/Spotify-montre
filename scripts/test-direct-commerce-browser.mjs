@@ -97,9 +97,10 @@ try{
   assert.equal(await page.locator('#amDirectForm').isVisible(),false,
     'An unknown Render tenant must never receive a customer checkout');
   assert.equal(foreignRequests,0,'No request may reach an unpinned merchant API');
+  const configObserved=page.waitForResponse(response=>response.url().endsWith('/config.json'));
   await page.goto(new URL('index.html',base).href,{waitUntil:'domcontentloaded'});
-  await page.waitForResponse(response=>response.url().endsWith('/config.json'))
-    .catch(()=>{}); // The page may have completed its config load before this line.
+  await configObserved;
+  await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
   assert.equal(await page.locator('.am-direct-card-link').count(),0,
     'An unpinned merchant API must not create own-site purchase CTAs');
   assert.equal(foreignRequests,0,'No offer discovery may reach an unknown Render API');
