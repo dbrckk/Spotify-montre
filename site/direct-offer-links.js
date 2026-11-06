@@ -85,6 +85,16 @@
         Number.isSafeInteger(o.deliveryMinDays)&&o.deliveryMinDays>=1&&
         Number.isSafeInteger(o.deliveryMaxDays)&&o.deliveryMaxDays>=o.deliveryMinDays&&o.deliveryMaxDays<=120).map(o=>[o.id,o]));
       if(offerMap.size){
+        // A valid direct offer changes the merchant role only for that route;
+        // static affiliate-era guidance must not contradict the new checkout.
+        const answer=document.getElementById('homePurchaseAnswer');
+        if(answer)answer.textContent='Lorsqu’une fiche affiche « Acheter sur Atelier Montres » et un prix TTC, vous commandez auprès de notre boutique, avec paiement sécurisé et suivi ici. Pour les autres références, le paiement et la livraison sont gérés par le marchand du lien externe.';
+        for(const p of document.querySelectorAll('footer p')){
+          if(p.textContent.includes("Aucun achat ni paiement ne s'effectue sur ce site actuellement.")){
+            p.textContent=p.textContent.replace("Aucun achat ni paiement ne s'effectue sur ce site actuellement.",
+              'Certaines montres sont achetables directement sur Atelier Montres, uniquement si un prix TTC et un bouton de commande sont affichés. Les autres achats se font chez le vendeur partenaire.');
+          }
+        }
         const navigation=document.querySelector('.home-nav-buy');
         if(navigation){
           navigation.href=staticLink.href;
