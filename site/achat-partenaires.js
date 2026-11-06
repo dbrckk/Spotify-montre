@@ -11,7 +11,12 @@
   const status=document.getElementById('amPartnerStatus');
   const filters=document.getElementById('amPartnerFilters');
   const retry=document.getElementById('amPartnerRetry');
-  if(!root||!grid||!status||!filters||!retry)return;
+  const unmatched=document.getElementById('amPartnerUnmatched');
+  const unmatchedLink=document.getElementById('amPartnerUnmatchedLink');
+  const search=document.getElementById('amPartnerSearch');
+  const empty=document.getElementById('amPartnerEmpty');
+  if(!root||!grid||!status||!filters||!retry||!unmatched||!unmatchedLink||
+     !search||!empty)return;
 
   const idPattern=/^[a-z0-9-]{4,64}$/;
   const asinPattern=/^[A-Z0-9]{10}$/;
@@ -86,26 +91,107 @@
       checkedOn:known.checkedOn
     }));
   };
-  let catalog=[],selected='all',featured=null,loading=false;
+  // The additional 37 editorial models already have an independently
+  // generated commercial proof registry. Only their exact, authorized Amazon
+  // product matches may join the purchase showroom; generic searches and
+  // merely proposed partner accounts are never promoted as exact offers.
+  const supplementalEntries=(discovery,proof,config,core)=>{
+    if(discovery?.version!==1||discovery.source!=='verified_site_catalogues'||
+       discovery.total!==52||discovery.coreCount!==15||discovery.supplementalCount!==37||
+       !Array.isArray(discovery.products)||discovery.products.length!==52||
+       proof?.version!==1||proof.scope!=='editorial_watch_purchase_evidence_not_live_offers'||
+       proof.counts?.total!==52||!Array.isArray(proof.products)||proof.products.length!==52)
+      return [];
+    const commercial=new Map(proof.products.map(item=>[item.id,item]));
+    const allIds=new Set(discovery.products.map(item=>item.id));
+    if(commercial.size!==52||allIds.size!==52)return [];
+    const coreIds=new Set(core.map(item=>item.product.id));
+    const sourceExtras=proof.products.filter(item=>
+      item.collection==='supplemental'&&item.amazon?.referralActive===true);
+    const extras=discovery.products.filter(item=>
+      item.kind==='supplemental'&&item.merchantKind==='direct');
+    if(!extras.length||extras.length>37||extras.length!==sourceExtras.length||
+       proof.counts.activeExactAmazonReferrals!==core.length+extras.length)return [];
+    const ready=extras.every(item=>{
+      const match=commercial.get(item.id);
+      const offer=match?.amazon;
+      const verifiedPhoto=Boolean(item.photoUrl);
+      return idPattern.test(item.id||'')&&!coreIds.has(item.id)&&
+        safeText(item.brand)&&safeText(item.model)&&
+        Object.hasOwn(tierLabel,item.tier)&&
+        item.detailUrl==='./montres/'+item.id+'.html'&&
+        item.commercialStatus==='documented_amazon_referral'&&
+        (!verifiedPhoto||item.photoUrl==='./assets/watches-popular/'+item.id+'.webp')&&
+        match?.collection==='supplemental'&&match.brand===item.brand&&
+        match.model===item.model&&match.vendorSourceUrl===item.officialUrl&&
+        match.photo?.published===verifiedPhoto&&
+        match.directSale?.eligible===false&&match.commission?.confirmed===false&&
+        offer?.referralActive===true&&offer.referralUrl===item.merchantUrl&&
+        offer.currentAvailability==='not_verified'&&
+        offer.observedAvailability==='not_documented'&&
+        asinPattern.test(offer.asin||'')&&
+        validUrl(item.merchantUrl,offer.asin,config.amazonPartnerTag)&&
+        offer.sourceCheckedOn===item.sourceCheckedOn&&
+        /^20\d{2}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(item.sourceCheckedOn||'')&&
+        ['amazon_fr_product_page','amazon_fr_comparator_redirect'].includes(item.merchantEvidenceType)&&
+        offer.evidenceKind===item.merchantEvidenceType&&
+        (offer.variantNote||null)===(item.marketplaceVariant||null)&&
+        (!item.marketplaceVariant||(safeText(item.marketplaceVariant)||
+          typeof item.marketplaceVariant==='string'&&
+          item.marketplaceVariant.length<=240));
+    });
+    if(!ready)return [];
+    return extras.map(p=>({
+      product:p,offer:{url:p.merchantUrl},
+      kind:'supplemental',detailUrl:p.detailUrl,photoUrl:p.photoUrl,
+      availabilityAtCheck:'not_checked',checkedOn:p.sourceCheckedOn,
+      evidenceType:p.merchantEvidenceType,variant:p.marketplaceVariant||null
+    }));
+  };
+  let catalog=[],selected='all',query='',featured=null,loading=false,expanded=false;
+  const normalize=value=>String(value??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
   function render(){
-    const shown=selected==='all'?catalog:catalog.filter(({product})=>product.tier===selected);
+    const terms=normalize(query).split(' ').filter(Boolean);
+    const shown=catalog.filter(({product})=>{
+      if(selected!=='all'&&product.tier!==selected)return false;
+      if(!terms.length)return true;
+      const label=normalize([product.brand,product.model,product.id].join(' '));
+      const compact=label.replace(/\s+/g,'');
+      return terms.every(term=>label.includes(term)||compact.includes(term));
+    });
     // Preserve exact product intent from /acheter.html?modele=..., but keep
     // other independently verified references available for comparison.
     const ordered=featured&&selected==='all'?[...shown].sort((a,b)=>
       Number(b.product.id===featured)-Number(a.product.id===featured)):shown;
-    const cards=ordered.map(({product:p,offer,availabilityAtCheck,checkedOn})=>{
+    const cards=ordered.map(({product:p,offer,availabilityAtCheck,checkedOn,
+      kind,detailUrl,photoUrl,evidenceType,variant})=>{
       const card=element('article','am-partner-card');
       card.dataset.watchId=p.id;
       if(p.id===featured)card.dataset.featured='true';
       const cover=element('a','am-partner-cover');
-      cover.href='./montre.html?id='+encodeURIComponent(p.id);
-      cover.setAttribute('aria-label','Découvrir '+p.brand+' '+p.model);
-      const photo=element('img');
-      photo.alt=p.brand+' '+p.model+' — photographie de la référence';
-      photo.src=p.photoReview.localUrl+'?v='+p.photoReview.localSha256.slice(0,12);
-      photo.loading='lazy';photo.decoding='async';
-      photo.width=440;photo.height=440;
-      cover.append(photo);
+      const productDetail=detailUrl||'./montre.html?id='+encodeURIComponent(p.id);
+      cover.href=productDetail;
+      // Let the real photo alt text or the honest no-photo caption become
+      // the accessible name. A shorter aria-label would hide visible text
+      // from speech input and violate WCAG label-in-name.
+      const picture=photoUrl===undefined
+        ?p.photoReview.localUrl+'?v='+p.photoReview.localSha256.slice(0,12)
+        :photoUrl;
+      if(picture){
+        const photo=element('img');
+        photo.alt=p.brand+' '+p.model+' — photographie de la référence';
+        photo.src=picture;
+        photo.loading='lazy';photo.decoding='async';
+        photo.width=440;photo.height=440;
+        cover.append(photo);
+      }else{
+        const figure=element('span','am-partner-no-photo');
+        figure.append(element('span','',p.brand),element('strong','',p.model),
+          element('small','',''));
+        figure.lastChild.textContent='Aucune photographie publiée pour cette référence';
+        cover.append(figure);
+      }
       const content=element('div','am-partner-card-content');
       content.append(element('span','am-partner-tier',tierLabel[p.tier]+' / '+p.brand));
       const title=element('h3','am-partner-name',p.model);
@@ -114,29 +200,47 @@
         'Votre modèle recherché'));
       const actions=element('div','am-partner-actions');
       const previousUnavailable=availabilityAtCheck==='unavailable_at_check';
+      const viaComparison=evidenceType==='amazon_fr_comparator_redirect';
       const purchase=link(offer.url,previousUnavailable
         ? 'Consulter la fiche Amazon.fr · stock à vérifier'
-        : 'Voir la référence sur Amazon.fr','am-partner-buy');
+        : viaComparison
+          ? 'Consulter l’ASIN sur Amazon.fr · modèle à confirmer'
+          : 'Voir la référence sur Amazon.fr','am-partner-buy');
       purchase.target='_blank';
       purchase.rel='noopener noreferrer nofollow sponsored';
       purchase.dataset.amazonProduct=p.id;
       purchase.dataset.amazonPlacement='showroom';
-      const detail=link('./montre.html?id='+encodeURIComponent(p.id),
-        'Comparer la montre','am-partner-detail');
+      const detail=link(productDetail,
+        'Consulter la fiche et les caractéristiques','am-partner-detail');
       actions.append(purchase,detail);
       content.append(actions);
       const date=checkedOn.split('-').reverse().join('/');
-      content.append(element('p','am-partner-card-note',previousUnavailable
-        ? 'Lien rémunéré · Indisponible lors du contrôle du '+date+
-          '. Situation actuelle inconnue : vérifiez auprès du vendeur.'
-        : 'Lien rémunéré · Disponibilité non vérifiée au '+date+
-          '. Prix, variante, vendeur et stock à contrôler chez Amazon.fr.'));
+      const note=kind==='supplemental'
+        ?viaComparison
+          ?'Lien rémunéré · ASIN recoupé via comparateur le '+date+
+            '. Page Amazon.fr non consultée directement : référence, prix, vendeur et stock à confirmer.'
+          :'Lien rémunéré · ASIN documenté le '+date+
+            '. Disponibilité, variante, prix total et vendeur à vérifier sur Amazon.fr.'
+        :previousUnavailable
+          ?'Lien rémunéré · Indisponible lors du contrôle du '+date+
+            '. Situation actuelle inconnue : vérifiez auprès du vendeur.'
+          :'Lien rémunéré · Disponibilité non vérifiée au '+date+
+            '. Prix, variante, vendeur et stock à contrôler chez Amazon.fr.';
+      content.append(element('p','am-partner-card-note',note));
+      if(variant)content.append(element('p','am-partner-variant',
+        'Variante de la fiche Amazon.fr à vérifier : '+variant));
       card.append(cover,content);
       return card;
     });
     grid.replaceChildren(...cards);
+    empty.hidden=shown.length!==0;
     const focusVisible=featured&&shown.some(x=>x.product.id===featured);
     const selectedProduct=focusVisible?catalog.find(x=>x.product.id===featured)?.product:null;
+    const unmatchedRequested=Boolean(expanded&&featured&&
+      !catalog.some(x=>x.product.id===featured));
+    unmatched.hidden=!unmatchedRequested;
+    if(unmatchedRequested)unmatchedLink.href=
+      './montres/toutes-les-montres.html?q='+encodeURIComponent(featured);
     status.textContent=shown.length+' modèle'+(shown.length===1?'':'s')+
       ' avec référence Amazon.fr documentée'+(shown.length===1?'':'s')+
       ' · disponibilité actuelle non garantie'+
@@ -153,10 +257,16 @@
     selected=button.dataset.tier;
     render();
   });
+  search.addEventListener('input',()=>{
+    query=search.value.slice(0,70);
+    render();
+  });
   retry.addEventListener('click',()=>{void init()});
   async function init(){
     if(loading)return;
     loading=true;
+    expanded=false;
+    unmatched.hidden=true;
     retry.hidden=true;
     retry.disabled=true;
     status.textContent='Vérification des références partenaires…';
@@ -170,11 +280,29 @@
       if(!verified.length)throw Error('Aucune correspondance partenaire validée');
       catalog=verified;
       const requested=new URLSearchParams(location.search).get('modele');
-      featured=idPattern.test(requested||'')&&catalog.some(x=>x.product.id===requested)
-        ?requested:null;
+      featured=idPattern.test(requested||'')?requested:null;
       filters.hidden=false;
       render();
-      if(featured)root.scrollIntoView({block:'start',behavior:'auto'});
+      if(featured&&catalog.some(x=>x.product.id===featured))
+        root.scrollIntoView({block:'start',behavior:'auto'});
+      // Non-critical enhancement. Show thirteen verified core references
+      // immediately; if either supplemental proof is unavailable or altered,
+      // do not add any unsubstantiated merchant destination.
+      try{
+        const [discovery,proof]=await Promise.all([
+          readJson('./discovery-catalogue.json'),
+          readJson('./commercial-registry.json')
+        ]);
+        const extras=supplementalEntries(discovery,proof,config,verified);
+        if(extras.length){
+          catalog=[...verified,...extras];
+          render();
+          if(featured&&extras.some(x=>x.product.id===featured))
+            root.scrollIntoView({block:'start',behavior:'auto'});
+        }
+      }catch{/* Keep the thirteen validated models; never invent a product exit. */}
+      expanded=true;
+      render();
     }catch{
       // Fail closed: no previously displayed checkout exits may survive
       // a failed refresh or a tampered source.
@@ -182,6 +310,8 @@
       featured=null;
       grid.replaceChildren();
       filters.hidden=true;
+      empty.hidden=true;
+      unmatched.hidden=true;
       status.textContent='Les références partenaires ne sont pas vérifiables actuellement. Réessayez ou consultez les fiches du catalogue.';
       retry.hidden=false;
     }finally{

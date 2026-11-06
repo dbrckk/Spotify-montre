@@ -13,6 +13,13 @@ const feed=JSON.parse(readFileSync(new URL('selection-affiliation.json',root),'u
 const evidence=JSON.parse(readFileSync(new URL('amazon-product-links.json',root),'utf8'));
 const evidenceDate=evidence.checkedOn.split('-').reverse().join('/');
 const ids=Object.keys(config.links);
+const discovery=JSON.parse(readFileSync(new URL('discovery-catalogue.json',root),'utf8'));
+const commercial=JSON.parse(readFileSync(new URL('commercial-registry.json',root),'utf8'));
+const extra=discovery.products.filter(p=>p.kind==='supplemental'&&p.merchantKind==='direct');
+const total=ids.length+extra.length;
+assert.equal(extra.length,10,'Ten independently reviewed exact Amazon supplemental models must publish');
+assert.equal(commercial.counts.activeExactAmazonReferrals,total,
+  'The purchase showroom must agree with the independent commercial proof');
 assert.equal(Object.values(evidence.links).filter(x=>
   x.availabilityAtCheck==='unavailable_at_check').length,4,
   'Four historically unavailable exact ASINs must remain visibly qualified');
@@ -25,8 +32,8 @@ try{
   const issues=[];
   page.on('pageerror',error=>issues.push(error.message));
   await page.goto(new URL('acheter.html',base).href,{waitUntil:'domcontentloaded'});
-  await page.locator('.am-partner-card').first().waitFor();
-  assert.equal(await page.locator('.am-partner-card').count(),13);
+  await page.waitForFunction(()=>document.querySelectorAll('.am-partner-card').length===23);
+  assert.equal(await page.locator('.am-partner-card').count(),total);
   assert.equal(await page.locator('#amDirectForm').isVisible(),false,
     'Affiliate gateway must never activate the own-site merchant checkout');
   assert.equal(await page.locator('#amDirectCommerce').isVisible(),false,
@@ -54,6 +61,35 @@ try{
     if(unavailable)assert.match(await a.innerText(),/stock à vérifier/i,
       'Historically unavailable products must not use the normal buy CTA label');
   }
+  for(const product of extra){
+    const card=page.locator('.am-partner-card[data-watch-id="'+product.id+'"]');
+    assert.equal(await card.count(),1,'Additional ASIN model must be displayed: '+product.id);
+    const action=card.locator('.am-partner-buy');
+    assert.equal(await action.getAttribute('href'),product.merchantUrl);
+    assert.equal(await action.getAttribute('rel'),'noopener noreferrer nofollow sponsored');
+    assert.equal(await action.getAttribute('data-amazon-product'),product.id);
+    assert.equal(await card.locator('.am-partner-detail').getAttribute('href'),
+      './montres/'+product.id+'.html','Supplemental detail must open a real SEO product page');
+    const note=await card.locator('.am-partner-card-note').innerText();
+    const onDate=product.sourceCheckedOn.split('-').reverse().join('/');
+    assert.ok(note.includes(onDate),'Supplemental ASIN proof must include the real research date');
+    assert.doesNotMatch(note,/en stock|livraison garantie|commande confirmée/i,
+      'Historical source evidence is not a live buyable offer');
+    const proof=commercial.products.find(p=>p.id===product.id);
+    assert.equal(proof.amazon.referralUrl,product.merchantUrl);
+    if(product.photoUrl){
+      assert.equal(await card.locator('img').getAttribute('src'),product.photoUrl);
+    }else{
+      assert.equal(await card.locator('img').count(),0);
+      assert.match(await card.locator('.am-partner-no-photo').innerText(),/Aucune photographie publiée/);
+    }
+    if(product.marketplaceVariant)
+      assert.match(await card.locator('.am-partner-variant').innerText(),/Variante de la fiche Amazon.fr/);
+    if(product.merchantEvidenceType==='amazon_fr_comparator_redirect'){
+      assert.match(note,/non consultée directement/);
+      assert.match(await action.innerText(),/modèle à confirmer/);
+    }
+  }
   const first=cards.first().locator('img');
   // Native lazy loading must be activated before waiting for image.onload.
   await first.scrollIntoViewIfNeeded();
@@ -61,15 +97,37 @@ try{
     if(!img.complete)await new Promise(resolve=>{img.addEventListener('load',resolve,{once:true});img.addEventListener('error',resolve,{once:true})});
   });
   assert.equal(await first.evaluate(img=>img.naturalWidth>0),true,'First real product image must load');
-  const essential=feed.products.filter(p=>p.tier==='essential'&&ids.includes(p.id)).length;
-  const prestige=feed.products.filter(p=>p.tier==='prestige'&&ids.includes(p.id)).length;
+  const essential=feed.products.filter(p=>p.tier==='essential'&&ids.includes(p.id)).length+
+    extra.filter(p=>p.tier==='essential').length;
+  const prestige=feed.products.filter(p=>p.tier==='prestige'&&ids.includes(p.id)).length+
+    extra.filter(p=>p.tier==='prestige').length;
   await page.locator('#amPartnerFilters button[data-tier=essential]').click();
   assert.equal(await page.locator('.am-partner-card').count(),essential);
   assert.equal(await page.locator('#amPartnerFilters button[data-tier=essential]').getAttribute('aria-pressed'),'true');
   await page.locator('#amPartnerFilters button[data-tier=prestige]').click();
   assert.equal(await page.locator('.am-partner-card').count(),prestige);
   await page.locator('#amPartnerFilters button[data-tier=all]').click();
-  assert.equal(await page.locator('.am-partner-card').count(),13);
+  assert.equal(await page.locator('.am-partner-card').count(),total);
+  await page.locator('#amPartnerSearch').fill('SKMEI1257');
+  assert.equal(await page.locator('.am-partner-card').count(),1,
+    'Mobile buyers can search compact model codes without punctuation');
+  assert.equal(await page.locator('.am-partner-card').first().getAttribute('data-watch-id'),
+    'skmei-1257');
+  await page.locator('#amPartnerSearch').fill('référence totalement absente');
+  assert.equal(await page.locator('.am-partner-card').count(),0);
+  assert.equal(await page.locator('#amPartnerEmpty').isVisible(),true,
+    'Empty results must offer a route back to the full 52-watch catalogue');
+  await page.locator('#amPartnerSearch').fill('');
+  assert.equal(await page.locator('.am-partner-card').count(),total);
+  assert.equal(await page.locator('#amPartnerEmpty').isVisible(),false);
+  await page.setViewportSize({width:320,height:740});
+  const narrow=await page.evaluate(()=>({
+    client:document.documentElement.clientWidth,
+    scroll:document.documentElement.scrollWidth
+  }));
+  assert.ok(narrow.scroll<=narrow.client+2,
+    'Complete 23-model shopping showroom must reflow at 320px Android');
+  await page.setViewportSize({width:390,height:840});
   const mobile=await page.evaluate(()=>({
     documentWidth:document.documentElement.clientWidth,
     scrollWidth:document.documentElement.scrollWidth
@@ -141,8 +199,8 @@ try{
   const referred=await browser.newPage({viewport:{width:390,height:840}});
   await referred.goto(new URL('acheter.html?modele='+referredId,base).href,
     {waitUntil:'domcontentloaded'});
-  await referred.locator('.am-partner-card').first().waitFor();
-  assert.equal(await referred.locator('.am-partner-card').count(),13);
+  await referred.waitForFunction(()=>document.querySelectorAll('.am-partner-card').length===23);
+  assert.equal(await referred.locator('.am-partner-card').count(),total);
   assert.equal(await referred.locator('.am-partner-card').first().getAttribute('data-watch-id'),
     referredId);
   assert.equal(await referred.locator('.am-partner-card').first().getAttribute('data-featured'),
@@ -158,6 +216,59 @@ try{
   assert.equal(await referred.locator('.am-partner-card').first().getAttribute('data-watch-id'),
     referredId);
   await referred.close();
+
+  // Supplemental deep links must highlight the exact researched product,
+  // never an unrelated watch from the older 13-watch checkout selection.
+  const supplementalId=extra.find(p=>p.merchantEvidenceType==='amazon_fr_comparator_redirect')?.id||extra[0].id;
+  const supplementalPage=await browser.newPage({viewport:{width:390,height:840}});
+  await supplementalPage.goto(new URL('acheter.html?modele='+supplementalId,base).href,
+    {waitUntil:'domcontentloaded'});
+  await supplementalPage.waitForFunction(()=>document.querySelectorAll('.am-partner-card').length===23);
+  assert.equal(await supplementalPage.locator('.am-partner-card').first().getAttribute('data-watch-id'),
+    supplementalId,'Additional buyer referrals must preserve the exact model deep link');
+  assert.equal(await supplementalPage.locator('.am-partner-card').first().getAttribute('data-featured'),'true');
+  assert.equal(await supplementalPage.locator('#amPartnerUnmatched').isVisible(),false);
+  await supplementalPage.close();
+
+  // A missing independently checked Amazon match must offer a catalogue
+  // search rather than putting a different reference first.
+  const unmatched=await browser.newPage({viewport:{width:390,height:840}});
+  await unmatched.goto(new URL('acheter.html?modele=skmei-2056',base).href,
+    {waitUntil:'domcontentloaded'});
+  await unmatched.locator('#amPartnerUnmatched').waitFor({state:'visible'});
+  assert.match(await unmatched.locator('#amPartnerUnmatched').innerText(),
+    /ne pouvons pas confirmer ici un lien Amazon.fr exact/);
+  assert.match(await unmatched.locator('#amPartnerUnmatchedLink').getAttribute('href'),
+    /toutes-les-montres\.html\?q=skmei-2056$/);
+  await unmatched.close();
+
+  // An altered supplemental ref, or a missing proof registry, must never
+  // publish misleading new Amazon links; valid original core links survive.
+  const tamperedDiscovery=structuredClone(discovery);
+  const injected=tamperedDiscovery.products.find(p=>p.id===extra[0].id);
+  injected.merchantUrl='https://malicious.invalid/dp/B012345678?tag='+config.amazonPartnerTag;
+  const forgedSupplemental=await browser.newPage();
+  const supplementErrors=[];
+  forgedSupplemental.on('pageerror',e=>supplementErrors.push(e.message));
+  await forgedSupplemental.route('**/discovery-catalogue.json',route=>route.fulfill({
+    status:200,contentType:'application/json',body:JSON.stringify(tamperedDiscovery)
+  }));
+  await forgedSupplemental.goto(new URL('acheter.html?modele='+extra[0].id,base).href,
+    {waitUntil:'domcontentloaded'});
+  await forgedSupplemental.locator('#amPartnerUnmatched').waitFor({state:'visible'});
+  assert.equal(await forgedSupplemental.locator('.am-partner-card').count(),13);
+  assert.equal(await forgedSupplemental.locator('.am-partner-buy[href*="malicious.invalid"]').count(),0);
+  assert.deepEqual(supplementErrors,[]);
+  await forgedSupplemental.close();
+
+  const unavailableSupplemental=await browser.newPage();
+  await unavailableSupplemental.route('**/commercial-registry.json',
+    route=>route.abort('failed'));
+  await unavailableSupplemental.goto(new URL('acheter.html?modele='+extra[0].id,base).href,
+    {waitUntil:'domcontentloaded'});
+  await unavailableSupplemental.locator('#amPartnerUnmatched').waitFor({state:'visible'});
+  assert.equal(await unavailableSupplemental.locator('.am-partner-card').count(),13);
+  await unavailableSupplemental.close();
 
   // An invented "in stock" value is tampered evidence: fail closed.
   const stockForgery=structuredClone(evidence);
@@ -213,15 +324,15 @@ try{
   await recover.locator('#amPartnerRetry').waitFor({state:'visible'});
   assert.equal(await recover.locator('.am-partner-card').count(),0);
   await recover.locator('#amPartnerRetry').click();
-  await recover.locator('.am-partner-card').first().waitFor();
-  assert.equal(await recover.locator('.am-partner-card').count(),13);
+  await recover.waitForFunction(()=>document.querySelectorAll('.am-partner-card').length===23);
+  assert.equal(await recover.locator('.am-partner-card').count(),total);
   assert.equal(await recover.locator('.am-partner-card').first().getAttribute('data-watch-id'),
     'seiko-sharp');
   assert.equal(await recover.locator('#amPartnerRetry').isVisible(),false);
   await recover.locator('#amPartnerFilters button[data-tier=essential]').click();
   assert.equal(await recover.locator('.am-partner-card').count(),essential);
   await recover.locator('#amPartnerFilters button[data-tier=all]').click();
-  assert.equal(await recover.locator('.am-partner-card').count(),13);
+  assert.equal(await recover.locator('.am-partner-card').count(),total);
   assert.equal(await recover.locator('#amDirectForm').isVisible(),false);
   await recover.close();
 
@@ -252,7 +363,7 @@ try{
   await inactive.close();
   const noJS=await browser.newPage({javaScriptEnabled:false});
   await noJS.goto(new URL('acheter.html',base).href,{waitUntil:'domcontentloaded'});
-  assert.match(await noJS.locator('#amPartnerStatus').innerText(),/explorez les 15 fiches comparatives/);
+  assert.match(await noJS.locator('#amPartnerStatus').innerText(),/explorez les 52 fiches de montres/);
   assert.equal(await noJS.locator('#amDirectCommerce').isVisible(),false,
     'A disabled direct checkout must remain hidden even without JavaScript');
   await noJS.close();
