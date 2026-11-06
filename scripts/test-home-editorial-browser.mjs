@@ -17,7 +17,7 @@ try{
       deviceScaleFactor:1,locale:'fr-FR'
     });
     page.on('pageerror',error=>failures.push(width+': '+error.message));
-    await page.goto(new URL('/index.html',base).href,{waitUntil:'domcontentloaded'});
+    await page.goto(new URL('/affiliation.html',base).href,{waitUntil:'domcontentloaded'});
     await page.locator('.am-hero-watch img').waitFor({state:'visible',timeout:15000});
     assert.equal(await page.locator('.am-style-card').count(),3,
       'three factual image-led catalogue paths must remain');
@@ -79,7 +79,7 @@ try{
     await page.close();
   }
   assert.deepEqual(failures,[]);
-  console.log('Premium generated homepage OK: 52-watch links, 7 authentic local-photo placements, 3 detailed highlights, responsive menu, no overflow, accurate shipping disclosure');
+  console.log('Premium editorial comparison showroom OK: 52-watch links, 7 authentic local-photo placements, 3 detailed highlights, responsive menu, no overflow, accurate shipping disclosure');
 }finally{
   await browser.close();
 }
