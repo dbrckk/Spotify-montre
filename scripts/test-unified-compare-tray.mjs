@@ -340,7 +340,7 @@ try{
   const heroPage=await browser.newPage({viewport:{width:393,height:852},
     isMobile:true,hasTouch:true,locale:'fr-FR'});
   heroPage.on('pageerror',e=>errors.push('showroom: '+e.message));
-  await heroPage.goto(new URL('/index.html#selection-accessible',base).href,
+  await heroPage.goto(new URL('/affiliation.html#selection-accessible',base).href,
     {waitUntil:'domcontentloaded'});
   const featuredCard=heroPage.locator('[data-affordable-id="skmei-1257"]');
   assert.ok(await featuredCard.isVisible(),'Affordable real-watch gallery must be visible on Android');
@@ -356,7 +356,7 @@ try{
   const duelPage=await browser.newPage({viewport:{width:393,height:852},
     isMobile:true,hasTouch:true,locale:'fr-FR'});
   duelPage.on('pageerror',e=>errors.push('duel: '+e.message));
-  await duelPage.goto(new URL('/index.html#duels-accessibles',base).href,{waitUntil:'domcontentloaded'});
+  await duelPage.goto(new URL('/affiliation.html#duels-accessibles',base).href,{waitUntil:'domcontentloaded'});
   assert.equal(await duelPage.locator('.am-duel-promo-card').count(),4,
     'Four distinct, photographed-or-fallback buyer decision articles must be discoverable');
   await duelPage.locator('[data-duel-promo="addiesdive-ad2030-vs-pagani-pd1701"] a').click();
