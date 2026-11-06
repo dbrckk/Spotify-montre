@@ -17,12 +17,11 @@ try{
       viewport:{width,height:850},locale:'fr-FR'
     });
     await page.goto(url,{waitUntil:'domcontentloaded'});
-    assert.equal(await page.locator('#amDirectPrelaunch').isVisible(),true);
+    assert.equal(await page.locator('#amDirectCommerce').isVisible(),false,
+      'Unverified payment section must not be displayed to customers');
     assert.equal(await page.locator('#amDirectForm').isVisible(),false);
-    assert.match(await page.locator('#amDirectStatus').innerText(),/paiement direct/i);
-    const link=page.locator('.am-direct-prelaunch-primary');
-    assert.equal(await link.count(),1);
-    assert.equal(await link.getAttribute('href'),'./montres/toutes-les-montres.html');
+    assert.equal(await page.locator('#amPartnerSelection').isVisible(),true,
+      'Partner selection must be available without scripts');
     assert.equal(await page.locator('.am-direct-discovery-card').count(),3);
     await page.close();
   }
@@ -37,7 +36,8 @@ try{
   await page.waitForFunction(()=>
     document.getElementById('amDirectStatus')?.textContent.includes('ne peut pas être vérifiée')
   );
-  assert.equal(await page.locator('#amDirectPrelaunch').isVisible(),true);
+  assert.equal(await page.locator('#amDirectCommerce').isVisible(),false);
+  assert.equal(await page.locator('#amPartnerSelection').isVisible(),true);
   assert.equal(await page.locator('#amDirectForm').isVisible(),false);
   await page.unroute('**/config.json');
 
@@ -59,6 +59,7 @@ try{
     }));
   await page.reload({waitUntil:'domcontentloaded'});
   await page.locator('#amDirectForm').waitFor({state:'visible'});
+  assert.equal(await page.locator('#amDirectCommerce').isVisible(),true);
   assert.equal(await page.locator('#amDirectPrelaunch').isVisible(),false);
   assert.match(await page.locator('#amDirectPrice').innerText(),/99,90/);
   assert.equal(await page.locator('#amDirectOffers option').count(),1);

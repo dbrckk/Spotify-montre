@@ -51,6 +51,7 @@ assert.match(ownCode,/localStorage\.setItem/);
 assert.doesNotMatch(ownCode,/innerHTML\s*=|stripe\.|fetch\s*\(/);
 assert.match(ownCss,/@media\(max-width:600px\)/);
 assert.match(read('site/index.html'),/href="\.\/affiliation\.html"/);
-assert.match(read('site/index.html'),/href="\.\/marque\.html"/);
+assert.match(read('site/index.html'),/href="\.\/montres\/toutes-les-montres\.html"/);
+assert.match(read('site/index.html'),/href="\.\/acheter\.html#amPartnerSelection"/);
 assert.equal(JSON.parse(read('site/config.json')).checkoutMode,'inactive');
 console.log('15 verifiable watch references, affiliate disclosure, 3 brand concepts, and purchase-disabled setup — OK');

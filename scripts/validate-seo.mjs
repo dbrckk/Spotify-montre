@@ -112,7 +112,8 @@ for(const name of ['citizen-tsuyosa','tissot-prx-quartz','orient-bambino','casio
 }
 assert.match(read('editorial-photo.js'),/assets\/watch-thumbs\/.*item\.id/,'Featured picker must request smaller local thumbnails');
 assert.match(read('affiliation.js'),/assets\/watch-responsive\/.*p\.id/,'Dynamic catalogue must prefer responsive photos');
-const home=read('index.html');
+const publicHome=read('index.html');
+const home=read('affiliation.html');
 const affordableDuels=JSON.parse(read('comparaisons-accessibles.json'));
 const escapeEditorialHtml=value=>String(value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 const affordableCatalog=JSON.parse(read('selection-populaires.json')).products;
@@ -192,8 +193,21 @@ for(const pair of affordableDuels.comparisons){
 assert.match(read('affordable-comparisons.css'),/\.am-duel-promo-grid\{/,
   'Fully responsive premium comparison design must be deployed');
 
-const legacyHome=read('affiliation.html');
-assert.equal(home,legacyHome,'Generated landing pages must remain byte-identical');
+// The public storefront and the long-form editorial comparison are now
+// deliberately different pages, both useful and indexable.
+assert.notEqual(publicHome,home,'Customer homepage must not be a duplicate comparison page');
+assert.match(publicHome,/href="\.\/montres\/toutes-les-montres\.html"/);
+assert.match(publicHome,/href="\.\/acheter\.html#amPartnerSelection"/);
+assert.match(publicHome,/href="\.\/public-home\.css"/);
+assert.match(publicHome,/id="montres"/);
+assert.doesNotMatch(publicHome,/Projet en préparation|Notre sélection se prépare/);
+assert.ok(publicHome.includes('<link rel="canonical" href="'+manifest.siteUrl+'">'),
+  'Customer homepage must retain its own canonical URL');
+assert.ok(home.includes('<link rel="canonical" href="'+manifest.siteUrl+'affiliation.html">'),
+  'Editorial showroom must have its own canonical URL');
+assert.equal((publicHome.match(/rel="canonical"/g)||[]).length,1);
+assert.equal((publicHome.match(/AM_PUBLIC_SEO_START/g)||[]).length,1);
+assert.equal((publicHome.match(/AM_PUBLIC_SEO_END/g)||[]).length,1);
 assert.ok(home.includes('52 MONTRES DOCUMENTÉES'),'The hero must present the full 52-model range');
 assert.ok(home.includes('Explorer les 52 montres'),'Primary discovery CTA must open the complete catalogue');
 assert.ok(home.includes('15 montres comparées en détail'),'The 15 in-depth subset must remain clearly described');
@@ -203,7 +217,7 @@ assert.ok(home.includes('52 montres documentées à découvrir, dont 15 comparé
 const premiumCss=read('premium-system.css');
 assert.match(premiumCss,/--am-p-paper:/,'Premium color tokens must ship');
 assert.match(premiumCss,/prefers-reduced-motion:reduce/,'Motion preferences must be respected');
-for(const page of ['index.html','conseiller.html','montre.html']){
+for(const page of ['affiliation.html','conseiller.html','montre.html']){
   assert.match(read(page),/<link rel="stylesheet" href="\.\/premium-system\.css">/,'Missing shared design system '+page);
 }
 assert.match(read('montres/citizen-tsuyosa.html'),/<link rel="stylesheet" href="\.\.\/premium-system\.css">/,'SEO product page must share the design system');

@@ -4,10 +4,12 @@
   const status=$('amDirectStatus'),offers=$('amDirectOffers'),form=$('amDirectForm');
   if(!status||!offers||!form)return;
   const prelaunch=$('amDirectPrelaunch');
+  const commerce=$('amDirectCommerce');
   const show=(message,error=false)=>{status.textContent=message;status.dataset.error=String(error)};
   const showPrelaunch=(message,error=false)=>{
     form.hidden=true;
-    if(prelaunch)prelaunch.hidden=false;
+    if(prelaunch)prelaunch.hidden=true;
+    if(commerce)commerce.hidden=true;
     show(message,error);
   };
   // Bound the whole response, including JSON, to avoid an endless loading state.
@@ -60,6 +62,7 @@
       offers.replaceChildren(...elements);
       if(list.some(x=>x.id===selected))offers.value=selected;
       if(prelaunch)prelaunch.hidden=true;
+      if(commerce)commerce.hidden=false;
       form.hidden=false;show('Le prix TTC de la montre sélectionnée est indiqué ci-dessous. Les frais et délais sont précisés avant validation.');
       updatePrice();
     }catch{return showPrelaunch('Le service marchand ne répond pas. Aucun paiement n’a été demandé.',true)}

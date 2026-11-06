@@ -29,7 +29,8 @@ try{
   assert.equal(await page.locator('.am-partner-card').count(),13);
   assert.equal(await page.locator('#amDirectForm').isVisible(),false,
     'Affiliate gateway must never activate the own-site merchant checkout');
-  assert.equal(await page.locator('#amDirectPrelaunch').isVisible(),true);
+  assert.equal(await page.locator('#amDirectCommerce').isVisible(),false,
+    'The inactive merchant checkout must not occupy customer-facing screen space');
   assert.equal(await page.locator('#amPartnerFilters').isVisible(),true);
   const cards=page.locator('.am-partner-card');
   for(let i=0;i<ids.length;i++){
@@ -81,6 +82,43 @@ try{
   await page.screenshot({path:'artifacts/verified-partner-purchase-desktop.png',fullPage:true});
   assert.deepEqual(issues,[]);
   await page.close();
+
+  // Public entrypoint: the homepage must sell the selection, not the
+  // engineering roadmap. Verify actual photos, product navigation and mobile
+  // reflow on the same local build as the partner purchase journey.
+  const home=await browser.newPage({viewport:{width:320,height:720},locale:'fr-FR'});
+  const homeErrors=[];
+  home.on('pageerror',error=>homeErrors.push(error.message));
+  await home.goto(new URL('index.html',base).href,{waitUntil:'domcontentloaded'});
+  assert.match(await home.locator('h1').innerText(),/Trouvez la montre/);
+  assert.equal(await home.locator('.home-product-card').count(),3);
+  assert.equal(await home.locator('#siteStatus').count(),0,
+    'Internal prelaunch status must not appear in the public site');
+  assert.equal(await home.locator('#emptyState').count(),0,
+    'The homepage must not present an empty catalog when real references exist');
+  assert.equal(await home.locator('.home-product-card a[href*="montre.html?id="]').count(),6);
+  for(const width of [320,390,1280]){
+    await home.setViewportSize({width,height:width===1280?900:760});
+    const sizes=await home.evaluate(()=>({
+      viewport:document.documentElement.clientWidth,
+      contents:document.documentElement.scrollWidth
+    }));
+    assert.ok(sizes.contents<=sizes.viewport+2,
+      'Public homepage horizontal overflow at '+width+' px: '+JSON.stringify(sizes));
+    await home.screenshot({path:'artifacts/public-home-'+width+'.png',fullPage:true});
+  }
+  const heroPhoto=home.locator('.home-hero-visual img');
+  await heroPhoto.scrollIntoViewIfNeeded();
+  await heroPhoto.evaluate(async img=>{
+    if(!img.complete)await new Promise(resolve=>{
+      img.addEventListener('load',resolve,{once:true});
+      img.addEventListener('error',resolve,{once:true});
+    });
+  });
+  assert.equal(await heroPhoto.evaluate(img=>img.naturalWidth>0),true,
+    'Real photograph must load in the public homepage hero');
+  assert.deepEqual(homeErrors,[]);
+  await home.close();
 
   // Deep-linked discovery must preserve the exact watch instead of forcing
   // Android shoppers to search again through all 13 partner offers.
@@ -200,7 +238,8 @@ try{
   const noJS=await browser.newPage({javaScriptEnabled:false});
   await noJS.goto(new URL('acheter.html',base).href,{waitUntil:'domcontentloaded'});
   assert.match(await noJS.locator('#amPartnerStatus').innerText(),/explorez les 15 fiches comparatives/);
-  assert.equal(await noJS.locator('#amDirectPrelaunch').isVisible(),true);
+  assert.equal(await noJS.locator('#amDirectCommerce').isVisible(),false,
+    'A disabled direct checkout must remain hidden even without JavaScript');
   await noJS.close();
 
   // All the real shopping entrypoints must display the same dated source

@@ -11,7 +11,7 @@ try{
     const page=await browser.newPage({viewport:{width,height:852},deviceScaleFactor:1,isMobile:width<768,hasTouch:width<768,locale:'fr-FR'});
     const errors=[];
     page.on('pageerror',e=>errors.push(e.message));
-    await page.goto(new URL('/',base).href,{waitUntil:'domcontentloaded'});
+    await page.goto(new URL('/affiliation.html',base).href,{waitUntil:'domcontentloaded'});
     await page.waitForSelector('#affGrid .aff-card',{timeout:25000});
     await page.locator('#affViewGallery').click();
     await page.waitForFunction(()=>document.querySelector('#affGrid')?.dataset.view==='gallery');
