@@ -47,19 +47,20 @@ try{
   assert.equal(await page.locator('#amDirectUnavailable').isVisible(),false);
   await page.unroute('**/config.json');
 
-  // The actual public prelaunch state must explain the sales freeze visibly,
-  // keep every payment field hidden, and preserve shopping alternatives.
+  // Public inactive checkout must prioritize real merchant references while
+  // keeping the entire payment panel and all payment fields hidden.
   await page.route('**/config.json',route=>route.fulfill({
     status:200,contentType:'application/json',
     body:JSON.stringify({checkoutMode:'inactive',status:'prelaunch',
       commerceApiUrl:'https://atelier-montres-commerce-api.onrender.com/'})
   }));
   await page.goto(url,{waitUntil:'domcontentloaded'});
-  await page.locator('#amDirectPrelaunch').waitFor({state:'visible'});
-  assert.match(await page.locator('#amDirectStatus').innerText(),/Aucun paiement direct/);
+  await page.waitForFunction(()=>document.getElementById('amDirectStatus')?.textContent.includes('Aucun paiement direct'));
+  assert.equal(await page.locator('#amDirectCommerce').isVisible(),false);
+  assert.equal(await page.locator('#amDirectPrelaunch').isVisible(),false);
+  assert.equal(await page.locator('#amPartnerSelection').isVisible(),true);
   assert.equal(await page.locator('#amDirectForm').isVisible(),false);
   assert.equal(await page.locator('#amDirectPurchaseSteps').isVisible(),false);
-  assert.equal(await page.locator('#amDirectPrelaunch a[href="#amPartnerSelection"]').isVisible(),true);
   const prelaunchLayout=await page.evaluate(()=>({
     width:document.documentElement.clientWidth,
     scroll:document.documentElement.scrollWidth
