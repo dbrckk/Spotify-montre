@@ -10,10 +10,19 @@
   const unavailable=$('amDirectUnavailable');
   const show=(message,error=false)=>{status.textContent=message;status.dataset.error=String(error)};
   const showPrelaunch=(message,error=false)=>{
+    // The checkout form stays closed, but the customer must actually SEE
+    // why payment is unavailable and where to continue browsing.
     form.hidden=true;
-    if(prelaunch)prelaunch.hidden=true;
-    if(commerce)commerce.hidden=true;
-    if(unavailable)unavailable.hidden=true;
+    if(prelaunch)prelaunch.hidden=false;
+    if(commerce){commerce.hidden=false;commerce.dataset.mode='prelaunch'}
+    const steps=$('amDirectPurchaseSteps');
+    if(steps)steps.hidden=true;
+    const title=$('checkoutTitle');
+    if(title)title.textContent='Achat direct indisponible';
+    // Only an established sales freeze (not a network failure) may state
+    // that a specifically requested watch is unavailable for direct sale.
+    const requested=new URLSearchParams(location.search).get('modele')||'';
+    if(unavailable)unavailable.hidden=error||!/^[a-z0-9-]{4,64}$/.test(requested);
     show(message,error);
   };
   // Bound the whole response, including JSON, to avoid an endless loading state.
@@ -93,8 +102,10 @@
     }));
     offers.disabled=ids.length===1;
     if(prelaunch)prelaunch.hidden=true;
-    if(commerce)commerce.hidden=false;
+    if(commerce){commerce.hidden=false;commerce.dataset.mode='recovery'}
     if(unavailable)unavailable.hidden=true;
+    const title=$('checkoutTitle');
+    if(title)title.textContent='Reprendre une commande';
     if(heading)heading.replaceChildren('Retrouver une tentative précédente');
     if(lead)lead.textContent='Les nouvelles ventes sont suspendues. Sélectionnez votre ancienne référence si plusieurs tentatives existent, puis ressaisissez exactement les mêmes informations. Aucun nouveau paiement ne sera créé.';
     // A recovery-only form must not show purchase promises, checkout terms
@@ -159,7 +170,11 @@
       if(list.some(x=>x.id===selected))offers.value=selected;
       if(prelaunch)prelaunch.hidden=true;
       if(unavailable)unavailable.hidden=true;
-      if(commerce)commerce.hidden=false;
+      if(commerce){commerce.hidden=false;commerce.dataset.mode='live'}
+      const steps=$('amDirectPurchaseSteps');
+      if(steps)steps.hidden=false;
+      const title=$('checkoutTitle');
+      if(title)title.textContent='Votre commande';
       if(heading){
         const emphasis=document.createElement('em');
         emphasis.textContent='chez Atelier Montres.';
