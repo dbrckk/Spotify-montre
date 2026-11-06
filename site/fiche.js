@@ -8,7 +8,12 @@
  const node=(tag,cls,text)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e};
  const fail=()=>{status.textContent='Référence non vérifiée.';error.hidden=false;shell.hidden=true};
  if(!id||!/^[a-z0-9-]{4,64}$/.test(id)){fail();return}
- fetch('./selection-affiliation.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('Not available');return r.json()}).then(x=>{
+ // A stalled catalogue request must not leave an Android visitor indefinitely
+ // on a loading screen. Keep the failure route useful and non-commercial.
+ const controller=new AbortController();
+ const loadingTimeout=setTimeout(()=>controller.abort(),10000);
+ fetch('./selection-affiliation.json',{cache:'no-store',signal:controller.signal})
+ .then(r=>{if(!r.ok)throw Error('Not available');return r.json()}).then(x=>{
    if(x?.version!==1||!Array.isArray(x.products)||x.affiliateEnabled!==false)throw Error('Invalid feed');
    const p=x.products.find(t=>t.id===id);
    if(!p||!safeOfficial(p.officialUrl)||p.affiliateUrl!==null||p.merchantLinkStatus!=='untracked_official')throw Error('Invalid model');
@@ -294,5 +299,5 @@
        }).catch(()=>{ /* Advisory content never blocks the verified product page. */ });
    }
    status.hidden=true;shell.hidden=false;
- }).catch(fail);
+ }).catch(fail).finally(()=>clearTimeout(loadingTimeout));
 })();
