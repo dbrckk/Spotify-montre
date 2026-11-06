@@ -1,5 +1,6 @@
 import {getApprovedOffer} from './db.mjs';
 import {storefrontCheckoutPermitted} from './merchant-gate.mjs';
+import {merchantPublicationPermitted} from './merchant-publication.mjs';
 
 /**
  * Operator-only, read-only launch diagnostics. Never exposes credentials,
@@ -68,10 +69,11 @@ const isHttpsOrigin=value=>{
       !url.hash&&url.pathname==='/'&&url.search===''&&url.port==='';
   }catch{return false}
 };
-export function merchantConfigurationChecks(env={},siteConfig={}){
+export function merchantConfigurationChecks(env={},siteConfig={},documentOptions={}){
   const cap=Number(env.CJ_DAILY_CAP_USD_CENTS||0);
   return {
     storefront_checkout_active:siteConfig.checkoutMode==='active',
+    merchant_publication_pinned_and_verified:merchantPublicationPermitted(env,documentOptions),
     storefront_checkout_targets_this_backend:storefrontCheckoutPermitted(
       siteConfig,env.COMMERCE_PUBLIC_URL),
     commerce_explicitly_enabled:env.COMMERCE_ENABLED==='true',
@@ -87,7 +89,7 @@ export function merchantConfigurationChecks(env={},siteConfig={}){
     commerce_public_url_configured:isHttpsOrigin(env.COMMERCE_PUBLIC_URL)
   };
 }
-export async function commercialReadinessReport(pool,{env={},siteConfig={},now=new Date()}={}){
+export async function commercialReadinessReport(pool,{env={},siteConfig={},now=new Date(),documentOptions={}}={}){
   const {rows}=await pool.query(`
     SELECT o.*,coalesce(q.quote_count,0)::integer AS quote_count,
       q.last_checked_at,
@@ -160,7 +162,7 @@ export async function commercialReadinessReport(pool,{env={},siteConfig={},now=n
   const quotes=await pool.query(
     'SELECT count(*)::integer AS count FROM commerce_offer_preflight_quotes'
   );
-  const checks=merchantConfigurationChecks(env,siteConfig);
+  const checks=merchantConfigurationChecks(env,siteConfig,documentOptions);
   const configBlockers=Object.entries(checks)
     .filter(([,value])=>!value).map(([name])=>name);
   if(!offers.some(x=>x.purchaseGateEligible))
