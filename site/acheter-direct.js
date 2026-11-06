@@ -23,10 +23,12 @@
     if(steps)steps.hidden=true;
     const title=$('checkoutTitle');
     if(title)title.textContent='Achat direct indisponible';
-    // Only an established sales freeze (not a network failure) may state
-    // that a specifically requested watch is unavailable for direct sale.
-    const requested=new URLSearchParams(location.search).get('modele')||'';
-    if(unavailable)unavailable.hidden=error||!/^[a-z0-9-]{4,64}$/.test(requested);
+    // An inactive checkout is a site-wide sales freeze, not evidence that
+    // the requested exact watch is missing from our partner catalogue.
+    // Let the verified merchant cards highlight that watch instead of
+    // presenting a misleading unavailable-product notice above the results.
+    // In active mode, a missing exact SKU still gets its own warning.
+    if(unavailable)unavailable.hidden=true;
     show(message,error);
   };
   // Bound the whole response, including JSON, to avoid an endless loading state.
