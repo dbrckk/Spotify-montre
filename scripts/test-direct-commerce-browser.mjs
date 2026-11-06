@@ -137,6 +137,159 @@ try{
   await page.waitForFunction(()=>document.readyState==='complete');
   await page.waitForTimeout(200);
   assert.equal(await page.locator('.watch-product .am-direct-card-link').count(),0);
+  // Mobile browsers can discard the active tab while a checkout POST is
+  // uncertain. A NEW tab on the same site must reuse exactly the old retry
+  // key. All responses below are synthetic and never reach Mollie or CJ.
+  const recoveryContext=await browser.newContext({
+    viewport:{width:393,height:852},locale:'fr-FR'
+  });
+  let postCount=0,firstAttempt=null;
+  await recoveryContext.route('**/config.json',route=>route.fulfill({
+    status:200,contentType:'application/json',
+    body:JSON.stringify({checkoutMode:'active',
+      commerceApiUrl:'https://atelier-montres-commerce-api.onrender.com/'})
+  }));
+  await recoveryContext.route('https://atelier-montres-commerce-api.onrender.com/api/offers',
+    route=>route.fulfill({
+      status:200,contentType:'application/json',
+      headers:{'Access-Control-Allow-Origin':base.origin},
+      body:JSON.stringify({checkoutEnabled:true,offers:[
+        {id:'ci-watch-only',label:'Montre CI non commercialisée',
+          amountCents:9990,deliveryMinDays:7,deliveryMaxDays:14}
+      ]})
+    }));
+  await recoveryContext.route('https://atelier-montres-commerce-api.onrender.com/api/checkout',
+    route=>{
+      // Browsers may preflight the cross-origin JSON POST. This is still an
+      // isolated localhost test and must never reach the real provider.
+      if(route.request().method()==='OPTIONS')return route.fulfill({
+        status:204,headers:{
+          'Access-Control-Allow-Origin':base.origin,
+          'Access-Control-Allow-Methods':'POST, OPTIONS',
+          'Access-Control-Allow-Headers':'Content-Type'
+        }
+      });
+      postCount++;
+      const sent=route.request().postDataJSON();
+      assert.equal(sent.offerId,'ci-watch-only');
+      assert.match(sent.idempotencyKey,/^[a-f0-9]{32}$/);
+      if(firstAttempt===null)firstAttempt=sent.idempotencyKey;
+      else assert.equal(sent.idempotencyKey,firstAttempt,
+        'A fresh Android tab must NOT create a different Mollie payment attempt');
+      if(postCount===1)return route.abort('failed');
+      return route.fulfill({
+        status:200,contentType:'application/json',
+        headers:{'Access-Control-Allow-Origin':base.origin},
+        body:JSON.stringify({
+          kind:'status',status:'PAYMENT_CREATING',
+          orderId:'ord_'+'b'.repeat(40),orderToken:'t'.repeat(43)
+        })
+      });
+    });
+  const enterCheckout=async checkoutPage=>{
+    await checkoutPage.locator('#amDirectForm').waitFor({state:'visible'});
+    for(const [name,value] of Object.entries({
+      fullName:'Client Test Local',email:'client@example.test',
+      address1:'10 rue du Test',postalCode:'75001',city:'Paris',region:'Paris'
+    })){
+      await checkoutPage.locator('#amDirectForm [name="'+name+'"]').fill(value);
+    }
+    await checkoutPage.locator('#amDirectForm [name="acceptTerms"]').check();
+  };
+  const tabOne=await recoveryContext.newPage();
+  await tabOne.goto(new URL('acheter.html?modele=ci-watch-only',base).href,
+    {waitUntil:'domcontentloaded'});
+  await enterCheckout(tabOne);
+  await tabOne.locator('#amDirectSubmit').click();
+  await tabOne.waitForFunction(()=>document.querySelector('#amDirectStatus')
+    ?.textContent?.includes('Failed to fetch')||
+    document.querySelector('#amDirectStatus')?.textContent?.includes('paiement'));
+  await tabOne.waitForFunction(()=>document.querySelector('#amDirectSubmit')
+    ?.disabled===false);
+  assert.equal(postCount,1);
+  const saved=await tabOne.evaluate(()=>{
+    const key=localStorage.getItem('am_checkout_pending_v1_ci-watch-only');
+    return {
+      key,session:sessionStorage.getItem('am_checkout_key_ci-watch-only'),
+      localData:Object.entries(localStorage),
+      sessionData:Object.entries(sessionStorage)
+    };
+  });
+  assert.equal(saved.key,firstAttempt);
+  assert.equal(saved.session,firstAttempt);
+  assert.ok(saved.localData.every(([k])=>k==='am_checkout_pending_v1_ci-watch-only'),
+    'Persistent storage may contain ONLY the opaque retry key, never customer details');
+  assert.doesNotMatch(JSON.stringify(saved.localData),/Client Test Local|rue du Test|client@example/);
+  await tabOne.close();
+  const tabTwo=await recoveryContext.newPage();
+  await tabTwo.goto(new URL('acheter.html?modele=ci-watch-only',base).href,
+    {waitUntil:'domcontentloaded'});
+  assert.equal(await tabTwo.evaluate(()=>
+    sessionStorage.getItem('am_checkout_key_ci-watch-only')),null,
+    'New tab starts without the old session key');
+  await enterCheckout(tabTwo);
+  await tabTwo.locator('#amDirectSubmit').click();
+  await tabTwo.waitForFunction(()=>document.querySelector('#amDirectStatus')
+    ?.textContent?.includes('en cours de préparation'));
+  assert.equal(postCount,2);
+  assert.equal(await tabTwo.evaluate(()=>
+    localStorage.getItem('am_checkout_pending_v1_ci-watch-only')),firstAttempt,
+    'An unresolved payment keeps its original retry key');
+  await tabTwo.close();
+  await recoveryContext.close();
+
+  // Storage denied by Android privacy/browser settings must fail BEFORE any
+  // checkout POST; a generated key that cannot survive an uncertain HTTP
+  // response is unsafe to charge against.
+  const blockedContext=await browser.newContext({
+    viewport:{width:393,height:852},locale:'fr-FR'
+  });
+  await blockedContext.addInitScript(()=>{
+    Object.defineProperty(window,'localStorage',{configurable:true,
+      get(){throw new DOMException('Local data access denied','SecurityError')}
+    });
+  });
+  let blockedCheckoutPosts=0;
+  await blockedContext.route('**/config.json',route=>route.fulfill({
+    status:200,contentType:'application/json',
+    body:JSON.stringify({checkoutMode:'active',
+      commerceApiUrl:'https://atelier-montres-commerce-api.onrender.com/'})
+  }));
+  await blockedContext.route(
+    'https://atelier-montres-commerce-api.onrender.com/api/offers',
+    route=>route.fulfill({
+      status:200,contentType:'application/json',
+      headers:{'Access-Control-Allow-Origin':base.origin},
+      body:JSON.stringify({checkoutEnabled:true,offers:[
+        {id:'ci-watch-only',label:'Montre CI',amountCents:9990,
+          deliveryMinDays:7,deliveryMaxDays:14}
+      ]})
+    }));
+  await blockedContext.route(
+    'https://atelier-montres-commerce-api.onrender.com/api/checkout',
+    route=>{
+      if(route.request().method()==='OPTIONS')return route.fulfill({
+        status:204,headers:{
+          'Access-Control-Allow-Origin':base.origin,
+          'Access-Control-Allow-Methods':'POST, OPTIONS',
+          'Access-Control-Allow-Headers':'Content-Type'
+        }
+      });
+      blockedCheckoutPosts++;
+      return route.abort('failed');
+    });
+  const blockedPage=await blockedContext.newPage();
+  await blockedPage.goto(new URL('acheter.html?modele=ci-watch-only',base).href,
+    {waitUntil:'domcontentloaded'});
+  await enterCheckout(blockedPage);
+  await blockedPage.locator('#amDirectSubmit').click();
+  await blockedPage.waitForFunction(()=>document.querySelector('#amDirectStatus')
+    ?.textContent?.includes('Autorisez le stockage local'));
+  assert.equal(blockedCheckoutPosts,0,
+    'Never attempt a charge without durable idempotency storage');
+  assert.equal(await blockedPage.locator('#amDirectSubmit').isEnabled(),true);
+  await blockedContext.close();
+
   // An existing customer must still track an order after an emergency
   // freeze of NEW checkout. All order data below is localhost browser-only;
   // no payment, vendor API, customer address or real shipment is involved.

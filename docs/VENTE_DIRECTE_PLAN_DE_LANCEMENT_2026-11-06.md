@@ -55,6 +55,15 @@ Le code versionné comprend le contrôle **en lecture seule** de la demande écr
 
 **Ne pas interpréter un job « vert » comme une approbation du devis** : cela signifie seulement que le ticket est encore en attente et que la récupération des métadonnées n'a pas échoué.
 
+## Résilience de l'achat depuis Android : reprise sans double paiement
+
+Le formulaire `site/acheter-direct.js` conserve une référence aléatoire de tentative en stockage local **uniquement après que le client a effectivement soumis sa commande**. Si une réponse réseau est perdue ou si l'onglet se ferme, la référence peut être réutilisée sur le même appareil et le même navigateur, y compris dans un nouvel onglet, pour reprendre une commande existante sur l'API. Le backend relie cette référence à l'identité et au contenu du panier et ne crée pas une seconde facturation quand la première tentative existe déjà.
+
+- Le navigateur ne conserve durablement **ni nom, ni adresse, ni informations de carte, ni jeton d'accès au suivi**. Seul un identifiant aléatoire sans signification commerciale est enregistré.
+- Si le navigateur empêche cette sauvegarde, la soumission est refusée **avant tout POST paiement**, avec un message client explicite. Ne jamais recommencer en générant silencieusement une nouvelle clé lors d'un statut fournisseur incertain.
+- Après une réponse validée et la sauvegarde du jeton de suivi dans la session en cours, la référence de tentative est retirée ; le suivi est accessible sur `commande.html` dans cette session. Une perte de session après paiement nécessite un canal de récupération authentifié supplémentaire avant l'ouverture commerciale à grande échelle.
+- Les tests GitHub simulent la fermeture d'un onglet Android après une perte de réponse, un nouvel onglet avec la même référence et le refus de débit lorsque le stockage est interdit. Ils n'envoient aucune transaction réelle à Mollie ou CJ.
+
 ## Ordre de lancement (pilote : une seule référence)
 
 1. **Vendeur responsable** : immatriculation et identité légale réelles, contact SAV, CGV, livraison, rétractation, garanties et politique de données ; ni adresses fictives ni clauses inventées.
