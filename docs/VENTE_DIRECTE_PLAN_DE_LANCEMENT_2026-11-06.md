@@ -18,6 +18,29 @@
 - Un ticket CJ de devis livraison/conformité est ouvert pour le candidat `CJZBNSET00031-black` : réponse écrite et coût final livré non encore attestés dans le contexte disponible. Ne pas interpréter le ticket comme une offre approuvée.
 - Identité légale du vendeur, CGV complètes, médiateur, garantie, retour, importation, TVA, preuve de droits image, compte Mollie live/KYC, financement du portefeuille CJ, devis et identité variante exacts : preuves d'activation **non toutes constatées**.
 
+## Documents de vente : validation obligatoire avant le premier paiement
+
+Une nouvelle vérification indépendante du backend (`commerce/merchant-publication.mjs`) empêche **toute création de paiement Mollie et tout nouvel achat chez CJ** tant que les quatre fichiers publics suivants n'ont pas été examinés et approuvés ensemble :
+
+- `site/informations-legales.html` : identité juridique réelle du vendeur, immatriculation applicable (SIREN/SIRET), contact et adresse ; retirer les mentions expliquant que ces données sont manquantes.
+- `site/confidentialite.html` : document couvrant réellement les données de commande, adresse de livraison, destinataires CJ/PSP et droits RGPD ; ne plus affirmer qu'aucune commande ne peut avoir lieu.
+- `site/conditions-generales-vente.html` : CGV réellement applicables, prix TTC, livraison, droit de rétractation, garanties légales, retours, service client et médiation lorsque requise. **Ce fichier n'est pas encore publié : ne pas inventer les données du vendeur pour le créer.**
+- `site/acheter.html` : lien direct et accessible aux CGV réelles à côté de la case d'acceptation.
+
+**Vérification gratuite depuis un terminal Node 22**, après avoir rempli les documents avec les informations exactes :
+
+`node commerce/merchant-publication.mjs`
+
+Cette commande produit la liste des pièces manquantes sans afficher les informations personnelles et, seulement si le dossier paraît complet, son empreinte SHA-256. Un résultat « documents présents » ne suffit **pas** à garantir que leur contenu est juridiquement exact : le responsable doit vérifier et approuver les mentions.
+
+Après validation humaine, configurer **uniquement dans l'environnement privé du service API Render** :
+- `MERCHANT_LEGAL_VERIFIED=true`
+- `MERCHANT_LEGAL_BUNDLE_SHA256=<empreinte SHA-256 générée>`
+
+Le backend relit les quatre documents à chaque vérification d'autorisation. Si l'un change, disparaît, ou si les variables Render sont absentes, **la caisse et toute nouvelle transmission de commande CJ se ferment**, même avec une clé Mollie live, un devis fournisseur et `COMMERCE_ENABLED=true`. Les anciennes commandes continuent à bénéficier du suivi et des rapprochements existants.
+
+Cette validation s'ajoute aux deux verrous historiques : `checkoutMode=active` dans le site **et** `COMMERCE_ENABLED=true` dans l'API. Elle ne doit être configurée qu'après les preuves commerciales et fiscales, pas pour rendre des boutons visibles.
+
 ## Surveillance concrète du premier fournisseur
 
 Le code versionné comprend le contrôle **en lecture seule** de la demande écrite déjà ouverte pour `CJZBNSET00031-black` (marqueur `AM-CJ-FR-QUOTE-20261104-CJZBNSET00031`). La consultation automatique est définie dans `.github/workflows/cj-pilot-written-quote-watch.yml` : une exécution à l'intégration initiale, puis chaque jour à 08:23 UTC, et déclenchement manuel possible dans GitHub Actions.
@@ -44,7 +67,7 @@ Le code versionné comprend le contrôle **en lecture seule** de la demande écr
 
 **Activation** : garder `checkoutMode=inactive` et `COMMERCE_ENABLED` désactivé tant que les jalons 1–5 et les essais requis n'ont pas été validés. Ce sont deux verrous indépendants. Ne jamais configurer `checkoutMode=active` uniquement pour rendre un bouton visible.
 
-## Correctif du parcours (PR en cours)
+## Parcours client déjà intégré (contrôles toujours requis)
 
 - Un `?modele=<id>` absent de `/api/offers` doit afficher une indisponibilité et laisser le paiement fermé ; **ne jamais présélectionner un autre SKU**.
 - Pour chaque SKU qualifié, les boutons de commande directe seront insérés en priorité sur l'accueil, le catalogue 52, le comparatif 15, les fiches SEO principales/complémentaires et la fiche interactive ; aucune offre API = aucun bouton d'achat direct.
