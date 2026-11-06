@@ -63,6 +63,14 @@ Référence pilote du dossier fournisseur : `CJZBNSET00031-black`. Une absence d
 - Les tests du navigateur mobile, la validation SEO, l'accessibilité et le contrôle de sécurité commerce sont exécutés par les workflows GitHub de la PR.
 - Vérification visuelle finale sur URL de production après fusion et déploiement Render requise : pas de validation graphique réelle sans rendu navigateur.
 
+## Correction de la page d'achat publique (6 novembre 2026)
+
+- Auparavant, `showPrelaunch()` masquait simultanément `#amDirectCommerce` **et** la carte `#amDirectPrelaunch` qu'il devait afficher. Le visiteur ne voyait pas la raison de l'indisponibilité.
+- Désormais, lorsque le paiement n'est pas ouvert ou que la configuration commerciale est inaccessible, le panneau de pré-lancement et le message d'état sont visibles. **Le formulaire et les quatre étapes de paiement restent masqués**.
+- Une arrivée avec `?modele=<référence>` indique explicitement qu'aucune vente directe de cette référence n'est possible en période de suspension ; une panne réseau n'est pas confondue avec une indisponibilité commerciale vérifiée.
+- L'écran est présenté sur une colonne sur Android, y compris pour la reprise d'une tentative existante. La version sans JavaScript conserve la vitrine et les liens d'exploration sans afficher le paiement.
+- Tests Playwright de la panne de configuration, du gel commercial, de la référence exacte et du débordement mobile. Aucune transaction réelle, aucun changement du verrou `checkoutMode`.
+
 ## Prochain travail à valeur réelle
 
 Au lieu d'augmenter artificiellement le catalogue ou d'ouvrir des caisses fictives, obtenir un devis écrit CJ complet pour une seule référence, sélectionner et qualifier sa variante exacte, valider le vendeur et le paiement, puis ouvrir **une seule offre réellement achetable**. En parallèle, améliorer la qualité photographique uniquement avec des sources autorisées correspondant précisément au SKU affiché.
