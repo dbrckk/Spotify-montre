@@ -74,7 +74,7 @@ try{
  const pocket=await browser.newPage({viewport:{width:320,height:740},isMobile:true,hasTouch:true,javaScriptEnabled:false});
  // On a remote CDN, DOMContentLoaded can precede responsive CSS completion
  // on the no-JS 320px browser. Do not classify unstyled HTML as a layout bug.
- await pocket.goto(new URL('/index.html',base).href,{waitUntil:'load',timeout:30000});
+ await pocket.goto(new URL('/affiliation.html',base).href,{waitUntil:'load',timeout:30000});
  const pocketLayout=await pocket.locator('.am-affordable-grid').evaluate(el=>({
    flow:getComputedStyle(el).gridAutoFlow,
    overflow:getComputedStyle(el).overflowX
