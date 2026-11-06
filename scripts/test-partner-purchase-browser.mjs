@@ -108,6 +108,26 @@ try{
   assert.equal(await page.locator('.am-partner-card').count(),prestige);
   await page.locator('#amPartnerFilters button[data-tier=all]').click();
   assert.equal(await page.locator('.am-partner-card').count(),total);
+  await page.locator('#amPartnerSearch').fill('SKMEI1257');
+  assert.equal(await page.locator('.am-partner-card').count(),1,
+    'Mobile buyers can search compact model codes without punctuation');
+  assert.equal(await page.locator('.am-partner-card').first().getAttribute('data-watch-id'),
+    'skmei-1257');
+  await page.locator('#amPartnerSearch').fill('référence totalement absente');
+  assert.equal(await page.locator('.am-partner-card').count(),0);
+  assert.equal(await page.locator('#amPartnerEmpty').isVisible(),true,
+    'Empty results must offer a route back to the full 52-watch catalogue');
+  await page.locator('#amPartnerSearch').fill('');
+  assert.equal(await page.locator('.am-partner-card').count(),total);
+  assert.equal(await page.locator('#amPartnerEmpty').isVisible(),false);
+  await page.setViewportSize({width:320,height:740});
+  const narrow=await page.evaluate(()=>({
+    client:document.documentElement.clientWidth,
+    scroll:document.documentElement.scrollWidth
+  }));
+  assert.ok(narrow.scroll<=narrow.client+2,
+    'Complete 23-model shopping showroom must reflow at 320px Android');
+  await page.setViewportSize({width:390,height:840});
   const mobile=await page.evaluate(()=>({
     documentWidth:document.documentElement.clientWidth,
     scrollWidth:document.documentElement.scrollWidth
