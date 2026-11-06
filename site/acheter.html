@@ -40,7 +40,7 @@
 <label for="amDirectOffers">Modèle disponible</label>
 <select id="amDirectOffers" name="offerId" required></select>
 <strong id="amDirectPrice" class="am-direct-price" aria-live="polite"></strong><p id="amDirectDelivery" class="am-direct-delivery" aria-live="polite"></p>
-<p class="am-direct-hint">Prix total TTC pour la France métropolitaine, frais de livraison annoncés inclus. Le délai indiqué dépend de la référence sélectionnée. Aucun paiement ne doit être demandé sans confirmation de ces conditions.</p>
+<p class="am-direct-hint" id="amDirectPurchaseHint">Prix total TTC pour la France métropolitaine, frais de livraison annoncés inclus. Le délai indiqué dépend de la référence sélectionnée. Aucun paiement ne doit être demandé sans confirmation de ces conditions.</p>
 <div class="am-direct-fields">
 <label>Nom complet<input name="fullName" autocomplete="name" maxlength="50" minlength="3" required></label>
 <label>Adresse e-mail<input name="email" type="email" autocomplete="email" maxlength="120" required></label>
@@ -51,12 +51,12 @@
 <label class="am-wide">Département / région<input name="region" autocomplete="address-level1" maxlength="50" required></label>
 <label class="am-wide">Téléphone pour la livraison (facultatif)<input name="phone" type="tel" autocomplete="tel" maxlength="20"></label>
 </div>
-<label class="am-direct-check"><input type="checkbox" name="acceptTerms" required><span>Je confirme avoir consulté les informations de vente, de livraison, de rétractation et de confidentialité, et j'accepte les conditions applicables. <a href="./informations-legales.html">Informations légales</a> · <a href="./confidentialite.html">Vie privée</a>.</span></label>
+<label class="am-direct-check" id="amDirectTerms"><input type="checkbox" name="acceptTerms" required><span>Je confirme avoir consulté les informations de vente, de livraison, de rétractation et de confidentialité, et j'accepte les conditions applicables. <a href="./informations-legales.html">Informations légales</a> · <a href="./confidentialite.html">Vie privée</a>.</span></label>
 <button class="am-direct-button" id="amDirectSubmit" type="submit">Payer sur la page sécurisée du prestataire</button>
-<p class="am-direct-hint">Le paiement est traité sur une page externe sécurisée. Vous revenez ensuite sur notre site pour consulter l'état de votre commande. Les adresses sont transmises au fournisseur uniquement pour expédier la montre.</p>
+<p class="am-direct-hint" id="amDirectPaymentHint">Le paiement est traité sur une page externe sécurisée. Vous revenez ensuite sur notre site pour consulter l'état de votre commande. Les adresses sont transmises au fournisseur uniquement pour expédier la montre.</p>
 </form>
 </section>
-<aside class="am-direct-aside">
+<aside class="am-direct-aside" id="amDirectPurchaseSteps">
 <h2>Un parcours contrôlé</h2>
 <p><strong>01</strong> Choisissez une montre réellement disponible.</p>
 <p><strong>02</strong> Vérifiez le total et payez chez le prestataire sécurisé.</p>
