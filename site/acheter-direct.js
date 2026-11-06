@@ -10,8 +10,8 @@
   const unavailable=$('amDirectUnavailable');
   const show=(message,error=false)=>{status.textContent=message;status.dataset.error=String(error)};
   const showPrelaunch=(message,error=false)=>{
-    // The checkout form stays closed, but the customer must actually SEE
-    // why payment is unavailable and where to continue browsing.
+    // Never expose the payment form when checkout cannot be offered.
+    // For a known sales freeze, the partner showroom itself is the fallback.
     form.hidden=true;
     // The public partner showroom is the primary shopping experience while
     // own-site checkout is inactive. Do not lead with an operational warning.
