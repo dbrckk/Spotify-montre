@@ -60,8 +60,12 @@ for(const required of [
   'issues: write',
   'node commerce/cj-quote-ticket.mjs status',
   'node commerce/cj-quote-watch-signal.mjs',
-  "if: steps.quote.outputs.attention == 'true'"
+  "if: ${{ always() && (steps.quote.outputs.attention == 'true' || steps.quote.outputs.blocked == 'true') }}"
 ])assert.ok(workflow.includes(required),'CJ watch needs '+required);
+assert.match(workflow,/gh issue list --state all/,
+  'Supplier alerts and missing-ticket alerts must reuse the same issue');
+assert.match(workflow,/steps.quote.outputs.blocked == 'true'/,
+  'A missing CJ ticket must generate operator action despite a nonzero prior step');
 assert.ok(!workflow.includes('node commerce/cj-quote-ticket.mjs send'),
   'Automated monitoring must never submit supplier tickets');
 assert.ok(!workflow.includes('/api/checkout'),
