@@ -35,6 +35,13 @@ assert.match(detail,/id="detailSpecList"/);
 assert.match(detail,/id="detailAmazon"/);
 assert.match(detail,/id="detailEbay"/);
 assert.match(detail,/id="detailPhotoLabel"/);
+assert.match(detail,/id="detailBuyerTitle"/,'Public product must show checkout verification guidance');
+assert.match(detail,/class="detail-nojs"/,'No-JS visitors need a real collection fallback');
+assert.match(detail,/href="\.\/index\.html"/,'Watch page logo must link to the public homepage');
+assert.doesNotMatch(detail,/Liens actuellement non rémunérés, aucune commission d'affiliation active/,
+  'A product page must not deny affiliate commissions that can be active');
+assert.match(detailJS,/new AbortController\(\)/,
+  'A stalled product feed must not create an indefinite loading state');
 assert.match(detail,/PHOTOGRAPHIE DU MODÈLE/);
 assert.match(detailJS,/encodeURIComponent/);
 assert.match(detailJS,/publicUsageApproved===true/);

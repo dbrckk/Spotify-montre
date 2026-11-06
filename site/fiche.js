@@ -8,7 +8,12 @@
  const node=(tag,cls,text)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e};
  const fail=()=>{status.textContent='Référence non vérifiée.';error.hidden=false;shell.hidden=true};
  if(!id||!/^[a-z0-9-]{4,64}$/.test(id)){fail();return}
- fetch('./selection-affiliation.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('Not available');return r.json()}).then(x=>{
+ // A stalled catalogue request must not leave an Android visitor indefinitely
+ // on a loading screen. Keep the failure route useful and non-commercial.
+ const controller=new AbortController();
+ const loadingTimeout=setTimeout(()=>controller.abort(),10000);
+ fetch('./selection-affiliation.json',{cache:'no-store',signal:controller.signal})
+ .then(r=>{if(!r.ok)throw Error('Not available');return r.json()}).then(x=>{
    if(x?.version!==1||!Array.isArray(x.products)||x.affiliateEnabled!==false)throw Error('Invalid feed');
    const p=x.products.find(t=>t.id===id);
    if(!p||!safeOfficial(p.officialUrl)||p.affiliateUrl!==null||p.merchantLinkStatus!=='untracked_official')throw Error('Invalid model');
@@ -68,13 +73,21 @@
        selectedContext.set('q',requestedSearch.slice(0,100));
    }
    const hasContext=[...selectedContext.keys()].length>0;
-   const backUrl=new URL('./affiliation.html',location.href);
-   for(const [key,value] of selectedContext)backUrl.searchParams.set(key,value);
-   backUrl.hash='montres';
+   // When a visitor arrives directly from the public home or a shared link,
+   // return to the full 52-watch collection. Preserve the filtered 15-watch
+   // comparison view only when the link carries an allowlisted context.
+   const backUrl=new URL(hasContext?'./affiliation.html':'./montres/toutes-les-montres.html',location.href);
+   const comparisonUrl=new URL('./affiliation.html',location.href);
+   for(const [key,value] of selectedContext){
+     backUrl.searchParams.set(key,value);
+     comparisonUrl.searchParams.set(key,value);
+   }
+   if(hasContext)backUrl.hash='montres';
+   comparisonUrl.hash='montres';
    const backLink=$('detailBackToResults');
    if(backLink){
      backLink.href=backUrl.href;
-     backLink.textContent=hasContext?'← Retour à ma sélection':'← Retour au catalogue';
+     backLink.textContent=hasContext?'← Retour à ma sélection':'← Voir les 52 montres';
    }
    const collectionBreadcrumb=document.querySelector('.am-breadcrumb a[href="./affiliation.html#montres"]');
    if(collectionBreadcrumb)collectionBreadcrumb.href=backUrl.href;
@@ -146,7 +159,7 @@
        if(Array.isArray(stored))selections=[...new Set(stored.filter(id=>typeof id==='string'&&x.products.some(t=>t.id===id&&safeOfficial(t.officialUrl))))].slice(0,3);
      }catch(_){}
      if(!selections.includes(p.id)&&selections.length<3)selections.push(p.id);
-     const url=new URL(backUrl.href);
+     const url=new URL(comparisonUrl.href);
      url.searchParams.set('compare',selections.join(','));compareLink.href=url.href;
      if(selections.length>1)compareLink.textContent='⇄ Reprendre la comparaison ('+selections.length+')';
    }
@@ -286,5 +299,5 @@
        }).catch(()=>{ /* Advisory content never blocks the verified product page. */ });
    }
    status.hidden=true;shell.hidden=false;
- }).catch(fail);
+ }).catch(fail).finally(()=>clearTimeout(loadingTimeout));
 })();
