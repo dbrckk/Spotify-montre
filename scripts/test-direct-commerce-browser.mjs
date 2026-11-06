@@ -201,6 +201,13 @@ try{
     'A failed status refresh must not pretend stale shipment details are current');
   assert.equal(await orderPage.locator('#amOrderRefresh').isEnabled(),true);
   await orderPage.close();
+  const noScriptTracking=await browser.newPage({
+    javaScriptEnabled:false,viewport:{width:320,height:740},locale:'fr-FR'
+  });
+  await noScriptTracking.goto(orderUrl,{waitUntil:'domcontentloaded'});
+  assert.equal(await noScriptTracking.locator('noscript a[href="./informations-legales.html"]').isVisible(),true,
+    'A customer without scripts must find a way to contact the seller');
+  await noScriptTracking.close();
   assert.deepEqual(errors,[]);
   await page.close();
   console.log('Purchase and historical order tracking OK: live-sale gate off, token required, refresh and API failure; no payments');
