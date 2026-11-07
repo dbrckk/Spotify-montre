@@ -18,6 +18,15 @@ try{
     await page.locator('#udFilters').waitFor({state:'visible'});
     assert.equal(await page.locator('.ud-card').count(),52);
 
+    for(const id of ['skmei-2056','skmei-2514','addiesdive-ad2030','pagani-pd1701']){
+      const photo=page.locator('.ud-feature-card[data-feature-id="'+id+'"] img');
+      const srcset=await photo.getAttribute('srcset');
+      assert.ok(srcset?.includes('popular-responsive/'+id+'-240.webp 240w')&&
+        srcset.includes('popular-responsive/'+id+'-480.webp 480w'),
+        'Heavy editorial photo must have verified mobile WebP variants: '+id);
+    }
+
+
     // The featured Casio and Citizen use approved local responsive WebPs.
     // At 393px the photo is only 37% of a split card, not a full-width image.
     for(const id of ['casio-mtp-1302','citizen-tsuyosa']){

@@ -1,4 +1,4 @@
-import {readFileSync,writeFileSync} from 'node:fs';
+import {readFileSync,writeFileSync,existsSync} from 'node:fs';
 import {join} from 'node:path';
 import {loadApprovedPopularPhotos} from './popular-photo-rights.mjs';
 import {loadVerifiedPopularLinks} from './popular-verified-affiliate.mjs';
@@ -187,11 +187,22 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
     const exit=direct?'Consulter sur Amazon.fr · lien rémunéré':awin?'Voir chez le partenaire via Awin · lien rémunéré':'Voir chez la marque · lien non rémunéré';
     const detail=p.detailUrl.replace('./montres/','./');
     const visual='../'+p.photoUrl.slice(2);
+    const mobilePopularWidths={'skmei-2056':1000,'skmei-2514':800,'addiesdive-ad2030':1200,'pagani-pd1701':800};
+    let popularAttrs='';
+    if(p.kind==='supplemental'&&Object.hasOwn(mobilePopularWidths,p.id)){
+      const widths=[240,480];
+      // Rights-negative test fixtures intentionally remove popular photos and
+      // derivatives. Never publish broken srcset URLs in those builds.
+      const ready=widths.every(width=>
+        existsSync(join(root,'assets','popular-responsive',p.id+'-'+width+'.webp')));
+      if(ready)popularAttrs=' srcset="'+widths.map(width=>'../assets/popular-responsive/'+p.id+'-'+width+'.webp '+width+'w').join(', ')+
+        ', '+visual+' '+mobilePopularWidths[p.id]+'w" sizes="(max-width: 365px) 88vw, (max-width: 660px) 33vw, (max-width: 1100px) 44vw, 29vw"';
+    }
     return '<article class="ud-feature-card" data-feature-id="'+e(p.id)+'">'
       +'<a class="ud-feature-photo" href="'+e(detail)+'" aria-label="Découvrir '+e(p.brand+' '+p.model)+'">'
       +'<img src="'+e(visual)+'"'
       +(p.kind==='core'?responsiveAttrs(root,coreById.get(p.id),{
-        prefix:'../',sizes:'(max-width: 365px) 88vw, (max-width: 660px) 33vw, (max-width: 1100px) 44vw, 29vw',escape:e}):'')
+        prefix:'../',sizes:'(max-width: 365px) 88vw, (max-width: 660px) 33vw, (max-width: 1100px) 44vw, 29vw',escape:e}):popularAttrs)
       +' width="540" height="540" loading="lazy" decoding="async" alt="Photographie du modèle '+e(p.brand+' '+p.model)+'"></a>'
       +'<div class="ud-feature-info"><span class="ud-feature-type">'+e(styleLabels[p.style])+' · '+e(tierLabels[p.tier])+'</span>'
       +'<h3><a href="'+e(detail)+'">'+e(p.brand+' '+p.model)+'</a></h3>'

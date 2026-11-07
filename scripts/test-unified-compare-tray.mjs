@@ -173,8 +173,8 @@ try{
   const heroPhoto=spotlight.locator('[data-feature-id="skmei-2056"] img');
   await heroPhoto.scrollIntoViewIfNeeded();
   assert.ok(await heroPhoto.evaluate(async img=>{
-    try{await img.decode();return img.naturalWidth>=400}catch{return false}
-  }),'The SKMEI hero photo must really load and decode');
+    try{await img.decode();return img.complete&&img.naturalWidth>0&&img.naturalHeight>0&&/\/assets\/(popular-responsive|watches-popular)\/skmei-2056(?:-240|-480)?\.webp(?:\?|$)/.test(new URL(img.currentSrc).pathname)}catch{return false}
+  }),'The responsive SKMEI hero photo must really load and decode at mobile resolution');
   await checkOverflow(phone,'Mobile editorial photo showroom');
 
   await phone.locator('#modele-skmei-2056 button.ud-select').click();
