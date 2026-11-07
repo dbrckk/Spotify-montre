@@ -184,10 +184,12 @@ def src_candidates(html: str, base: str, code: str) -> list[str]:
     nodes = soup.select(gallery)
     for container in nodes:
         for img in container.select("img"):
-            for attr in ("data-large_image", "data-zoom-image", "data-full", "data-original", "data-src", "src"):
-                add(img.get(attr), 3)
+            # Prefer a correctly sized gallery srcset before its smaller lazy
+            # thumbnail; a srcset with an exact SKU still outranks both.
             for attr in ("data-srcset", "srcset"):
                 add_srcset(img.get(attr), 3)
+            for attr in ("data-large_image", "data-zoom-image", "data-full", "data-original", "data-src", "src"):
+                add(img.get(attr), 3)
         for source in container.select("picture source, source[srcset]"):
             add_srcset(source.get("srcset") or source.get("data-srcset"), 3)
             add(source.get("src") or source.get("data-src"), 3)
