@@ -637,8 +637,12 @@ assert.match(read('photo-zoom.js'),/watches-popular/,
   'Shared viewer must accept exact locally registered supplemental watch photos');
 const visualJs=read('unified-discovery.js');
 assert.match(visualJs,/window\.AtelierPhoto\.open/,'Viewer actions must use the shared accessible photo component');
-assert.match(visualJs,/changeView\(params\.get\('view'\)/,
+assert.match(visualJs,/const requestedView=params\.get\('view'\)/,
   'Shareable grid and large-photo view must restore safely from URL');
+assert.match(visualJs,/requestedView==='grid'\|\|requestedView==='large'/,
+  'Both explicit display parameters must be respected before device defaults');
+assert.match(visualJs,/localStorage\.setItem\(VIEW_KEY,view\)/,
+  'Manual grid or large-photo view preference must persist across visits');
 assert.match(visualJs,/controls\.visual\.value/,
   'Photo availability filter must operate on trusted catalogue data');
 assert.match(unifiedHtml,/id="udFilters"[^>]*hidden/,'Filter controls invisible before JS initialization');

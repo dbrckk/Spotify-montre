@@ -221,15 +221,28 @@
     updateActiveFilters();
     persist();
   };
-  const changeView=mode=>{
+  // Narrow Android screens benefit from photographs large enough to inspect
+  // without opening every detail sheet. Respect a user-controlled preference;
+  // a URL view parameter can override it for a shared catalogue link.
+  const VIEW_KEY='atelier-montres-catalogue-view-v1';
+  const storedView=()=>{
+    try{
+      const value=localStorage.getItem(VIEW_KEY);
+      return value==='grid'||value==='large'?value:null;
+    }catch(_){return null}
+  };
+  const changeView=(mode,remember=false)=>{
     view=mode==='large'?'large':'grid';
     root.classList.toggle('ud-view-large',view==='large');
     viewCompact.setAttribute('aria-pressed',String(view==='grid'));
     viewLarge.setAttribute('aria-pressed',String(view==='large'));
+    if(remember){
+      try{localStorage.setItem(VIEW_KEY,view)}catch(_){}
+    }
     persist();
   };
-  viewCompact.addEventListener('click',()=>changeView('grid'));
-  viewLarge.addEventListener('click',()=>changeView('large'));
+  viewCompact.addEventListener('click',()=>changeView('grid',true));
+  viewLarge.addEventListener('click',()=>changeView('large',true));
   savedToggle.addEventListener('click',()=>{
     savedOnly=!savedOnly;
     render();
@@ -451,7 +464,11 @@
       if(window.AtelierPhoto?.open)
         card.querySelector('button.ud-zoom')?.removeAttribute('hidden');
     }
-    changeView(params.get('view')==='large'?'large':'grid');
+    const requestedView=params.get('view');
+    const selectedView=requestedView==='grid'||requestedView==='large'
+      ?requestedView
+      :storedView()||(window.matchMedia('(max-width: 420px)').matches?'large':'grid');
+    changeView(selectedView);
     const initial=params.get('compare')?.split(',').filter(validId)||[];
     selected=[...new Set(initial)].filter(x=>watches.has(x)).slice(0,3);
     render();renderCompare();

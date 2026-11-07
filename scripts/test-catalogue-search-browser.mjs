@@ -21,6 +21,42 @@ try{
     await page.locator('#udFilters').waitFor({state:'visible'});
     assert.equal(await page.locator('.ud-card').count(),52);
 
+    // A narrow Android screen should open into the photo-first, single-column
+    // view; a deliberate switch to the grid must survive a page reload.
+    await page.locator('#udViewTools').waitFor({state:'visible'});
+    if(width<=420){
+      assert.equal(await page.locator('#udViewLarge').getAttribute('aria-pressed'),'true');
+      assert.ok(await page.locator('#udGrid').evaluate(el=>el.classList.contains('ud-view-large')),
+        'Narrow Android should initially show large, inspectable watch photos');
+      const photoDimensions=await page.locator('#udGrid .ud-card[data-visual="photo"] .ud-photo').first()
+        .evaluate(el=>{
+          const r=el.getBoundingClientRect();
+          return {height:r.height,width:r.width};
+        });
+      assert.ok(photoDimensions.height>=300&&photoDimensions.width>=290,
+        'Initial Android watch photograph too small: '+JSON.stringify(photoDimensions));
+      const firstLarge=page.locator('#udGrid .ud-card').first();
+      assert.equal(await firstLarge.locator('dl>div').count(),2);
+      assert.ok(await firstLarge.locator('dl>div').last().isVisible(),
+        'Large Android gallery must reveal both documented characteristics');
+      await page.locator('#udViewCompact').click();
+      assert.equal(await page.locator('#udViewCompact').getAttribute('aria-pressed'),'true');
+      assert.ok(!await page.locator('#udGrid').evaluate(el=>el.classList.contains('ud-view-large')));
+      await page.reload({waitUntil:'domcontentloaded'});
+      await page.locator('#udViewTools').waitFor({state:'visible'});
+      assert.equal(await page.locator('#udViewCompact').getAttribute('aria-pressed'),'true',
+        'Manual mobile grid preference must survive reload');
+      await page.locator('#udViewLarge').click();
+      await page.reload({waitUntil:'domcontentloaded'});
+      await page.locator('#udViewTools').waitFor({state:'visible'});
+      assert.equal(await page.locator('#udViewLarge').getAttribute('aria-pressed'),'true',
+        'Manual large-image preference must survive reload');
+    }else{
+      assert.equal(await page.locator('#udViewCompact').getAttribute('aria-pressed'),'true',
+        'Desktop must keep its original compact catalogue grid');
+    }
+
+
     // The public catalogue hero should help a buyer browse rather than read
     // development plans. Its two real navigation paths must work on Android.
     const shopperHero=page.locator('header.ud-heading');
@@ -164,10 +200,9 @@ try{
         await image.scrollIntoViewIfNeeded();
         await image.evaluate(node=>node.decode());
         const selected=await image.evaluate(node=>new URL(node.currentSrc).pathname);
-        assert.ok(
-          selected==='/assets/popular-responsive/'+id+'-240.webp'||
-          selected==='/assets/popular-responsive/'+id+'-480.webp',
-          'Chromium used an oversized image for '+id+': '+selected);
+        const validWidths=width<=420?[240,480,720,960]:[240,480];
+        assert.ok(validWidths.some(w=>selected==='/assets/popular-responsive/'+id+'-'+w+'.webp'),
+          'Chromium used an unrelated or full-size original watch image for '+id+': '+selected);
       }
     }
 
@@ -184,17 +219,18 @@ try{
         'Featured photo sizes must reflect split-card layout: '+id);
     }
 
-    // The gallery uses one column at 360px and two columns at 393px.
-    // srcset's sizes must reflect this or mobile downloads oversized WebPs.
+    // Browser-sized lazy images follow the actual layout selected by the
+    // shopper: one-column Android large mode or desktop four-column grid.
     const photo=page.locator('#modele-casio-mdv107 .ud-photo img');
     const sizes=await photo.getAttribute('sizes');
-    assert.ok(sizes?.includes('(max-width: 365px) 90vw')&&
+    assert.ok(sizes?.startsWith('auto, ')&&
+      sizes.includes('(max-width: 420px) 90vw')&&
       sizes.includes('(max-width: 650px) 46vw'),
-      'Responsive watch image sizes must match mobile gallery columns');
+      'Adaptive image sizes must support the Android gallery and compact fallback');
     const columns=await page.locator('#udGrid').evaluate(el=>
       getComputedStyle(el).gridTemplateColumns.split(' ').length);
-    assert.equal(columns,width===360?1:width===393?2:4,
-      'Gallery column count should agree with responsive image sizing');
+    assert.equal(columns,width<=420?1:4,
+      'Photo-first Android and compact desktop gallery must match image sizing');
 
     assert.equal(await page.locator('#udActiveFilters').isVisible(),false);
 
