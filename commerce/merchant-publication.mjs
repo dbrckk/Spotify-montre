@@ -41,7 +41,7 @@ const bannedClaims={
 // An arbitrary nine-digit string is not sufficient evidence of a French
 // registered merchant. Validate the public SIREN check digit before allowing
 // legal-document publication. This does not verify active registration.
-const sirenPattern=/\\bSIRE(?:N|T)\\b\\s*[:#-]?\\s*((?:\\d[\\s.]?){9})(?:\\s*\\d{5})?\\b/gi;
+const sirenPattern=/\bSIRE(?:N|T)\b\s*[:#-]?\s*((?:\d[\s.]?){9})(?:\s*\d{5})?\b/gi;
 export function hasValidMerchantSiren(document){
   if(typeof document!=='string')return false;
   for(const match of document.matchAll(sirenPattern)){
