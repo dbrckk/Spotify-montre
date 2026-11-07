@@ -78,7 +78,12 @@ export function loadApprovedPopularPhotos({root,picks}){
     if(bytes.length<8000||bytes.toString('ascii',0,4)!=='RIFF'||bytes.toString('ascii',8,12)!=='WEBP'
       ||createHash('sha256').update(bytes).digest('hex')!==item.imageSha256.toLowerCase())
       throw Error('Licensed watch photo invalid or hash changed: '+id);
-    approved.set(id,Object.freeze({url:item.file,rightsHolder:item.rightsHolder,rightsBasis:item.rightsBasis,sourcePage:item.sourcePage}));
+    if(!Number.isInteger(item.width)||!Number.isInteger(item.height)||
+       item.width<480||item.width>10000||item.height<1||item.height>10000)
+      throw Error('Untrustworthy documented photo dimensions: '+id);
+    approved.set(id,Object.freeze({url:item.file,rightsHolder:item.rightsHolder,
+      rightsBasis:item.rightsBasis,sourcePage:item.sourcePage,
+      width:item.width,height:item.height,imageSha256:item.imageSha256.toLowerCase()}));
   }
   if(existsSync(directory)){
     for(const file of readdirSync(directory)){

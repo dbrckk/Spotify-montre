@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
+import {existsSync,readFileSync} from 'node:fs';
 
 // Only exercise a generated local collection; merchant links are never clicked.
 const base=process.env.WATCH_STOREFRONT_URL||'http://127.0.0.1:8765';
@@ -8,6 +9,8 @@ if(origin.protocol!=='http:'||!['localhost','127.0.0.1'].includes(origin.hostnam
   throw Error('This catalogue search test is restricted to localhost');
 const browser=await chromium.launch({headless:true});
 const errors=[];
+const popularPhotoProof=JSON.parse(readFileSync(
+  new URL('../site/popular-photo-rights.json',import.meta.url),'utf8')).photos;
 try{
   for(const width of [360,393,1366]){
     const page=await browser.newPage({viewport:{width,height:900},
@@ -26,6 +29,43 @@ try{
         'Heavy editorial photo must have verified mobile WebP variants: '+id);
     }
 
+
+    // Registered supplemental photos must preserve real source dimensions;
+    // only publish 240px/480px candidates when both verified assets exist.
+    const supplemental=await page.locator('.ud-card[data-visual="photo"] .ud-photo img')
+      .evaluateAll(images=>images.map(img=>({
+        id:img.closest('.ud-card')?.dataset.id,
+        width:Number(img.getAttribute('width')),height:Number(img.getAttribute('height')),
+        srcset:img.getAttribute('srcset')||''
+      })));
+    const imagesById=new Map(supplemental.map(item=>[item.id,item]));
+    for(const [id,proof] of Object.entries(popularPhotoProof)){
+      const img=imagesById.get(id);
+      assert.ok(img,'Missing registered photograph for '+id);
+      assert.equal(img.width,proof.width,'Wrong source width for '+id);
+      assert.equal(img.height,proof.height,'Wrong source height for '+id);
+      if([240,480].every(size=>existsSync(new URL(
+        '../site/assets/popular-responsive/'+id+'-'+size+'.webp',import.meta.url)))){
+        for(const size of [240,480])
+          assert.ok(img.srcset.includes('popular-responsive/'+id+'-'+size+'.webp '+size+'w'),
+            'Small verified local WebP missing: '+id+'/'+size);
+        assert.ok(img.srcset.includes('watches-popular/'+id+'.webp '+proof.width+'w'),
+          'Full-size exact-model fallback missing for '+id);
+      }
+    }
+    // Verify Chromium actually decodes smaller images on a narrow Android screen.
+    if(width===393){
+      for(const id of ['skmei-2056','skmei-2514','addiesdive-ad2030','pagani-pd1701']){
+        const image=page.locator('#modele-'+id+' .ud-photo img');
+        await image.scrollIntoViewIfNeeded();
+        await image.evaluate(node=>node.decode());
+        const selected=await image.evaluate(node=>new URL(node.currentSrc).pathname);
+        assert.ok(
+          selected==='/assets/popular-responsive/'+id+'-240.webp'||
+          selected==='/assets/popular-responsive/'+id+'-480.webp',
+          'Chromium used an oversized image for '+id+': '+selected);
+      }
+    }
 
     // The featured Casio and Citizen use approved local responsive WebPs.
     // At 393px the photo is only 37% of a split card, not a full-width image.

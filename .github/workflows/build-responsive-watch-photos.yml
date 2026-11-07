@@ -6,6 +6,22 @@ on:
     paths:
       - 'scripts/build-responsive-watch-photos.py'
       - 'scripts/build-popular-editorial-thumbnails.py'
+      - 'site/popular-photo-rights.json'
+      - 'site/assets/watches-popular/**'
+      - 'site/selection-affiliation.json'
+      - 'site/assets/watches/**'
+      - '.github/workflows/build-responsive-watch-photos.yml'
+  pull_request:
+    paths:
+      - 'scripts/build-popular-editorial-thumbnails.py'
+      - 'scripts/build-responsive-watch-photos.py'
+      - 'scripts/popular-photo-rights.mjs'
+      - 'scripts/responsive-images.mjs'
+      - 'scripts/build-unified-discovery.mjs'
+      - 'site/popular-photo-rights.json'
+      - 'site/assets/watches-popular/**'
+      - 'site/selection-affiliation.json'
+      - 'site/assets/watches/**'
       - '.github/workflows/build-responsive-watch-photos.yml'
 permissions:
   contents: write
@@ -29,7 +45,33 @@ jobs:
         run: |
           python scripts/build-responsive-watch-photos.py
           python scripts/build-popular-editorial-thumbnails.py
+      - name: Verify 42 responsive assets are included in the generated catalogue
+        if: github.event_name == 'pull_request'
+        run: |
+          node --check scripts/build-unified-discovery.mjs
+          node --check scripts/responsive-images.mjs
+          node scripts/build-seo.mjs
+          node scripts/validate-seo.mjs
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import {readFileSync} from 'node:fs';
+          const rights=JSON.parse(readFileSync('site/popular-photo-rights.json','utf8')).photos;
+          const html=readFileSync('site/montres/toutes-les-montres.html','utf8');
+          assert.equal(Object.keys(rights).length,21,'Approved supplemental photo count changed');
+          for(const id of Object.keys(rights)){
+            const start=html.indexOf('id="modele-'+id+'"');
+            assert.ok(start>=0,'Missing exact-model catalogue card: '+id);
+            const end=html.indexOf('</article>',start);
+            assert.ok(end>start,'Missing card close: '+id);
+            const card=html.slice(start,end);
+            for(const width of [240,480])
+              assert.ok(card.includes('popular-responsive/'+id+'-'+width+'.webp '+width+'w'),
+                'New 240/480px derivative not referenced by catalogue: '+id+'/'+width);
+          }
+          console.log('PASS: 21 original photographs -> 42 verified WebPs linked in the 52-watch catalogue');
+          NODE
       - name: Commit verified derivatives
+        if: github.event_name != 'pull_request'
         run: |
           git add site/assets/watch-responsive/ site/assets/popular-responsive/
           if git diff --cached --quiet; then
@@ -37,7 +79,7 @@ jobs:
           else
             git config user.name 'github-actions[bot]'
             git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git commit -m 'assets: add reproducible 480 and 800px watch WebPs [skip ci]'
+            git commit -m 'assets: refresh approved responsive watch WebPs [skip ci]'
             git fetch origin main
             git rebase -X theirs origin/main
             git push origin HEAD:main
