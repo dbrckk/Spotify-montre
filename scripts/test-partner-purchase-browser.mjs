@@ -199,6 +199,34 @@ try{
   assert.deepEqual(homeErrors,[]);
   await home.close();
 
+  // The large budget cards must give buyers the full category, not only the
+  // two editorial watches on the homepage. Check the actual mobile click
+  // through, source-backed filtered count and preserved query parameters.
+  const budget=await browser.newPage({
+    viewport:{width:390,height:840},deviceScaleFactor:1,locale:'fr-FR'
+  });
+  budget.on('pageerror',error=>issues.push('budget: '+error.message));
+  for(const tier of ['essential','signature','prestige']){
+    await budget.goto(new URL('index.html',base).href,{waitUntil:'domcontentloaded'});
+    const relative='./montres/toutes-les-montres.html?tier='+tier+'#udCount';
+    const card=budget.locator('.am-budget-card[href="'+relative+'"]');
+    assert.equal(await card.count(),1,'Homepage must open the full '+tier+' collection');
+    await card.click();
+    await budget.waitForURL(url=>url.pathname.endsWith('/montres/toutes-les-montres.html')&&
+      url.searchParams.get('tier')===tier&&url.hash==='#udCount');
+    await budget.locator('#udFilters').waitFor({state:'visible'});
+    assert.equal(await budget.locator('#udTier').inputValue(),tier,
+      'Landing filter must preserve the selected budget category');
+    const expected=discovery.products.filter(p=>p.tier===tier).length;
+    assert.ok(expected>2,'Budget selection should open more than the homepage featured watches');
+    assert.equal(await budget.locator('#udGrid .ud-card:not([hidden])').count(),expected,
+      'Category must show every documented watch in the selected tier');
+    assert.equal(await budget.locator('#udGrid .ud-card:not([hidden]):not([data-tier="'+tier+'"])').count(),0,
+      'A filtered category must never show another tier');
+    assert.match(await budget.locator('#udCount').innerText(),new RegExp('^'+expected+' modèles? sur 52'));
+  }
+  await budget.close();
+
   // Deep-linked discovery must preserve the exact watch instead of forcing
   // Android shoppers to search again through all 13 partner offers.
   const referredId='seiko-sharp'; // Historically unavailable at last check.
