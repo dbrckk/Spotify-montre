@@ -42,7 +42,9 @@ for(const site of sites){
 // real-user Core Web Vitals. Home uses three-run medians; product is a smoke
 // sample and remains informational until repeated measurements are available.
 const budgets={
-  'Accueil':{scoreMin:85,lcpMax:3000,tbtMax:300,clsMax:0.15,imageBytesMax:300000},
+  // After budget-card mobile sizing: 56,633 image bytes (2026-11-07),
+  // down from 101,302. 90 KB allows measurement noise but blocks regression.
+  'Accueil':{scoreMin:85,lcpMax:3000,tbtMax:300,clsMax:0.15,imageBytesMax:90000},
   // Production baseline: 66,944 image bytes (2026-11-07). Allow headroom
   // for network variability while catching a return to 338 KB originals.
   'Catalogue 52 montres':{imageBytesMax:180000}
@@ -76,7 +78,7 @@ for(const r of reports){
  lines.push('Miniatures WebP téléchargées : '+r.thumbCount+' ; images adaptatives : '+r.responsiveCount+' ; octets d’images redimensionnables encore estimés : '+r.responsiveImageWaste+'.','');
  lines.push('Scores par passage : '+r.runs.map(run=>round(run.score,0)).join(', ')+'.','');
 }
-lines.push('Garde-fous accueil (médiane) : score ≥85, LCP ≤3000 ms, TBT ≤300 ms, CLS ≤0,15, images ≤300 Ko. Catalogue (un passage) : images ≤180 Ko ; autres mesures indicatives. Fiche produit indicative.','');
+lines.push('Garde-fous accueil (médiane) : score ≥85, LCP ≤3000 ms, TBT ≤300 ms, CLS ≤0,15, images ≤90 Ko. Catalogue (un passage) : images ≤180 Ko ; autres mesures indicatives. Fiche produit indicative.','');
 lines.push(violations.length?'Régressions détectées : '+violations.join(' ; '):'Aucune régression majeure détectée par les seuils Lighthouse.','');
 lines.push('La médiane réduit la variabilité sans constituer une mesure terrain. L’INP réel et les métriques Core Web Vitals proviennent de CrUX/Search Console, pas du TBT Lighthouse.','');
 const summary=lines.join('\n');
