@@ -29,13 +29,16 @@ for(const id of cards){
 }
 assert.equal((home.match(/class="am-budget-card"/g)||[]).length,3,
   'Three visually distinct budget categories required');
-for(const [id,range] of [
-  ['collection-accessible','20–120 €'],
-  ['collection-intermediaire','150–450 €'],
-  ['collection-prestige','500–1 200 €']
+assert.equal((home.match(/class="am-budget-action">Explorer toute la gamme/g)||[]).length,3,
+  'All budget categories must clearly advertise access to their full collection');
+for(const [id,tier,range] of [
+  ['collection-accessible','essential','20–120 €'],
+  ['collection-intermediaire','signature','150–450 €'],
+  ['collection-prestige','prestige','500–1 200 €']
 ]){
-  assert.ok(home.includes('id="'+id+'"'),'Broken budget-category anchor: '+id);
-  assert.ok(home.includes('href="#'+id+'"'),'Missing category navigation: '+id);
+  assert.ok(home.includes('id="'+id+'"'),'Broken budget showcase section: '+id);
+  assert.ok(home.includes('href="./montres/toutes-les-montres.html?tier='+tier+'#udCount"'),
+    'A homepage budget card must open the complete filtered catalogue: '+tier);
   assert.ok(home.includes(range),'Missing budget guidance: '+range);
 }
 assert.ok(home.includes('Budgets d’orientation, non prix de vente'),
