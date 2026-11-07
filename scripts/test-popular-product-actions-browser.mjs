@@ -36,7 +36,7 @@ for(const p of picks){
       'An unphotographed watch must keep its honest typographic fallback: '+p.id);
     assert.ok(html.includes('class="am-extra-photo-unavailable"'),
       'Missing explicit photo-unavailable disclosure: '+p.id);
-    const photoLink=html.match(/<a href="([^"]+)" target="_blank" rel="noopener noreferrer" aria-label="Voir les photos de [^"]+ sur la fiche officielle, nouvel onglet">Voir les photos du modèle exact/);
+    const photoLink=html.match(/<a href="([^"]+)" target="_blank" rel="noopener noreferrer" aria-label="Voir les photos du modèle exact : [^"]+ sur la fiche officielle \(nouvel onglet\)">Voir les photos du modèle exact/);
     assert.ok(photoLink,'Missing source-first exact-model photo CTA: '+p.id);
     assert.equal(photoLink[1],p.officialUrl.replaceAll('&','&amp;'),
       'Photo CTA must link to the documented manufacturer or seller URL: '+p.id);
