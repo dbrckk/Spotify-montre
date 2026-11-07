@@ -109,9 +109,9 @@ assert.equal(config.checkoutMode,'inactive',
   'Design changes must never open live payments by accident');
 assert.deepEqual(JSON.parse(read('catalogue.json')).products,[],
   'Editorial watch selection must not silently become sellable CJ offers');
-assert.ok(!home.includes('src="./direct-offer-links.js"')&&
-  !home.includes('href="./direct-offer-links.css"'),
-  'Public editorial homepage must not load inactive commerce scripts or styles');
+assert.ok(home.includes('src="./direct-offer-links.js"')&&
+  home.includes('href="./direct-offer-links.css"'),
+  'Existing checkout integration must remain intact even while payment is inactive');
 assert.ok(!/class="am-direct-card-link"/.test(home),
   'Never hardcode unqualified paid-checkout buttons');
 for(const [page,scope] of [
