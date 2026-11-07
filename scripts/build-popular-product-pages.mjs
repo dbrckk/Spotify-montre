@@ -121,6 +121,7 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       +'<span class="am-extra-art-model">'+e(p.model)+'</span>'
       +(!photo&&p.brand==='SKMEI'?'<span class="am-budget-watch am-budget-watch-large" aria-hidden="true"><span class="am-budget-dial"></span></span>':'')
       +'<span class="am-extra-art-label">'+(photo?'Photo de marque · accord déclaré · '+e(photo.rightsHolder):'Une référence à découvrir · photographie exacte chez le vendeur ou la marque')+'</span>'
+      +(!photo?'<div class="am-extra-official-photo"><span class="am-extra-photo-unavailable">Photo du modèle non publiée ici</span><a href="'+e(p.officialUrl)+'" target="_blank" rel="noopener noreferrer" aria-label="Voir les photos de '+e(name)+' sur la fiche officielle, nouvel onglet">Voir les photos du modèle exact <span aria-hidden="true">↗</span></a><small>Sur le site de la marque ou du vendeur · référence à confirmer avant achat</small></div>':'')
       +(photo?'</div>':'')
       +'</div>'
       +'<div class="am-extra-intro"><p class="am-extra-overline">'+e(tierNames[p.tier])+' / '+e(category)+'</p>'
