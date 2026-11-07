@@ -78,6 +78,45 @@ try{
     if(width===1366)await page.screenshot({path:'artifacts/atelier-home-1366.png'});
     await page.close();
   }
+  // The actual public homepage is distinct from the legacy comparison page.
+  // Its large, padded budget visuals need only 480px at Lighthouse's 412px /
+  // 1.75x emulation. Citizen is deliberately excluded: it reuses the 800px
+  // hero image already fetched, avoiding another download.
+  const publicHome=await browser.newPage({
+    viewport:{width:412,height:823},deviceScaleFactor:1.75,
+    isMobile:true,hasTouch:true,locale:'fr-FR'
+  });
+  try{
+    const response=await publicHome.goto(new URL('/',base).href,{waitUntil:'domcontentloaded'});
+    assert.ok(response?.ok(),'The public premium homepage must load');
+    assert.equal(await publicHome.locator('.am-budget-card').count(),3,
+      'All three real-photo budget tiers must remain visible');
+    for(const id of ['casio-mtp-1302','tissot-prx-auto']){
+      const photo=publicHome.locator('.am-budget-art img[src="./assets/watches/'+id+'.webp"]');
+      assert.equal(await photo.count(),1,'Missing exact watch photo: '+id);
+      await photo.scrollIntoViewIfNeeded();
+      await photo.evaluate(img=>img.decode());
+      const rendered=await photo.evaluate(img=>({
+        path:new URL(img.currentSrc).pathname,width:img.naturalWidth,height:img.naturalHeight
+      }));
+      assert.equal(rendered.path,'/assets/watch-responsive/'+id+'-480.webp',
+        'Mobile budget visual must download the smaller existing local WebP: '+id);
+      assert.ok(rendered.width>0&&rendered.height>0,'Budget photo failed to decode: '+id);
+    }
+    const hero=publicHome.locator('.home-hero-visual img');
+    assert.equal(await hero.count(),1,'The real Citizen hero must remain');
+    assert.ok((await hero.getAttribute('fetchpriority'))==='high',
+      'Keep the main Citizen watch image prioritized');
+    const mobileWidth=await publicHome.evaluate(()=>({
+      client:document.documentElement.clientWidth,
+      scroll:document.documentElement.scrollWidth
+    }));
+    assert.ok(mobileWidth.scroll<=mobileWidth.client+2,
+      'Budget image sizing must not introduce mobile overflow');
+    console.log('PASS PUBLIC MOBILE HOME: two 480px budget images decode, three tiers, Citizen hero retained');
+  }finally{
+    await publicHome.close();
+  }
   assert.deepEqual(failures,[]);
   console.log('Premium editorial comparison showroom OK: 52-watch links, 7 authentic local-photo placements, 3 detailed highlights, responsive menu, no overflow, accurate shipping disclosure');
 }finally{
