@@ -39,7 +39,7 @@ export function responsivePopularAttrs(root,product,approved,{prefix='../',sizes
      !Number.isInteger(approved.width)||approved.width<480)return '';
   const file=join(root,approved.url);
   if(!existsSync(file))return '';
-  const candidates=[240,480].filter(width=>width<approved.width&&
+  const candidates=[240,480,720,960].filter(width=>width<approved.width&&
     existsSync(join(root,'assets/popular-responsive',id+'-'+width+'.webp')));
   if(!candidates.length)return '';
   const srcset=[...candidates.map(width=>prefix+'assets/popular-responsive/'+id+'-'+width+'.webp '+width+'w'),

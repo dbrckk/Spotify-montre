@@ -26,8 +26,7 @@ for(const site of sites){
   // and the image-byte limit below still prevents heavy regressions.
   const exactPhotoFiles=site.photoId?[
    '/assets/watches-popular/'+site.photoId+'.webp',
-   '/assets/popular-responsive/'+site.photoId+'-240.webp',
-   '/assets/popular-responsive/'+site.photoId+'-480.webp'
+   ...[240,480,720,960].map(width=>'/assets/popular-responsive/'+site.photoId+'-'+width+'.webp')
   ]:[];
   const loadedPhotoPaths=imageAssetPaths.filter(x=>exactPhotoFiles.includes(x));
   if(site.expectedPath){

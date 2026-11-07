@@ -33,7 +33,11 @@ def main():
             source = ImageOps.exif_transpose(source)
             if source.size != (record["width"], record["height"]):
                 raise ValueError(f"Image size differs from approved registry: {model_id}")
-            for width in (240, 480):
+            # Two lightweight cards plus medium/high-DPI product-sheet tiers.
+            # Only produce variants smaller than each documented original.
+            for width in (240, 480, 720, 960):
+                if width >= source.width:
+                    continue
                 if source.width < width:
                     raise ValueError(f"Source too small: {model_id}")
                 resized = source.resize(
@@ -51,9 +55,10 @@ def main():
     for file in OUTPUT.glob("*.webp"):
         if file.name not in expected:
             file.unlink()
-    if len(expected) != 2 * len(registry):
-        raise ValueError("Expected exactly two verified WebPs per approved watch")
-    print(f"Verified {len(expected)} lightweight WebP derivatives across {len(registry)} exact watch models")
+    count = sum(sum(width < record["width"] for width in (240, 480, 720, 960)) for record in registry.values())
+    if len(expected) != count:
+        raise ValueError(f"Expected exactly {count} verified model-exact WebP derivatives")
+    print(f"Verified {len(expected)} adaptive WebP derivatives across {len(registry)} exact watch models")
 
 
 if __name__ == "__main__":

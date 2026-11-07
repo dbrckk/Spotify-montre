@@ -45,7 +45,7 @@ jobs:
         run: |
           python scripts/build-responsive-watch-photos.py
           python scripts/build-popular-editorial-thumbnails.py
-      - name: Verify 42 responsive assets are included in the generated catalogue
+      - name: Verify every approved derivative in the catalogue and product detail pages
         if: github.event_name == 'pull_request'
         run: |
           node --check scripts/build-unified-discovery.mjs
@@ -58,17 +58,27 @@ jobs:
           const rights=JSON.parse(readFileSync('site/popular-photo-rights.json','utf8')).photos;
           const html=readFileSync('site/montres/toutes-les-montres.html','utf8');
           assert.equal(Object.keys(rights).length,21,'Approved supplemental photo count changed');
-          for(const id of Object.keys(rights)){
+          let total=0;
+          for(const [id,proof] of Object.entries(rights)){
             const start=html.indexOf('id="modele-'+id+'"');
             assert.ok(start>=0,'Missing exact-model catalogue card: '+id);
             const end=html.indexOf('</article>',start);
             assert.ok(end>start,'Missing card close: '+id);
             const card=html.slice(start,end);
-            for(const width of [240,480])
-              assert.ok(card.includes('popular-responsive/'+id+'-'+width+'.webp '+width+'w'),
-                'New 240/480px derivative not referenced by catalogue: '+id+'/'+width);
+            const detail=readFileSync('site/montres/'+id+'.html','utf8');
+            for(const width of [240,480,720,960].filter(w=>w<proof.width)){
+              const descriptor='popular-responsive/'+id+'-'+width+'.webp '+width+'w';
+              assert.ok(card.includes(descriptor),
+                'Verified derivative missing from catalogue: '+id+'/'+width);
+              assert.ok(detail.includes(descriptor),
+                'Verified derivative missing from product sheet: '+id+'/'+width);
+              total++;
+            }
+            assert.ok(detail.includes('watches-popular/'+id+'.webp '+proof.width+'w'),
+              'Full-resolution authorized fallback missing: '+id);
           }
-          console.log('PASS: 21 original photographs -> 42 verified WebPs linked in the 52-watch catalogue');
+          assert.equal(total,80,'Expected 80 WebPs: 21x240/480/720 plus 17x960');
+          console.log('PASS: 21 approved photos -> 80 SHA-verified responsive WebPs on catalogue and detailed pages');
           NODE
       - name: Commit verified derivatives
         if: github.event_name != 'pull_request'

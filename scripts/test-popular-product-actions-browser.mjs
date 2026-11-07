@@ -24,9 +24,9 @@ for(const p of picks){
       'Verified watch must have an unobstructed photo stage and separate metadata: '+p.id);
     assert.ok(hero.includes('width="'+proof.width+'"')&&
       hero.includes('height="'+proof.height+'"'),'Original aspect dimensions missing: '+p.id);
-    for(const size of [240,480])
+    for(const size of [240,480,720,960].filter(size=>size<proof.width))
       assert.ok(hero.includes('popular-responsive/'+p.id+'-'+size+'.webp '+size+'w'),
-        'Detailed watch hero must expose the real '+size+'px WebP: '+p.id);
+        'Detailed watch hero must expose the verified '+size+'px WebP: '+p.id);
     assert.ok(hero.includes('watches-popular/'+p.id+'.webp '+proof.width+'w'),
       'Full-size original must remain eligible on detail '+p.id);
   }else{
@@ -141,6 +141,29 @@ try{
     assert.deepEqual(errors,[]);
     await context.close();
   }
+
+  // High-density Android screens must not jump straight from a 480px card
+  // image to the full 1080px SKMEI original. Full original stays for zoom.
+  const dense=await browser.newContext({viewport:{width:393,height:852},
+    isMobile:true,hasTouch:true,deviceScaleFactor:3,locale:'fr-FR'});
+  try{
+    const page=await dense.newPage();
+    await page.goto(new URL('/montres/skmei-1251.html',base).href,
+      {waitUntil:'domcontentloaded'});
+    const photo=page.locator('.am-extra-photo-stage img.am-extra-licensed-photo');
+    await photo.waitFor({state:'visible'});
+    await photo.evaluate(image=>image.decode());
+    const selection=await photo.evaluate(image=>({
+      path:new URL(image.currentSrc).pathname,
+      width:image.naturalWidth,height:image.naturalHeight,
+      renderedWidth:Math.round(image.getBoundingClientRect().width)
+    }));
+    assert.equal(selection.path,'/assets/popular-responsive/skmei-1251-960.webp',
+      'Dense Android must select 960px optimized exact-model WebP: '+JSON.stringify(selection));
+    assert.ok(selection.width>0&&selection.height>0);
+    assert.ok(await page.locator('button.am-extra-zoom').isVisible(),
+      'Original zoom remains available when optimized display image loads');
+  }finally{await dense.close();}
 
   const noScript=await browser.newPage({javaScriptEnabled:false});
   await noScript.goto(new URL('/montres/skmei-1251.html',base).href);
