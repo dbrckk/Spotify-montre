@@ -204,7 +204,7 @@ try{
     });
   });
   assert.match(await responsiveHero.evaluate(img=>img.currentSrc),
-    /assets\\/watch-responsive\\/citizen-tsuyosa-(480|800)\\.webp/,
+    /assets\/watch-responsive\/citizen-tsuyosa-(480|800)\.webp/,
     'Mobile hero must use an existing lightweight responsive photograph');
   assert.equal(await home.locator('.am-editorial-path').count(),3,
     'Three visible image-led style and movement collections are required');
