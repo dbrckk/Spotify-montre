@@ -6,6 +6,10 @@ on:
     paths:
       - 'scripts/build-responsive-watch-photos.py'
       - 'scripts/build-popular-editorial-thumbnails.py'
+      - 'site/popular-photo-rights.json'
+      - 'site/assets/watches-popular/**'
+      - 'site/selection-affiliation.json'
+      - 'site/assets/watches/**'
       - '.github/workflows/build-responsive-watch-photos.yml'
 permissions:
   contents: write
@@ -37,7 +41,7 @@ jobs:
           else
             git config user.name 'github-actions[bot]'
             git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git commit -m 'assets: add reproducible 480 and 800px watch WebPs [skip ci]'
+            git commit -m 'assets: refresh approved responsive watch WebPs [skip ci]'
             git fetch origin main
             git rebase -X theirs origin/main
             git push origin HEAD:main
