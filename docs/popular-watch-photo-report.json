@@ -55,10 +55,8 @@
     },
     {
       "id": "tissot-prx-35-blue",
-      "status": "created",
-      "source": "https://www.tissotwatches.com/fr-fr/T1372101104100.html",
-      "image": "https://www.tissotwatches.com/dw/image/v2/BKKD_PRD/on/demandware.static/-/Sites-Tissot-Catalogue/default/dw85cbf290/product-pictures/137cb52c-5d13-4d79-a9ce-53d32356fd77_T137-210-11-041-00_shadow.png?sh=1680&sm=fit&sw=1680",
-      "sha256": "9761ef6bdbcf75a9152a1da28cddd7a9c2524889451bea4a5a5695890ecd1c18"
+      "status": "preserved",
+      "source": "https://www.tissotwatches.com/fr-fr/T1372101104100.html"
     },
     {
       "id": "seiko-5-srpk29",
