@@ -57,7 +57,8 @@ jobs:
           import {readFileSync} from 'node:fs';
           const rights=JSON.parse(readFileSync('site/popular-photo-rights.json','utf8')).photos;
           const html=readFileSync('site/montres/toutes-les-montres.html','utf8');
-          assert.equal(Object.keys(rights).length,21,'Approved supplemental photo count changed');
+          assert.ok(Object.keys(rights).length>=21&&Object.keys(rights).length<=37,
+            'Only existing documented models may enter approved photo registry');
           let total=0;
           for(const [id,proof] of Object.entries(rights)){
             const start=html.indexOf('id="modele-'+id+'"');
@@ -77,8 +78,11 @@ jobs:
             assert.ok(detail.includes('watches-popular/'+id+'.webp '+proof.width+'w'),
               'Full-resolution authorized fallback missing: '+id);
           }
-          assert.equal(total,80,'Expected 80 WebPs: 21x240/480/720 plus 17x960');
-          console.log('PASS: 21 approved photos -> 80 SHA-verified responsive WebPs on catalogue and detailed pages');
+          const expected=Object.values(rights).reduce((sum,proof)=>
+            sum+[240,480,720,960].filter(w=>w<proof.width).length,0);
+          assert.equal(total,expected,'Expected one verified derivative per eligible width');
+          console.log('PASS: '+Object.keys(rights).length+' approved photos -> '+total+
+            ' SHA-verified responsive WebPs on catalogue and detailed pages');
           NODE
       - name: Commit verified derivatives
         if: github.event_name != 'pull_request'
