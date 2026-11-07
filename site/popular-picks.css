@@ -619,3 +619,14 @@
     transform:none!important;transition:none!important
   }
 }
+
+/* Source-first photo access for the 15 exact models without publishable images.
+   No remote image embed, fabricated product rendering, or visual overlay. */
+.am-extra-official-photo{display:flex;flex-direction:column;align-items:flex-start;gap:10px;margin-top:clamp(18px,3vw,30px);padding:17px 0 0;border-top:1px solid #ffffff65;max-width:100%}
+.am-extra-photo-unavailable{display:inline-flex;align-items:center;min-height:30px;padding:5px 11px;border:1px solid #ffffff80;border-radius:3px;background:#ffffff16;color:#fff;font:700 12px/1.4 system-ui,sans-serif}
+.am-extra-official-photo>a{display:inline-flex;align-items:center;justify-content:space-between;gap:14px;min-height:48px;max-width:100%;padding:11px 16px;background:#fffaf0;color:#183d2c;border:2px solid #fffaf0;border-radius:5px;text-decoration:none;font:750 14px/1.4 system-ui,sans-serif;overflow-wrap:anywhere;transition:background .18s ease,color .18s ease}
+.am-extra-official-photo>a:hover{background:#e6ddc6;color:#153d2b}
+.am-extra-official-photo>a:focus-visible{outline:3px solid #e6bb6c;outline-offset:4px}
+.am-extra-official-photo small{color:#f0e7d6;font:500 12px/1.55 system-ui,sans-serif}
+@media(max-width:600px){.am-extra-official-photo{width:100%}.am-extra-official-photo>a{width:100%}}
+@media(prefers-reduced-motion:reduce){.am-extra-official-photo>a{transition:none}}
