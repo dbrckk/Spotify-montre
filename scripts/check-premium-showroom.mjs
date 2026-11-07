@@ -30,11 +30,11 @@ for(const id of cards){
 // The photo-led homepage uses only approved local exact-reference WebPs.
 // Every responsive candidate must exist and the LCP preload must match the
 // hero image, preventing a redundant full-size desktop download on Android.
-const photoTags=[...home.matchAll(/<img\\b[^>]*>/g)].map(x=>x[0])
-  .filter(tag=>/src="\\.\\/assets\\/watches\\/[a-z0-9-]+\\.webp"/.test(tag));
+const photoTags=[...home.matchAll(/<img\b[^>]*>/g)].map(x=>x[0])
+  .filter(tag=>/src="\.\/assets\/watches\/[a-z0-9-]+\.webp"/.test(tag));
 assert.equal(photoTags.length,13,'Ten original showcase images plus three editorial collection photos');
 for(const tag of photoTags){
-  const id=/src="\\.\\/assets\\/watches\\/([a-z0-9-]+)\\.webp"/.exec(tag)?.[1];
+  const id=/src="\.\/assets\/watches\/([a-z0-9-]+)\.webp"/.exec(tag)?.[1];
   const proof=known.get(id)?.photoReview;
   assert.ok(proof?.publicUsageApproved===true,'Unapproved homepage photograph: '+id);
   assert.ok(tag.includes('srcset="')&&tag.includes('sizes="')&&
@@ -58,7 +58,7 @@ assert.ok(heroPreload.includes('imagesrcset="'+heroSrcset+'"')&&
 assert.equal(photoTags.filter(tag=>tag.includes('fetchpriority="high"')).length,1,
   'High network priority must be reserved for the single hero photograph');
 
-const structured=home.match(/<script type="application\\/ld\\+json">([\\s\\S]*?)<\\/script>/);
+const structured=home.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
 assert.ok(structured,'Homepage should expose an indexable real-watch collection');
 const graph=JSON.parse(structured[1])['@graph'];
 const webPage=graph.find(item=>item['@type']==='CollectionPage');
