@@ -167,6 +167,16 @@ try{
       assert.ok(srcset?.includes('popular-responsive/'+id+'-240.webp 240w')&&
         srcset.includes('popular-responsive/'+id+'-480.webp 480w'),
         'Heavy editorial photo must have verified mobile WebP variants: '+id);
+      const proof=popularPhotoProof[id];
+      assert.ok(proof&&proof.width>480,'Featured watch must have exact-model photo evidence: '+id);
+      // 720px and 960px are needed on high-density phones, but are only
+      // exposed if smaller than the approved original and actually generated.
+      for(const widthCandidate of [720,960]){
+        const candidateExists=widthCandidate<proof.width&&existsSync(
+          new URL('../site/assets/popular-responsive/'+id+'-'+widthCandidate+'.webp',import.meta.url));
+        assert.equal(Boolean(srcset?.includes('popular-responsive/'+id+'-'+widthCandidate+'.webp '+widthCandidate+'w')),
+          candidateExists,'Featured image descriptor must reflect verified generated asset: '+id+' '+widthCandidate);
+      }
     }
 
 
