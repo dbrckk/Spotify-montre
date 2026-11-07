@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {mkdirSync} from 'node:fs';
+import {mkdirSync,readFileSync} from 'node:fs';
 import {chromium} from 'playwright';
 
 // The test always uses the built, local HTTP store by default; no remote
@@ -10,6 +10,10 @@ assert.ok(origin.protocol==='https:'||(origin.protocol==='http:'&&
   ['localhost','127.0.0.1'].includes(origin.hostname)),'Only localhost HTTP or real HTTPS');
 const browser=await chromium.launch({headless:true});
 const errors=[];
+const documentedSupplementalPhotos=Object.keys(JSON.parse(readFileSync(
+  new URL('../site/popular-photo-rights.json',import.meta.url),'utf8')).photos).length;
+const approvedPhotoCount=15+documentedSupplementalPhotos;
+const noPhotoCount=52-approvedPhotoCount;
 const checkOverflow=async(page,label)=>{
   const w=await page.evaluate(()=>{
     const client=document.documentElement.clientWidth;
@@ -267,16 +271,16 @@ try{
   assert.equal(new URL(phone.url()).searchParams.has('compare'),false,
     'Clearing selection also removes the shareable comparison URL');
 
-  // The visual-only filters are backed by the 15 approved core photos and
-  // the 21 source-registry approved supplemental photos; no fake packshots.
-  assert.equal(await phone.locator('.ud-card[data-visual="photo"]').count(),36,
-    'Only the 36 owner-attested local model photos receive photo-backed cards');
-  assert.equal(await phone.locator('.ud-card[data-visual="no-photo"]').count(),16,
-    'The remaining 16 models must disclose missing published photos');
-  assert.equal(await phone.locator('button.ud-zoom').count(),36,
+  // Compare the rendered photo/fallback split with the exact-model rights
+  // registry; newly approved photos must not break consumer-side filters.
+  assert.equal(await phone.locator('.ud-card[data-visual="photo"]').count(),approvedPhotoCount,
+    'Only core and SHA-registered supplemental photos receive real photo cards');
+  assert.equal(await phone.locator('.ud-card[data-visual="no-photo"]').count(),noPhotoCount,
+    'Every remaining unphotographed model must disclose the missing packshot');
+  assert.equal(await phone.locator('button.ud-zoom').count(),approvedPhotoCount,
     'Photo zoom is never offered for a fallback or unapproved visual');
   await phone.locator('#udVisual').selectOption('photo');
-  assert.equal(await phone.locator('.ud-card:visible').count(),36,
+  assert.equal(await phone.locator('.ud-card:visible').count(),approvedPhotoCount,
     'Photo-only filter lists strictly documented photographed models');
   assert.match(new URL(phone.url()).search,/visual=photo/);
   await phone.locator('#udViewLarge').click();
@@ -304,7 +308,7 @@ try{
 
   // Fallback-only views must never show a made-up product rendering.
   await phone.locator('#udVisual').selectOption('no-photo');
-  assert.equal(await phone.locator('.ud-card:visible').count(),16);
+  assert.equal(await phone.locator('.ud-card:visible').count(),noPhotoCount);
   const missing=phone.locator('.ud-card[data-visual="no-photo"]:visible');
   assert.equal(await missing.locator('img').count(),0);
   assert.equal(await missing.locator('.ud-zoom').count(),0);
