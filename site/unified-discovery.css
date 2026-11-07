@@ -516,3 +516,20 @@
   .ud-page .ud-heading .ud-disclosure{padding:13px 12px}
 }
 @media(prefers-reduced-motion:reduce){.ud-heading-actions a{transition:none}}
+
+/* Premium photo-first mobile mode: when a shopper asks for large visuals,
+   show the real watch and both documented facts without requiring a detail tap.
+   Compact grid remains selectable and remembered by the viewer. */
+@media(max-width:420px){
+  .ud-page .ud-grid.ud-view-large{grid-template-columns:minmax(0,1fr);gap:19px}
+  .ud-page .ud-grid.ud-view-large .ud-card{border-radius:11px;box-shadow:0 13px 30px rgba(26,47,30,.12)}
+  .ud-page .ud-grid.ud-view-large .ud-photo{height:clamp(310px,88vw,370px);padding:clamp(14px,4vw,22px)}
+  .ud-page .ud-grid.ud-view-large .ud-card-main{padding:20px;gap:12px}
+  .ud-page .ud-grid.ud-view-large .ud-card h2{font-size:clamp(27px,7vw,32px);line-height:1.16}
+  .ud-page .ud-grid.ud-view-large .ud-description{font-size:14px;line-height:1.65}
+  .ud-page .ud-grid.ud-view-large .ud-card-main>dl{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .ud-page .ud-grid.ud-view-large .ud-card-main>dl>div:last-child{display:block}
+  .ud-page .ud-grid.ud-view-large .ud-card-main>dl>div{padding:10px 11px}
+  .ud-page .ud-grid.ud-view-large .ud-card-main>.ud-actions a,
+  .ud-page .ud-grid.ud-view-large .ud-select{font-size:13px;min-height:48px}
+}
