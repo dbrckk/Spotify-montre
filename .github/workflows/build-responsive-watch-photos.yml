@@ -93,7 +93,7 @@ jobs:
           else
             git config user.name 'github-actions[bot]'
             git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git commit -m 'assets: refresh approved responsive watch WebPs [skip ci]'
+            git commit -m 'assets: refresh approved responsive watch WebPs'
             git fetch origin main
             git rebase -X theirs origin/main
             git push origin HEAD:main
