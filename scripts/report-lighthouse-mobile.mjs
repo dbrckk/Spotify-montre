@@ -14,10 +14,13 @@ for(const site of sites){
   const summary=(audits['resource-summary']?.details?.items||[]).find(x=>x.resourceType==='image');
   const requests=audits['network-requests']?.details?.items||[];
   const thumbRequests=requests.filter(x=>x.url?.includes('/assets/watch-thumbs/'));
+  const firstParty=requests.filter(x=>{try{return new URL(x.url).origin===new URL(data.finalDisplayedUrl||data.finalUrl||data.requestedUrl).origin;}catch{return false;}});
+  const transferredByType=Object.fromEntries(['Stylesheet','Script','Image','Document','Font'].map(type=>[type,firstParty.filter(x=>x.resourceType===type).reduce((sum,x)=>sum+(Number(x.transferSize)||0),0)]));
   const suggestion=audits['uses-responsive-images'];
   return {score:(data.categories?.performance?.score||0)*100,
    measurements:numbers,imagesTransferred:summary?.transferSize??null,
    thumbCount:thumbRequests.length,
+   requestCount:firstParty.length,transferredByType,
    responsiveImageWaste:suggestion?.details?.overallSavingsBytes??null,
    url:data.finalDisplayedUrl||data.finalUrl||data.requestedUrl,
    // Raw run data is saved as an artifact for independent inspection.
@@ -28,7 +31,9 @@ for(const site of sites){
  reports.push({name:site.name,runCount:runs.length,score:round(median(runs.map(r=>r.score)),0),
    measurements,imagesTransferred:round(median(runs.map(r=>r.imagesTransferred)),0),
    responsiveImageWaste:round(median(runs.map(r=>r.responsiveImageWaste)),0),
-   thumbCount:median(runs.map(r=>r.thumbCount)),runs});
+   thumbCount:median(runs.map(r=>r.thumbCount)),
+   requestCount:median(runs.map(r=>r.requestCount)),
+   transferredByType:Object.fromEntries(['Stylesheet','Script','Image','Document','Font'].map(type=>[type,round(median(runs.map(r=>r.transferredByType[type])),0)])),runs});
 }
 mkdirSync('artifacts',{recursive:true});
 writeFileSync('artifacts/lighthouse-mobile-summary.json',JSON.stringify({createdAt:new Date().toISOString(),method:'Median for repeated mobile home runs; simulated Lighthouse laboratory, not field Core Web Vitals',reports},null,2)+'\n');
@@ -38,7 +43,8 @@ const lines=['### Lighthouse mobile — production (médianes)','',
 for(const r of reports)lines.push('| '+r.name+' | '+r.runCount+' | '+r.score+' | '+r.measurements.FCP+' | '+r.measurements.LCP+' | '+r.measurements.TBT+' | '+r.measurements.CLS+' | '+r.imagesTransferred+' |');
 lines.push('');
 for(const r of reports){
- lines.push('**'+r.name+'** : téléchargements de miniatures WebP vus par Lighthouse : '+r.thumbCount+' ; octets d’images redimensionnables encore estimés : '+r.responsiveImageWaste+'.','');
+ lines.push('**'+r.name+'** : '+r.requestCount+' requêtes première partie ; transferts CSS '+r.transferredByType.Stylesheet+' o, JS '+r.transferredByType.Script+' o, images '+r.transferredByType.Image+' o.','');
+ lines.push('Miniatures WebP téléchargées : '+r.thumbCount+' ; octets d’images redimensionnables encore estimés : '+r.responsiveImageWaste+'.','');
  lines.push('Scores par passage : '+r.runs.map(run=>round(run.score,0)).join(', ')+'.','');
 }
 lines.push('La médiane réduit la variabilité sans constituer une mesure terrain. L’INP réel et les métriques Core Web Vitals proviennent de CrUX/Search Console, pas du TBT Lighthouse.','');
