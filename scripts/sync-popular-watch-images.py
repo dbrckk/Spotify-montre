@@ -98,6 +98,11 @@ def src_candidates(html: str, base: str, code: str) -> list[str]:
         path = unquote(urlparse(full).path).lower()
         if any(word in path for word in NO_IMAGES):
             return
+        # Some srcset query parameters include commas (e.g. gravity=center).
+        # Splitting them must not turn a parameter into an image URL.
+        # Real manufacturer product images use a recognizable file extension.
+        if not re.search(r"\\.(?:jpe?g|png|webp|avif)$", path):
+            return
         image_code = re.sub(r"[^A-Z0-9]", "", unquote(urlparse(full).path).upper())
         # Strongest evidence: the exact SKU appears in the image path.
         score = 0 if normalized_code and normalized_code in image_code else priority
@@ -305,6 +310,20 @@ def main() -> int:
                 raise ValueError("Page title/content does not confirm exact model")
             key = model_key(p["model"])
             candidates = src_candidates(html, page_url, key)
+            # Exact manufacturer asset independently traceable to the Tissot
+            # PRX 35 mm reference. Never fall back to a generic watch picture.
+            # The product page is checked first and the binary must still pass
+            # the normal image/domain/size validation before publication.
+            if pid == "tissot-prx-35-blue" and key == "T1372101104100":
+                official_image = (
+                    "https://www.tissotwatches.com/dw/image/v2/BKKD_PRD/on/"
+                    "demandware.static/-/Sites-Tissot-Catalogue/default/"
+                    "dw85cbf290/product-pictures/"
+                    "137cb52c-5d13-4d79-a9ce-53d32356fd77_"
+                    "T137-210-11-041-00_shadow.png?sh=1680&sm=fit&sw=1680"
+                )
+                if host_allowed(official_image, page_url):
+                    candidates.insert(0, official_image)
             if not candidates:
                 raise ValueError("No trusted product image source found in structured data or product gallery")
             print("CANDIDATES", pid, len(candidates), flush=True)
