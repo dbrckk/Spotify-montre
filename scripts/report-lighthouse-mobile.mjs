@@ -1,6 +1,7 @@
 import {readFileSync,writeFileSync,appendFileSync,mkdirSync} from 'node:fs';
 const sites=[
  {name:'Accueil',files:[1,2,3].map(n=>'artifacts/lighthouse-mobile-home-'+n+'.json')},
+ {name:'Catalogue 52 montres',files:['artifacts/lighthouse-mobile-catalogue.json']},
  {name:'Fiche Casio',files:['artifacts/lighthouse-mobile-product.json']}
 ];
 const keys={'first-contentful-paint':'FCP','largest-contentful-paint':'LCP','speed-index':'Speed Index','total-blocking-time':'TBT','cumulative-layout-shift':'CLS'};
@@ -14,12 +15,13 @@ for(const site of sites){
   const summary=(audits['resource-summary']?.details?.items||[]).find(x=>x.resourceType==='image');
   const requests=audits['network-requests']?.details?.items||[];
   const thumbRequests=requests.filter(x=>x.url?.includes('/assets/watch-thumbs/'));
+  const responsiveRequests=requests.filter(x=>x.url?.includes('/assets/watch-responsive/'));
   const firstParty=requests.filter(x=>{try{return new URL(x.url).origin===new URL(data.finalDisplayedUrl||data.finalUrl||data.requestedUrl).origin;}catch{return false;}});
   const transferredByType=Object.fromEntries(['Stylesheet','Script','Image','Document','Font'].map(type=>[type,firstParty.filter(x=>x.resourceType===type).reduce((sum,x)=>sum+(Number(x.transferSize)||0),0)]));
   const suggestion=audits['uses-responsive-images'];
   return {score:(data.categories?.performance?.score||0)*100,
    measurements:numbers,imagesTransferred:summary?.transferSize??null,
-   thumbCount:thumbRequests.length,
+   thumbCount:thumbRequests.length,responsiveCount:responsiveRequests.length,
    requestCount:firstParty.length,transferredByType,
    responsiveImageWaste:suggestion?.details?.overallSavingsBytes??null,
    url:data.finalDisplayedUrl||data.finalUrl||data.requestedUrl,
@@ -32,6 +34,7 @@ for(const site of sites){
    measurements,imagesTransferred:round(median(runs.map(r=>r.imagesTransferred)),0),
    responsiveImageWaste:round(median(runs.map(r=>r.responsiveImageWaste)),0),
    thumbCount:median(runs.map(r=>r.thumbCount)),
+   responsiveCount:median(runs.map(r=>r.responsiveCount)),
    requestCount:median(runs.map(r=>r.requestCount)),
    transferredByType:Object.fromEntries(['Stylesheet','Script','Image','Document','Font'].map(type=>[type,round(median(runs.map(r=>r.transferredByType[type])),0)])),runs});
 }
@@ -67,10 +70,10 @@ for(const r of reports)lines.push('| '+r.name+' | '+r.runCount+' | '+r.score+' |
 lines.push('');
 for(const r of reports){
  lines.push('**'+r.name+'** : '+r.requestCount+' requêtes première partie ; transferts CSS '+r.transferredByType.Stylesheet+' o, JS '+r.transferredByType.Script+' o, images '+r.transferredByType.Image+' o.','');
- lines.push('Miniatures WebP téléchargées : '+r.thumbCount+' ; octets d’images redimensionnables encore estimés : '+r.responsiveImageWaste+'.','');
+ lines.push('Miniatures WebP téléchargées : '+r.thumbCount+' ; images adaptatives : '+r.responsiveCount+' ; octets d’images redimensionnables encore estimés : '+r.responsiveImageWaste+'.','');
  lines.push('Scores par passage : '+r.runs.map(run=>round(run.score,0)).join(', ')+'.','');
 }
-lines.push('Garde-fous accueil (médiane) : score ≥85, LCP ≤3000 ms, TBT ≤300 ms, CLS ≤0,15, images ≤300 Ko. La fiche produit reste indicative (un seul passage).','');
+lines.push('Garde-fous accueil (médiane) : score ≥85, LCP ≤3000 ms, TBT ≤300 ms, CLS ≤0,15, images ≤300 Ko. Le catalogue et la fiche produit restent indicatifs (un seul passage chacun).','');
 lines.push(violations.length?'Régressions détectées : '+violations.join(' ; '):'Aucune régression majeure détectée par les seuils Lighthouse.','');
 lines.push('La médiane réduit la variabilité sans constituer une mesure terrain. L’INP réel et les métriques Core Web Vitals proviennent de CrUX/Search Console, pas du TBT Lighthouse.','');
 const summary=lines.join('\n');
