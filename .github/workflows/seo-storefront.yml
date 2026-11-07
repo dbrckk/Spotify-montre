@@ -27,6 +27,8 @@ jobs:
           node-version: '20'
       - name: Existing storefront functional checks
         run: npm test
+      - name: Verify production Lighthouse report contracts offline
+        run: node scripts/test-lighthouse-mobile-report.mjs
       - name: Generate deployable SEO storefront
         env:
           PUBLIC_SITE_URL: https://atelier-montres-selection-fr.onrender.com/
