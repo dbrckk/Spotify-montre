@@ -21,6 +21,35 @@ try{
     await page.locator('#udFilters').waitFor({state:'visible'});
     assert.equal(await page.locator('.ud-card').count(),52);
 
+    // The storefront must present the watch before sales evidence, while
+    // showing truthful availability disclosures immediately beside the exits.
+    const cards=await page.locator('#udGrid .ud-card').evaluateAll(items=>
+      items.map(card=>{
+        const main=card.querySelector('.ud-card-main');
+        const children=[...main.children];
+        const heading=main.querySelector('h2');
+        const context=main.querySelector('.ud-offer-context');
+        const actions=main.querySelector('.ud-actions');
+        return {
+          id:card.dataset.id,
+          headingBeforeEvidence:children.indexOf(heading)>=0&&
+            children.indexOf(heading)<children.indexOf(context),
+          evidenceBeforeExit:children.indexOf(context)>=0&&
+            children.indexOf(context)<children.indexOf(actions),
+          evidence:context?.querySelector('.ud-commercial-proof')?.textContent,
+          merchant:context?.querySelector('.ud-merchant-kind')?.textContent,
+          source:actions?.querySelector('.ud-source')?.getAttribute('href')
+        };
+      }));
+    assert.equal(cards.length,52);
+    for(const card of cards){
+      assert.ok(card.headingBeforeEvidence&&card.evidenceBeforeExit,
+        'Watch details must lead with the model, seller proof near merchant exits: '+card.id);
+      assert.ok(card.evidence?.trim()&&card.merchant?.trim()&&card.source?.startsWith('https://'),
+        'Source and seller transparency must remain visible on '+card.id);
+    }
+
+
     for(const id of ['skmei-2056','skmei-2514','addiesdive-ad2030','pagani-pd1701']){
       const photo=page.locator('.ud-feature-card[data-feature-id="'+id+'"] img');
       const srcset=await photo.getAttribute('srcset');
