@@ -78,56 +78,144 @@ def is_exact_page(html: str, page_url: str, model: dict) -> bool:
 
 
 def src_candidates(html: str, base: str, code: str) -> list[str]:
+    """Extract genuine product-gallery sources, not recommendations or logos.
+
+    Some official Orient and Tissot pages render their packshots in <picture>
+    and lazy-load data-src/srcset rather than publishing Product JSON-LD or
+    og:image. The exact product reference must already be verified in the
+    page's title/body by is_exact_page; never infer it from an image alone.
+    """
     soup = BeautifulSoup(html, "html.parser")
-    urls: list[str] = []
-    # Structured Product schema and social packshot are usually the primary variant.
+    ranked: list[tuple[int, str]] = []
+    normalized_code = re.sub(r"[^A-Z0-9]", "", code.upper())
+
+    def add(raw: str | None, priority: int = 4):
+        if not isinstance(raw, str) or not raw.strip():
+            return
+        full = urljoin(base, raw.strip().replace("&amp;", "&"))
+        if not host_allowed(full, base):
+            return
+        path = unquote(urlparse(full).path).lower()
+        if any(word in path for word in NO_IMAGES):
+            return
+        image_code = re.sub(r"[^A-Z0-9]", "", unquote(urlparse(full).path).upper())
+        # Strongest evidence: the exact SKU appears in the image path.
+        score = 0 if normalized_code and normalized_code in image_code else priority
+        ranked.append((score, full))
+
+    def add_srcset(srcset: str | None, priority: int):
+        # Width / density descriptors must never be concatenated into a URL.
+        if not srcset:
+            return
+        parsed: list[tuple[float, str]] = []
+        for item in srcset.split(","):
+            fields = item.strip().rsplit(None, 1)
+            if not fields:
+                continue
+            size = 0.0
+            if len(fields) == 2:
+                try:
+                    value, descriptor = fields[1][:-1], fields[1][-1:]
+                    if descriptor in ("w", "x"):
+                        size = float(value)
+                except ValueError:
+                    continue
+            url = fields[0]
+            if url:
+                parsed.append((size, url))
+        # Try the largest candidate first, retaining fallback if unavailable.
+        for _, src in sorted(parsed, reverse=True)[:3]:
+            add(src, priority)
+
     for script in soup.select('script[type="application/ld+json"]'):
         try:
             data = json.loads(script.string or script.get_text() or "{}")
         except (ValueError, TypeError):
             continue
+
         def walk(obj):
             if isinstance(obj, list):
-                for v in obj:
-                    walk(v)
+                for item in obj:
+                    walk(item)
             elif isinstance(obj, dict):
-                typ = str(obj.get("@type", "")).lower()
-                if typ == "product" or (isinstance(obj.get("@type"), list) and "Product" in obj["@type"]):
+                kinds = obj.get("@type", [])
+                if isinstance(kinds, str):
+                    kinds = [kinds]
+                if any(str(kind).lower().split("/")[-1] == "product" for kind in kinds):
                     images = obj.get("image", [])
                     if isinstance(images, (str, dict)):
                         images = [images]
                     for item in images:
                         if isinstance(item, str):
-                            urls.append(item)
-                        elif isinstance(item, dict) and isinstance(item.get("url"), str):
-                            urls.append(item["url"])
-                for field in ("@graph",):
-                    if field in obj:
-                        walk(obj[field])
+                            add(item, 1)
+                        elif isinstance(item, dict):
+                            add(item.get("url") or item.get("contentUrl"), 1)
+                walk(obj.get("@graph", []))
         walk(data)
-    for selector in ('meta[property="og:image:secure_url"]', 'meta[property="og:image"]', 'meta[name="twitter:image"]'):
+
+    for selector in (
+        'meta[property="og:image:secure_url"]',
+        'meta[property="og:image"]',
+        'meta[name="twitter:image"]',
+        'link[rel="image_src"]',
+        'meta[itemprop="image"]',
+    ):
         for item in soup.select(selector):
-            if item.get("content"):
-                urls.append(item["content"])
-    # Product galleries only; do not fetch logos / unrelated recommendations.
-    for item in soup.select(".woocommerce-product-gallery img, .product-gallery img, .product__media img, .product-single__media img, img.wp-post-image, [data-product-image] img"):
-        for attr in ("data-large_image", "data-zoom-image", "data-src", "src"):
-            if item.get(attr):
-                urls.append(item[attr])
-        if item.get("srcset"):
-            candidate = item["srcset"].split(",")[-1].strip().split(" ")[0]
-            if candidate:
-                urls.append(candidate)
+            add(item.get("content") or item.get("href"), 2)
+
+    gallery = ", ".join((
+        ".woocommerce-product-gallery",
+        ".product-gallery",
+        ".product__media",
+        ".product-single__media",
+        ".product-detail__images",
+        ".product-detail__gallery",
+        ".product-image-gallery",
+        ".product-photo-gallery",
+        ".pdp-gallery",
+        ".pdp-product-images",
+        ".pdp-images",
+        "[data-product-image]",
+        "[data-product-gallery]",
+        "[data-pdp-gallery]",
+        "[data-gallery-role='gallery-placeholder']",
+        ".product-view .product-image",
+    ))
+    nodes = soup.select(gallery)
+    for container in nodes:
+        for img in container.select("img"):
+            for attr in ("data-large_image", "data-zoom-image", "data-full", "data-original", "data-src", "src"):
+                add(img.get(attr), 3)
+            for attr in ("data-srcset", "srcset"):
+                add_srcset(img.get(attr), 3)
+        for source in container.select("picture source, source[srcset]"):
+            add_srcset(source.get("srcset") or source.get("data-srcset"), 3)
+            add(source.get("src") or source.get("data-src"), 3)
+
+    # Self-identified primary product image outside a known gallery wrapper.
+    # Do not widen this to every page <img>: recommendations are common.
+    for img in soup.select("img.wp-post-image, img[itemprop='image'], img[data-product-image]"):
+        for attr in ("data-large_image", "data-src", "src"):
+            add(img.get(attr), 3)
+        add_srcset(img.get("srcset") or img.get("data-srcset"), 3)
+
+    # A path containing the exact SKU also identifies the model when a
+    # brand renders its gallery with otherwise unrecognizable markup.
+    for img in soup.select("main img, picture img"):
+        matches = [img.get(attr) for attr in
+                   ("data-large_image", "data-zoom-image", "data-src", "src")]
+        for value in matches:
+            if value and normalized_code in re.sub(r"[^A-Z0-9]", "", unquote(urlparse(value).path).upper()):
+                add(value, 1)
+
+    ranked.sort(key=lambda item: item[0])
     out: list[str] = []
-    for candidate in urls:
-        full = urljoin(base, candidate.replace("&amp;", "&"))
-        if not host_allowed(full, base):
-            continue
-        path = unquote(urlparse(full).path).lower()
-        if any(word in path for word in NO_IMAGES) or full in out:
-            continue
-        out.append(full)
-    return out[:8]
+    for _, candidate in ranked:
+        if candidate not in out:
+            out.append(candidate)
+        if len(out) >= 12:
+            break
+    return out
 
 
 def fetch_page(session: requests.Session, url: str) -> tuple[str, str]:
