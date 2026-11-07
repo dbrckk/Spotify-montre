@@ -4,7 +4,7 @@ const sites=[
  {name:'Catalogue 52 montres',files:['artifacts/lighthouse-mobile-catalogue.json']},
  {name:'Fiche Casio',files:['artifacts/lighthouse-mobile-product.json']},
  {name:'Fiche SKMEI avec photo',files:['artifacts/lighthouse-mobile-studio-photo.json'],
-  expectedPath:'/montres/skmei-1251.html',imagePath:'/assets/popular-responsive/skmei-1251-'},
+  expectedPath:'/montres/skmei-1251.html',photoId:'skmei-1251'},
  {name:'Fiche Casio sans photo',files:['artifacts/lighthouse-mobile-no-photo.json'],
   expectedPath:'/montres/casio-f91w-1.html',forbidWatchImage:true}
 ];
@@ -18,14 +18,26 @@ for(const site of sites){
   const numbers=Object.fromEntries(Object.entries(keys).map(([id,label])=>[label,audits[id]?.numericValue]));
   const summary=(audits['resource-summary']?.details?.items||[]).find(x=>x.resourceType==='image');
   const requests=audits['network-requests']?.details?.items||[];
+  const imageAssetPaths=requests.map(x=>{
+   try{return new URL(x.url).pathname;}catch{return null;}
+  }).filter(x=>typeof x==='string');
+  // Browsers on dense screens may choose the original exact-model image
+  // rather than 240/480px derivatives. All three variants are trusted,
+  // and the image-byte limit below still prevents heavy regressions.
+  const exactPhotoFiles=site.photoId?[
+   '/assets/watches-popular/'+site.photoId+'.webp',
+   '/assets/popular-responsive/'+site.photoId+'-240.webp',
+   '/assets/popular-responsive/'+site.photoId+'-480.webp'
+  ]:[];
+  const loadedPhotoPaths=imageAssetPaths.filter(x=>exactPhotoFiles.includes(x));
   if(site.expectedPath){
    const finalUrl=new URL(data.finalDisplayedUrl||data.finalUrl||data.requestedUrl);
    if(finalUrl.pathname!==site.expectedPath)
     throw Error(site.name+': Lighthouse measured the wrong route: '+finalUrl.pathname);
-   if(site.imagePath&&!requests.some(x=>x.url?.includes(site.imagePath)))
-    throw Error(site.name+': responsive source-verified image was not fetched');
-   if(site.forbidWatchImage&&requests.some(x=>x.url?.includes('/assets/watches-popular/')||
-      x.url?.includes('/assets/popular-responsive/')))
+   if(site.photoId&&!loadedPhotoPaths.length)
+    throw Error(site.name+': no verified model-exact image variant was fetched');
+   if(site.forbidWatchImage&&imageAssetPaths.some(x=>x.startsWith('/assets/watches-popular/')||
+      x.startsWith('/assets/popular-responsive/')))
     throw Error(site.name+': unsupported exact-model photograph was fetched');
   }
   const thumbRequests=requests.filter(x=>x.url?.includes('/assets/watch-thumbs/'));
@@ -38,6 +50,7 @@ for(const site of sites){
    thumbCount:thumbRequests.length,responsiveCount:responsiveRequests.length,
    requestCount:firstParty.length,transferredByType,
    responsiveImageWaste:suggestion?.details?.overallSavingsBytes??null,
+   verifiedPhotoVariants:loadedPhotoPaths,
    url:data.finalDisplayedUrl||data.finalUrl||data.requestedUrl,
    // Raw run data is saved as an artifact for independent inspection.
    lighthouseVersion:data.lighthouseVersion
@@ -96,6 +109,8 @@ for(const r of reports){
  lines.push('**'+r.name+'** : '+r.requestCount+' requêtes première partie ; transferts CSS '+r.transferredByType.Stylesheet+' o, JS '+r.transferredByType.Script+' o, images '+r.transferredByType.Image+' o.','');
  lines.push('Miniatures WebP téléchargées : '+r.thumbCount+' ; images adaptatives : '+r.responsiveCount+' ; octets d’images redimensionnables encore estimés : '+r.responsiveImageWaste+'.','');
  lines.push('Scores par passage : '+r.runs.map(run=>round(run.score,0)).join(', ')+'.','');
+ if(r.runs.some(run=>run.verifiedPhotoVariants?.length))
+  lines.push('Variantes photographiques exactes téléchargées : '+r.runs.flatMap(run=>run.verifiedPhotoVariants).join(', ')+'.','');
 }
 lines.push('Garde-fous accueil (médiane) : score ≥85, LCP ≤3000 ms, TBT ≤300 ms, CLS ≤0,15, images ≤90 Ko. Catalogue (un passage) : images ≤180 Ko. Fiches photo/sans photo (un passage) : score ≥75, LCP ≤4500 ms, CLS ≤0,2, images ≤160 Ko ; mesures laboratoire indicatives.','');
 lines.push(violations.length?'Régressions détectées : '+violations.join(' ; '):'Aucune régression majeure détectée par les seuils Lighthouse.','');
