@@ -200,10 +200,9 @@ try{
         await image.scrollIntoViewIfNeeded();
         await image.evaluate(node=>node.decode());
         const selected=await image.evaluate(node=>new URL(node.currentSrc).pathname);
-        assert.ok(
-          selected==='/assets/popular-responsive/'+id+'-240.webp'||
-          selected==='/assets/popular-responsive/'+id+'-480.webp',
-          'Chromium used an oversized image for '+id+': '+selected);
+        const validWidths=width<=420?[240,480,720,960]:[240,480];
+        assert.ok(validWidths.some(w=>selected==='/assets/popular-responsive/'+id+'-'+w+'.webp'),
+          'Chromium used an unrelated or full-size original watch image for '+id+': '+selected);
       }
     }
 
@@ -220,17 +219,18 @@ try{
         'Featured photo sizes must reflect split-card layout: '+id);
     }
 
-    // The gallery uses one column at 360px and two columns at 393px.
-    // srcset's sizes must reflect this or mobile downloads oversized WebPs.
+    // Browser-sized lazy images follow the actual layout selected by the
+    // shopper: one-column Android large mode or desktop four-column grid.
     const photo=page.locator('#modele-casio-mdv107 .ud-photo img');
     const sizes=await photo.getAttribute('sizes');
-    assert.ok(sizes?.includes('(max-width: 365px) 90vw')&&
+    assert.ok(sizes?.startsWith('auto, ')&&
+      sizes.includes('(max-width: 420px) 90vw')&&
       sizes.includes('(max-width: 650px) 46vw'),
-      'Responsive watch image sizes must match mobile gallery columns');
+      'Adaptive image sizes must support the Android gallery and compact fallback');
     const columns=await page.locator('#udGrid').evaluate(el=>
       getComputedStyle(el).gridTemplateColumns.split(' ').length);
-    assert.equal(columns,width===360?1:width===393?2:4,
-      'Gallery column count should agree with responsive image sizing');
+    assert.equal(columns,width<=420?1:4,
+      'Photo-first Android and compact desktop gallery must match image sizing');
 
     assert.equal(await page.locator('#udActiveFilters').isVisible(),false);
 
