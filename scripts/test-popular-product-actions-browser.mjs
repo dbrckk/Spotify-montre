@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readFileSync,mkdirSync} from 'node:fs';
 import {chromium} from 'playwright';
 
 // Local-only verification. Do not follow merchant links or invoke payments.
@@ -19,6 +19,9 @@ for(const p of picks){
   if(proof){
     const hero=html.match(/<img class="am-extra-licensed-photo"[^>]+>/)?.[0]||'';
     assert.ok(hero,'Published exact-model photograph missing: '+p.id);
+    assert.ok(html.includes('class="am-extra-photo-stage"')&&
+      html.includes('class="am-extra-photo-meta"'),
+      'Verified watch must have an unobstructed photo stage and separate metadata: '+p.id);
     assert.ok(hero.includes('width="'+proof.width+'"')&&
       hero.includes('height="'+proof.height+'"'),'Original aspect dimensions missing: '+p.id);
     for(const size of [240,480])
@@ -29,8 +32,11 @@ for(const p of picks){
   }else{
     assert.ok(!html.includes('class="am-extra-licensed-photo"'),
       'Do not publish unapproved watch photography: '+p.id);
+    assert.ok(!html.includes('class="am-extra-photo-stage"'),
+      'An unphotographed watch must keep its honest typographic fallback: '+p.id);
   }
 }
+mkdirSync('artifacts',{recursive:true});
 const browser=await chromium.launch({headless:true});
 try{
   for(const width of [360,393,1366]){
@@ -46,6 +52,39 @@ try{
     page.on('pageerror',error=>errors.push(error.message));
     await page.goto(new URL('/montres/skmei-1251.html',base).href,
       {waitUntil:'domcontentloaded'});
+    // A genuine watch photo must be entirely separate from its caption.
+    // The older dark overlay obscured the bottom portion of the packshot.
+    const studio=await page.evaluate(()=>{
+      const stage=document.querySelector('.am-extra-photo-stage');
+      const art=document.querySelector('.am-extra-art-with-photo');
+      const image=stage?.querySelector('img.am-extra-licensed-photo');
+      const meta=document.querySelector('.am-extra-photo-meta');
+      const zoom=stage?.querySelector('button.am-extra-zoom');
+      if(!stage||!art||!image||!meta||!zoom)return null;
+      const s=stage.getBoundingClientRect(),i=image.getBoundingClientRect(),
+        m=meta.getBoundingClientRect(),a=art.getBoundingClientRect(),
+        z=zoom.getBoundingClientRect();
+      return {
+        stageInsideArt:s.left>=a.left-2&&s.right<=a.right+2,
+        photoInsideStage:i.left>=s.left-2&&i.right<=s.right+2&&i.top>=s.top-2&&i.bottom<=s.bottom+2,
+        metaAfterStage:m.top>=s.bottom-2&&m.left>=a.left-2&&m.right<=a.right+2,
+        photoFit:getComputedStyle(image).objectFit,
+        studioBg:getComputedStyle(stage).backgroundImage,
+        captionText:meta.textContent.trim(),
+        zoomVisible:!zoom.hidden&&z.width>=44&&z.height>=44,
+        client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth
+      };
+    });
+    assert.ok(studio?.stageInsideArt&&studio.photoInsideStage&&studio.metaAfterStage,
+      'Real watch photograph must remain unoccluded in the studio: '+width+' '+JSON.stringify(studio));
+    assert.equal(studio.photoFit,'contain','Do not crop exact-model product photos');
+    assert.ok(studio.captionText.includes('SKMEI')&&studio.captionText.includes('1251'),
+      'Photo provenance and actual model must remain visible');
+    assert.ok(studio.zoomVisible,'Photo zoom needs a visible 44px touch target');
+    assert.ok(studio.scroll<=studio.client+2,'Studio layout must not overflow on '+width);
+    if(width===393||width===1366)
+      await page.locator('.am-extra-hero').screenshot({path:'artifacts/atelier-watch-studio-'+width+'.png'});
+
     if(width===393){
       const image=page.locator('.am-extra-licensed-photo');
       await image.waitFor({state:'visible'});
@@ -105,10 +144,32 @@ try{
 
   const noScript=await browser.newPage({javaScriptEnabled:false});
   await noScript.goto(new URL('/montres/skmei-1251.html',base).href);
+  assert.ok(await noScript.locator('.am-extra-photo-stage img').isVisible(),
+    'Real photo must display without JavaScript');
+  assert.ok(await noScript.locator('.am-extra-photo-meta').isVisible(),
+    'Photo caption must display without JavaScript');
+  assert.equal(await noScript.locator('.am-extra-zoom').isVisible(),false,
+    'Image zoom affordance is progressive enhancement');
+
   assert.equal(await noScript.locator('.am-extra-local-tools').isVisible(),false);
   assert.ok(await noScript.locator('.am-extra-actions a').count()>=1,
     'Manufacturer/merchant links remain available without JavaScript');
   await noScript.close();
+  // A model blocked by the manufacturer stays a typographic composition.
+  const noPhoto=await browser.newPage({viewport:{width:393,height:852},isMobile:true,hasTouch:true});
+  await noPhoto.goto(new URL('/montres/casio-f91w-1.html',base).href,
+    {waitUntil:'domcontentloaded'});
+  assert.equal(await noPhoto.locator('.am-extra-photo-stage').count(),0,
+    'Never substitute another watch photograph for an inaccessible source');
+  assert.equal(await noPhoto.locator('.am-extra-licensed-photo').count(),0);
+  assert.ok(await noPhoto.locator('.am-extra-art:not(.am-extra-art-with-photo) .am-extra-art-label').isVisible());
+  assert.ok(await noPhoto.locator('.am-extra-actions a').count()>=1);
+  const bounds=await noPhoto.evaluate(()=>({
+    scroll:document.documentElement.scrollWidth,client:document.documentElement.clientWidth
+  }));
+  assert.ok(bounds.scroll<=bounds.client+2,'Unphotographed watch must not overflow Android');
+  await noPhoto.close();
+
 
   // Browser clipboard/share may both be unavailable or blocked. Users must
   // still be able to manually copy the full, model-specific URL.

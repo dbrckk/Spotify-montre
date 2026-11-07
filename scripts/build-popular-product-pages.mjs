@@ -112,14 +112,16 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       +'<article class="am-extra-product" data-popular-watch-id="'+e(p.id)+'" data-brand="'+e(p.brand)+'" data-model="'+e(p.model)+'" data-official-url="'+e(p.officialUrl)+'">'
       +'<div class="am-extra-hero">'
       +'<div class="am-extra-art am-pick-'+e(p.style)+(photo?' am-extra-art-with-photo':'')+'" role="group" aria-label="'+(photo?'Photo du modèle exact, droits de publication déclarés':'Composition graphique non contractuelle, sans photographie de cette montre')+'">'
-      +(photo?'<img class="am-extra-licensed-photo" src="../'+e(photo.url)+'"'
+      +(photo?'<div class="am-extra-photo-stage"><img class="am-extra-licensed-photo" src="../'+e(photo.url)+'"'
         +responsivePopularAttrs(root,p,photo,{prefix:'../',sizes:'(max-width: 760px) 78vw, (max-width: 1200px) 40vw, 520px',escape:e})
-        +' width="'+photo.width+'" height="'+photo.height+'" alt="Montre '+e(name)+'" decoding="async" loading="eager">':'')
+        +' width="'+photo.width+'" height="'+photo.height+'" alt="Montre '+e(name)+'" decoding="async" loading="eager">'
+        +'<button type="button" class="am-extra-zoom" data-extra-zoom-id="'+e(p.id)+'" aria-label="Agrandir la photo du modèle '+e(name)+'" hidden>Agrandir la photo</button>'
+        +'</div><div class="am-extra-photo-meta">':'')
       +'<span class="am-extra-art-kicker">'+e(p.category)+'</span><span class="am-extra-art-brand">'+e(p.brand)+'</span>'
       +'<span class="am-extra-art-model">'+e(p.model)+'</span>'
       +(!photo&&p.brand==='SKMEI'?'<span class="am-budget-watch am-budget-watch-large" aria-hidden="true"><span class="am-budget-dial"></span></span>':'')
       +'<span class="am-extra-art-label">'+(photo?'Photo de marque · accord déclaré · '+e(photo.rightsHolder):'Une référence à découvrir · photographie exacte chez le vendeur ou la marque')+'</span>'
-      +(photo?'<button type="button" class="am-extra-zoom" data-extra-zoom-id="'+e(p.id)+'" aria-label="Agrandir la photo du modèle '+e(name)+'" hidden>Agrandir la photo du modèle</button>':'')
+      +(photo?'</div>':'')
       +'</div>'
       +'<div class="am-extra-intro"><p class="am-extra-overline">'+e(tierNames[p.tier])+' / '+e(category)+'</p>'
       +'<h1>'+e(name)+'</h1><p class="am-extra-subtitle">'+e(p.lead)+'</p>'
