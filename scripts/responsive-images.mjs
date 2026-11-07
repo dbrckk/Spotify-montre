@@ -24,3 +24,25 @@ export function responsiveAttrs(root,product,{prefix='../',sizes,escape}){
   const set=responsiveSrcset(root,product,prefix);
   return set?' srcset="'+escape(set)+'" sizes="'+escape(sizes)+'"':'';
 }
+
+/**
+ * The supplemental gallery has the same image needs as the 15 core watches.
+ * Source legitimacy and exact model identity are checked upstream by
+ * loadApprovedPopularPhotos; only use those approved records here.
+ * Full originals remain available for zoom and as a fallback.
+ */
+export function responsivePopularAttrs(root,product,approved,{prefix='../',sizes,escape}){
+  if(!sizes||typeof escape!=='function')throw Error('Popular image needs responsive sizes and escaper');
+  const id=product?.id;
+  if(typeof id!=='string'||!^[a-z0-9-]+$/.test(id)||
+     approved?.url!=='assets/watches-popular/'+id+'.webp'||
+     !Number.isInteger(approved.width)||approved.width<480)return '';
+  const file=join(root,approved.url);
+  if(!existsSync(file))return '';
+  const candidates=[240,480].filter(width=>width<approved.width&&
+    existsSync(join(root,'assets/popular-responsive',id+'-'+width+'.webp')));
+  if(!candidates.length)return '';
+  const srcset=[...candidates.map(width=>prefix+'assets/popular-responsive/'+id+'-'+width+'.webp '+width+'w'),
+    prefix+approved.url+' '+approved.width+'w'].join(', ');
+  return ' srcset="'+escape(srcset)+'" sizes="'+escape(sizes)+'"';
+}
