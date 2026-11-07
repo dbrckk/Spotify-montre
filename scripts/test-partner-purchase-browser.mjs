@@ -222,7 +222,8 @@ try{
     assert.equal(await image.evaluate(img=>img.naturalWidth>100),true,
       'Editorial category photo must decode: '+slug);
   }
-  assert.equal(await home.locator('.home-nav-buy').innerText(),'Voir les vendeurs');
+  assert.equal((await home.locator('.home-nav-buy').textContent()).trim(),'Voir les vendeurs',
+    'Navigation copy should be read from source rather than CSS text-transform');
   await home.locator('.am-editorial-path[href="./montres/montres-quartz.html"]').click();
   await home.waitForURL(url=>url.pathname.endsWith('/montres/montres-quartz.html'));
   assert.match(await home.locator('h1').innerText(),/quartz/i,
