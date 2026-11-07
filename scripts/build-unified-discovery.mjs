@@ -1,4 +1,4 @@
-import {readFileSync,writeFileSync} from 'node:fs';
+import {readFileSync,writeFileSync,existsSync} from 'node:fs';
 import {join} from 'node:path';
 import {loadApprovedPopularPhotos} from './popular-photo-rights.mjs';
 import {loadVerifiedPopularLinks} from './popular-verified-affiliate.mjs';
@@ -187,11 +187,22 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
     const exit=direct?'Consulter sur Amazon.fr · lien rémunéré':awin?'Voir chez le partenaire via Awin · lien rémunéré':'Voir chez la marque · lien non rémunéré';
     const detail=p.detailUrl.replace('./montres/','./');
     const visual='../'+p.photoUrl.slice(2);
+    const mobilePopular=new Set(['skmei-2056','skmei-2514','addiesdive-ad2030','pagani-pd1701']);
+    let popularAttrs='';
+    if(p.kind==='popular'&&mobilePopular.has(p.id)){
+      const widths=[240,480];
+      for(const width of widths){
+        if(!existsSync(join(root,'assets','popular-responsive',p.id+'-'+width+'.webp')))
+          throw Error('Missing verified popular mobile image: '+p.id+'-'+width);
+      }
+      popularAttrs=' srcset="'+widths.map(width=>'../assets/popular-responsive/'+p.id+'-'+width+'.webp '+width+'w').join(', ')+
+        ', '+visual+' 800w" sizes="(max-width: 365px) 88vw, (max-width: 660px) 33vw, (max-width: 1100px) 44vw, 29vw"';
+    }
     return '<article class="ud-feature-card" data-feature-id="'+e(p.id)+'">'
       +'<a class="ud-feature-photo" href="'+e(detail)+'" aria-label="Découvrir '+e(p.brand+' '+p.model)+'">'
       +'<img src="'+e(visual)+'"'
       +(p.kind==='core'?responsiveAttrs(root,coreById.get(p.id),{
-        prefix:'../',sizes:'(max-width: 365px) 88vw, (max-width: 660px) 33vw, (max-width: 1100px) 44vw, 29vw',escape:e}):'')
+        prefix:'../',sizes:'(max-width: 365px) 88vw, (max-width: 660px) 33vw, (max-width: 1100px) 44vw, 29vw',escape:e}):popularAttrs)
       +' width="540" height="540" loading="lazy" decoding="async" alt="Photographie du modèle '+e(p.brand+' '+p.model)+'"></a>'
       +'<div class="ud-feature-info"><span class="ud-feature-type">'+e(styleLabels[p.style])+' · '+e(tierLabels[p.tier])+'</span>'
       +'<h3><a href="'+e(detail)+'">'+e(p.brand+' '+p.model)+'</a></h3>'
