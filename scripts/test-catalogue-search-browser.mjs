@@ -21,6 +21,39 @@ try{
     await page.locator('#udFilters').waitFor({state:'visible'});
     assert.equal(await page.locator('.ud-card').count(),52);
 
+    // The public catalogue hero should help a buyer browse rather than read
+    // development plans. Its two real navigation paths must work on Android.
+    const shopperHero=page.locator('header.ud-heading');
+    assert.match(await shopperHero.locator('h1').innerText(),/52 montres.*vous ressemble/i);
+    const customerActions=shopperHero.locator('.ud-heading-actions a');
+    assert.equal(await customerActions.count(),2);
+    assert.equal(await customerActions.nth(0).getAttribute('href'),'#udCount');
+    assert.equal(await customerActions.nth(1).getAttribute('href'),'../conseiller.html');
+    assert.equal(await shopperHero.locator('.ud-heading-highlights li').count(),3);
+    const heroAudit=await shopperHero.evaluate(header=>{
+      const nodes=[header,...header.querySelectorAll('.ud-heading-actions a')];
+      const r=header.getBoundingClientRect();
+      return {
+        width:r.width,left:r.left,right:r.right,
+        ctas:nodes.slice(1).map(item=>{
+          const b=item.getBoundingClientRect();
+          return {width:b.width,height:b.height,left:b.left,right:b.right,
+            visible:getComputedStyle(item).visibility==='visible'};
+        }),
+        text:header.textContent
+      };
+    });
+    assert.ok(heroAudit.left>=-1&&heroAudit.right<=width+1,
+      'Premium catalogue hero overflows viewport: '+width);
+    for(const action of heroAudit.ctas)
+      assert.ok(action.width>0&&action.height>=44&&action.left>=-1&&action.right<=width+1&&action.visible,
+        'Main customer CTA not touch-accessible at '+width+'px');
+    assert.ok(!/vente directement sur notre site ne sera proposée|prix inventé|classement commercial fictif/i.test(heroAudit.text),
+      'Do not display engineering roadmap or developer-centric caveats as hero copy');
+    assert.match(heroAudit.text,/prix.*disponibilité.*livraison/i,
+      'Merchant price, stock and delivery caveat must remain visible to buyers');
+
+
     // The 15 models without publishable packshots must let a shopper open
     // the exact manufacturer/source photo from the catalogue itself.
     const noPhotoCards=await page.locator('.ud-card[data-visual="no-photo"]').count();
