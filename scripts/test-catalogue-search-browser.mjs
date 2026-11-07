@@ -21,6 +21,42 @@ try{
     await page.locator('#udFilters').waitFor({state:'visible'});
     assert.equal(await page.locator('.ud-card').count(),52);
 
+    // A narrow Android screen should open into the photo-first, single-column
+    // view; a deliberate switch to the grid must survive a page reload.
+    await page.locator('#udViewTools').waitFor({state:'visible'});
+    if(width<=420){
+      assert.equal(await page.locator('#udViewLarge').getAttribute('aria-pressed'),'true');
+      assert.ok(await page.locator('#udGrid').evaluate(el=>el.classList.contains('ud-view-large')),
+        'Narrow Android should initially show large, inspectable watch photos');
+      const photoDimensions=await page.locator('#udGrid .ud-card[data-visual="photo"] .ud-photo').first()
+        .evaluate(el=>{
+          const r=el.getBoundingClientRect();
+          return {height:r.height,width:r.width};
+        });
+      assert.ok(photoDimensions.height>=300&&photoDimensions.width>=290,
+        'Initial Android watch photograph too small: '+JSON.stringify(photoDimensions));
+      const firstLarge=page.locator('#udGrid .ud-card').first();
+      assert.equal(await firstLarge.locator('dl>div').count(),2);
+      assert.ok(await firstLarge.locator('dl>div').last().isVisible(),
+        'Large Android gallery must reveal both documented characteristics');
+      await page.locator('#udViewCompact').click();
+      assert.equal(await page.locator('#udViewCompact').getAttribute('aria-pressed'),'true');
+      assert.ok(!await page.locator('#udGrid').evaluate(el=>el.classList.contains('ud-view-large')));
+      await page.reload({waitUntil:'domcontentloaded'});
+      await page.locator('#udViewTools').waitFor({state:'visible'});
+      assert.equal(await page.locator('#udViewCompact').getAttribute('aria-pressed'),'true',
+        'Manual mobile grid preference must survive reload');
+      await page.locator('#udViewLarge').click();
+      await page.reload({waitUntil:'domcontentloaded'});
+      await page.locator('#udViewTools').waitFor({state:'visible'});
+      assert.equal(await page.locator('#udViewLarge').getAttribute('aria-pressed'),'true',
+        'Manual large-image preference must survive reload');
+    }else{
+      assert.equal(await page.locator('#udViewCompact').getAttribute('aria-pressed'),'true',
+        'Desktop must keep its original compact catalogue grid');
+    }
+
+
     // The public catalogue hero should help a buyer browse rather than read
     // development plans. Its two real navigation paths must work on Android.
     const shopperHero=page.locator('header.ud-heading');
