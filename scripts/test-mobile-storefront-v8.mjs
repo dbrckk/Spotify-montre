@@ -842,6 +842,12 @@ await page.locator('#affGrid .aff-card input[type="checkbox"]').nth(0).check();
  for(const watch of watchSource){
    const response=await editorialPage.goto(new URL('/montre.html?id='+encodeURIComponent(watch.id),base).href,{waitUntil:'domcontentloaded'});
    assert.ok(response?.ok(),'Dynamic watch route reachable: '+watch.id);
+   await editorialPage.locator('#detailShell').waitFor({state:'visible'});
+   const exactGateway='./acheter.html?modele='+encodeURIComponent(watch.id)+'#amPartnerSelection';
+   for(const selector of ['#detailNavFindVendors','#detailPartnerGateway']){
+     assert.equal(await editorialPage.locator(selector).getAttribute('href'),exactGateway,
+       'The purchase gateway must keep the original watch reference: '+watch.id);
+   }
    await editorialPage.locator('#detailEditorialAdvice').waitFor({state:'visible',timeout:12000});
    const insight=editorialSource.products[watch.id];
    assert.ok(insight,'Must have a reviewed exact-model editorial brief: '+watch.id);
