@@ -30,6 +30,13 @@ mkdirSync('artifacts',{recursive:true});
 try{
   const response=await page.goto(new URL('/index.html',base).href,{waitUntil:'domcontentloaded',timeout:30000});
   assert.ok(response?.ok(),'Home page must respond HTTP 2xx');
+  assert.ok(await page.locator('a[href="./montres/toutes-les-montres.html"]').count()>0,
+    'Public homepage must provide a direct link to all 52 models');
+  // The premium landing page intentionally has no legacy 15-card grid.
+  // Validate the original 15 actual photos on the dedicated comparison page.
+  const collectionResponse=await page.goto(new URL('/affiliation.html',base).href,
+    {waitUntil:'domcontentloaded',timeout:30000});
+  assert.ok(collectionResponse?.ok(),'15-watch comparison page must respond HTTP 2xx');
   const cards=page.locator('#affGrid .aff-card');
   await cards.first().waitFor({state:'visible',timeout:30000});
   assert.equal(await cards.count(),15,'All 15 real watches should be rendered as cards');
