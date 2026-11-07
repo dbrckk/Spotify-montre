@@ -192,6 +192,42 @@ try{
     assert.ok(await photo.evaluate(img=>img.naturalWidth>100),
       'Every featured public watch must have a real, decodable local photograph');
   }
+  // A model shown in the first viewport must use a lightweight local
+  // responsive WebP. The full-size original is reserved for larger displays.
+  await home.setViewportSize({width:390,height:840});
+  await home.reload({waitUntil:'domcontentloaded'});
+  const responsiveHero=home.locator('.home-hero-visual img');
+  await responsiveHero.evaluate(async img=>{
+    if(!img.complete)await new Promise(resolve=>{
+      img.addEventListener('load',resolve,{once:true});
+      img.addEventListener('error',resolve,{once:true});
+    });
+  });
+  assert.match(await responsiveHero.evaluate(img=>img.currentSrc),
+    /assets\\/watch-responsive\\/citizen-tsuyosa-(480|800)\\.webp/,
+    'Mobile hero must use an existing lightweight responsive photograph');
+  assert.equal(await home.locator('.am-editorial-path').count(),3,
+    'Three visible image-led style and movement collections are required');
+  for(const slug of ['montres-quartz','montres-automatiques','montres-petit-boitier']){
+    const entry=home.locator('.am-editorial-path[href="./montres/'+slug+'.html"]');
+    assert.equal(await entry.count(),1,'Homepage must offer source-backed path '+slug);
+    const image=entry.locator('img');
+    await image.scrollIntoViewIfNeeded();
+    await image.evaluate(async img=>{
+      if(!img.complete)await new Promise(resolve=>{
+        img.addEventListener('load',resolve,{once:true});
+        img.addEventListener('error',resolve,{once:true});
+      });
+    });
+    assert.equal(await image.evaluate(img=>img.naturalWidth>100),true,
+      'Editorial category photo must decode: '+slug);
+  }
+  assert.equal(await home.locator('.home-nav-buy').innerText(),'Voir les vendeurs');
+  await home.locator('.am-editorial-path[href="./montres/montres-quartz.html"]').click();
+  await home.waitForURL(url=>url.pathname.endsWith('/montres/montres-quartz.html'));
+  assert.match(await home.locator('h1').innerText(),/quartz/i,
+    'The editorial category must open a real search-indexable watch guide');
+  await home.goto(new URL('index.html',base).href,{waitUntil:'domcontentloaded'});
   assert.equal(await home.locator('.home-choice[href="./affiliation.html#selection-accessible"]').count(),1,
     'Budget shoppers must land on the photographed affordable collection');
   assert.equal(await home.getByRole('button',{name:/Une question \?/}).count(),1,
