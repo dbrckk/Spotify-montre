@@ -191,11 +191,11 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
     let popularAttrs='';
     if(p.kind==='supplemental'&&Object.hasOwn(mobilePopularWidths,p.id)){
       const widths=[240,480];
-      for(const width of widths){
-        if(!existsSync(join(root,'assets','popular-responsive',p.id+'-'+width+'.webp')))
-          throw Error('Missing verified popular mobile image: '+p.id+'-'+width);
-      }
-      popularAttrs=' srcset="'+widths.map(width=>'../assets/popular-responsive/'+p.id+'-'+width+'.webp '+width+'w').join(', ')+
+      // Rights-negative test fixtures intentionally remove popular photos and
+      // derivatives. Never publish broken srcset URLs in those builds.
+      const ready=widths.every(width=>
+        existsSync(join(root,'assets','popular-responsive',p.id+'-'+width+'.webp')));
+      if(ready)popularAttrs=' srcset="'+widths.map(width=>'../assets/popular-responsive/'+p.id+'-'+width+'.webp '+width+'w').join(', ')+
         ', '+visual+' '+mobilePopularWidths[p.id]+'w" sizes="(max-width: 365px) 88vw, (max-width: 660px) 33vw, (max-width: 1100px) 44vw, 29vw"';
     }
     return '<article class="ud-feature-card" data-feature-id="'+e(p.id)+'">'
