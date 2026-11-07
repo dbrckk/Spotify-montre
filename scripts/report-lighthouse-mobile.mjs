@@ -35,6 +35,29 @@ for(const site of sites){
    requestCount:median(runs.map(r=>r.requestCount)),
    transferredByType:Object.fromEntries(['Stylesheet','Script','Image','Document','Font'].map(type=>[type,round(median(runs.map(r=>r.transferredByType[type])),0)])),runs});
 }
+// Guard against substantial regressions without pretending lab results are
+// real-user Core Web Vitals. Home uses three-run medians; product is a smoke
+// sample and remains informational until repeated measurements are available.
+const budgets={
+  'Accueil':{scoreMin:85,lcpMax:3000,tbtMax:300,clsMax:0.15,imageBytesMax:300000}
+};
+const violations=[];
+for(const r of reports){
+  const budget=budgets[r.name];
+  if(!budget)continue;
+  const checks=[
+    ['score',r.score,budget.scoreMin,'min'],
+    ['LCP',r.measurements.LCP,budget.lcpMax,'max'],
+    ['TBT',r.measurements.TBT,budget.tbtMax,'max'],
+    ['CLS',r.measurements.CLS,budget.clsMax,'max'],
+    ['image bytes',r.imagesTransferred,budget.imageBytesMax,'max']
+  ];
+  for(const [name,value,limit,direction] of checks){
+    if(!Number.isFinite(value)){violations.push(r.name+': '+name+' measurement missing');continue;}
+    if(direction==='min'?value<limit:value>limit)
+      violations.push(r.name+': '+name+' '+value+' violates '+direction+' '+limit);
+  }
+}
 mkdirSync('artifacts',{recursive:true});
 writeFileSync('artifacts/lighthouse-mobile-summary.json',JSON.stringify({createdAt:new Date().toISOString(),method:'Median for repeated mobile home runs; simulated Lighthouse laboratory, not field Core Web Vitals',reports},null,2)+'\n');
 const lines=['### Lighthouse mobile — production (médianes)','',
@@ -47,7 +70,10 @@ for(const r of reports){
  lines.push('Miniatures WebP téléchargées : '+r.thumbCount+' ; octets d’images redimensionnables encore estimés : '+r.responsiveImageWaste+'.','');
  lines.push('Scores par passage : '+r.runs.map(run=>round(run.score,0)).join(', ')+'.','');
 }
+lines.push('Garde-fous accueil (médiane) : score ≥85, LCP ≤3000 ms, TBT ≤300 ms, CLS ≤0,15, images ≤300 Ko. La fiche produit reste indicative (un seul passage).','');
+lines.push(violations.length?'Régressions détectées : '+violations.join(' ; '):'Aucune régression majeure détectée par les seuils Lighthouse.','');
 lines.push('La médiane réduit la variabilité sans constituer une mesure terrain. L’INP réel et les métriques Core Web Vitals proviennent de CrUX/Search Console, pas du TBT Lighthouse.','');
 const summary=lines.join('\n');
 if(process.env.GITHUB_STEP_SUMMARY)appendFileSync(process.env.GITHUB_STEP_SUMMARY,summary);
 console.log(summary);
+if(violations.length){console.error('Lighthouse performance regression: '+violations.join(' | '));process.exitCode=1;}
