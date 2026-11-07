@@ -6,7 +6,7 @@ const sites=[
  {name:'Fiche SKMEI avec photo',files:['artifacts/lighthouse-mobile-studio-photo.json'],
   expectedPath:'/montres/skmei-1251.html',photoId:'skmei-1251'},
  {name:'Fiche Casio sans photo',files:['artifacts/lighthouse-mobile-no-photo.json'],
-  expectedPath:'/montres/casio-f91w-1.html',forbidWatchImage:true}
+  expectedPath:'/montres/casio-f91w-1.html',forbidPhotoId:'casio-f91w-1'}
 ];
 const keys={'first-contentful-paint':'FCP','largest-contentful-paint':'LCP','speed-index':'Speed Index','total-blocking-time':'TBT','cumulative-layout-shift':'CLS'};
 const median=(numbers)=>{const sorted=numbers.filter(Number.isFinite).sort((a,b)=>a-b);return sorted.length?sorted[Math.floor(sorted.length/2)]:null;};
@@ -36,9 +36,14 @@ for(const site of sites){
     throw Error(site.name+': Lighthouse measured the wrong route: '+finalUrl.pathname);
    if(site.photoId&&!loadedPhotoPaths.length)
     throw Error(site.name+': no verified model-exact image variant was fetched');
-   if(site.forbidWatchImage&&imageAssetPaths.some(x=>x.startsWith('/assets/watches-popular/')||
-      x.startsWith('/assets/popular-responsive/')))
-    throw Error(site.name+': unsupported exact-model photograph was fetched');
+   // A page without its own packshot may still display legitimate,
+   // model-exact images on related recommendation cards. Reject only images
+   // falsely claimed to depict this unphotographed product.
+   if(site.forbidPhotoId&&imageAssetPaths.some(x=>
+     x==='/assets/watches-popular/'+site.forbidPhotoId+'.webp'||
+     x==='/assets/popular-responsive/'+site.forbidPhotoId+'-240.webp'||
+     x==='/assets/popular-responsive/'+site.forbidPhotoId+'-480.webp'))
+    throw Error(site.name+': unsupported photo for the unphotographed model was fetched');
   }
   const thumbRequests=requests.filter(x=>x.url?.includes('/assets/watch-thumbs/'));
   const responsiveRequests=requests.filter(x=>x.url?.includes('/assets/watch-responsive/')||x.url?.includes('/assets/popular-responsive/'));

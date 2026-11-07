@@ -70,11 +70,19 @@ try{
   write(cases[5][0],missing);
   assert.notEqual(run().status,0,'Missing real photo must fail');
   write(...cases[5]);
+  // True photos on related-product cards are allowed on a no-photo page,
+  // but fabricating an image of the unphotographed main model is prohibited.
+  let related=structuredClone(cases[6][1]);
+  related.audits['network-requests'].details.items.push({
+    url:host+'/assets/popular-responsive/skmei-1251-240.webp',resourceType:'Image',transferSize:2000});
+  write(cases[6][0],related);
+  assert.equal(run().status,0,'Approved related-model image should be allowed');
+  write(...cases[6]);
   let wrong=structuredClone(cases[6][1]);
   wrong.audits['network-requests'].details.items.push({
-    url:host+'/assets/popular-responsive/skmei-1251-240.webp',resourceType:'Image',transferSize:2000});
+    url:host+'/assets/popular-responsive/casio-f91w-1-240.webp',resourceType:'Image',transferSize:2000});
   write(cases[6][0],wrong);
-  assert.notEqual(run().status,0,'Invented photo on no-photo page must fail');
+  assert.notEqual(run().status,0,'Invented F-91W photo on no-photo page must fail');
   write(...cases[6]);
   let shift=structuredClone(cases[5][1]);
   shift.audits['cumulative-layout-shift'].numericValue=0.45;
