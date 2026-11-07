@@ -17,6 +17,10 @@ on:
       - 'site/direct-offer-links.js'
       - 'site/direct-offer-links.css'
       - 'site/catalogue-view.css'
+      - 'site/unified-discovery.css'
+      - 'site/unified-discovery.js'
+      - 'scripts/build-unified-discovery.mjs'
+      - 'site/discovery-catalogue.json'
       - 'site/premium-system.css'
       - 'site/seo-guides.css'
       - 'site/assets/watch-thumbs/**'
@@ -48,7 +52,7 @@ jobs:
           base='https://atelier-montres-selection-fr.onrender.com'
           for attempt in $(seq 1 30); do
             ready=1
-            for file in public-home.css premium-showroom.css base.css features.css direct-offer-links.js direct-offer-links.css seo-guides.css catalogue-view.css premium-system.css editorial-photo.js; do
+            for file in public-home.css premium-showroom.css base.css features.css direct-offer-links.js direct-offer-links.css seo-guides.css catalogue-view.css premium-system.css editorial-photo.js unified-discovery.css unified-discovery.js; do
               if ! curl -fsSL --max-time 15 "$base/$file" -o "$RUNNER_TEMP/lh-$file"; then
                 ready=0
               elif ! cmp -s "site/$file" "$RUNNER_TEMP/lh-$file"; then
@@ -78,7 +82,7 @@ jobs:
           done
           echo "Render has not published the matching homepage and assets for this Lighthouse run."
           exit 1
-      - name: Three independent mobile runs on homepage, one product page
+      - name: Three mobile runs on homepage, one catalogue and one product page
         run: |
           mkdir -p artifacts
           CHROME="$(command -v google-chrome || command -v chromium || true)"
@@ -86,6 +90,7 @@ jobs:
           for n in 1 2 3; do
             npx --yes lighthouse@12 "https://atelier-montres-selection-fr.onrender.com/" --chrome-path="$CHROME" --chrome-flags="--headless --no-sandbox" --only-categories=performance --form-factor=mobile --max-wait-for-load=45000 --output=json --output-path="artifacts/lighthouse-mobile-home-$n.json" --quiet
           done
+          npx --yes lighthouse@12 "https://atelier-montres-selection-fr.onrender.com/montres/toutes-les-montres.html" --chrome-path="$CHROME" --chrome-flags="--headless --no-sandbox" --only-categories=performance --form-factor=mobile --max-wait-for-load=45000 --output=json --output-path=artifacts/lighthouse-mobile-catalogue.json --quiet
           npx --yes lighthouse@12 "https://atelier-montres-selection-fr.onrender.com/montres/casio-mtp-1302.html" --chrome-path="$CHROME" --chrome-flags="--headless --no-sandbox" --only-categories=performance --form-factor=mobile --max-wait-for-load=45000 --output=json --output-path=artifacts/lighthouse-mobile-product.json --quiet
       - name: Build median-based, inspectable report
         run: node scripts/report-lighthouse-mobile.mjs
