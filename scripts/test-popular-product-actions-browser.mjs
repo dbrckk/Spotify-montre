@@ -7,6 +7,7 @@ const base=new URL(process.env.WATCH_STOREFRONT_URL||'http://127.0.0.1:8765');
 if(base.protocol!=='http:'||!['localhost','127.0.0.1'].includes(base.hostname))
   throw Error('Supplemental product browser tests must run on localhost');
 const picks=JSON.parse(readFileSync('site/selection-populaires.json','utf8')).products;
+const rights=JSON.parse(readFileSync('site/popular-photo-rights.json','utf8')).photos;
 assert.equal(picks.length,37);
 for(const p of picks){
   const html=readFileSync('site/montres/'+p.id+'.html','utf8');
@@ -14,6 +15,21 @@ for(const p of picks){
   assert.ok(html.includes('data-extra-favorite="'+p.id+'"'));
   assert.ok(html.includes('data-extra-share="'+p.id+'"'));
   assert.ok(html.includes('href="./toutes-les-montres.html?saved=1"'));
+  const proof=rights[p.id];
+  if(proof){
+    const hero=html.match(/<img class="am-extra-licensed-photo"[^>]+>/)?.[0]||'';
+    assert.ok(hero,'Published exact-model photograph missing: '+p.id);
+    assert.ok(hero.includes('width="'+proof.width+'"')&&
+      hero.includes('height="'+proof.height+'"'),'Original aspect dimensions missing: '+p.id);
+    for(const size of [240,480])
+      assert.ok(hero.includes('popular-responsive/'+p.id+'-'+size+'.webp '+size+'w'),
+        'Detailed watch hero must expose the real '+size+'px WebP: '+p.id);
+    assert.ok(hero.includes('watches-popular/'+p.id+'.webp '+proof.width+'w'),
+      'Full-size original must remain eligible on detail '+p.id);
+  }else{
+    assert.ok(!html.includes('class="am-extra-licensed-photo"'),
+      'Do not publish unapproved watch photography: '+p.id);
+  }
 }
 const browser=await chromium.launch({headless:true});
 try{
@@ -30,6 +46,21 @@ try{
     page.on('pageerror',error=>errors.push(error.message));
     await page.goto(new URL('/montres/skmei-1251.html',base).href,
       {waitUntil:'domcontentloaded'});
+    if(width===393){
+      const image=page.locator('.am-extra-licensed-photo');
+      await image.waitFor({state:'visible'});
+      await image.evaluate(node=>node.decode());
+      const actual=await image.evaluate(node=>({
+        path:new URL(node.currentSrc).pathname,
+        width:node.naturalWidth,height:node.naturalHeight
+      }));
+      assert.equal(actual.path,'/assets/popular-responsive/skmei-1251-480.webp',
+        'Android product sheet must actually download the lightweight exact-model WebP');
+      // With a width-descriptor srcset, naturalWidth can be density-adjusted:
+      // assert successful decode and the exact requested derivative instead.
+      assert.ok(actual.width>0&&actual.height>0,
+        'Mobile product photo failed to decode: '+JSON.stringify(actual));
+    }
     const actions=page.locator('.am-extra-local-tools');
     await actions.waitFor({state:'visible'});
     const favorite=actions.locator('[data-extra-favorite]');

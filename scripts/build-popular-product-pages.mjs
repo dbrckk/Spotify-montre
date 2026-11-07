@@ -1,5 +1,6 @@
 import {writeFileSync} from 'node:fs';
 import {join} from 'node:path';
+import {responsivePopularAttrs} from './responsive-images.mjs';
 
 // Conversion-friendly product landing pages without unlicensed watch images,
 // invented Amazon ASINs, or unverifiable prices. The existing 15 core models
@@ -90,7 +91,9 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
         :movementFamily(q.movement)===movementFamily(p.movement)?'Mouvement comparable':'Autre approche';
       return '<li data-related-id="'+e(q.id)+'" data-related-reason="'+e(reason)+'">'
         +'<a class="am-extra-related-thumb" href="./'+e(q.id)+'.html">'
-        +(otherPhoto?'<img loading="lazy" decoding="async" width="320" height="220" src="../'+e(otherPhoto.url)+'" alt="Photographie de '+e(q.brand+' '+q.model)+'">'
+        +(otherPhoto?'<img loading="lazy" decoding="async" width="'+otherPhoto.width+'" height="'+otherPhoto.height+'" src="../'+e(otherPhoto.url)+'"'
+          +responsivePopularAttrs(root,q,otherPhoto,{prefix:'../',sizes:'(max-width: 650px) 42vw, (max-width: 950px) 26vw, 190px',escape:e})
+          +' alt="Photographie de '+e(q.brand+' '+q.model)+'">'
           :'<span class="am-extra-related-fallback"><span>'+e(q.brand)+'</span><strong>'+e(q.model)+'</strong><small>Photo chez le vendeur</small></span>')
         +'</a><span class="am-extra-related-label">'+e(reason)+'</span>'
         +'<a class="am-extra-related-name" href="./'+e(q.id)+'.html">'+e(q.brand+' '+q.model)+'</a>'
@@ -109,7 +112,9 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       +'<article class="am-extra-product" data-popular-watch-id="'+e(p.id)+'" data-brand="'+e(p.brand)+'" data-model="'+e(p.model)+'" data-official-url="'+e(p.officialUrl)+'">'
       +'<div class="am-extra-hero">'
       +'<div class="am-extra-art am-pick-'+e(p.style)+(photo?' am-extra-art-with-photo':'')+'" role="group" aria-label="'+(photo?'Photo du modèle exact, droits de publication déclarés':'Composition graphique non contractuelle, sans photographie de cette montre')+'">'
-      +(photo?'<img class="am-extra-licensed-photo" src="../'+e(photo.url)+'" alt="Montre '+e(name)+'" decoding="async" loading="eager">':'')
+      +(photo?'<img class="am-extra-licensed-photo" src="../'+e(photo.url)+'"'
+        +responsivePopularAttrs(root,p,photo,{prefix:'../',sizes:'(max-width: 760px) 78vw, (max-width: 1200px) 40vw, 520px',escape:e})
+        +' width="'+photo.width+'" height="'+photo.height+'" alt="Montre '+e(name)+'" decoding="async" loading="eager">':'')
       +'<span class="am-extra-art-kicker">'+e(p.category)+'</span><span class="am-extra-art-brand">'+e(p.brand)+'</span>'
       +'<span class="am-extra-art-model">'+e(p.model)+'</span>'
       +(!photo&&p.brand==='SKMEI'?'<span class="am-budget-watch am-budget-watch-large" aria-hidden="true"><span class="am-budget-dial"></span></span>':'')
