@@ -1,5 +1,9 @@
 name: Verify production Render watch storefront on Android
 on:
+  workflow_run:
+    workflows: ["Build verified responsive watch WebP assets"]
+    types: [completed]
+    branches: [main]
   push:
     branches: [main]
     paths:
@@ -49,7 +53,7 @@ permissions:
 jobs:
   published-android:
     # Production Render is still on main during PR review; check the live deployment only after merge or on manual dispatch.
-    if: github.event_name != 'pull_request'
+    if: github.event_name != 'pull_request' && (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
@@ -143,6 +147,13 @@ jobs:
               elif [ "$(grep -oF 'class="ud-feature-card"' "$RUNNER_TEMP/live-unified.html" | wc -l)" -ne 6 ]; then
                 ready=0
                 reason="$reason [missing or incomplete: six-photo editorial showroom]"
+              else
+                expected_photos="$(node -p "15+Object.keys(JSON.parse(require('node:fs').readFileSync('site/popular-photo-rights.json','utf8')).photos).length")"
+                deployed_photos="$(grep -oF 'data-visual="photo"' "$RUNNER_TEMP/live-unified.html" | wc -l)"
+                if [ "$deployed_photos" -ne "$expected_photos" ]; then
+                  ready=0
+                  reason="$reason [outdated photo coverage: live=$deployed_photos source=$expected_photos]"
+                fi
               fi
             fi
             # New release: do not run browser checks against an old CDN page
