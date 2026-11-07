@@ -108,7 +108,7 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
   const photoMarkup=p=>p.photoUrl
     ?'<img src="../'+e(p.photoUrl.slice(2))+'"'
       +(p.kind==='core'?responsiveAttrs(root,coreById.get(p.id),{
-        prefix:'../',sizes:'(max-width: 580px) 85vw, (max-width: 850px) 48vw, (max-width: 1220px) 31vw, 24vw',escape:e}):'')
+        prefix:'../',sizes:'(max-width: 365px) 90vw, (max-width: 650px) 46vw, (max-width: 850px) 46vw, (max-width: 1220px) 30vw, 23vw',escape:e}):'')
       +' alt="Photographie du modèle '+e(p.brand+' '+p.model)+'" width="540" height="540" loading="lazy" decoding="async">'
     :'<span class="ud-art-fallback"><span class="ud-art-fallback-kicker">Fiche produit documentée</span><span class="ud-art-fallback-brand">'+e(p.brand)+'</span><strong>'+e(p.model)+'</strong><small>Aucune photographie publiée pour cette référence</small></span>';
   const card=p=>{
