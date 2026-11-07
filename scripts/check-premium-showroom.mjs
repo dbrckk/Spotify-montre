@@ -29,6 +29,8 @@ for(const id of cards){
 }
 assert.equal((home.match(/class="am-budget-card"/g)||[]).length,3,
   'Three visually distinct budget categories required');
+assert.equal((home.match(/class="am-budget-action">Explorer toute la gamme/g)||[]).length,3,
+  'All budget categories must clearly advertise access to their full collection');
 for(const [id,tier,range] of [
   ['collection-accessible','essential','20–120 €'],
   ['collection-intermediaire','signature','150–450 €'],
