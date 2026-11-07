@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {spawnSync} from 'node:child_process';
-import {inspectMerchantPublication,merchantPublicationPermitted} from './merchant-publication.mjs';
+import {inspectMerchantPublication,merchantPublicationPermitted,hasValidMerchantSiren} from './merchant-publication.mjs';
 import {merchantConfigurationChecks} from './readiness.mjs';
 
 const current=inspectMerchantPublication();
@@ -18,7 +18,7 @@ const fixtures={
   'informations-legales.html':
     '<!doctype html><html lang="fr"><head><title>Informations légales</title></head>'+
     '<body><h1>Éditeur</h1><p>Données fictives exclusivement dans le test CI :'+
-    ' SIREN 123 456 789, contact@merchant.test, adresse artificielle du marchand.'+
+    ' SIREN 732 829 320, contact@merchant.test, adresse artificielle du marchand.'+
     ' La conformité réelle exige la vérification des coordonnées.</p></body></html>'+
     ' '.repeat(350),
   'confidentialite.html':
@@ -46,6 +46,20 @@ const fixtureRead=url=>{
   if(!Object.hasOwn(fixtures,name))throw Error('unknown file');
   return fixtures[name];
 };
+// Check digit validation prevents a syntactically plausible but fabricated
+// registration number from satisfying the live checkout publication gate.
+assert.equal(hasValidMerchantSiren('SIREN 732 829 320'),true);
+assert.equal(hasValidMerchantSiren('SIRET 732 829 320 00074'),true);
+for(const invalid of ['SIREN 123 456 789','SIREN 000 000 000',
+  'SIREN 732 829 321','SIREN not-provided']){
+  assert.equal(hasValidMerchantSiren(invalid),false);
+}
+const invalidRegistration=fixtures['informations-legales.html'].replace(
+  'SIREN 732 829 320','SIREN 123 456 789');
+const invalidReader=url=>new URL(url).pathname.endsWith('informations-legales.html')
+  ?invalidRegistration:fixtureRead(url);
+assert.ok(inspectMerchantPublication({read:invalidReader}).blockers.includes(
+  'informations-legales.html:siren_checksum_invalid'));
 const inspected=inspectMerchantPublication({read:fixtureRead});
 assert.equal(inspected.ready,true,'Complete isolated test documents pass structural checks');
 assert.match(inspected.bundleSha256,/^[0-9a-f]{64}$/);

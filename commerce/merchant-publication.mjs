@@ -38,6 +38,23 @@ const bannedClaims={
   'confidentialite.html':/il n'encaisse aucun paiement|ne prend aucune commande/i,
   'conditions-generales-vente.html':/en préparation|incomplètes|à compléter|exemple fictif|non disponibles|placeholders?/i
 };
+// An arbitrary nine-digit string is not sufficient evidence of a French
+// registered merchant. Validate the public SIREN check digit before allowing
+// legal-document publication. This does not verify active registration.
+const sirenPattern=/\bSIRE(?:N|T)\b\s*[:#-]?\s*((?:\d[\s.]?){9})(?:\s*\d{5})?\b/gi;
+export function hasValidMerchantSiren(document){
+  if(typeof document!=='string')return false;
+  for(const match of document.matchAll(sirenPattern)){
+    const digits=match[1].replace(/[^0-9]/g,'');
+    if(digits.length!==9||/^0{9}$/.test(digits))continue;
+    const sum=[...digits].reduce((total,digit,index)=>{
+      const value=Number(digit)*(index%2===1?2:1);
+      return total+(value>9?value-9:value);
+    },0);
+    if(sum%10===0)return true;
+  }
+  return false;
+}
 const issue=(file,name)=>file+':'+name;
 export function inspectMerchantPublication({read=readFileSync}={}){
   const body=new Map(),blockers=[];
@@ -59,6 +76,9 @@ export function inspectMerchantPublication({read=readFileSync}={}){
       if(!pattern.test(content))blockers.push(issue(file,name+'_missing'));
     }
   }
+  if(body.has('informations-legales.html')&&
+     !hasValidMerchantSiren(body.get('informations-legales.html')))
+    blockers.push(issue('informations-legales.html','siren_checksum_invalid'));
   if(blockers.length)return {ready:false,blockers,bundleSha256:null};
   const h=createHash('sha256').update('atelier-montres-merchant-publication-v1\0');
   for(const file of files){
