@@ -409,3 +409,71 @@
   .ud-page .ud-card:hover{transform:none;box-shadow:0 12px 32px rgba(23,37,26,.06)}
   .ud-page .ud-card:hover .ud-photo img{transform:none}
 }
+
+/* Customer-first catalogue cards: lead with the actual model, not a wall of
+   merchant provenance. Seller evidence stays visible directly before exits.
+   Works on all prerendered cards without JavaScript or remote fonts. */
+.ud-page .ud-card-main>.ud-kicker{
+  display:flex;align-items:center;gap:8px;margin:0;
+  color:#805c38;letter-spacing:.09em;font-size:11px;font-weight:750
+}
+.ud-page .ud-card-main>h2{margin:0;color:#1e3928;text-wrap:balance}
+.ud-page .ud-card-main>h2 a{display:inline;text-decoration:none}
+.ud-page .ud-card-main>h2 a:hover{text-decoration:underline;text-decoration-thickness:1px}
+.ud-page .ud-card-main>.ud-description{flex:1 1 auto;margin:0;color:#4d6155;line-height:1.65}
+.ud-page .ud-card-main>dl{display:grid;gap:8px;grid-template-columns:repeat(2,minmax(0,1fr))}
+.ud-page .ud-card-main>dl>div{
+  padding:10px 11px;border:1px solid #e0ded3;border-radius:5px;
+  background:#f7f5ee;min-width:0
+}
+.ud-page .ud-card-main>dl dt{
+  color:#667468;font-size:10px;line-height:1.5;font-weight:700;
+  letter-spacing:.035em;text-transform:uppercase
+}
+.ud-page .ud-card-main>dl dd{margin:3px 0 0;color:#274532;font-size:12px;line-height:1.5}
+.ud-page .ud-offer-context{
+  display:grid;gap:8px;align-content:start;margin-top:3px;
+  padding:13px 12px 12px;border:1px solid #ded5c5;border-radius:6px;
+  background:#f5f1e8
+}
+.ud-page .ud-offer-context .ud-merchant-kind{
+  margin:0;align-self:start;max-width:100%;overflow-wrap:anywhere;
+  font-size:10px;line-height:1.45
+}
+.ud-page .ud-offer-context .ud-commercial-proof{
+  margin:0;padding:0;border:0;background:transparent;
+  color:#3d5745;font-size:11px;line-height:1.6;font-weight:600
+}
+.ud-page .ud-card[data-commerce-status="external_source_only"] .ud-offer-context .ud-commercial-proof{
+  background:transparent;color:#68543a
+}
+.ud-page .ud-offer-context .ud-exact-variant,
+.ud-page .ud-offer-context .ud-redirect-proof{
+  padding:9px 10px;border-radius:3px;background:#fffcf7
+}
+.ud-page .ud-card-main>.ud-actions{gap:8px;margin-top:0}
+.ud-page .ud-card-main>.ud-actions a{transition:background-color .16s ease,border-color .16s ease}
+.ud-page .ud-card-main>.ud-actions .ud-details{border:1px solid #254a34}
+.ud-page .ud-card-main>.ud-actions .ud-merchant{background:#eee7dc;border-color:#bfa787}
+.ud-page .ud-card-main>.ud-actions .ud-merchant:hover{background:#e8dcc8}
+.ud-page .ud-card-main>.ud-actions .ud-source{background:#fffdf8;border-color:#a9b9ac}
+.ud-page .ud-card-main>.ud-actions .ud-source:hover{background:#e7efe6}
+@media(max-width:650px){
+  .ud-page .ud-card-main>.ud-kicker{font-size:10px;letter-spacing:.04em}
+  .ud-page .ud-card-main>dl{grid-template-columns:1fr;gap:5px}
+  .ud-page .ud-card-main>dl>div{padding:8px 9px}
+  .ud-page .ud-card-main>dl>div:last-child{display:none}
+  .ud-page .ud-offer-context{gap:7px;padding:10px 9px}
+  .ud-page .ud-offer-context .ud-merchant-kind{font-size:10px}
+  .ud-page .ud-offer-context .ud-commercial-proof{font-size:10px;line-height:1.5}
+  .ud-page .ud-card-main>.ud-actions a{min-height:46px;font-size:11px;line-height:1.4}
+}
+@media(max-width:365px){
+  .ud-page .ud-card-main>dl{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ud-page .ud-card-main>dl>div:last-child{display:block}
+  .ud-page .ud-offer-context{padding:13px}
+  .ud-page .ud-offer-context .ud-commercial-proof{font-size:11px}
+}
+@media(prefers-reduced-motion:reduce){
+  .ud-page .ud-card-main>.ud-actions a{transition:none}
+}
