@@ -232,9 +232,12 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
     +'</nav>';
   const path='montres/toutes-les-montres.html';
   const main='<div class="wrap ud-page"><nav class="crumb" aria-label="Fil d’Ariane"><a href="../index.html">Accueil</a> / Les 52 montres</nav>'
-    +'<header class="ud-heading"><span class="eyebrow">Un seul catalogue · 52 références réelles</span>'
-    +'<h1>52 montres à découvrir et comparer.</h1><p>Des digitales SKMEI accessibles aux belles mécaniques. Explorez toutes nos références documentées, sans prix inventé ni classement commercial fictif.</p>'
-    +'<p class="ud-disclosure">Atelier Montres présente des références sourcées. Les liens Amazon, lorsqu’ils sont rémunérés, mènent au vendeur partenaire. La vente directement sur notre site ne sera proposée que pour les montres dont le prix TTC, la livraison et le fournisseur ont été vérifiés. Une recherche Amazon ne garantit pas la variante exacte : contrôlez toujours la référence avant achat.</p></header>'
+    +'<header class="ud-heading" aria-labelledby="udCollectionTitle"><span class="eyebrow">Atelier Montres · Collection homme et femme</span>'
+    +'<h1 id="udCollectionTitle">52 montres. Trouvez celle qui vous ressemble.</h1>'
+    +'<p class="ud-heading-lead">Du digital sportif à la mécanique élégante, découvrez des montres sélectionnées pour leur style. Comparez les mouvements, les proportions et les détails qui comptent pour vous.</p>'
+    +'<div class="ud-heading-actions"><a class="ud-heading-primary" href="#udCount">Explorer les 52 montres <span aria-hidden="true">↘</span></a><a class="ud-heading-secondary" href="../conseiller.html">Me guider dans mon choix <span aria-hidden="true">↗</span></a></div>'
+    +'<ul class="ud-heading-highlights" aria-label="Les avantages du catalogue"><li>52 modèles à comparer</li><li>Caractéristiques documentées</li><li>Photos de modèle quand disponibles</li></ul>'
+    +'<p class="ud-disclosure"><strong>Avant votre achat :</strong> consultez le prix, la disponibilité et les conditions de livraison chez le marchand. Certains liens partenaires peuvent nous rémunérer. Une recherche Amazon ne garantit pas le modèle exact : vérifiez la référence auprès du vendeur.</p></header>'
     +shortcuts+showroom
     +'<div class="ud-favorite-tools" id="udFavoriteTools" hidden><div><strong>Votre sélection, à votre rythme.</strong><p>Gardez vos modèles préférés sur cet appareil, puis comparez-les parmi les 52 montres.</p></div><button id="udSavedToggle" type="button" aria-pressed="false"><span aria-hidden="true">♡</span> <span id="udSavedButtonLabel">Voir mes favoris</span> <span class="ud-favorite-total">(<span id="udSavedCount">0</span>)</span></button></div>'
     +'<form id="udFilters" class="ud-filters" role="search" aria-label="Affiner les 52 montres" hidden>'
