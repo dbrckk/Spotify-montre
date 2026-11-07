@@ -113,6 +113,42 @@ try{
     }));
     assert.ok(mobileWidth.scroll<=mobileWidth.client+2,
       'Budget image sizing must not introduce mobile overflow');
+    // The four commercial routes must fit one compact Android navigation
+    // strip, with accessible 44px targets and an operable final link.
+    for(const width of [412,360]){
+      await publicHome.setViewportSize({width,height:823});
+      await publicHome.waitForFunction(()=>{
+        const nav=document.querySelector('.home-nav');
+        return nav&&getComputedStyle(nav).overflowX==='auto';
+      },null,{timeout:10000});
+      const layout=await publicHome.evaluate(()=>{
+        const nav=document.querySelector('.home-nav');
+        const links=[...nav.querySelectorAll('a')];
+        return {
+          flexWrap:getComputedStyle(nav).flexWrap,
+          overflowX:getComputedStyle(nav).overflowX,
+          targets:links.map(link=>Math.round(link.getBoundingClientRect().height)),
+          pageWidth:document.documentElement.clientWidth,
+          pageScroll:document.documentElement.scrollWidth
+        };
+      });
+      assert.equal(layout.flexWrap,'nowrap','Android navigation must stay on one row at '+width);
+      assert.equal(layout.overflowX,'auto','Android navigation must scroll natively');
+      assert.equal(layout.targets.length,4,'Keep the four customer destinations');
+      assert.ok(layout.targets.every(height=>height>=44),
+        'Android navigation touch targets must be at least 44px high: '+JSON.stringify(layout));
+      assert.ok(layout.pageScroll<=layout.pageWidth+2,
+        'Scrollable menu must not overflow the entire page: '+JSON.stringify(layout));
+      await publicHome.locator('.home-nav a').last().scrollIntoViewIfNeeded();
+      const lastLink=await publicHome.locator('.home-nav a').last().evaluate(link=>{
+        const bounds=link.getBoundingClientRect();
+        const viewport=link.closest('nav').getBoundingClientRect();
+        return {left:bounds.left,right:bounds.right,viewLeft:viewport.left,viewRight:viewport.right};
+      });
+      assert.ok(lastLink.left>=lastLink.viewLeft-2&&lastLink.right<=lastLink.viewRight+2,
+        'Visitors must be able to reach the vendor link by touch scrolling: '+JSON.stringify(lastLink));
+    }
+    await publicHome.screenshot({path:'artifacts/atelier-public-home-android-360.png'});
     console.log('PASS PUBLIC MOBILE HOME: two 480px budget images decode, three tiers, Citizen hero retained');
   }finally{
     await publicHome.close();
