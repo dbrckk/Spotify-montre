@@ -189,7 +189,7 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
     const visual='../'+p.photoUrl.slice(2);
     const mobilePopularWidths={'skmei-2056':1000,'skmei-2514':800,'addiesdive-ad2030':1200,'pagani-pd1701':800};
     let popularAttrs='';
-    if(p.kind==='popular'&&Object.hasOwn(mobilePopularWidths,p.id)){
+    if(p.kind==='supplemental'&&Object.hasOwn(mobilePopularWidths,p.id)){
       const widths=[240,480];
       for(const width of widths){
         if(!existsSync(join(root,'assets','popular-responsive',p.id+'-'+width+'.webp')))
