@@ -28,7 +28,7 @@ SOURCE = SITE / "selection-populaires.json"
 RIGHTS = SITE / "popular-photo-rights.json"
 DEST = SITE / "assets" / "watches-popular"
 REPORT = ROOT / "docs" / "popular-watch-photo-report.json"
-DATE = "2026-10-31"
+DATE = date.today().isoformat()
 USER_AGENT = "AtelierMontresPhotoSync/1.0 (+https://atelier-montres-selection-fr.onrender.com/; product-image-cache)"
 MAX_IMAGE = 12_000_000
 SAFE_CDN = {"cdn.shopify.com", "cdn.shopifycdn.net", "static.wixstatic.com", "cdn11.bigcommerce.com"}
@@ -304,7 +304,8 @@ def main() -> int:
             key = model_key(p["model"])
             candidates = src_candidates(html, page_url, key)
             if not candidates:
-                raise ValueError("No trusted product image source found")
+                raise ValueError("No trusted product image source found in structured data or product gallery")
+            print("CANDIDATES", pid, len(candidates), flush=True)
             for candidate in candidates:
                 try:
                     image, width, height = download(session, candidate, page_url)
