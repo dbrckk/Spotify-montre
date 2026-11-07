@@ -17,6 +17,18 @@ try{
       {waitUntil:'domcontentloaded'});
     await page.locator('#udFilters').waitFor({state:'visible'});
     assert.equal(await page.locator('.ud-card').count(),52);
+    // The gallery uses one column at 360px and two columns at 393px.
+    // srcset's sizes must reflect this or mobile downloads oversized WebPs.
+    const photo=page.locator('#modele-casio-mdv107 .ud-photo img');
+    const sizes=await photo.getAttribute('sizes');
+    assert.ok(sizes?.includes('(max-width: 365px) 90vw')&&
+      sizes.includes('(max-width: 650px) 46vw'),
+      'Responsive watch image sizes must match mobile gallery columns');
+    const columns=await page.locator('#udGrid').evaluate(el=>
+      getComputedStyle(el).gridTemplateColumns.split(' ').length);
+    assert.equal(columns,width===360?1:width===393?2:4,
+      'Gallery column count should agree with responsive image sizing');
+
     assert.equal(await page.locator('#udActiveFilters').isVisible(),false);
 
     for(const [query,id] of [
