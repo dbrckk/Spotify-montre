@@ -190,3 +190,38 @@ body.am-showroom-home{background:var(--show-paper)}
   .am-editorial-path,.am-editorial-path-photo img{transition:none}
   .am-editorial-path:hover,.am-editorial-path:hover .am-editorial-path-photo img{transform:none}
 }
+
+/* Android storefront navigation: a single, touch-friendly row instead of
+   wrapping the primary destinations across multiple cramped header lines.
+   The fourth link stays reachable by native horizontal scrolling, no JS. */
+@media(max-width:760px){
+  .am-showroom-home .home-header{align-items:stretch;gap:9px;padding-block:15px 7px}
+  .am-showroom-home .home-nav{
+    display:flex;flex-wrap:nowrap;align-items:stretch;width:100%;gap:8px;
+    overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;
+    scroll-snap-type:x proximity;scroll-padding-inline:3px;
+    -webkit-overflow-scrolling:touch;padding:3px 3px 9px;
+    scrollbar-width:thin;scrollbar-color:#b89a6e #1b3026
+  }
+  .am-showroom-home .home-nav a{
+    display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;
+    min-height:44px;padding:10px 12px;border:1px solid rgba(229,202,162,.32);
+    border-radius:3px;font-size:12px;line-height:1.35;
+    letter-spacing:.025em;text-transform:none;scroll-snap-align:start
+  }
+  .am-showroom-home .home-nav .home-nav-buy{
+    border-color:#c4a77a;background:rgba(226,189,134,.12);color:#fff2db
+  }
+  .am-showroom-home .home-nav a:focus-visible{
+    outline:3px solid #f7d39f;outline-offset:-3px
+  }
+  .am-showroom-home .home-hero-grid{gap:24px;padding-block:42px 46px}
+  .am-showroom-home .home-hero-copy::before{margin-bottom:17px}
+}
+@media(max-width:430px){
+  .am-showroom-home .home-hero h1{
+    font-size:clamp(45px,11.7vw,56px);line-height:1.04
+  }
+  .am-showroom-home .home-hero-visual img{padding:4% 11% 7%}
+  .am-showroom-home .home-hero-visual-caption{padding:12px 14px}
+}
