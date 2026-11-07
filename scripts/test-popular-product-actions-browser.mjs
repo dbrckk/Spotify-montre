@@ -56,7 +56,9 @@ try{
       }));
       assert.equal(actual.path,'/assets/popular-responsive/skmei-1251-480.webp',
         'Android product sheet must actually download the lightweight exact-model WebP');
-      assert.ok(actual.width===480&&actual.height>0,
+      // With a width-descriptor srcset, naturalWidth can be density-adjusted:
+      // assert successful decode and the exact requested derivative instead.
+      assert.ok(actual.width>0&&actual.height>0,
         'Mobile product photo failed to decode: '+JSON.stringify(actual));
     }
     const actions=page.locator('.am-extra-local-tools');
