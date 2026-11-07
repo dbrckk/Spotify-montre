@@ -159,7 +159,7 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
       +'<h2><a href="'+e(p.detailUrl.replace('./montres/','./'))+'">'+e(p.brand+' '+p.model)+'</a></h2>'
       +'<p class="ud-description">'+e(p.lead)+'</p>'
       +'<dl><div><dt>Mouvement</dt><dd>'+e(movementLabels[p.movement])+'</dd></div><div><dt>Boîtier</dt><dd>'+e(p.caseText)+'</dd></div></dl>'
-      +'<div class="ud-offer-context" aria-label="Informations du vendeur et de la référence">'
+      +'<div class="ud-offer-context" role="group" aria-label="Informations du vendeur et de la référence">'
       +'<p class="ud-merchant-kind">'+e(merchantLabel)+'</p>'
       +'<p class="ud-commercial-proof">'+e(evidenceMessage)+'</p>'
       +variant+partnerVariant+redirectProof
