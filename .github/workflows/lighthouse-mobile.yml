@@ -58,15 +58,15 @@ jobs:
             if ! curl -fsSL --max-time 15 "$base/index.html" -o "$RUNNER_TEMP/lh-index.html"; then
               ready=0
             elif ! python3 - "$RUNNER_TEMP/lh-index.html" <<'PY'
-import pathlib,sys
-local=pathlib.Path('site/index.html').read_text()
-live=pathlib.Path(sys.argv[1]).read_text()
-# SEO generation can inject verification and analytics into <head>.
-# Compare the entire customer-visible <main> and navigation instead.
-def visible(html):
-    return html[html.index('<header class="header">'):html.index('</main>')+len('</main>')]
-assert visible(local)==visible(live), 'Deployed customer-visible homepage differs from source'
-PY
+          import pathlib,sys
+          local=pathlib.Path('site/index.html').read_text()
+          live=pathlib.Path(sys.argv[1]).read_text()
+          # SEO generation can inject verification and analytics into <head>.
+          # Compare the entire customer-visible <main> and navigation instead.
+          def visible(html):
+              return html[html.index('<header class="header">'):html.index('</main>')+len('</main>')]
+          assert visible(local)==visible(live), 'Deployed customer-visible homepage differs from source'
+          PY
             then
               ready=0
             fi
