@@ -15,7 +15,7 @@ for(const site of sites){
   const summary=(audits['resource-summary']?.details?.items||[]).find(x=>x.resourceType==='image');
   const requests=audits['network-requests']?.details?.items||[];
   const thumbRequests=requests.filter(x=>x.url?.includes('/assets/watch-thumbs/'));
-  const responsiveRequests=requests.filter(x=>x.url?.includes('/assets/watch-responsive/'));
+  const responsiveRequests=requests.filter(x=>x.url?.includes('/assets/watch-responsive/')||x.url?.includes('/assets/popular-responsive/'));
   const firstParty=requests.filter(x=>{try{return new URL(x.url).origin===new URL(data.finalDisplayedUrl||data.finalUrl||data.requestedUrl).origin;}catch{return false;}});
   const transferredByType=Object.fromEntries(['Stylesheet','Script','Image','Document','Font'].map(type=>[type,firstParty.filter(x=>x.resourceType===type).reduce((sum,x)=>sum+(Number(x.transferSize)||0),0)]));
   const suggestion=audits['uses-responsive-images'];
@@ -42,7 +42,10 @@ for(const site of sites){
 // real-user Core Web Vitals. Home uses three-run medians; product is a smoke
 // sample and remains informational until repeated measurements are available.
 const budgets={
-  'Accueil':{scoreMin:85,lcpMax:3000,tbtMax:300,clsMax:0.15,imageBytesMax:300000}
+  'Accueil':{scoreMin:85,lcpMax:3000,tbtMax:300,clsMax:0.15,imageBytesMax:300000},
+  // Production baseline: 66,944 image bytes (2026-11-07). Allow headroom
+  // for network variability while catching a return to 338 KB originals.
+  'Catalogue 52 montres':{imageBytesMax:180000}
 };
 const violations=[];
 for(const r of reports){
@@ -54,7 +57,7 @@ for(const r of reports){
     ['TBT',r.measurements.TBT,budget.tbtMax,'max'],
     ['CLS',r.measurements.CLS,budget.clsMax,'max'],
     ['image bytes',r.imagesTransferred,budget.imageBytesMax,'max']
-  ];
+  ].filter(([, ,limit])=>Number.isFinite(limit));
   for(const [name,value,limit,direction] of checks){
     if(!Number.isFinite(value)){violations.push(r.name+': '+name+' measurement missing');continue;}
     if(direction==='min'?value<limit:value>limit)
@@ -73,7 +76,7 @@ for(const r of reports){
  lines.push('Miniatures WebP téléchargées : '+r.thumbCount+' ; images adaptatives : '+r.responsiveCount+' ; octets d’images redimensionnables encore estimés : '+r.responsiveImageWaste+'.','');
  lines.push('Scores par passage : '+r.runs.map(run=>round(run.score,0)).join(', ')+'.','');
 }
-lines.push('Garde-fous accueil (médiane) : score ≥85, LCP ≤3000 ms, TBT ≤300 ms, CLS ≤0,15, images ≤300 Ko. Le catalogue et la fiche produit restent indicatifs (un seul passage chacun).','');
+lines.push('Garde-fous accueil (médiane) : score ≥85, LCP ≤3000 ms, TBT ≤300 ms, CLS ≤0,15, images ≤300 Ko. Catalogue (un passage) : images ≤180 Ko ; autres mesures indicatives. Fiche produit indicative.','');
 lines.push(violations.length?'Régressions détectées : '+violations.join(' ; '):'Aucune régression majeure détectée par les seuils Lighthouse.','');
 lines.push('La médiane réduit la variabilité sans constituer une mesure terrain. L’INP réel et les métriques Core Web Vitals proviennent de CrUX/Search Console, pas du TBT Lighthouse.','');
 const summary=lines.join('\n');
