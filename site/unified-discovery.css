@@ -487,3 +487,32 @@
 .ud-photo-official:focus-visible{outline:3px solid #b78b46;outline-offset:3px}
 .ud-photo-official span{font-size:16px;line-height:1}
 @media(prefers-reduced-motion:reduce){.ud-photo-official{transition:none}}
+
+/* Consumer-first catalogue opening: premium editorial typography without a
+   heavy hero image, extra HTTP requests or intrusive development copy. */
+.ud-page .ud-heading{position:relative;isolation:isolate;overflow:hidden;box-sizing:border-box;max-width:none;margin:clamp(20px,3.6vw,42px) 0 30px;padding:clamp(27px,5.4vw,72px) clamp(22px,5vw,72px) clamp(23px,3.3vw,44px);border:1px solid #d2d8c8;border-radius:12px;background:radial-gradient(circle at 90% 4%,#d9e4d1 0%,transparent 42%),linear-gradient(120deg,#f9f8f3 0%,#f0f1e8 100%);box-shadow:0 20px 55px #1f3b2811}
+.ud-page .ud-heading::before{content:"";position:absolute;z-index:-1;width:clamp(190px,27vw,440px);aspect-ratio:1;top:-36%;right:-6%;border:clamp(28px,4vw,65px) solid #75987922;border-radius:50%;pointer-events:none}
+.ud-page .ud-heading .eyebrow{display:block;color:#7c5930;font:800 11px/1.55 system-ui,sans-serif;letter-spacing:.15em;text-transform:uppercase}
+.ud-page .ud-heading h1{max-width:17ch;margin:17px 0;font:400 clamp(38px,5.9vw,77px)/1.065 Georgia,serif;letter-spacing:-.053em;color:#1d3d2b;text-wrap:balance}
+.ud-page .ud-heading .ud-heading-lead{max-width:66ch;margin:0 0 24px;color:#3c5845;font:400 clamp(15px,1.65vw,19px)/1.72 system-ui,sans-serif}
+.ud-heading-actions{display:flex;flex-wrap:wrap;align-items:stretch;gap:11px;margin:0 0 26px}
+.ud-heading-actions a{display:inline-flex;align-items:center;justify-content:space-between;gap:16px;min-height:50px;box-sizing:border-box;padding:12px 19px;border:2px solid #1c4731;border-radius:5px;font:750 14px/1.4 system-ui,sans-serif;text-decoration:none;transition:background-color .17s ease,box-shadow .17s ease}
+.ud-heading-actions a.ud-heading-primary{background:#204a34;color:#fff}
+.ud-heading-actions a.ud-heading-secondary{background:#fffefa;color:#204a34}
+.ud-heading-actions a:hover{background:#38664a;color:#fff;box-shadow:0 8px 24px #16392322}
+.ud-heading-actions a:focus-visible{outline:3px solid #ad7b38;outline-offset:4px}
+.ud-heading-actions span{font-size:18px;line-height:1}
+.ud-heading-highlights{display:flex;flex-wrap:wrap;gap:8px 19px;list-style:none;padding:0;margin:0 0 19px}
+.ud-heading-highlights li{display:flex;align-items:center;gap:8px;color:#3f5d47;font:650 12px/1.5 system-ui,sans-serif}
+.ud-heading-highlights li::before{content:"";display:inline-block;width:7px;height:7px;flex:none;border-radius:50%;background:#8b7549}
+.ud-page .ud-heading .ud-disclosure{max-width:86ch;margin:0;padding:13px 16px;border:0;border-top:1px solid #ccd7c7;border-radius:0;background:#ffffff85;color:#536458;font:400 12px/1.65 system-ui,sans-serif}
+.ud-page .ud-heading .ud-disclosure strong{color:#284835}
+@media(max-width:650px){
+  .ud-page .ud-heading{margin-top:18px;padding:27px 19px 20px;border-radius:9px}
+  .ud-page .ud-heading h1{font-size:clamp(35px,9vw,52px);max-width:100%;text-wrap:pretty}
+  .ud-heading-actions{flex-direction:column;gap:9px}
+  .ud-heading-actions a{width:100%;min-height:50px}
+  .ud-heading-highlights{gap:8px 14px}
+  .ud-page .ud-heading .ud-disclosure{padding:13px 12px}
+}
+@media(prefers-reduced-motion:reduce){.ud-heading-actions a{transition:none}}
