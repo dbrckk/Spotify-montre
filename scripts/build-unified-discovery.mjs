@@ -156,12 +156,14 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
       +(p.photoUrl?'<button type="button" class="ud-zoom" data-zoom-id="'+e(p.id)+'" aria-label="Agrandir la photographie de '+e(p.brand+' '+p.model)+'" hidden><span aria-hidden="true">＋</span> Agrandir</button>':'')
       +'<span class="ud-visual-label">'+(p.photoUrl?'Photo du modèle':'Sans photo publiée')+'</span></div>'
       +'<div class="ud-card-main"><p class="ud-kicker">'+e(tierLabels[p.tier])+' · '+e(styleLabels[p.style])+'</p>'
-      +'<p class="ud-merchant-kind">'+e(merchantLabel)+'</p>'
-      +'<p class="ud-commercial-proof">'+e(evidenceMessage)+'</p>'
-      +variant+partnerVariant+redirectProof
       +'<h2><a href="'+e(p.detailUrl.replace('./montres/','./'))+'">'+e(p.brand+' '+p.model)+'</a></h2>'
       +'<p class="ud-description">'+e(p.lead)+'</p>'
       +'<dl><div><dt>Mouvement</dt><dd>'+e(movementLabels[p.movement])+'</dd></div><div><dt>Boîtier</dt><dd>'+e(p.caseText)+'</dd></div></dl>'
+      +'<div class="ud-offer-context" aria-label="Informations du vendeur et de la référence">'
+      +'<p class="ud-merchant-kind">'+e(merchantLabel)+'</p>'
+      +'<p class="ud-commercial-proof">'+e(evidenceMessage)+'</p>'
+      +variant+partnerVariant+redirectProof
+      +'</div>'
       +'<div class="ud-actions"><a class="ud-details" href="'+e(p.detailUrl.replace('./montres/','./'))+'">Voir la fiche et les sources</a>'
       +actions+'</div>'
       +'<button type="button" class="ud-select" data-compare-id="'+e(p.id)+'" aria-pressed="false" hidden>Ajouter à la comparaison</button>'
