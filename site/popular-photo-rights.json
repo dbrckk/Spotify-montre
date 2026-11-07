@@ -295,6 +295,20 @@
       "imageSha256": "b5c3f17813aa71e6ee275272f8365a0f90bf87dfac9adec5ac6e71047714c73d",
       "width": 1000,
       "height": 1000
+    },
+    "tissot-prx-35-blue": {
+      "rightsBasis": "site_owner_attested_brand_authorization",
+      "rightsHolder": "Tissot",
+      "scope": "commercial_affiliate_website_display_and_local_hosting",
+      "approvedOn": "2026-11-07",
+      "attestationSource": "site_owner_declaration_2026-10-31",
+      "permissionIndependentlyVerified": false,
+      "sourcePage": "https://www.tissotwatches.com/fr-fr/T1372101104100.html",
+      "sourceImageUrl": "https://www.tissotwatches.com/dw/image/v2/BKKD_PRD/on/demandware.static/-/Sites-Tissot-Catalogue/default/dw85cbf290/product-pictures/137cb52c-5d13-4d79-a9ce-53d32356fd77_T137-210-11-041-00_shadow.png?sh=1680&sm=fit&sw=1680",
+      "file": "assets/watches-popular/tissot-prx-35-blue.webp",
+      "imageSha256": "9761ef6bdbcf75a9152a1da28cddd7a9c2524889451bea4a5a5695890ecd1c18",
+      "width": 1200,
+      "height": 1200
     }
   }
 }

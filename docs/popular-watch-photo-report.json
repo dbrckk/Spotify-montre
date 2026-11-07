@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "reviewedOn": "2026-10-31",
+  "reviewedOn": "2026-11-07",
   "total": 37,
   "photos": [
     {
@@ -52,6 +52,13 @@
       "id": "citizen-tsuyosa-37-blue",
       "status": "preserved",
       "source": "https://fr.citizenwatch.eu/fr/p/nj0200-50m/"
+    },
+    {
+      "id": "tissot-prx-35-blue",
+      "status": "created",
+      "source": "https://www.tissotwatches.com/fr-fr/T1372101104100.html",
+      "image": "https://www.tissotwatches.com/dw/image/v2/BKKD_PRD/on/demandware.static/-/Sites-Tissot-Catalogue/default/dw85cbf290/product-pictures/137cb52c-5d13-4d79-a9ce-53d32356fd77_T137-210-11-041-00_shadow.png?sh=1680&sm=fit&sw=1680",
+      "sha256": "9761ef6bdbcf75a9152a1da28cddd7a9c2524889451bea4a5a5695890ecd1c18"
     },
     {
       "id": "seiko-5-srpk29",
@@ -136,15 +143,11 @@
     },
     {
       "id": "orient-bambino-38-cream",
-      "reason": "No trusted product image source found"
-    },
-    {
-      "id": "tissot-prx-35-blue",
-      "reason": "No trusted product image source found"
+      "reason": "No trusted product image source found in structured data or product gallery"
     },
     {
       "id": "tissot-gentleman-auto",
-      "reason": "No trusted product image source found"
+      "reason": "No trusted product image source found in structured data or product gallery"
     },
     {
       "id": "casio-f91w-1",
@@ -160,11 +163,11 @@
     },
     {
       "id": "orient-mako40-black",
-      "reason": "No trusted product image source found"
+      "reason": "No trusted product image source found in structured data or product gallery"
     },
     {
       "id": "tissot-le-locle-white",
-      "reason": "No trusted product image source found"
+      "reason": "No trusted product image source found in structured data or product gallery"
     },
     {
       "id": "casio-ae1200wh-1av",
