@@ -199,6 +199,35 @@ try{
   assert.deepEqual(homeErrors,[]);
   await home.close();
 
+  // The detailed watch must reach its own verified partner record, not a
+  // generic 23-item purchase listing. Unmatched models must stay explicitly
+  // unmatched rather than being silently replaced by another watch.
+  const detailJourney=await browser.newPage({viewport:{width:390,height:840},locale:'fr-FR'});
+  detailJourney.on('pageerror',error=>issues.push('detail journey: '+error.message));
+  await detailJourney.goto(new URL('montre.html?id=seiko-sharp',base).href,
+    {waitUntil:'domcontentloaded'});
+  await detailJourney.locator('#detailShell').waitFor({state:'visible'});
+  assert.equal(await detailJourney.locator('#detailNavFindVendors').getAttribute('href'),
+    './acheter.html?modele=seiko-sharp#amPartnerSelection');
+  await detailJourney.locator('#detailPartnerGateway').click();
+  await detailJourney.waitForURL(url=>url.pathname.endsWith('/acheter.html')&&
+    url.searchParams.get('modele')==='seiko-sharp');
+  await detailJourney.waitForFunction(()=>document.querySelectorAll('.am-partner-card').length===23);
+  assert.equal(await detailJourney.locator('.am-partner-card').first().getAttribute('data-watch-id'),
+    'seiko-sharp','Customer must find exactly the watch selected on its product page');
+
+  await detailJourney.goto(new URL('montre.html?id=tissot-prx-auto',base).href,
+    {waitUntil:'domcontentloaded'});
+  await detailJourney.locator('#detailShell').waitFor({state:'visible'});
+  await detailJourney.locator('#detailPartnerGateway').click();
+  await detailJourney.waitForURL(url=>url.pathname.endsWith('/acheter.html')&&
+    url.searchParams.get('modele')==='tissot-prx-auto');
+  await detailJourney.locator('#amPartnerUnmatched').waitFor({state:'visible'});
+  assert.match(await detailJourney.locator('#amPartnerUnmatched').innerText(),
+    /ne pouvons pas confirmer ici un lien Amazon.fr exact/);
+  assert.equal(await detailJourney.locator('#amDirectForm').isVisible(),false);
+  await detailJourney.close();
+
   // The large budget cards must give buyers the full category, not only the
   // two editorial watches on the homepage. Check the actual mobile click
   // through, source-backed filtered count and preserved query parameters.
