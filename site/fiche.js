@@ -165,6 +165,18 @@
    }
    $('detailOfficial').href=p.officialUrl;
    $('detailOfficial').setAttribute('aria-label','Voir les photos et la fiche officielle de '+p.model+' chez '+p.brand);
+   // Preserve exact product intent through the internal merchant gateway.
+   // Gateway validates each ASIN and explains when no exact match exists.
+   const merchantGateway='./acheter.html?modele='+encodeURIComponent(p.id)+'#amPartnerSelection';
+   for(const targetId of ['detailNavFindVendors','detailPartnerGateway']){
+     const action=$(targetId);
+     if(!action)continue;
+     action.href=merchantGateway;
+     // The accessible name begins with the visible label (WCAG label-in-name).
+     action.setAttribute('aria-label',(targetId==='detailNavFindVendors'
+       ?'Où acheter ?':'Trouver cette montre chez les vendeurs')+
+       ' — '+p.brand+' '+p.model+' · correspondances documentées à vérifier');
+   }
    const q=encodeURIComponent((p.brand+' '+p.model).slice(0,90));
    $('detailAmazon').href='https://www.amazon.fr/s?k='+q;
    $('detailEbay').href='https://www.ebay.fr/sch/i.html?_nkw='+q;

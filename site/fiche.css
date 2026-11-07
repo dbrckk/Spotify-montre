@@ -151,3 +151,16 @@
 .detail-nojs h1{font:400 clamp(28px,5vw,42px)/1.2 Georgia,serif;margin:0 0 14px;color:#23432e}
 .detail-nojs p{font:400 15px/1.75 system-ui,sans-serif;color:#415a49;margin:0 0 22px}
 .detail-nojs .button{min-height:48px;white-space:normal;text-align:center}
+
+/* Keep the product-specific merchant journey visible before generic marketplace searches. */
+.detail-shops .detail-partner-gateway{
+  background:#263f32;
+  border-color:#263f32;
+  color:#fff;
+  font-weight:750;
+  flex:1 1 225px;
+  justify-content:center;
+  text-align:center;
+}
+.detail-shops .detail-partner-gateway:hover{background:#365b46;color:#fff}
+.detail-shops .detail-partner-gateway:focus-visible{outline:3px solid #b18d4d;outline-offset:3px}
