@@ -17,6 +17,20 @@ try{
       {waitUntil:'domcontentloaded'});
     await page.locator('#udFilters').waitFor({state:'visible'});
     assert.equal(await page.locator('.ud-card').count(),52);
+
+    // The featured Casio and Citizen use approved local responsive WebPs.
+    // At 393px the photo is only 37% of a split card, not a full-width image.
+    for(const id of ['casio-mtp-1302','citizen-tsuyosa']){
+      const img=page.locator('.ud-feature-card[data-feature-id="'+id+'"] img');
+      const srcset=await img.getAttribute('srcset');
+      const sizes=await img.getAttribute('sizes');
+      assert.ok(srcset?.includes('watch-responsive/'+id+'-480.webp'),
+        'Featured photo should reuse local approved responsive variant: '+id);
+      assert.ok(sizes?.includes('(max-width: 660px) 33vw')&&
+        sizes.includes('(max-width: 365px) 88vw'),
+        'Featured photo sizes must reflect split-card layout: '+id);
+    }
+
     // The gallery uses one column at 360px and two columns at 393px.
     // srcset's sizes must reflect this or mobile downloads oversized WebPs.
     const photo=page.locator('#modele-casio-mdv107 .ud-photo img');
