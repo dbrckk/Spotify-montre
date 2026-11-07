@@ -522,14 +522,18 @@ assert.equal((unifiedHtml.match(/class="ud-card"/g)||[]).length,52,
 assert.equal((unifiedHtml.match(/class="ud-select"/g)||[]).length,52,
   'Each watch must have an opt-in local comparison button');
 const photoCount=unified.products.filter(p=>p.photoUrl!==null).length;
-assert.equal(photoCount,36,'Exactly 15 core and 21 supplemental owner-attested photos');
-assert.equal(unified.products.filter(p=>p.photoUrl===null).length,16,
-  'Missing published photos must remain explicit rather than be replaced with AI packshots');
-assert.equal((unifiedHtml.match(/data-visual="photo"/g)||[]).length,36);
-assert.equal((unifiedHtml.match(/data-visual="no-photo"/g)||[]).length,16);
-assert.equal((unifiedHtml.match(/class="ud-zoom"/g)||[]).length,36,
+const expectedPhotoCount=15+approvedPopularPhotos.size;
+const missingPhotoCount=52-expectedPhotoCount;
+assert.ok(approvedPopularPhotos.size<=37,'More approved photos than documented models');
+assert.equal(photoCount,expectedPhotoCount,
+  'Only 15 core and SHA-checked supplemental photos may be shown');
+assert.equal(unified.products.filter(p=>p.photoUrl===null).length,missingPhotoCount,
+  'Missing published photos must remain explicit, never replaced with AI packshots');
+assert.equal((unifiedHtml.match(/data-visual="photo"/g)||[]).length,expectedPhotoCount);
+assert.equal((unifiedHtml.match(/data-visual="no-photo"/g)||[]).length,missingPhotoCount);
+assert.equal((unifiedHtml.match(/class="ud-zoom"/g)||[]).length,expectedPhotoCount,
   'Only photograph-backed models can provide a zoom control');
-assert.equal((unifiedHtml.match(/Aucune photographie publiée pour cette référence/g)||[]).length,16);
+assert.equal((unifiedHtml.match(/Aucune photographie publiée pour cette référence/g)||[]).length,missingPhotoCount);
 assert.ok(unifiedHtml.includes('id="udVisual"')&&unifiedHtml.includes('value="no-photo"'),
   'Users must be able to distinguish photo-backed models from honest fallbacks');
 assert.ok(unifiedHtml.includes('id="udMerchant"')&&unifiedHtml.includes('value="direct"')
