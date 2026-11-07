@@ -101,7 +101,7 @@ def src_candidates(html: str, base: str, code: str) -> list[str]:
         # Some srcset query parameters include commas (e.g. gravity=center).
         # Splitting them must not turn a parameter into an image URL.
         # Real manufacturer product images use a recognizable file extension.
-        if not re.search(r"\\.(?:jpe?g|png|webp|avif)$", path):
+        if not re.search(r"\.(?:jpe?g|png|webp|avif)$", path):
             return
         image_code = re.sub(r"[^A-Z0-9]", "", unquote(urlparse(full).path).upper())
         # Strongest evidence: the exact SKU appears in the image path.
