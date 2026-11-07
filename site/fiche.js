@@ -172,7 +172,10 @@
      const action=$(targetId);
      if(!action)continue;
      action.href=merchantGateway;
-     action.setAttribute('aria-label','Vérifier les vendeurs et les correspondances documentées pour '+p.brand+' '+p.model);
+     // The accessible name begins with the visible label (WCAG label-in-name).
+     action.setAttribute('aria-label',(targetId==='detailNavFindVendors'
+       ?'Où acheter ?':'Trouver cette montre chez les vendeurs')+
+       ' — '+p.brand+' '+p.model+' · correspondances documentées à vérifier');
    }
    const q=encodeURIComponent((p.brand+' '+p.model).slice(0,90));
    $('detailAmazon').href='https://www.amazon.fr/s?k='+q;
