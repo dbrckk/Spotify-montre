@@ -56,15 +56,22 @@ try{
           'Missing genuine full-size fallback for '+id);
       }
     }
-    // The four already existing derivatives must be fetched by Chromium,
-    // not merely listed in HTML; the exact model original remains accessible.
+    // Exercise an actual decoded WebP, not just the HTML srcset attribute.
     if(width===393){
       for(const id of ['skmei-2056','skmei-2514','addiesdive-ad2030','pagani-pd1701']){
         const image=page.locator('#modele-'+id+' .ud-photo img');
         await image.scrollIntoViewIfNeeded();
         await image.evaluate(node=>node.decode());
         const selected=await image.evaluate(node=>new URL(node.currentSrc).pathname);
-        assert.match(selected,new RegExp('/assets/popular-responsive/'+id+'-(240|480)\\.webp
+        assert.ok(
+          selected==='/assets/popular-responsive/'+id+'-240.webp'||
+          selected==='/assets/popular-responsive/'+id+'-480.webp',
+          'Chromium must download a real small WebP for '+id+': '+selected
+        );
+      }
+    }
+
+    // The featured Casio and Citizen use approved local responsive WebPs.
     // At 393px the photo is only 37% of a split card, not a full-width image.
     for(const id of ['casio-mtp-1302','citizen-tsuyosa']){
       const img=page.locator('.ud-feature-card[data-feature-id="'+id+'"] img');
