@@ -46,10 +46,10 @@ mkdirSync('artifacts',{recursive:true});
 const browser=await chromium.launch({headless:true});
 try{
   // Verify the honest fallback is actually usable at mobile viewport width.
-  const noPhoto=await browser.newPage({viewport:{width:393,height:852},isMobile:true,hasTouch:true,locale:'fr-FR'});
+  const officialFallbackPage=await browser.newPage({viewport:{width:393,height:852},isMobile:true,hasTouch:true,locale:'fr-FR'});
   try{
-    await noPhoto.goto(new URL('/montres/casio-f91w-1.html',base).href,{waitUntil:'domcontentloaded'});
-    const cta=noPhoto.locator('.am-extra-official-photo>a');
+    await officialFallbackPage.goto(new URL('/montres/casio-f91w-1.html',base).href,{waitUntil:'domcontentloaded'});
+    const cta=officialFallbackPage.locator('.am-extra-official-photo>a');
     await cta.waitFor({state:'visible'});
     assert.equal(await cta.getAttribute('href'),'https://www.casio.com/fr/watches/casio/product.F-91W-1/');
     assert.equal(await cta.getAttribute('target'),'_blank');
@@ -57,9 +57,9 @@ try{
     const bounds=await cta.boundingBox();
     assert.ok(bounds&&bounds.height>=44&&bounds.x>=0&&bounds.x+bounds.width<=393,
       'Mobile exact-model photo CTA must fit the screen and offer a 44px touch target');
-    assert.equal(await noPhoto.locator('.am-extra-licensed-photo').count(),0,
+    assert.equal(await officialFallbackPage.locator('.am-extra-licensed-photo').count(),0,
       'No fabricated F-91W photograph may appear');
-  }finally{await noPhoto.close();}
+  }finally{await officialFallbackPage.close();}
   for(const width of [360,393,1366]){
     const context=await browser.newContext({viewport:{width,height:870},
       isMobile:width<600,hasTouch:width<600,locale:'fr-FR'});
