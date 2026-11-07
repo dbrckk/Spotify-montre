@@ -2,7 +2,11 @@ import {readFileSync,writeFileSync,appendFileSync,mkdirSync} from 'node:fs';
 const sites=[
  {name:'Accueil',files:[1,2,3].map(n=>'artifacts/lighthouse-mobile-home-'+n+'.json')},
  {name:'Catalogue 52 montres',files:['artifacts/lighthouse-mobile-catalogue.json']},
- {name:'Fiche Casio',files:['artifacts/lighthouse-mobile-product.json']}
+ {name:'Fiche Casio',files:['artifacts/lighthouse-mobile-product.json']},
+ {name:'Fiche SKMEI avec photo',files:['artifacts/lighthouse-mobile-studio-photo.json'],
+  expectedPath:'/montres/skmei-1251.html',imagePath:'/assets/popular-responsive/skmei-1251-'},
+ {name:'Fiche Casio sans photo',files:['artifacts/lighthouse-mobile-no-photo.json'],
+  expectedPath:'/montres/casio-f91w-1.html',forbidWatchImage:true}
 ];
 const keys={'first-contentful-paint':'FCP','largest-contentful-paint':'LCP','speed-index':'Speed Index','total-blocking-time':'TBT','cumulative-layout-shift':'CLS'};
 const median=(numbers)=>{const sorted=numbers.filter(Number.isFinite).sort((a,b)=>a-b);return sorted.length?sorted[Math.floor(sorted.length/2)]:null;};
@@ -14,6 +18,16 @@ for(const site of sites){
   const numbers=Object.fromEntries(Object.entries(keys).map(([id,label])=>[label,audits[id]?.numericValue]));
   const summary=(audits['resource-summary']?.details?.items||[]).find(x=>x.resourceType==='image');
   const requests=audits['network-requests']?.details?.items||[];
+  if(site.expectedPath){
+   const finalUrl=new URL(data.finalDisplayedUrl||data.finalUrl||data.requestedUrl);
+   if(finalUrl.pathname!==site.expectedPath)
+    throw Error(site.name+': Lighthouse measured the wrong route: '+finalUrl.pathname);
+   if(site.imagePath&&!requests.some(x=>x.url?.includes(site.imagePath)))
+    throw Error(site.name+': responsive source-verified image was not fetched');
+   if(site.forbidWatchImage&&requests.some(x=>x.url?.includes('/assets/watches-popular/')||
+      x.url?.includes('/assets/popular-responsive/')))
+    throw Error(site.name+': unsupported exact-model photograph was fetched');
+  }
   const thumbRequests=requests.filter(x=>x.url?.includes('/assets/watch-thumbs/'));
   const responsiveRequests=requests.filter(x=>x.url?.includes('/assets/watch-responsive/')||x.url?.includes('/assets/popular-responsive/'));
   const firstParty=requests.filter(x=>{try{return new URL(x.url).origin===new URL(data.finalDisplayedUrl||data.finalUrl||data.requestedUrl).origin;}catch{return false;}});
@@ -47,7 +61,12 @@ const budgets={
   'Accueil':{scoreMin:85,lcpMax:3000,tbtMax:300,clsMax:0.15,imageBytesMax:90000},
   // Production baseline: 66,944 image bytes (2026-11-07). Allow headroom
   // for network variability while catching a return to 338 KB originals.
-  'Catalogue 52 montres':{imageBytesMax:180000}
+  'Catalogue 52 montres':{imageBytesMax:180000},
+  // These are single-run guardrails, deliberately generous for lab noise.
+  // The small verified WebP must stay inexpensive; a Casio with no photo
+  // must not download an invented model image.
+  'Fiche SKMEI avec photo':{scoreMin:75,lcpMax:4500,clsMax:0.2,imageBytesMax:160000},
+  'Fiche Casio sans photo':{scoreMin:75,lcpMax:4500,clsMax:0.2,imageBytesMax:160000}
 };
 const violations=[];
 for(const r of reports){
@@ -78,7 +97,7 @@ for(const r of reports){
  lines.push('Miniatures WebP téléchargées : '+r.thumbCount+' ; images adaptatives : '+r.responsiveCount+' ; octets d’images redimensionnables encore estimés : '+r.responsiveImageWaste+'.','');
  lines.push('Scores par passage : '+r.runs.map(run=>round(run.score,0)).join(', ')+'.','');
 }
-lines.push('Garde-fous accueil (médiane) : score ≥85, LCP ≤3000 ms, TBT ≤300 ms, CLS ≤0,15, images ≤90 Ko. Catalogue (un passage) : images ≤180 Ko ; autres mesures indicatives. Fiche produit indicative.','');
+lines.push('Garde-fous accueil (médiane) : score ≥85, LCP ≤3000 ms, TBT ≤300 ms, CLS ≤0,15, images ≤90 Ko. Catalogue (un passage) : images ≤180 Ko. Fiches photo/sans photo (un passage) : score ≥75, LCP ≤4500 ms, CLS ≤0,2, images ≤160 Ko ; mesures laboratoire indicatives.','');
 lines.push(violations.length?'Régressions détectées : '+violations.join(' ; '):'Aucune régression majeure détectée par les seuils Lighthouse.','');
 lines.push('La médiane réduit la variabilité sans constituer une mesure terrain. L’INP réel et les métriques Core Web Vitals proviennent de CrUX/Search Console, pas du TBT Lighthouse.','');
 const summary=lines.join('\n');
