@@ -27,6 +27,56 @@ for(const id of cards){
   assert.ok(home.includes('href="./montre.html?id='+id+'"'),
     id+': product must open its own verified detail');
 }
+// The photo-led homepage uses only approved local exact-reference WebPs.
+// Every responsive candidate must exist and the LCP preload must match the
+// hero image, preventing a redundant full-size desktop download on Android.
+const photoTags=[...home.matchAll(/<img\\b[^>]*>/g)].map(x=>x[0])
+  .filter(tag=>/src="\\.\\/assets\\/watches\\/[a-z0-9-]+\\.webp"/.test(tag));
+assert.equal(photoTags.length,13,'Ten original showcase images plus three editorial collection photos');
+for(const tag of photoTags){
+  const id=/src="\\.\\/assets\\/watches\\/([a-z0-9-]+)\\.webp"/.exec(tag)?.[1];
+  const proof=known.get(id)?.photoReview;
+  assert.ok(proof?.publicUsageApproved===true,'Unapproved homepage photograph: '+id);
+  assert.ok(tag.includes('srcset="')&&tag.includes('sizes="')&&
+    tag.includes('decoding="async"'),'Missing responsive image attributes for '+id);
+  for(const width of [480,800]){
+    assert.ok(tag.includes('./assets/watch-responsive/'+id+'-'+width+'.webp'),
+      'Missing responsive variant reference '+id+'/'+width);
+    const file=new URL('assets/watch-responsive/'+id+'-'+width+'.webp',site);
+    assert.ok(existsSync(file)&&statSync(file).size>1000,
+      'Missing optimized WebP file '+id+'/'+width);
+  }
+}
+const heroPreload=home.match(/<link rel="preload"[^>]+>/)?.[0]||'';
+const heroTag=photoTags.find(tag=>tag.includes('fetchpriority="high"'));
+assert.ok(heroTag,'Exactly one hero photo must be prioritized');
+const heroSrcset=/srcset="([^"]+)"/.exec(heroTag)?.[1];
+const heroSizes=/sizes="([^"]+)"/.exec(heroTag)?.[1];
+assert.ok(heroPreload.includes('imagesrcset="'+heroSrcset+'"')&&
+  heroPreload.includes('imagesizes="'+heroSizes+'"'),
+  'The LCP preload must select the exact responsive resource used by the hero');
+assert.equal(photoTags.filter(tag=>tag.includes('fetchpriority="high"')).length,1,
+  'High network priority must be reserved for the single hero photograph');
+
+const structured=home.match(/<script type="application\\/ld\\+json">([\\s\\S]*?)<\\/script>/);
+assert.ok(structured,'Homepage should expose an indexable real-watch collection');
+const graph=JSON.parse(structured[1])['@graph'];
+const webPage=graph.find(item=>item['@type']==='CollectionPage');
+assert.equal(webPage?.mainEntity?.numberOfItems,6);
+assert.deepEqual(webPage.mainEntity.itemListElement.map(item=>item.position),[1,2,3,4,5,6]);
+for(const item of webPage.mainEntity.itemListElement){
+  assert.ok(cards.some(id=>item.url.endsWith('/montres/'+id+'.html')),
+    'Only a real showcased watch with an indexable page may be added to ItemList');
+}
+assert.ok(!structured[1].includes('"offers"')&&!structured[1].includes('"aggregateRating"'),
+  'Never invent ecommerce offers or consumer ratings for editorial pages');
+for(const slug of ['montres-quartz','montres-automatiques','montres-petit-boitier'])
+  assert.ok(home.includes('href="./montres/'+slug+'.html"'),
+    'A photo-led homepage entry must link a real SEO collection: '+slug);
+assert.equal((home.match(/class="am-editorial-path"/g)||[]).length,3);
+assert.ok(css.includes('am-editorial-paths-grid')&&css.includes('@media(max-width:650px)'),
+  'Editorial gallery needs an accessible mobile layout');
+
 assert.equal((home.match(/class="am-budget-card"/g)||[]).length,3,
   'Three visually distinct budget categories required');
 assert.equal((home.match(/class="am-budget-action">Explorer toute la gamme/g)||[]).length,3,
