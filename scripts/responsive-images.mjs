@@ -34,7 +34,7 @@ export function responsiveAttrs(root,product,{prefix='../',sizes,escape}){
 export function responsivePopularAttrs(root,product,approved,{prefix='../',sizes,escape}){
   if(!sizes||typeof escape!=='function')throw Error('Popular image needs responsive sizes and escaper');
   const id=product?.id;
-  if(typeof id!=='string'||!^[a-z0-9-]+$/.test(id)||
+  if(typeof id!=='string'||!/^[a-z0-9-]+$/.test(id)||
      approved?.url!=='assets/watches-popular/'+id+'.webp'||
      !Number.isInteger(approved.width)||approved.width<480)return '';
   const file=join(root,approved.url);
