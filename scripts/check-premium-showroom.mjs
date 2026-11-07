@@ -93,18 +93,25 @@ for(const [id,tier,range] of [
 }
 assert.ok(home.includes('Budgets d’orientation, non prix de vente'),
   'Budget suggestions must not be confused with merchant prices');
-assert.ok(home.includes('Un achat direct sur Atelier Montres ne s’affiche que'),
-  'Do not advertise checkout without a verified offer');
-assert.ok(home.includes('class="am-order-story" id="achat-direct"'),
-  'Explain seller-owned payment and background supplier fulfillment');
-assert.match(home,/Après confirmation du paiement, le fournisseur reçoit la commande/);
+assert.ok(home.includes('class="am-order-story am-buyer-guide" id="bien-acheter"'),
+  'Public homepage must teach customers to select, compare and verify the seller');
+for(const link of [
+  './montres/toutes-les-montres.html',
+  './montres/guide-choisir-montre.html',
+  './acheter.html#amPartnerSelection'
+])assert.ok(home.includes('href="'+link+'"'),
+  'Buyer guide must link to a real public destination: '+link);
+assert.ok(!home.includes('id="achat-direct"')&&
+  !home.includes('Après confirmation du paiement, le fournisseur reçoit la commande'),
+  'The editorial homepage must not promote a nonfunctional checkout');
 assert.match(home,/site\/premium-showroom\.css|href="\.\/premium-showroom\.css"/);
 assert.equal(config.checkoutMode,'inactive',
   'Design changes must never open live payments by accident');
 assert.deepEqual(JSON.parse(read('catalogue.json')).products,[],
   'Editorial watch selection must not silently become sellable CJ offers');
-assert.ok(home.includes('src="./direct-offer-links.js"'),
-  'Only verified API offers may insert direct buy calls to action');
+assert.ok(!home.includes('src="./direct-offer-links.js"')&&
+  !home.includes('href="./direct-offer-links.css"'),
+  'Public editorial homepage must not load inactive commerce scripts or styles');
 assert.ok(!/class="am-direct-card-link"/.test(home),
   'Never hardcode unqualified paid-checkout buttons');
 for(const [page,scope] of [
