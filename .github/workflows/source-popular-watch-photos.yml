@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - scripts/sync-popular-watch-images.py
+      - scripts/test_popular_photo_sources.py
       - scripts/popular-photo-rights.mjs
       - .github/workflows/source-popular-watch-photos.yml
   pull_request:
@@ -37,6 +38,8 @@ jobs:
           node-version: '22'
       - name: Install only open-source media and HTTP packages
         run: python -m pip install --disable-pip-version-check --quiet 'requests>=2.31,<3' 'beautifulsoup4>=4.12,<5' 'Pillow>=11,<13'
+      - name: Verify exact-model page and gallery extraction offline
+        run: python -m unittest discover -s scripts -p test_popular_photo_sources.py -v
       - name: Download and resize exact-model official product photos
         run: python scripts/sync-popular-watch-images.py
       - name: Validate photo registry, static SEO pages and affiliate links
