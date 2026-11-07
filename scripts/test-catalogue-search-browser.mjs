@@ -21,6 +21,48 @@ try{
     await page.locator('#udFilters').waitFor({state:'visible'});
     assert.equal(await page.locator('.ud-card').count(),52);
 
+    // The 15 models without publishable packshots must let a shopper open
+    // the exact manufacturer/source photo from the catalogue itself.
+    const noPhotoCards=await page.locator('.ud-card[data-visual="no-photo"]').count();
+    assert.equal(noPhotoCards,15,'Unexpected source-backed no-photo coverage');
+    assert.equal(await page.locator('.ud-card[data-visual="photo"] .ud-photo-official').count(),0,
+      'Do not duplicate source-photo buttons on already photographed cards');
+    const unpictured=await page.locator('.ud-card[data-visual="no-photo"]').evaluateAll(items=>
+      items.map(card=>{
+        const button=card.querySelector('a.ud-photo-official');
+        const rect=button?.getBoundingClientRect();
+        return {
+          id:card.dataset.id,
+          url:button?.getAttribute('href'),
+          label:button?.getAttribute('aria-label'),
+          text:button?.textContent?.trim(),
+          target:button?.getAttribute('target'),
+          rel:button?.getAttribute('rel'),
+          height:rect?.height,
+          x:rect?.x,
+          right:rect?.right
+        };
+      }));
+    const knownUnpictured=JSON.parse(readFileSync(
+      new URL('../site/selection-populaires.json',import.meta.url),'utf8')).products
+      .filter(p=>!popularPhotoProof[p.id]);
+    assert.equal(knownUnpictured.length,15);
+    for(const item of unpictured){
+      const source=knownUnpictured.find(p=>p.id===item.id);
+      assert.ok(source,'Unregistered unphotographed model: '+item.id);
+      assert.equal(item.url,source.officialUrl.replaceAll('&','&amp;'),
+        'Source photo CTA must use exact documented model URL: '+item.id);
+      assert.equal(item.target,'_blank');
+      assert.match(item.rel||'',/noopener/);
+      assert.match(item.rel||'',/noreferrer/);
+      assert.ok(item.text?.includes('Voir les photos du modèle exact'));
+      assert.ok(item.label?.includes('Voir les photos du modèle exact '+source.brand+' '+source.model));
+      assert.ok(item.height>=44,'Mobile touch target below WCAG threshold: '+item.id);
+      assert.ok(item.x>=-1&&item.right<=width+1,
+        'No-photo source CTA overflows viewport: '+item.id);
+    }
+
+
     // The storefront must present the watch before sales evidence, while
     // showing truthful availability disclosures immediately beside the exits.
     const cards=await page.locator('#udGrid .ud-card').evaluateAll(items=>

@@ -477,3 +477,13 @@
 @media(prefers-reduced-motion:reduce){
   .ud-page .ud-card-main>.ud-actions a{transition:none}
 }
+
+/* Official-source product photos: truthful, prominent access for unpictured watches.
+   The local catalogue never loads remote photos or an unrelated model image. */
+.ud-card[data-visual="no-photo"] .ud-media{display:flex;flex-direction:column;position:relative}
+.ud-card[data-visual="no-photo"] .ud-media .ud-photo{flex:1;min-height:0}
+.ud-photo-official{display:flex;align-items:center;justify-content:center;gap:9px;min-height:48px;margin:0 12px 13px;padding:10px 13px;border:1px solid #c4b58f;border-radius:5px;background:#fffaf0;color:#204934!important;font:750 12px/1.4 system-ui,sans-serif;text-align:center;text-decoration:none;transition:background-color .18s ease}
+.ud-photo-official:hover{background:#eee4cb;color:#173c29!important}
+.ud-photo-official:focus-visible{outline:3px solid #b78b46;outline-offset:3px}
+.ud-photo-official span{font-size:16px;line-height:1}
+@media(prefers-reduced-motion:reduce){.ud-photo-official{transition:none}}
