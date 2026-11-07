@@ -25,6 +25,7 @@ on:
       - 'site/premium-system.css'
       - 'site/affiliation.html'
       - 'site/index.html'
+      - 'site/premium-showroom.css'
       - 'site/acheter.html'
       - 'site/acheter-direct.js'
       - 'site/achat-partenaires.js'
