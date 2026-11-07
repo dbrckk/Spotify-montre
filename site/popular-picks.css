@@ -523,3 +523,99 @@
   .am-focus-group-heading{padding:4px 4px 0}
   .am-focus-group-heading h3{font-size:27px}
 }
+
+/* Real-photo product sheets: pale atelier stage, full unoccluded packshot,
+   and a distinct factual caption. Unphotographed editorial pages deliberately
+   keep their existing graphic composition. No remote assets or new fonts. */
+.am-extra-art.am-extra-art-with-photo{
+  display:flex;flex-direction:column;justify-content:flex-start;gap:0;
+  min-height:0;padding:clamp(11px,1.45vw,20px);overflow:hidden;
+  border:1px solid #d5c7ae;border-radius:8px;
+  color:#203d2c;background:linear-gradient(152deg,#fffdf6,#f4f0e7 65%,#ebe6dc);
+  box-shadow:0 16px 45px rgba(25,44,31,.11)
+}
+.am-extra-art-with-photo::before,
+.am-extra-art-with-photo::after{content:none;display:none}
+.am-extra-photo-stage{
+  position:relative;isolation:isolate;display:grid;place-items:center;
+  box-sizing:border-box;min-width:0;width:100%;
+  height:clamp(320px,35vw,505px);
+  border:1px solid #e4e0d4;border-radius:5px;overflow:hidden;
+  background:radial-gradient(ellipse at 47% 38%,#fffdfa 0%,#f0eee8 63%,#e2dfd7 100%)
+}
+.am-extra-photo-stage::before{
+  content:"";position:absolute;inset:12px;pointer-events:none;
+  border:1px solid rgba(255,255,255,.72);z-index:0
+}
+.am-extra-art-with-photo .am-extra-photo-stage .am-extra-licensed-photo{
+  position:relative;inset:auto;top:auto;right:auto;
+  display:block;box-sizing:border-box;width:100%;height:100%;
+  max-width:100%;max-height:100%;object-fit:contain;
+  padding:clamp(17px,3vw,35px);z-index:1;mix-blend-mode:multiply;
+  filter:drop-shadow(0 16px 15px rgba(35,45,34,.19));
+  transition:transform .25s ease
+}
+.am-extra-photo-meta{
+  display:flex;flex-direction:column;align-items:flex-start;gap:6px;
+  min-width:0;padding:clamp(17px,2vw,24px) clamp(9px,2vw,17px) 10px
+}
+.am-extra-art-with-photo .am-extra-photo-meta .am-extra-art-kicker{
+  margin:0 0 3px;padding:0;border:0;border-radius:0;
+  background:transparent;color:#816842;
+  font:750 10px/1.5 system-ui,sans-serif;letter-spacing:.10em;
+  text-transform:uppercase
+}
+.am-extra-art-with-photo .am-extra-photo-meta .am-extra-art-brand{
+  color:#365e46;text-shadow:none;
+  font:750 11px/1.5 system-ui,sans-serif;letter-spacing:.16em
+}
+.am-extra-art-with-photo .am-extra-photo-meta .am-extra-art-model{
+  margin:0 0 2px;max-width:100%;overflow-wrap:anywhere;
+  color:#203a2b;text-shadow:none;
+  font:400 clamp(26px,2.8vw,37px)/1.12 Georgia,serif;letter-spacing:-.025em
+}
+.am-extra-art-with-photo .am-extra-photo-meta .am-extra-art-label{
+  color:#59695b;text-shadow:none;
+  font:500 11px/1.55 system-ui,sans-serif;overflow-wrap:anywhere
+}
+.am-extra-art-with-photo .am-extra-photo-stage .am-extra-zoom{
+  position:absolute;top:auto;bottom:13px;right:13px;z-index:3;
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:44px;min-height:44px;max-width:calc(100% - 26px);
+  padding:10px 14px;box-shadow:0 6px 22px rgba(25,47,31,.15);
+  background:rgba(255,253,247,.97);color:#234632;border:1px solid #b5a080
+}
+.am-extra-art-with-photo .am-extra-photo-stage .am-extra-zoom[hidden]{display:none!important}
+.am-extra-art-with-photo .am-extra-photo-stage .am-extra-zoom:hover{
+  background:#224b34;color:#fff
+}
+.am-extra-art-with-photo .am-extra-photo-stage .am-extra-zoom:focus-visible{
+  outline:3px solid #b58337;outline-offset:3px
+}
+@media(hover:hover) and (pointer:fine){
+  .am-extra-art-with-photo .am-extra-photo-stage:hover .am-extra-licensed-photo{transform:scale(1.03)}
+}
+@media(max-width:900px){
+  .am-extra-photo-stage{height:clamp(320px,52vw,480px)}
+}
+@media(max-width:760px){
+  .am-extra-art.am-extra-art-with-photo{padding:11px;min-height:0}
+  .am-extra-photo-stage{height:clamp(290px,85vw,430px)}
+  .am-extra-photo-meta{padding:16px 13px 10px;gap:5px}
+  .am-extra-art-with-photo .am-extra-photo-meta .am-extra-art-model{font-size:clamp(26px,6.2vw,34px)}
+}
+@media(max-width:520px){
+  .am-extra-art.am-extra-art-with-photo{padding:9px;min-height:0}
+  .am-extra-photo-stage{height:clamp(265px,88vw,365px)}
+  .am-extra-photo-stage::before{inset:7px}
+  .am-extra-art-with-photo .am-extra-photo-stage .am-extra-licensed-photo{padding:15px}
+  .am-extra-art-with-photo .am-extra-photo-stage .am-extra-zoom{
+    bottom:10px;right:10px;padding:9px 11px;font-size:12px
+  }
+  .am-extra-photo-meta{padding:14px 11px 9px}
+}
+@media(prefers-reduced-motion:reduce){
+  .am-extra-art-with-photo .am-extra-photo-stage .am-extra-licensed-photo{
+    transform:none!important;transition:none!important
+  }
+}
