@@ -43,6 +43,27 @@ try{
     'Accueil','Catalogue 52 montres','Fiche Casio','Fiche SKMEI avec photo','Fiche Casio sans photo']);
   assert.equal(summary.reports[3].responsiveCount,1);
   assert.equal(summary.reports[4].imagesTransferred,0);
+
+  // A high-DPI browser legitimately selects the original verified WebP.
+  const hdpi=structuredClone(cases[5][1]);
+  hdpi.audits['network-requests'].details.items=
+    hdpi.audits['network-requests'].details.items.map(item=>
+      item.resourceType==='Image'?{
+        ...item,url:host+'/assets/watches-popular/skmei-1251.webp'
+      }:item);
+  write(cases[5][0],hdpi);
+  assert.equal(run().status,0,'Verified full-resolution image must pass on high-DPI screens');
+  write(...cases[5]);
+  const mismatched=structuredClone(cases[5][1]);
+  mismatched.audits['network-requests'].details.items=
+    mismatched.audits['network-requests'].details.items.map(item=>
+      item.resourceType==='Image'?{
+        ...item,url:host+'/assets/watches-popular/skmei-1257.webp'
+      }:item);
+  write(cases[5][0],mismatched);
+  assert.notEqual(run().status,0,'Another watch model must never pass as the verified photo');
+  write(...cases[5]);
+
   let missing=structuredClone(cases[5][1]);
   missing.audits['network-requests'].details.items=
     missing.audits['network-requests'].details.items.filter(x=>x.resourceType!=='Image');
