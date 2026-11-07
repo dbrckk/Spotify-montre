@@ -187,16 +187,16 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
     const exit=direct?'Consulter sur Amazon.fr · lien rémunéré':awin?'Voir chez le partenaire via Awin · lien rémunéré':'Voir chez la marque · lien non rémunéré';
     const detail=p.detailUrl.replace('./montres/','./');
     const visual='../'+p.photoUrl.slice(2);
-    const mobilePopular=new Set(['skmei-2056','skmei-2514','addiesdive-ad2030','pagani-pd1701']);
+    const mobilePopularWidths={'skmei-2056':1000,'skmei-2514':800,'addiesdive-ad2030':1200,'pagani-pd1701':800};
     let popularAttrs='';
-    if(p.kind==='popular'&&mobilePopular.has(p.id)){
+    if(p.kind==='popular'&&Object.hasOwn(mobilePopularWidths,p.id)){
       const widths=[240,480];
       for(const width of widths){
         if(!existsSync(join(root,'assets','popular-responsive',p.id+'-'+width+'.webp')))
           throw Error('Missing verified popular mobile image: '+p.id+'-'+width);
       }
       popularAttrs=' srcset="'+widths.map(width=>'../assets/popular-responsive/'+p.id+'-'+width+'.webp '+width+'w').join(', ')+
-        ', '+visual+' 800w" sizes="(max-width: 365px) 88vw, (max-width: 660px) 33vw, (max-width: 1100px) 44vw, 29vw"';
+        ', '+visual+' '+mobilePopularWidths[p.id]+'w" sizes="(max-width: 365px) 88vw, (max-width: 660px) 33vw, (max-width: 1100px) 44vw, 29vw"';
     }
     return '<article class="ud-feature-card" data-feature-id="'+e(p.id)+'">'
       +'<a class="ud-feature-photo" href="'+e(detail)+'" aria-label="Découvrir '+e(p.brand+' '+p.model)+'">'
