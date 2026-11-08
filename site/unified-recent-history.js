@@ -46,7 +46,10 @@
   const localAsset=(raw,id)=>{
     try{
       const url=new URL(raw,location.href);
-      if(url.origin!==location.origin||url.hash||url.search)return false;
+      if(url.origin!==location.origin||url.hash||url.username||url.password)return false;
+      // The build appends a SHA-256 cache key to approved responsive WebPs.
+      // Keep only that exact syntax; arbitrary URLs and query strings remain blocked.
+      if(url.search&&!/^\?v=[a-f0-9]{12}$/.test(url.search))return false;
       return url.pathname==='/assets/watches/'+id+'.webp'
         ||url.pathname==='/assets/watches-popular/'+id+'.webp'
         ||new RegExp('^/assets/(?:watch-responsive|popular-responsive)/'+id+'-[0-9]+\\.webp$').test(url.pathname);
