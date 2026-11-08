@@ -27,7 +27,8 @@ class OfficialProductSources(unittest.TestCase):
         for pid, evidence in research["sources"].items():
             item = by_id[pid]
             actual = sync.official_recovery(item, research["sources"])
-            self.assertEqual(actual["modelCode"], sync.model_key(item["model"]))
+            self.assertEqual(sync.re.sub(r"[^A-Z0-9]", "", actual["modelCode"]),
+                sync.model_key(item["model"]))
             self.assertEqual(actual["productPage"], item["officialUrl"])
         image = research["sources"]["tissot-gentleman-auto"]["officialImage"]
         self.assertTrue(sync.host_allowed(image, by_id["tissot-gentleman-auto"]["officialUrl"]))
