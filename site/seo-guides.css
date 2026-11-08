@@ -323,3 +323,19 @@
 /* Manufacturer/documentary ASIN evidence, not an Amazon live stock feed. */
 .watch-product .amazon-evidence-note{max-width:680px;margin:13px 0 0;padding:11px 15px;border-left:3px solid #879b81;background:#edf0e9;color:#344d3b;font:500 12px/1.7 system-ui,sans-serif}
 .watch-product .amazon-evidence-note[data-amazon-evidence-status="unavailable_at_check"]{border-left-color:#a57c3a;background:#f6f0e4;color:#634b2f}
+
+
+/* Return to an actual filtered search, only after navigation from the
+   52-watch catalogue. Direct product landing pages remain unchanged. */
+.am-catalogue-return{display:flex;margin:-7px 0 21px;align-items:center;max-width:100%}
+.am-catalogue-return a{display:inline-flex;min-height:48px;align-items:center;
+  padding:10px 19px;border:1px solid #789580;border-radius:5px;
+  background:#edf3e9;color:#224b32;font:750 13px/1.5 system-ui,sans-serif;
+  text-decoration:none;max-width:100%;transition:background-color .18s ease}
+.am-catalogue-return a:hover{background:#d9e8d8}
+.am-catalogue-return a:focus-visible{outline:3px solid #b18c52;outline-offset:3px}
+@media(max-width:650px){
+  .am-catalogue-return{margin:0 0 20px}
+  .am-catalogue-return a{width:100%;justify-content:center;text-align:center}
+}
+@media(prefers-reduced-motion:reduce){.am-catalogue-return a{transition:none}}
