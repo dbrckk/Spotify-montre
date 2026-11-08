@@ -37,7 +37,8 @@ export function loadVerifiedPopularLinks({root,picks,affiliates,amazonPartnerTag
       // Manufacturer PD-1701 is also presented as 1701/PGN-1701 in the Amazon listing.
       'pagani-pd1701':'1701',
       'casio-dw5600rl-1':'DW-5600RL-1ER',
-      'tissot-le-locle-white':'T0064071103300'
+      'tissot-le-locle-white':'T0064071103300',
+      'casio-la-20wh-4a1':'LA-20WH-4A1EF'
     };
     if(item.marketplaceModel!==p.model&&item.marketplaceModel!==regionalEquivalents[id])
       throw Error('Unverified regional edition or variant: '+id);
