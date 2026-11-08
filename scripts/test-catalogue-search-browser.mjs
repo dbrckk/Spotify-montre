@@ -30,6 +30,8 @@ try{
     // A comparator redirect plus independent matching model evidence can
     // establish an ASIN destination, but never stock, price or a sale.
     for(const [id,asin,code] of [
+      ['casio-la-20wh-4a1','B077YZHF21','LA-20WH-4A1EF'],
+      ['tissot-gentleman-auto','B07XTVQ3W7','T1274071104100'],
       ['casio-dw5600rl-1','B0DN6LT6FX','DW-5600RL-1ER'],
       ['tissot-le-locle-white','B01N7FXE80','T0064071103300']
     ]){
@@ -49,7 +51,7 @@ try{
         /page Amazon.fr non consultée directement/i);
       assert.equal(await card.locator('a[data-amazon-search-id]').count(),0);
     }
-    for(const id of ['seiko-5-srpk29','citizen-promaster-bn0150']){
+    for(const id of ['seiko-5-srpk29','citizen-promaster-bn0150','seiko-presage-srpe43','skmei-2056']){
       const card=page.locator('#modele-'+id);
       assert.notEqual(await card.getAttribute('data-merchant'),'direct',
         'Unverified or unavailable Amazon.fr evidence must never become an exact paid CTA: '+id);
