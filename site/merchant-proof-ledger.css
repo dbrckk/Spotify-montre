@@ -1,0 +1,25 @@
+/* Editorial traceability for Amazon.fr ASINs verified via external
+ * comparator redirect and separately corroborated manufacturer codes.
+ * This block is not a live offer, stock feed or sponsored exit. */
+.am-extra-proof-ledger{margin:22px 0 25px;padding:clamp(19px,2.6vw,28px);border:1px solid #d6decf;border-top:4px solid #547d62;border-radius:7px;background:linear-gradient(132deg,#fafbf6,#f1f5ee);box-shadow:0 10px 28px rgba(29,57,36,.06);color:#24422e}
+.am-extra-proof-overline{margin:0 0 7px!important;color:#5b6c56!important;letter-spacing:.09em;text-transform:uppercase;font:750 10px/1.5 system-ui,sans-serif!important}
+.am-extra-proof-ledger h3{margin:0 0 17px;font:400 clamp(23px,3vw,31px)/1.2 Georgia,serif;letter-spacing:-.02em;color:#1f402d;text-wrap:balance}
+.am-extra-proof-identity{display:flex;align-items:center;flex-wrap:wrap;gap:10px 22px;padding:11px 14px;border:1px solid #dce3d8;background:#fffefa;border-radius:4px;color:#304b37!important;font:550 12px/1.65 system-ui,sans-serif!important}
+.am-extra-proof-identity strong{font-weight:800;color:#203e2d}
+.am-extra-proof-identity code{padding:3px 6px;border:1px solid #cddbc9;border-radius:4px;background:#eaf0e6;color:#1d4b33;font:800 12px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace}
+.am-extra-proof-sources{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:15px 0 13px;padding:0;list-style:none}
+.am-extra-proof-sources li{min-width:0;display:flex;flex-direction:column;gap:7px;margin:0;padding:17px 18px;border:1px solid #d5dfd2;border-radius:5px;background:#fffefa}
+.am-extra-proof-step{display:block;text-transform:uppercase;letter-spacing:.07em;color:#61765f;font:750 10px/1.45 system-ui,sans-serif}
+.am-extra-proof-sources a{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:46px;padding:10px 11px;border:1px solid #94ad94;border-radius:4px;background:#f1f6ef;color:#234b32;text-decoration:none;font:750 12px/1.45 system-ui,sans-serif;overflow-wrap:anywhere}
+.am-extra-proof-sources a span{font-size:19px;line-height:1}
+.am-extra-proof-sources a:hover{background:#dfebe0;border-color:#597f5d}
+.am-extra-proof-sources a:focus-visible,.am-extra-proof-jump a:focus-visible{outline:3px solid #b68b43;outline-offset:3px}
+.am-extra-proof-sources small{display:block;font:450 11px/1.55 system-ui,sans-serif;color:#536953}
+.am-extra-proof-warning{margin:9px 0 0!important;padding:11px 14px;border-left:3px solid #aa8554;background:#f9f4e9;color:#4e5748!important;font:500 12px/1.7 system-ui,sans-serif!important}
+.am-extra-proof-jump{display:block;margin-top:9px;padding-top:9px;border-top:1px solid #c9d6c6}
+.am-extra-proof-jump a{display:inline-flex;align-items:center;gap:8px;min-height:42px;color:#204a32;text-decoration:underline;text-underline-offset:3px;font:750 12px/1.5 system-ui,sans-serif}
+@media(max-width:650px){
+ .am-extra-proof-sources{grid-template-columns:1fr}
+ .am-extra-proof-sources li{padding:14px}
+ .am-extra-proof-identity{display:grid;gap:6px}
+}

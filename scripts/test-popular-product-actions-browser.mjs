@@ -64,9 +64,71 @@ for(const p of picks){
       'Photo CTA must link to the documented manufacturer or seller URL: '+p.id);
   }
 }
+// Comparator proof is the only trusted reason to publish two external
+// documentary sources. Other exact links are NOT silently given fake proof.
+const research=JSON.parse(readFileSync('research/amazon-fr-popular-verified.json','utf8')).verifiedProducts;
+const documented=Object.entries(research)
+  .filter(([,r])=>r.evidenceType==='amazon_fr_comparator_redirect');
+assert.equal(documented.length,6,'Six different model/ASIN comparator proofs are currently substantiated');
+for(const p of picks){
+  const html=readFileSync('site/montres/'+p.id+'.html','utf8');
+  const proof=research[p.id];
+  const comparator=proof?.evidenceType==='amazon_fr_comparator_redirect';
+  if(!comparator){
+    assert.ok(!html.includes('data-asin-proof-id='),
+      'Never invent independent corroboration for '+p.id);
+    assert.ok(!html.includes('href="../merchant-proof-ledger.css"'),
+      'Unrelated product pages must not download the audit-ledger CSS: '+p.id);
+    continue;
+  }
+  assert.equal((html.match(/data-asin-proof-id=/g)||[]).length,1);
+  assert.ok(html.includes('data-asin-proof-id="'+p.id+'"'));
+  assert.ok(html.includes('href="../merchant-proof-ledger.css"'));
+  assert.ok(html.includes('<code>'+proof.asin+'</code>'));
+  assert.ok(html.includes('Code associé : <strong>'+escapeHtml(proof.marketplaceModel)+'</strong>'));
+  assert.ok(html.includes('href="'+escapeHtml(proof.comparisonUrl)+'"'),
+    'Published comparator URL must exactly match research: '+p.id);
+  assert.ok(html.includes('href="'+escapeHtml(proof.corroborationUrl)+'"'),
+    'Corroboration URL must exactly match separately approved source: '+p.id);
+  assert.ok(html.includes('href="#sources">Voir les deux sources de correspondance'),
+    'Purchaser should find the auditable evidence before leaving: '+p.id);
+  assert.equal((html.match(/class="am-extra-proof-step"/g)||[]).length,2);
+  assert.ok(html.includes('La page Amazon.fr n’a pas pu être consultée directement'),
+    'Do not present a comparator redirect as a live stock check: '+p.id);
+}
 mkdirSync('artifacts',{recursive:true});
 const browser=await chromium.launch({headless:true});
 try{
+  // Source transparency remains readable and usable on a 393px phone.
+  // Do not follow external merchant or evidence links in automated checks.
+  const auditPhone=await browser.newPage({viewport:{width:393,height:852},isMobile:true,hasTouch:true,locale:'fr-FR'});
+  try{
+    await auditPhone.goto(new URL('/montres/casio-la-20wh-4a1.html',base).href,
+      {waitUntil:'domcontentloaded'});
+    const card=auditPhone.locator('.am-extra-proof-ledger');
+    await card.scrollIntoViewIfNeeded();
+    assert.ok(await card.isVisible());
+    assert.equal(await card.getAttribute('data-asin-proof-id'),'casio-la-20wh-4a1');
+    assert.equal(await card.locator('.am-extra-proof-sources a').count(),2);
+    for(const link of await card.locator('.am-extra-proof-sources a').all()){
+      assert.equal(await link.getAttribute('target'),'_blank');
+      assert.equal(await link.getAttribute('rel'),'noopener noreferrer nofollow',
+        'Editorial evidence must never be labelled a paid checkout exit');
+      const bounds=await link.boundingBox();
+      assert.ok(bounds&&bounds.height>=44,'Source CTA should be touch-accessible on Android');
+    }
+    const geometry=await auditPhone.evaluate(()=>{
+      const el=document.querySelector('.am-extra-proof-ledger');
+      const r=el.getBoundingClientRect();
+      return {left:r.left,right:r.right,width:r.width,client:document.documentElement.clientWidth,
+        scroll:document.documentElement.scrollWidth,columns:getComputedStyle(el.querySelector('.am-extra-proof-sources')).gridTemplateColumns};
+    });
+    assert.ok(geometry.left>=-1&&geometry.right<=393&&geometry.width>=280,
+      'Provenance ledger must fit phone without clipped source URLs: '+JSON.stringify(geometry));
+    assert.ok(geometry.scroll<=geometry.client+2,
+      'Buyer-facing provenance block must not create horizontal scrolling');
+    await card.screenshot({path:'artifacts/atelier-asin-proof-ledger-393.png'});
+  }finally{await auditPhone.close();}
   // Verify the honest fallback is actually usable at mobile viewport width.
   const officialFallbackPage=await browser.newPage({viewport:{width:393,height:852},isMobile:true,hasTouch:true,locale:'fr-FR'});
   try{
