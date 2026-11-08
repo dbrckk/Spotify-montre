@@ -55,6 +55,7 @@ on:
       - 'site/unified-discovery.js'
       - 'site/catalogue-return.js'
       - 'site/unified-discovery.css'
+      - 'site/unified-tier-finish.css'
       - 'site/extra-product-viewer.js'
       - 'site/extra-source-passport.css'
       - 'scripts/build-popular-product-pages.mjs'
