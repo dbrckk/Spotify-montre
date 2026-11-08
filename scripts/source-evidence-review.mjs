@@ -28,6 +28,7 @@ export function buildSourceEvidenceReview({coreResearch,supplemental,catalogIds,
         evidenceKind:p?.evidenceType,collection:'supplemental'}))
   ];
   if(new Set(records.map(p=>p.id)).size!==records.length||
+     new Set(records.map(p=>p.asin)).size!==records.length||
      records.some(p=>!catalogIds.has(p.id)||!/^B[0-9A-Z]{9}$/.test(p.asin||'')||
        !['dated_model_match','amazon_fr_comparator_redirect',
          'amazon_fr_product_page'].includes(p.evidenceKind)))
