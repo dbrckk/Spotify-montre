@@ -1,10 +1,10 @@
 {
   "version": 1,
-  "researchedOn": "2026-11-01",
+  "researchedOn": "2026-11-08",
   "marketplace": "amazon.fr",
   "publishable": false,
   "status": "candidates_only_no_amazon_fr_detail_confirmation",
-  "explanation": "Candidats documentaires non publiables : la Tissot Gentleman n'a pas de fiche Amazon.fr vérifiée dans les sources accessibles. La SKMEI 2056 a une fiche Amazon.fr réelle, mais la variante blanche SKM-2056F01 y est affichée comme indisponible au contrôle du 1er novembre 2026. Un ASIN confirmé pour une variante épuisée ne doit pas remplacer une recherche Amazon potentiellement achetable. La disponibilité future n'est pas garantie.",
+  "explanation": "Candidats documentaires non publiables : les rapprochements Amazon.fr / modèle doivent prouver l'ASIN et une variante sans signal d'indisponibilité actuel. La Tissot Gentleman reste sans fiche Amazon.fr vérifiée ; la SKMEI 2056 blanche était indisponible au contrôle du 1er novembre. La Seiko SRPK29K1 est liée à l'ASIN B0C3W82YW5 via comparateur mais Amazon était indiqué « Indisponible » au contrôle du 8 novembre. La Citizen BN0150-10E possède un rapprochement documentaire B00R7PSW38 sans redirection Amazon.fr fraîche et exacte. Aucune de ces quatre pistes n'autorise de lien rémunéré direct sur le site.",
   "candidates": [
     {
       "productId": "tissot-gentleman-auto",
@@ -30,6 +30,31 @@
         "https://device.report/skmei/skm-2056f01"
       ],
       "note": "Le titre Amazon.fr décrit une SKMEI transparente blanche, et la section Product details confirme le modèle SKM-2056F01, la référence 2056M et l'ASIN B0C7W5NNX2. L'offre affichait « Currently unavailable ». Le site doit conserver un lien de recherche clairement étiqueté pour SKMEI 2056 jusqu'à la vérification d'une offre Amazon.fr réellement achetable pour une variante exacte."
+    },
+    {
+      "productId": "seiko-5-srpk29",
+      "model": "SRPK29K1",
+      "asinCandidate": "B0C3W82YW5",
+      "status": "verified_model_but_marked_unavailable_on_fr_comparator_do_not_publish",
+      "marketplaceModel": "SRPK29K1",
+      "observedOn": "2026-11-08",
+      "evidence": [
+        "https://leboncadran.fr/montre/seiko-5-sports-automatique-homme-noire-srpk29k1",
+        "https://www.yeskart.in/products/seiko-stainless-steel-analogue-black-dial-men-watch-srpk29k1-bandcolor-silver"
+      ],
+      "note": "Le 8 novembre 2026 le lien Amazon.fr du comparateur dirige vers /dp/B0C3W82YW5, tandis que le comparateur affiche cette offre Amazon comme « Indisponible ». Une fiche indépendante confirme l'ASIN et la Seiko SRPK29K1. Ne pas remplacer la recherche Amazon par un bouton vers une offre actuellement signalée indisponible sans nouveau contrôle direct."
+    },
+    {
+      "productId": "citizen-promaster-bn0150",
+      "model": "BN0150-10E",
+      "asinCandidate": "B00R7PSW38",
+      "status": "independent_model_asin_sources_but_no_recent_amazon_fr_direct_redirect",
+      "observedOn": "2026-11-08",
+      "evidence": [
+        "https://www.plongeealacarte.com/test-montre-citizen-watch-bn0150-10e",
+        "https://www.preisgenau.de/710400935-product"
+      ],
+      "note": "Deux sources secondaires associent B00R7PSW38 au modèle Citizen BN0150-10E. Aucune redirection actuelle vers une fiche Amazon.fr précisément identifiée avec disponibilité vérifiée n'a été confirmée lors de cette recherche. Garder la source fabricant et, si activée, la recherche Amazon correctement étiquetée."
     }
   ]
 }
