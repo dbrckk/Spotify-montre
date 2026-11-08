@@ -107,11 +107,22 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
           +e(item.title)+'</a><small>Face à '+e(item.other)+' · faits et limites documentés</small></div>').join('')
         +'</div></div>'
       :'';
+    // Source-backed premium typographic reference: never imply that a model
+    // photograph has been published, or draw an unverified watch silhouette.
+    const referencePassport=photo?''
+      :'<div class="am-extra-reference-passport" role="group" aria-label="Repères documentaires de '+e(name)+'">'
+        +'<div class="am-extra-passport-head"><span>DOCUMENTATION / RÉFÉRENCE</span><span>ÉDITION ATELIER</span></div>'
+        +'<dl class="am-extra-passport-facts">'
+        +'<div><dt>Mouvement</dt><dd>'+e(p.movement)+'</dd></div>'
+        +'<div><dt>Boîtier</dt><dd>'+e(p.case)+'</dd></div>'
+        +'</dl>'
+        +'<p>Présentation typographique uniquement. L’aspect exact de cette montre est à consulter sur la fiche officielle ci-dessous.</p>'
+        +'</div>';
     const main='<div class="wrap am-extra-page">'
       +'<nav class="crumb" aria-label="Fil d’Ariane"><a href="../index.html">Collection</a> / <a href="./modeles-populaires.html">'+products.length+' modèles complémentaires</a> / '+e(name)+'</nav>'
       +'<article class="am-extra-product" data-popular-watch-id="'+e(p.id)+'" data-brand="'+e(p.brand)+'" data-model="'+e(p.model)+'" data-official-url="'+e(p.officialUrl)+'">'
       +'<div class="am-extra-hero">'
-      +'<div class="am-extra-art am-pick-'+e(p.style)+(photo?' am-extra-art-with-photo':'')+'" role="group" aria-label="'+(photo?'Photo du modèle exact, droits de publication déclarés':'Composition graphique non contractuelle, sans photographie de cette montre')+'">'
+      +'<div class="am-extra-art am-pick-'+e(p.style)+(photo?' am-extra-art-with-photo':' am-extra-art-no-photo')+'" role="group" aria-label="'+(photo?'Photo du modèle exact, droits de publication déclarés':'Fiche documentaire typographique, aucune photographie de cette montre publiée ici')+'">'
       +(photo?'<div class="am-extra-photo-stage"><img class="am-extra-licensed-photo" src="../'+e(photo.url)+'"'
         +responsivePopularAttrs(root,p,photo,{prefix:'../',sizes:'(max-width: 760px) 78vw, (max-width: 1200px) 40vw, 520px',escape:e})
         +' width="'+photo.width+'" height="'+photo.height+'" alt="Montre '+e(name)+'" decoding="async" loading="eager">'
@@ -119,7 +130,7 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
         +'</div><div class="am-extra-photo-meta">':'')
       +'<span class="am-extra-art-kicker">'+e(p.category)+'</span><span class="am-extra-art-brand">'+e(p.brand)+'</span>'
       +'<span class="am-extra-art-model">'+e(p.model)+'</span>'
-      +(!photo&&p.brand==='SKMEI'?'<span class="am-budget-watch am-budget-watch-large" aria-hidden="true"><span class="am-budget-dial"></span></span>':'')
+      +referencePassport
       +'<span class="am-extra-art-label">'+(photo?'Photo de marque · accord déclaré · '+e(photo.rightsHolder):'Une référence à découvrir · photographie exacte chez le vendeur ou la marque')+'</span>'
       +(!photo?'<div class="am-extra-official-photo"><span class="am-extra-photo-unavailable">Photo du modèle non publiée ici</span><a href="'+e(p.officialUrl)+'" target="_blank" rel="noopener noreferrer" aria-label="Voir les photos du modèle exact : '+e(name)+' sur la fiche officielle (nouvel onglet)">Voir les photos du modèle exact <span aria-hidden="true">↗</span></a><small>Sur le site de la marque ou du vendeur · référence à confirmer avant achat</small></div>':'')
       +(photo?'</div>':'')
@@ -130,6 +141,7 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       +'<p class="am-extra-reference"><span>Référence à retrouver chez le marchand</span><strong>'+e(name)+'</strong></p>'
       +'<p class="am-extra-approval">À vérifier auprès du vendeur : référence exacte, variante, prix, disponibilité, garantie et conditions de retour. Nous ne vendons pas directement ce produit.</p>'
       +(affiliates.enabled?'<p class="am-extra-link-status '+(direct?'am-extra-link-direct':'am-extra-link-search')+'"><strong>'+(direct?'Fiche Amazon.fr correspondant au code modèle':'Recherche Amazon.fr — modèle non garanti')+'</strong><span>'+(direct?(comparator?'ASIN recoupé via un comparateur et une source indépendante ; fiche Amazon.fr non consultée directement. Vérifiez la variante, le vendeur et le stock.':'Lien associé à un ASIN documenté. Contrôlez la variante, le vendeur et le stock.'):'Les résultats peuvent contenir d’autres montres. Vérifiez le code affiché ci-dessus avant l’achat.')+'</span>'+(direct?.marketplaceVariant?'<span class="am-extra-merchant-variant"><strong>Variante de la fiche Amazon :</strong> '+e(direct.marketplaceVariant)+'</span>':'')+'</p>':'')
+      +(!photo?'<p class="am-extra-seller-path"><strong>Étape 2 / Consulter les sources</strong> Les liens suivants ouvrent des sites externes. Une recherche marchand ne garantit ni la variante exacte, ni son stock.</p>':'')
       +'<div class="am-extra-actions">'+actions+'</div>'
       +'<div class="am-extra-local-tools" role="group" aria-label="Conserver ou partager cette montre" hidden>'
       +'<button type="button" class="am-extra-favorite" data-extra-favorite="'+e(p.id)+'" aria-pressed="false" hidden>♡ Ajouter aux favoris</button>'
