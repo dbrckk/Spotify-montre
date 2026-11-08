@@ -14,8 +14,8 @@ const manifest=JSON.parse(read('seo-manifest.json'));
 assert.equal(manifest.productCount,15);
 assert.equal(manifest.popularAdditionalCount,37,'37 researched models complement the 15 photo-backed core products');
 assert.equal(manifest.popularDetailCount,37,'Every supplemental model requires a dedicated factual landing page');
-assert.equal(manifest.popularAffiliateDirectLinks,manifest.affiliateActive?12:0,'Only source-verified supplementary ASINs may become direct product links');
-assert.equal(manifest.popularAffiliateSearchLinks,manifest.affiliateActive?25:0,'All remaining supplemental products require labeled Amazon searches');
+assert.equal(manifest.popularAffiliateDirectLinks,manifest.affiliateActive?14:0,'Only source-verified supplementary ASINs may become direct product links');
+assert.equal(manifest.popularAffiliateSearchLinks,manifest.affiliateActive?23:0,'All remaining supplemental products require labeled Amazon searches');
 const insightData=JSON.parse(read('editorial-insights.json'));
 assert.equal(insightData.version,1);
 assert.equal(Object.keys(insightData.products).length,15,'15 unique editorial briefs required');
@@ -386,8 +386,12 @@ assert.match(read('popular-picks.css'),/\.am-affordable-grid\{/,
 // source-confirmed Amazon.fr ASINs can become direct product links.
 const exactPopular=JSON.parse(readFileSync(resolve(root,'../research/amazon-fr-popular-verified.json'),'utf8'));
 const exactPopularLinks=exactPopular.verifiedProducts;
-assert.equal(Object.keys(exactPopularLinks).length,12,'ASIN promotion requires a source-verified registry entry');
+assert.equal(Object.keys(exactPopularLinks).length,14,'ASIN promotion requires a source-verified registry entry');
 for(const [id,asin,code,comparator] of [
+  ['casio-la-20wh-4a1','B077YZHF21','LA-20WH-4A1EF',
+    'https://www.123comparer.fr/Montres-femme/go4ueqjige5dnpt38yhur.html'],
+  ['tissot-gentleman-auto','B07XTVQ3W7','T1274071104100',
+    'https://www.123comparer.fr/Montres-homme/gh5dncjsgyhdrqj1gahug.html'],
   ['casio-dw5600rl-1','B0DN6LT6FX','DW-5600RL-1ER',
     'https://leboncadran.fr/montre/casio-the-origin-dw-5600rl-1er'],
   ['tissot-le-locle-white','B01N7FXE80','T0064071103300',
@@ -465,9 +469,9 @@ assert.equal(commercial.scope,'editorial_watch_purchase_evidence_not_live_offers
 assert.equal(commercial.counts.total,52);
 assert.equal(commercial.counts.core,15);
 assert.equal(commercial.counts.supplemental,37);
-assert.equal(commercial.counts.documentedAmazonAsins,25);
+assert.equal(commercial.counts.documentedAmazonAsins,27);
 assert.equal(commercial.counts.historicallyUnavailable,4);
-assert.equal(commercial.counts.activeExactAmazonReferrals,manifest.affiliateActive?25:0);
+assert.equal(commercial.counts.activeExactAmazonReferrals,manifest.affiliateActive?27:0);
 assert.equal(commercial.counts.directSaleEligible,0);
 assert.equal(commercial.products.length,52);
 assert.deepEqual(commercial.products.map(p=>p.id),unified.products.map(p=>p.id),
