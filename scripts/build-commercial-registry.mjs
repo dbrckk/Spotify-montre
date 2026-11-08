@@ -26,7 +26,7 @@ export function buildCommercialRegistry({root,coreProducts,affiliates,coreAmazon
   if(primaryEvidence.version!==1||!date.test(primaryEvidence.checkedOn||'')||
       Object.keys(primaryEvidence.products||{}).length!==15||
       supplementalEvidence.version!==1||
-      Object.keys(supplementalEvidence.verifiedProducts||{}).length!==10)
+      Object.keys(supplementalEvidence.verifiedProducts||{}).length!==12)
     throw Error('Commercial source snapshots are incomplete');
   if(affiliates.enabled!==tracked.enabled||affiliates.links.size!==Object.keys(tracked.links).length)
     throw Error('Commercial affiliate activation disagrees with the validated account state');
