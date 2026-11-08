@@ -27,6 +27,46 @@ try{
       {waitUntil:'domcontentloaded'});
     await page.locator('#udFilters').waitFor({state:'visible'});
     assert.equal(await page.locator('.ud-card').count(),52);
+    // Customer-facing collections use the same exact source feed as the 52
+    // cards. Editorial tiers are not silently passed off as price bands.
+    const tierLinks=page.locator('.ud-tier-shortcuts [data-tier-shortcut]');
+    assert.equal(await tierLinks.count(),3,'All three collections must be explorable');
+    assert.match(await page.locator('.ud-tier-disclaimer').innerText(),
+      /pas des fourchettes de prix/i);
+    assert.ok(await page.locator('link[href="../unified-tier-finish.css"]').count()===1,
+      'Premium catalogue requires its cache-independent stylesheet');
+    let tierSum=0;
+    for(const tier of ['essential','signature','prestige']){
+      const count=await page.locator('.ud-card[data-tier="'+tier+'"]').count();
+      assert.ok(count>0,'Empty collection: '+tier);
+      tierSum+=count;
+      const tierLink=tierLinks.locator('[data-tier-shortcut="'+tier+'"]');
+      assert.equal(await tierLink.count(),1);
+      assert.equal(await tierLink.getAttribute('href'),'?tier='+tier+'#udCount');
+      assert.match(await tierLink.innerText(),new RegExp('\\b'+count+' modèle'));
+    }
+    assert.equal(tierSum,52,'Editorial tier totals must exactly cover 52 watches');
+    assert.equal(await page.locator('.ud-card .ud-tier-pill').count(),52);
+    for(const tier of ['essential','signature','prestige']){
+      const actual=await page.locator('.ud-card[data-tier="'+tier+'"] .ud-tier-pill').first().innerText();
+      assert.match(actual,/Gamme (Essentielle|Signature|Prestige)/);
+    }
+    if(width===393){
+      const shortcut=tierLinks.locator('[data-tier-shortcut="signature"]');
+      const geometry=await shortcut.boundingBox();
+      assert.ok(geometry&&geometry.width>=200&&geometry.height>=180&&
+        geometry.x>=-1&&geometry.x+geometry.width<=width+1,
+        'Editorial range shortcuts must fit a narrow Android viewport');
+      const expected=await page.locator('.ud-card[data-tier="signature"]').count();
+      await shortcut.click();
+      await page.locator('#udFilters').waitFor({state:'visible'});
+      assert.equal(new URL(page.url()).searchParams.get('tier'),'signature');
+      assert.equal(await page.locator('.ud-card:visible').count(),expected);
+      await page.goto(new URL('/montres/toutes-les-montres.html',base).href,
+        {waitUntil:'domcontentloaded'});
+      await page.locator('#udFilters').waitFor({state:'visible'});
+    }
+
 
     // A narrow Android screen should open into the photo-first, single-column
     // view; a deliberate switch to the grid must survive a page reload.
