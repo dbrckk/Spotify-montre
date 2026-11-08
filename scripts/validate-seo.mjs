@@ -9,6 +9,8 @@ import {commercialShortlist} from './build-commercial-shortlist.mjs';
 import {loadApprovedPartnerOffers} from './approved-partner-offers.mjs';
 const root=resolve(process.cwd(),'site');
 const read=p=>readFileSync(resolve(root,p),'utf8');
+const htmlEscape=value=>String(value).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+  .replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#39;');
 const feed=JSON.parse(read('selection-affiliation.json'));
 const manifest=JSON.parse(read('seo-manifest.json'));
 assert.equal(manifest.productCount,15);
@@ -24,6 +26,18 @@ for(const p of feed.products){
  const insight=insightData.products[p.id];
  assert.ok(insight,'No editorial copy for '+p.id);
  const pageHtml=read('montres/'+p.id+'.html');
+  assert.ok(pageHtml.includes('data-watch-id="'+p.id+'"'
+    +' data-brand="'+htmlEscape(p.brand)+'" data-model="'+htmlEscape(p.model)+'"'),
+    'Core watch reference must use documented brand and model: '+p.id);
+  assert.equal((pageHtml.match(/data-watch-ref-copy=/g)||[]).length,1,
+    'One exact source-only model copy control per historical watch: '+p.id);
+  assert.ok(pageHtml.includes('data-watch-ref-copy="'+p.id+'" hidden>Copier la référence</button>'),
+    'Source-model copy enhancement must fail closed without JavaScript: '+p.id);
+  assert.ok(pageHtml.includes('<h1>'+htmlEscape(p.brand+' '+p.model)+'</h1>'),
+    'Core reference identity must match visible H1: '+p.id);
+  assert.ok(pageHtml.includes('src="../watch-reference-copy.js"')&&
+    pageHtml.includes('href="../watch-reference-copy.css"'),
+    'Historical watch page must load common safe reference helper: '+p.id);
  assert.equal((pageHtml.match(/class="watch-decision-grid"/g)||[]).length,1,'One decision grid per product '+p.id);
  assert.match(pageHtml,/href="#avis-editorial"/,'Editorial anchor missing '+p.id);
  assert.match(pageHtml,/sans prétendre avoir essayé ce modèle/,'No fabricated hands-on claim '+p.id);
