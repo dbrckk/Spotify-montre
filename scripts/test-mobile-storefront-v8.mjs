@@ -226,9 +226,9 @@ try{
  }
 
  assert.equal(await popularPage.locator('.am-picks-tier').count(),3,'All three editorial ranges are represented');
- assert.equal(await popularPage.locator('a[data-amazon-search-id]').count(),27,'Twenty-seven variants without sufficiently linked ASINs must remain searches');
- assert.equal(await popularPage.locator('a[data-amazon-product]').count(),16,
-   'Ten original exact product links plus six direct-merchant shortlist cards are attributed without new ASINs');
+ assert.equal(await popularPage.locator('a[data-amazon-search-id]').count(),25,'Twenty-five variants without sufficiently linked ASINs must remain searches');
+ assert.equal(await popularPage.locator('a[data-amazon-product]').count(),18,
+   'Twelve exact product links plus six direct-merchant shortlist cards remain attributed');
  const confirmedGshock=popularPage.locator('#pick-casio-gw-m5610u-1 a[data-amazon-product]');
  assert.equal(await confirmedGshock.getAttribute('href'),'https://www.amazon.fr/dp/B09BCPP68Q?tag=drackk04-21');
  assert.equal(await confirmedGshock.getAttribute('data-amazon-placement'),'popular');
@@ -307,9 +307,9 @@ try{
    'JavaScript disabled must preserve all source-backed watch ideas');
  assert.equal(await noJs.locator('#am-pick-filters:visible').count(),0,
    'Non-functional controls must not be exposed without JavaScript');
- assert.equal(await noJs.locator('a[data-amazon-search-id]').count(),27);
- assert.equal(await noJs.locator('a[data-amazon-product]').count(),16,
-   'Without JavaScript, all ten original and six shortlist exact Amazon options remain clickable');
+ assert.equal(await noJs.locator('a[data-amazon-search-id]').count(),25);
+ assert.equal(await noJs.locator('a[data-amazon-product]').count(),18,
+   'Without JavaScript, all twelve source-backed and six shortlist exact Amazon links remain clickable');
  assert.equal(await noJs.locator('#selection-10-montres .am-focus-merchant a').count(),10,
    'Ten seller-specific choices remain visible without scripting');
  await noJs.close();
@@ -464,7 +464,7 @@ try{
  }
  assert.ok(narrow.scroll<=narrow.client+2,'Supplemental watch landing must reflow at 320 CSS px '+JSON.stringify(narrow));
  await popularPage.close();
- console.log('PASS: 37 SEO watch pages, ten sourced Amazon.fr ASINs, twenty-seven honest searches, exact variants and Android reflow');
+ console.log('PASS: 37 SEO watch pages, twelve sourced Amazon.fr ASINs, twenty-five honest searches, exact variants and Android reflow');
  const shopFirst=await page.evaluate(()=>{
    const ids=['gammes','montres','amEditorialGallery','histoire'];
    const positions=ids.map(id=>document.getElementById(id)?.getBoundingClientRect().top+window.scrollY);

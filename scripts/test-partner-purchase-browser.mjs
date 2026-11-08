@@ -17,7 +17,7 @@ const discovery=JSON.parse(readFileSync(new URL('discovery-catalogue.json',root)
 const commercial=JSON.parse(readFileSync(new URL('commercial-registry.json',root),'utf8'));
 const extra=discovery.products.filter(p=>p.kind==='supplemental'&&p.merchantKind==='direct');
 const total=ids.length+extra.length;
-assert.equal(extra.length,10,'Ten independently reviewed exact Amazon supplemental models must publish');
+assert.equal(extra.length,12,'Twelve independently reviewed supplemental ASINs must publish');
 assert.equal(commercial.counts.activeExactAmazonReferrals,total,
   'The purchase showroom must agree with the independent commercial proof');
 assert.equal(Object.values(evidence.links).filter(x=>
@@ -32,7 +32,7 @@ try{
   const issues=[];
   page.on('pageerror',error=>issues.push(error.message));
   await page.goto(new URL('acheter.html',base).href,{waitUntil:'domcontentloaded'});
-  await page.waitForFunction(()=>document.querySelectorAll('.am-partner-card').length===23);
+  await page.waitForFunction(()=>document.querySelectorAll('.am-partner-card').length===25);
   assert.equal(await page.locator('.am-partner-card').count(),total);
   assert.equal(await page.locator('#amDirectForm').isVisible(),false,
     'Affiliate gateway must never activate the own-site merchant checkout');
@@ -132,7 +132,7 @@ try{
     scroll:document.documentElement.scrollWidth
   }));
   assert.ok(narrow.scroll<=narrow.client+2,
-    'Complete 23-model shopping showroom must reflow at 320px Android');
+    'Complete 25-model shopping showroom must reflow at 320px Android');
   await page.setViewportSize({width:390,height:840});
   const mobile=await page.evaluate(()=>({
     documentWidth:document.documentElement.clientWidth,
@@ -237,7 +237,7 @@ try{
   await home.close();
 
   // The detailed watch must reach its own verified partner record, not a
-  // generic 23-item purchase listing. Unmatched models must stay explicitly
+  // generic 25-item purchase listing. Unmatched models must stay explicitly
   // unmatched rather than being silently replaced by another watch.
   const detailJourney=await browser.newPage({viewport:{width:390,height:840},locale:'fr-FR'});
   detailJourney.on('pageerror',error=>issues.push('detail journey: '+error.message));
@@ -249,7 +249,7 @@ try{
   await detailJourney.locator('#detailPartnerGateway').click();
   await detailJourney.waitForURL(url=>url.pathname.endsWith('/acheter.html')&&
     url.searchParams.get('modele')==='seiko-sharp');
-  await detailJourney.waitForFunction(()=>document.querySelectorAll('.am-partner-card').length===23);
+  await detailJourney.waitForFunction(()=>document.querySelectorAll('.am-partner-card').length===25);
   assert.equal(await detailJourney.locator('.am-partner-card').first().getAttribute('data-watch-id'),
     'seiko-sharp','Customer must find exactly the watch selected on its product page');
 
@@ -299,7 +299,7 @@ try{
   const referred=await browser.newPage({viewport:{width:390,height:840}});
   await referred.goto(new URL('acheter.html?modele='+referredId,base).href,
     {waitUntil:'domcontentloaded'});
-  await referred.waitForFunction(()=>document.querySelectorAll('.am-partner-card').length===23);
+  await referred.waitForFunction(()=>document.querySelectorAll('.am-partner-card').length===25);
   assert.equal(await referred.locator('.am-partner-card').count(),total);
   assert.equal(await referred.locator('.am-partner-card').first().getAttribute('data-watch-id'),
     referredId);
@@ -325,7 +325,7 @@ try{
   const supplementalPage=await browser.newPage({viewport:{width:390,height:840}});
   await supplementalPage.goto(new URL('acheter.html?modele='+supplementalId,base).href,
     {waitUntil:'domcontentloaded'});
-  await supplementalPage.waitForFunction(()=>document.querySelectorAll('.am-partner-card').length===23);
+  await supplementalPage.waitForFunction(()=>document.querySelectorAll('.am-partner-card').length===25);
   assert.equal(await supplementalPage.locator('.am-partner-card').first().getAttribute('data-watch-id'),
     supplementalId,'Additional buyer referrals must preserve the exact model deep link');
   assert.equal(await supplementalPage.locator('.am-partner-card').first().getAttribute('data-featured'),'true');
@@ -426,7 +426,7 @@ try{
   await recover.locator('#amPartnerRetry').waitFor({state:'visible'});
   assert.equal(await recover.locator('.am-partner-card').count(),0);
   await recover.locator('#amPartnerRetry').click();
-  await recover.waitForFunction(()=>document.querySelectorAll('.am-partner-card').length===23);
+  await recover.waitForFunction(()=>document.querySelectorAll('.am-partner-card').length===25);
   assert.equal(await recover.locator('.am-partner-card').count(),total);
   assert.equal(await recover.locator('.am-partner-card').first().getAttribute('data-watch-id'),
     'seiko-sharp');

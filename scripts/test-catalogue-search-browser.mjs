@@ -27,6 +27,35 @@ try{
       {waitUntil:'domcontentloaded'});
     await page.locator('#udFilters').waitFor({state:'visible'});
     assert.equal(await page.locator('.ud-card').count(),52);
+    // A comparator redirect plus independent matching model evidence can
+    // establish an ASIN destination, but never stock, price or a sale.
+    for(const [id,asin,code] of [
+      ['casio-dw5600rl-1','B0DN6LT6FX','DW-5600RL-1ER'],
+      ['tissot-le-locle-white','B01N7FXE80','T0064071103300']
+    ]){
+      const card=page.locator('#modele-'+id);
+      assert.equal(await card.getAttribute('data-merchant'),'direct',
+        'Independently cross-checked Amazon.fr model must no longer be a generic search: '+id);
+      const direct=card.locator('a[data-amazon-product="'+id+'"]');
+      assert.equal(await direct.count(),1);
+      const target=new URL(await direct.getAttribute('href'));
+      assert.equal(target.origin,'https://www.amazon.fr');
+      assert.equal(target.pathname,'/dp/'+asin);
+      assert.deepEqual([...target.searchParams.keys()],['tag']);
+      assert.equal(target.searchParams.get('tag'),'drackk04-21');
+      assert.match(await direct.getAttribute('rel'),/\bsponsored\b/);
+      assert.match(await card.locator('.ud-exact-variant').innerText(),new RegExp(code));
+      assert.match(await card.locator('.ud-redirect-proof').innerText(),
+        /page Amazon.fr non consultée directement/i);
+      assert.equal(await card.locator('a[data-amazon-search-id]').count(),0);
+    }
+    for(const id of ['seiko-5-srpk29','citizen-promaster-bn0150']){
+      const card=page.locator('#modele-'+id);
+      assert.notEqual(await card.getAttribute('data-merchant'),'direct',
+        'Unverified or unavailable Amazon.fr evidence must never become an exact paid CTA: '+id);
+      assert.equal(await card.locator('a[data-amazon-product]').count(),0);
+    }
+
     // Customer-facing collections use the same exact source feed as the 52
     // cards. Editorial tiers are not silently passed off as price bands.
     const tierLinks=page.locator('.ud-tier-shortcuts [data-tier-shortcut]');

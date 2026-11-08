@@ -14,8 +14,8 @@ const manifest=JSON.parse(read('seo-manifest.json'));
 assert.equal(manifest.productCount,15);
 assert.equal(manifest.popularAdditionalCount,37,'37 researched models complement the 15 photo-backed core products');
 assert.equal(manifest.popularDetailCount,37,'Every supplemental model requires a dedicated factual landing page');
-assert.equal(manifest.popularAffiliateDirectLinks,manifest.affiliateActive?10:0,'Only source-verified supplementary ASINs may become direct product links');
-assert.equal(manifest.popularAffiliateSearchLinks,manifest.affiliateActive?27:0,'All remaining supplemental products require labeled Amazon searches');
+assert.equal(manifest.popularAffiliateDirectLinks,manifest.affiliateActive?12:0,'Only source-verified supplementary ASINs may become direct product links');
+assert.equal(manifest.popularAffiliateSearchLinks,manifest.affiliateActive?25:0,'All remaining supplemental products require labeled Amazon searches');
 const insightData=JSON.parse(read('editorial-insights.json'));
 assert.equal(insightData.version,1);
 assert.equal(Object.keys(insightData.products).length,15,'15 unique editorial briefs required');
@@ -386,7 +386,21 @@ assert.match(read('popular-picks.css'),/\.am-affordable-grid\{/,
 // source-confirmed Amazon.fr ASINs can become direct product links.
 const exactPopular=JSON.parse(readFileSync(resolve(root,'../research/amazon-fr-popular-verified.json'),'utf8'));
 const exactPopularLinks=exactPopular.verifiedProducts;
-assert.equal(Object.keys(exactPopularLinks).length,10,'ASIN promotion requires a source-verified registry entry');
+assert.equal(Object.keys(exactPopularLinks).length,12,'ASIN promotion requires a source-verified registry entry');
+for(const [id,asin,code,comparator] of [
+  ['casio-dw5600rl-1','B0DN6LT6FX','DW-5600RL-1ER',
+    'https://leboncadran.fr/montre/casio-the-origin-dw-5600rl-1er'],
+  ['tissot-le-locle-white','B01N7FXE80','T0064071103300',
+    'https://leboncadran.fr/montre/tissot-le-locle-automatique-t0064071103300']
+]){
+  const record=exactPopularLinks[id];
+  assert.equal(record.asin,asin,'Exact source ASIN for '+id);
+  assert.equal(record.marketplaceModel,code,'No inferred regional model for '+id);
+  assert.equal(record.evidenceType,'amazon_fr_comparator_redirect',
+    'Do not imply first-hand Amazon.fr inspection: '+id);
+  assert.equal(record.comparisonUrl,comparator);
+  assert.equal(record.evidenceUrl,'https://www.amazon.fr/dp/'+asin);
+}
 assert.equal(exactPopularLinks['casio-gw-m5610u-1'].asin,'B09BCPP68Q','Actual Amazon.fr G-SHOCK source code must be used');
 assert.equal(exactPopularLinks['casio-f91w-1'].asin,'B000J34HN4','Casio F-91W documented Amazon.fr ASIN');
 assert.equal(exactPopularLinks['casio-a168wg-9'].asin,'B002LAS086','Casio vintage gold documented Amazon.fr ASIN');
@@ -451,9 +465,9 @@ assert.equal(commercial.scope,'editorial_watch_purchase_evidence_not_live_offers
 assert.equal(commercial.counts.total,52);
 assert.equal(commercial.counts.core,15);
 assert.equal(commercial.counts.supplemental,37);
-assert.equal(commercial.counts.documentedAmazonAsins,23);
+assert.equal(commercial.counts.documentedAmazonAsins,25);
 assert.equal(commercial.counts.historicallyUnavailable,4);
-assert.equal(commercial.counts.activeExactAmazonReferrals,manifest.affiliateActive?23:0);
+assert.equal(commercial.counts.activeExactAmazonReferrals,manifest.affiliateActive?25:0);
 assert.equal(commercial.counts.directSaleEligible,0);
 assert.equal(commercial.products.length,52);
 assert.deepEqual(commercial.products.map(p=>p.id),unified.products.map(p=>p.id),
@@ -1081,7 +1095,7 @@ const trackedDirect=popularHtml.match(/data-amazon-product=/g)||[];
 const sponsoring=popularHtml.match(/rel="noopener noreferrer nofollow sponsored"/g)||[];
 assert.equal(trackedResults.length,manifest.popularAffiliateSearchLinks,'Only unverified models may have search links');
 assert.equal(trackedDirect.length,manifest.popularAffiliateDirectLinks+(manifest.affiliateActive?6:0),
-  'Six source-confirmed shortlist merchant actions augment 10 original cards, without pretending to verify new ASINs');
+  'Six source-confirmed shortlist merchant actions augment twelve original cards');
 assert.equal(sponsoring.length,manifest.affiliateActive?43:0,'All 37 catalogue and six shortlist paid actions must carry sponsored relation');
 assert.equal((popularHtml.match(/amazon\.fr\/dp\/B09BCPP68Q/g)||[]).length,manifest.affiliateActive?2:0,
   'The same G-SHOCK ASIN appears in one standard card and one shortlist action, never a new unverified ASIN');
