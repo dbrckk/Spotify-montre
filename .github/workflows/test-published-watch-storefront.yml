@@ -166,6 +166,20 @@ jobs:
                   ready=0
                   reason="$reason [outdated photo coverage: live=$deployed_photos source=$expected_photos]"
                 fi
+                # A mixed CDN release may serve old generated HTML beside
+                # new discovery-catalogue.json. Verify counts and new exact
+                # references before running browser filters on that mixture.
+                expected_direct="$(node -p "const fs=require('node:fs');const a=JSON.parse(fs.readFileSync('site/affiliate-links.json'));const p=JSON.parse(fs.readFileSync('research/amazon-fr-popular-verified.json'));a.enabled?Object.keys(a.links).length+Object.keys(p.verifiedProducts).length:0")"
+                deployed_direct="$(grep -oF 'data-merchant="direct"' "$RUNNER_TEMP/live-unified.html" | wc -l)"
+                if [ "$deployed_direct" -ne "$expected_direct" ]; then
+                  ready=0
+                  reason="$reason [mixed CDN merchant HTML: live=$deployed_direct source=$expected_direct]"
+                fi
+                if ! grep -Fq 'https://www.amazon.fr/dp/B0DN6LT6FX?tag=drackk04-21' "$RUNNER_TEMP/live-unified.html" ||
+                   ! grep -Fq 'https://www.amazon.fr/dp/B01N7FXE80?tag=drackk04-21' "$RUNNER_TEMP/live-unified.html"; then
+                  ready=0
+                  reason="$reason [missing newly documented Casio/Tissot direct ASIN cards]"
+                fi
               fi
             fi
             # New release: do not run browser checks against an old CDN page
