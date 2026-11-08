@@ -294,7 +294,7 @@ const summary='### Atelier Montres — live SEO audit\n\n'
   +'- Pages in sitemap: '+report.pages+'\n'
   +'- Pages fetched successfully: '+checked.length+'\n'
   +'- Commercial landing pages checked: '+report.commercialPages+' / '+popular.length+' ('+report.commercialChecks+' integrity assertions)\n'
-  +'- Dated Amazon.fr model matches: '+sourceEvidenceReview.documentedAsins+'; evidence needing re-review after '+reviewDays+' days: '+sourceEvidenceReview.dueCount+' (no live stock claims)\n'
+  +'- Dated Amazon.fr model matches: '+sourceEvidenceReview.documentedAsins+'; evidence needing re-review after ' +sourceEvidenceReview.reviewIntervalDays+' days: '+sourceEvidenceReview.dueCount+' (no live stock claims)\n'
   +'- Issues: '+issues.length+'\n\n'
   +(issues.length?'#### Detected problems\n'+issues.map(x=>'- '+x).join('\n'):'All public technical SEO checks passed.')+'\n';
 if(process.env.GITHUB_STEP_SUMMARY)appendFileSync(process.env.GITHUB_STEP_SUMMARY,summary);
