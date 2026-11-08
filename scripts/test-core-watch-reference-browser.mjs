@@ -22,7 +22,7 @@ for(const p of products){
     'Unvalidated copy button must be hidden without JavaScript: '+p.id);
   assert.ok(html.includes('<h1>'+escapeHtml(name)+'</h1>'),
     'Copied source identity must match buyer-facing heading: '+p.id);
-  assert.equal((html.match(/src="\.\.\/watch-reference-copy\.js"/g)||[]).length,1);
+  assert.equal((html.match(/src="\.\.\/watch-reference-copy-v2\.js"/g)||[]).length,1);
   assert.equal((html.match(/href="\.\.\/watch-reference-copy\.css"/g)||[]).length,1);
   assert.ok(html.includes('data-watch-ref-status'), 'Accessible copy outcome required: '+p.id);
 }
