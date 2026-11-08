@@ -71,7 +71,6 @@ try{
 
     // Buyer-facing merchant paths must count real source-backed destinations,
     // never merchant prices, unverified inventory or invented Awin offers.
-    const pathNav=page.locator('.ud-path-links');
     const pathLinks=page.locator('.ud-path-link[data-merchant-path]');
     assert.ok(await pathLinks.count()>=3,'The public merchant choices are hidden');
     assert.match(await page.locator('.ud-paths-disclosure').innerText(),
