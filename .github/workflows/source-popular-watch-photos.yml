@@ -7,11 +7,14 @@ on:
       - scripts/sync-popular-watch-images.py
       - scripts/test_popular_photo_sources.py
       - scripts/popular-photo-rights.mjs
+      - research/official-watch-photo-sources.json
       - .github/workflows/source-popular-watch-photos.yml
   pull_request:
     paths:
       - scripts/sync-popular-watch-images.py
+      - scripts/test_popular_photo_sources.py
       - scripts/popular-photo-rights.mjs
+      - research/official-watch-photo-sources.json
       - .github/workflows/source-popular-watch-photos.yml
   workflow_dispatch:
 
