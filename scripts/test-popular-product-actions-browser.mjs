@@ -16,6 +16,14 @@ for(const p of picks){
   assert.match(html,/src="\.\.\/extra-product-actions\.js"/);
   assert.ok(html.includes('data-extra-favorite="'+p.id+'"'));
   assert.ok(html.includes('data-extra-share="'+p.id+'"'));
+  assert.ok(html.includes('data-watch-ref-copy="'+p.id+'"'),
+    'Every supplemental watch must expose its actual model reference: '+p.id);
+  assert.ok(html.includes('data-watch-ref-tools hidden'),
+    'Copy controls must remain invisible without validated JavaScript: '+p.id);
+  assert.ok(html.includes('src="../watch-reference-copy.js"'),
+    'Dedicated source-copy enhancement missing on '+p.id);
+  assert.ok(html.includes('href="../watch-reference-copy.css"'),
+    'Dedicated source-copy styling missing on '+p.id);
   assert.ok(html.includes('href="./toutes-les-montres.html?saved=1"'));
   const proof=rights[p.id];
   if(proof){
@@ -332,6 +340,14 @@ try{
     }});
   });
   await fallback.goto(new URL('/montres/skmei-1251.html',base).href);
+  const refButton=fallback.locator('button[data-watch-ref-copy="skmei-1251"]');
+  assert.ok(await refButton.isVisible(),'Copy exact manufacturer code must work as an Android fallback');
+  await refButton.click();
+  const refField=fallback.locator('input[data-watch-ref-manual]');
+  assert.ok(await refField.isVisible(),'Denied clipboard permission must reveal a selectable reference');
+  assert.equal(await refField.inputValue(),'SKMEI 1251');
+  assert.equal(await refField.getAttribute('readonly'),'');
+  assert.match(await fallback.locator('[data-watch-ref-status]').innerText(),/Copie automatique indisponible/);
   await fallback.locator('[data-extra-share]').click();
   const field=fallback.locator('[data-extra-copy-link]');
   assert.ok(await field.isVisible());
