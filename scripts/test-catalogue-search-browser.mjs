@@ -43,7 +43,7 @@ try{
       assert.equal(target.pathname,'/dp/'+asin);
       assert.deepEqual([...target.searchParams.keys()],['tag']);
       assert.equal(target.searchParams.get('tag'),'drackk04-21');
-      assert.match(await direct.getAttribute('rel'),/\\bsponsored\\b/);
+      assert.match(await direct.getAttribute('rel'),/\bsponsored\b/);
       assert.match(await card.locator('.ud-exact-variant').innerText(),new RegExp(code));
       assert.match(await card.locator('.ud-redirect-proof').innerText(),
         /page Amazon.fr non consultée directement/i);
