@@ -62,6 +62,7 @@ on:
       - 'site/unified-shopper-paths.css'
       - 'site/extra-product-viewer.js'
       - 'site/extra-source-passport.css'
+      - 'site/merchant-proof-ledger.css'
       - 'scripts/build-popular-product-pages.mjs'
       - 'scripts/build-popular-editorial-thumbnails.py'
       - 'scripts/responsive-images.mjs'
