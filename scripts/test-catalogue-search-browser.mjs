@@ -259,10 +259,15 @@ try{
       'Merchant price, stock and delivery caveat must remain visible to buyers');
 
 
-    // The 15 models without publishable packshots must let a shopper open
-    // the exact manufacturer/source photo from the catalogue itself.
+    // Derive coverage from approved photographs, not an obsolete count.
+    // A newly approved exact-model image must not break Android CI.
+    const knownUnpictured=JSON.parse(readFileSync(
+      new URL('../site/selection-populaires.json',import.meta.url),'utf8')).products
+      .filter(p=>!popularPhotoProof[p.id]);
+    assert.ok(knownUnpictured.length>0,'The no-photo fallback must be tested');
     const noPhotoCards=await page.locator('.ud-card[data-visual="no-photo"]').count();
-    assert.equal(noPhotoCards,15,'Unexpected source-backed no-photo coverage');
+    assert.equal(noPhotoCards,knownUnpictured.length,
+      'Rendered no-photo cards must match the approved-photo registry');
     assert.equal(await page.locator('.ud-card[data-visual="photo"] .ud-photo-official').count(),0,
       'Do not duplicate source-photo buttons on already photographed cards');
     const unpictured=await page.locator('.ud-card[data-visual="no-photo"]').evaluateAll(items=>
@@ -281,10 +286,8 @@ try{
           right:rect?.right
         };
       }));
-    const knownUnpictured=JSON.parse(readFileSync(
-      new URL('../site/selection-populaires.json',import.meta.url),'utf8')).products
-      .filter(p=>!popularPhotoProof[p.id]);
-    assert.equal(knownUnpictured.length,15);
+    assert.equal(unpictured.length,knownUnpictured.length,
+      'Every unphotographed model must expose a source-photo link');
     for(const item of unpictured){
       const source=knownUnpictured.find(p=>p.id===item.id);
       assert.ok(source,'Unregistered unphotographed model: '+item.id);

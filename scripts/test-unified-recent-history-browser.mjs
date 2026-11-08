@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {readFileSync,mkdirSync} from 'node:fs';
+import {readFileSync,mkdirSync,existsSync} from 'node:fs';
 import {chromium} from 'playwright';
 
 // Local-only tests: navigate real published-model HTML, never merchant links.
@@ -62,17 +62,42 @@ try{
     const pictures=section.locator('.am-unified-recent-media img');
     assert.ok(await pictures.count()>=3,
       'Photo-backed historical models should display actual approved local images');
+    let responsiveChecked=0;
     for(const img of await pictures.all()){
       const raw=await img.getAttribute('src');
       const url=new URL(raw,page.url());
       assert.equal(url.origin,base.origin,'Recently viewed must never load a remote image');
       assert.match(url.pathname,/^\/assets\/watches(?:-popular)?\/[a-z0-9-]+\.webp$/);
       const item=img.locator('xpath=ancestor::article[1]');
-      assert.ok(url.pathname.endsWith('/'+await item.getAttribute('data-recent-watch-id')+'.webp'),
+      const id=await item.getAttribute('data-recent-watch-id');
+      assert.ok(url.pathname.endsWith('/'+id+'.webp'),
         'A thumbnail must depict the exact model that the link opens');
+      if(core.some(product=>product.id===id)&&
+        existsSync('site/assets/watch-responsive/'+id+'-480.webp')){
+        // Hashed responsive photo URLs must not silently disable srcset.
+        const sourceSet=await img.getAttribute('srcset');
+        assert.ok(sourceSet?.includes('/watch-responsive/'+id+'-480.webp?v='),
+          'Versioned responsive image must remain selectable for '+id);
+        for(const candidate of sourceSet.split(',')){
+          const parts=candidate.trim().split(/\s+/);
+          assert.equal(parts.length,2,'Valid image URL and width descriptor');
+          assert.match(parts[1],/^[1-9][0-9]*w$/);
+          const imageUrl=new URL(parts[0],page.url());
+          assert.equal(imageUrl.origin,base.origin,'No remote responsive image');
+          assert.match(imageUrl.search,/^\?v=[a-f0-9]{12}$/);
+          const original=imageUrl.pathname==='/assets/watches/'+id+'.webp';
+          const prefix='/assets/watch-responsive/'+id+'-';
+          const responsive=imageUrl.pathname.startsWith(prefix)&&
+            /^[0-9]+[.]webp$/.test(imageUrl.pathname.slice(prefix.length));
+          assert.ok(original||responsive,'The responsive image must match '+id);
+        }
+        responsiveChecked++;
+      }
       assert.equal(await img.getAttribute('alt'),'',
         'The visible model name should label the link once');
     }
+    assert.ok(responsiveChecked>=2,
+      'Two core watch thumbnails must exercise versioned responsive WebPs');
     const noPhotoItem=section.locator('[data-recent-watch-id="'+noPhoto.id+'"]');
     assert.equal(await noPhotoItem.locator('img').count(),0,
       'Unphotographed models must not be given generated or unrelated pictures');
