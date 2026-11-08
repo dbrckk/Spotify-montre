@@ -35,7 +35,9 @@ export function loadVerifiedPopularLinks({root,picks,affiliates,amazonPartnerTag
       'casio-ga-2100-1a1':'GA-2100-1A1ER',
       'casio-ae1200wh-1av':'AE-1200WH-1AVEF',
       // Manufacturer PD-1701 is also presented as 1701/PGN-1701 in the Amazon listing.
-      'pagani-pd1701':'1701'
+      'pagani-pd1701':'1701',
+      'casio-dw5600rl-1':'DW-5600RL-1ER',
+      'tissot-le-locle-white':'T0064071103300'
     };
     if(item.marketplaceModel!==p.model&&item.marketplaceModel!==regionalEquivalents[id])
       throw Error('Unverified regional edition or variant: '+id);
@@ -58,8 +60,10 @@ export function loadVerifiedPopularLinks({root,picks,affiliates,amazonPartnerTag
     if(item.evidenceType==='amazon_fr_comparator_redirect'){
       const compare=new URL(item.comparisonUrl);
       const corroborate=new URL(item.corroborationUrl);
-      if(compare.protocol!=='https:'||!['www.leguide.com','www.123comparer.fr'].includes(compare.hostname)
-        ||compare.username||compare.password||compare.hash
+      if(compare.protocol!=='https:'||!['www.leguide.com','www.123comparer.fr','leboncadran.fr'].includes(compare.hostname)
+        ||compare.username||compare.password||compare.hash||compare.port
+        ||(compare.hostname==='leboncadran.fr'&&(
+          !/^\/montre\/[a-z0-9-]+$/.test(compare.pathname)||compare.search))
         ||corroborate.protocol!=='https:'||corroborate.username||corroborate.password
         ||corroborate.hostname===compare.hostname||corroborate.hostname==='www.amazon.fr'
         ||!item.marketplaceVariant||!item.evidenceNote.includes('pas pu être consultée directement')
