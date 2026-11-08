@@ -67,6 +67,9 @@ export function loadVerifiedPopularLinks({root,picks,affiliates,amazonPartnerTag
         ||(compare.hostname==='leboncadran.fr'&&(
           !/^\/montre\/[a-z0-9-]+$/.test(compare.pathname)||compare.search))
         ||corroborate.protocol!=='https:'||corroborate.username||corroborate.password
+        ||corroborate.port||corroborate.hash
+        ||!['www.desertcart.in','www.desertcart.com.au','www.clubpromos.fr',
+             'www.vivre-riche.com','www.preisgenau.de'].includes(corroborate.hostname)
         ||corroborate.hostname===compare.hostname||corroborate.hostname==='www.amazon.fr'
         ||!item.marketplaceVariant||!item.evidenceNote.includes('pas pu être consultée directement')
         ||!item.evidenceNote.includes(item.asin))
@@ -96,7 +99,9 @@ export function loadVerifiedPopularLinks({root,picks,affiliates,amazonPartnerTag
         verifiedAt:item.verifiedAt,
         marketplaceVariant:item.marketplaceVariant||null,
         evidenceType:item.evidenceType,
-        source:item.evidenceUrl
+        source:item.evidenceUrl,
+        comparisonUrl:item.evidenceType==='amazon_fr_comparator_redirect'?item.comparisonUrl:null,
+        corroborationUrl:item.evidenceType==='amazon_fr_comparator_redirect'?item.corroborationUrl:null
       }));
     }
   }
