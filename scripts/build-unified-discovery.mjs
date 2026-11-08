@@ -123,6 +123,15 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
         :p.commercialStatus==='documented_awin_referral'
           ?'Lien partenaire documenté'+(observedDate?' le '+observedDate:'')+' · stock actuel non vérifié'
           :'Référence vendeur · aucune offre exacte rémunérée active';
+    // A compact buyer-facing marker is derived from the same validated
+    // merchantKind as the destination. It never claims stock, price or seller.
+    const merchantMarker={
+      direct:'Fiche Amazon associée',
+      awin:'Variante partenaire associée',
+      search:'Recherche Amazon uniquement',
+      official:'Référence à vérifier à la source'
+    }[merchantType];
+    if(!merchantMarker)throw Error('Unsupported catalogue merchant state: '+p.id);
     const merchantLabel=p.merchantEvidenceType==='amazon_fr_comparator_redirect'
       ?'Référence et ASIN recoupés via comparateur'
       :{direct:'Fiche du modèle identifiée',awin:'Variante partenaire identifiée',search:'Recherche marchande · variante à confirmer',official:'Source externe · sans lien d’achat vérifié'}[merchantType];
@@ -156,7 +165,7 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
       +'<button type="button" class="ud-save" data-save-id="'+e(p.id)+'" aria-pressed="false" aria-label="Favoris : ajouter '+e(p.brand+' '+p.model)+'" hidden><span class="ud-save-heart" aria-hidden="true">♡</span><span class="ud-save-word">Favoris</span></button>'
       +(p.photoUrl?'<button type="button" class="ud-zoom" data-zoom-id="'+e(p.id)+'" aria-label="Agrandir la photographie de '+e(p.brand+' '+p.model)+'" hidden><span aria-hidden="true">＋</span> Agrandir</button>':'')
       +'<span class="ud-visual-label">'+(p.photoUrl?'Photo du modèle':'Sans photo publiée')+'</span></div>'
-      +'<div class="ud-card-main"><p class="ud-kicker"><span class="ud-tier-pill">Gamme '+e(tierLabels[p.tier])+'</span><span class="ud-card-style">'+e(styleLabels[p.style])+'</span></p>'
+      +'<div class="ud-card-main"><p class="ud-trust-marker" data-merchant-confidence="'+e(merchantType)+'"><span class="ud-trust-dot" aria-hidden="true"></span>'+e(merchantMarker)+'</p><p class="ud-kicker"><span class="ud-tier-pill">Gamme '+e(tierLabels[p.tier])+'</span><span class="ud-card-style">'+e(styleLabels[p.style])+'</span></p>'
       +'<h2><a href="'+e(p.detailUrl.replace('./montres/','./'))+'">'+e(p.brand+' '+p.model)+'</a></h2>'
       +'<p class="ud-description">'+e(p.lead)+'</p>'
       +'<dl><div><dt>Mouvement</dt><dd>'+e(movementLabels[p.movement])+'</dd></div><div><dt>Boîtier</dt><dd>'+e(p.caseText)+'</dd></div></dl>'
@@ -344,6 +353,6 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
   ]};
   writeFileSync(join(root,path),page(pageHead({title:'52 montres homme et femme à comparer | Atelier Montres',
     description:'Explorez 52 montres Casio, SKMEI, Citizen, Seiko et autres. Comparez style, mouvement, dimensions vérifiées et liens marchands sans faux prix.',path}),main,graph)
-    .replace('</head>','<link rel="stylesheet" href="../unified-discovery.css"><link rel="stylesheet" href="../unified-tier-finish.css"><link rel="stylesheet" href="../unified-shopper-paths.css"><link rel="stylesheet" href="../photo-zoom.css"><script defer src="../photo-zoom.js"></script><link rel="stylesheet" href="../direct-offer-links.css"><link rel="stylesheet" href="../editorial-atelier-2026.css"><script defer src="../conseiller-engine.js"></script><script defer src="../unified-discovery.js"></script><script defer src="../direct-offer-links.js"></script></head>'));
+    .replace('</head>','<link rel="stylesheet" href="../unified-discovery.css"><link rel="stylesheet" href="../unified-trust-markers.css"><link rel="stylesheet" href="../unified-tier-finish.css"><link rel="stylesheet" href="../unified-shopper-paths.css"><link rel="stylesheet" href="../photo-zoom.css"><script defer src="../photo-zoom.js"></script><link rel="stylesheet" href="../direct-offer-links.css"><link rel="stylesheet" href="../editorial-atelier-2026.css"><script defer src="../conseiller-engine.js"></script><script defer src="../unified-discovery.js"></script><script defer src="../direct-offer-links.js"></script></head>'));
   return {path,count:normalized.length,coreCount:coreProducts.length,supplementalCount:extras.length};
 }

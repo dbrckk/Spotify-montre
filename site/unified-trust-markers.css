@@ -1,0 +1,31 @@
+/* Source-derived commercial confidence on all 52 editorial watch cards.
+   The marker describes link quality only; never a verified offer or stock. */
+.ud-page .ud-card-main>.ud-trust-marker{
+  display:inline-flex;align-items:center;align-self:flex-start;gap:8px;
+  max-width:100%;min-height:27px;box-sizing:border-box;
+  margin:0;padding:5px 10px;border:1px solid #cad6cb;border-radius:4px;
+  background:#eef4ed;color:#274a36;
+  font:750 10px/1.4 system-ui,sans-serif;letter-spacing:.015em;
+  overflow-wrap:anywhere
+}
+.ud-page .ud-trust-dot{
+  display:inline-block;flex:none;width:7px;height:7px;
+  border-radius:50%;background:#386a49
+}
+.ud-page .ud-card-main>.ud-trust-marker[data-merchant-confidence="awin"]{
+  background:#edf2f4;border-color:#c6d5da;color:#305467
+}
+.ud-page .ud-trust-marker[data-merchant-confidence="awin"] .ud-trust-dot{background:#49738a}
+.ud-page .ud-card-main>.ud-trust-marker[data-merchant-confidence="search"]{
+  background:#faf4e9;border-color:#decda9;color:#6c522d
+}
+.ud-page .ud-trust-marker[data-merchant-confidence="search"] .ud-trust-dot{background:#a27a3d}
+.ud-page .ud-card-main>.ud-trust-marker[data-merchant-confidence="official"]{
+  background:#f1f1ef;border-color:#d5d9d3;color:#4e6055
+}
+.ud-page .ud-trust-marker[data-merchant-confidence="official"] .ud-trust-dot{background:#7b897f}
+@media(max-width:650px){
+  .ud-page .ud-card-main>.ud-trust-marker{
+    min-height:26px;padding:5px 8px;font-size:10px;line-height:1.35
+  }
+}
