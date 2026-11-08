@@ -7,6 +7,7 @@
 import {mkdirSync,writeFileSync,appendFileSync,readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {resolve,dirname} from 'node:path';
+import {buildSourceEvidenceReview} from './source-evidence-review.mjs';
 
 const base=new URL(process.env.SEO_AUDIT_BASE_URL||'https://atelier-montres-selection-fr.onrender.com/');
 if(base.protocol!=='https:'||base.pathname!=='/'||base.search||base.hash){
@@ -26,39 +27,12 @@ if(popular.length!==37||core.length!==15||new Set([...popular,...core].map(p=>p.
 const report={checkedAt:new Date().toISOString(),site:base.href,pages:0,issues,checked,commercialPages:0,commercialChecks:0};
 let affiliateActive=null;
 let publishedDuels=false;
-const evidenceRecords=[
-  ...Object.entries(coreResearch).filter(([,p])=>p.status==='matched_on_amazon_fr')
-    .map(([id,p])=>({id,asin:p.asin,checkedOn:p.checkedOn,
-      evidenceKind:'dated_model_match'})),
-  ...Object.entries(verified).map(([id,p])=>({
-    id,asin:p.asin,checkedOn:p.verifiedAt,evidenceKind:p.evidenceType}))
-];
-// This is a schedule for editorial re-review, not Amazon stock polling.
-// A passing HTTPS request or old ASIN identity cannot establish an active offer.
-const reviewDays=45;
-const dayMs=86400000;
-const today=new Date().toISOString().slice(0,10);
-const todayMs=Date.parse(today+'T00:00:00Z');
-const catalogIds=new Set([...core,...popular].map(p=>p.id));
-if(new Set(evidenceRecords.map(p=>p.id)).size!==evidenceRecords.length
-   ||evidenceRecords.some(p=>!catalogIds.has(p.id)||!/^B[0-9A-Z]{9}$/.test(p.asin)))
-  throw Error('Documentary freshness audit requires unique model-matched catalog ASINs');
-const sourceEvidenceReview={
-  asOf:today,reviewIntervalDays:reviewDays,
-  documentedAsins:evidenceRecords.length,dueCount:0,
-  notes:'Documentary evidence dates only; no price, stock, seller, Amazon approval or commission verification.',
-  records:evidenceRecords.map(p=>{
-    const sourceMs=Date.parse((p.checkedOn||'')+'T00:00:00Z');
-    if(!/^20\d{2}-\d{2}-\d{2}$/.test(p.checkedOn||'')
-       ||!Number.isFinite(sourceMs)||new Date(sourceMs).toISOString().slice(0,10)!==p.checkedOn
-       ||sourceMs>todayMs)throw Error('Invalid/future documentary source date for '+p.id);
-    const ageDays=Math.floor((todayMs-sourceMs)/dayMs);
-    return {...p,ageDays,needsReview:ageDays>=reviewDays};
-  }).sort((a,b)=>b.ageDays-a.ageDays||a.id.localeCompare(b.id))
-};
-sourceEvidenceReview.dueCount=sourceEvidenceReview.records.filter(p=>p.needsReview).length;
+// Review timestamps come from source evidence, never from runtime offer checks.
+const sourceEvidenceReview=buildSourceEvidenceReview({
+  coreResearch,supplemental:verified,
+  catalogIds:new Set([...core,...popular].map(p=>p.id))
+});
 report.sourceEvidenceReview=sourceEvidenceReview;
-
 
 async function request(url){
   let error;
