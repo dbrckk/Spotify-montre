@@ -177,9 +177,11 @@ jobs:
                 fi
                 if [ "$expected_direct" -gt 0 ] && {
                    ! grep -Fq 'https://www.amazon.fr/dp/B0DN6LT6FX?tag=drackk04-21' "$RUNNER_TEMP/live-unified.html" ||
-                   ! grep -Fq 'https://www.amazon.fr/dp/B01N7FXE80?tag=drackk04-21' "$RUNNER_TEMP/live-unified.html"; }; then
+                   ! grep -Fq 'https://www.amazon.fr/dp/B01N7FXE80?tag=drackk04-21' "$RUNNER_TEMP/live-unified.html" ||
+                   ! grep -Fq 'https://www.amazon.fr/dp/B077YZHF21?tag=drackk04-21' "$RUNNER_TEMP/live-unified.html" ||
+                   ! grep -Fq 'https://www.amazon.fr/dp/B07XTVQ3W7?tag=drackk04-21' "$RUNNER_TEMP/live-unified.html"; }; then
                   ready=0
-                  reason="$reason [missing newly documented Casio/Tissot direct ASIN cards]"
+                  reason="$reason [missing 2026 source-backed direct ASIN cards]"
                 fi
               fi
             fi
