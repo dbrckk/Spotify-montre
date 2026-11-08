@@ -19,12 +19,46 @@ const repoRoot=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const popular=JSON.parse(readFileSync(resolve(repoRoot,'site/selection-populaires.json'),'utf8')).products;
 const core=JSON.parse(readFileSync(resolve(repoRoot,'site/selection-affiliation.json'),'utf8')).products;
 const verified=JSON.parse(readFileSync(resolve(repoRoot,'research/amazon-fr-popular-verified.json'),'utf8')).verifiedProducts;
+const coreResearch=JSON.parse(readFileSync(resolve(repoRoot,'research/amazon-fr-exact-products.json'),'utf8')).products;
 const approvedPhotos=JSON.parse(readFileSync(resolve(repoRoot,'site/popular-photo-rights.json'),'utf8')).photos;
 const affordableDuels=JSON.parse(readFileSync(resolve(repoRoot,'site/comparaisons-accessibles.json'),'utf8')).comparisons;
 if(popular.length!==37||core.length!==15||new Set([...popular,...core].map(p=>p.id)).size!==52)throw Error('Expected 52 unique documented watches in current catalog');
 const report={checkedAt:new Date().toISOString(),site:base.href,pages:0,issues,checked,commercialPages:0,commercialChecks:0};
 let affiliateActive=null;
 let publishedDuels=false;
+const evidenceRecords=[
+  ...Object.entries(coreResearch).filter(([,p])=>p.status==='matched_on_amazon_fr')
+    .map(([id,p])=>({id,asin:p.asin,checkedOn:p.checkedOn,
+      evidenceKind:'dated_model_match'})),
+  ...Object.entries(verified).map(([id,p])=>({
+    id,asin:p.asin,checkedOn:p.verifiedAt,evidenceKind:p.evidenceType}))
+];
+// This is a schedule for editorial re-review, not Amazon stock polling.
+// A passing HTTPS request or old ASIN identity cannot establish an active offer.
+const reviewDays=45;
+const dayMs=86400000;
+const today=new Date().toISOString().slice(0,10);
+const todayMs=Date.parse(today+'T00:00:00Z');
+const catalogIds=new Set([...core,...popular].map(p=>p.id));
+if(new Set(evidenceRecords.map(p=>p.id)).size!==evidenceRecords.length
+   ||evidenceRecords.some(p=>!catalogIds.has(p.id)||!/^B[0-9A-Z]{9}$/.test(p.asin)))
+  throw Error('Documentary freshness audit requires unique model-matched catalog ASINs');
+const sourceEvidenceReview={
+  asOf:today,reviewIntervalDays:reviewDays,
+  documentedAsins:evidenceRecords.length,dueCount:0,
+  notes:'Documentary evidence dates only; no price, stock, seller, Amazon approval or commission verification.',
+  records:evidenceRecords.map(p=>{
+    const sourceMs=Date.parse((p.checkedOn||'')+'T00:00:00Z');
+    if(!/^20\\d{2}-\\d{2}-\\d{2}$/.test(p.checkedOn||'')
+       ||!Number.isFinite(sourceMs)||new Date(sourceMs).toISOString().slice(0,10)!==p.checkedOn
+       ||sourceMs>todayMs)throw Error('Invalid/future documentary source date for '+p.id);
+    const ageDays=Math.floor((todayMs-sourceMs)/dayMs);
+    return {...p,ageDays,needsReview:ageDays>=reviewDays};
+  }).sort((a,b)=>b.ageDays-a.ageDays||a.id.localeCompare(b.id))
+};
+sourceEvidenceReview.dueCount=sourceEvidenceReview.records.filter(p=>p.needsReview).length;
+report.sourceEvidenceReview=sourceEvidenceReview;
+
 
 async function request(url){
   let error;
@@ -131,9 +165,31 @@ async function auditPage(url){
         expect(html.includes(escapeHtml(direct.marketplaceVariant)),
           'Exact Amazon marketplace variant warning missing from live product page');
       }
-      if(direct.evidenceType==='amazon_fr_comparator_redirect')
+      if(direct.evidenceType==='amazon_fr_comparator_redirect'){
         expect(html.includes('fiche Amazon.fr non consultée directement'),
           'Comparator-only evidence must never be presented as direct Amazon inspection');
+        const escapeHtml=value=>String(value).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+          .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+        expect(html.includes('data-asin-proof-id="'+model.id+'"'),
+          'Public product must disclose the two source references for '+model.id);
+        expect(html.includes('<code>'+direct.asin+'</code>'),
+          'Documentary proof ASIN differs from verified source: '+model.id);
+        for(const [kind,url] of [['comparison',direct.comparisonUrl],['corroboration',direct.corroborationUrl]]){
+          expect(typeof url==='string'&&url.startsWith('https://'),
+            'Source registry lacks independently confirmed '+kind+' URL');
+          expect(html.includes('href="'+escapeHtml(url)+'" rel="noopener noreferrer nofollow"'),
+            'Published editorial '+kind+' link must match research and must not be sponsored');
+        }
+        expect((html.match(/class="am-extra-proof-step"/g)||[]).length===2,
+          'An ASIN comparator match requires exactly two documentary proof steps');
+        expect(html.includes('href="../merchant-proof-ledger.css"'),
+          'Missing the mobile-first proof layout on product detail');
+        expect(html.includes('La page Amazon.fr n’a pas pu être consultée directement'),
+          'Must not claim directly inspected Amazon stock');
+      }else{
+        expect(!html.includes('data-asin-proof-id='),
+          'First-hand Amazon evidence must not display fabricated comparator corroboration');
+      }
 
     }else if(affiliateActive===true){
       expect(html.includes('data-amazon-search-id="'+model.id+'"'),'unverified model must use a labeled search');
@@ -264,6 +320,7 @@ const summary='### Atelier Montres — live SEO audit\n\n'
   +'- Pages in sitemap: '+report.pages+'\n'
   +'- Pages fetched successfully: '+checked.length+'\n'
   +'- Commercial landing pages checked: '+report.commercialPages+' / '+popular.length+' ('+report.commercialChecks+' integrity assertions)\n'
+  +'- Dated Amazon.fr model matches: '+sourceEvidenceReview.documentedAsins+'; evidence needing re-review after '+reviewDays+' days: '+sourceEvidenceReview.dueCount+' (no live stock claims)\\n'
   +'- Issues: '+issues.length+'\n\n'
   +(issues.length?'#### Detected problems\n'+issues.map(x=>'- '+x).join('\n'):'All public technical SEO checks passed.')+'\n';
 if(process.env.GITHUB_STEP_SUMMARY)appendFileSync(process.env.GITHUB_STEP_SUMMARY,summary);
