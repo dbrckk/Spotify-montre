@@ -94,6 +94,14 @@ export function loadApprovedPopularPhotos({root,picks}){
     if(typeof item.sourcePage!=='string'||typeof item.sourceImageUrl!=='string'||
        (!unchanged&&!supportedMigration&&!documentedManufacturer))
       throw Error('Cannot match image to the exact-model manufacturer product page: '+id);
+    if(documentedManufacturer){
+      const src=new URL(item.sourceImageUrl);
+      const expected='/'+alternate.modelCode+'_main.webp';
+      if(model.brand!=='Orient'||src.protocol!=='https:'||
+        src.hostname!=='orient-watch.com'||!src.pathname.endsWith(expected)||
+        src.hash||src.username||src.password||src.port)
+        throw Error('Only the official exact-model Orient front view is permitted: '+id);
+    }
     let photoHost, pageHost;
     try{
       const img=new URL(item.sourceImageUrl), page=new URL(item.sourcePage);
