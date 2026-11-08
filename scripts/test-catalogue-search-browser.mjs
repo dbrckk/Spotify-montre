@@ -27,6 +27,34 @@ try{
       {waitUntil:'domcontentloaded'});
     await page.locator('#udFilters').waitFor({state:'visible'});
     assert.equal(await page.locator('.ud-card').count(),52);
+    assert.equal(await page.locator('link[href="../watch-reference-copy.css"]').count(),1,
+      'The 52-watch collection must use the cache-isolated reference-copy stylesheet');
+    assert.equal(await page.locator('script[src="../watch-reference-copy.js"]').count(),1);
+    assert.equal(await page.locator('.ud-card [data-watch-ref-tools]').count(),52);
+    const allCopyButtons=page.locator('.ud-card button[data-watch-ref-copy]');
+    assert.equal(await allCopyButtons.count(),52);
+    for(const button of await allCopyButtons.all()){
+      const card=button.locator('xpath=ancestor::article[1]');
+      assert.equal(await button.getAttribute('data-watch-ref-copy'),await card.getAttribute('data-id'),
+        'A reference-copy control cannot reference a different watch');
+      assert.ok(await button.isVisible(),'Actual model reference must be copyable on supported browsers');
+    }
+    if(width===393){
+      await page.evaluate(()=>{
+        Object.defineProperty(navigator,'clipboard',{configurable:true,value:{
+          writeText:async text=>{window.__copiedWatchReference=text;}
+        }});
+      });
+      const copyCard=page.locator('#modele-tissot-le-locle-white');
+      await copyCard.locator('button[data-watch-ref-copy]').click();
+      assert.equal(await page.evaluate(()=>window.__copiedWatchReference),
+        'Tissot Le Locle T0064071103300',
+        'The exact documented manufacturer reference must be copied, not a fabricated Amazon variant');
+      assert.match(await copyCard.locator('[data-watch-ref-status]').innerText(),/Référence copiée/);
+      assert.equal(await copyCard.locator('input[data-watch-ref-manual]').count(),0,
+        'Successful clipboard writes must not show a manual field');
+    }
+
     assert.equal(await page.locator('link[href="../unified-trust-markers.css"]').count(),1,
       'All catalogue pages must load the cache-independent confidence stylesheet');
     const markers=await page.locator('.ud-card').evaluateAll(cards=>cards.map(card=>({
