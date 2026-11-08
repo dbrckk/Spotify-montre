@@ -249,6 +249,45 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
     +'<nav class="ud-tier-shortcuts" aria-label="Explorer les trois gammes de montres">'+tierCards+'</nav>'
     +'<p class="ud-tier-disclaimer">Les gammes sont des repères éditoriaux, pas des fourchettes de prix. Prix, variante, stock et conditions d’achat sont à vérifier chez le vendeur.</p>'
     +'</section>';
+
+  // Each shortcut is backed by the exact same commercial status as its watch
+  // cards. No partner is created or promoted when its documented count is 0.
+  const merchantPaths=[
+    {kind:'direct',eyebrow:'Fiche associée à une référence',title:'Voir les fiches Amazon identifiées',
+      description:'Code modèle et fiche marchande associés dans nos sources. Vérifiez la variante et le vendeur.'},
+    {kind:'awin',eyebrow:'Partenaire documenté',title:'Voir les références partenaires',
+      description:'Variante référencée par un partenaire ; stock et conditions restent à contrôler.'},
+    {kind:'search',eyebrow:'Recherche, pas une offre exacte',title:'Explorer les recherches Amazon',
+      description:'Les résultats peuvent montrer plusieurs montres. Comparez d’abord les codes modèles.'},
+    {kind:'official',eyebrow:'Sans lien marchand rémunéré',title:'Consulter les sources fabricant',
+      description:'Fiches de référence à vérifier auprès des marques ou distributeurs.'}
+  ];
+  const merchantCounts=new Map(merchantPaths.map(({kind})=>[kind,0]));
+  for(const product of normalized){
+    const kind=product.merchantKind||'official';
+    if(!merchantCounts.has(kind))throw Error('Unsupported customer purchase path: '+kind);
+    merchantCounts.set(kind,merchantCounts.get(kind)+1);
+  }
+  if([...merchantCounts.values()].reduce((sum,n)=>sum+n,0)!==normalized.length)
+    throw Error('Merchant shortcuts cannot omit an exact watch');
+  const merchantShortcuts=merchantPaths.filter(({kind})=>merchantCounts.get(kind)>0)
+    .map(({kind,eyebrow,title,description})=>{
+      const count=merchantCounts.get(kind);
+      return '<a class="ud-path-link" data-merchant-path="'+kind+'" href="?merchant='+kind+'#udCount">'
+        +'<span class="ud-path-icon" aria-hidden="true">↗</span>'
+        +'<span class="ud-path-eyebrow">'+e(eyebrow)+'</span>'
+        +'<strong>'+e(title)+'</strong>'
+        +'<span class="ud-path-description">'+e(description)+'</span>'
+        +'<span class="ud-path-count">'+count+' référence'+(count===1?'':'s')+' à consulter</span>'
+        +'</a>';
+    }).join('');
+  const merchantNavigation='<section class="ud-paths" aria-labelledby="udPathsHeading">'
+    +'<div class="ud-paths-header"><div><span>Vos prochaines étapes</span><h2 id="udPathsHeading">Comment consulter une montre chez un marchand ?</h2></div>'
+    +'<p>Choisissez un niveau de correspondance documenté. Les liens suivants filtrent les mêmes 52 références, sans prix ni disponibilité inventés.</p></div>'
+    +'<nav class="ud-path-links" aria-label="Explorer selon le type de lien marchand">'
+    +merchantShortcuts+'</nav>'
+    +'<p class="ud-paths-disclosure">Une fiche associée ne prouve ni stock ni prix actuel. Une recherche Amazon ne garantit pas le modèle exact. Les liens rémunérés sont identifiés sur chaque carte ; les achats externes sont conclus chez le marchand.</p>'
+    +'</section>';
   const path='montres/toutes-les-montres.html';
   const main='<div class="wrap ud-page"><nav class="crumb" aria-label="Fil d’Ariane"><a href="../index.html">Accueil</a> / Les 52 montres</nav>'
     +'<header class="ud-heading" aria-labelledby="udCollectionTitle"><span class="eyebrow">Atelier Montres · Collection homme et femme</span>'
@@ -257,7 +296,7 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
     +'<div class="ud-heading-actions"><a class="ud-heading-primary" href="#udCount">Explorer les 52 montres <span aria-hidden="true">↘</span></a><a class="ud-heading-secondary" href="../conseiller.html">Me guider dans mon choix <span aria-hidden="true">↗</span></a></div>'
     +'<ul class="ud-heading-highlights" aria-label="Les avantages du catalogue"><li>52 modèles à comparer</li><li>Caractéristiques documentées</li><li>Photos de modèle quand disponibles</li></ul>'
     +'<p class="ud-disclosure"><strong>Avant votre achat :</strong> consultez le prix, la disponibilité et les conditions de livraison chez le marchand. Certains liens partenaires peuvent nous rémunérer. Une recherche Amazon ne garantit pas le modèle exact : vérifiez la référence auprès du vendeur.</p></header>'
-    +shortcuts+showroom+tierNavigation
+    +shortcuts+showroom+tierNavigation+merchantNavigation
     +'<div class="ud-favorite-tools" id="udFavoriteTools" hidden><div><strong>Votre sélection, à votre rythme.</strong><p>Gardez vos modèles préférés sur cet appareil, puis comparez-les parmi les 52 montres.</p></div><button id="udSavedToggle" type="button" aria-pressed="false"><span aria-hidden="true">♡</span> <span id="udSavedButtonLabel">Voir mes favoris</span> <span class="ud-favorite-total">(<span id="udSavedCount">0</span>)</span></button></div>'
     +'<form id="udFilters" class="ud-filters" role="search" aria-label="Affiner les 52 montres" hidden>'
     +'<label>Recherche<input id="udSearch" type="search" maxlength="100" placeholder="Marque, modèle, caractéristiques…"></label>'
@@ -305,6 +344,6 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
   ]};
   writeFileSync(join(root,path),page(pageHead({title:'52 montres homme et femme à comparer | Atelier Montres',
     description:'Explorez 52 montres Casio, SKMEI, Citizen, Seiko et autres. Comparez style, mouvement, dimensions vérifiées et liens marchands sans faux prix.',path}),main,graph)
-    .replace('</head>','<link rel="stylesheet" href="../unified-discovery.css"><link rel="stylesheet" href="../unified-tier-finish.css"><link rel="stylesheet" href="../photo-zoom.css"><script defer src="../photo-zoom.js"></script><link rel="stylesheet" href="../direct-offer-links.css"><link rel="stylesheet" href="../editorial-atelier-2026.css"><script defer src="../conseiller-engine.js"></script><script defer src="../unified-discovery.js"></script><script defer src="../direct-offer-links.js"></script></head>'));
+    .replace('</head>','<link rel="stylesheet" href="../unified-discovery.css"><link rel="stylesheet" href="../unified-tier-finish.css"><link rel="stylesheet" href="../unified-shopper-paths.css"><link rel="stylesheet" href="../photo-zoom.css"><script defer src="../photo-zoom.js"></script><link rel="stylesheet" href="../direct-offer-links.css"><link rel="stylesheet" href="../editorial-atelier-2026.css"><script defer src="../conseiller-engine.js"></script><script defer src="../unified-discovery.js"></script><script defer src="../direct-offer-links.js"></script></head>'));
   return {path,count:normalized.length,coreCount:coreProducts.length,supplementalCount:extras.length};
 }
