@@ -61,7 +61,7 @@ on:
       - 'site/unified-discovery.css'
       - 'site/unified-trust-markers.css'
       - 'site/watch-reference-copy.css'
-      - 'site/watch-reference-copy.js'
+      - 'site/watch-reference-copy-v2.js'
       - 'site/unified-tier-finish.css'
       - 'site/unified-shopper-paths.css'
       - 'site/extra-product-viewer.js'
