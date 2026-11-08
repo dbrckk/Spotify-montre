@@ -53,6 +53,7 @@ on:
       - 'scripts/test-catalogue-search-browser.mjs'
       - 'scripts/build-unified-discovery.mjs'
       - 'site/unified-discovery.js'
+      - 'site/catalogue-return.js'
       - 'site/unified-discovery.css'
       - 'site/extra-product-viewer.js'
       - 'scripts/build-popular-product-pages.mjs'
