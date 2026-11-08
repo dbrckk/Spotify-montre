@@ -1,0 +1,23 @@
+/* Private on-device browsing history: text links only, no extra image requests. */
+.am-unified-recent[hidden]{display:none!important}
+.am-unified-recent{margin:18px 0 22px;padding:20px 22px;border:1px solid #cbd9c9;
+  border-radius:8px;background:linear-gradient(125deg,#f4f7f0,#fffdf7);color:#214332}
+.am-unified-recent-head{display:flex;align-items:start;justify-content:space-between;
+  gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.am-unified-recent h2{font:400 clamp(21px,2.4vw,28px)/1.25 Georgia,serif;
+  margin:0 0 5px;color:#193b29}
+.am-unified-recent p{font:400 12px/1.6 system-ui,sans-serif;margin:0;color:#47634d}
+.am-unified-recent-clear{min-height:44px;padding:9px 13px;background:#fffefa;
+  border:1px solid #90a88e;border-radius:5px;color:#244c34;
+  font:700 12px/1.5 system-ui,sans-serif;cursor:pointer}
+.am-unified-recent-clear:focus-visible,.am-unified-recent-link:focus-visible{
+  outline:3px solid #b78b45;outline-offset:3px}
+.am-unified-recent-list{display:flex;gap:9px;flex-wrap:wrap}
+.am-unified-recent-link{display:inline-flex;align-items:center;min-height:44px;
+  max-width:100%;padding:9px 14px;border-radius:4px;border:1px solid #bed1be;
+  background:#fff;color:#214b33;font:700 12px/1.5 system-ui,sans-serif;
+  text-decoration:none;overflow-wrap:anywhere}
+.am-unified-recent-link:hover{background:#e8f0e7;border-color:#648a6a}
+@media(max-width:420px){.am-unified-recent{padding:16px}
+  .am-unified-recent-link{width:100%;justify-content:flex-start}
+  .am-unified-recent-clear{width:100%}}
