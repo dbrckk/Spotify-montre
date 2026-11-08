@@ -127,6 +127,34 @@
       "evidenceNote": "Fiche Amazon.fr consultée directement le 1er novembre 2026 : titre Pagani Design 1701, ASIN B0C7QC653D, données produit modèle PGN-1701, tableau de variantes mentionnant aussi PD-1701 V4. La page fabricant https://www.paganidesignwatch.com/fr/pagani-design-pd-1701/ confirme l'appellation PD-1701 et le calibre VK63. La génération, la couleur, le bracelet, le vendeur, la disponibilité et le prix de la variante sélectionnée doivent être recontrôlés : ne pas assimiler toutes les générations et finitions.",
       "marketplaceVariant": "1701 / PGN-1701 — génération, coloris et bracelet à vérifier sur Amazon.fr",
       "corroborationUrl": "https://www.paganidesignwatch.com/fr/pagani-design-pd-1701/"
+    },
+    "casio-dw5600rl-1": {
+      "brand": "Casio G-SHOCK",
+      "canonicalModel": "DW-5600RL-1",
+      "marketplaceModel": "DW-5600RL-1ER",
+      "asin": "B0DN6LT6FX",
+      "verifiedAt": "2026-11-08",
+      "evidenceUrl": "https://www.amazon.fr/dp/B0DN6LT6FX",
+      "evidenceListingTitle": "Casio The Origin DW-5600RL-1ER — montre G-SHOCK numérique noire",
+      "evidenceType": "amazon_fr_comparator_redirect",
+      "comparisonUrl": "https://leboncadran.fr/montre/casio-the-origin-dw-5600rl-1er",
+      "corroborationUrl": "https://www.clubpromos.fr/threads/montre-casio-g-shock-dw-5600rl-1er-51-46%E2%82%AC-au-lieu-de-89%E2%82%AC-amazon.179585/",
+      "marketplaceVariant": "Casio DW-5600RL-1ER, version régionale noire à bracelet résine ; vérifier la référence et la finition sur Amazon.fr",
+      "evidenceNote": "Le 8 novembre 2026, la fiche Le Bon Cadran identifie la Casio The Origin DW-5600RL-1ER et son lien Amazon.fr redirige vers /dp/B0DN6LT6FX. Une annonce indépendante Clubpromos du 6 mai 2025 affiche explicitement la même référence DW-5600RL-1ER et la même destination Amazon.fr /dp/B0DN6LT6FX. La page Amazon.fr n'a pas pu être consultée directement de façon stable. Une mention de stock par le comparateur ne garantit ni la variante exacte commandable, ni le stock, le vendeur, le prix, la livraison ou une commission actuelle."
+    },
+    "tissot-le-locle-white": {
+      "brand": "Tissot",
+      "canonicalModel": "Le Locle T0064071103300",
+      "marketplaceModel": "T0064071103300",
+      "asin": "B01N7FXE80",
+      "verifiedAt": "2026-11-08",
+      "evidenceUrl": "https://www.amazon.fr/dp/B01N7FXE80",
+      "evidenceListingTitle": "Tissot Le Locle Automatique T0064071103300 — Powermatic 80 acier argent",
+      "evidenceType": "amazon_fr_comparator_redirect",
+      "comparisonUrl": "https://leboncadran.fr/montre/tissot-le-locle-automatique-t0064071103300",
+      "corroborationUrl": "https://www.vivre-riche.com/avis-montre-tissot-le-locle-powermatic-80-elegance-et-precision",
+      "marketplaceVariant": "Tissot Le Locle T0064071103300, cadran argenté et bracelet acier ; contrôler précisément la variante Amazon.fr",
+      "evidenceNote": "Le 8 novembre 2026, la fiche Le Bon Cadran de Tissot Le Locle Automatique T0064071103300 propose un lien Amazon.fr redirigeant vers /dp/B01N7FXE80. La revue indépendante Vivre Riche reprend les données du produit Amazon.fr avec le même ASIN B01N7FXE80 et le numéro T0064071103300. La page Amazon.fr n'a pas pu être consultée directement, et le relevé du comparateur datait du 5 octobre 2026. La concordance du code ne prouve ni un stock actuel, ni un prix, ni le vendeur, ni les conditions d'expédition, ni la commission."
     }
   }
 }
