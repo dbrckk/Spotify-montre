@@ -29,7 +29,7 @@ for(const p of products){
 // A guide is not a product page and must not download a nonfunctional copy widget.
 const guide=readFileSync('site/montres/guide-choisir-montre.html','utf8');
 assert.ok(!guide.includes('data-watch-ref-copy='));
-assert.ok(!guide.includes('watch-reference-copy.js'));
+assert.ok(!guide.includes('watch-reference-copy-v2.js'));
 
 const browser=await chromium.launch({headless:true});
 try{
