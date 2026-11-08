@@ -171,7 +171,7 @@ try{
       assert.ok(proof&&proof.width>480,'Featured watch must have exact-model photo evidence: '+id);
       // 720px and 960px are needed on high-density phones, but are only
       // exposed if smaller than the approved original and actually generated.
-      for(const widthCandidate of [720,960]){
+      for(const widthCandidate of [360,720,960]){
         const candidateExists=widthCandidate<proof.width&&existsSync(
           new URL('../site/assets/popular-responsive/'+id+'-'+widthCandidate+'.webp',import.meta.url));
         assert.equal(Boolean(srcset?.includes('popular-responsive/'+id+'-'+widthCandidate+'.webp '+widthCandidate+'w')),
@@ -210,7 +210,7 @@ try{
         await image.scrollIntoViewIfNeeded();
         await image.evaluate(node=>node.decode());
         const selected=await image.evaluate(node=>new URL(node.currentSrc).pathname);
-        const validWidths=width<=420?[240,480,720,960]:[240,480];
+        const validWidths=width<=420?[240,360,480,720,960]:[240,360,480];
         assert.ok(validWidths.some(w=>selected==='/assets/popular-responsive/'+id+'-'+w+'.webp'),
           'Chromium used an unrelated or full-size original watch image for '+id+': '+selected);
       }

@@ -24,7 +24,7 @@ for(const p of picks){
       'Verified watch must have an unobstructed photo stage and separate metadata: '+p.id);
     assert.ok(hero.includes('width="'+proof.width+'"')&&
       hero.includes('height="'+proof.height+'"'),'Original aspect dimensions missing: '+p.id);
-    for(const size of [240,480,720,960].filter(size=>size<proof.width))
+    for(const size of [240,360,480,720,960].filter(size=>size<proof.width))
       assert.ok(hero.includes('popular-responsive/'+p.id+'-'+size+'.webp '+size+'w'),
         'Detailed watch hero must expose the verified '+size+'px WebP: '+p.id);
     assert.ok(hero.includes('watches-popular/'+p.id+'.webp '+proof.width+'w'),
@@ -114,8 +114,9 @@ try{
         path:new URL(node.currentSrc).pathname,
         width:node.naturalWidth,height:node.naturalHeight
       }));
-      assert.equal(actual.path,'/assets/popular-responsive/skmei-1251-480.webp',
-        'Android product sheet must actually download the lightweight exact-model WebP');
+      assert.ok(['/assets/popular-responsive/skmei-1251-360.webp',
+         '/assets/popular-responsive/skmei-1251-480.webp'].includes(actual.path),
+         'Android product sheet must download a lightweight exact-model WebP: '+actual.path);
       // With a width-descriptor srcset, naturalWidth can be density-adjusted:
       // assert successful decode and the exact requested derivative instead.
       assert.ok(actual.width>0&&actual.height>0,
