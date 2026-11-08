@@ -161,6 +161,7 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       +'<h1>'+e(name)+'</h1><p class="am-extra-subtitle">'+e(p.lead)+'</p>'
       +'<dl class="am-extra-facts">'+facts+'</dl>'
       +'<p class="am-extra-reference"><span>Référence à retrouver chez le marchand</span><strong>'+e(name)+'</strong></p>'
+      +'<div class="am-ref-copy-tools" data-watch-ref-tools hidden><button type="button" class="am-ref-copy-button" data-watch-ref-copy="'+e(p.id)+'" hidden>Copier la référence</button><span class="am-ref-copy-status" role="status" aria-live="polite" data-watch-ref-status></span></div>'
       +'<p class="am-extra-approval">À vérifier auprès du vendeur : référence exacte, variante, prix, disponibilité, garantie et conditions de retour. Nous ne vendons pas directement ce produit.</p>'
       +(affiliates.enabled?'<p class="am-extra-link-status '+(direct?'am-extra-link-direct':'am-extra-link-search')+'"><strong>'+(direct?'Fiche Amazon.fr correspondant au code modèle':'Recherche Amazon.fr — modèle non garanti')+'</strong><span>'+(direct?(comparator?'ASIN recoupé via un comparateur et une source indépendante ; fiche Amazon.fr non consultée directement. Vérifiez la variante, le vendeur et le stock.':'Lien associé à un ASIN documenté. Contrôlez la variante, le vendeur et le stock.'):'Les résultats peuvent contenir d’autres montres. Vérifiez le code affiché ci-dessus avant l’achat.')+'</span>'+(direct?.marketplaceVariant?'<span class="am-extra-merchant-variant"><strong>Variante de la fiche Amazon :</strong> '+e(direct.marketplaceVariant)+'</span>':'')
         +(comparator?'<span class="am-extra-proof-jump"><a href="#sources">Voir les deux sources de correspondance <span aria-hidden="true">↓</span></a></span>':'')+'</p>':'')
@@ -229,7 +230,7 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
         +(!photo?'<link rel="stylesheet" href="../extra-source-passport.css">':'')
         +(comparator?'<link rel="stylesheet" href="../merchant-proof-ledger.css">':'')
         +(photo?'<link rel="stylesheet" href="../photo-zoom.css"><script defer src="../photo-zoom.js"></script><script defer src="../extra-product-viewer.js"></script>':'')
-        +'<link rel="stylesheet" href="../extra-factual-comparison.css"><script defer src="../extra-product-actions.js"></script></head>');
+        +'<link rel="stylesheet" href="../extra-factual-comparison.css"><link rel="stylesheet" href="../watch-reference-copy.css"><script defer src="../watch-reference-copy.js"></script><script defer src="../extra-product-actions.js"></script></head>');
     writeFileSync(join(root,path),html);
     paths.push(path);
   }

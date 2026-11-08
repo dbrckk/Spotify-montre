@@ -1,0 +1,48 @@
+/* Reference-only customer action. The title and merchant URLs remain unchanged. */
+.am-ref-copy-tools[hidden],.am-ref-copy-button[hidden],.am-ref-copy-manual[hidden]{display:none!important}
+.am-ref-copy-tools{
+  display:flex;flex-wrap:wrap;align-items:center;gap:7px 12px;
+  min-width:0;margin:0 0 13px;color:#34523e
+}
+.am-ref-copy-button{
+  min-height:44px;min-width:0;padding:10px 15px;
+  border:1px solid #668b70;border-radius:5px;
+  background:#f0f5ed;color:#204a31;cursor:pointer;
+  font:750 12px/1.5 system-ui,sans-serif;
+  transition:background-color .16s ease,border-color .16s ease
+}
+.am-ref-copy-button:hover{background:#e3eee1;border-color:#2b5a39}
+.am-ref-copy-button:focus-visible,.am-ref-copy-manual:focus-visible{
+  outline:3px solid #b48c4c;outline-offset:3px
+}
+.am-ref-copy-status{
+  flex:1 1 180px;min-width:0;
+  color:#47634d;font:500 12px/1.55 system-ui,sans-serif
+}
+.am-ref-copy-status:empty{display:none}
+.am-ref-copy-manual{
+  display:block;flex:1 1 100%;width:100%;min-width:0;min-height:44px;
+  box-sizing:border-box;padding:9px 12px;
+  border:1px solid #8ca58d;border-radius:4px;background:#fffefa;
+  color:#203f2c;font:650 13px/1.45 system-ui,sans-serif
+}
+.ud-page .ud-card-main>.am-ref-copy-tools{
+  margin:-2px 0 0;padding:0;gap:5px 9px
+}
+.ud-page .ud-card-main>.am-ref-copy-tools .am-ref-copy-button{
+  padding:7px 11px;min-height:44px;background:#fffefa;
+  border-color:#bcccb9;font-size:11px
+}
+.ud-page .ud-card-main>.am-ref-copy-tools .am-ref-copy-status{
+  flex-basis:100%;font-size:11px
+}
+@media(max-width:420px){
+  .am-ref-copy-tools{align-items:stretch}
+  .am-ref-copy-status{flex-basis:100%}
+  .ud-page .ud-card-main>.am-ref-copy-tools .am-ref-copy-button{
+    width:100%;text-align:center
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .am-ref-copy-button{transition:none}
+}

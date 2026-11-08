@@ -157,7 +157,7 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
       ?'<p class="ud-redirect-proof">ASIN recoupé via comparateur et catalogue tiers ; page Amazon.fr non consultée directement. Vérifier le produit avant commande.</p>':'';
 
     return '<article class="ud-card" id="modele-'+e(p.id)+'" data-id="'+e(p.id)+'"'
-      +' data-brand="'+e(p.brand)+'" data-tier="'+e(p.tier)+'" data-style="'+e(p.style)+'"'
+      +' data-brand="'+e(p.brand)+'" data-model="'+e(p.model)+'" data-tier="'+e(p.tier)+'" data-style="'+e(p.style)+'"'
       +' data-movement="'+e(p.movement)+'" data-merchant="'+merchantType+'" data-commerce-status="'+e(p.commercialStatus)+'" data-visual="'+(p.photoUrl?'photo':'no-photo')+'" data-search="'+e([p.brand,p.model,p.description,p.lead,p.caseText,p.movement].join(' '))+'">'
       +'<div class="ud-media '+(p.photoUrl?'ud-media-verified':'ud-media-no-photo')+'">'
       +'<a class="ud-photo" href="'+e(p.detailUrl.replace('./montres/','./'))+'">'+photoMarkup(p)+'</a>'
@@ -167,6 +167,7 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
       +'<span class="ud-visual-label">'+(p.photoUrl?'Photo du modèle':'Sans photo publiée')+'</span></div>'
       +'<div class="ud-card-main"><p class="ud-trust-marker" data-merchant-confidence="'+e(merchantType)+'"><span class="ud-trust-dot" aria-hidden="true"></span>'+e(merchantMarker)+'</p><p class="ud-kicker"><span class="ud-tier-pill">Gamme '+e(tierLabels[p.tier])+'</span><span class="ud-card-style">'+e(styleLabels[p.style])+'</span></p>'
       +'<h2><a href="'+e(p.detailUrl.replace('./montres/','./'))+'">'+e(p.brand+' '+p.model)+'</a></h2>'
+      +'<div class="am-ref-copy-tools" data-watch-ref-tools hidden><button type="button" class="am-ref-copy-button" data-watch-ref-copy="'+e(p.id)+'" hidden>Copier la référence</button><span class="am-ref-copy-status" role="status" aria-live="polite" data-watch-ref-status></span></div>'
       +'<p class="ud-description">'+e(p.lead)+'</p>'
       +'<dl><div><dt>Mouvement</dt><dd>'+e(movementLabels[p.movement])+'</dd></div><div><dt>Boîtier</dt><dd>'+e(p.caseText)+'</dd></div></dl>'
       +'<div class="ud-offer-context" role="group" aria-label="Informations du vendeur et de la référence">'
@@ -353,6 +354,6 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
   ]};
   writeFileSync(join(root,path),page(pageHead({title:'52 montres homme et femme à comparer | Atelier Montres',
     description:'Explorez 52 montres Casio, SKMEI, Citizen, Seiko et autres. Comparez style, mouvement, dimensions vérifiées et liens marchands sans faux prix.',path}),main,graph)
-    .replace('</head>','<link rel="stylesheet" href="../unified-discovery.css"><link rel="stylesheet" href="../unified-trust-markers.css"><link rel="stylesheet" href="../unified-tier-finish.css"><link rel="stylesheet" href="../unified-shopper-paths.css"><link rel="stylesheet" href="../photo-zoom.css"><script defer src="../photo-zoom.js"></script><link rel="stylesheet" href="../direct-offer-links.css"><link rel="stylesheet" href="../editorial-atelier-2026.css"><script defer src="../conseiller-engine.js"></script><script defer src="../unified-discovery.js"></script><script defer src="../direct-offer-links.js"></script></head>'));
+    .replace('</head>','<link rel="stylesheet" href="../unified-discovery.css"><link rel="stylesheet" href="../watch-reference-copy.css"><script defer src="../watch-reference-copy.js"></script><link rel="stylesheet" href="../unified-trust-markers.css"><link rel="stylesheet" href="../unified-tier-finish.css"><link rel="stylesheet" href="../unified-shopper-paths.css"><link rel="stylesheet" href="../photo-zoom.css"><script defer src="../photo-zoom.js"></script><link rel="stylesheet" href="../direct-offer-links.css"><link rel="stylesheet" href="../editorial-atelier-2026.css"><script defer src="../conseiller-engine.js"></script><script defer src="../unified-discovery.js"></script><script defer src="../direct-offer-links.js"></script></head>'));
   return {path,count:normalized.length,coreCount:coreProducts.length,supplementalCount:extras.length};
 }
