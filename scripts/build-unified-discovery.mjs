@@ -156,7 +156,7 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
       +'<button type="button" class="ud-save" data-save-id="'+e(p.id)+'" aria-pressed="false" aria-label="Favoris : ajouter '+e(p.brand+' '+p.model)+'" hidden><span class="ud-save-heart" aria-hidden="true">♡</span><span class="ud-save-word">Favoris</span></button>'
       +(p.photoUrl?'<button type="button" class="ud-zoom" data-zoom-id="'+e(p.id)+'" aria-label="Agrandir la photographie de '+e(p.brand+' '+p.model)+'" hidden><span aria-hidden="true">＋</span> Agrandir</button>':'')
       +'<span class="ud-visual-label">'+(p.photoUrl?'Photo du modèle':'Sans photo publiée')+'</span></div>'
-      +'<div class="ud-card-main"><p class="ud-kicker">'+e(tierLabels[p.tier])+' · '+e(styleLabels[p.style])+'</p>'
+      +'<div class="ud-card-main"><p class="ud-kicker"><span class="ud-tier-pill">Gamme '+e(tierLabels[p.tier])+'</span><span class="ud-card-style">'+e(styleLabels[p.style])+'</span></p>'
       +'<h2><a href="'+e(p.detailUrl.replace('./montres/','./'))+'">'+e(p.brand+' '+p.model)+'</a></h2>'
       +'<p class="ud-description">'+e(p.lead)+'</p>'
       +'<dl><div><dt>Mouvement</dt><dd>'+e(movementLabels[p.movement])+'</dd></div><div><dt>Boîtier</dt><dd>'+e(p.caseText)+'</dd></div></dl>'
@@ -225,6 +225,30 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
     +'<a href="?size=compact#udCount"><span>03 / Proportions</span><strong>Petits boîtiers ↗</strong></a>'
     +'<a href="?visual=photo#udCount"><span>04 / Photographies</span><strong>Modèles photographiés ↗</strong></a>'
     +'</nav>';
+  // Editorial entrypoints are derived from the exact 52-model feed and
+  // reuse the same deep-linking filters as the existing catalogue controls.
+  // These ranges are NOT price brackets: actual prices and stock are external.
+  const tierDescriptions={
+    essential:{headline:'Les essentiels',detail:'Des lignes utiles, sportives ou sobres pour trouver votre style.'},
+    signature:{headline:'Le style signature',detail:'Des designs plus affirmés et des détails qui se remarquent.'},
+    prestige:{headline:'L’esprit prestige',detail:'Des références à explorer pour leur caractère horloger.'}
+  };
+  const tierCards=Object.entries(tierDescriptions).map(([tier,copy],index)=>{
+    const count=normalized.filter(p=>p.tier===tier).length;
+    if(count===0)throw Error('Editorial tier has no watch references: '+tier);
+    return '<a class="ud-tier-shortcut" data-tier-shortcut="'+tier+'" href="?tier='+tier+'#udCount">'
+      +'<span class="ud-tier-shortcut-index">COLLECTION '+String(index+1).padStart(2,'0')+'</span>'
+      +'<strong>'+e(copy.headline)+'</strong><span class="ud-tier-shortcut-desc">'+e(copy.detail)+'</span>'
+      +'<span class="ud-tier-shortcut-footer">'+count+' modèle'+(count===1?'':'s')+' à découvrir <span aria-hidden="true">↗</span></span>'
+      +'</a>';
+  }).join('');
+  const tierNavigation='<section class="ud-tier-navigation" aria-labelledby="udTierTitle">'
+    +'<div class="ud-tier-navigation-head"><div><span class="ud-tier-navigation-eyebrow">Une collection, trois univers</span>'
+    +'<h2 id="udTierTitle">Choisissez votre univers.</h2></div>'
+    +'<p>Du quotidien aux pièces de caractère : trouvez un style qui vous correspond, puis comparez les références réelles.</p></div>'
+    +'<nav class="ud-tier-shortcuts" aria-label="Explorer les trois gammes de montres">'+tierCards+'</nav>'
+    +'<p class="ud-tier-disclaimer">Les gammes sont des repères éditoriaux, pas des fourchettes de prix. Prix, variante, stock et conditions d’achat sont à vérifier chez le vendeur.</p>'
+    +'</section>';
   const path='montres/toutes-les-montres.html';
   const main='<div class="wrap ud-page"><nav class="crumb" aria-label="Fil d’Ariane"><a href="../index.html">Accueil</a> / Les 52 montres</nav>'
     +'<header class="ud-heading" aria-labelledby="udCollectionTitle"><span class="eyebrow">Atelier Montres · Collection homme et femme</span>'
@@ -233,7 +257,7 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
     +'<div class="ud-heading-actions"><a class="ud-heading-primary" href="#udCount">Explorer les 52 montres <span aria-hidden="true">↘</span></a><a class="ud-heading-secondary" href="../conseiller.html">Me guider dans mon choix <span aria-hidden="true">↗</span></a></div>'
     +'<ul class="ud-heading-highlights" aria-label="Les avantages du catalogue"><li>52 modèles à comparer</li><li>Caractéristiques documentées</li><li>Photos de modèle quand disponibles</li></ul>'
     +'<p class="ud-disclosure"><strong>Avant votre achat :</strong> consultez le prix, la disponibilité et les conditions de livraison chez le marchand. Certains liens partenaires peuvent nous rémunérer. Une recherche Amazon ne garantit pas le modèle exact : vérifiez la référence auprès du vendeur.</p></header>'
-    +shortcuts+showroom
+    +shortcuts+showroom+tierNavigation
     +'<div class="ud-favorite-tools" id="udFavoriteTools" hidden><div><strong>Votre sélection, à votre rythme.</strong><p>Gardez vos modèles préférés sur cet appareil, puis comparez-les parmi les 52 montres.</p></div><button id="udSavedToggle" type="button" aria-pressed="false"><span aria-hidden="true">♡</span> <span id="udSavedButtonLabel">Voir mes favoris</span> <span class="ud-favorite-total">(<span id="udSavedCount">0</span>)</span></button></div>'
     +'<form id="udFilters" class="ud-filters" role="search" aria-label="Affiner les 52 montres" hidden>'
     +'<label>Recherche<input id="udSearch" type="search" maxlength="100" placeholder="Marque, modèle, caractéristiques…"></label>'
@@ -281,6 +305,6 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
   ]};
   writeFileSync(join(root,path),page(pageHead({title:'52 montres homme et femme à comparer | Atelier Montres',
     description:'Explorez 52 montres Casio, SKMEI, Citizen, Seiko et autres. Comparez style, mouvement, dimensions vérifiées et liens marchands sans faux prix.',path}),main,graph)
-    .replace('</head>','<link rel="stylesheet" href="../unified-discovery.css"><link rel="stylesheet" href="../photo-zoom.css"><script defer src="../photo-zoom.js"></script><link rel="stylesheet" href="../direct-offer-links.css"><link rel="stylesheet" href="../editorial-atelier-2026.css"><script defer src="../conseiller-engine.js"></script><script defer src="../unified-discovery.js"></script><script defer src="../direct-offer-links.js"></script></head>'));
+    .replace('</head>','<link rel="stylesheet" href="../unified-discovery.css"><link rel="stylesheet" href="../unified-tier-finish.css"><link rel="stylesheet" href="../photo-zoom.css"><script defer src="../photo-zoom.js"></script><link rel="stylesheet" href="../direct-offer-links.css"><link rel="stylesheet" href="../editorial-atelier-2026.css"><script defer src="../conseiller-engine.js"></script><script defer src="../unified-discovery.js"></script><script defer src="../direct-offer-links.js"></script></head>'));
   return {path,count:normalized.length,coreCount:coreProducts.length,supplementalCount:extras.length};
 }

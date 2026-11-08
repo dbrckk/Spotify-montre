@@ -1,0 +1,73 @@
+/* Atelier Montres · visual finishing for the public 52-watch collection.
+ * Editorial ranges are NOT verified price brackets. No additional images,
+ * fonts, scripts, merchant endpoints or remote resources. */
+.ud-tier-navigation{margin:clamp(36px,5vw,66px) 0 35px;padding:0;min-width:0;color:#203e2d}
+.ud-tier-navigation-head{display:flex;justify-content:space-between;align-items:end;gap:18px 35px;margin:0 0 22px}
+.ud-tier-navigation-eyebrow{display:block;margin:0 0 10px;color:#866742;letter-spacing:.11em;text-transform:uppercase;font:800 11px/1.5 system-ui,sans-serif}
+.ud-tier-navigation h2{margin:0;font:400 clamp(30px,4vw,48px)/1.13 Georgia,serif;letter-spacing:-.035em;color:#193b2a;text-wrap:balance}
+.ud-tier-navigation-head>p{max-width:44ch;margin:0;color:#4a6250;font:400 14px/1.75 system-ui,sans-serif}
+.ud-tier-shortcuts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.ud-tier-shortcut{--tone:#8a8f70;min-width:0;display:flex;flex-direction:column;gap:10px;min-height:226px;padding:24px 23px 19px;position:relative;overflow:hidden;border:1px solid #d4d8c9;border-top:4px solid var(--tone);border-radius:7px;background:#fffcf5;color:#20412e;text-decoration:none;box-shadow:0 9px 27px rgba(24,51,31,.055);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+.ud-tier-shortcut::after{content:"";position:absolute;right:-50px;top:-44px;width:155px;aspect-ratio:1;border:20px solid color-mix(in srgb,var(--tone),transparent 83%);border-radius:50%;pointer-events:none}
+.ud-tier-shortcut[data-tier-shortcut="essential"]{--tone:#749779;background:linear-gradient(135deg,#f7faf4,#fffdf7)}
+.ud-tier-shortcut[data-tier-shortcut="signature"]{--tone:#ab8754;background:linear-gradient(135deg,#fbf5e8,#fffdfa)}
+.ud-tier-shortcut[data-tier-shortcut="prestige"]{--tone:#61788c;background:linear-gradient(135deg,#eff3f7,#fffdf8)}
+.ud-tier-shortcut-index{position:relative;z-index:1;color:#4c6552;letter-spacing:.14em;font:750 10px/1.5 system-ui,sans-serif}
+.ud-tier-shortcut strong{position:relative;z-index:1;font:400 clamp(23px,2.6vw,31px)/1.16 Georgia,serif;letter-spacing:-.025em}
+.ud-tier-shortcut-desc{position:relative;z-index:1;color:#4b5e4e;font:450 13px/1.65 system-ui,sans-serif;max-width:35ch}
+.ud-tier-shortcut-footer{position:relative;z-index:1;margin-top:auto;padding-top:12px;border-top:1px solid #cdd7ca;color:#23513a;font:750 12px/1.4 system-ui,sans-serif;display:flex;justify-content:space-between;gap:10px}
+.ud-tier-shortcut-footer span{font-size:19px;line-height:1}
+.ud-tier-shortcut:hover{border-color:var(--tone);box-shadow:0 16px 33px rgba(27,52,34,.12);transform:translateY(-3px)}
+.ud-tier-shortcut:focus-visible{outline:3px solid #b88b44;outline-offset:4px}
+.ud-tier-disclaimer{margin:13px 0 0;color:#5a6959;font:450 12px/1.7 system-ui,sans-serif}
+/* Watch cards retain the existing source, comparison and commercial flows.
+   A discrete collection signature helps shoppers compare at a glance. */
+.ud-page .ud-grid{align-items:stretch}
+.ud-page .ud-card{--card-accent:#829983;position:relative;border:1px solid #d4ddcf;border-radius:9px;box-shadow:0 10px 25px rgba(29,57,36,.067);transition:border-color .17s ease,box-shadow .17s ease;isolation:isolate}
+.ud-page .ud-card[data-tier="essential"]{--card-accent:#618a70}
+.ud-page .ud-card[data-tier="signature"]{--card-accent:#a67e43}
+.ud-page .ud-card[data-tier="prestige"]{--card-accent:#55758c}
+.ud-page .ud-card::before{content:"";height:4px;position:absolute;z-index:4;top:0;left:0;right:0;background:var(--card-accent);pointer-events:none}
+.ud-page .ud-card:hover{border-color:#9bb5a0;box-shadow:0 17px 36px rgba(28,54,36,.13)}
+.ud-page .ud-card-main{gap:11px}
+.ud-page .ud-card .ud-kicker{display:flex;align-items:center;flex-wrap:wrap;gap:7px 9px;letter-spacing:normal;text-transform:none}
+.ud-page .ud-tier-pill{display:inline-flex;align-items:center;min-height:27px;padding:5px 9px;border-radius:4px;border:1px solid color-mix(in srgb,var(--card-accent),white 55%);background:color-mix(in srgb,var(--card-accent),white 90%);color:#284633;font:800 10px/1.4 system-ui,sans-serif;letter-spacing:.018em}
+.ud-page .ud-card[data-tier="signature"] .ud-tier-pill{color:#725328}
+.ud-page .ud-card[data-tier="prestige"] .ud-tier-pill{color:#2c526c}
+.ud-page .ud-card-style{font:600 11px/1.5 system-ui,sans-serif;color:#607062}
+.ud-page .ud-card h2{letter-spacing:-.02em;text-wrap:pretty}
+.ud-page .ud-description{color:#405c49}
+.ud-page .ud-card-main>dl{padding:11px 12px;background:#f5f6f0;border:1px solid #e4e7dd;border-radius:5px;gap:11px}
+.ud-page .ud-card-main>dl>div{padding-top:0;border:0}
+.ud-page .ud-offer-context{border-radius:5px;overflow-wrap:anywhere}
+.ud-page .ud-merchant-kind{max-width:100%;font-size:11px;line-height:1.45}
+.ud-page .ud-card .ud-actions a{min-height:48px;border-radius:5px;line-height:1.5;padding:11px 12px;text-wrap:pretty;overflow-wrap:anywhere}
+.ud-page .ud-card .ud-actions .ud-details{background:#244d35;color:#fff!important;border:1px solid #244d35}
+.ud-page .ud-card .ud-actions .ud-details:hover{background:#345f45}
+.ud-page .ud-card[data-merchant="direct"] .ud-actions .ud-merchant,
+.ud-page .ud-card[data-merchant="awin"] .ud-actions .ud-merchant{background:#e8f0e5;border:1px solid #7ba183;color:#1e5033!important;font-weight:800}
+.ud-page .ud-card[data-merchant="direct"] .ud-actions .ud-merchant:hover,
+.ud-page .ud-card[data-merchant="awin"] .ud-actions .ud-merchant:hover{background:#dceadb}
+.ud-page .ud-card[data-merchant="search"] .ud-actions .ud-merchant{background:#f9f2e6;border-color:#ccb58b;color:#654920!important}
+.ud-page .ud-card[data-merchant="search"] .ud-actions .ud-source{border-color:#7d9d82}
+.ud-page .ud-card .ud-actions :is(a,button):focus-visible,
+.ud-page .ud-card .ud-select:focus-visible{outline:3px solid #b88b44;outline-offset:3px}
+@media(max-width:900px){
+ .ud-tier-navigation-head{display:block}
+ .ud-tier-navigation-head>p{margin:12px 0 0}
+ .ud-tier-shortcut{padding:20px 17px;min-height:224px}
+}
+@media(max-width:650px){
+ .ud-tier-navigation{margin:35px 0 28px}
+ .ud-tier-shortcuts{display:flex;overflow-x:auto;gap:12px;scroll-snap-type:x proximity;overscroll-behavior-x:contain;padding:4px 4px 14px;margin:0 -4px;scrollbar-width:thin;scrollbar-color:#97a995 #edece5}
+ .ud-tier-shortcut{flex:0 0 min(83%,325px);scroll-snap-align:start;min-height:205px}
+ .ud-page .ud-card-main>dl{padding:9px}
+}
+@media(max-width:420px){
+ .ud-page .ud-grid.ud-view-large .ud-card-main>dl{padding:11px}
+ .ud-page .ud-grid:not(.ud-view-large) .ud-card-main>dl{padding:8px}
+}
+@media(prefers-reduced-motion:reduce){
+ .ud-tier-shortcut,.ud-page .ud-card{transition:none}
+ .ud-tier-shortcut:hover{transform:none}
+}
