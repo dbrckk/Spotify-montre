@@ -56,6 +56,7 @@ on:
       - 'site/catalogue-return.js'
       - 'site/unified-discovery.css'
       - 'site/unified-tier-finish.css'
+      - 'site/unified-shopper-paths.css'
       - 'site/extra-product-viewer.js'
       - 'site/extra-source-passport.css'
       - 'scripts/build-popular-product-pages.mjs'
