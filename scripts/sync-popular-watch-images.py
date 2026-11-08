@@ -275,7 +275,20 @@ def fetch_page(session: requests.Session, url: str) -> tuple[str, str]:
     return res.text, res.url
 
 
-def download(session: requests.Session, url: str, source: str) -> tuple[bytes, int, int]:
+def is_official_orient_front(url: str, model_code: str) -> bool:
+    """Never replace a watch's front photo with a bracelet/back/gallery view."""
+    try:
+        parsed = urlparse(url)
+        return (parsed.scheme == "https"
+            and (parsed.hostname or "").lower() == "orient-watch.com"
+            and parsed.path.endswith("/" + model_code + "_main.webp")
+            and not parsed.fragment)
+    except ValueError:
+        return False
+
+
+def download(session: requests.Session, url: str, source: str,
+             *, exact_orient_front: bool = False) -> tuple[bytes, int, int]:
     if not host_allowed(url, source):
         raise ValueError("Image source is not an approved manufacturer/distributor CDN")
     with session.get(url, stream=True, timeout=(10, 30), allow_redirects=True) as response:
@@ -295,7 +308,7 @@ def download(session: requests.Session, url: str, source: str) -> tuple[bytes, i
     try:
         with Image.open(io.BytesIO(raw.getvalue())) as im:
             im.load()
-            if im.width < 380 or im.height < 380 or max(im.size) > 9000:
+            if im.width < (300 if exact_orient_front else 380) or im.height < 380 or max(im.size) > 9000:
                 raise ValueError("Image resolution not suitable")
             im = ImageOps.exif_transpose(im)
             if im.mode in ("RGBA", "LA") or "transparency" in im.info:
@@ -305,6 +318,14 @@ def download(session: requests.Session, url: str, source: str) -> tuple[bytes, i
                 im = background.convert("RGB")
             else:
                 im = im.convert("RGB")
+            # Orient's official exact-SKU front asset is a narrow 328px
+            # catalog portrait. Keep its real front view instead of the larger
+            # 738px reverse/strap gallery photos. Upscaling is a layout
+            # derivative, not evidence of additional photographic detail.
+            if exact_orient_front and im.width < 480:
+                target_width = 480
+                im = im.resize((target_width, round(im.height * target_width / im.width)),
+                               Image.Resampling.LANCZOS)
             im.thumbnail((1200, 1200), Image.Resampling.LANCZOS)
             buf = io.BytesIO()
             im.save(buf, "WEBP", quality=86, method=5)
@@ -381,12 +402,20 @@ def main() -> int:
                     )
                     if host_allowed(official_image, page_url):
                         candidates.insert(0, official_image)
+                exact_orient_front = (
+                    p["brand"] == "Orient"
+                    and source_config.get("alternateManufacturerPage") == photo_page
+                )
+                if exact_orient_front:
+                    candidates = [item for item in candidates
+                        if is_official_orient_front(item, source_config["modelCode"])]
                 if not candidates:
-                    raise ValueError("No trusted product image source found in structured data or product gallery")
+                    raise ValueError("No trusted exact-model front packshot in official product gallery")
                 print("CANDIDATES", pid, len(candidates), photo_page, flush=True)
                 for candidate in dict.fromkeys(candidates):
                     try:
-                        image, width, height = download(session, candidate, photo_page)
+                        image, width, height = download(session, candidate, photo_page,
+                            exact_orient_front=exact_orient_front)
                         sha = hashlib.sha256(image).hexdigest()
                         # Commit only after the exact model, brand-domain,
                         # source bytes and usable dimensions are verified.
