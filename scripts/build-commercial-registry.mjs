@@ -26,7 +26,7 @@ export function buildCommercialRegistry({root,coreProducts,affiliates,coreAmazon
   if(primaryEvidence.version!==1||!date.test(primaryEvidence.checkedOn||'')||
       Object.keys(primaryEvidence.products||{}).length!==15||
       supplementalEvidence.version!==1||
-      Object.keys(supplementalEvidence.verifiedProducts||{}).length!==12)
+      Object.keys(supplementalEvidence.verifiedProducts||{}).length!==14)
     throw Error('Commercial source snapshots are incomplete');
   if(affiliates.enabled!==tracked.enabled||affiliates.links.size!==Object.keys(tracked.links).length)
     throw Error('Commercial affiliate activation disagrees with the validated account state');
@@ -132,7 +132,7 @@ export function buildCommercialRegistry({root,coreProducts,affiliates,coreAmazon
     imagePublished:records.filter(p=>p.photo.published).length,
     directSaleEligible:records.filter(p=>p.directSale.eligible).length
   };
-  if(counts.total!==52||counts.documentedAmazonAsins!==25||
+  if(counts.total!==52||counts.documentedAmazonAsins!==13+Object.keys(supplementalEvidence.verifiedProducts).length||
      counts.historicallyUnavailable!==4||
      counts.activeExactAmazonReferrals!==affiliates.links.size+exactSupplemental.size||
      counts.activeAwinReferrals!==awin.size||counts.directSaleEligible!==0)

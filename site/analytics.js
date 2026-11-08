@@ -23,6 +23,7 @@
     "casio-f91w-1": "B000J34HN4",
     "casio-ga-2100-1a1": "B07WGJ1JNW",
     "casio-gw-m5610u-1": "B09BCPP68Q",
+    "casio-la-20wh-4a1": "B077YZHF21",
     "casio-ltp1302": "B0039UT5HC",
     "casio-mdv107": "B09TV2TZY9",
     "casio-mtp-1302": "B0BRPD1FTX",
@@ -38,6 +39,7 @@
     "skmei-1257": "B07B6ML1VJ",
     "swatch-clearly": "B0C3WQ8YXJ",
     "tissot-le-locle-white": "B01N7FXE80",
+    "tissot-gentleman-auto": "B07XTVQ3W7",
     "tissot-prx-quartz": "B08TB1MF6F"
   });
   const placements=new Set(['catalogue','fiche','seo','popular','showroom']);

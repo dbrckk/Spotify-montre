@@ -4,19 +4,8 @@
   "marketplace": "amazon.fr",
   "publishable": false,
   "status": "candidates_only_no_amazon_fr_detail_confirmation",
-  "explanation": "Candidats documentaires non publiables : les rapprochements Amazon.fr / modèle doivent prouver l'ASIN et une variante sans signal d'indisponibilité actuel. La Tissot Gentleman reste sans fiche Amazon.fr vérifiée ; la SKMEI 2056 blanche était indisponible au contrôle du 1er novembre. La Seiko SRPK29K1 est liée à l'ASIN B0C3W82YW5 via comparateur mais Amazon était indiqué « Indisponible » au contrôle du 8 novembre. La Citizen BN0150-10E possède un rapprochement documentaire B00R7PSW38 sans redirection Amazon.fr fraîche et exacte. Aucune de ces quatre pistes n'autorise de lien rémunéré direct sur le site.",
+  "explanation": "Candidats refusés ou en attente de preuve : seuls un ASIN, une variante fabricant précisément identifiée, une destination Amazon.fr contrôlée et une corroboration indépendante autorisent une correspondance marchande publiée. La Tissot Gentleman T1274071104100 a été qualifiée le 8 novembre 2026 et retirée des candidats après rapprochement de redirection 123comparer / ASIN B07XTVQ3W7 et corroboration indépendante. Les autres candidats restent non publiables : SKMEI 2056 et Seiko SRPK29 indiquées indisponibles, Citizen BN0150 et Seiko Presage SRPE43 sans redirection Amazon.fr suffisamment contrôlée.",
   "candidates": [
-    {
-      "productId": "tissot-gentleman-auto",
-      "model": "T1274071104100",
-      "asinCandidate": "B07XTVQ3W7",
-      "status": "unverified_direct_amazon_fr",
-      "evidence": [
-        "https://www.vivre-riche.com/test-de-la-montre-automatique-tissot-gentleman-t127-407-11-041-00",
-        "https://www.preisgenau.de/1648823068-product"
-      ],
-      "note": "Des sources secondaires relient cet ASIN à la référence complète ; la fiche Amazon.fr elle-même était inaccessible lors du contrôle."
-    },
     {
       "productId": "skmei-2056",
       "model": "2056",
@@ -55,6 +44,18 @@
         "https://www.preisgenau.de/710400935-product"
       ],
       "note": "Deux sources secondaires associent B00R7PSW38 au modèle Citizen BN0150-10E. Aucune redirection actuelle vers une fiche Amazon.fr précisément identifiée avec disponibilité vérifiée n'a été confirmée lors de cette recherche. Garder la source fabricant et, si activée, la recherche Amazon correctement étiquetée."
+    },
+    {
+      "productId": "seiko-presage-srpe43",
+      "model": "SRPE43J1",
+      "asinCandidate": "B08F41JHQ8",
+      "status": "secondary_amazon_fr_product_claim_without_independent_live_fr_redirect",
+      "observedOn": "2026-11-08",
+      "evidence": [
+        "https://www.1ruevintage.com/avis-seiko-montre-unisex-srpe43j1-un-style-intemporel",
+        "https://leboncadran.fr/montre/seiko-presage-automatique-cocktail-srpe43j1"
+      ],
+      "note": "La revue 1RueVintage cite Amazon.fr et l'ASIN B08F41JHQ8 pour Seiko SRPE43J1. Le Bon Cadran corrobore le modèle, mais ses marchands affichés pour cette fiche sont Ocarat et Lepage, non Amazon.fr ; aucune redirection Amazon.fr actuelle vers ce code exact n'a été inspectée. Ne pas promouvoir au statut de fiche rémunérée."
     }
   ]
 }
