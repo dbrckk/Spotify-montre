@@ -35,7 +35,7 @@ for(const p of feed.products){
     'Source-model copy enhancement must fail closed without JavaScript: '+p.id);
   assert.ok(pageHtml.includes('<h1>'+htmlEscape(p.brand+' '+p.model)+'</h1>'),
     'Core reference identity must match visible H1: '+p.id);
-  assert.ok(pageHtml.includes('src="../watch-reference-copy.js"')&&
+  assert.ok(pageHtml.includes('src="../watch-reference-copy-v2.js"')&&
     pageHtml.includes('href="../watch-reference-copy.css"'),
     'Historical watch page must load common safe reference helper: '+p.id);
  assert.equal((pageHtml.match(/class="watch-decision-grid"/g)||[]).length,1,'One decision grid per product '+p.id);

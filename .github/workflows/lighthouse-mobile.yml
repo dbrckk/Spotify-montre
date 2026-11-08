@@ -26,7 +26,7 @@ on:
       - 'site/unified-discovery.css'
       - 'site/unified-trust-markers.css'
       - 'site/watch-reference-copy.css'
-      - 'site/watch-reference-copy.js'
+      - 'site/watch-reference-copy-v2.js'
       - 'site/unified-tier-finish.css'
       - 'site/unified-shopper-paths.css'
       - 'site/unified-discovery.js'
@@ -84,7 +84,7 @@ jobs:
           base='https://atelier-montres-selection-fr.onrender.com'
           for attempt in $(seq 1 30); do
             ready=1
-            for file in public-home.css premium-showroom.css base.css features.css direct-offer-links.js direct-offer-links.css seo-guides.css catalogue-view.css premium-system.css editorial-photo.js unified-discovery.css unified-trust-markers.css watch-reference-copy.css watch-reference-copy.js unified-tier-finish.css unified-shopper-paths.css unified-discovery.js popular-picks.css extra-source-passport.css merchant-proof-ledger.css extra-product-viewer.js; do
+            for file in public-home.css premium-showroom.css base.css features.css direct-offer-links.js direct-offer-links.css seo-guides.css catalogue-view.css premium-system.css editorial-photo.js unified-discovery.css unified-trust-markers.css watch-reference-copy.css watch-reference-copy-v2.js unified-tier-finish.css unified-shopper-paths.css unified-discovery.js popular-picks.css extra-source-passport.css merchant-proof-ledger.css extra-product-viewer.js; do
               if ! curl -fsSL --max-time 15 "$base/$file" -o "$RUNNER_TEMP/lh-$file"; then
                 ready=0
               elif ! cmp -s "site/$file" "$RUNNER_TEMP/lh-$file"; then
@@ -158,7 +158,7 @@ jobs:
           assert article(local)==article(live), 'Stale core model article: '+watch_id
           assert 'data-watch-ref-copy="'+watch_id+'"' in live
           assert 'href="../watch-reference-copy.css"' in live
-          assert 'src="../watch-reference-copy.js"' in live
+          assert 'src="../watch-reference-copy-v2.js"' in live
           PY
               then
                 ready=0

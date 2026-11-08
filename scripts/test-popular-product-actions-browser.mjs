@@ -20,7 +20,7 @@ for(const p of picks){
     'Every supplemental watch must expose its actual model reference: '+p.id);
   assert.ok(html.includes('data-watch-ref-tools hidden'),
     'Copy controls must remain invisible without validated JavaScript: '+p.id);
-  assert.ok(html.includes('src="../watch-reference-copy.js"'),
+  assert.ok(html.includes('src="../watch-reference-copy-v2.js"'),
     'Dedicated source-copy enhancement missing on '+p.id);
   assert.ok(html.includes('href="../watch-reference-copy.css"'),
     'Dedicated source-copy styling missing on '+p.id);
