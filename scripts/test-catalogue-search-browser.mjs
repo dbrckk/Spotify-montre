@@ -16,6 +16,13 @@ try{
     const page=await browser.newPage({viewport:{width,height:900},
       isMobile:width<600,hasTouch:width<600,locale:'fr-FR'});
     page.on('pageerror',error=>errors.push(width+': '+error.message));
+    // Browser-share is stubbed for a deterministic test: no external app or
+    // merchant is opened and we can inspect the exact customer-facing URL.
+    await page.addInitScript(()=>{
+      Object.defineProperty(navigator,'share',{configurable:true,value:async({url})=>{
+        window.__lastSharedCatalogueUrl=url;
+      }});
+    });
     await page.goto(new URL('/montres/toutes-les-montres.html',base).href,
       {waitUntil:'domcontentloaded'});
     await page.locator('#udFilters').waitFor({state:'visible'});
@@ -285,6 +292,47 @@ try{
       'Clearing all filters returns keyboard focus to the search field');
     assert.equal(await page.locator('.ud-card:visible').count(),52);
     assert.equal(new URL(page.url()).searchParams.has('q'),false);
+
+    if(width===393){
+      await page.locator('#udSearch').fill('mdv107');
+      const share=page.locator('#udShareSelection');
+      assert.equal(await share.isVisible(),true,'Share action missing in the public catalogue');
+      await share.click();
+      const shared=await page.evaluate(()=>window.__lastSharedCatalogueUrl);
+      const sharedUrl=new URL(shared);
+      assert.equal(sharedUrl.pathname,'/montres/toutes-les-montres.html');
+      assert.equal(sharedUrl.searchParams.get('q'),'mdv107');
+      assert.equal(sharedUrl.hash,'#udCount');
+      assert.equal(await page.locator('#udShareStatus').innerText(),'Sélection partagée.');
+
+      // The link must reproduce the visible exact-reference search on another
+      // visit, rather than sharing a generic catalogue page.
+      await page.goto(shared,{waitUntil:'domcontentloaded'});
+      await page.locator('#udFilters').waitFor({state:'visible'});
+      assert.equal(await page.locator('.ud-card:visible').count(),1);
+      assert.equal(await page.locator('#modele-casio-mdv107').isVisible(),true);
+
+      // Native Share is not the only working route: copy the identical URL.
+      await page.evaluate(()=>{
+        Object.defineProperty(navigator,'share',{configurable:true,value:undefined});
+        Object.defineProperty(navigator,'clipboard',{configurable:true,value:{
+          writeText:async text=>{window.__copiedCatalogueUrl=text;}
+        }});
+      });
+      await page.locator('#udShareSelection').click();
+      assert.equal(await page.evaluate(()=>window.__copiedCatalogueUrl),shared);
+      assert.equal(await page.locator('#udShareStatus').innerText(),'Lien de sélection copié.');
+
+      // Favourites only exist in localStorage: they must not masquerade as
+      // a portable selection and leak a broken saved=1 link.
+      await page.locator('#udSavedToggle').click();
+      await page.locator('#udShareSelection').click();
+      assert.match(await page.locator('#udShareStatus').innerText(),/favoris restent sur cet appareil/);
+      assert.equal(await page.evaluate(()=>window.__copiedCatalogueUrl),shared);
+      await page.locator('#udSavedToggle').click();
+      await page.locator('#udClearActiveFilters').click();
+      assert.equal(await page.locator('.ud-card:visible').count(),52);
+    }
 
     const size=await page.evaluate(()=>({
       width:document.documentElement.clientWidth,

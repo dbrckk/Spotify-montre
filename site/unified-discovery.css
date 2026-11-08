@@ -533,3 +533,27 @@
   .ud-page .ud-grid.ud-view-large .ud-card-main>.ud-actions a,
   .ud-page .ud-grid.ud-view-large .ud-select{font-size:13px;min-height:48px}
 }
+
+
+/* One-tap sharing for the full 52-watch catalogue, with a usable manual
+   fallback on Android browsers that deny native share or clipboard access. */
+.ud-share-tools{display:flex;flex-wrap:wrap;align-items:center;gap:12px 18px;
+  padding:14px 16px;margin:14px 0 0;background:#f8f6ef;border:1px solid #d8d2c6;
+  border-radius:7px;color:#36533e}
+.ud-share-tools button{min-height:48px;padding:10px 20px;border:2px solid #27533a;
+  border-radius:5px;background:#244c35;color:#fff;cursor:pointer;
+  font:750 13px/1.4 system-ui,sans-serif;transition:background-color .18s ease}
+.ud-share-tools button:hover{background:#386449}
+.ud-share-tools button:focus-visible,.ud-share-tools input:focus-visible{
+  outline:3px solid #b68b49;outline-offset:3px}
+.ud-share-status{flex:1;min-width:180px;font:500 13px/1.55 system-ui,sans-serif;
+  overflow-wrap:anywhere}
+.ud-share-tools input{flex-basis:100%;max-width:100%;min-width:0;min-height:44px;
+  padding:8px 10px;background:#fff;color:#233c2c;border:1px solid #8fa895;
+  border-radius:4px;font:500 12px/1.6 system-ui,sans-serif}
+.ud-share-tools [hidden]{display:none!important}
+@media(max-width:650px){
+  .ud-share-tools{align-items:stretch;flex-direction:column;padding:14px}
+  .ud-share-tools button,.ud-share-status{width:100%}
+}
+@media(prefers-reduced-motion:reduce){.ud-share-tools button{transition:none}}
