@@ -54,6 +54,7 @@ on:
       - 'scripts/test-watch-comparisons-browser.mjs'
       - 'scripts/test-unified-compare-tray.mjs'
       - 'scripts/test-catalogue-search-browser.mjs'
+      - 'scripts/test-core-watch-reference-browser.mjs'
       - 'scripts/build-unified-discovery.mjs'
       - 'site/unified-discovery.js'
       - 'site/catalogue-return.js'
@@ -123,6 +124,7 @@ jobs:
           WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-watch-comparisons-browser.mjs
           WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-unified-compare-tray.mjs
           WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-popular-product-actions-browser.mjs
+          WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-core-watch-reference-browser.mjs
           WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-catalogue-search-browser.mjs
           WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-intent-collections-browser.mjs
           WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-premium-readability.mjs
