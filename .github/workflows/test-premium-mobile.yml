@@ -62,6 +62,9 @@ on:
       - 'site/unified-trust-markers.css'
       - 'site/watch-reference-copy.css'
       - 'site/watch-reference-copy-v2.js'
+      - 'site/unified-recent-history.js'
+      - 'site/unified-recent-history.css'
+      - 'scripts/test-unified-recent-history-browser.mjs'
       - 'site/unified-tier-finish.css'
       - 'site/unified-shopper-paths.css'
       - 'site/extra-product-viewer.js'
@@ -125,6 +128,7 @@ jobs:
           WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-unified-compare-tray.mjs
           WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-popular-product-actions-browser.mjs
           WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-core-watch-reference-browser.mjs
+          WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-unified-recent-history-browser.mjs
           WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-catalogue-search-browser.mjs
           WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-intent-collections-browser.mjs
           WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-premium-readability.mjs

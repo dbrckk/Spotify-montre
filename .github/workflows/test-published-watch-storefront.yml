@@ -21,6 +21,8 @@ on:
       - 'site/unified-trust-markers.css'
       - 'site/watch-reference-copy.css'
       - 'site/watch-reference-copy-v2.js'
+      - 'site/unified-recent-history.js'
+      - 'site/unified-recent-history.css'
       - 'site/unified-tier-finish.css'
       - 'site/unified-shopper-paths.css'
       - 'site/affiliation.js'
@@ -86,7 +88,7 @@ jobs:
           for attempt in $(seq 1 42); do
             ready=1
             reason=''
-            for file in affiliation.js selection-share.js affiliate-ui.js catalogue-view.css premium-system.css fiche.js fiche.css seo-guides.css editorial-photo.js editorial-photo.css popular-filters.js popular-picks.css extra-source-passport.css merchant-proof-ledger.css affordable-comparisons.css extra-factual-comparison.css shopper-selections.css unified-discovery.js unified-discovery.css unified-trust-markers.css watch-reference-copy.css watch-reference-copy-v2.js unified-tier-finish.css unified-shopper-paths.css; do
+            for file in affiliation.js selection-share.js affiliate-ui.js catalogue-view.css premium-system.css fiche.js fiche.css seo-guides.css editorial-photo.js editorial-photo.css popular-filters.js popular-picks.css extra-source-passport.css merchant-proof-ledger.css affordable-comparisons.css extra-factual-comparison.css shopper-selections.css unified-discovery.js unified-discovery.css unified-trust-markers.css watch-reference-copy.css watch-reference-copy-v2.js unified-recent-history.js unified-recent-history.css unified-tier-finish.css unified-shopper-paths.css; do
               if ! curl -fsSL --max-time 15 "$base/$file" -o "$RUNNER_TEMP/live-$file"; then
                 ready=0
                 reason="$reason [missing asset: $file]"
@@ -180,6 +182,9 @@ jobs:
               elif [ "$(grep -oF '<article class="ud-card" id="modele-' "$RUNNER_TEMP/live-unified.html" | wc -l)" -ne 52 ]; then
                 ready=0
                 reason="$reason [wrong card count: unified 52-watch catalog]"
+              elif ! grep -Fq 'data-unified-recent-list' "$RUNNER_TEMP/live-unified.html"; then
+                ready=0
+                reason="$reason [missing: private recent watch rail]"
               elif [ "$(grep -oF 'data-watch-ref-copy="' "$RUNNER_TEMP/live-unified.html" | wc -l)" -ne 52 ]; then
                 ready=0
                 reason="$reason [outdated buyer reference controls: 52 model-specific cards expected]"
