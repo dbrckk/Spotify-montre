@@ -16,14 +16,14 @@ const approvedAsins=Object.fromEntries([
     .map(([id,p])=>[id,p.asin]),
   ...Object.entries(supplemental).map(([id,p])=>[id,p.asin])
 ]);
-assert.equal(Object.keys(approvedAsins).length,25,
-  '13 core and 12 documented supplemental ASINs, no inferred models');
+assert.equal(Object.keys(approvedAsins).length,27,
+  '13 core and 14 documented supplemental ASINs, no inferred models');
 const encoded=source.match(/const exactAmazonAsinByModel=Object\.freeze\((\{[\s\S]*?\})\);/);
 assert.ok(encoded,'A source-backed exact model-to-ASIN map is required in the production tracker');
 const attributedAsins=JSON.parse(encoded[1]);
 assert.deepEqual(attributedAsins,Object.fromEntries(Object.entries(approvedAsins)
   .sort(([a],[b])=>a.localeCompare(b))),
-  'The browser attribution map must equal all 25 actual research ASINs');
+  'The browser attribution map must equal all 27 actual research ASINs');
 const events=[];
 let click;
 const context={
@@ -104,7 +104,7 @@ for(const [modelId,asin] of Object.entries(approvedAsins)){
   assert.equal(events.at(-1),'amazon:'+modelId+':seo',
     'Documented ASIN must track only its own product ID: '+modelId);
 }
-assert.equal(events.length,beforeAll+25,'Exactly the 25 source-backed ASINs must be attributable');
+assert.equal(events.length,beforeAll+27,'Exactly the 27 source-backed ASINs must be attributable');
 
 // An ASIN exists, but it belongs to a DIFFERENT watch. Ignore the event
 // rather than misreport a qualified affiliate exit to the wrong product.
