@@ -40,7 +40,7 @@ try{
       const count=await page.locator('.ud-card[data-tier="'+tier+'"]').count();
       assert.ok(count>0,'Empty collection: '+tier);
       tierSum+=count;
-      const tierLink=tierLinks.locator('[data-tier-shortcut="'+tier+'"]');
+      const tierLink=page.locator('.ud-tier-shortcuts [data-tier-shortcut="'+tier+'"]');
       assert.equal(await tierLink.count(),1);
       assert.equal(await tierLink.getAttribute('href'),'?tier='+tier+'#udCount');
       assert.match(await tierLink.innerText(),new RegExp('\\b'+count+' modèle'));
@@ -52,8 +52,9 @@ try{
       assert.match(actual,/Gamme (Essentielle|Signature|Prestige)/);
     }
     if(width===393){
-      const shortcut=tierLinks.locator('[data-tier-shortcut="signature"]');
-      const geometry=await shortcut.boundingBox();
+      const shortcut=page.locator('.ud-tier-shortcuts [data-tier-shortcut="signature"]');
+      const firstShortcut=page.locator('.ud-tier-shortcuts [data-tier-shortcut="essential"]');
+      const geometry=await firstShortcut.boundingBox();
       assert.ok(geometry&&geometry.width>=200&&geometry.height>=180&&
         geometry.x>=-1&&geometry.x+geometry.width<=width+1,
         'Editorial range shortcuts must fit a narrow Android viewport');
