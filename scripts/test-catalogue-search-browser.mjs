@@ -29,7 +29,7 @@ try{
     assert.equal(await page.locator('.ud-card').count(),52);
     assert.equal(await page.locator('link[href="../watch-reference-copy.css"]').count(),1,
       'The 52-watch collection must use the cache-isolated reference-copy stylesheet');
-    assert.equal(await page.locator('script[src="../watch-reference-copy.js"]').count(),1);
+    assert.equal(await page.locator('script[src="../watch-reference-copy-v2.js"]').count(),1);
     assert.equal(await page.locator('.ud-card [data-watch-ref-tools]').count(),52);
     const allCopyButtons=page.locator('.ud-card button[data-watch-ref-copy]');
     assert.equal(await allCopyButtons.count(),52);
