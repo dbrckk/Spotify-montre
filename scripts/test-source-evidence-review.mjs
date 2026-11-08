@@ -43,6 +43,10 @@ assert.throws(()=>buildSourceEvidenceReview({...params,supplemental:{
   ...verified,'casio-mtp-1302':{asin:'B0BRPD1FTX',verifiedAt:'2026-11-01',
     evidenceType:'amazon_fr_product_page'}}}),/duplicated/);
 assert.throws(()=>buildSourceEvidenceReview({...params,supplemental:{
+  ...verified,'casio-la-20wh-4a1':{...verified['casio-la-20wh-4a1'],
+    asin:verified['tissot-gentleman-auto'].asin}}}),/duplicated/,
+  'Different watch models must never share the same Amazon ASIN');
+assert.throws(()=>buildSourceEvidenceReview({...params,supplemental:{
   ...verified,'casio-la-20wh-4a1':{...verified['casio-la-20wh-4a1'],asin:'B0000X'}}}),/invalid ASIN/);
 assert.throws(()=>buildSourceEvidenceReview({...params,supplemental:{
   ...verified,'casio-la-20wh-4a1':{...verified['casio-la-20wh-4a1'],verifiedAt:'2026-11-31'}}}),/calendar/);
