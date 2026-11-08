@@ -17,6 +17,7 @@ on:
       - 'scripts/build-unified-discovery.mjs'
       - 'site/unified-discovery.js'
       - 'site/unified-discovery.css'
+      - 'site/unified-trust-markers.css'
       - 'site/unified-tier-finish.css'
       - 'site/unified-shopper-paths.css'
       - 'site/affiliation.js'
@@ -82,7 +83,7 @@ jobs:
           for attempt in $(seq 1 42); do
             ready=1
             reason=''
-            for file in affiliation.js selection-share.js affiliate-ui.js catalogue-view.css premium-system.css fiche.js fiche.css seo-guides.css editorial-photo.js editorial-photo.css popular-filters.js popular-picks.css extra-source-passport.css merchant-proof-ledger.css affordable-comparisons.css extra-factual-comparison.css shopper-selections.css unified-discovery.js unified-discovery.css unified-tier-finish.css unified-shopper-paths.css; do
+            for file in affiliation.js selection-share.js affiliate-ui.js catalogue-view.css premium-system.css fiche.js fiche.css seo-guides.css editorial-photo.js editorial-photo.css popular-filters.js popular-picks.css extra-source-passport.css merchant-proof-ledger.css affordable-comparisons.css extra-factual-comparison.css shopper-selections.css unified-discovery.js unified-discovery.css unified-trust-markers.css unified-tier-finish.css unified-shopper-paths.css; do
               if ! curl -fsSL --max-time 15 "$base/$file" -o "$RUNNER_TEMP/live-$file"; then
                 ready=0
                 reason="$reason [missing asset: $file]"
