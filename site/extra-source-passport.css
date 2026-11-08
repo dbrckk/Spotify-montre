@@ -1,0 +1,86 @@
+/* Atelier Montres — photographic honesty and source-first documentary studio.
+   CSS loaded only for exact models without a publishable product photo. */
+
+
+/* Source-first luxury editorial card for the fifteen supplemental watches
+   without publishable photographs. No photo surrogate or invented watch face. */
+.am-extra-art-no-photo{
+  background:radial-gradient(ellipse at 90% 2%,rgba(205,180,129,.17),transparent 55%),
+    linear-gradient(150deg,#1a332d 0%,var(--extra-shade) 65%,#142a25 100%);
+  border:1px solid #aa946e;
+  box-shadow:0 22px 55px rgba(18,39,29,.15),inset 0 0 0 7px rgba(255,255,255,.035)
+}
+.am-extra-art-no-photo::before{
+  top:6%;right:-7%;width:48%;border:1px solid var(--extra-accent);
+  border-radius:4px;opacity:.19;transform:rotate(33deg);box-shadow:0 0 0 20px #ffffff09
+}
+.am-extra-art-no-photo::after{
+  left:auto;right:12%;top:10%;width:28%;height:1px;
+  transform:rotate(-35deg);background:linear-gradient(90deg,transparent,var(--extra-accent),transparent)
+}
+.am-extra-art-no-photo .am-extra-art-kicker{
+  border-color:#e0cd9d;background:#ffffff0b;border-radius:3px;
+  font-size:11px;letter-spacing:.09em;text-transform:uppercase
+}
+.am-extra-art-no-photo .am-extra-art-brand{font-size:13px}
+.am-extra-art-no-photo .am-extra-art-model{
+  margin:7px 0 9px;font-size:clamp(37px,4.6vw,69px);line-height:1.09;
+  text-wrap:pretty
+}
+.am-extra-reference-passport{
+  width:100%;min-width:0;margin:14px 0 10px;padding:17px 18px 14px;
+  border-top:1px solid rgba(238,222,184,.65);
+  border-bottom:1px solid rgba(238,222,184,.35);
+  background:linear-gradient(135deg,rgba(246,237,208,.095),rgba(255,255,255,.025))
+}
+.am-extra-passport-head{
+  display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 16px;
+  margin-bottom:15px;color:#f6deb1;letter-spacing:.11em;
+  font:700 10px/1.5 system-ui,sans-serif
+}
+.am-extra-passport-head span:last-child{color:#d9ddd0;font-weight:500}
+.am-extra-passport-facts{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;margin:0
+}
+.am-extra-passport-facts>div{min-width:0;border-left:2px solid var(--extra-accent);padding-left:12px}
+.am-extra-passport-facts dt{
+  font:600 11px/1.5 system-ui,sans-serif;color:#e4e8de;margin:0 0 6px
+}
+.am-extra-passport-facts dd{
+  font:650 14px/1.45 system-ui,sans-serif;color:#fffaf0;margin:0;overflow-wrap:anywhere
+}
+.am-extra-reference-passport>p{
+  margin:15px 0 0;color:#e7ebdf;font:500 11px/1.6 system-ui,sans-serif;
+  max-width:45ch
+}
+.am-extra-art-no-photo .am-extra-art-label{
+  font-size:12px;line-height:1.55;color:#f5ebdc
+}
+.am-extra-art-no-photo .am-extra-official-photo{
+  margin-top:19px;padding-top:16px;border-top:1px solid #e3d0aa7d
+}
+.am-extra-art-no-photo .am-extra-official-photo>a{
+  width:100%;justify-content:center;text-align:center;min-height:52px;
+  background:#f3e1bb;border-color:#f3e1bb;color:#1e352b
+}
+.am-extra-art-no-photo .am-extra-official-photo>a:hover{
+  background:#fff1d5;border-color:#fff1d5
+}
+@media(max-width:600px){
+  .am-extra-art-no-photo{padding:clamp(20px,5vw,27px)}
+  .am-extra-reference-passport{padding:15px 13px}
+  .am-extra-passport-facts{grid-template-columns:1fr;gap:11px}
+  .am-extra-passport-facts>div{padding-left:10px}
+  .am-extra-art-no-photo .am-extra-art-model{font-size:clamp(34px,9vw,49px)}
+}
+
+.am-extra-seller-path{
+  margin:2px 0 12px;padding:13px 16px;border:1px solid #d6d2c2;
+  border-left:4px solid #a68851;background:#faf6ec;color:#405548;
+  font:500 12px/1.65 system-ui,sans-serif
+}
+.am-extra-seller-path strong{
+  display:block;margin-bottom:4px;color:#284a34;
+  font:750 12px/1.5 system-ui,sans-serif
+}
