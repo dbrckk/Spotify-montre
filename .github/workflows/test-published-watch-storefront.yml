@@ -160,6 +160,13 @@ jobs:
               elif [ "$(grep -oF '<article class="ud-card" id="modele-' "$RUNNER_TEMP/live-unified.html" | wc -l)" -ne 52 ]; then
                 ready=0
                 reason="$reason [wrong card count: unified 52-watch catalog]"
+              elif [ "$(grep -oF 'data-watch-ref-copy="' "$RUNNER_TEMP/live-unified.html" | wc -l)" -ne 52 ]; then
+                ready=0
+                reason="$reason [outdated buyer reference controls: 52 model-specific cards expected]"
+              elif ! grep -Fq 'href="../watch-reference-copy.css"' "$RUNNER_TEMP/live-unified.html" ||
+                   ! grep -Fq 'src="../watch-reference-copy.js"' "$RUNNER_TEMP/live-unified.html"; then
+                ready=0
+                reason="$reason [old catalogue HTML missing reference copy JS/CSS]"
               elif [ "$(grep -oF 'class="ud-feature-card"' "$RUNNER_TEMP/live-unified.html" | wc -l)" -ne 6 ]; then
                 ready=0
                 reason="$reason [missing or incomplete: six-photo editorial showroom]"
