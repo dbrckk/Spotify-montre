@@ -8,6 +8,8 @@ if(base.protocol!=='http:'||!['localhost','127.0.0.1'].includes(base.hostname))
   throw Error('Supplemental product browser tests must run on localhost');
 const picks=JSON.parse(readFileSync('site/selection-populaires.json','utf8')).products;
 const rights=JSON.parse(readFileSync('site/popular-photo-rights.json','utf8')).photos;
+const escapeHtml=value=>String(value).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+  .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 assert.equal(picks.length,37);
 for(const p of picks){
   const html=readFileSync('site/montres/'+p.id+'.html','utf8');
@@ -17,6 +19,10 @@ for(const p of picks){
   assert.ok(html.includes('href="./toutes-les-montres.html?saved=1"'));
   const proof=rights[p.id];
   if(proof){
+    assert.ok(!html.includes('class="am-extra-reference-passport"'),
+      'Real approved photographs should not be replaced by an editorial passport: '+p.id);
+    assert.ok(!html.includes('class="am-extra-art-no-photo"'),
+      'Photographed product must not use the no-photo treatment: '+p.id);
     const hero=html.match(/<img class="am-extra-licensed-photo"[^>]+>/)?.[0]||'';
     assert.ok(hero,'Published exact-model photograph missing: '+p.id);
     assert.ok(html.includes('class="am-extra-photo-stage"')&&
@@ -30,6 +36,18 @@ for(const p of picks){
     assert.ok(hero.includes('watches-popular/'+p.id+'.webp '+proof.width+'w'),
       'Full-size original must remain eligible on detail '+p.id);
   }else{
+    assert.ok(html.includes('am-extra-art-no-photo'),
+      'No-photo product must receive the source-first studio art direction: '+p.id);
+    assert.equal((html.match(/class="am-extra-reference-passport"/g)||[]).length,1,
+      'One factual reference panel required per unphotographed product: '+p.id);
+    assert.equal((html.match(/class="am-extra-seller-path"/g)||[]).length,1,
+      'Commercial exits must be distinguished from official photos: '+p.id);
+    assert.ok(html.includes('<dt>Mouvement</dt><dd>'+escapeHtml(p.movement)+'</dd>'),
+      'Editorial passport movement must match the exact source field: '+p.id);
+    assert.ok(html.includes('<dt>Boîtier</dt><dd>'+escapeHtml(p.case)+'</dd>'),
+      'Editorial passport case description must remain documented: '+p.id);
+    assert.ok(!html.includes('class="am-budget-dial"'),
+      'Do not simulate an unsupported product dial on a no-photo model: '+p.id);
     assert.ok(!html.includes('class="am-extra-licensed-photo"'),
       'Do not publish unapproved watch photography: '+p.id);
     assert.ok(!html.includes('class="am-extra-photo-stage"'),
@@ -57,6 +75,28 @@ try{
     const bounds=await cta.boundingBox();
     assert.ok(bounds&&bounds.height>=44&&bounds.x>=0&&bounds.x+bounds.width<=393,
       'Mobile exact-model photo CTA must fit the screen and offer a 44px touch target');
+
+    const passport=officialFallbackPage.locator('.am-extra-reference-passport');
+    assert.equal(await passport.isVisible(),true,
+      'No-photo model must display source-backed technical facts in the hero');
+    const fallbackModel=picks.find(p=>p.id==='casio-f91w-1');
+    assert.ok(fallbackModel,'Documented Casio F-91W-1 missing');
+    assert.ok((await passport.innerText()).includes(fallbackModel.movement));
+    assert.ok((await passport.innerText()).includes(fallbackModel.case));
+    assert.equal(await officialFallbackPage.locator('.am-extra-seller-path').isVisible(),true);
+    const studio=await officialFallbackPage.locator('.am-extra-art-no-photo').boundingBox();
+    const panel=await passport.boundingBox();
+    assert.ok(studio&&panel&&panel.width>250&&panel.x>=studio.x-2
+      &&panel.x+panel.width<=studio.x+studio.width+2,
+      'No-photo editorial passport must remain within the mobile studio');
+    const pageBounds=await officialFallbackPage.evaluate(()=>({
+      width:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth
+    }));
+    assert.ok(pageBounds.scroll<=pageBounds.width+2,
+      'Source-first hero must not overflow on Android: '+JSON.stringify(pageBounds));
+    await officialFallbackPage.locator('.am-extra-art-no-photo').screenshot({
+      path:'artifacts/atelier-no-photo-editorial-393.png'
+    });
     assert.equal(await officialFallbackPage.locator('.am-extra-licensed-photo').count(),0,
       'No fabricated F-91W photograph may appear');
   }finally{await officialFallbackPage.close();}
