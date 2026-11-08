@@ -230,7 +230,7 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
         +(!photo?'<link rel="stylesheet" href="../extra-source-passport.css">':'')
         +(comparator?'<link rel="stylesheet" href="../merchant-proof-ledger.css">':'')
         +(photo?'<link rel="stylesheet" href="../photo-zoom.css"><script defer src="../photo-zoom.js"></script><script defer src="../extra-product-viewer.js"></script>':'')
-        +'<link rel="stylesheet" href="../extra-factual-comparison.css"><link rel="stylesheet" href="../watch-reference-copy.css"><script defer src="../watch-reference-copy.js"></script><script defer src="../extra-product-actions.js"></script></head>');
+        +'<link rel="stylesheet" href="../extra-factual-comparison.css"><link rel="stylesheet" href="../watch-reference-copy.css"><script defer src="../watch-reference-copy-v2.js"></script><script defer src="../extra-product-actions.js"></script></head>');
     writeFileSync(join(root,path),html);
     paths.push(path);
   }
