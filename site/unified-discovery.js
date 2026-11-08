@@ -241,6 +241,62 @@
     }
     persist();
   };
+  // A real, shareable 52-watch search link. Personal favourites stay local
+  // and must never be misrepresented as a portable selection.
+  const installShareTools=()=>{
+    const tools=node('div',null,'ud-share-tools');
+    tools.id='udShareTools';
+    const button=node('button','Partager cette sélection');
+    button.id='udShareSelection';
+    button.type='button';
+    const message=node('span',null,'ud-share-status');
+    message.id='udShareStatus';
+    message.setAttribute('role','status');
+    message.setAttribute('aria-live','polite');
+    const manual=node('input');
+    manual.id='udShareManualLink';
+    manual.type='url';
+    manual.readOnly=true;
+    manual.hidden=true;
+    manual.setAttribute('aria-label','Lien de votre sélection à copier');
+    tools.append(button,message,manual);
+    viewTools.after(tools);
+    button.addEventListener('click',async()=>{
+      manual.hidden=true;
+      if(savedOnly){
+        message.textContent='Les favoris restent sur cet appareil. Affichez toutes les montres pour partager vos filtres.';
+        return;
+      }
+      // render() has already synced the validated filters and model IDs to
+      // history; the anchor opens at actual results, or the comparison table.
+      const url=new URL(location.href);
+      url.searchParams.delete('saved');
+      if(url.hash!=='#comparer'||selected.length<2)url.hash='udCount';
+      const shareUrl=url.href;
+      message.textContent='';
+      if(typeof navigator.share==='function'){
+        try{
+          await navigator.share({title:'Sélection de montres — Atelier Montres',url:shareUrl});
+          message.textContent='Sélection partagée.';
+          return;
+        }catch(error){
+          if(error?.name==='AbortError')return;
+        }
+      }
+      if(navigator.clipboard?.writeText){
+        try{
+          await navigator.clipboard.writeText(shareUrl);
+          message.textContent='Lien de sélection copié.';
+          return;
+        }catch(_){}
+      }
+      manual.value=shareUrl;
+      manual.hidden=false;
+      manual.focus();
+      manual.select();
+      message.textContent='Sélectionnez et copiez le lien pour partager cette sélection.';
+    });
+  };
   viewCompact.addEventListener('click',()=>changeView('grid',true));
   viewLarge.addEventListener('click',()=>changeView('large',true));
   savedToggle.addEventListener('click',()=>{
@@ -458,6 +514,7 @@
     form.hidden=false;
     viewTools.hidden=false;
     favoriteTools.hidden=false;
+    installShareTools();
     for(const card of cards){
       card.querySelector('button.ud-save')?.removeAttribute('hidden');
       card.querySelector('button.ud-select')?.removeAttribute('hidden');
