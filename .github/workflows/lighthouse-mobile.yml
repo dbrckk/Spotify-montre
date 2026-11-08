@@ -105,7 +105,7 @@ jobs:
             # The 2026 studio refresh changes generated product HTML, not
             # merely CSS. Confirm both real-photo and honest no-photo routes
             # have been deployed before auditing them.
-            for product in skmei-1251 casio-f91w-1 tissot-prx-35-blue; do
+            for product in skmei-1251 casio-f91w-1 tissot-prx-35-blue casio-dw5600rl-1 tissot-le-locle-white; do
               if ! curl -fsSL --max-time 15 "$base/montres/$product.html" -o "$RUNNER_TEMP/lh-$product.html"; then
                 ready=0
               elif ! python3 - "$product" "$RUNNER_TEMP/lh-$product.html" <<'PY'
@@ -120,6 +120,10 @@ jobs:
           expected_photo=product in ('skmei-1251','tissot-prx-35-blue')
           assert ('class="am-extra-photo-stage"' in live)==expected_photo
           assert ('class="am-extra-licensed-photo"' in live)==expected_photo
+          for model,asin in [('casio-dw5600rl-1','B0DN6LT6FX'),
+                             ('tissot-le-locle-white','B01N7FXE80')]:
+              if product==model:
+                  assert 'https://www.amazon.fr/dp/'+asin+'?tag=drackk04-21' in live, 'Exact paid destination not published: '+model
           if product=='tissot-prx-35-blue':
               assert 'popular-responsive/tissot-prx-35-blue-960.webp' in live, 'New Tissot responsive original unavailable'
 
