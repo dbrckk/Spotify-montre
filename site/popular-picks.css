@@ -704,3 +704,13 @@
   .am-extra-passport-facts>div{padding-left:10px}
   .am-extra-art-no-photo .am-extra-art-model{font-size:clamp(34px,9vw,49px)}
 }
+
+.am-extra-seller-path{
+  margin:2px 0 12px;padding:13px 16px;border:1px solid #d6d2c2;
+  border-left:4px solid #a68851;background:#faf6ec;color:#405548;
+  font:500 12px/1.65 system-ui,sans-serif
+}
+.am-extra-seller-path strong{
+  display:block;margin-bottom:4px;color:#284a34;
+  font:750 12px/1.5 system-ui,sans-serif
+}
