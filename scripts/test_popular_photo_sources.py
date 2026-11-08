@@ -17,6 +17,48 @@ ORIENT = "https://www.orientwatch.fr/or/fr_FR/brands/orient/orient-bambino-38mm/
 
 
 class OfficialProductSources(unittest.TestCase):
+    def test_documented_recovery_sources_are_exact_and_manufacturer_only(self):
+        import json
+        research = json.loads(sync.RECOVERY_SOURCE.read_text(encoding="utf-8"))
+        products = json.loads(sync.SOURCE.read_text(encoding="utf-8"))["products"]
+        by_id = {p["id"]: p for p in products}
+        self.assertEqual(research["version"], 1)
+        self.assertEqual(len(research["sources"]), 3)
+        for pid, evidence in research["sources"].items():
+            item = by_id[pid]
+            actual = sync.official_recovery(item, research["sources"])
+            self.assertEqual(actual["modelCode"], sync.model_key(item["model"]))
+            self.assertEqual(actual["productPage"], item["officialUrl"])
+        image = research["sources"]["tissot-gentleman-auto"]["officialImage"]
+        self.assertTrue(sync.host_allowed(image, by_id["tissot-gentleman-auto"]["officialUrl"]))
+        self.assertIn("T127-407-11-041-00_shadow.png", image)
+        self.assertIn("orient-watch.com",
+            research["sources"]["orient-mako40-black"]["alternateManufacturerPage"])
+        self.assertNotIn("amazon.", str(research))
+
+    def test_recovery_fails_closed_on_other_brand_or_code(self):
+        import json
+        research = json.loads(sync.RECOVERY_SOURCE.read_text(encoding="utf-8"))
+        models = {p["id"]:p for p in
+            json.loads(sync.SOURCE.read_text(encoding="utf-8"))["products"]}
+        original = research["sources"]["orient-mako40-black"]
+        malicious = {"orient-mako40-black": {**original,
+            "alternateManufacturerPage": "https://evil.example/RA-AC0Q01B.jpg"}}
+        with self.assertRaisesRegex(ValueError,"Untrusted alternative"):
+            sync.official_recovery(models["orient-mako40-black"],malicious)
+        malicious = {"orient-mako40-black": {**original,"modelCode":"RA-AC0Q02L"}}
+        with self.assertRaisesRegex(ValueError,"exact catalog model"):
+            sync.official_recovery(models["orient-mako40-black"],malicious)
+        tissot = research["sources"]["tissot-gentleman-auto"]
+        with self.assertRaisesRegex(ValueError,"packshot or model mismatch"):
+            sync.official_recovery(models["tissot-gentleman-auto"],{
+                "tissot-gentleman-auto":{**tissot,
+                    "officialImage":tissot["officialImage"].replace(
+                        "T127-407-11-041-00","T127-407-11-031-00")}})
+        with self.assertRaisesRegex(ValueError,"exact catalog model"):
+            sync.official_recovery({**models["tissot-gentleman-auto"],
+                "officialUrl":"https://wrong.example/product"},research["sources"])
+
     def test_tissot_lazy_picture_and_exact_sku_priority(self):
         html = """<html><head><title>Tissot PRX 35mm T137.210.11.041.00</title>
         <meta property="og:image" content="/campaign/logo.png"></head>
