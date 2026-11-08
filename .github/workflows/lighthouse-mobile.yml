@@ -141,6 +141,29 @@ jobs:
                 ready=0
               fi
             done
+            # Unlike untracked verification tags in <head>, the shopper-facing
+            # article must exactly match the fresh builder output. Prevent a
+            # Lighthouse pass on stale HTML with new JS/CSS assets.
+            for core in casio-mtp-1302 citizen-tsuyosa; do
+              if ! curl -fsSL --max-time 15 "$base/montres/$core.html" -o "$RUNNER_TEMP/lh-core-$core.html"; then
+                ready=0
+              elif ! python3 - "$core" "$RUNNER_TEMP/lh-core-$core.html" <<'PY'
+          import pathlib,sys
+          watch_id,live_path=sys.argv[1:]
+          local=pathlib.Path('site/montres/'+watch_id+'.html').read_text()
+          live=pathlib.Path(live_path).read_text()
+          def article(html):
+              start=html.index('<article class="watch watch-product"')
+              return html[start:html.index('</article>',start)+len('</article>')]
+          assert article(local)==article(live), 'Stale core model article: '+watch_id
+          assert 'data-watch-ref-copy="'+watch_id+'"' in live
+          assert 'href="../watch-reference-copy.css"' in live
+          assert 'src="../watch-reference-copy.js"' in live
+          PY
+              then
+                ready=0
+              fi
+            done
             if [ "$ready" -eq 1 ]; then
               echo "Lighthouse will measure the deployed homepage, source-matched watch pages and full styles."
               exit 0
