@@ -94,9 +94,8 @@
       button.setAttribute('aria-pressed',String(selected));
       button.textContent=selected?'Retirer de la comparaison':'Sélectionner pour comparer';
       const card=cards.get(id);
-      button.setAttribute('aria-label',(selected?'Retirer ':'Sélectionner ')
-        +(card?.dataset.brand||'')+' '+(card?.dataset.model||'')
-        +(selected?' de la comparaison':' pour comparer'));
+      button.setAttribute('aria-label',button.textContent+' '
+        +(card?.dataset.brand||'')+' '+(card?.dataset.model||''));
     }
     actions.hidden=chosen.length===0;
     message.textContent=chosen.length===1?'Une montre choisie. Sélectionnez-en une deuxième.'
@@ -119,7 +118,6 @@
       item.dataset.recentWatchId=id;
       const link=text('a',null,'am-unified-recent-link');
       link.href='./'+id+'.html';
-      link.setAttribute('aria-label','Revoir '+card.dataset.brand+' '+card.dataset.model);
       const media=text('span',null,'am-unified-recent-media');
       const photo=photoFor(card,id);
       if(photo){
