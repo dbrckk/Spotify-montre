@@ -54,7 +54,7 @@ try {
   const disabledRegistry=JSON.parse(readFileSync(join(target,'commercial-registry.json'),'utf8'));
   assert.equal(disabledRegistry.products.length,52,
     'Disabled affiliate fixture must keep all 52 source documents');
-  assert.equal(disabledRegistry.counts.documentedAmazonAsins,25,
+  assert.equal(disabledRegistry.counts.documentedAmazonAsins,27,
     'Disabling attribution never erases researched ASIN identity');
   assert.equal(disabledRegistry.counts.activeExactAmazonReferrals,0,
     'No paid Amazon referral is published from disabled account state');
@@ -213,20 +213,20 @@ try {
   build();
   const liveRegistry=JSON.parse(readFileSync(join(target,'commercial-registry.json'),'utf8'));
   assert.equal(liveRegistry.counts.total,52);
-  assert.equal(liveRegistry.counts.documentedAmazonAsins,25);
-  assert.equal(liveRegistry.counts.activeExactAmazonReferrals,25);
+  assert.equal(liveRegistry.counts.documentedAmazonAsins,27);
+  assert.equal(liveRegistry.counts.activeExactAmazonReferrals,27);
   assert.equal(liveRegistry.counts.historicallyUnavailable,4);
   assert.equal(liveRegistry.counts.directSaleEligible,0);
   assert.equal(liveRegistry.counts.activeAwinReferrals,0,
     'Awin must remain disabled until publisher approval and issued URLs');
-  assert.equal(liveRegistry.products.filter(p=>p.amazon.referralActive).length,25);
+  assert.equal(liveRegistry.products.filter(p=>p.amazon.referralActive).length,27);
   assert.ok(liveRegistry.products.every(p=>p.amazon.currentAvailability==='not_verified'),
     'Published source research cannot become a fictitious live-stock guarantee');
   const manifest=JSON.parse(readFileSync(join(target,'seo-manifest.json'),'utf8'));
   assert.equal(manifest.affiliateActive,true);
   assert.equal(manifest.affiliateCount,13,'Publish the 13 owner-tagged core product matches');
-  assert.equal(manifest.popularAffiliateDirectLinks,12,'Twelve source-backed supplemental direct links');
-  assert.equal(manifest.popularAffiliateSearchLinks,25,'Remaining twenty-five supplemental watches must stay labeled searches');
+  assert.equal(manifest.popularAffiliateDirectLinks,14,'Twelve source-backed supplemental direct links');
+  assert.equal(manifest.popularAffiliateSearchLinks,23,'Remaining twenty-five supplemental watches must stay labeled searches');
   assert.equal(manifest.popularPartnerAffiliateLinks,0,'No unapproved Awin partner URL is published');
   const liveHome=readFileSync(join(target,'index.html'),'utf8');
   const liveBudget=liveHome.match(/<section class="am-affordable" id="selection-accessible"[\s\S]*?<\/section>/)?.[0];
