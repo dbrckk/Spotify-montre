@@ -34,6 +34,8 @@ try {
   cpSync(join(repository,'research','amazon-fr-popular-verified.json'),join(tmp,'research','amazon-fr-popular-verified.json'));
   cpSync(join(repository,'research','partner-affiliate-offers.json'),join(tmp,'research','partner-affiliate-offers.json'));
   cpSync(join(repository,'research','aliexpress-skmei-candidates.json'),join(tmp,'research','aliexpress-skmei-candidates.json'));
+  cpSync(join(repository,'research','official-watch-photo-sources.json'),
+    join(tmp,'research','official-watch-photo-sources.json'));
   const verifiedPopularPath=join(tmp,'research','amazon-fr-popular-verified.json');
   const build=(extraEnv={})=>execFileSync(process.execPath,[join(repository,'scripts/build-seo.mjs')],{
     cwd:tmp,env:{...process.env,PUBLIC_SITE_URL:'https://atelier-montres-selection-fr.onrender.com/',UMAMI_WEBSITE_ID:'',...extraEnv},encoding:'utf8',timeout:15000
