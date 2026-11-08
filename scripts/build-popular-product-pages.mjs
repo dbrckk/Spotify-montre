@@ -202,6 +202,7 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
     const html=page(pageHead({title:name+' : caractéristiques et photos fabricant | Atelier Montres',
       description,path,type:'product'}),main,graph)
       .replace('</head>','<link rel="stylesheet" href="../popular-picks.css">'
+        +(!photo?'<link rel="stylesheet" href="../extra-source-passport.css">':'')
         +(photo?'<link rel="stylesheet" href="../photo-zoom.css"><script defer src="../photo-zoom.js"></script><script defer src="../extra-product-viewer.js"></script>':'')
         +'<link rel="stylesheet" href="../extra-factual-comparison.css"><script defer src="../extra-product-actions.js"></script></head>');
     writeFileSync(join(root,path),html);
