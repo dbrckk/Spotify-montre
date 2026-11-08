@@ -132,7 +132,7 @@ export function buildCommercialRegistry({root,coreProducts,affiliates,coreAmazon
     imagePublished:records.filter(p=>p.photo.published).length,
     directSaleEligible:records.filter(p=>p.directSale.eligible).length
   };
-  if(counts.total!==52||counts.documentedAmazonAsins!==25||
+  if(counts.total!==52||counts.documentedAmazonAsins!==13+Object.keys(supplementalEvidence.verifiedProducts).length||
      counts.historicallyUnavailable!==4||
      counts.activeExactAmazonReferrals!==affiliates.links.size+exactSupplemental.size||
      counts.activeAwinReferrals!==awin.size||counts.directSaleEligible!==0)
