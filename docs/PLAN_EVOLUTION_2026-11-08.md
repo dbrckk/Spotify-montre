@@ -65,6 +65,7 @@ La CI et la version Render publiée peuvent évoluer indépendamment : chaque va
 
 - **`site/unified-recent-history.js`** : accepte uniquement un paramètre de version `?v=` suivi de **12 caractères hexadécimaux minuscules** sur un chemin WebP local déjà lié à la référence exacte. Rejette toujours les origines tierces, fragments, identifiants d'URL et paramètres inconnus. Le navigateur peut conserver les `srcset` des photos approuvées.
 - **`scripts/test-unified-recent-history-browser.mjs`** : ajoute une régression vérifiant que les candidats `srcset` sont bien présents, hachés, locaux, et montrent **la même référence** ; inclut le contrôle de deux photos du catalogue principal.
+- **`scripts/test-catalogue-search-browser.mjs`** : corrige une **régression CI identifiée lors de la première exécution**. Le test attendait encore 15 fiches sans photo alors que les nouvelles photos officielles ont réduit le nombre à 12. Le test vérifie désormais le compte **calculé depuis le registre des photos autorisées** et les liens sources de toutes les fiches non photographiées, sans affaiblir la couverture.
 - **Ce plan** : objectif, ordre des travaux, preuves nécessaires et critères d'acceptation consignés au dépôt.
 
 ## 5. Vérification, livraison, limites
