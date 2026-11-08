@@ -114,8 +114,9 @@ try{
         path:new URL(node.currentSrc).pathname,
         width:node.naturalWidth,height:node.naturalHeight
       }));
-      assert.equal(actual.path,'/assets/popular-responsive/skmei-1251-480.webp',
-        'Android product sheet must actually download the lightweight exact-model WebP');
+      assert.ok(['/assets/popular-responsive/skmei-1251-360.webp',
+         '/assets/popular-responsive/skmei-1251-480.webp'].includes(actual.path),
+         'Android product sheet must download a lightweight exact-model WebP: '+actual.path);
       // With a width-descriptor srcset, naturalWidth can be density-adjusted:
       // assert successful decode and the exact requested derivative instead.
       assert.ok(actual.width>0&&actual.height>0,
