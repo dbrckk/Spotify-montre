@@ -19,6 +19,8 @@ for(const p of picks){
   assert.ok(html.includes('href="./toutes-les-montres.html?saved=1"'));
   const proof=rights[p.id];
   if(proof){
+    assert.ok(!html.includes('href="../extra-source-passport.css"'),
+      'Approved photo should not download the no-photo editorial CSS: '+p.id);
     assert.ok(!html.includes('class="am-extra-reference-passport"'),
       'Real approved photographs should not be replaced by an editorial passport: '+p.id);
     assert.ok(!html.includes('class="am-extra-art-no-photo"'),
@@ -36,6 +38,8 @@ for(const p of picks){
     assert.ok(hero.includes('watches-popular/'+p.id+'.webp '+proof.width+'w'),
       'Full-size original must remain eligible on detail '+p.id);
   }else{
+    assert.ok(html.includes('href="../extra-source-passport.css"'),
+      'Source-backed no-photo design must load its uniquely named CSS asset: '+p.id);
     assert.ok(html.includes('am-extra-art-no-photo'),
       'No-photo product must receive the source-first studio art direction: '+p.id);
     assert.equal((html.match(/class="am-extra-reference-passport"/g)||[]).length,1,
