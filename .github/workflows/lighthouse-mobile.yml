@@ -43,6 +43,9 @@ on:
       - 'site/popular-photo-rights.json'
       - 'scripts/build-popular-editorial-thumbnails.py'
       - 'scripts/build-seo.mjs'
+      - 'research/amazon-fr-popular-verified.json'
+      - 'scripts/popular-verified-affiliate.mjs'
+      - 'site/analytics.js'
       - 'scripts/responsive-images.mjs'
       - 'site/affiliation.js'
   schedule:
