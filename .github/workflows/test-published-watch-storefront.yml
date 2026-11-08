@@ -10,6 +10,7 @@ on:
       - '.github/workflows/test-published-watch-storefront.yml'
       - 'scripts/test-selection-share.mjs'
       - 'scripts/test-mobile-storefront-v8.mjs'
+      - 'scripts/test-core-watch-reference-browser.mjs'
       - 'scripts/test-mobile-live-storefront.mjs'
       - 'scripts/test-recently-viewed.mjs'
       - 'scripts/test-compare-persistence.mjs'
@@ -104,6 +105,25 @@ jobs:
                 ready=0
                 reason="$reason [incomplete: citizen product facts]"
               fi
+            fi
+            # All 15 historical SEO pages must expose the new customer
+            # reference control; a live asset alone does not prove the
+            # generated HTML was published. Check exact model IDs.
+            if [ "$ready" -eq 1 ]; then
+              for watch_id in $(node -p "JSON.parse(require('node:fs').readFileSync('site/selection-affiliation.json','utf8')).products.map(p=>p.id).join(' ')"); do
+                if ! curl -fsSL --max-time 15 "$base/montres/$watch_id.html" -o "$RUNNER_TEMP/live-core-$watch_id.html"; then
+                  ready=0
+                  reason="$reason [missing original watch page: $watch_id]"
+                  break
+                elif ! grep -Fq 'data-watch-ref-copy="'"${watch_id}"'"' "$RUNNER_TEMP/live-core-$watch_id.html" ||
+                     ! grep -Fq 'data-watch-id="'"${watch_id}"'"' "$RUNNER_TEMP/live-core-$watch_id.html" ||
+                     ! grep -Fq 'href="../watch-reference-copy.css"' "$RUNNER_TEMP/live-core-$watch_id.html" ||
+                     ! grep -Fq 'src="../watch-reference-copy.js"' "$RUNNER_TEMP/live-core-$watch_id.html"; then
+                  ready=0
+                  reason="$reason [old or mismatched original reference control: $watch_id]"
+                  break
+                fi
+              done
             fi
             # An old CDN version may serve a valid homepage and the 15 existing
             # photos while still serving the PREVIOUS 13-watch collection.

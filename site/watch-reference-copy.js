@@ -8,12 +8,13 @@
   const tools=[...document.querySelectorAll('[data-watch-ref-tools]')];
   const idPattern=/^[a-z0-9-]{4,64}$/;
   for(const group of tools){
-    const article=group.closest('article.ud-card[data-id],article.am-extra-product[data-popular-watch-id]');
+    const article=group.closest('article.ud-card[data-id],article.am-extra-product[data-popular-watch-id],article.watch.watch-product[data-watch-id]');
     const button=group.querySelector('button[data-watch-ref-copy]');
     const status=group.querySelector('[data-watch-ref-status]');
     if(!article||!button||!status||!article.contains(group))continue;
     const isCard=article.matches('article.ud-card[data-id]');
-    const id=isCard?article.dataset.id:article.dataset.popularWatchId;
+    const isCore=article.matches('article.watch.watch-product[data-watch-id]');
+    const id=isCard?article.dataset.id:isCore?article.dataset.watchId:article.dataset.popularWatchId;
     const brand=article.dataset.brand,model=article.dataset.model;
     const heading=article.querySelector(isCard?'h2':'h1');
     if(!idPattern.test(id||'')||button.dataset.watchRefCopy!==id
