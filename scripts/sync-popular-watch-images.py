@@ -34,6 +34,44 @@ MAX_IMAGE = 12_000_000
 SAFE_CDN = {"cdn.shopify.com", "cdn.shopifycdn.net", "static.wixstatic.com", "cdn11.bigcommerce.com"}
 NO_IMAGES = ("placeholder", "logo", "default", "icon", "sprite", "banner", "payment", "avatar", "badge", "favicon")
 
+RECOVERY_SOURCE = ROOT / "research" / "official-watch-photo-sources.json"
+
+
+def official_recovery(model: dict, registry: dict) -> dict:
+    """Only manually documented, same-brand, exact-code manufacturer media.
+
+    Never chase generic image search results or third-party resellers. The
+    merchant product URL remains unchanged; alternate URLs are photo-only.
+    """
+    entry = registry.get(model["id"])
+    if entry is None:
+        return {}
+    if entry["productPage"] != model["officialUrl"] or (
+        re.sub(r"[^A-Z0-9]", "", entry["modelCode"].upper()) != model_key(model["model"])
+    ):
+        raise ValueError("Manufacturer recovery source does not match exact catalog model")
+    alternate = entry.get("alternateManufacturerPage")
+    if alternate:
+        alt = urlparse(alternate)
+        if (model["brand"] != "Orient" or alt.scheme != "https"
+            or alt.hostname != "orient-watch.com" or alt.query or alt.fragment
+            or alt.username or alt.password or alt.port
+            or model_key(model["model"]) not in re.sub(r"[^A-Z0-9]", "", alt.path.upper())):
+            raise ValueError("Untrusted alternative manufacturer image page")
+    picture = entry.get("officialImage")
+    if picture:
+        image = urlparse(picture)
+        if (model["brand"] != "Tissot" or image.scheme != "https"
+            or image.hostname != "www.tissotwatches.com" or image.query
+            or image.fragment or image.username or image.password or image.port
+            or not image.path.endswith((".png", ".jpg", ".webp"))
+            or model_key(model["model"]) not in re.sub(r"[^A-Z0-9]", "", image.path.upper())):
+            raise ValueError("Untrusted manufacturer packshot or model mismatch")
+    if bool(alternate) == bool(picture):
+        raise ValueError("Exactly one manufacturer recovery method is required")
+    return entry
+
+
 
 def host_allowed(url: str, page_url: str) -> bool:
     try:
@@ -237,7 +275,20 @@ def fetch_page(session: requests.Session, url: str) -> tuple[str, str]:
     return res.text, res.url
 
 
-def download(session: requests.Session, url: str, source: str) -> tuple[bytes, int, int]:
+def is_official_orient_front(url: str, model_code: str) -> bool:
+    """Never replace a watch's front photo with a bracelet/back/gallery view."""
+    try:
+        parsed = urlparse(url)
+        return (parsed.scheme == "https"
+            and (parsed.hostname or "").lower() == "orient-watch.com"
+            and parsed.path.endswith("/" + model_code + "_main.webp")
+            and not parsed.fragment)
+    except ValueError:
+        return False
+
+
+def download(session: requests.Session, url: str, source: str,
+             *, exact_orient_front: bool = False) -> tuple[bytes, int, int]:
     if not host_allowed(url, source):
         raise ValueError("Image source is not an approved manufacturer/distributor CDN")
     with session.get(url, stream=True, timeout=(10, 30), allow_redirects=True) as response:
@@ -257,7 +308,7 @@ def download(session: requests.Session, url: str, source: str) -> tuple[bytes, i
     try:
         with Image.open(io.BytesIO(raw.getvalue())) as im:
             im.load()
-            if im.width < 380 or im.height < 380 or max(im.size) > 9000:
+            if im.width < (300 if exact_orient_front else 380) or im.height < 380 or max(im.size) > 9000:
                 raise ValueError("Image resolution not suitable")
             im = ImageOps.exif_transpose(im)
             if im.mode in ("RGBA", "LA") or "transparency" in im.info:
@@ -267,6 +318,14 @@ def download(session: requests.Session, url: str, source: str) -> tuple[bytes, i
                 im = background.convert("RGB")
             else:
                 im = im.convert("RGB")
+            # Orient's official exact-SKU front asset is a narrow 328px
+            # catalog portrait. Keep its real front view instead of the larger
+            # 738px reverse/strap gallery photos. Upscaling is a layout
+            # derivative, not evidence of additional photographic detail.
+            if exact_orient_front and im.width < 480:
+                target_width = 480
+                im = im.resize((target_width, round(im.height * target_width / im.width)),
+                               Image.Resampling.LANCZOS)
             im.thumbnail((1200, 1200), Image.Resampling.LANCZOS)
             buf = io.BytesIO()
             im.save(buf, "WEBP", quality=86, method=5)
@@ -287,6 +346,16 @@ def main() -> int:
     if len(products) != 37 or len({p["id"] for p in products}) != len(products):
         raise ValueError("Expected 37 distinct documented models")
     DEST.mkdir(parents=True, exist_ok=True)
+    recovery_data = json.loads(RECOVERY_SOURCE.read_text(encoding="utf-8"))
+    if (recovery_data.get("version") != 1
+        or recovery_data.get("scope") != "documented_exact_model_manufacturer_image_recovery_only"
+        or not isinstance(recovery_data.get("sources"), dict)):
+        raise ValueError("Invalid independent manufacturer recovery registry")
+    recovery_sources = recovery_data["sources"]
+    if not set(recovery_sources).issubset({p["id"] for p in products}):
+        raise ValueError("Manufacturer recovery contains unknown watch models")
+    for candidate in products:
+        official_recovery(candidate, recovery_sources)
     session = requests.Session()
     session.headers.update({"User-Agent": USER_AGENT, "Accept-Language": "fr-FR,fr;q=0.9,en;q=0.8"})
     report = {"version": 1, "reviewedOn": DATE, "total": len(products), "photos": [], "missing": []}
@@ -304,58 +373,82 @@ def main() -> int:
                 continue
             raise ValueError("Existing registered image hash mismatch: " + pid)
         errors = []
-        try:
-            html, page_url = fetch_page(session, source)
-            if not is_exact_page(html, page_url, p):
-                raise ValueError("Page title/content does not confirm exact model")
-            key = model_key(p["model"])
-            candidates = src_candidates(html, page_url, key)
-            # Exact manufacturer asset independently traceable to the Tissot
-            # PRX 35 mm reference. Never fall back to a generic watch picture.
-            # The product page is checked first and the binary must still pass
-            # the normal image/domain/size validation before publication.
-            if pid == "tissot-prx-35-blue" and key == "T1372101104100":
-                official_image = (
-                    "https://www.tissotwatches.com/dw/image/v2/BKKD_PRD/on/"
-                    "demandware.static/-/Sites-Tissot-Catalogue/default/"
-                    "dw85cbf290/product-pictures/"
-                    "137cb52c-5d13-4d79-a9ce-53d32356fd77_"
-                    "T137-210-11-041-00_shadow.png?sh=1680&sm=fit&sw=1680"
+        recovered = False
+        source_config = official_recovery(p, recovery_sources)
+        photo_pages = [source]
+        if source_config.get("alternateManufacturerPage"):
+            photo_pages.append(source_config["alternateManufacturerPage"])
+        for photo_page in photo_pages:
+            try:
+                html, page_url = fetch_page(session, photo_page)
+                if not is_exact_page(html, page_url, p):
+                    raise ValueError("Page title/content does not confirm exact model")
+                key = model_key(p["model"])
+                candidates = src_candidates(html, page_url, key)
+                # Only independently researched, exact-SKU Tissot media.
+                # The manufacturer page MUST identify that reference first.
+                if source_config.get("officialImage"):
+                    image_url = source_config["officialImage"]
+                    if host_allowed(image_url, photo_page):
+                        candidates.insert(0, image_url)
+                # Keep the historical known exact Tissot PRX 35 mm packshot.
+                if pid == "tissot-prx-35-blue" and key == "T1372101104100":
+                    official_image = (
+                        "https://www.tissotwatches.com/dw/image/v2/BKKD_PRD/on/"
+                        "demandware.static/-/Sites-Tissot-Catalogue/default/"
+                        "dw85cbf290/product-pictures/"
+                        "137cb52c-5d13-4d79-a9ce-53d32356fd77_"
+                        "T137-210-11-041-00_shadow.png?sh=1680&sm=fit&sw=1680"
+                    )
+                    if host_allowed(official_image, page_url):
+                        candidates.insert(0, official_image)
+                exact_orient_front = (
+                    p["brand"] == "Orient"
+                    and source_config.get("alternateManufacturerPage") == photo_page
                 )
-                if host_allowed(official_image, page_url):
-                    candidates.insert(0, official_image)
-            if not candidates:
-                raise ValueError("No trusted product image source found in structured data or product gallery")
-            print("CANDIDATES", pid, len(candidates), flush=True)
-            for candidate in candidates:
-                try:
-                    image, width, height = download(session, candidate, page_url)
-                    sha = hashlib.sha256(image).hexdigest()
-                    file.write_bytes(image)
-                    rights["photos"][pid] = {
-                        "rightsBasis": "site_owner_attested_brand_authorization",
-                        "rightsHolder": p["brand"],
-                        "scope": "commercial_affiliate_website_display_and_local_hosting",
-                        "approvedOn": DATE,
-                        "attestationSource": "site_owner_declaration_2026-10-31",
-                        "permissionIndependentlyVerified": False,
-                        "sourcePage": source,
-                        "sourceImageUrl": candidate,
-                        "file": "assets/watches-popular/" + pid + ".webp",
-                        "imageSha256": sha,
-                        "width": width, "height": height,
-                    }
-                    report["photos"].append({"id": pid, "status": "created", "source": source, "image": candidate, "sha256": sha})
-                    print("SUCCESS", pid, width, height, len(image), flush=True)
+                if exact_orient_front:
+                    candidates = [item for item in candidates
+                        if is_official_orient_front(item, source_config["modelCode"])]
+                if not candidates:
+                    raise ValueError("No trusted exact-model front packshot in official product gallery")
+                print("CANDIDATES", pid, len(candidates), photo_page, flush=True)
+                for candidate in dict.fromkeys(candidates):
+                    try:
+                        image, width, height = download(session, candidate, photo_page,
+                            exact_orient_front=exact_orient_front)
+                        sha = hashlib.sha256(image).hexdigest()
+                        # Commit only after the exact model, brand-domain,
+                        # source bytes and usable dimensions are verified.
+                        file.write_bytes(image)
+                        rights["photos"][pid] = {
+                            "rightsBasis": "site_owner_attested_brand_authorization",
+                            "rightsHolder": p["brand"],
+                            "scope": "commercial_affiliate_website_display_and_local_hosting",
+                            "approvedOn": DATE,
+                            "attestationSource": "site_owner_declaration_2026-10-31",
+                            "permissionIndependentlyVerified": False,
+                            "sourcePage": photo_page,
+                            "sourceImageUrl": candidate,
+                            "file": "assets/watches-popular/" + pid + ".webp",
+                            "imageSha256": sha,
+                            "width": width, "height": height,
+                        }
+                        report["photos"].append({"id": pid, "status": "created",
+                            "source": photo_page, "image": candidate, "sha256": sha})
+                        print("SUCCESS", pid, width, height, len(image), flush=True)
+                        recovered = True
+                        break
+                    except (requests.RequestException, ValueError, OSError) as exc:
+                        errors.append(str(exc)[:160])
+                if recovered:
                     break
-                except (requests.RequestException, ValueError, OSError) as exc:
-                    errors.append(str(exc)[:160])
-            else:
-                raise ValueError("; ".join(errors[-3:]))
-        except (requests.RequestException, ValueError, OSError) as exc:
-            file.unlink(missing_ok=True) if not original else None
-            report["missing"].append({"id": pid, "reason": str(exc)[:240]})
-            print("SKIP", pid, str(exc)[:140], flush=True)
+            except (requests.RequestException, ValueError, OSError) as exc:
+                errors.append(str(exc)[:160])
+        if not recovered:
+            file.unlink(missing_ok=True)
+            reason = "; ".join(errors[-3:]) if errors else "No approved exact-model packshot"
+            report["missing"].append({"id": pid, "reason": reason[:240]})
+            print("SKIP", pid, reason[:140], flush=True)
     RIGHTS.write_text(json.dumps(rights, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     REPORT.parent.mkdir(exist_ok=True)
     REPORT.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

@@ -18,7 +18,38 @@ export function loadApprovedPopularPhotos({root,picks}){
     ||!data.photos||typeof data.photos!=='object'||Array.isArray(data.photos))
     throw Error('Invalid supplemental watch photo rights registry');
   const directory=join(root,'assets','watches-popular');
+  const recoveries=JSON.parse(readFileSync(join(root,'../research/official-watch-photo-sources.json'),'utf8'));
+  if(recoveries.version!==1||
+    recoveries.scope!=='documented_exact_model_manufacturer_image_recovery_only'||
+    !recoveries.sources||Array.isArray(recoveries.sources))
+    throw Error('Invalid official image recovery registry');
   const ids=new Set(picks.map(p=>p.id));
+  for(const [id,source] of Object.entries(recoveries.sources)){
+    const product=picks.find(p=>p.id===id);
+    if(!product||source.productPage!==product.officialUrl||!product.model.includes(source.modelCode))
+      throw Error('Official photo recovery is not bound to the exact manufacturer model: '+id);
+    const alt=source.alternateManufacturerPage;
+    if(alt){
+      const uri=new URL(alt);
+      if(product.brand!=='Orient'||uri.protocol!=='https:'||
+        uri.hostname!=='orient-watch.com'||uri.username||uri.password||
+        uri.search||uri.hash||uri.port||
+        !uri.pathname.toUpperCase().includes(source.modelCode.toUpperCase()))
+        throw Error('Untrusted alternate manufacturer photo source: '+id);
+    }
+    if(source.officialImage){
+      const uri=new URL(source.officialImage);
+      const normalize=v=>v.toUpperCase().replace(/[^A-Z0-9]/g,'');
+      if(product.brand!=='Tissot'||uri.protocol!=='https:'||
+        uri.hostname!=='www.tissotwatches.com'||uri.username||uri.password||
+        uri.search||uri.hash||uri.port||
+        !/\.(?:png|jpg|webp)$/i.test(uri.pathname)||
+        !normalize(uri.pathname).includes(normalize(source.modelCode)))
+        throw Error('Untrusted official image or different watch code: '+id);
+    }
+    if(Boolean(alt)===Boolean(source.officialImage))
+      throw Error('Ambiguous manufacturer photo recovery method: '+id);
+  }
   const approved=new Map();
   for(const [id,item] of Object.entries(data.photos)){
     if(!ids.has(id)||!item||typeof item!=='object'||Array.isArray(item))
@@ -57,9 +88,20 @@ export function loadApprovedPopularPhotos({root,picks}){
     const unchanged=item.sourcePage===model.officialUrl;
     const supportedMigration=migrated&&item.sourcePage===migrated.former&&
       model.officialUrl===migrated.current;
+    const alternate=recoveries.sources[id];
+    const documentedManufacturer=alternate?.alternateManufacturerPage===item.sourcePage
+      &&alternate?.productPage===model.officialUrl;
     if(typeof item.sourcePage!=='string'||typeof item.sourceImageUrl!=='string'||
-       (!unchanged&&!supportedMigration))
-      throw Error('Cannot match image to the exact-model product page: '+id);
+       (!unchanged&&!supportedMigration&&!documentedManufacturer))
+      throw Error('Cannot match image to the exact-model manufacturer product page: '+id);
+    if(documentedManufacturer){
+      const src=new URL(item.sourceImageUrl);
+      const expected='/'+alternate.modelCode+'_main.webp';
+      if(model.brand!=='Orient'||src.protocol!=='https:'||
+        src.hostname!=='orient-watch.com'||!src.pathname.endsWith(expected)||
+        src.hash||src.username||src.password||src.port)
+        throw Error('Only the official exact-model Orient front view is permitted: '+id);
+    }
     let photoHost, pageHost;
     try{
       const img=new URL(item.sourceImageUrl), page=new URL(item.sourcePage);
