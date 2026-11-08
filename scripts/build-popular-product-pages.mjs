@@ -79,6 +79,28 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       '<div class="am-extra-fact"><dt>'+e(label)+'</dt><dd>'+e(value)+'</dd></div>').join('');
     const direct=verifiedLinks.get(p.id);
     const comparator=direct?.evidenceType==='amazon_fr_comparator_redirect';
+    // Show only actual independently validated evidence links. These are
+    // editorial sources, never revenue-tracked merchant destinations.
+    if(comparator&&(!direct.comparisonUrl||!direct.corroborationUrl))
+      throw Error('Source-backed Amazon referral lacks two audit links: '+p.id);
+    const proofLedger=comparator
+      ?'<div class="am-extra-proof-ledger" data-asin-proof-id="'+e(p.id)+'" role="group" aria-label="Preuves de correspondance du modèle Amazon">'
+        +'<p class="am-extra-proof-overline">Traçabilité · contrôle documentaire du '+e(direct.verifiedAt.split('-').reverse().join('/'))+'</p>'
+        +'<h3>Sur quoi repose la référence Amazon ?</h3>'
+        +'<p class="am-extra-proof-identity"><span>Code associé : <strong>'+e(direct.model)+'</strong></span>'
+        +'<span>ASIN : <code>'+e(direct.asin)+'</code></span></p>'
+        +'<ol class="am-extra-proof-sources">'
+        +'<li><span class="am-extra-proof-step">01 · Première source</span>'
+        +'<a href="'+e(direct.comparisonUrl)+'" rel="noopener noreferrer nofollow" target="_blank">Consulter la fiche du comparateur <span aria-hidden="true">↗</span></a>'
+        +'<small>Le comparateur associait cette référence à une redirection vers cet ASIN.</small></li>'
+        +'<li><span class="am-extra-proof-step">02 · Corroboration indépendante</span>'
+        +'<a href="'+e(direct.corroborationUrl)+'" rel="noopener noreferrer nofollow" target="_blank">Contrôler le code modèle et l’ASIN <span aria-hidden="true">↗</span></a>'
+        +'<small>Une source distincte mentionne le même ASIN et la référence du fabricant.</small></li>'
+        +'</ol>'
+        +'<p class="am-extra-proof-warning">Ces deux liens prouvent un rapprochement documentaire, pas une offre actuelle. La page Amazon.fr n’a pas pu être consultée directement. Avant tout achat, vérifier la variante, le prix final, le stock et le vendeur sur Amazon.fr.</p>'
+        +'</div>'
+      :'';
+
     const alternatePartner=partnerOffers.get(p.id);
     const actions=affiliateLink(p)
       +partnerLink(p)
@@ -140,7 +162,8 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       +'<dl class="am-extra-facts">'+facts+'</dl>'
       +'<p class="am-extra-reference"><span>Référence à retrouver chez le marchand</span><strong>'+e(name)+'</strong></p>'
       +'<p class="am-extra-approval">À vérifier auprès du vendeur : référence exacte, variante, prix, disponibilité, garantie et conditions de retour. Nous ne vendons pas directement ce produit.</p>'
-      +(affiliates.enabled?'<p class="am-extra-link-status '+(direct?'am-extra-link-direct':'am-extra-link-search')+'"><strong>'+(direct?'Fiche Amazon.fr correspondant au code modèle':'Recherche Amazon.fr — modèle non garanti')+'</strong><span>'+(direct?(comparator?'ASIN recoupé via un comparateur et une source indépendante ; fiche Amazon.fr non consultée directement. Vérifiez la variante, le vendeur et le stock.':'Lien associé à un ASIN documenté. Contrôlez la variante, le vendeur et le stock.'):'Les résultats peuvent contenir d’autres montres. Vérifiez le code affiché ci-dessus avant l’achat.')+'</span>'+(direct?.marketplaceVariant?'<span class="am-extra-merchant-variant"><strong>Variante de la fiche Amazon :</strong> '+e(direct.marketplaceVariant)+'</span>':'')+'</p>':'')
+      +(affiliates.enabled?'<p class="am-extra-link-status '+(direct?'am-extra-link-direct':'am-extra-link-search')+'"><strong>'+(direct?'Fiche Amazon.fr correspondant au code modèle':'Recherche Amazon.fr — modèle non garanti')+'</strong><span>'+(direct?(comparator?'ASIN recoupé via un comparateur et une source indépendante ; fiche Amazon.fr non consultée directement. Vérifiez la variante, le vendeur et le stock.':'Lien associé à un ASIN documenté. Contrôlez la variante, le vendeur et le stock.'):'Les résultats peuvent contenir d’autres montres. Vérifiez le code affiché ci-dessus avant l’achat.')+'</span>'+(direct?.marketplaceVariant?'<span class="am-extra-merchant-variant"><strong>Variante de la fiche Amazon :</strong> '+e(direct.marketplaceVariant)+'</span>':'')
+        +(comparator?'<span class="am-extra-proof-jump"><a href="#sources">Voir les deux sources de correspondance <span aria-hidden="true">↓</span></a></span>':'')+'</p>':'')
       +(!photo?'<p class="am-extra-seller-path"><strong>Étape 2 / Consulter les sources</strong> Les liens suivants ouvrent des sites externes. Une recherche marchand ne garantit ni la variante exacte, ni son stock.</p>':'')
       +'<div class="am-extra-actions">'+actions+'</div>'
       +'<div class="am-extra-local-tools" role="group" aria-label="Conserver ou partager cette montre" hidden>'
@@ -171,6 +194,7 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       +'<section id="sources" class="am-extra-provenance" aria-label="Origine des informations"><h2>Des informations vérifiables</h2>'
       +'<p>'+e(ranking)+'</p><p><strong>Pourquoi cette référence ?</strong> '+source+'</p>'
       +'<p><strong>Caractéristiques et photos exactes :</strong> '+link(p.officialUrl,(p.brand==='SKMEI'?'Fiche du vendeur SKMEI':'Site officiel '+p.brand))+'</p>'
+      +proofLedger
       +'<p>'+(photo?'L’éditeur déclare disposer de l’autorisation commerciale de la marque. Cette autorisation n’a pas été vérifiée indépendamment.':'Les photos sont consultables chez la marque ou le vendeur cité : nous ne les republions pas sans autorisation.')+' La mention de meilleures ventes, lorsqu’elle existe, n’atteste pas le classement de ce modèle sur Amazon.fr.</p></section>'
       +'<section id="comparables" class="am-extra-related" aria-labelledby="am-extra-related-heading">'
       +'<h2 id="am-extra-related-heading">Trois montres dans le même esprit</h2><p>Suggestions établies à partir de la marque, du style et du mouvement indiqués dans nos fiches. Elles ne constituent ni des essais comparatifs ni un classement de qualité ; seules les photos déclarées autorisées sont affichées.</p>'
@@ -203,6 +227,7 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       description,path,type:'product'}),main,graph)
       .replace('</head>','<link rel="stylesheet" href="../popular-picks.css">'
         +(!photo?'<link rel="stylesheet" href="../extra-source-passport.css">':'')
+        +(comparator?'<link rel="stylesheet" href="../merchant-proof-ledger.css">':'')
         +(photo?'<link rel="stylesheet" href="../photo-zoom.css"><script defer src="../photo-zoom.js"></script><script defer src="../extra-product-viewer.js"></script>':'')
         +'<link rel="stylesheet" href="../extra-factual-comparison.css"><script defer src="../extra-product-actions.js"></script></head>');
     writeFileSync(join(root,path),html);
