@@ -49,7 +49,7 @@ const sourceEvidenceReview={
   notes:'Documentary evidence dates only; no price, stock, seller, Amazon approval or commission verification.',
   records:evidenceRecords.map(p=>{
     const sourceMs=Date.parse((p.checkedOn||'')+'T00:00:00Z');
-    if(!/^20\\d{2}-\\d{2}-\\d{2}$/.test(p.checkedOn||'')
+    if(!/^20\d{2}-\d{2}-\d{2}$/.test(p.checkedOn||'')
        ||!Number.isFinite(sourceMs)||new Date(sourceMs).toISOString().slice(0,10)!==p.checkedOn
        ||sourceMs>todayMs)throw Error('Invalid/future documentary source date for '+p.id);
     const ageDays=Math.floor((todayMs-sourceMs)/dayMs);
@@ -320,7 +320,7 @@ const summary='### Atelier Montres — live SEO audit\n\n'
   +'- Pages in sitemap: '+report.pages+'\n'
   +'- Pages fetched successfully: '+checked.length+'\n'
   +'- Commercial landing pages checked: '+report.commercialPages+' / '+popular.length+' ('+report.commercialChecks+' integrity assertions)\n'
-  +'- Dated Amazon.fr model matches: '+sourceEvidenceReview.documentedAsins+'; evidence needing re-review after '+reviewDays+' days: '+sourceEvidenceReview.dueCount+' (no live stock claims)\\n'
+  +'- Dated Amazon.fr model matches: '+sourceEvidenceReview.documentedAsins+'; evidence needing re-review after '+reviewDays+' days: '+sourceEvidenceReview.dueCount+' (no live stock claims)\n'
   +'- Issues: '+issues.length+'\n\n'
   +(issues.length?'#### Detected problems\n'+issues.map(x=>'- '+x).join('\n'):'All public technical SEO checks passed.')+'\n';
 if(process.env.GITHUB_STEP_SUMMARY)appendFileSync(process.env.GITHUB_STEP_SUMMARY,summary);
