@@ -175,8 +175,9 @@ jobs:
                   ready=0
                   reason="$reason [mixed CDN merchant HTML: live=$deployed_direct source=$expected_direct]"
                 fi
-                if ! grep -Fq 'https://www.amazon.fr/dp/B0DN6LT6FX?tag=drackk04-21' "$RUNNER_TEMP/live-unified.html" ||
-                   ! grep -Fq 'https://www.amazon.fr/dp/B01N7FXE80?tag=drackk04-21' "$RUNNER_TEMP/live-unified.html"; then
+                if [ "$expected_direct" -gt 0 ] && {
+                   ! grep -Fq 'https://www.amazon.fr/dp/B0DN6LT6FX?tag=drackk04-21' "$RUNNER_TEMP/live-unified.html" ||
+                   ! grep -Fq 'https://www.amazon.fr/dp/B01N7FXE80?tag=drackk04-21' "$RUNNER_TEMP/live-unified.html"; }; then
                   ready=0
                   reason="$reason [missing newly documented Casio/Tissot direct ASIN cards]"
                 fi
