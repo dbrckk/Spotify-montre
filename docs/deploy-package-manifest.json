@@ -3,87 +3,72 @@
   "models": 15,
   "totalModels": 52,
   "supplementalPhotos": 25,
-  "files": 349,
+  "files": 277,
   "parts": [
     {
       "file": "deploy-package-01.json",
-      "count": 31,
-      "bytes": 707765
+      "count": 32,
+      "bytes": 698040
     },
     {
       "file": "deploy-package-02.json",
-      "count": 30,
-      "bytes": 710797
+      "count": 31,
+      "bytes": 659481
     },
     {
       "file": "deploy-package-03.json",
       "count": 37,
-      "bytes": 683738
+      "bytes": 719353
     },
     {
       "file": "deploy-package-04.json",
-      "count": 27,
-      "bytes": 675158
+      "count": 30,
+      "bytes": 696136
     },
     {
       "file": "deploy-package-05.json",
-      "count": 19,
-      "bytes": 687675
+      "count": 20,
+      "bytes": 714649
     },
     {
       "file": "deploy-package-06.json",
-      "count": 10,
-      "bytes": 678549
+      "count": 12,
+      "bytes": 590679
     },
     {
       "file": "deploy-package-07.json",
-      "count": 5,
-      "bytes": 657976
+      "count": 4,
+      "bytes": 652605
     },
     {
       "file": "deploy-package-08.json",
-      "count": 5,
-      "bytes": 644233
+      "count": 6,
+      "bytes": 687109
     },
     {
       "file": "deploy-package-09.json",
-      "count": 6,
-      "bytes": 676376
+      "count": 5,
+      "bytes": 697595
     },
     {
       "file": "deploy-package-10.json",
       "count": 8,
-      "bytes": 660489
+      "bytes": 615977
     },
     {
       "file": "deploy-package-11.json",
       "count": 9,
-      "bytes": 679539
+      "bytes": 662716
     },
     {
       "file": "deploy-package-12.json",
-      "count": 52,
-      "bytes": 715537
+      "count": 50,
+      "bytes": 715803
     },
     {
       "file": "deploy-package-13.json",
-      "count": 38,
-      "bytes": 698831
-    },
-    {
-      "file": "deploy-package-14.json",
-      "count": 34,
-      "bytes": 592666
-    },
-    {
-      "file": "deploy-package-15.json",
-      "count": 37,
-      "bytes": 662554
-    },
-    {
-      "file": "deploy-package-16.json",
-      "count": 1,
-      "bytes": 84323
+      "count": 33,
+      "bytes": 431033
     }
   ]
 }
