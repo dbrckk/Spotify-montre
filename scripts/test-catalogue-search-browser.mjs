@@ -343,6 +343,65 @@ try{
     await page.close();
   }
 
+  // A shopper browsing the 52-model catalogue must be able to inspect a
+  // product and return to the exact filtered results, not a generic homepage.
+  // No extra URL parameters are appended to product canonicals.
+  const returnContext=await browser.newContext({viewport:{width:393,height:852},
+    isMobile:true,hasTouch:true,locale:'fr-FR'});
+  const returnPage=await returnContext.newPage();
+  const returnErrors=[];
+  returnPage.on('pageerror',error=>returnErrors.push(error.message));
+  try{
+    await returnPage.goto(new URL('/montres/toutes-les-montres.html?q=skmei1251',base).href,
+      {waitUntil:'domcontentloaded'});
+    await returnPage.locator('#udFilters').waitFor({state:'visible'});
+    assert.equal(await returnPage.locator('.ud-card:visible').count(),1);
+    await returnPage.locator('#modele-skmei-1251 .ud-details').click();
+    await returnPage.locator('.am-catalogue-return a').waitFor({state:'visible'});
+    assert.equal(new URL(returnPage.url()).search,'',
+      'SEO product URL must remain canonical, without copied filter parameters');
+    const back=returnPage.locator('.am-catalogue-return a');
+    assert.equal(new URL(await back.getAttribute('href')).searchParams.get('q'),'skmei1251');
+    assert.equal(new URL(await back.getAttribute('href')).hash,'#udCount');
+    const dimensions=await back.boundingBox();
+    assert.ok(dimensions&&dimensions.height>=48&&dimensions.x>=0
+      &&dimensions.x+dimensions.width<=393,'Return-to-selection link must fit Android');
+    // Browse a genuinely related product and retain the original filter.
+    await returnPage.locator('.am-extra-related-name').first().click();
+    await returnPage.locator('.am-catalogue-return a').waitFor({state:'visible'});
+    assert.equal(new URL(await returnPage.locator('.am-catalogue-return a')
+      .getAttribute('href')).searchParams.get('q'),'skmei1251');
+    await returnPage.locator('.am-catalogue-return a').click();
+    await returnPage.locator('#udFilters').waitFor({state:'visible'});
+    assert.equal(await returnPage.locator('.ud-card:visible').count(),1);
+    assert.ok(await returnPage.locator('#modele-skmei-1251').isVisible());
+
+    // A photographed core product must share this exact workflow.
+    await returnPage.goto(new URL('/montres/toutes-les-montres.html?q=mdv107',base).href,
+      {waitUntil:'domcontentloaded'});
+    await returnPage.locator('#udFilters').waitFor({state:'visible'});
+    await returnPage.locator('#modele-casio-mdv107 .ud-details').click();
+    await returnPage.locator('.am-catalogue-return a').waitFor({state:'visible'});
+    assert.equal(new URL(await returnPage.locator('.am-catalogue-return a')
+      .getAttribute('href')).searchParams.get('q'),'mdv107');
+
+    // All 52 SEO product pages embed the same tiny enhancement.
+    const core=readFileSync('site/montres/casio-mdv107.html','utf8');
+    const photoMissing=readFileSync('site/montres/casio-f91w-1.html','utf8');
+    assert.match(core,/src="\.\.\/catalogue-return\.js"/);
+    assert.match(photoMissing,/src="\.\.\/catalogue-return\.js"/);
+    assert.deepEqual(returnErrors,[]);
+  }finally{await returnContext.close();}
+
+  // Direct SEO visits without a catalogue referrer do not claim the shopper
+  // has a previous local selection.
+  const directPage=await browser.newPage({viewport:{width:393,height:852}});
+  try{
+    await directPage.goto(new URL('/montres/casio-f91w-1.html',base).href,
+      {waitUntil:'domcontentloaded'});
+    assert.equal(await directPage.locator('.am-catalogue-return').count(),0);
+  }finally{await directPage.close();}
+
   const noScript=await browser.newPage({javaScriptEnabled:false});
   await noScript.goto(new URL('/montres/toutes-les-montres.html',base).href);
   assert.equal(await noScript.locator('.ud-card').count(),52);
