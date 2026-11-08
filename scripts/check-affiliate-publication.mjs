@@ -225,8 +225,8 @@ try {
   const manifest=JSON.parse(readFileSync(join(target,'seo-manifest.json'),'utf8'));
   assert.equal(manifest.affiliateActive,true);
   assert.equal(manifest.affiliateCount,13,'Publish the 13 owner-tagged core product matches');
-  assert.equal(manifest.popularAffiliateDirectLinks,14,'Twelve source-backed supplemental direct links');
-  assert.equal(manifest.popularAffiliateSearchLinks,23,'Remaining twenty-five supplemental watches must stay labeled searches');
+  assert.equal(manifest.popularAffiliateDirectLinks,14,'Fourteen source-backed supplemental direct links');
+  assert.equal(manifest.popularAffiliateSearchLinks,23,'Remaining twenty-three supplemental watches must stay labeled searches');
   assert.equal(manifest.popularPartnerAffiliateLinks,0,'No unapproved Awin partner URL is published');
   const liveHome=readFileSync(join(target,'index.html'),'utf8');
   const liveBudget=liveHome.match(/<section class="am-affordable" id="selection-accessible"[\s\S]*?<\/section>/)?.[0];
