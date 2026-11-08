@@ -38,9 +38,9 @@ def main():
             source = ImageOps.exif_transpose(source)
             if source.size != (record["width"], record["height"]):
                 raise ValueError(f"Image size differs from approved registry: {model_id}")
-            # Two lightweight cards plus medium/high-DPI product-sheet tiers.
+            # Three lightweight cards plus medium/high-DPI product-sheet tiers.
             # Only produce variants smaller than each documented original.
-            for width in (240, 480, 720, 960):
+            for width in (240, 360, 480, 720, 960):
                 if width >= source.width:
                     continue
                 if source.width < width:
@@ -85,7 +85,7 @@ def main():
     for file in OUTPUT.glob("*.webp"):
         if file.name not in expected:
             file.unlink()
-    count = sum(sum(width < record["width"] for width in (240, 480, 720, 960)) for record in registry.values())
+    count = sum(sum(width < record["width"] for width in (240, 360, 480, 720, 960)) for record in registry.values())
     if len(expected) != count:
         raise ValueError(f"Expected exactly {count} verified model-exact WebP derivatives")
     saved = baseline_bytes - optimized_bytes
