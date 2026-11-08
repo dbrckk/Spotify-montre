@@ -27,6 +27,28 @@ try{
       {waitUntil:'domcontentloaded'});
     await page.locator('#udFilters').waitFor({state:'visible'});
     assert.equal(await page.locator('.ud-card').count(),52);
+    assert.equal(await page.locator('link[href="../unified-trust-markers.css"]').count(),1,
+      'All catalogue pages must load the cache-independent confidence stylesheet');
+    const markers=await page.locator('.ud-card').evaluateAll(cards=>cards.map(card=>({
+      id:card.dataset.id,kind:card.dataset.merchant,
+      marker:card.querySelector('.ud-card-main>.ud-trust-marker'),
+      title:card.querySelector('h2')?.innerText
+    })).map(x=>({id:x.id,kind:x.kind,text:x.marker?.textContent?.trim()||'',
+      data:x.marker?.dataset.merchantConfidence||'',title:x.title})));
+    const labels={
+      direct:'Fiche Amazon associée',awin:'Variante partenaire associée',
+      search:'Recherche Amazon uniquement',official:'Référence à vérifier à la source'
+    };
+    assert.equal(markers.length,52);
+    for(const marker of markers){
+      assert.equal(marker.data,marker.kind,'Confidence marker must use actual merchant kind: '+marker.id);
+      assert.equal(marker.text,labels[marker.kind],
+        'Buyer-facing merchant confidence cannot invent stock or an exact listing: '+marker.id);
+      assert.doesNotMatch(marker.text,/disponible|livraison offerte|meilleur prix|en stock/i);
+    }
+    assert.equal(markers.filter(m=>m.kind==='direct').length,27,
+      'Only the 27 documented exact Amazon references can carry the green marker');
+
     // A comparator redirect plus independent matching model evidence can
     // establish an ASIN destination, but never stock, price or a sale.
     for(const [id,asin,code] of [
