@@ -37,6 +37,18 @@ class OfficialProductSources(unittest.TestCase):
             research["sources"]["orient-mako40-black"]["alternateManufacturerPage"])
         self.assertNotIn("amazon.", str(research))
 
+    def test_only_exact_orient_front_is_eligible_for_mobile_cards(self):
+        base = "https://orient-watch.com/en/orient/collection/sports/diver-design-40/RA-AC0Q01B/product_en_file/file/"
+        self.assertTrue(sync.is_official_orient_front(base+"RA-AC0Q01B_main.webp", "RA-AC0Q01B"))
+        self.assertFalse(sync.is_official_orient_front(base+"RA-AC0Q01B_01.webp", "RA-AC0Q01B"),
+            "Back and clasp views must not become the catalog front photograph")
+        self.assertFalse(sync.is_official_orient_front(base+"RA-AC0Q01B_02.webp", "RA-AC0Q01B"))
+        self.assertFalse(sync.is_official_orient_front(base+"RA-AC0Q02L_main.webp", "RA-AC0Q01B"))
+        self.assertFalse(sync.is_official_orient_front(
+            "https://www.amazon.fr/RA-AC0Q01B_main.webp","RA-AC0Q01B"))
+        other = "https://orient-watch.com/en/orient/collection/classic/classic-and-simple-style-38/RA-AC0M04Y/product_en_file/file/"
+        self.assertTrue(sync.is_official_orient_front(other+"RA-AC0M04Y_main.webp","RA-AC0M04Y"))
+
     def test_recovery_fails_closed_on_other_brand_or_code(self):
         import json
         research = json.loads(sync.RECOVERY_SOURCE.read_text(encoding="utf-8"))
