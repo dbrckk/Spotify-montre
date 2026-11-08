@@ -69,6 +69,46 @@ try{
     }
 
 
+    // Buyer-facing merchant paths must count real source-backed destinations,
+    // never merchant prices, unverified inventory or invented Awin offers.
+    const pathLinks=page.locator('.ud-path-link[data-merchant-path]');
+    assert.ok(await pathLinks.count()>=3,'The public merchant choices are hidden');
+    assert.match(await page.locator('.ud-paths-disclosure').innerText(),
+      /ne prouve ni stock ni prix actuel/i);
+    assert.equal(await page.locator('link[href="../unified-shopper-paths.css"]').count(),1);
+    const actualDestinations=await page.locator('.ud-card').evaluateAll(cards=>cards.reduce((map,card)=>{
+      const kind=card.dataset.merchant;
+      map[kind]=(map[kind]||0)+1;
+      return map;
+    },{}));
+    const shortcutKinds=await pathLinks.evaluateAll(links=>links.map(link=>link.dataset.merchantPath));
+    assert.deepEqual([...shortcutKinds].sort(),Object.keys(actualDestinations).sort(),
+      'Merchant shortcuts must exist only for categories with actual documented watches');
+    for(const kind of shortcutKinds){
+      const item=page.locator('.ud-path-link[data-merchant-path="'+kind+'"]');
+      assert.equal(await item.getAttribute('href'),'?merchant='+kind+'#udCount');
+      const count=actualDestinations[kind];
+      assert.ok(Number.isInteger(count)&&count>0);
+      assert.match(await item.innerText(),new RegExp('\\b'+count+' référence'));
+    }
+    assert.equal(Object.values(actualDestinations).reduce((sum,n)=>sum+n,0),52);
+    if(width===393){
+      const firstPath=page.locator('.ud-path-link').first();
+      const bounds=await firstPath.boundingBox();
+      assert.ok(bounds&&bounds.width>=200&&bounds.height>=180&&
+        bounds.x>=-1&&bounds.x+bounds.width<=width+1,
+        'Buyer-facing merchant navigation must fit an Android viewport');
+      await page.locator('.ud-path-link[data-merchant-path="direct"]').click();
+      await page.locator('#udFilters').waitFor({state:'visible'});
+      assert.equal(new URL(page.url()).searchParams.get('merchant'),'direct');
+      assert.equal(await page.locator('.ud-card:visible').count(),actualDestinations.direct);
+      assert.equal(await page.locator('.ud-card[data-merchant="direct"]:visible').count(),actualDestinations.direct);
+      await page.goto(new URL('/montres/toutes-les-montres.html',base).href,
+        {waitUntil:'domcontentloaded'});
+      await page.locator('#udFilters').waitFor({state:'visible'});
+      assert.equal(await page.locator('.ud-card:visible').count(),52);
+    }
+
     // A narrow Android screen should open into the photo-first, single-column
     // view; a deliberate switch to the grid must survive a page reload.
     await page.locator('#udViewTools').waitFor({state:'visible'});

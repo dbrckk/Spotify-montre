@@ -1,0 +1,33 @@
+/* Source-backed merchant entrypoints for the 52-watch public catalogue.
+   Editorial counts only: no implied offer prices, stock, commission or sales. */
+.ud-page .ud-paths{margin:36px 0 30px;padding:clamp(19px,3vw,33px);border:1px solid #d2dccc;border-radius:9px;background:linear-gradient(135deg,#f9faf4,#f1f3ea);color:#254434}
+.ud-paths-header{display:flex;justify-content:space-between;align-items:end;gap:16px 36px;margin-bottom:19px}
+.ud-paths-header>div{min-width:0;max-width:60%}
+.ud-paths-header>div>span{display:block;margin-bottom:7px;color:#7e6142;text-transform:uppercase;letter-spacing:.11em;font:800 10px/1.5 system-ui,sans-serif}
+.ud-paths-header h2{margin:0;font:400 clamp(26px,3.1vw,39px)/1.2 Georgia,serif;letter-spacing:-.03em;color:#1e3f2d;text-wrap:balance}
+.ud-paths-header>p{max-width:43ch;margin:0;color:#485d4d;font:450 13px/1.7 system-ui,sans-serif}
+.ud-path-links{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:12px}
+.ud-path-link{--path-accent:#597d61;position:relative;display:flex;flex-direction:column;gap:8px;min-width:0;min-height:215px;padding:18px;border:1px solid #cdd9cb;border-radius:6px;background:#fffefa;color:#254534;text-decoration:none;box-shadow:0 6px 20px rgba(31,57,35,.05);transition:border-color .18s ease,box-shadow .18s ease}
+.ud-path-link[data-merchant-path="direct"]{--path-accent:#29734a;border-top:4px solid #29734a}
+.ud-path-link[data-merchant-path="awin"]{--path-accent:#536d99;border-top:4px solid #536d99}
+.ud-path-link[data-merchant-path="search"]{--path-accent:#967041;border-top:4px solid #967041}
+.ud-path-link[data-merchant-path="official"]{--path-accent:#5e7770;border-top:4px solid #5e7770}
+.ud-path-icon{position:absolute;top:14px;right:15px;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#eef2ea;color:var(--path-accent);font:750 20px/1 system-ui,sans-serif}
+.ud-path-eyebrow{padding-right:27px;color:#546c56;letter-spacing:.04em;text-transform:uppercase;font:750 10px/1.45 system-ui,sans-serif}
+.ud-path-link strong{display:block;max-width:22ch;font:400 clamp(21px,2.2vw,27px)/1.19 Georgia,serif;color:#21422f;letter-spacing:-.018em}
+.ud-path-description{color:#516558;font:450 12px/1.6 system-ui,sans-serif}
+.ud-path-count{display:inline-flex;justify-content:space-between;align-items:center;gap:9px;margin-top:auto;padding:10px 0 0;border-top:1px solid #dce2d8;color:#24503a;font:800 12px/1.5 system-ui,sans-serif}
+.ud-path-link:hover{border-color:var(--path-accent);box-shadow:0 12px 30px rgba(24,55,31,.13)}
+.ud-path-link:focus-visible{outline:3px solid #b68a44;outline-offset:3px}
+.ud-paths-disclosure{max-width:103ch;margin:15px 0 0;color:#4f6153;font:450 12px/1.75 system-ui,sans-serif}
+@media(max-width:850px){
+ .ud-paths-header{display:block}
+ .ud-paths-header>div{max-width:none}
+ .ud-paths-header>p{margin-top:11px;max-width:70ch}
+}
+@media(max-width:650px){
+ .ud-page .ud-paths{margin:27px 0 25px;padding:18px 15px}
+ .ud-path-links{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x proximity;overscroll-behavior-x:contain;scrollbar-width:thin;scrollbar-color:#9aac9b #edf0e8;padding:3px 3px 14px;margin:0 -3px}
+ .ud-path-link{flex:0 0 min(84%,310px);min-height:220px;scroll-snap-align:start}
+}
+@media(prefers-reduced-motion:reduce){.ud-path-link{transition:none}}
