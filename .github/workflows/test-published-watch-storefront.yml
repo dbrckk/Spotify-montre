@@ -43,6 +43,9 @@ on:
       - 'site/popular-filters.js'
       - 'scripts/build-popular-picks.mjs'
       - 'scripts/build-seo.mjs'
+      - 'research/amazon-fr-popular-verified.json'
+      - 'scripts/popular-verified-affiliate.mjs'
+      - 'site/analytics.js'
   pull_request:
     branches: [main]
     paths:
