@@ -115,7 +115,7 @@ const markdown=[
   'Exporter la liste des 52 modèles : `npm run compliance:r1:csv`. Vérifier sa cohérence : `npm run compliance:r1:check`.',
   '',
   '**R1 non validé.** Ne pas activer l’achat direct sur cette base.'
-].join('\n').replaceAll('`','`')+'\n';
+].join('\n')+'\n';
 const modes=['--json','--csv'].filter(flag=>process.argv.includes(flag));
 if(modes.length>1)throw Error('Choose one output mode');
 if(modes[0]==='--json')process.stdout.write(JSON.stringify(result,null,2)+'\n');
