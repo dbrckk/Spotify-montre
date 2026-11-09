@@ -20,8 +20,12 @@
   const share=document.getElementById('am-pick-share');
   const shareStatus=document.getElementById('am-pick-share-status');
   const manual=document.getElementById('am-pick-share-manual');
+  const active=document.getElementById('am-pick-active');
+  const activeChips=document.getElementById('am-pick-active-chips');
+  const clearActive=document.getElementById('am-pick-active-clear');
   if(!cards.length||!sections.length||!count||!empty||!query||!style||
-    !movement||!tier||!photoOnly||!matchOnly||!share||!shareStatus||!manual)return;
+    !movement||!tier||!photoOnly||!matchOnly||!share||!shareStatus||!manual
+    ||!active||!activeChips||!clearActive)return;
 
   const allowed={
     tier:new Set(['essential','signature','prestige']),
@@ -42,6 +46,40 @@
   photoOnly.checked=unique('photo')==='1';
   matchOnly.checked=unique('asin')==='1';
 
+  const chipControls={
+    q:{label:'Recherche',control:query},
+    tier:{label:'Gamme',control:tier},
+    style:{label:'Style',control:style},
+    movement:{label:'Mouvement',control:movement},
+    photo:{label:'Photo réelle',control:photoOnly},
+    asin:{label:'Référence Amazon',control:matchOnly}
+  };
+  let previousChips='';
+  const updateChips=()=>{
+    const selected=Object.entries(chipControls).flatMap(([key,{label,control}])=>{
+      const value=key==='photo'||key==='asin'
+        ?(control.checked?'Oui':''):control.value.trim();
+      if(!value)return [];
+      const display=control.tagName==='SELECT'
+        ?control.selectedOptions[0]?.textContent||value:value;
+      return [{key,label,display}];
+    });
+    active.hidden=selected.length===0;
+    const signature=JSON.stringify(selected);
+    // Keep a pressed chip alive through the blur/change/click sequence.
+    if(signature===previousChips)return;
+    previousChips=signature;
+    const buttons=selected.map(({key,label,display})=>{
+      const button=document.createElement('button');
+      button.type='button';
+      button.className='am-pick-chip';
+      button.dataset.removeFilter=key;
+      button.textContent=label+' : '+display+' ×';
+      button.setAttribute('aria-label','Retirer le filtre '+label+' : '+display);
+      return button;
+    });
+    activeChips.replaceChildren(...buttons);
+  };
   const selectionUrl=()=>{
     const url=new URL(location.pathname,location.origin);
     const search=query.value.trim();
@@ -71,6 +109,7 @@
     }
     count.textContent=shown+' modèle'+(shown>1?'s':'')+' sur '+cards.length;
     empty.hidden=shown!==0;
+    updateChips();
     if(updateUrl){
       const url=selectionUrl();
       history.replaceState(null,'',url.pathname+url.search+location.hash);
@@ -79,6 +118,19 @@
     }
   };
 
+  activeChips.addEventListener('click',event=>{
+    const button=event.target.closest('button[data-remove-filter]');
+    if(!button||!Object.hasOwn(chipControls,button.dataset.removeFilter))return;
+    const {control}=chipControls[button.dataset.removeFilter];
+    if(control.type==='checkbox')control.checked=false;
+    else control.value='';
+    apply();
+    control.focus({preventScroll:true});
+  });
+  clearActive.addEventListener('click',()=>{
+    form.reset();
+    query.focus({preventScroll:true});
+  });
   form.hidden=false;
   share.hidden=false;
   form.addEventListener('input',()=>apply());

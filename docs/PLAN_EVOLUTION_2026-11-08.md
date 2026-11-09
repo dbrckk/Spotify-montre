@@ -202,3 +202,11 @@ Le workflow `test-premium-mobile.yml` exécute déjà la génération et le test
 - `.github/workflows/lighthouse-mobile.yml` et `scripts/report-lighthouse-mobile.mjs` : inclure `shopper-selections.css` et son générateur dans les déclencheurs, vérifier la feuille publiée et mesurer réellement la page femme à six cartes avec un budget Lighthouse mobile explicite (un passage de laboratoire, sans attribution de ventes ou de Core Web Vitals terrain).
 
 **Critère de fin :** 4 vérifications de PR vertes, génération statique puis contrôle Android de Render et Lighthouse sur **la version effectivement déployée** ; aucune régression de navigation, d'accessibilité, de source image ou de paiement.
+
+## Lot P1 suivant — 9 novembre 2026 : filtres actifs visibles dans les 37 montres
+
+**Audit :** les six critères complémentaires étaient partageables dans l'URL, mais une sélection `q=1251&photo=1&asin=1` n'expliquait pas d'un coup d'œil quels filtres étaient responsables du résultat. Le bouton « Effacer les filtres » imposait de tout supprimer pour élargir une recherche.
+
+**Livré :** pastilles de critères actives, libellées et supprimables séparément (recherche, gamme, style, mouvement, photo réelle, correspondance Amazon documentée). Bouton « Tout effacer », focus restauré sur le contrôle source après retrait, minimum 44 px tactile, et état cohérent avec les URL partageables. Les éléments n'apparaissent pas sans JavaScript, sans retirer les 37 fiches SEO statiques. Aucune nouvelle donnée commerciale ni image inventée.
+
+**Validation :** Playwright Android 393 px : rechargement d'une URL à trois critères, retrait isolé de l'ASIN, restauration de son critère, cohérence de l'URL, dimensions tactiles, remise à zéro, focus clavier et absence de débordement horizontal. Tests SEO, WCAG, build et production restent obligatoires.

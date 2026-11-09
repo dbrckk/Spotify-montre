@@ -204,6 +204,22 @@
   color:#244b35;font:500 13px/1.5 system-ui,sans-serif}
 .am-pick-share-manual:focus-visible{outline:3px solid #b9852b;outline-offset:3px}
 
+/* Compact, individually removable criteria keep the active selection legible. */
+.am-pick-active{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:17px;
+  padding-top:15px;border-top:1px solid #d2dfd1;color:#244734}
+.am-pick-active[hidden]{display:none!important}
+.am-pick-active>strong{font:750 12px/1.4 system-ui,sans-serif}
+.am-pick-active-chips{display:flex;flex:1;gap:8px;flex-wrap:wrap;min-width:0}
+.am-pick-active button{min-height:44px;padding:9px 12px;border:1px solid #8ba58d;
+  border-radius:5px;background:#e8f0e6;color:#214d35;cursor:pointer;
+  font:700 12px/1.45 system-ui,sans-serif;text-align:left;overflow-wrap:anywhere}
+.am-pick-active .am-pick-active-clear{background:#fffdf8;border-color:#a3b4a4}
+.am-pick-active button:hover{background:#d9e8d8}
+.am-pick-active button:focus-visible{outline:3px solid #b9852b;outline-offset:3px}
+@media(max-width:570px){.am-pick-active>strong{flex-basis:100%}
+  .am-pick-active-chips{flex-basis:100%}
+  .am-pick-active button{width:auto;max-width:100%}
+  .am-pick-active .am-pick-active-clear{width:100%}}
 .am-pick-filter-empty{padding:24px;border:1px dashed #8ca58f;border-radius:5px;background:#f5f6ee;color:#244633;font:500 15px/1.7 system-ui,sans-serif}
 .am-pick-exact{align-self:flex-start;padding:9px 11px;margin:0;border-left:3px solid #4f7553;background:#eef2e9;color:#264d38;font:700 12px/1.55 system-ui,sans-serif}
 
