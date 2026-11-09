@@ -190,3 +190,15 @@ Le workflow `test-premium-mobile.yml` exécute déjà la génération et le test
 - `scripts/test-intent-collections-browser.mjs` : contrôler **les six pages** et leur nombre de modèles, la correspondance stricte du fichier local à l'ID, les dimensions et le contenu des variantes réellement produites, un chargement WebP mobile sélectionné par Chromium et la navigation par l'image vers la bonne fiche. Garder les validations écran 320/393 px, desktop et sans JavaScript.
 
 **Limites et critères :** ces photos reposent sur les autorisations déclarées par le responsable du site, non confirmées indépendamment ; aucune image de produit manquant n'est recréée comme représentation factuelle. Aucune donnée marchande, prix, ASIN, affiliation, paiement ou inventaire n'est modifiée. Valider les 4 CI de PR puis les 7 CI post-fusion, y compris Lighthouse de production **sans revendiquer de gain causal avant comparaison**.
+
+
+## 13. Correctif de validation production — 9 novembre 2026
+
+**Constat reproductible après #246 :** les quatre CI de PR étaient verts, dont les tests Android locaux sur les six collections. La version Render a servi les mêmes CSS/JS et références, mais l'audit Android post-fusion a mesuré le débordement dès `DOMContentLoaded` sur `montres-femme-accessibles`, avant de vérifier le calcul des styles. L'outil de test de production avait déjà un garde-fou identique sur la fiche Citizen, mais pas sur ces pages éditoriales. Deux tentatives post-fusion ont reproduit cet échec. La cause exacte du débordement ne doit pas être imputée au réseau avant contrôle complémentaire.
+
+**Correctif soumis :**
+- `scripts/test-mobile-storefront-v8.mjs` : attendre les **styles réellement calculés** (grille une colonne, photo masquée si débordement, lien photographique en position absolue) avant toute assertion géométrique, puis conserver le test strict du débordement et inclure des détails sur les premiers éléments fautifs en cas d'échec. Aucun simple `sleep` ou suppression d'assertion.
+- `.github/workflows/test-published-watch-storefront.yml` : contrôler le contenu client exact des trois pages de sélection à six montres, et plus seulement l'existence de la grille et les nombres de cartes, avant de lancer le navigateur sur la version publiée. Les feuilles CSS étaient déjà comparées octet pour octet.
+- `.github/workflows/lighthouse-mobile.yml` et `scripts/report-lighthouse-mobile.mjs` : inclure `shopper-selections.css` et son générateur dans les déclencheurs, vérifier la feuille publiée et mesurer réellement la page femme à six cartes avec un budget Lighthouse mobile explicite (un passage de laboratoire, sans attribution de ventes ou de Core Web Vitals terrain).
+
+**Critère de fin :** 4 vérifications de PR vertes, génération statique puis contrôle Android de Render et Lighthouse sur **la version effectivement déployée** ; aucune régression de navigation, d'accessibilité, de source image ou de paiement.

@@ -37,6 +37,8 @@ on:
       - 'site/premium-system.css'
       - 'site/seo-guides.css'
       - 'site/popular-picks.css'
+      - 'site/shopper-selections.css'
+      - 'scripts/build-shopper-selections.mjs'
       - 'site/extra-source-passport.css'
       - 'site/merchant-proof-ledger.css'
       - 'site/extra-product-viewer.js'
@@ -86,7 +88,7 @@ jobs:
           base='https://atelier-montres-selection-fr.onrender.com'
           for attempt in $(seq 1 30); do
             ready=1
-            for file in public-home.css premium-showroom.css base.css features.css direct-offer-links.js direct-offer-links.css seo-guides.css catalogue-view.css premium-system.css editorial-photo.js unified-discovery.css unified-trust-markers.css watch-reference-copy.css watch-reference-copy-v2.js unified-recent-history.js unified-recent-history.css unified-tier-finish.css unified-shopper-paths.css unified-discovery.js popular-picks.css extra-source-passport.css merchant-proof-ledger.css extra-product-viewer.js; do
+            for file in public-home.css premium-showroom.css base.css features.css direct-offer-links.js direct-offer-links.css seo-guides.css catalogue-view.css premium-system.css editorial-photo.js unified-discovery.css unified-trust-markers.css watch-reference-copy.css watch-reference-copy-v2.js unified-recent-history.js unified-recent-history.css unified-tier-finish.css unified-shopper-paths.css unified-discovery.js popular-picks.css shopper-selections.css extra-source-passport.css merchant-proof-ledger.css extra-product-viewer.js; do
               if ! curl -fsSL --max-time 15 "$base/$file" -o "$RUNNER_TEMP/lh-$file"; then
                 ready=0
               elif ! cmp -s "site/$file" "$RUNNER_TEMP/lh-$file"; then
@@ -197,6 +199,7 @@ jobs:
           npx --yes lighthouse@12 "https://atelier-montres-selection-fr.onrender.com/montres/casio-mtp-1302.html" --chrome-path="$CHROME" --chrome-flags="--headless --no-sandbox" --only-categories=performance --form-factor=mobile --max-wait-for-load=45000 --output=json --output-path=artifacts/lighthouse-mobile-product.json --quiet
           npx --yes lighthouse@12 "https://atelier-montres-selection-fr.onrender.com/montres/skmei-1251.html" --chrome-path="$CHROME" --chrome-flags="--headless --no-sandbox" --only-categories=performance --form-factor=mobile --max-wait-for-load=45000 --output=json --output-path=artifacts/lighthouse-mobile-studio-photo.json --quiet
           npx --yes lighthouse@12 "https://atelier-montres-selection-fr.onrender.com/montres/casio-f91w-1.html" --chrome-path="$CHROME" --chrome-flags="--headless --no-sandbox" --only-categories=performance --form-factor=mobile --max-wait-for-load=45000 --output=json --output-path=artifacts/lighthouse-mobile-no-photo.json --quiet
+          npx --yes lighthouse@12 "https://atelier-montres-selection-fr.onrender.com/montres/montres-femme-accessibles.html" --chrome-path="$CHROME" --chrome-flags="--headless --no-sandbox" --only-categories=performance --form-factor=mobile --max-wait-for-load=45000 --output=json --output-path=artifacts/lighthouse-mobile-curated-femme.json --quiet
       - name: Build median-based, inspectable report
         run: node scripts/report-lighthouse-mobile.mjs
       - name: Save Lighthouse results

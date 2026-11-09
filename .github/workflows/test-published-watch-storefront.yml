@@ -161,6 +161,16 @@ jobs:
                 elif [ "$(grep -oF 'class="am-shopper-card"' "$RUNNER_TEMP/live-$slug.html" | wc -l)" -ne 6 ]; then
                   ready=0
                   reason="$reason [wrong card count: $slug]"
+                elif ! node -e "
+                    const fs=require('node:fs'),slug=process.argv[1],live=process.argv[2];
+                    const section=file=>{const html=fs.readFileSync(file,'utf8');
+                      const start=html.indexOf('<div class=\"wrap am-shopper-page\">');
+                      if(start<0)throw Error('Editorial section missing');
+                      return html.slice(start,html.indexOf('</main>',start));};
+                    if(section('site/montres/'+slug+'.html')!==section(live))process.exit(1);
+                  " "$slug" "$RUNNER_TEMP/live-$slug.html"; then
+                  ready=0
+                  reason="$reason [outdated customer-visible curated page: $slug]"
                 fi
               done
             fi

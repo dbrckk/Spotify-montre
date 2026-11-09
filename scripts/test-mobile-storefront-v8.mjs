@@ -223,12 +223,36 @@ try{
    const curated=await browser.newPage({viewport:{width:393,height:852},isMobile:true,hasTouch:true,locale:'fr-FR'});
    const response=await curated.goto(new URL('/montres/'+slug+'.html',base).href,{waitUntil:'domcontentloaded'});
    assert.ok(response?.ok(),'Curated SEO landing page must load '+slug);
+   // The public CDN can finish HTML parsing before the first-ever CSS load.
+   // Do not judge layout on unstyled DOM: require the *actual computed*
+   // customer-facing responsive stylesheet, not a fixed timeout or URL check.
+   await curated.waitForFunction(()=>{
+     const grid=document.querySelector('.am-shopper-grid');
+     const photo=grid?.querySelector('.am-shopper-real-photo');
+     const link=photo?.querySelector('.am-shopper-photo-link');
+     if(!grid||!photo||!link)return false;
+     const stageStyle=getComputedStyle(photo),linkStyle=getComputedStyle(link);
+     return getComputedStyle(grid).display==='grid'
+       &&getComputedStyle(grid).gridTemplateColumns.split(' ').length===1
+       &&stageStyle.overflow==='hidden'
+       &&linkStyle.position==='absolute'&&linkStyle.display==='grid';
+   },null,{timeout:20000});
    assert.equal(await curated.locator('article.am-shopper-card').count(),6,'Six traceable watch options '+slug);
    assert.equal(await curated.locator('.am-shopper-nav a').count(),6,'Three existing selections and three new source-backed search intents must be linked '+slug);
    assert.equal(await curated.locator('.am-shopper-card h2 a').count(),6,'Every title must link its model facts '+slug);
    assert.equal(await curated.locator('a.am-shopper-action').count(),6,'Every watch needs a real merchant or manufacturer exit '+slug);
-   const dimensions=await curated.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
-   assert.ok(dimensions.scroll<=dimensions.client+2,'Curated cards must not overflow Android '+slug);
+   const dimensions=await curated.evaluate(()=>{
+     const client=document.documentElement.clientWidth,scroll=document.documentElement.scrollWidth;
+     return {client,scroll,offenders:scroll>client+2
+       ?[...document.querySelectorAll('body *')].filter(el=>{
+         const r=el.getBoundingClientRect();
+         return r.width>0&&r.right>client+2&&r.left<client;
+       }).slice(0,8).map(el=>({tag:el.tagName,cls:String(el.className).slice(0,110),
+         right:Math.round(el.getBoundingClientRect().right)}))
+       :[]};
+   });
+   assert.ok(dimensions.scroll<=dimensions.client+2,
+     'Curated cards must not overflow Android '+slug+' '+JSON.stringify(dimensions));
    await curated.screenshot({path:'artifacts/android-selection-'+slug+'.png',fullPage:true});
    await curated.close();
  }

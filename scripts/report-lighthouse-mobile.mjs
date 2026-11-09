@@ -6,7 +6,10 @@ const sites=[
  {name:'Fiche SKMEI avec photo',files:['artifacts/lighthouse-mobile-studio-photo.json'],
   expectedPath:'/montres/skmei-1251.html',photoId:'skmei-1251'},
  {name:'Fiche Casio sans photo',files:['artifacts/lighthouse-mobile-no-photo.json'],
-  expectedPath:'/montres/casio-f91w-1.html',forbidPhotoId:'casio-f91w-1'}
+  expectedPath:'/montres/casio-f91w-1.html',forbidPhotoId:'casio-f91w-1'},
+ {name:'Sélection femme — photos responsives',
+  files:['artifacts/lighthouse-mobile-curated-femme.json'],
+  expectedPath:'/montres/montres-femme-accessibles.html'}
 ];
 const keys={'first-contentful-paint':'FCP','largest-contentful-paint':'LCP','speed-index':'Speed Index','total-blocking-time':'TBT','cumulative-layout-shift':'CLS'};
 const median=(numbers)=>{const sorted=numbers.filter(Number.isFinite).sort((a,b)=>a-b);return sorted.length?sorted[Math.floor(sorted.length/2)]:null;};
@@ -83,7 +86,11 @@ const budgets={
   // The small verified WebP must stay inexpensive; a Casio with no photo
   // must not download an invented model image.
   'Fiche SKMEI avec photo':{scoreMin:75,lcpMax:4500,clsMax:0.2,imageBytesMax:160000},
-  'Fiche Casio sans photo':{scoreMin:75,lcpMax:4500,clsMax:0.2,imageBytesMax:160000}
+  'Fiche Casio sans photo':{scoreMin:75,lcpMax:4500,clsMax:0.2,imageBytesMax:160000},
+  // Curated page has six true watch cards, some below the fold. This mobile
+  // first-load budget blocks full-resolution image regressions without
+  // pretending the single simulated run represents field Core Web Vitals.
+  'Sélection femme — photos responsives':{scoreMin:75,lcpMax:4500,clsMax:0.2,imageBytesMax:300000}
 };
 const violations=[];
 for(const r of reports){
@@ -116,7 +123,7 @@ for(const r of reports){
  if(r.runs.some(run=>run.verifiedPhotoVariants?.length))
   lines.push('Variantes photographiques exactes téléchargées : '+r.runs.flatMap(run=>run.verifiedPhotoVariants).join(', ')+'.','');
 }
-lines.push('Garde-fous accueil (médiane) : score ≥85, LCP ≤3000 ms, TBT ≤300 ms, CLS ≤0,15, images ≤90 Ko. Catalogue (un passage) : images ≤180 Ko. Fiches photo/sans photo (un passage) : score ≥75, LCP ≤4500 ms, CLS ≤0,2, images ≤160 Ko ; mesures laboratoire indicatives.','');
+lines.push('Garde-fous accueil (médiane) : score ≥85, LCP ≤3000 ms, TBT ≤300 ms, CLS ≤0,15, images ≤90 Ko. Catalogue (un passage) : images ≤180 Ko. Fiches photo/sans photo (un passage) : score ≥75, LCP ≤4500 ms, CLS ≤0,2, images ≤160 Ko. Sélection éditoriale femme (un passage) : score ≥75, LCP ≤4500 ms, CLS ≤0,2, images ≤300 Ko ; mesures laboratoire indicatives.','');
 lines.push(violations.length?'Régressions détectées : '+violations.join(' ; '):'Aucune régression majeure détectée par les seuils Lighthouse.','');
 lines.push('La médiane réduit la variabilité sans constituer une mesure terrain. L’INP réel et les métriques Core Web Vitals proviennent de CrUX/Search Console, pas du TBT Lighthouse.','');
 const summary=lines.join('\n');
