@@ -30,7 +30,8 @@ const cases=[
   ['lighthouse-mobile-catalogue.json',fixture('/montres/toutes-les-montres.html')],
   ['lighthouse-mobile-product.json',fixture('/montres/casio-mtp-1302.html')],
   ['lighthouse-mobile-studio-photo.json',fixture('/montres/skmei-1251.html',true)],
-  ['lighthouse-mobile-no-photo.json',fixture('/montres/casio-f91w-1.html')]
+  ['lighthouse-mobile-no-photo.json',fixture('/montres/casio-f91w-1.html')],
+  ['lighthouse-mobile-curated-femme.json',fixture('/montres/montres-femme-accessibles.html',true)]
 ];
 const write=(name,report)=>writeFileSync(join(folder,name),JSON.stringify(report));
 const run=()=>spawnSync(process.execPath,[script],{cwd:dir,encoding:'utf8'});
@@ -40,9 +41,25 @@ try{
   assert.equal(result.status,0,result.stderr||result.stdout);
   let summary=JSON.parse(readFileSync(join(folder,'lighthouse-mobile-summary.json'),'utf8'));
   assert.deepEqual(summary.reports.map(x=>x.name),[
-    'Accueil','Catalogue 52 montres','Fiche Casio','Fiche SKMEI avec photo','Fiche Casio sans photo']);
+    'Accueil','Catalogue 52 montres','Fiche Casio','Fiche SKMEI avec photo',
+    'Fiche Casio sans photo','Sélection femme — photos responsives']);
   assert.equal(summary.reports[3].responsiveCount,1);
   assert.equal(summary.reports[4].imagesTransferred,0);
+  assert.equal(summary.reports[5].imagesTransferred,14000);
+  // The new curated page must be measured at its real URL, not another
+  // collection or a stale redirect. Test its independent image-byte ceiling.
+  const otherPage=structuredClone(cases[7][1]);
+  otherPage.finalDisplayedUrl=host+'/montres/montres-homme-style-accessible.html';
+  write(cases[7][0],otherPage);
+  assert.notEqual(run().status,0,'A different curated route must not pass the mobile audit');
+  write(...cases[7]);
+  const bloated=structuredClone(cases[7][1]);
+  bloated.audits['resource-summary'].details.items[0].transferSize=350000;
+  write(cases[7][0],bloated);
+  const huge=run();
+  assert.notEqual(huge.status,0,'A 350 KB editorial image transfer must breach the photo budget');
+  assert.match(huge.stderr,/image bytes/);
+  write(...cases[7]);
 
   // A high-DPI browser legitimately selects the original verified WebP.
   const hdpi=structuredClone(cases[5][1]);
@@ -90,5 +107,5 @@ try{
   result=run();
   assert.notEqual(result.status,0,'CLS regression must fail');
   assert.match(result.stderr,/CLS/);
-  console.log('PASS: 5 Lighthouse pages, photographic evidence, no-photo route, CLS guard');
+  console.log('PASS: 6 Lighthouse pages, curated source photo budget, wrong route, no-photo and CLS guards');
 }finally{rmSync(dir,{recursive:true,force:true});}
