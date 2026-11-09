@@ -78,6 +78,18 @@ jobs:
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.64.1
           npx playwright install --with-deps chromium
+      # The six SEO selection pages are GENERATED, not committed Git files.
+      # Regenerate them before comparing their customer-visible content with
+      # the deployed CDN; otherwise the readiness loop can never succeed.
+      - name: Regenerate exact selected-watch HTML for deployed-source checks
+        run: |
+          python -m pip install --disable-pip-version-check --quiet 'Pillow>=11,<13'
+          python scripts/build-popular-editorial-thumbnails.py
+          node scripts/build-seo.mjs
+          node scripts/validate-seo.mjs
+          test -f site/montres/montres-femme-accessibles.html
+          test -f site/montres/montres-homme-style-accessible.html
+          test -f site/montres/montres-automatiques-selection.html
       - name: Wait for exact catalog JS, CSS and filterable SEO collection to reach Render
         run: |
           set -eu
