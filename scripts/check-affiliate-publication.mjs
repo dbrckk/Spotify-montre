@@ -123,7 +123,11 @@ try {
   assert.match(purchaseText(),/data-do-not-track="true"/);
   assert.ok(trackedProduct.includes('src="../analytics.js"'));
   assert.ok(trackedProduct.includes('data-amazon-product="citizen-tsuyosa"'));
-  assert.match(privacyText(),/Les visites et clics sortants vers Amazon\.fr et les fiches des marques ou vendeurs documentés sont mesurés avec Umami Cloud/);
+  assert.match(privacyText(),/Lorsque Umami Cloud est activé, nous mesurons les visites/);
+  assert.match(privacyText(),/ouvertures de comparatifs et l’activation des filtres documentaires/);
+  assert.match(privacyText(),/aucun texte de recherche, réponse au conseiller, donnée personnelle/);
+  assert.equal((privacyText().match(/Lorsque Umami Cloud est activé/g)||[]).length,1,
+    'Optional funnel disclosure must appear exactly once after rebuild');
   const trackedSupplement=readFileSync(join(target,'montres/skmei-2056.html'),'utf8');
   assert.ok(trackedSupplement.includes('data-merchant-official-id="skmei-2056" data-merchant-placement="popular"'),
     'The SKMEI product must be measurable as vendor intent only with opted-in analytics');
@@ -141,7 +145,10 @@ try {
     'No external analytics request on partner landing page without Umami configuration');
   assert.ok(!purchaseText().includes('src="./analytics.js"'),
     'The event tracker must also be removed when Umami is disabled');
-  assert.doesNotMatch(privacyText(),/Les visites et clics sortants vers Amazon\.fr et les fiches des marques ou vendeurs documentés sont mesurés avec Umami Cloud/);
+  assert.doesNotMatch(privacyText(),/Lorsque Umami Cloud est activé/);
+  assert.doesNotMatch(privacyText(),/ouvertures de comparatifs et l’activation des filtres documentaires/);
+  assert.match(privacyText(),/Nous n'avons pas installé de système de publicité ciblée/,
+    'Disabling Umami must restore the inactive privacy notice');
   let invalidAnalyticsIdBlocked=false;
   try {build({UMAMI_WEBSITE_ID:'"><img src=x onerror=alert(1)>'})}catch{invalidAnalyticsIdBlocked=true}
   assert.equal(invalidAnalyticsIdBlocked,true,'Invalid analytics identifiers must not inject arbitrary HTML');
