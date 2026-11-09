@@ -213,3 +213,11 @@ Le workflow `test-premium-mobile.yml` exécute déjà la génération et le test
 **Livré :** pastilles de critères actives, libellées et supprimables séparément (recherche, gamme, style, mouvement, photo réelle, correspondance Amazon documentée). Bouton « Tout effacer », focus restauré sur le contrôle source après retrait, minimum 44 px tactile, et état cohérent avec les URL partageables. Les éléments n'apparaissent pas sans JavaScript, sans retirer les 37 fiches SEO statiques. Aucune nouvelle donnée commerciale ni image inventée.
 
 **Validation :** Playwright Android 393 px : rechargement d'une URL à trois critères, retrait isolé de l'ASIN, restauration de son critère, cohérence de l'URL, dimensions tactiles, remise à zéro, focus clavier et absence de débordement horizontal. Tests SEO, WCAG, build et production restent obligatoires.
+
+## Lot P1 — 9 novembre 2026 : accès immédiat aux 37 montres
+
+**Problème constaté :** la collection `modeles-populaires.html` présentait trois longs paragraphes avant les dix références détaillées, puis seulement plus bas les filtres des 37 montres. Sur petit écran, le catalogue complet était difficile à atteindre sans défilement prolongé.
+
+**Solution mise en place :** introduction éditoriale raccourcie, avertissement commercial concis immédiatement visible, informations détaillées préservées dans une section `details` accessible et deux raccourcis natifs vers la sélection de dix modèles ou vers le catalogue filtrable des 37 modèles. Les liens fonctionnent sans JavaScript ; les six critères partageables, les 37 fiches indexables, les preuves des ASIN et tous les liens commerciaux sont conservés. Aucune modification du paiement, du stock ou des images.
+
+**Validation requise :** `npm test`, génération et validation SEO, Playwright Android 393 px (cibles des deux raccourcis, aire tactile, absence de débordement, accès à l’avertissement), audit WCAG, puis contrôle de la version Render publiée et Lighthouse. Les captures doivent démontrer le gain visuel, sans prétendre à une amélioration de conversion non mesurée.

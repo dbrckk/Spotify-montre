@@ -583,6 +583,28 @@ try{
   try{
     const selectedUrl=new URL('/montres/modeles-populaires.html?q=1251&photo=1&asin=1',base);
     await supplement.goto(selectedUrl.href,{waitUntil:'domcontentloaded'});
+    // Shoppers must reach either the 10-model editorial shortlist or the
+    // whole 37-watch filterable list without scrolling through ten long cards.
+    const journeys=supplement.locator('.am-picks-journeys');
+    assert.equal(await journeys.locator('a').count(),2);
+    for(const [href,target] of [
+      ['#selection-10-montres','#selection-10-montres'],
+      ['#am-picks-browse','#am-pick-filters']
+    ]){
+      const link=journeys.locator('a[href="'+href+'"]');
+      const bounds=await link.boundingBox();
+      assert.ok(bounds&&bounds.height>=44&&bounds.x>=0&&bounds.x+bounds.width<=393,
+        'Discovery shortcut must fit the Android viewport: '+href);
+      await link.click();
+      assert.equal(new URL(supplement.url()).hash,href);
+      assert.equal(await supplement.locator(target).isVisible(),true,
+        'Discovery shortcut must land on real customer content: '+href);
+    }
+    const disclosure=supplement.locator('.am-picks-transparency');
+    await disclosure.locator('summary').click();
+    assert.match(await disclosure.innerText(),/Aucun tarif, stock, note ou volume de ventes/);
+    assert.match(await disclosure.innerText(),/identifiant Partenaires/);
+    await disclosure.locator('summary').click();
     await supplement.locator('#am-pick-filters').waitFor({state:'visible'});
     assert.equal(await supplement.locator('#am-filter-query').inputValue(),'1251');
     assert.equal(await supplement.locator('#am-filter-photo').isChecked(),true);
