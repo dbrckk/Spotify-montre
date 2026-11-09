@@ -53,6 +53,10 @@ on:
       - 'research/amazon-fr-popular-verified.json'
       - 'scripts/popular-verified-affiliate.mjs'
       - 'site/analytics.js'
+      - 'site/confidentialite.html'
+      - 'site/privacy-controls.js'
+      - 'site/privacy-controls.css'
+      - 'scripts/test-privacy-controls-browser.mjs'
   pull_request:
     branches: [main]
     paths:
@@ -100,7 +104,7 @@ jobs:
           for attempt in $(seq 1 42); do
             ready=1
             reason=''
-            for file in affiliation.js selection-share.js affiliate-ui.js catalogue-view.css premium-system.css fiche.js fiche.css seo-guides.css editorial-photo.js editorial-photo.css popular-filters.js popular-picks.css extra-source-passport.css merchant-proof-ledger.css affordable-comparisons.css extra-factual-comparison.css shopper-selections.css unified-discovery.js unified-discovery.css unified-trust-markers.css watch-reference-copy.css watch-reference-copy-v2.js unified-recent-history.js unified-recent-history.css unified-tier-finish.css unified-shopper-paths.css; do
+            for file in affiliation.js selection-share.js affiliate-ui.js catalogue-view.css premium-system.css fiche.js fiche.css seo-guides.css editorial-photo.js editorial-photo.css popular-filters.js popular-picks.css extra-source-passport.css merchant-proof-ledger.css affordable-comparisons.css extra-factual-comparison.css shopper-selections.css unified-discovery.js unified-discovery.css unified-trust-markers.css watch-reference-copy.css watch-reference-copy-v2.js unified-recent-history.js unified-recent-history.css unified-tier-finish.css unified-shopper-paths.css privacy-controls.js privacy-controls.css; do
               if ! curl -fsSL --max-time 15 "$base/$file" -o "$RUNNER_TEMP/live-$file"; then
                 ready=0
                 reason="$reason [missing asset: $file]"
@@ -185,6 +189,20 @@ jobs:
                   reason="$reason [outdated customer-visible curated page: $slug]"
                 fi
               done
+            fi
+            # A static legal page can still be served by an older deployment
+            # even if the new JS/CSS assets are live. Verify the actual public
+            # privacy UI before testing the storage mutation in Chromium.
+            if [ "$ready" -eq 1 ]; then
+              if ! curl -fsSL --max-time 15 "$base/confidentialite.html" -o "$RUNNER_TEMP/live-confidentialite.html"; then
+                ready=0
+                reason="$reason [missing: privacy page]"
+              elif ! grep -Fq 'id="amPrivacyControls"' "$RUNNER_TEMP/live-confidentialite.html" ||
+                   ! grep -Fq 'src="./privacy-controls.js"' "$RUNNER_TEMP/live-confidentialite.html" ||
+                   ! grep -Fq 'id="amPrivacyFallback"' "$RUNNER_TEMP/live-confidentialite.html"; then
+                ready=0
+                reason="$reason [outdated privacy controls HTML]"
+              fi
             fi
             # The unified 52-watch catalogue and its merchant-confidence filter
             # must be deployed before any production Android browser assertions.
@@ -273,6 +291,7 @@ jobs:
       - name: Verify deployed website, 15 local photos, sharing and watch history
         env:
           WATCH_STOREFRONT_URL: https://atelier-montres-selection-fr.onrender.com
+          WATCH_PUBLIC_VERIFICATION: '1'
         run: |
           timeout 180s node scripts/test-mobile-live-storefront.mjs
           timeout 180s node scripts/test-mobile-storefront-v8.mjs
@@ -280,6 +299,7 @@ jobs:
           timeout 120s node scripts/test-recently-viewed.mjs
           timeout 120s node scripts/test-compare-persistence.mjs
           timeout 180s node scripts/test-unified-compare-tray.mjs
+          timeout 120s node scripts/test-privacy-controls-browser.mjs
       - name: Save real deployment screenshots
         if: always()
         uses: actions/upload-artifact@v4

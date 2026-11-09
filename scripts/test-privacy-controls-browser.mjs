@@ -1,11 +1,16 @@
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 
-// Only local browser storage is tested. Never follow partner links, send
-// requests to external services or contact the commerce API.
+// Only first-party browser storage is tested. Never follow external merchant
+// links, submit payment, fetch the commerce API or transmit stored values.
 const base=new URL(process.env.WATCH_STOREFRONT_URL||'http://127.0.0.1:8765');
-if(base.protocol!=='http:'||!['localhost','127.0.0.1'].includes(base.hostname))
-  throw Error('Privacy-controls browser QA is restricted to localhost');
+const local=base.protocol==='http:'&&['localhost','127.0.0.1'].includes(base.hostname);
+const publicReadOnly=process.env.WATCH_PUBLIC_VERIFICATION==='1'
+  &&base.protocol==='https:'&&base.hostname==='atelier-montres-selection-fr.onrender.com'
+  &&base.port===''&&base.pathname==='/'&&!base.search&&!base.hash
+  &&!base.username&&!base.password;
+if(!local&&!publicReadOnly)
+  throw Error('Privacy browser QA must be local or explicitly allowlisted Render production');
 const localKeys=[
   'atelier-montres-multibrand-favorites-v1',
   'atelier-montres-catalogue-view-v1',
