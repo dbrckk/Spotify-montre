@@ -630,3 +630,32 @@
 .am-extra-official-photo small{color:#f0e7d6;font:500 12px/1.55 system-ui,sans-serif}
 @media(max-width:600px){.am-extra-official-photo{width:100%}.am-extra-official-photo>a{width:100%}}
 @media(prefers-reduced-motion:reduce){.am-extra-official-photo>a{transition:none}}
+
+/* Source-backed recommendations stay inside the shopper's editorial range.
+   The badge makes the budget context explicit without claiming a live price. */
+.am-extra-related li{
+  border-radius:9px;
+  box-shadow:0 8px 24px rgba(27,61,41,.045);
+  transition:border-color .18s ease,box-shadow .18s ease;
+}
+.am-extra-related li:hover{
+  border-color:#acbda8;
+  box-shadow:0 14px 30px rgba(27,61,41,.09);
+}
+.am-extra-related li .am-extra-related-tier{
+  align-self:flex-start;
+  display:inline-flex;
+  align-items:center;
+  min-height:26px;
+  padding:4px 9px;
+  border:1px solid #cbd8c7;
+  border-radius:999px;
+  background:#eff4ea;
+  color:#244632;
+  font:750 10px/1.35 system-ui,sans-serif;
+  letter-spacing:.045em;
+  text-transform:uppercase;
+}
+@media(prefers-reduced-motion:reduce){
+  .am-extra-related li{transition:none}
+}
