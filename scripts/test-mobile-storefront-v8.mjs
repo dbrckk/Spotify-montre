@@ -582,8 +582,13 @@ try{
    assert.equal(await popularPage.locator('a[data-amazon-product]').count(),0,
      'Unverified watches must not publish direct ASINs: '+watch.id);
  }
-   assert.equal(await popularPage.locator('.am-extra-actions a').last().getAttribute('href'),
-     watch.officialUrl,'Official photos link must be model-specific: '+watch.id);
+   const merchantActions=popularPage.locator('.am-extra-actions');
+   const officialSource=merchantActions.locator('a[data-merchant-official-id="'+watch.id+'"]');
+   assert.equal(await officialSource.getAttribute('href'),watch.officialUrl,
+     'Actual manufacturer or vendor source must remain model-specific: '+watch.id);
+   assert.equal(await merchantActions.locator('a').first().getAttribute('href'),
+     verified?merchant.href:watch.officialUrl,
+     'An exact ASIN leads when documented; otherwise the manufacturer or vendor source must lead: '+watch.id);
    const overflow=await popularPage.evaluate(()=>({
      client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth
    }));

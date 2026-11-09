@@ -82,13 +82,16 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
     const facts=keyFacts.map(([label,value])=>
       '<div class="am-extra-fact"><dt>'+e(label)+'</dt><dd>'+e(value)+'</dd></div>').join('');
     const direct=verifiedLinks.get(p.id);
+    const alternatePartner=partnerOffers.get(p.id);
     const comparator=direct?.evidenceType==='amazon_fr_comparator_redirect';
     const merchantRoute=affiliates.enabled
-      ?comparator?'comparator':direct?'asin':'search'
-      :partnerOffers.has(p.id)?'partner':'official';
+      ?comparator?'comparator':direct?'asin':alternatePartner?'partner':'search'
+      :alternatePartner?'partner':'official';
     const merchantFacts=affiliates.enabled
       ?'<dl class="am-extra-merchant-facts" aria-label="Informations à vérifier avant la visite marchande">'
-        +'<div><dt>Destination</dt><dd>'+(direct?'Page Amazon.fr · ASIN '+e(direct.asin):'Résultats de recherche Amazon.fr')+'</dd></div>'
+        +'<div><dt>Destination prioritaire</dt><dd>'+(direct?'Page Amazon.fr · ASIN '+e(direct.asin)
+          :alternatePartner?'Lien partenaire Awin · référence à vérifier'
+            :'Fiche du modèle chez la marque ou le vendeur')+'</dd></div>'
         +'<div><dt>Code recherché</dt><dd>'+e(direct?.model||p.model)+'</dd></div>'
         +'<div><dt>Contrôle documentaire</dt><dd>'+e(direct?.verifiedAt||'Aucun ASIN exact documenté')+'</dd></div>'
         +'</dl>'
@@ -115,10 +118,18 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
         +'</div>'
       :'';
 
-    const alternatePartner=partnerOffers.get(p.id);
-    const actions=affiliateLink(p)
-      +partnerLink(p)
-      +link(p.officialUrl,p.brand==='SKMEI'?'Voir les photos et la fiche vendeur':'Voir les vraies photos et la fiche constructeur',false,p.id,'official');
+    // An Amazon search is not an exact product offer: for the 23 models
+    // without an ASIN, guide the visitor to the actual model source first.
+    // Keep paid research links available and accurately labelled as optional.
+    const amazonAction=affiliateLink(p);
+    const awinAction=partnerLink(p);
+    const officialAction=link(p.officialUrl,
+      p.brand==='SKMEI'?'Voir le modèle exact chez le vendeur'
+        :'Voir le modèle exact chez le fabricant',false,p.id,'official');
+    const actionPriority=affiliates.enabled&&direct?'amazon':alternatePartner?'awin':'source';
+    const actions=actionPriority==='amazon'?amazonAction+awinAction+officialAction
+      :actionPriority==='awin'?awinAction+officialAction+amazonAction
+      :officialAction+amazonAction;
     const source=link(p.marketEvidence.url,p.marketEvidence.label);
     const relatedItems=suggestions.map(q=>{
       const otherPhoto=approvedPhotos.get(q.id);
@@ -177,12 +188,17 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       +'<p class="am-extra-reference"><span>Référence à retrouver chez le marchand</span><strong>'+e(name)+'</strong></p>'
       +'<div class="am-ref-copy-tools" data-watch-ref-tools hidden><button type="button" class="am-ref-copy-button" data-watch-ref-copy="'+e(p.id)+'" hidden>Copier la référence</button><span class="am-ref-copy-status" role="status" aria-live="polite" data-watch-ref-status></span></div>'
       +'<p class="am-extra-approval">À vérifier auprès du vendeur : référence exacte, variante, prix, disponibilité, garantie et conditions de retour. Nous ne vendons pas directement ce produit.</p>'
-      +(affiliates.enabled?'<div class="am-extra-link-status '+(direct?'am-extra-link-direct':'am-extra-link-search')+'" data-merchant-route="'+merchantRoute+'"><strong>'+(direct?'Fiche Amazon.fr correspondant au code modèle':'Recherche Amazon.fr — modèle non garanti')+'</strong><span>'+(direct?(comparator?'ASIN recoupé via un comparateur et une source indépendante ; fiche Amazon.fr non consultée directement. Vérifiez la variante, le vendeur et le stock.':'Lien associé à un ASIN documenté. Contrôlez la variante, le vendeur et le stock.'):'Les résultats peuvent contenir d’autres montres. Vérifiez le code affiché ci-dessus avant l’achat.')+'</span>'
+      +(affiliates.enabled?'<div class="am-extra-link-status '+(direct?'am-extra-link-direct':'am-extra-link-search')+'" data-merchant-route="'+merchantRoute+'"><strong>'+(direct?'Fiche Amazon.fr correspondant au code modèle'
+          :alternatePartner?'Lien partenaire documenté · vérifier la variante'
+          :'Fiche du modèle à consulter avant toute recherche')+'</strong><span>'+(direct
+          ?(comparator?'ASIN recoupé via un comparateur et une source indépendante ; fiche Amazon.fr non consultée directement. Vérifiez la variante, le vendeur et le stock.':'Lien associé à un ASIN documenté. Contrôlez la variante, le vendeur et le stock.')
+          :alternatePartner?'Le lien Awin concerne cette référence documentée, sans garantir le stock ni la variante. La recherche Amazon.fr reste facultative.'
+            :'Recherche Amazon.fr — modèle non garanti. Aucun ASIN exact établi : consultez d’abord la fiche fabricant ou vendeur, puis contrôlez tout résultat marchand.')+'</span>'
         +merchantFacts
         +(direct?.marketplaceVariant?'<span class="am-extra-merchant-variant"><strong>Variante de la fiche Amazon :</strong> '+e(direct.marketplaceVariant)+'</span>':'')
         +(comparator?'<span class="am-extra-proof-jump"><a href="#sources">Voir les deux sources de correspondance <span aria-hidden="true">↓</span></a></span>':'')+'</div>':'')
       +(!photo?'<p class="am-extra-seller-path"><strong>Étape 2 / Consulter les sources</strong> Les liens suivants ouvrent des sites externes. Une recherche marchand ne garantit ni la variante exacte, ni son stock.</p>':'')
-      +'<div class="am-extra-actions">'+actions+'</div>'
+      +'<div class="am-extra-actions" data-action-priority="'+actionPriority+'" role="group" aria-label="Sources et vendeurs pour '+e(name)+'">'+actions+'</div>'
       +'<div class="am-extra-local-tools" role="group" aria-label="Conserver ou partager cette montre" hidden>'
       +'<button type="button" class="am-extra-favorite" data-extra-favorite="'+e(p.id)+'" aria-pressed="false" hidden>♡ Ajouter aux favoris</button>'
       +'<button type="button" class="am-extra-share" data-extra-share="'+e(p.id)+'" hidden>Partager cette montre</button>'
