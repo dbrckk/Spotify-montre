@@ -252,11 +252,17 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
   const main='<div class="wrap am-picks-page"><nav class="crumb" aria-label="Fil d’Ariane"><a href="../index.html">Collection</a> / Modèles complémentaires</nav>'
     +'<header class="am-picks-intro"><p class="eyebrow">Tendances documentées · '+e(source.reviewedOn)+'</p>'
     +'<h1>'+picks.length+' montres supplémentaires : modèles repérés et choix de style.</h1>'
-    +'<p class="lead">Des références identifiées dans des listes de meilleures ventes propres à certains vendeurs ou marques, ainsi que des alternatives choisies pour leur design. Notre sélection est éditoriale, pas un classement des ventes françaises ou Amazon.</p>'
-    +'<p>'+e(globalDisclaimer)+'</p><p>'+e(affiliateNote)+'</p>'
+    +'<p class="lead">Des montres choisies pour leur style et des références documentées. Cette sélection éditoriale ne constitue pas un classement de ventes Amazon ou françaises.</p>'
+    +'<p class="am-picks-brief">Certains liens sont rémunérés. Prix, variantes et disponibilité sont à vérifier chez chaque vendeur.</p>'
+    +'<nav class="am-picks-journeys" aria-label="Choisir comment découvrir les montres">'
+    +'<a class="am-picks-journey am-picks-journey-primary" href="#am-picks-browse"><span>Collection complète</span><strong>Explorer les '+picks.length+' montres</strong><small>Recherche et filtres facultatifs, toutes les fiches accessibles</small></a>'
+    +'<a class="am-picks-journey" href="#selection-10-montres"><span>Choix rapides</span><strong>Voir 10 références sélectionnées</strong><small>Comparaisons et sources documentées</small></a></nav>'
+    +'<details class="am-picks-transparency"><summary>Notre sélection, les photographies et les liens partenaires</summary>'
+    +'<div><p>'+e(globalDisclaimer)+'</p><p>'+e(affiliateNote)+'</p></div></details>'
     +'<nav class="am-picks-tier-nav" aria-label="Choisir une gamme"><a href="#pick-skmei-2056">SKMEI · petit budget</a>'
     +tiers.map(t=>'<a href="#gamme-'+e(t)+'">'+e(tierNames[t])+'</a>').join('')
-    +'</nav>'+shopper.navPopular+'</header>'+commercialFocus+filters+'<div id="am-picks-list">'+sections+'</div>'+emptyMessage
+    +'</nav>'+shopper.navPopular+'</header>'+commercialFocus
+    +'<div class="am-picks-browse" id="am-picks-browse">'+filters+'<div id="am-picks-list">'+sections+'</div>'+emptyMessage+'</div>'
     +'<aside class="am-picks-method"><h2>Comment ces montres sont-elles sélectionnées ?</h2>'
     +'<p>Chaque code de modèle et caractéristique sont rapprochés de la fiche de la marque ou du distributeur cité. Les mentions « meilleures ventes » décrivent uniquement la liste citée, à la date du '+e(source.reviewedOn)+'. Elles ne constituent pas des données de ventes Amazon ni un palmarès national.</p>'
     +'<p>Nous n’affichons pas de photographie d’un modèle sans autorisation de reproduction, ni de prix Amazon non synchronisé. Les recherches Amazon.fr sont explicitement annoncées comme telles et peuvent mener à plusieurs variantes. Seules les références contrôlées sur une fiche Amazon.fr disposent d’un lien direct. Pour comparer directement des modèles aux photographies locales déjà documentées, <a href="../index.html#montres">revenir aux 15 montres du comparateur</a>.</p></aside></div>';
