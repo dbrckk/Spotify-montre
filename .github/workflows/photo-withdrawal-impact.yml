@@ -1,0 +1,38 @@
+name: Preview watch photo withdrawal impact (read-only)
+
+on:
+  workflow_dispatch:
+    inputs:
+      watch_id:
+        description: "Exact watch ID (e.g. skmei-1251)"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  preview-photo-removal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    env:
+      WATCH_ID: ${{ inputs.watch_id }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify complete and read-only photo inventory
+        run: npm run compliance:photo:impact:check
+      - name: Prepare a specific impact report without changing the site
+        run: |
+          mkdir -p artifacts
+          node scripts/report-photo-withdrawal.mjs --id "$WATCH_ID" > artifacts/photo-withdrawal-plan.md
+          node scripts/report-photo-withdrawal.mjs --id "$WATCH_ID" --json > artifacts/photo-withdrawal-plan.json
+          cat artifacts/photo-withdrawal-plan.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: photo-withdrawal-impact-read-only
+          path: artifacts/photo-withdrawal-plan.*
+          if-no-files-found: error
+          retention-days: 14

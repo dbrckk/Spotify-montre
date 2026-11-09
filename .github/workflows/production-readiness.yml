@@ -9,6 +9,9 @@ on:
       - 'scripts/check-r1-evidence.mjs'
       - 'scripts/prepare-photo-permission-requests.mjs'
       - 'scripts/check-photo-permission-requests.mjs'
+      - 'scripts/report-photo-withdrawal.mjs'
+      - 'scripts/check-photo-withdrawal.mjs'
+      - '.github/workflows/photo-withdrawal-impact.yml'
       - '.github/workflows/r1-photo-requests.yml'
       - 'docs/DOSSIER_PREUVES_R1_2026-11-09.md'
       - 'site/selection-affiliation.json'
@@ -33,6 +36,9 @@ on:
       - 'scripts/check-r1-evidence.mjs'
       - 'scripts/prepare-photo-permission-requests.mjs'
       - 'scripts/check-photo-permission-requests.mjs'
+      - 'scripts/report-photo-withdrawal.mjs'
+      - 'scripts/check-photo-withdrawal.mjs'
+      - '.github/workflows/photo-withdrawal-impact.yml'
       - '.github/workflows/r1-photo-requests.yml'
       - 'docs/DOSSIER_PREUVES_R1_2026-11-09.md'
       - 'site/selection-affiliation.json'
@@ -70,6 +76,8 @@ jobs:
         run: npm run compliance:r1:check
       - name: Validate source-only photo permission packets
         run: npm run compliance:r1:requests:check
+      - name: Verify photo-withdrawal incident map, 52 watches
+        run: npm run compliance:photo:impact:check
       - name: Display aggregated R1 evidence in job summary
         run: node scripts/report-r1-evidence.mjs --ci-summary > /dev/null
       - name: Display current GO/NO-GO snapshot in the job summary

@@ -55,3 +55,18 @@ npm run compliance:r1:requests:check
 L'export est aussi régénéré automatiquement sur les changements du registre et des scripts concernés. Sur Android, utiliser **GitHub → Actions → Export R1 photo permission packets (unsent)** (ou **Run workflow** pour le renouveler), puis récupérer l’artefact contenant les brouillons Markdown et les données JSON. Ce workflow **n’envoie aucune communication**. Il n’identifie pas non plus les coordonnées d’un titulaire de droits.
 
 Chaque brouillon fournit la référence du modèle, son URL source, le chemin exact du WebP et le SHA-256 pour aider à vérifier le périmètre des autorisations de reproduction. Une source fabricant ou une empreinte de fichier n’est pas une licence. Le message doit être relu, envoyé au véritable ayant droit par l’exploitant, et la réponse doit être contrôlée hors du dépôt avant toute modification du registre ou du jalon R1.
+
+## Incident de droits — cartographier le retrait d'une photographie
+
+Le site réutilise un original, des versions WebP responsives, des miniatures, des pages statiques et des archives de déploiement. **Enlever seulement une entrée du registre ou masquer une image par CSS ne constitue pas un retrait.** Cette procédure permet d'identifier les dépendances **sans supprimer quoi que ce soit** :
+
+```sh
+npm run compliance:photo:impact
+npm run compliance:photo:impact -- --id casio-mtp-1302
+npm run compliance:photo:impact -- --id skmei-1251 --json
+npm run compliance:photo:impact:check
+```
+
+Sur Android, GitHub → Actions → **Preview watch photo withdrawal impact (read-only)** → **Run workflow**, saisir l'identifiant précis du modèle et télécharger les deux rapports Markdown/JSON. L'outil recense les fichiers originaux, les variantes mobiles, les pages HTML/JS/JSON qui pointent vers ces chemins et les anciennes archives du générateur de déploiement.
+
+Si un titulaire de droits conteste un visuel, un opérateur devra contrôler la demande, empêcher toute resynchronisation de la photographie, retirer les fichiers concernés du dépôt et de la livraison, regénérer le site et les paquets, et vérifier les URL directes sur Render et le cache éventuel. Les validateurs historiques demandent encore 15 photographies principales : leur adaptation et des tests de remplacement par une présentation sans photo sont nécessaires avant de pouvoir retirer sans régression une photo principale. **Ce rapport ne réalise pas lui-même le retrait et ne confirme ni purge ni conformité.**
