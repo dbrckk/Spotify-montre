@@ -55,8 +55,8 @@ def build():
     for stale in DEST.glob("*.webp"):
         if stale.name not in expected:
             stale.unlink()
-    if len(expected) < 15:
-        raise ValueError(f"Expected responsive images for all fifteen watches, found {len(expected)}")
+    if not expected:
+        raise ValueError('No responsive photos remain: review the asset pipeline')
     print(f"Validated {len(expected)} responsive photo derivatives")
 
 if __name__ == "__main__":

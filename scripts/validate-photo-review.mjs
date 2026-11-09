@@ -14,6 +14,14 @@ for(const p of catalogue.products){
   const photo=p.photoReview;
   assert.ok(photo,'Missing official photo research for '+p.id);
   assert.equal(photo.accuracy,'exact');
+  if(photo.publicUsageApproved===false){
+    assert.equal(photo.licence,'withdrawn_pending_review');
+    assert.equal(p.imageMode,'illustration');
+    assert.equal(p.photoRights,'withdrawn_pending_review');
+    for(const key of ['url','localUrl','localSha256','originalFetchedFrom'])
+      assert.equal(photo[key],undefined,'Withdrawn photograph metadata must not be public: '+p.id);
+    continue;
+  }
   assert.equal(photo.publicUsageApproved,true,'The site owner has explicitly authorized publication in this revision');
   assert.equal(photo.licence,'permission_declared_by_site_owner');
   assert.equal(photo.permissionDeclaration,'site_owner_explicit_confirmation_2026-10-30');

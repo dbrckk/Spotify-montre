@@ -70,3 +70,23 @@ npm run compliance:photo:impact:check
 Sur Android, GitHub → Actions → **Preview watch photo withdrawal impact (read-only)** → **Run workflow**, saisir l'identifiant précis du modèle et télécharger les deux rapports Markdown/JSON. L'outil recense les fichiers originaux, les variantes mobiles, les pages HTML/JS/JSON qui pointent vers ces chemins et les anciennes archives du générateur de déploiement.
 
 Si un titulaire de droits conteste un visuel, un opérateur devra contrôler la demande, empêcher toute resynchronisation de la photographie, retirer les fichiers concernés du dépôt et de la livraison, regénérer le site et les paquets, et vérifier les URL directes sur Render et le cache éventuel. Les validateurs historiques demandent encore 15 photographies principales : leur adaptation et des tests de remplacement par une présentation sans photo sont nécessaires avant de pouvoir retirer sans régression une photo principale. **Ce rapport ne réalise pas lui-même le retrait et ne confirme ni purge ni conformité.**
+
+## Retrait effectif d'une image — procédure sous contrôle
+
+**Objectif :** pouvoir retirer un original WebP, ses miniatures et dérivés ainsi que ses références dans les pages et archives du prochain déploiement, sans retirer la fiche ni rétablir la photo au prochain téléchargement automatique.
+
+Depuis Android : GitHub → Actions → **Prepare exact-photo withdrawal PR (manual, never auto-merge)** → **Run workflow**. Renseigner l'identifiant **exact** de la montre et la confirmation `RETIRER:<identifiant>`, par exemple `RETIRER:skmei-1251`. Une branche spécifique est créée ; l'opération retire le média dans cette branche, met à jour le registre, regénère les pages et archives, puis ouvre une **pull request non fusionnée automatiquement**.
+
+En local, sur une **branche isolée uniquement** :
+
+```sh
+node scripts/withdraw-watch-photo.mjs --id skmei-1251
+node scripts/withdraw-watch-photo.mjs --id skmei-1251 --apply --confirm RETIRER:skmei-1251
+node scripts/validate-seo.mjs
+```
+
+Le fichier `site/photo-takedowns.json` enregistre le retrait sans preuve personnelle : les scripts de synchronisation n'ont plus le droit de réimporter le modèle retiré. La fiche conserve le modèle exact et les liens vers le fabricant, avec une présentation sans photo. Les tests d'intégration créent des copies isolées du dépôt et effectuent de vrais retraits sur une montre principale et une complémentaire **sans rien retirer du site public**.
+
+La publication n'est considérée terminée qu'après la fusion **et** la vérification des anciennes URL directes (404/410) sur Render, la vérification des pages, et toute invalidation de cache ou hébergeur secondaire nécessaire. Un workflow `Verify live withdrawal after published deployment` surveille les URL publiées après modification du registre ; il ne certifie pas la disparition des anciennes versions GitHub, caches externes, captures ou copies par des tiers.
+
+**Mesure de sécurité :** ne jamais déclencher l'opération pour un simple test sur `main`. Une absence de preuve de droits ou un différend nécessite une évaluation documentaire, mais ne suffit pas à inventer une réclamation. La première suppression publique nécessite une demande explicite concernant une référence.

@@ -105,8 +105,16 @@ def main():
     })
     report={'version':1,'count':15,'items':[],'unavailable':[]}
     used={}
+    takedowns=json.loads((CATALOGUE.parent/'photo-takedowns.json').read_text(encoding='utf-8'))
+    if takedowns.get('version')!=1 or not isinstance(takedowns.get('retired'),list):
+        raise ValueError('Bad permanent takedown registry')
+    removed={p['id'] for p in takedowns['retired']}
     for p in catalogue['products']:
         id=p['id']
+        if id in removed or p['photoReview'].get('publicUsageApproved') is not True:
+            assert not (OUTPUT/(id+'.webp')).exists(), 'Refusing to re-cache blocked photograph: '+id
+            report['items'].append({'id':id,'ok':False,'retired':id in removed})
+            continue
         photo=p['photoReview']
         output=OUTPUT/(id+'.webp')
         attempts=[]

@@ -1,0 +1,54 @@
+name: Verify live withdrawal after published deployment
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'site/photo-takedowns.json'
+
+permissions:
+  contents: read
+
+jobs:
+  public-photo-removal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check exact model images no longer resolve on public Render
+        run: |
+          set -euo pipefail
+          node scripts/check-photo-withdrawal.mjs
+          node - <<'NODE' > /tmp/takedown-paths.txt
+          const {readFileSync}=require('node:fs');
+          const rows=JSON.parse(readFileSync('site/photo-takedowns.json','utf8')).retired;
+          for(const item of rows)
+            for(const folder of ['watches','watches-popular','watch-responsive','popular-responsive','watch-thumbs'])
+              for(const name of [item.id+'.webp',...([200,240,360,480,720,800,960].map(w=>item.id+'-'+w+'.webp'))])
+                console.log('assets/'+folder+'/'+name);
+          NODE
+          # Render may still be publishing when main is pushed; retry until the
+          # host returns 404/410. This never claims CDN-wide global purging.
+          for attempt in $(seq 1 10); do
+            stale=0
+            while IFS= read -r media; do
+              status=$(curl --location --silent --output /dev/null --max-time 18 \
+                --write-out '%{http_code}' "https://atelier-montres-selection-fr.onrender.com/$media")
+              if [ "$status" != "404" ] && [ "$status" != "410" ]; then
+                echo "$media status=$status"
+                stale=$((stale+1))
+              fi
+            done < /tmp/takedown-paths.txt
+            if [ "$stale" -eq 0 ]; then
+              echo "All retired WebP paths returned 404 or 410." >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            if [ "$attempt" -eq 10 ]; then
+              echo "Render still exposes or cannot verify $stale images" >&2
+              exit 1
+            fi
+            sleep 25
+          done

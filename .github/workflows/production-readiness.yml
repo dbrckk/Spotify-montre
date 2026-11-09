@@ -10,6 +10,10 @@ on:
       - 'scripts/prepare-photo-permission-requests.mjs'
       - 'scripts/check-photo-permission-requests.mjs'
       - 'scripts/report-photo-withdrawal.mjs'
+      - 'scripts/withdraw-watch-photo.mjs'
+      - 'scripts/photo-takedowns.mjs'
+      - 'site/photo-takedowns.json'
+      - '.github/workflows/photo-withdrawal-test.yml'
       - 'scripts/check-photo-withdrawal.mjs'
       - '.github/workflows/photo-withdrawal-impact.yml'
       - '.github/workflows/r1-photo-requests.yml'
@@ -37,6 +41,10 @@ on:
       - 'scripts/prepare-photo-permission-requests.mjs'
       - 'scripts/check-photo-permission-requests.mjs'
       - 'scripts/report-photo-withdrawal.mjs'
+      - 'scripts/withdraw-watch-photo.mjs'
+      - 'scripts/photo-takedowns.mjs'
+      - 'site/photo-takedowns.json'
+      - '.github/workflows/photo-withdrawal-test.yml'
       - 'scripts/check-photo-withdrawal.mjs'
       - '.github/workflows/photo-withdrawal-impact.yml'
       - '.github/workflows/r1-photo-requests.yml'
@@ -76,6 +84,11 @@ jobs:
         run: npm run compliance:r1:check
       - name: Validate source-only photo permission packets
         run: npm run compliance:r1:requests:check
+      - name: Syntax check retirement entrypoint and denylist loader
+        run: |
+          node --check scripts/withdraw-watch-photo.mjs
+          node --check scripts/photo-takedowns.mjs
+          node --check scripts/check-photo-withdrawal-sandbox.mjs
       - name: Verify photo-withdrawal incident map, 52 watches
         run: npm run compliance:photo:impact:check
       - name: Display aggregated R1 evidence in job summary

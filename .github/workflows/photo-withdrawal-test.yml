@@ -1,0 +1,41 @@
+name: Test real photo withdrawal in isolated repository copies
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/withdraw-watch-photo.mjs'
+      - 'scripts/photo-takedowns.mjs'
+      - 'scripts/check-photo-withdrawal-sandbox.mjs'
+      - 'scripts/build-seo.mjs'
+      - 'scripts/build-shipstatic-bundle.py'
+      - 'scripts/build-responsive-watch-photos.py'
+      - 'scripts/generate-watch-thumbnails.py'
+      - 'scripts/sync-watch-images.py'
+      - 'scripts/sync-popular-watch-images.py'
+      - 'site/photo-takedowns.json'
+      - '.github/workflows/photo-withdrawal-test.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/withdraw-watch-photo.mjs'
+      - 'scripts/photo-takedowns.mjs'
+      - 'scripts/check-photo-withdrawal-sandbox.mjs'
+      - 'site/photo-takedowns.json'
+
+permissions:
+  contents: read
+
+jobs:
+  withdrawal-sandbox:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Exercise actual source deletion and full storefront rebuild in temp directories
+        run: node scripts/check-photo-withdrawal-sandbox.mjs

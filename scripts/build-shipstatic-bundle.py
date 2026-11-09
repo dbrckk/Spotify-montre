@@ -26,6 +26,12 @@ def assemble():
     catalog=json.loads((SITE/'selection-affiliation.json').read_text(encoding='utf-8'))
     products=catalog['products']
     assert len(products)==15, 'Expected 15 actual watch models'
+    takedowns=json.loads((SITE/'photo-takedowns.json').read_text(encoding='utf-8'))
+    if takedowns.get('version')!=1 or not isinstance(takedowns.get('retired'),list):
+        raise ValueError('Invalid takedown register')
+    removed={p['id'] for p in takedowns['retired']}
+    if len(removed)!=len(takedowns['retired']):
+        raise ValueError('Duplicate retired photo ID')
     assets=[]
     for path in sorted(SITE.rglob('*')):
         if not path.is_file():
@@ -43,6 +49,8 @@ def assemble():
             })
         else:
             raise ValueError('Unexpected site asset format: '+relative)
+    if any(a['path'].startswith(('assets/watches/','assets/watches-popular/','assets/watch-responsive/','assets/popular-responsive/','assets/watch-thumbs/')) and any(a['path'].rsplit('/',1)[-1]==id+'.webp' or a['path'].rsplit('/',1)[-1].startswith(id+'-') for id in removed) for a in assets):
+        raise ValueError('Retired photograph would be published by the bundle')
     assets.append({'path':'index.html','content':(SITE/'affiliation.html').read_text(encoding='utf-8')})
     ids=set()
     for p in products:
@@ -51,13 +59,17 @@ def assemble():
         ids.add(id)
         expected='./assets/watches/'+id+'.webp'
         photo=p['photoReview']
+        if photo.get('publicUsageApproved') is not True:
+            assert photo.get('localUrl') is None, 'Retired photo path must not be published for '+id
+            assert not (SITE/'assets'/'watches'/(id+'.webp')).exists(), 'Retired source photo still on disk: '+id
+            continue
         assert photo.get('localUrl')==expected, 'No verified local file for '+id
         path=SITE/'assets'/'watches'/(id+'.webp')
         assert path.is_file(), 'Missing physical photo: '+id
         data=path.read_bytes()
         assert data[:4]==b'RIFF' and data[8:12]==b'WEBP', 'Not actual WebP: '+id
         assert hashlib.sha256(data).hexdigest()==photo['localSha256'], 'Photo changed unexpectedly: '+id
-    assert len([a for a in assets if a['path'].startswith('assets/watches/')])==len(products)
+    assert len([a for a in assets if a['path'].startswith('assets/watches/')])==len([p for p in products if p['photoReview'].get('publicUsageApproved') is True])
     # Pack the 37 source-backed accessories only after the checksummed registry
     # has been populated. No external images or unregistered files are allowed.
     popular=json.loads((SITE/'selection-populaires.json').read_text(encoding='utf-8'))

@@ -359,8 +359,19 @@ def main() -> int:
     session = requests.Session()
     session.headers.update({"User-Agent": USER_AGENT, "Accept-Language": "fr-FR,fr;q=0.9,en;q=0.8"})
     report = {"version": 1, "reviewedOn": DATE, "total": len(products), "photos": [], "missing": []}
+    blocked_file=SITE / 'photo-takedowns.json'
+    blocked=json.loads(blocked_file.read_text(encoding='utf-8'))
+    if blocked.get('version') != 1 or not isinstance(blocked.get('retired'),list):
+        raise ValueError('Invalid permanent takedown registry')
+    blocked_ids={x['id'] for x in blocked['retired']}
     for p in products:
         pid, source = p["id"], p["officialUrl"]
+        if pid in blocked_ids:
+            if pid in rights['photos'] or (DEST/(pid+'.webp')).exists():
+                raise ValueError('Retired photo is present again: '+pid)
+            report['missing'].append({'id':pid,'reason':'withdrawn_pending_rights_review'})
+            print('WITHDRAWN',pid,flush=True)
+            continue
         original = rights["photos"].get(pid)
         file = DEST / (pid + ".webp")
         if original:

@@ -80,3 +80,6 @@ h2{font:400 clamp(34px,4.3vw,60px)/1.14 Georgia,"Times New Roman",serif;letter-s
 
 /* Accessibility: kicker labels remain readable on ivory editorial backgrounds. */
 .kicker{color:#70522f}
+
+/* Fallback shown only after an authorized photo-retirement change. */
+.am-photo-withdrawn{display:flex;align-items:center;justify-content:center;min-height:9rem;padding:1.4rem;text-align:center;background:#ebece6;color:#425747;font:600 0.9rem/1.55 system-ui,sans-serif;border:1px solid #d1d9ce;border-radius:8px}

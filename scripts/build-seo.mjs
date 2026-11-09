@@ -9,6 +9,7 @@ import {buildPopularPicks} from './build-popular-picks.mjs';
 import {buildUnifiedDiscovery} from './build-unified-discovery.mjs';
 import {buildCommercialRegistry} from './build-commercial-registry.mjs';
 import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
+import {assertPhotoTakedownSources,maskRetiredStaticPhotos} from './photo-takedowns.mjs';
 
 (function buildSeo() {
   const site = new URL(process.env.PUBLIC_SITE_URL || 'https://atelier-montres-selection-fr.onrender.com/');
@@ -17,6 +18,8 @@ import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
   const data = JSON.parse(readFileSync(join(root, 'selection-affiliation.json'), 'utf8'));
   if (data.version !== 1 || data.affiliateEnabled !== false || data.products.length !== 15 || new Set(data.products.map(p => p.id)).size !== 15) throw Error('Catalogue invalide ou statut affilié inattendu');
   const products = data.products;
+  const supplementalCatalogue=JSON.parse(readFileSync(join(root,'selection-populaires.json'),'utf8')).products;
+  assertPhotoTakedownSources(root,products,supplementalCatalogue);
   // Editorial copy is authored independently; only documented catalogue fields
   // are rendered as numeric facts. Do not infer diameter from case width.
   const editorialData=JSON.parse(readFileSync(join(root,'editorial-insights.json'),'utf8'));
@@ -460,5 +463,6 @@ import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
   for(const name of ['revue-photo.html','revue-photo.js','revue-photo.css'])rmSync(join(root,name),{force:true});
   const manifest={siteUrl:homepage,unifiedCount:unified.count,unifiedPath:unified.path,productCount:products.length,popularAdditionalCount:popularPicks.count,popularDetailCount:popularPicks.detailPaths.length,popularAffiliateSearchLinks:popularPicks.searchLinks,popularAffiliateDirectLinks:popularPicks.directLinks,popularPartnerAffiliateLinks:popularPicks.partnerAffiliateLinks,paths:paths.map(u),affiliateActive:partners.enabled,affiliateCount:partners.links.size,checkoutActive:false,comparisonCount:comparisons.comparisonPaths.length,affordableComparisonCount:affordableComparisons.count,categoryCount:collections.paths.length,analyticsActive:Boolean(umamiId),analyticsProvider:umamiId?"umami":null,licensedImageCount:products.filter(p=>p.photoReview?.publicUsageApproved===true).length,photoPermissionEvidenceStatus:'owner_declared_not_independently_verified'};
   writeFileSync(join(root,'seo-manifest.json'),JSON.stringify(manifest,null,2)+'\n');
+  maskRetiredStaticPhotos(root);
   console.log('SEO build: '+unified.count+' montres au catalogue unifié (dont '+products.length+' historiques) ; '+products.length+' montres + '+(editorialPaths.length+1)+' guides + '+comparisons.comparisonPaths.length+' comparaisons historiques + '+affordableComparisons.count+' duels accessibles + '+collections.paths.length+' collections + méthode de sélection, '+paths.length+' URLs sur '+homepage);
 })();
