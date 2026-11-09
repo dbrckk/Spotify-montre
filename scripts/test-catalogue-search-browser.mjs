@@ -591,6 +591,25 @@ try{
     assert.equal(await supplement.locator('#pick-skmei-1251').isVisible(),true);
     assert.equal(await supplement.locator('#am-pick-filter-count').innerText(),'1 modèle sur 37');
 
+    const active=supplement.locator('#am-pick-active');
+    assert.equal(await active.isVisible(),true);
+    assert.equal(await supplement.locator('#am-pick-active-chips button').count(),3,
+      'Restored search, photo and Amazon proof must be removable separately');
+    for(const chip of await supplement.locator('#am-pick-active-chips button').all()){
+      const bounds=await chip.boundingBox();
+      assert.ok(bounds&&bounds.height>=44&&bounds.x>=0&&bounds.x+bounds.width<=393,
+        'Each criterion must be touch accessible and fit Android');
+    }
+    await supplement.locator('[data-remove-filter="asin"]').click();
+    assert.equal(await supplement.locator('#am-filter-match').isChecked(),false);
+    assert.equal(new URL(supplement.url()).searchParams.has('asin'),false);
+    assert.equal(await supplement.locator('#am-filter-match').evaluate(el=>el===document.activeElement),
+      true,'Removing an active criterion restores keyboard focus');
+    assert.equal(await supplement.locator('#am-pick-active-chips button').count(),2);
+    await supplement.locator('#am-filter-match').check();
+    assert.equal(await supplement.locator('#am-pick-active-chips button').count(),3);
+
+
     const share= supplement.locator('#am-pick-share');
     assert.equal(await share.isVisible(),true);
     const shareBounds=await share.boundingBox();
@@ -662,6 +681,16 @@ try{
     await supplement.locator('#am-pick-filters button[type=reset]').click();
     assert.equal(new URL(supplement.url()).search,'');
     assert.equal(await supplement.locator('#am-picks-list .am-pick-card:visible').count(),37);
+    assert.equal(await active.isVisible(),false,
+      'Reset must remove stale filter chips as well as URL parameters');
+    await supplement.locator('#am-filter-query').fill('1251');
+    assert.equal(await active.isVisible(),true);
+    await supplement.locator('#am-pick-active-clear').click();
+    assert.equal(await supplement.locator('#am-filter-query').inputValue(),'');
+    assert.equal(await active.isVisible(),false);
+    assert.equal(await supplement.locator('#am-filter-query').evaluate(el=>el===document.activeElement),
+      true,'Clear all criteria must return focus to search');
+    assert.equal(new URL(supplement.url()).search,'');
     const layout=await supplement.evaluate(()=>({
       width:document.documentElement.clientWidth,
       scroll:document.documentElement.scrollWidth

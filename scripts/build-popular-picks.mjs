@@ -243,6 +243,9 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     +'<button type="button" id="am-pick-share" class="am-pick-share" hidden>Partager cette sélection</button>'
     +'<span id="am-pick-share-status" class="am-pick-share-status" role="status" aria-live="polite"></span>'
     +'<input type="text" id="am-pick-share-manual" class="am-pick-share-manual" aria-label="Lien de sélection à copier" readonly hidden>'
+    +'</div><div id="am-pick-active" class="am-pick-active" role="group" aria-label="Critères actifs" hidden>'
+    +'<strong>Filtres appliqués</strong><div id="am-pick-active-chips" class="am-pick-active-chips"></div>'
+    +'<button type="button" id="am-pick-active-clear" class="am-pick-active-clear">Tout effacer</button>'
     +'</div></form>';
   const emptyMessage='<p id="am-pick-filter-empty" class="am-pick-filter-empty" role="status" hidden>Aucun modèle ne correspond à ces critères. Effacez un filtre ou essayez une autre référence.</p>';
   const path='montres/modeles-populaires.html';
