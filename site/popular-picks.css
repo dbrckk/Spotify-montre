@@ -761,3 +761,25 @@
 @media(max-width:650px){
   .am-pick-visual:has(> img.am-pick-licensed-photo){min-height:190px}
 }
+
+/* Model-specific, evidence-first decision panel for all 37 watch sheets.
+   Keeps customer caveats in view before any external merchant action. */
+.am-extra-decision{margin:0 0 17px;padding:17px clamp(13px,2vw,21px);
+  background:#f7f7f1;border:1px solid #d3decf;border-radius:8px;color:#24432d}
+.am-extra-decision h2{margin:0 0 13px;color:#24452f;
+  font:400 clamp(21px,2.2vw,27px)/1.25 Georgia,serif;letter-spacing:-.02em}
+.am-extra-decision dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;margin:0}
+.am-extra-decision dl>div{padding:11px 12px;background:#fff;
+  border:1px solid #e1e5d9;border-radius:5px;min-width:0}
+.am-extra-decision dl>div:last-child{grid-column:1/-1}
+.am-extra-decision dt{color:#536c58;font:650 11px/1.45 system-ui,sans-serif;
+  margin:0 0 5px}
+.am-extra-decision dd{color:#23432d;font:700 12px/1.5 system-ui,sans-serif;
+  margin:0;overflow-wrap:anywhere}
+.am-extra-decision>p{border-top:1px solid #d3decf;margin:14px 0 0;
+  padding:12px 0 0;color:#475845;font:500 13px/1.6 system-ui,sans-serif}
+.am-extra-decision>p strong{color:#2e4a37}
+@media(max-width:540px){.am-extra-decision{padding:15px 13px}
+  .am-extra-decision dl{grid-template-columns:minmax(0,1fr)}
+  .am-extra-decision dl>div:last-child{grid-column:auto}}
