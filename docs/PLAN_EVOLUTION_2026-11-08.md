@@ -202,3 +202,6 @@ Le workflow `test-premium-mobile.yml` exécute déjà la génération et le test
 - `.github/workflows/lighthouse-mobile.yml` et `scripts/report-lighthouse-mobile.mjs` : inclure `shopper-selections.css` et son générateur dans les déclencheurs, vérifier la feuille publiée et mesurer réellement la page femme à six cartes avec un budget Lighthouse mobile explicite (un passage de laboratoire, sans attribution de ventes ou de Core Web Vitals terrain).
 
 **Critère de fin :** 4 vérifications de PR vertes, génération statique puis contrôle Android de Render et Lighthouse sur **la version effectivement déployée** ; aucune régression de navigation, d'accessibilité, de source image ou de paiement.
+
+
+**Correctif supplémentaire de préparation CI (après #247) :** les pages `site/montres/montres-femme-accessibles.html`, `montres-homme-style-accessible.html` et `montres-automatiques-selection.html` sont **générées par `scripts/build-seo.mjs`** et ne sont pas directement versionnées sur Git. Le nouveau garde-fou d'identité HTML de production doit donc reconstruire les WebP sources et ces pages dans le même job avant d'effectuer la comparaison. L'absence de cette étape provoquait des tentatives de synchronisation sans fichier local de référence. Le test rejette toujours une page Render différente, un style incomplet ou un véritable débordement Android.
