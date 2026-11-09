@@ -10,7 +10,7 @@ const call=(where,args)=>spawnSync(process.execPath,
     cwd:where,encoding:'utf8',timeout:180000,maxBuffer:2e6
   });
 const read=(root,path)=>JSON.parse(readFileSync(join(root,path),'utf8'));
-for(const id of ['skmei-1251','casio-ltp1302']){
+for(const id of ['skmei-1251','casio-ltp1302','citizen-tsuyosa']){
   const tmp=mkdtempSync(join(tmpdir(),'atelier-photo-removal-'));
   try{
     for(const dir of ['site','scripts','research','docs'])
@@ -68,4 +68,4 @@ for(const id of ['skmei-1251','casio-ltp1302']){
     console.log('Isolated real retirement succeeded for '+id+' ('+plan.media.length+' source WebPs removed)');
   }finally{rmSync(tmp,{recursive:true,force:true});}
 }
-console.log('Both photographed catalogue families can withdraw, rebuild, validate, preserve the other 51 models and report live proof as pending.');
+console.log('Supplemental, ordinary core and homepage-hero core photos can be withdrawn in isolated copies with a complete rebuild; live proof remains pending.');
