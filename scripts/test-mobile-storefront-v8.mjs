@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {mkdirSync,readFileSync} from 'node:fs';
+import {mkdirSync,readFileSync,existsSync} from 'node:fs';
 import {chromium} from 'playwright';
 
 const base=process.env.WATCH_STOREFRONT_URL||'http://127.0.0.1:8765';
@@ -97,6 +97,14 @@ try{
  const popular=page.locator('#modeles-populaires');
  assert.ok(await popular.isVisible(),'Popular sourced watches should be visible below the core catalogue');
  assert.equal(await popular.locator('article.am-pick-card').count(),8,'Eight source-backed homepage ideas should render, including the exact ASIN option');
+ // The same validated local derivatives must also work from the root page.
+ const homePackshot=popular.locator('#pick-skmei-1257 img.am-pick-licensed-photo');
+ assert.match(await homePackshot.getAttribute('srcset'),
+   /^\.\/assets\/popular-responsive\/skmei-1257-240\.webp 240w,/,
+   'Home cards need their own correct relative responsive source path');
+ assert.equal(await homePackshot.getAttribute('sizes'),
+   '(max-width:650px) 43vw, (max-width:1020px) 23vw, 16vw');
+
  assert.equal(await popular.locator('a[data-amazon-search-id]').count(),2,
    'Two unverified homepage referrals must remain clearly labeled as searches');
  assert.equal(await popular.locator('a[data-amazon-product]').count(),6,
@@ -249,6 +257,51 @@ try{
  const approvedPhotoCount=Object.keys(approvedWatchPhotos).length;
  assert.equal(await popularPage.locator('img.am-pick-licensed-photo').count(),approvedPhotoCount,
    'All and only registered branded images should render in the supplemental catalogue');
+ // All 25 rights-registered editorial packshots must use already-generated
+ // exact-model responsive WebPs, not force 1080px originals on Android.
+ for(const [id,proof] of Object.entries(approvedWatchPhotos)){
+   const img=popularPage.locator('#pick-'+id+' img.am-pick-licensed-photo');
+   assert.equal(await img.count(),1,'Approved source photo missing in catalogue: '+id);
+   assert.equal(await img.getAttribute('src'),'../'+proof.file,
+     'Photo must match approved exact-model source file: '+id);
+   assert.equal(await img.getAttribute('width'),String(proof.width));
+   assert.equal(await img.getAttribute('height'),String(proof.height));
+   assert.equal(await img.getAttribute('loading'),'lazy');
+   const srcset=await img.getAttribute('srcset')||'';
+   const variants=[240,360,480,720,960].filter(size=>size<proof.width&&
+     existsSync('site/assets/popular-responsive/'+id+'-'+size+'.webp'));
+   if(variants.length){
+     for(const size of variants)
+       assert.ok(srcset.includes('../assets/popular-responsive/'+id+'-'+size+'.webp '+size+'w'),
+         'Missing generated exact-model mobile image '+id+' '+size);
+     assert.ok(srcset.includes('../'+proof.file+' '+proof.width+'w'),
+       'Original should remain an exact-model candidate: '+id);
+     assert.equal(await img.getAttribute('sizes'),
+       '(max-width:650px) 43vw, (max-width:1020px) 23vw, 16vw');
+   }else assert.equal(srcset,'','Never advertise missing responsive assets: '+id);
+ }
+ const optimizedPhoto=popularPage.locator('#pick-skmei-1251 .am-pick-licensed-photo');
+ await optimizedPhoto.scrollIntoViewIfNeeded();
+ await optimizedPhoto.evaluate(img=>img.decode());
+ const compactPhoto=await optimizedPhoto.evaluate(img=>({
+   url:new URL(img.currentSrc).pathname,naturalWidth:img.naturalWidth,
+   geometry:img.getBoundingClientRect().toJSON(),
+   name:img.closest('.am-pick-visual').querySelector('.am-pick-visual-name')
+     .getBoundingClientRect().toJSON(),
+   model:img.closest('.am-pick-visual').querySelector('.am-pick-visual-ref')
+     .getBoundingClientRect().toJSON()
+ }));
+ assert.match(compactPhoto.url,/^\/assets\/popular-responsive\/skmei-1251-[0-9]+\.webp$/,
+   'Mobile must really load a compact local packshot, not a full-size original');
+ // naturalWidth can reflect density-corrected intrinsic CSS pixels, not
+ // the actual 240px source file; the selected URL proves resource identity.
+ assert.ok(compactPhoto.naturalWidth>=100&&compactPhoto.geometry.width>=150&&
+   compactPhoto.name.right<=compactPhoto.geometry.left+2&&
+   compactPhoto.model.right<=compactPhoto.geometry.left+2,
+   'Genuine packshot must remain large and separate from labels: '+JSON.stringify(compactPhoto));
+ await popularPage.locator('#pick-skmei-1251 .am-pick-visual')
+   .screenshot({path:'artifacts/android-source-photo-card-393.png'});
+
  const visualResearch=JSON.parse(readFileSync('site/popular-ai-visuals.json','utf8')).visuals;
  assert.equal(await popularPage.locator('figure.am-pick-ai-preview').count(),9,
    'Nine SKMEI original AI concepts must appear in catalogue as secondary visuals');

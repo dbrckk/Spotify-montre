@@ -659,3 +659,24 @@
 @media(prefers-reduced-motion:reduce){
   .am-extra-related li{transition:none}
 }
+
+/* Exact-model photographic cards: larger, source-accurate packshots with a
+   quieter studio background. Unphotographed cards retain their distinct
+   typographic treatment; this block does not imply a real product shot. */
+.am-pick-visual:has(> img.am-pick-licensed-photo){
+  background:radial-gradient(ellipse at 80% 40%,#ffffff33 0%,transparent 59%),
+    linear-gradient(115deg,var(--visual-bg) 0%,var(--visual-bg) 49%,#496752 130%)
+}
+.am-pick-visual:has(> img.am-pick-licensed-photo)::before{display:none}
+.am-pick-visual > img.am-pick-licensed-photo{
+  top:8%;right:3%;width:51%;height:80%;
+  object-fit:contain;object-position:center;
+  filter:drop-shadow(0 12px 15px #10281f82)
+}
+.am-pick-visual:has(> img.am-pick-licensed-photo) .am-pick-visual-name,
+.am-pick-visual:has(> img.am-pick-licensed-photo) .am-pick-visual-ref{
+  max-width:44%;text-shadow:0 2px 8px #0e261e8c
+}
+@media(max-width:650px){
+  .am-pick-visual:has(> img.am-pick-licensed-photo){min-height:190px}
+}

@@ -103,3 +103,15 @@ Le workflow `test-premium-mobile.yml` exécute déjà la génération et le test
 - `scripts/test-watch-comparisons-browser.mjs`, `scripts/test-popular-product-actions-browser.mjs` : vérification navigateur des ancrages, du scroll réel, de la colonne épinglée, du débordement existant et de la source unique des 52 références.
 
 **Critères de livraison :** `npm test`, génération SEO et validation, navigateur Android et desktop, WCAG ; aucun changement des prix, photos, liens marchands ou du verrou de paiement. **Ne pas attribuer une amélioration de LCP/INP sans mesure liée à la version publiée.**
+
+
+## 7. Lot P1 — 9 novembre 2026 : photos sources des cartes du catalogue complémentaire
+
+**Base auditée :** `main@2d441cc114132c8796819cde02d1048e61570512` (post-PR #239, contrôles Android/SEO/Lighthouse/WCAG réussis). La page des 37 modèles complémentaires publiait les images principales des 25 références déclarées autorisées **sans utiliser leur `srcset` responsive**, même si les miniatures de 240, 360, 480, 720 et 960 px étaient déjà disponibles.
+
+**Correction ciblée :**
+- `scripts/build-popular-picks.mjs` réutilise `responsivePopularAttrs` sur les cartes des 37 modèles et les 8 idées de l'accueil ; `width` et `height` proviennent du registre photographique réel. Le navigateur choisit un WebP adapté à la taille affichée et à la densité d'écran. La photo d'origine reste en repli.
+- `site/popular-picks.css` : les images authentiques sont mises en valeur dans un studio plus sobre, légèrement plus grandes et séparées du texte ; les fiches sans photographie ne reçoivent aucune fausse image.
+- `scripts/test-mobile-storefront-v8.mjs` : contrôle exhaustif des 25 enregistrements, URL et dimensions exactes, existence des variantes locales et choix réel d'une miniature par Chromium Android, avec capture du rendu.
+
+**Exemples fondés sur les fichiers réellement versionnés** (octets de fichier, pas métriques de réseau) : SKMEI 1251 : original 59 580 o, 240 px 5 008 o ; ADDIESDIVE AD2030 : original 155 742 o, 240 px 7 058 o. Selon le DPR et la géométrie, une taille plus grande peut être sélectionnée. **Ne pas revendiquer de gain LCP sans un audit production après déploiement.** Aucun paiement, tarif, lien partenaire ou droit photographique n'est modifié.

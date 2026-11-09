@@ -7,6 +7,7 @@ import {loadApprovedPopularPhotos} from './popular-photo-rights.mjs';
 import {loadPopularAiVisuals} from './popular-ai-visuals.mjs';
 import {buildShopperSelections} from './build-shopper-selections.mjs';
 import {buildCommercialShortlist,commercialShortlist} from './build-commercial-shortlist.mjs';
+import {responsivePopularAttrs} from './responsive-images.mjs';
 
 // Curated discovery intentionally stays outside the 15-watch comparator until
 // individual Amazon ASINs and licensed exact-model images are validated.
@@ -85,7 +86,12 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
       +' data-pick-id="'+e(p.id)+'" data-pick-tier="'+e(p.tier)+'" data-pick-style="'+e(p.style)+'"'
       +' data-pick-movement="'+movementKind(p)+'" data-pick-search="'+e([p.brand,p.model,p.category,p.movement,p.lead].join(' '))+'">'
       +'<div class="am-pick-visual" role="group" aria-label="'+(photo?'Photographie de la référence exacte · autorisation déclarée':'Repère graphique non contractuel, sans photographie du modèle')+'"><span class="am-pick-visual-top">'+e(p.category)+'</span>'
-      +(photo?'<img class="am-pick-licensed-photo" loading="lazy" decoding="async" alt="Montre '+e(p.brand+' '+p.model)+'" src="'+(front?'./':'../')+e(photo.url)+'">':'')
+      +(photo?'<img class="am-pick-licensed-photo" loading="lazy" decoding="async" width="'+photo.width+'" height="'+photo.height+'" alt="Montre '+e(p.brand+' '+p.model)+'" src="'+(front?'./':'../')+e(photo.url)+'"'
+        +responsivePopularAttrs(root,p,photo,{
+          prefix:front?'./':'../',
+          sizes:'(max-width:650px) 43vw, (max-width:1020px) 23vw, 16vw',
+          escape:e
+        })+'>':'')
       +'<span class="am-pick-visual-name">'+e(p.brand)+'</span><span class="am-pick-visual-ref">'+e(p.model)+'</span>'
       +(!photo&&p.brand==='SKMEI'?'<span class="am-budget-watch" aria-hidden="true"><span class="am-budget-dial"></span></span>':'')
       +'<span class="am-pick-visual-caption">'+(photo?'Photo de marque · accord déclaré · '+e(photo.rightsHolder):'Repère graphique · photo exacte chez le vendeur ou la marque')+'</span></div>'
