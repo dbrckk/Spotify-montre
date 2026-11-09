@@ -567,3 +567,7 @@
 .ud-results-end-actions a:hover{filter:brightness(.95)}
 .ud-results-end-actions a:focus-visible{outline:3px solid #b68b49;outline-offset:3px}
 @media(max-width:580px){.ud-results-end-actions{flex-direction:column}.ud-results-end-actions a{width:100%}}
+
+.ud-feature-no-photo{display:flex;flex-direction:column;gap:9px;align-items:center;justify-content:center;min-height:100%;text-align:center;color:#375644;padding:20px}
+.ud-feature-no-photo strong{font:400 clamp(24px,3vw,38px)/1.2 Georgia,serif}
+.ud-feature-no-photo small{font:600 12px/1.5 system-ui,sans-serif;color:#627869;max-width:19ch}

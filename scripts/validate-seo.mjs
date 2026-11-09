@@ -650,12 +650,15 @@ assert.ok(!unifiedHtml.includes('Meilleures ventes garanties')&&!unifiedHtml.inc
   'A curated visual collection cannot invent sales or inventory');
 for(const id of spotlightIds){
   const p=unified.products.find(item=>item.id===id);
-  assert.ok(p?.photoUrl,'Spotlight must only use a source-attested exact photograph: '+id);
+  assert.ok(p?.detailUrl,'Editorial showroom requires a real documented watch: '+id);
   const start=unifiedHtml.indexOf('<article class="ud-feature-card" data-feature-id="'+id+'"');
   const end=unifiedHtml.indexOf('</article>',start);
   assert.ok(start>=0&&end>start,'Missing editorial card: '+id);
   const card=unifiedHtml.slice(start,end);
-  assert.ok(card.includes('../'+p.photoUrl.slice(2)),'Model photo must match the exact SKU: '+id);
+  assert.ok(p.photoUrl
+    ?card.includes('../'+p.photoUrl.slice(2))&&!card.includes('ud-feature-no-photo')
+    :card.includes('class="ud-feature-no-photo"')&&!card.includes('<img src='),
+    'Editorial watch must show either its exact photograph or an honest no-photo fallback: '+id);
   assert.ok(card.includes('href="./'+id+'.html"'),'Model facts and sources must remain accessible: '+id);
   if(p.merchantKind==='direct'){
     assert.ok(card.includes(p.merchantUrl.replaceAll('&','&amp;'))||card.includes(p.merchantUrl),

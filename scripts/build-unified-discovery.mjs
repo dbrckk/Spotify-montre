@@ -185,8 +185,8 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
   const featureIds=['skmei-2056','skmei-2514','addiesdive-ad2030',
     'pagani-pd1701','casio-mtp-1302','citizen-tsuyosa'];
   const featured=featureIds.map(id=>normalized.find(p=>p.id===id));
-  if(featured.some(p=>!p||!p.photoUrl||!p.detailUrl||!p.officialUrl))
-    throw Error('Editorial showroom must contain six documented, photographed references');
+  if(featured.some(p=>!p||!p.detailUrl||!p.officialUrl))
+    throw Error('Editorial showroom must contain six documented references');
   if(affiliates.enabled&&featured.filter(p=>p.merchantKind==='direct').length<3)
     throw Error('Editorial showroom requires at least three identified merchant listings');
   const featureCard=p=>{
@@ -201,19 +201,23 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
     const kind=direct?'Fiche marchande identifiée':awin?'Variante partenaire identifiée':'Fiche du fabricant';
     const exit=direct?'Consulter sur Amazon.fr · lien rémunéré':awin?'Voir chez le partenaire via Awin · lien rémunéré':'Voir chez la marque · lien non rémunéré';
     const detail=p.detailUrl.replace('./montres/','./');
-    const visual='../'+p.photoUrl.slice(2);
+    const visual=p.photoUrl?'../'+p.photoUrl.slice(2):null;
     const featureSizes='(max-width: 365px) 88vw, (max-width: 660px) 33vw, (max-width: 1100px) 44vw, 29vw';
-    // Reuse the approved source registry and all available 240–960px WebPs.
-    // Never hard-code source widths or publish nonexistent derivatives.
-    const popularAttrs=p.kind==='supplemental'
+    // Do not imply six photos after a rights withdrawal. A real, source-backed
+    // article and the exact merchant destination remain available without JS.
+    const popularAttrs=visual&&p.kind==='supplemental'
       ?responsivePopularAttrs(root,p,approvedPhotos.get(p.id),{
         prefix:'../',sizes:featureSizes,escape:e}):'';
+    const featureVisual=visual
+      ?'<img src="'+e(visual)+'"'
+        +(p.kind==='core'?responsiveAttrs(root,coreById.get(p.id),{
+          prefix:'../',sizes:featureSizes,escape:e}):popularAttrs)
+        +' width="540" height="540" loading="lazy" decoding="async" alt="Photographie du modèle '+e(p.brand+' '+p.model)+'">'
+      :'<span class="ud-feature-no-photo" role="img" aria-label="Photographie non publiée pour '+e(p.brand+' '+p.model)+'">'
+        +'<strong>'+e(p.brand)+'</strong><small>Photo du modèle disponible chez le fabricant</small></span>';
     return '<article class="ud-feature-card" data-feature-id="'+e(p.id)+'">'
       +'<a class="ud-feature-photo" href="'+e(detail)+'" aria-label="Découvrir '+e(p.brand+' '+p.model)+'">'
-      +'<img src="'+e(visual)+'"'
-      +(p.kind==='core'?responsiveAttrs(root,coreById.get(p.id),{
-        prefix:'../',sizes:featureSizes,escape:e}):popularAttrs)
-      +' width="540" height="540" loading="lazy" decoding="async" alt="Photographie du modèle '+e(p.brand+' '+p.model)+'"></a>'
+      +featureVisual+'</a>'
       +'<div class="ud-feature-info"><span class="ud-feature-type">'+e(styleLabels[p.style])+' · '+e(tierLabels[p.tier])+'</span>'
       +'<h3><a href="'+e(detail)+'">'+e(p.brand+' '+p.model)+'</a></h3>'
       +'<p class="ud-feature-lead">'+e(p.lead)+'</p>'
