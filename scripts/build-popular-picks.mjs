@@ -84,7 +84,9 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     const claim=p.marketEvidence.kind==='editorial'?'Sélection éditoriale':p.marketEvidence.kind==='manufacturer_bestseller'?'Signal marque':'Signal distributeur';
     return '<article class="am-pick-card am-pick-'+e(p.style)+(verifiedLinks.has(p.id)?' am-pick-direct':'')+'" id="pick-'+e(p.id)+'"'
       +' data-pick-id="'+e(p.id)+'" data-pick-tier="'+e(p.tier)+'" data-pick-style="'+e(p.style)+'"'
-      +' data-pick-movement="'+movementKind(p)+'" data-pick-search="'+e([p.brand,p.model,p.category,p.movement,p.lead].join(' '))+'">'
+      +' data-pick-movement="'+movementKind(p)+'" data-pick-photo="'+(photo?'yes':'no')+'"'
+      +' data-pick-match="'+(verifiedLinks.has(p.id)?'yes':'no')+'"'
+      +' data-pick-search="'+e([p.brand,p.model,p.category,p.movement,p.lead].join(' '))+'">'
       +'<div class="am-pick-visual" role="group" aria-label="'+(photo?'Photographie de la référence exacte · autorisation déclarée':'Repère graphique non contractuel, sans photographie du modèle')+'"><span class="am-pick-visual-top">'+e(p.category)+'</span>'
       +(photo?'<img class="am-pick-licensed-photo" loading="lazy" decoding="async" width="'+photo.width+'" height="'+photo.height+'" alt="Montre '+e(p.brand+' '+p.model)+'" src="'+(front?'./':'../')+e(photo.url)+'"'
         +responsivePopularAttrs(root,p,photo,{
@@ -209,7 +211,11 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     +'<label class="am-pick-filter-field" for="am-filter-tier"><span>Gamme</span><select id="am-filter-tier" name="gamme"><option value="">Toutes les gammes</option><option value="essential">Essentielle</option><option value="signature">Signature</option><option value="prestige">Prestige</option></select></label>'
     +'<label class="am-pick-filter-field" for="am-filter-style"><span>Style</span><select id="am-filter-style" name="style"><option value="">Tous les styles</option><option value="sport">Sport / robuste</option><option value="steel">Acier / sport chic</option><option value="dress">Habillée</option><option value="retro">Rétro</option><option value="compact">Compacte / colorée</option></select></label>'
     +'<label class="am-pick-filter-field" for="am-filter-movement"><span>Mouvement</span><select id="am-filter-movement" name="mouvement"><option value="">Tous les mouvements</option><option value="automatic">Automatique</option><option value="quartz">Quartz</option><option value="solar">Solaire</option></select></label>'
-    +'</div><div class="am-pick-filter-footer"><output id="am-pick-filter-count" for="am-filter-query am-filter-tier am-filter-style am-filter-movement" aria-live="polite" aria-atomic="true">'+picks.length+' modèles sur '+picks.length+'</output>'
+    +'</div><fieldset class="am-pick-filter-proofs"><legend>Afficher uniquement</legend>'
+    +'<label class="am-pick-proof-option" for="am-filter-photo"><input type="checkbox" id="am-filter-photo" name="photo-publiee"><span>Avec photo réelle publiée du modèle</span></label>'
+    +'<label class="am-pick-proof-option" for="am-filter-match"><input type="checkbox" id="am-filter-match" name="asin-documente"><span>Avec correspondance Amazon.fr documentée</span></label>'
+    +'<p class="am-pick-filter-explainer">Une correspondance de référence ne garantit ni la variante disponible, ni le vendeur, ni le tarif.</p>'
+    +'</fieldset><div class="am-pick-filter-footer"><output id="am-pick-filter-count" for="am-filter-query am-filter-tier am-filter-style am-filter-movement am-filter-photo am-filter-match" aria-live="polite" aria-atomic="true">'+picks.length+' modèles sur '+picks.length+'</output>'
     +'<button type="reset">Effacer les filtres</button></div></form>';
   const emptyMessage='<p id="am-pick-filter-empty" class="am-pick-filter-empty" role="status" hidden>Aucun modèle ne correspond à ces critères. Effacez un filtre ou essayez une autre référence.</p>';
   const path='montres/modeles-populaires.html';
