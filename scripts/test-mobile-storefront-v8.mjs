@@ -293,7 +293,9 @@ try{
  }));
  assert.match(compactPhoto.url,/^\/assets\/popular-responsive\/skmei-1251-[0-9]+\.webp$/,
    'Mobile must really load a compact local packshot, not a full-size original');
- assert.ok(compactPhoto.naturalWidth>=200&&
+ // naturalWidth can reflect density-corrected intrinsic CSS pixels, not
+ // the actual 240px source file; the selected URL proves resource identity.
+ assert.ok(compactPhoto.naturalWidth>=100&&compactPhoto.geometry.width>=150&&
    compactPhoto.name.right<=compactPhoto.geometry.left+2&&
    compactPhoto.model.right<=compactPhoto.geometry.left+2,
    'Genuine packshot must remain large and separate from labels: '+JSON.stringify(compactPhoto));
