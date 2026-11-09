@@ -217,6 +217,15 @@
     empty.textContent=savedOnly?'Aucun favori ne correspond à ces critères. Enregistrez des montres avec le cœur, ou affichez tout le catalogue.'
       :'Aucun résultat. Essayez une autre marque, un style différent ou effacez les filtres.';
     empty.hidden=visible!==0;
+    const endSummary=$('udResultsEndSummary');
+    const endNavigation=endSummary?.closest('.ud-results-end');
+    if(endSummary&&endNavigation){
+      endNavigation.hidden=visible===0;
+      endSummary.textContent=visible===cards.length
+        ?'Vous avez parcouru les '+cards.length+' références de cette sélection.'
+        :'Vous avez parcouru '+visible+' référence'+(visible===1?'':'s')
+          +' correspondant à vos critères sur '+cards.length+'.';
+    }
     updateSavedUI();
     updateActiveFilters();
     persist();

@@ -32,6 +32,7 @@ try{
       'A long 52-watch catalogue must offer clear return and comparison routes');
     assert.equal(await endNav.locator('a').first().getAttribute('href'),'#udCount');
     assert.equal(await endNav.locator('a').last().getAttribute('href'),'#comparer');
+    assert.match(await page.locator('#udResultsEndSummary').innerText(),/52 références/);
     if(width===360){
       await endNav.locator('a').first().scrollIntoViewIfNeeded();
       const links=await endNav.locator('a').evaluateAll(items=>items.map(a=>{
@@ -439,7 +440,9 @@ try{
       ['pd1701','pagani-pd1701']
     ]){
       await page.locator('#udSearch').fill(query);
-      assert.equal(await page.locator('.ud-card:visible').count(),1,
+      assert.match(await page.locator('#udResultsEndSummary').innerText(),/1 référence correspondant.*sur 52/,
+      'Filtered end-of-list copy must describe the visible result, not all 52');
+    assert.equal(await page.locator('.ud-card:visible').count(),1,
         'Exact hyphenless reference should return one model: '+query);
       assert.equal(await page.locator('#modele-'+id).isVisible(),true);
       assert.equal(await page.locator('#udActiveFilterPills button').count(),1);
@@ -450,6 +453,8 @@ try{
     await page.locator('#udSearch').fill('mdv107');
     await page.locator('#udBrand').selectOption('SKMEI');
     assert.equal(await page.locator('.ud-card:visible').count(),0);
+    assert.equal(await page.locator('.ud-results-end').isVisible(),false,
+      'Do not show end-of-results navigation when the filter has no matches');
     assert.equal(await page.locator('#udActiveFilterPills button').count(),2);
     await page.locator('[data-remove-filter="brand"]').click();
     assert.equal(await page.locator('#udBrand').inputValue(),'all');
@@ -749,6 +754,8 @@ try{
   const noScript=await browser.newPage({javaScriptEnabled:false});
   await noScript.goto(new URL('/montres/toutes-les-montres.html',base).href);
   assert.equal(await noScript.locator('.ud-card').count(),52);
+  assert.match(await noScript.locator('#udResultsEndSummary').innerText(),/52 références/,
+    'Without JS the static end summary must describe the full catalogue');
   assert.equal(await noScript.locator('.ud-results-end a').count(),2,
     'No-JS visitors must have a usable escape from the long catalogue');
   await noScript.locator('.ud-results-end a').first().click();
