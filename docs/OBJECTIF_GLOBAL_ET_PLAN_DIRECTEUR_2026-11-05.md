@@ -1,4 +1,6 @@
 # Atelier Montres — objectif global et plan directeur exécutable
+
+> **Charte d'exécution actualisée (9 novembre 2026) :** [Objectif final Production Ready — R0 à R4](OBJECTIF_FINAL_PRODUCTION_READY_2026-11-09.md). Le présent document conserve les tickets AM-00 à AM-18 et leur état historique ; la charte récente fixe la finalité, les priorités et les critères de signature.
 **Version 1.0 · 5 novembre 2026 · Dépôt `dbrckk/Spotify-montre` · Branche `main` · Base auditée `b056c27ee30935ab3fd3ba847405e11c1faa0c2a`**
 
 > **Document directeur actuel.** Les anciens audits, roadmaps sectorielles et guides de sourcing restent des références historiques ou spécialisées. En cas de contradiction sur l'état du projet ou l'ordre des travaux, ce document prévaut ; le code, les factures/preuves réelles, les journaux CI/Render et le droit applicable prévalent toujours sur ce plan. Un jalon est **terminé seulement avec des preuves**, non parce qu'il a été codé.

@@ -1,0 +1,60 @@
+name: Production ready agency gate (read-only)
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/report-production-readiness.mjs'
+      - 'scripts/check-production-readiness.mjs'
+      - 'site/selection-affiliation.json'
+      - 'site/selection-populaires.json'
+      - 'site/popular-photo-rights.json'
+      - 'site/affiliate-links.json'
+      - 'site/catalogue.json'
+      - 'site/config.json'
+      - 'site/informations-legales.html'
+      - 'research/partner-affiliate-offers.json'
+      - 'research/amazon-fr-exact-products.json'
+      - 'research/amazon-fr-popular-verified.json'
+      - 'package.json'
+      - 'docs/OBJECTIF_FINAL_PRODUCTION_READY_2026-11-09.md'
+      - '.github/workflows/production-readiness.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/report-production-readiness.mjs'
+      - 'scripts/check-production-readiness.mjs'
+      - 'site/selection-affiliation.json'
+      - 'site/selection-populaires.json'
+      - 'site/popular-photo-rights.json'
+      - 'site/affiliate-links.json'
+      - 'site/catalogue.json'
+      - 'site/config.json'
+      - 'site/informations-legales.html'
+      - 'research/partner-affiliate-offers.json'
+      - 'research/amazon-fr-exact-products.json'
+      - 'research/amazon-fr-popular-verified.json'
+      - 'package.json'
+      - 'docs/OBJECTIF_FINAL_PRODUCTION_READY_2026-11-09.md'
+      - '.github/workflows/production-readiness.yml'
+  workflow_dispatch:
+  schedule:
+    - cron: '17 8 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  source-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate read-only report never claims commercial readiness
+        run: npm run production:check
+      - name: Display current GO/NO-GO snapshot in the job summary
+        run: node scripts/report-production-readiness.mjs --ci-summary > /dev/null
+      # Do not run --strict in ordinary PR CI. It intentionally fails while
+      # external legal, PSP, CJ and sale proofs remain unverified.
