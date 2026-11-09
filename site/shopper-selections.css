@@ -17,8 +17,34 @@
 .am-shopper-art-brand{position:relative;text-transform:uppercase;letter-spacing:.18em;font:700 12px/1.3 system-ui,sans-serif}
 .am-shopper-art strong{position:relative;max-width:90%;overflow-wrap:anywhere;font:400 clamp(20px,3vw,31px)/1.2 Georgia,serif}
 .am-shopper-art-note{position:relative;font:400 11px/1.45 system-ui,sans-serif;max-width:26ch;opacity:.92}
-.am-shopper-real-photo{background:#f1f2ec}
-.am-shopper-real-photo img{width:100%;height:100%;max-width:280px;max-height:250px;object-fit:contain}
+/* Genuine, licensed-by-declaration model photos: editorial studio treatment.
+   Placeholder artwork never uses this frame or receives a fake watch image. */
+.am-shopper-real-photo{
+  isolation:isolate;
+  background:radial-gradient(ellipse at 72% 24%,#fffefa 0%,#f2f1e9 62%,#e1e7dc 100%)
+}
+.am-shopper-real-photo::before{
+  content:'';position:absolute;z-index:-1;inset:11%;
+  border:1px solid #ced8c9;border-radius:50%;opacity:.7
+}
+.am-shopper-photo-link{
+  position:absolute;inset:0;display:grid;place-items:center;
+  padding:19px;text-decoration:none;outline-offset:-5px
+}
+.am-shopper-photo-link img{
+  display:block;width:100%;height:100%;max-width:280px;max-height:250px;
+  object-fit:contain;object-position:center;
+  filter:drop-shadow(0 12px 13px #18362824);
+  transition:transform .2s ease
+}
+.am-shopper-photo-link:hover img{transform:scale(1.035)}
+.am-shopper-photo-link:focus-visible{outline:3px solid #a37736;outline-offset:-5px}
+.am-shopper-real-photo::after{
+  content:'PHOTO DU MODÈLE';position:absolute;left:13px;bottom:13px;
+  pointer-events:none;padding:5px 8px;border:1px solid #d6ded2;border-radius:4px;
+  background:#fffffff0;color:#405b45;font:750 9px/1.35 system-ui,sans-serif;
+  letter-spacing:.1em
+}
 .am-shopper-card-body{display:flex;flex:1;flex-direction:column;gap:12px;padding:22px}
 .am-shopper-card-label{text-transform:uppercase;letter-spacing:.12em;font:700 11px/1.3 system-ui,sans-serif;color:#69786c;margin:0}
 .am-shopper-card h2{font:400 clamp(22px,2.5vw,28px)/1.28 Georgia,serif;margin:0;color:#203e2d;overflow-wrap:anywhere}
@@ -42,7 +68,7 @@
 .am-shopper-nav a:focus-visible,.am-shopper-card a:focus-visible,.am-shopper-endnote a:focus-visible{outline:3px solid #af802f;outline-offset:3px}
 @media(max-width:950px){.am-shopper-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:620px){.am-shopper-grid{grid-template-columns:minmax(0,1fr);gap:16px}.am-shopper-heading{margin-top:22px}.am-shopper-art{min-height:220px}.am-shopper-card-body{padding:19px}.am-shopper-nav{gap:8px}.am-shopper-nav a{flex:1 1 auto;min-width:100px}.am-shopper-page{padding-bottom:55px}}
-@media(prefers-reduced-motion:reduce){.am-shopper-nav a,.am-shopper-card a{transition:none}}
+@media(prefers-reduced-motion:reduce){.am-shopper-nav a,.am-shopper-card a,.am-shopper-photo-link img{transition:none}.am-shopper-photo-link:hover img{transform:none}}
 
 /* Source-led brand and digital-watch pages. Simple semantic content remains
    indexable without JavaScript; comparison is a regular on-site hyperlink. */
