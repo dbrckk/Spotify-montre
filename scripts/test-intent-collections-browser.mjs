@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {mkdirSync} from 'node:fs';
+import {mkdirSync,existsSync} from 'node:fs';
 import {chromium} from 'playwright';
 
 const base=process.env.WATCH_STOREFRONT_URL||'http://127.0.0.1:8765';
@@ -15,6 +15,64 @@ const selections=[
 mkdirSync('artifacts',{recursive:true});
 const browser=await chromium.launch({headless:true});
 const errors=[];
+// Check the actual approved model assets, not page decoration. Six distinct
+// editorial collections share real source photos and typographic fallbacks.
+const photoCards=async(page,slug,count)=>{
+  const cards=await page.locator('.am-shopper-grid .am-shopper-card').evaluateAll(nodes=>nodes.map(card=>{
+    const id=card.dataset.shopperWatch,stage=card.querySelector('.am-shopper-art');
+    const img=stage?.querySelector('img'),link=stage?.querySelector('a.am-shopper-photo-link');
+    const source=img?.getAttribute('src')||null;
+    return {id,hasPhoto:stage?.classList.contains('am-shopper-real-photo')||false,
+      source,srcset:img?.getAttribute('srcset')||'',sizes:img?.getAttribute('sizes')||'',
+      width:img?.getAttribute('width')||'',height:img?.getAttribute('height')||'',
+      alt:img?.getAttribute('alt')??null,loading:img?.getAttribute('loading')||'',
+      link:link?.getAttribute('href')||'',label:link?.getAttribute('aria-label')||'',
+      stageWidth:stage?.getBoundingClientRect().width||0,
+      imageWidth:img?.getBoundingClientRect().width||0};
+  }));
+  assert.equal(cards.length,count,'All sourced watches must remain visible: '+slug);
+  let pictured=0,unpictured=0;
+  for(const card of cards){
+    assert.match(card.id,/^[a-z0-9-]+$/,'Source model ID must be valid: '+slug);
+    if(!card.hasPhoto){
+      unpictured++;
+      assert.equal(card.source,null,'Unphotographed model cannot acquire a synthetic product photo');
+      assert.equal(card.link,'','No inert clickable photo wrapper for unknown image');
+      continue;
+    }
+    pictured++;
+    assert.equal(card.source?.includes('/'+card.id+'.webp'),true,
+      'Photograph must belong to its actual exact watch reference: '+card.id);
+    const supplemental=card.source.startsWith('../assets/watches-popular/');
+    assert.ok(supplemental||card.source.startsWith('../assets/watches/'),
+      'Image must be a vetted local model photograph: '+card.id);
+    assert.equal(card.link,'../montres/'+card.id+'.html',
+      'Clicking the photograph must open that model information: '+card.id);
+    assert.match(card.label,/Consulter la fiche et les sources/);
+    assert.equal(card.alt,'','A labeled image link should not repeat its name to screen readers');
+    assert.equal(card.loading,'lazy');
+    const width=Number(card.width),height=Number(card.height);
+    assert.ok(Number.isInteger(width)&&width>0&&Number.isInteger(height)&&height>0,
+      'Real photograph must reserve genuine source dimensions: '+card.id);
+    assert.ok(card.stageWidth>=150&&card.imageWidth>=120&&card.imageWidth<=card.stageWidth+2,
+      'Photographs must occupy the premium stage without overflow: '+JSON.stringify(card));
+    const baseFolder=supplemental?'popular-responsive':'watch-responsive';
+    const sizes=supplemental?[240,360,480,720,960]:[480,800];
+    const variants=sizes.filter(size=>size<width
+      &&existsSync('site/assets/'+baseFolder+'/'+card.id+'-'+size+'.webp'));
+    if(variants.length){
+      assert.equal(card.sizes,'(max-width:420px) 75vw, 280px',
+        'The image candidates must match the card geometry');
+      for(const size of variants)
+        assert.ok(card.srcset.includes('../assets/'+baseFolder+'/'+card.id+'-'+size+'.webp'),
+          'Missing real mobile derivative '+card.id+':'+size);
+      assert.ok(card.srcset.includes(card.source),
+        'The exact original remains as high-resolution fallback: '+card.id);
+    }else assert.equal(card.srcset,'','Never generate an unavailable responsive image');
+  }
+  assert.ok(pictured>0,'Every editorial collection must show at least one genuine image: '+slug);
+  return {pictured,unpictured};
+};
 const noOverflow=async (page,label)=>{
   const width=await page.evaluate(()=>({inner:document.documentElement.clientWidth,
     scroll:document.documentElement.scrollWidth}));
@@ -65,6 +123,7 @@ try {
     assert.equal(new URL(canonical).pathname,path);
     const cards=phone.locator('.am-shopper-grid article.am-shopper-card');
     assert.equal(await cards.count(),selection.count,'Source-backed card count '+path);
+    await photoCards(phone,selection.slug,selection.count);
     assert.equal(await phone.locator('.am-shopper-matrix tbody tr').count(),selection.count,
       'Factual matrix must cover all original models '+path);
     const first=phone.locator('.am-shopper-matrix tr[data-matrix-watch="'+selection.first+'"]');
@@ -89,6 +148,36 @@ try {
     if(selection.slug==='montres-skmei'||selection.slug==='montres-pagani-design')
       await phone.screenshot({path:'artifacts/mobile-'+selection.slug+'.png',fullPage:true});
   }
+  // Complete the same responsive image audit on three six-watch commercial
+  // selections; these must never load full originals on Android by default.
+  for(const [slug,count] of [
+    ['montres-femme-accessibles',6],
+    ['montres-homme-style-accessible',6],
+    ['montres-automatiques-selection',6]
+  ]){
+    await phone.goto(new URL('/montres/'+slug+'.html',base).href,{waitUntil:'domcontentloaded'});
+    const measured=await photoCards(phone,slug,count);
+    assert.ok(measured.pictured+measured.unpictured===6);
+    await noOverflow(phone,'Real photographs at Android 393px: '+slug);
+  }
+  await phone.goto(new URL('/montres/montres-skmei.html',base).href,{waitUntil:'domcontentloaded'});
+  const packshot=phone.locator('[data-shopper-watch="skmei-1251"] .am-shopper-photo-link img');
+  await packshot.scrollIntoViewIfNeeded();
+  await packshot.evaluate(img=>img.decode());
+  const actuallyLoaded=await packshot.evaluate(img=>({
+    pathname:new URL(img.currentSrc).pathname,
+    width:img.naturalWidth,displayWidth:img.getBoundingClientRect().width
+  }));
+  assert.match(actuallyLoaded.pathname,
+    /^\/assets\/popular-responsive\/skmei-1251-[0-9]+\.webp$/,
+    'Chromium Android must choose a genuine compact WebP instead of the original');
+  assert.ok(actuallyLoaded.width>0&&actuallyLoaded.displayWidth>120,
+    'The exact-model photo must render at a usable display size');
+  await packshot.locator('xpath=..').screenshot({path:'artifacts/android-premium-sourced-packshot.png'});
+  await packshot.locator('xpath=..').click();
+  assert.equal(new URL(phone.url()).pathname,'/montres/skmei-1251.html',
+    'The whole premium photo must open the exact model fact sheet');
+
   // Link must be usable, not merely an attractive inactive button.
   await phone.goto(new URL('/montres/montres-pagani-design.html',base).href,{waitUntil:'domcontentloaded'});
   await phone.locator('.am-shopper-intent-nav .am-shopper-compare').click();
