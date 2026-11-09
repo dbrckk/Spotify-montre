@@ -37,6 +37,7 @@ for(const row of report.photos){
   assert.equal(row.legalSignOff,'EXTERNAL_PROOF_REQUIRED');
   assert.ok(row.nextAction.includes(row.photoPublished?'Conserver':'Obtenir'));
   assert.ok(row.id&&row.model&&row.brand);
+  assert.match(row.modelPage,/^https:\/\//,'Every model requires an exact documented seller/fabricant page');
   assert.equal(row.registryClaimsIndependentVerification,
     row.collection==='core'?
       core.find(p=>p.id===row.id).photoReview?.permissionIndependentlyVerified===true
