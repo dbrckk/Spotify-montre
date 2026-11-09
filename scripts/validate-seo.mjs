@@ -1008,14 +1008,25 @@ for(const p of popularFeed.products){
   for(const [,id,reason] of recommendations){
     const q=popularFeed.products.find(w=>w.id===id);
     assert.ok(q,'Recommended watch must exist in the researched source catalogue: '+id);
+    assert.equal(q.tier,p.tier,'Recommendation must stay in the exact editorial range: '+p.id+' / '+id);
+    assert.ok(detailHtml.includes('data-related-id="'+id+'" data-related-reason="'+reason+'" data-related-tier="'+p.tier+'"'),
+      'Related card must declare its verified editorial range: '+id);
+    assert.ok(detailHtml.includes('class="am-extra-related-tier">Gamme '+
+      ({essential:'Essentielle',signature:'Signature',prestige:'Prestige'})[p.tier]+'</span>'),
+      'Visible range badge required: '+p.id);
     assert.ok(['Même marque','Style proche','Mouvement comparable','Autre approche'].includes(reason),'Reason must not imply ranking or test: '+id);
     assert.ok(detailHtml.includes('class="am-extra-related-name" href="./'+id+'.html"'),'A live related detail page must be linked: '+id);
     const approved=approvedPopularPhotos.get(id);
     if(approved)assert.ok(detailHtml.includes('src="../'+approved.url+'"'),'Recommended product photo must be approved: '+id);
     else assert.ok(detailHtml.includes('class="am-extra-related-fallback"'),'Missing related photos need an honest fallback: '+id);
   }
-  if(popularFeed.products.filter(w=>w.brand===p.brand&&w.id!==p.id).length>=2)
-    assert.equal(recommendations.filter(m=>popularFeed.products.find(w=>w.id===m[1]).brand===p.brand).length,2,'Brand alternatives must include two distinct models: '+p.id);
+  const recommendedWatches=recommendations.map(m=>popularFeed.products.find(w=>w.id===m[1]));
+  assert.ok(recommendedWatches.some(w=>w.brand!==p.brand),
+    'Show another manufacturer to avoid a same-brand recommendation tunnel: '+p.id);
+  assert.ok(recommendedWatches.filter(w=>w.brand===p.brand).length<=2,
+    'Maximum two recommendations from the consulted brand: '+p.id);
+  assert.ok(detailHtml.includes('Trois alternatives dans la même gamme'),
+    'Buyer must see that alternatives have a common editorial range: '+p.id);
   assert.ok(detailHtml.includes('rel="canonical" href="'+manifest.siteUrl+detailPath+'"'),
     'Dedicated product canonical must be self-referencing: '+p.id);
   assert.ok(detailHtml.includes('name="robots" content="index,follow'),'New editorial product pages should be crawlable: '+p.id);
