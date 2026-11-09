@@ -1,49 +1,62 @@
-# Atelier Montres — analytics gratuites et commissions Amazon.fr
+# Atelier Montres — mesure gratuite des parcours et revenus vérifiés
 
-Date : 30 octobre 2026. Boutique : https://atelier-montres-selection-fr.onrender.com/
+Mise à jour : 9 novembre 2026 · Boutique : https://atelier-montres-selection-fr.onrender.com/
 
-## Objectifs et limites réelles
+## Ce qui existe réellement
 
-- **Trafic et clics sortants** : Umami peut mesurer les visites et les clics vers les 13 fiches Amazon.fr identifiées, avec la référence et l'emplacement du clic, **uniquement après configuration explicite**.
-- **Commissions et commandes réelles** : le Club Partenaires Amazon.fr fait foi. Le site ne peut pas connaître les achats, annulations, expéditions ou commissions sans accès aux rapports Amazon. Les clics du site et ceux d'Amazon peuvent différer.
-- **État actuel** : `site/affiliate-links.json` est encore inactif. Les liens produit publics sont non rémunérés. Aucune transaction n'est encaissée ici.
-- **Coûts** : aucune base de données ni service payant nécessaire. Umami Cloud Hobby était affiché à **0 $ jusqu'à 100 000 événements par mois, 1 site, conservation 6 mois** au 30 octobre 2026. Au-delà, consulter la tarification actuelle avant de passer sur un forfait supérieur.
+La boutique indépendante publie **52 références documentées** (15 principales et 37 complémentaires). Le registre Amazon.fr contient **27 associations référence/ASIN documentées** (13 modèles principaux et 14 complémentaires). Les autres sorties restent des recherches ou des sources commerciales explicitement identifiées. Une association ASIN n'est pas une garantie d'offre active, de prix, de stock, de variante ou de commission.
 
-## Mise en route sur smartphone Android (une fois la conformité vérifiée)
+Le suivi est **facultatif et désactivé tant que `UMAMI_WEBSITE_ID` n'est pas configuré au déploiement**. Le code prêt à mesurer les clics n'implique pas que des statistiques soient actuellement collectées. Le site n'a ni paiement direct activé, ni chiffre d'affaires attesté, ni accès natif aux achats des partenaires.
 
-1. Aller sur https://cloud.umami.is/ et créer un compte **Hobby gratuit**, sans choisir un essai payant.
-2. Dans Umami : **Settings → Websites → Add website**, nom `Atelier Montres`, domaine `atelier-montres-selection-fr.onrender.com`. Copier uniquement l'identifiant UUID **Website ID** affiché dans le code de suivi.
-3. Depuis le navigateur : https://dashboard.render.com/ → sélectionner `atelier-montres-selection-fr` → **Environment** → ajouter la variable `UMAMI_WEBSITE_ID` avec le UUID exact → enregistrer et déclencher/reprendre le déploiement.
-4. Visiter la boutique puis ouvrir une fiche produit Amazon.fr depuis une carte, une fiche interactive ou une fiche SEO. Dans Umami : **Events**, filtrer les événements `amazon:<id>:<emplacement>`.
-5. Dans Umami, vérifier le nombre de visites et les événements du site. Aucun prix, achat ni commission Amazon n'est transmis à Umami.
+## Événements mesurables avec Umami activé
 
-Aucun identifiant personnel, e-mail, URL de commande ni ID de suivi Amazon n'est transmis dans les événements. Les noms des événements sont des catégories publiques (ex. `amazon:citizen-tsuyosa:catalogue`, `amazon:citizen-tsuyosa:fiche`, `amazon:citizen-tsuyosa:seo`), en un événement par clic sans propriété supplémentaire. Une extension anti-tracking peut bloquer Umami ; ne pas retarder le clic Amazon pour tenter de contourner ce choix.
+| Nom d'événement | Sens réel | Ce qui n'est **pas** mesuré |
+|---|---|---|
+| `amazon:<modèle>:<emplacement>` | Clic sur un ASIN documenté avec identifiant Partenaires confirmé | Achat et commission |
+| `amazon-search:<modèle>` | Recherche Amazon.fr rémunérée, distincte d'un ASIN | Produit exact trouvé |
+| `amazon-unpaid:<modèle>:<emplacement>` | Ouverture d'un ASIN sans lien rémunéré | Revenu |
+| `merchant:<modèle>:<emplacement>` | Ouverture d'une source marque/vendeur autorisée | Achat chez le vendeur |
+| `awin:<modèle>:popular` | Ouverture d'un lien Awin validé | Conversion Awin |
+| `compare:<modèle>:fiche` | Accès au comparatif depuis la fiche complémentaire | Comparaison terminée ou achat |
+| `compare:<modèle>:selection` | Accès au comparatif depuis la sélection de dix modèles | Achat |
+| `compare:<modèle>:accueil` | Accès au comparatif depuis la sélection abordable de l'accueil | Achat |
+| `proof-filter:photo`, `proof-filter:asin`, `proof-filter:both` | Activation d'un filtre fondé sur les registres documentaires | Profil, intention d'achat certaine, volume de vente |
 
-La variable est **facultative** : en son absence, le build ne charge aucun script Umami et ne contacte pas ce fournisseur. Un UUID invalide bloque le build. Désactiver consiste à supprimer `UMAMI_WEBSITE_ID` de Render et redéployer. La notice de confidentialité publiée revient automatiquement à l'état sans analytics. Les réglages `Do Not Track` sont respectés.
+Les clics sont des **intentions, pas des transactions**. Les répétitions et les blocages anti-tracking peuvent fausser les ratios. Les pages vues d'Umami sont des métriques distinctes et non des « visiteurs ayant comparé » identifiés individuellement.
 
-**Juridique :** Umami utilise normalement aucun cookie mais traite certaines données de navigation. L'absence de cookies ne dispense pas automatiquement de vérifier les exigences RGPD/CNIL applicables à l'analyse d'audience. Compléter l'identité de l'éditeur et la notice de confidentialité avant activation effective. Ne pas configurer un suivi identifiant les personnes.
+La collecte des nouveaux événements est limitée aux catégories ci-dessus : **aucune recherche libre, valeur de formulaire, adresse, e-mail, commande, URL utilisateur ou identifiant client** n'est ajoutée comme propriété d'événement. Les comparatifs sont validés sur l'origine du site et les seuls identifiants de modèles présents dans les liens source. Les événements ne bloquent ni ne retardent la navigation. L'attribut `data-do-not-track="true"` est conservé dans le script Umami.
 
-## Rapports de commissions Amazon.fr
+## Activation facultative depuis Android
 
-Quand le compte Partenaires est effectivement approuvé et les liens spéciaux activés avec ses autorisations :
+1. Créer un site « Atelier Montres » dans **<https://cloud.umami.is/>** si un compte adapté et des obligations de confidentialité satisfaites sont disponibles.
+2. Relever le **Website ID UUID public** dans le code de suivi de ce site. Il ne s'agit ni d'une clé API ni d'un mot de passe.
+3. Dans **<https://dashboard.render.com/>**, ouvrir le service de la boutique, puis **Environment** et définir `UMAMI_WEBSITE_ID` avec ce UUID. Publier la nouvelle version.
+4. Vérifier dans l'HTML que `https://cloud.umami.is/script.js` apparaît une fois, puis dans **Events** que les clics réellement effectués produisent les catégories ci-dessus. La navigation doit continuer même si le script est bloqué.
+5. Pour désactiver : supprimer `UMAMI_WEBSITE_ID` et redéployer. Le build ne doit plus charger Umami ni `analytics.js`, et la notice de confidentialité doit revenir à sa version inactive.
 
-1. Ouvrir https://partenaires.amazon.fr/ → **Rapports / Rémunérations**.
-2. Examiner les **clics**, **articles sans commandes**, **articles commandés**, **articles expédiés**, **commissions** et le **résumé des ID de suivi**.
-3. Télécharger les rapports CSV ou XLSX si nécessaire. Ils sont la seule source fiable pour les conversions/commissions Amazon ; **ne pas** déduire un revenu des clics Umami.
-4. Réévaluer les modèles liés à des fiches actuellement indisponibles, sans afficher de stock fictif ni relier une variante erronée.
+**Avant activation :** compléter les mentions légales et la politique de confidentialité, confirmer la conformité RGPD/CNIL au contexte réel et les paramètres de conservation. « Sans cookie » ne signifie pas automatiquement « sans données personnelles ». Ne pas ajouter d'outils de profilage ou de suivi intersites. Les tarifs, limites et conditions d'Umami peuvent évoluer : vérifier la formule gratuite sur le site de l'éditeur avant souscription.
 
-Source officielle : https://partenaires.amazon.fr/help/topic/reports/faq
+## Tableau de décision mensuel (à remplir avec des faits)
 
-## Règles techniques testées
+Comparer deux périodes définies (par exemple 7 et 28 jours), à **canal et période identiques** :
 
-- `scripts/build-seo.mjs` injecte `https://cloud.umami.is/script.js` uniquement lorsque `UMAMI_WEBSITE_ID` est valide.
-- `site/analytics.js` n'enregistre que les clics sur de vrais liens `https://www.amazon.fr/dp/ASIN`, classés par ID de montre et emplacement.
-- L'ajout, la suppression et le changement de configuration sont vérifiés par `scripts/check-affiliate-publication.mjs`.
-- `scripts/validate-seo.mjs` vérifie aussi les 15 pages produit, l'existence des 13 liens exacts et la cohérence de la notice publiée.
-- Pas de cookies ajoutés, ni redirections d'affiliation cachées, ni dépendance serveur.
+- **Audience par page** : pages vues réellement enregistrées et pages produits effectivement consultées, d'après Umami si actif.
+- **Usage du parcours** : nombres des événements `compare:*` et `proof-filter:*` par emplacement, jamais des « utilisateurs uniques » déduits des clics.
+- **Sorties marchandes** : clics Amazon-ASIN vs recherches vs Awin vs fournisseurs. Un modèle qui génère des recherches mais pas de fiches identifiées est un candidat à approfondir, pas une vente manquée prouvée.
+- **Revenus vérifiés** : commandes et commissions **uniquement** depuis les rapports officiels Amazon Partenaires / Awin, sur leur propre période et après rapprochement des identifiants disponibles. Ne jamais multiplier les événements de clic par un taux hypothétique pour afficher un chiffre d'affaires.
+- **Décisions** : traiter d'abord les pages avec trafic avéré mais sorties peu compréhensibles, les références anciennes et les URLs cassées ; tester une seule modification UX puis mesurer sur un intervalle comparable. Ne pas interpréter un petit échantillon comme une tendance fiable.
 
-Références techniques :
-- https://docs.umami.is/docs/track-events
-- https://docs.umami.is/docs/cloud/faq
-- https://umami.is/pricing
-- https://docs.umami.is/docs/tracker-configuration
+Une baisse des événements après activation d'un bloqueur ou du paramètre « Do Not Track » ne signifie pas nécessairement une baisse des visites.
+
+## Source des commissions réelles
+
+Les rapports **<https://partenaires.amazon.fr/> → Rapports / Rémunérations** distinguent les clics, les articles commandés/expédiés et les commissions selon les règles du programme. Les conversions Awin sont consultables dans le compte éditeur Awin correspondant. Aucune de ces informations n'est obtenue automatiquement par le JavaScript statique de la boutique.
+
+## Contrôles du dépôt
+
+- `scripts/build-seo.mjs` n'injecte le script Umami et `site/analytics.js` qu'avec un UUID valide ; le paramètre Do Not Track est activé.
+- `scripts/check-merchant-analytics.mjs` exécute le **vrai tracker** et vérifie les 27 associations ASIN, les emplacements, les URLs et les trois nouveaux événements de comparatif et de preuve, y compris les cas malveillants ou non autorisés.
+- `scripts/check-affiliate-publication.mjs` teste les déploiements avec et sans Umami, la notice de confidentialité et le refus des identifiants malformés.
+- `npm test`, `npm run lint`, les workflows SEO, Android, WCAG et Lighthouse restent les barrières de livraison.
+
+Documentation fournisseur : <https://docs.umami.is/docs/track-events> ; <https://docs.umami.is/docs/tracker-configuration> ; <https://partenaires.amazon.fr/help/topic/reports/faq>.
