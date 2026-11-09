@@ -1,0 +1,13 @@
+.am-privacy-controls{margin:20px 0 30px;padding:clamp(18px,4vw,28px);background:#f0f3eb;border:1px solid #c7d6c8;border-left:4px solid #2b5941;border-radius:4px;max-width:800px}
+.am-privacy-controls h3{font:400 clamp(23px,3vw,29px)/1.25 Georgia,serif;color:#1f4030;margin:0 0 12px}
+.am-privacy-controls p{margin:8px 0;color:#304936}
+.am-privacy-count{font-weight:750;color:#1e4c32}
+.am-privacy-check{display:flex;align-items:flex-start;gap:11px;margin:18px 0 14px;font:600 15px/1.6 system-ui,sans-serif;color:#203f2e;cursor:pointer}
+.am-privacy-check input{margin:5px 0 0;flex:0 0 auto;width:19px;height:19px;accent-color:#264b36}
+.am-privacy-delete{display:inline-flex;align-items:center;justify-content:center;min-height:48px;max-width:100%;padding:11px 18px;border:1px solid #28513b;border-radius:4px;background:#28513b;color:#fff;font:700 14px/1.5 system-ui,sans-serif;text-align:center;cursor:pointer}
+.am-privacy-delete:hover:not(:disabled){background:#1c3d2b}
+.am-privacy-delete:disabled{cursor:not-allowed;opacity:.55}
+.am-privacy-delete:focus-visible,.am-privacy-check input:focus-visible{outline:3px solid #b98632;outline-offset:3px}
+.am-privacy-status{min-height:25px;font-weight:650;color:#214e35}
+@media(max-width:420px){.am-privacy-controls{margin-inline:-2px}.am-privacy-delete{width:100%;font-size:13px}}
+@media(prefers-reduced-motion:reduce){.am-privacy-delete{transition:none}}

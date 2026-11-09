@@ -152,3 +152,13 @@ Ces fonctions sont un **standard de qualité**, pas une affirmation qu'une agenc
 - `.github/workflows/production-readiness.yml` : contrôle PR et hebdomadaire, sans achat, sans ticket fournisseur, sans accès à des secrets.
 
 **Finalité :** vendre et livrer des montres réelles, avec un service fiable, une marque soignée, des clients correctement informés et une rentabilité démontrée — pas une version alpha, pas une vitrine prétendument rentable sur la seule base de tests.
+
+## 10. Livraison R1 Privacy — contrôle local de confidentialité (09/11/2026)
+
+**Défaut client identifié :** la page publique expliquait le stockage local, mais le visiteur ne pouvait effacer au même endroit les favoris, dernières montres, préférences de vue et comparaisons. Le navigateur abrite aussi des références de tentative de paiement et des jetons de suivi *distincts* ; un `localStorage.clear()` serait donc une régression grave.
+
+**Corrigé :** page `site/confidentialite.html` dotée d'un panneau progressif (« Effacer mes préférences »), affiché uniquement avec JavaScript. L'action exige une confirmation volontaire, montre le nombre de préférences réellement présentes, supprime seulement une liste blanche **7 clés locales + 2 clés de session** et confirme un effacement réussi ou partiel. Une procédure manuelle reste disponible sans JS. Aucun transfert réseau, cookie ou donnée privée ajouté. Les préfixes `am_checkout_pending_v1_`, `am_checkout_key_`, `am_order_`, les clés inconnues et les données d'autres fonctionnalités sont **préservés** ; la notice explique les limites de l'effacement et le risque d'un nettoyage global depuis le navigateur.
+
+**Recette requise :** `node scripts/build-seo.mjs && node scripts/validate-seo.mjs` ; tests Playwright sur 320 / 393 / 1366 px avec JS et sans JS, cases à cocher, état du stockage avant/après, non-suppression des jetons de commande, aucune fuite ni débordement ; WCAG automatisé et contrôle de la version publiée. **Ce contrôle ne remplace pas la validation juridique R1**, et n'affirme pas la suppression de journaux techniques hébergeur ou des données d'un marchand tiers.
+
+**Complément contrôle production (09/11) :** la suite de vérification Render compare également les deux nouveaux assets `privacy-controls.js/.css` octet pour octet aux sources, attend le HTML public équipé de la commande, puis exécute le même scénario Playwright sur `atelier-montres-selection-fr.onrender.com`, explicitement autorisé et sans accès marchand ni API commerce. Les jetons de commande d'essai restent **uniquement dans le contexte Chromium isolé**. Aucun test n'accède aux informations d'un vrai client.
