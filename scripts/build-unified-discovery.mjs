@@ -332,7 +332,7 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
     // 52 cards form a long mobile catalogue: give shoppers a no-JS escape
     // back to the live results count and a direct route to comparison.
     +'<nav class="ud-results-end" aria-label="Suite du catalogue">'
-    +'<p>Vous avez parcouru les 52 références de cette sélection.</p>'
+    +'<p id="udResultsEndSummary">Vous avez parcouru les 52 références de cette sélection.</p>'
     +'<div class="ud-results-end-actions"><a href="#udCount">↑ Revenir aux résultats et aux filtres</a>'
     +'<a href="#comparer">Comparer mes montres sélectionnées ↓</a></div></nav>'
     +'<p id="udEmpty" hidden>Aucun résultat. Essayez une autre marque, un style différent ou effacez les filtres.</p>'
