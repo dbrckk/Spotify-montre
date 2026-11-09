@@ -115,3 +115,20 @@ Le workflow `test-premium-mobile.yml` exécute déjà la génération et le test
 - `scripts/test-mobile-storefront-v8.mjs` : contrôle exhaustif des 25 enregistrements, URL et dimensions exactes, existence des variantes locales et choix réel d'une miniature par Chromium Android, avec capture du rendu.
 
 **Exemples fondés sur les fichiers réellement versionnés** (octets de fichier, pas métriques de réseau) : SKMEI 1251 : original 59 580 o, 240 px 5 008 o ; ADDIESDIVE AD2030 : original 155 742 o, 240 px 7 058 o. Selon le DPR et la géométrie, une taille plus grande peut être sélectionnée. **Ne pas revendiquer de gain LCP sans un audit production après déploiement.** Aucun paiement, tarif, lien partenaire ou droit photographique n'est modifié.
+
+
+## 8. Lot P2 — 9 novembre 2026 : filtres de preuves produit, sans stock fictif
+
+**Base vérifiée :** `main@4da384dfb2a959f251d19d8aa9a06d38e4426352`, 7 workflows post-PR #240 réussis (SEO, mobile, Render et Lighthouse notamment).
+
+**Constat source :** sur les 37 montres complémentaires, 25 ont une photo publiée avec autorisation déclarée, 14 ont une correspondance ASIN documentée et **5 ont les deux**. La recherche existante (texte, gamme, style, mouvement) ne permettait pas de limiter facilement le parcours à ces modèles.
+
+**Solution appliquée sur branche dédiée :**
+- `scripts/build-popular-picks.mjs` : publier sur chaque carte deux indicateurs techniques dérivés **uniquement** des registres existants (photo autorisée, correspondance marchande documentée) et ajouter deux choix facultatifs au formulaire du catalogue.
+- `site/popular-filters.js` : cumuler ces deux critères à la recherche, à la gamme, au style et au mouvement. RAZ complète et navigation par ancre compatibles ; aucun appel réseau.
+- `site/popular-picks.css` : filtres mobiles à grande zone tactile, focus clavier visible et avertissement clair. Le formulaire reste **masqué sans JavaScript**, et les 37 fiches restent consultables.
+- `scripts/test-mobile-storefront-v8.mjs` : comparer les correspondances rendues aux registres photo et ASIN, essayer chaque filtre et leur intersection sur Android, le reset et l’absence de débordement.
+
+**Propriété commerciale :** « Référence Amazon.fr documentée » n’est **ni** une garantie de stock, **ni** un prix validé, **ni** une commission ou une commande. Le paiement direct reste inactif. Aucun nouveau lien d'achat ou prix n'est généré.
+
+**Acceptation :** 37 références préservées, filtres combinables, test Android/desktop complet, SEO et WCAG validés. Aucun gain de trafic/vente n'est attribué sans mesure externe.

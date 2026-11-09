@@ -322,6 +322,51 @@ try{
  const filterForm=popularPage.locator('#am-pick-filters');
  assert.ok(await filterForm.isVisible(),'Source-backed collection filters should activate when JavaScript runs');
  assert.equal(await popularPage.locator('#am-pick-filter-count').innerText(),'37 modèles sur 37');
+ // Documentary-quality filters: they never suggest live prices or inventory.
+ const documentedRefs=JSON.parse(readFileSync(
+   'research/amazon-fr-popular-verified.json','utf8')).verifiedProducts;
+ const sourceCards=await popularPage.locator('#am-picks-list .am-pick-card').evaluateAll(nodes=>nodes.map(n=>({
+   id:n.dataset.pickId,photo:n.dataset.pickPhoto,match:n.dataset.pickMatch
+ })));
+ assert.equal(sourceCards.length,37);
+ assert.deepEqual(sourceCards.filter(x=>x.photo==='yes').map(x=>x.id).sort(),
+   Object.keys(approvedWatchPhotos).sort(),
+   'Exact-model photo filter must use only the source-approved photo ledger');
+ assert.deepEqual(sourceCards.filter(x=>x.match==='yes').map(x=>x.id).sort(),
+   Object.keys(documentedRefs).sort(),
+   'Documented Amazon identity filter must use only verified catalogue references');
+ const photoToggle=popularPage.getByRole('checkbox',{name:'Avec photo réelle publiée du modèle'});
+ const matchToggle=popularPage.getByRole('checkbox',{name:'Avec correspondance Amazon.fr documentée'});
+ assert.equal(await photoToggle.count(),1);
+ assert.equal(await matchToggle.count(),1);
+ const proofChoices=popularPage.locator('.am-pick-proof-option');
+ for(const option of await proofChoices.all()){
+   const box=await option.boundingBox();
+   assert.ok(box&&box.height>=44,'Evidence-filter control must be touch accessible');
+ }
+ const photoIds=sourceCards.filter(x=>x.photo==='yes').map(x=>x.id);
+ const matchIds=sourceCards.filter(x=>x.match==='yes').map(x=>x.id);
+ const combinedIds=sourceCards.filter(x=>x.photo==='yes'&&x.match==='yes').map(x=>x.id);
+ await photoToggle.check();
+ assert.equal(await popularPage.locator('#am-picks-list .am-pick-card:visible').count(),photoIds.length);
+ assert.equal(await popularPage.locator('#am-pick-filter-count').innerText(),photoIds.length+' modèles sur 37');
+ await matchToggle.check();
+ assert.equal(await popularPage.locator('#am-picks-list .am-pick-card:visible').count(),combinedIds.length);
+ assert.ok(combinedIds.length>0,'There must be a meaningful photo and Amazon proof intersection');
+ assert.equal(await popularPage.locator('#am-pick-filter-count').innerText(),
+   combinedIds.length+' modèles sur 37');
+ assert.match(await popularPage.locator('.am-pick-filter-explainer').innerText(),
+   /ne garantit ni la variante disponible, ni le vendeur, ni le tarif/);
+ const proofExtent=await popularPage.evaluate(()=>({
+   client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth
+ }));
+ assert.ok(proofExtent.scroll<=proofExtent.client+2,'Proof toggles must fit Android viewport');
+ await photoToggle.uncheck();
+ assert.equal(await popularPage.locator('#am-picks-list .am-pick-card:visible').count(),matchIds.length);
+ await filterForm.locator('button[type=reset]').click();
+ assert.equal(await photoToggle.isChecked(),false);
+ assert.equal(await matchToggle.isChecked(),false);
+ assert.equal(await popularPage.locator('#am-picks-list .am-pick-card:visible').count(),37);
  await popularPage.locator('#am-filter-style').selectOption('sport');
  assert.equal(await popularPage.locator('#am-picks-list .am-pick-card:visible').count(),10,
    'Sport style includes documented G-SHOCKs, Seiko 5, Citizen, Orient and Speedtimer');
