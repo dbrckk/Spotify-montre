@@ -130,6 +130,26 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
     const actions=actionPriority==='amazon'?amazonAction+awinAction+officialAction
       :actionPriority==='awin'?awinAction+officialAction+amazonAction
       :officialAction+amazonAction;
+    // A model-specific customer summary is visible without JS and derived only
+    // from the same validated photo and merchant routing as the purchase links.
+    // This is NOT a price/stock widget or an independently checked license.
+    const photoGuidance=photo
+      ?'Photo exacte publiée · droits déclarés par l’éditeur'
+      :'Photo non publiée ici · à consulter chez la marque ou le vendeur';
+    const merchantGuidance=merchantRoute==='comparator'
+      ?'ASIN rapproché via sources tierces · offre Amazon actuelle à contrôler'
+      :merchantRoute==='asin'
+        ?'Fiche Amazon.fr associée · variante et stock à contrôler'
+        :merchantRoute==='partner'
+          ?'Lien partenaire Awin documenté · disponibilité non vérifiée'
+          :'Fiche de référence de la marque ou du vendeur · offre exacte à rechercher';
+    const decision='<section class="am-extra-decision" aria-labelledby="am-extra-decision-title"'
+      +' data-decision-photo="'+(photo?'published':'source')+'" data-decision-route="'+merchantRoute+'">'
+      +'<h2 id="am-extra-decision-title">L’essentiel avant de choisir</h2>'
+      +'<dl><div><dt>Visuel du modèle</dt><dd>'+e(photoGuidance)+'</dd></div>'
+      +'<div><dt>Accès marchand</dt><dd>'+e(merchantGuidance)+'</dd></div>'
+      +'<div><dt>Paiement et livraison</dt><dd>Chez le vendeur tiers · pas de commande sur Atelier Montres</dd></div></dl>'
+      +'<p><strong>Point à contrôler sur ce modèle :</strong> '+e(p.caution)+'</p></section>';
     const source=link(p.marketEvidence.url,p.marketEvidence.label);
     const relatedItems=suggestions.map(q=>{
       const otherPhoto=approvedPhotos.get(q.id);
@@ -184,6 +204,7 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       +'</div>'
       +'<div class="am-extra-intro"><p class="am-extra-overline">'+e(tierNames[p.tier])+' / '+e(category)+'</p>'
       +'<h1>'+e(name)+'</h1><p class="am-extra-subtitle">'+e(p.lead)+'</p>'
+      +decision
       +'<dl class="am-extra-facts">'+facts+'</dl>'
       +'<p class="am-extra-reference"><span>Référence à retrouver chez le marchand</span><strong>'+e(name)+'</strong></p>'
       +'<div class="am-ref-copy-tools" data-watch-ref-tools hidden><button type="button" class="am-ref-copy-button" data-watch-ref-copy="'+e(p.id)+'" hidden>Copier la référence</button><span class="am-ref-copy-status" role="status" aria-live="polite" data-watch-ref-status></span></div>'

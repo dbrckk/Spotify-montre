@@ -81,6 +81,23 @@ const affiliateActive=JSON.parse(readFileSync('site/affiliate-links.json','utf8'
 let exactFirst=0,sourceFirst=0,partnerFirst=0;
 for(const watch of picks){
   const html=readFileSync('site/montres/'+watch.id+'.html','utf8');
+  const summary=html.match(/<section class="am-extra-decision"[^>]+>/)?.[0]||'';
+  assert.ok(summary,'Every watch needs an evidence-first decision summary: '+watch.id);
+  assert.ok(html.includes('<strong>Point à contrôler sur ce modèle :</strong> '+escapeHtml(watch.caution)),
+    'Decision summary must surface the documented, watch-specific caution: '+watch.id);
+  assert.ok(html.includes('Chez le vendeur tiers · pas de commande sur Atelier Montres'),
+    'The decision summary must not masquerade external checkout as direct purchase');
+  assert.ok(html.includes('<dt>Visuel du modèle</dt>')&&
+    html.includes('<dt>Accès marchand</dt>')&&
+    html.includes('<dt>Paiement et livraison</dt>'),
+    'Buyer evidence must cover photograph, merchant route and payment: '+watch.id);
+  assert.ok(summary.includes('data-decision-photo="'+(rights[watch.id]?'published':'source')+'"'),
+    'Photo disclosure must match declared image publication: '+watch.id);
+  const expectedRoute=affiliateActive&&exactResearch[watch.id]
+    ?(exactResearch[watch.id].evidenceType==='amazon_fr_comparator_redirect'?'comparator':'asin')
+    :affiliateActive?'search':'official';
+  assert.ok(summary.includes('data-decision-route="'+expectedRoute+'"'),
+    'Buyer summary must reflect source-first merchant evidence: '+watch.id);
   const match=html.match(/<div class="am-extra-actions" data-action-priority="(amazon|awin|source)"[^>]*>([\s\S]*?)<\/div>/);
   assert.ok(match,'Customer merchant priority must be explicit on '+watch.id);
   const first=match[2].match(/<a\b[^>]*>/)?.[0]||'';
@@ -228,6 +245,13 @@ try{
     page.on('pageerror',error=>errors.push(error.message));
     await page.goto(new URL('/montres/skmei-1251.html',base).href,
       {waitUntil:'domcontentloaded'});
+    const decision=page.locator('.am-extra-decision');
+    assert.equal(await decision.count(),1);
+    assert.ok(await decision.isVisible(),'Decision evidence must be readable before merchant actions');
+    assert.equal(await decision.getAttribute('data-decision-photo'),'published');
+    const decisionBox=await decision.boundingBox();
+    assert.ok(decisionBox&&decisionBox.x>=-1&&decisionBox.x+decisionBox.width<=width+1,
+      'Buyer guidance must fit the full viewport at '+width+'px');
     const merchant=page.locator('.am-extra-link-status');
     assert.equal(await merchant.getAttribute('data-merchant-route'),'comparator');
     assert.equal(await merchant.locator('.am-extra-merchant-facts dt').count(),3);
