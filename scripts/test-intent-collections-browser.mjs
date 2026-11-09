@@ -160,23 +160,35 @@ try {
     assert.ok(measured.pictured+measured.unpictured===6);
     await noOverflow(phone,'Real photographs at Android 393px: '+slug);
   }
-  await phone.goto(new URL('/montres/montres-skmei.html',base).href,{waitUntil:'domcontentloaded'});
-  const packshot=phone.locator('[data-shopper-watch="skmei-1251"] .am-shopper-photo-link img');
-  await packshot.scrollIntoViewIfNeeded();
-  await packshot.evaluate(img=>img.decode());
-  const actuallyLoaded=await packshot.evaluate(img=>({
-    pathname:new URL(img.currentSrc).pathname,
-    width:img.naturalWidth,displayWidth:img.getBoundingClientRect().width
-  }));
-  assert.match(actuallyLoaded.pathname,
-    /^\/assets\/popular-responsive\/skmei-1251-[0-9]+\.webp$/,
-    'Chromium Android must choose a genuine compact WebP instead of the original');
-  assert.ok(actuallyLoaded.width>0&&actuallyLoaded.displayWidth>120,
-    'The exact-model photo must render at a usable display size');
-  await packshot.locator('xpath=..').screenshot({path:'artifacts/android-premium-sourced-packshot.png'});
-  await packshot.locator('xpath=..').click();
-  assert.equal(new URL(phone.url()).pathname,'/montres/skmei-1251.html',
-    'The whole premium photo must open the exact model fact sheet');
+  // Browser caches can reuse the full-resolution image downloaded on a
+  // preceding collection. Inspect initial resource selection with a new,
+  // isolated context at DPR 1 to prove the actual mobile first load.
+  const fresh=await browser.newContext({viewport:{width:393,height:852},
+    isMobile:true,hasTouch:true,deviceScaleFactor:1,locale:'fr-FR'});
+  try{
+    const freshPage=await fresh.newPage();
+    await freshPage.goto(new URL('/montres/montres-skmei.html',base).href,
+      {waitUntil:'domcontentloaded'});
+    const packshot=freshPage.locator('[data-shopper-watch="skmei-1251"] .am-shopper-photo-link img');
+    await packshot.scrollIntoViewIfNeeded();
+    await packshot.evaluate(img=>img.decode());
+    const actuallyLoaded=await packshot.evaluate(img=>({
+      pathname:new URL(img.currentSrc).pathname,
+      srcset:img.getAttribute('srcset'),
+      sizes:img.getAttribute('sizes'),
+      width:img.naturalWidth,displayWidth:img.getBoundingClientRect().width,
+      ratio:window.devicePixelRatio
+    }));
+    assert.match(actuallyLoaded.pathname,
+      /^\/assets\/popular-responsive\/skmei-1251-[0-9]+\.webp$/,
+      'Cold Chromium Android must load a compact local WebP: '+JSON.stringify(actuallyLoaded));
+    assert.ok(actuallyLoaded.width>0&&actuallyLoaded.displayWidth>120,
+      'The exact-model photo must render at a usable display size');
+    await packshot.locator('xpath=..').screenshot({path:'artifacts/android-premium-sourced-packshot.png'});
+    await packshot.locator('xpath=..').click();
+    assert.equal(new URL(freshPage.url()).pathname,'/montres/skmei-1251.html',
+      'The whole premium photo must open the exact model fact sheet');
+  }finally{await fresh.close();}
 
   // Link must be usable, not merely an attractive inactive button.
   await phone.goto(new URL('/montres/montres-pagani-design.html',base).href,{waitUntil:'domcontentloaded'});
