@@ -73,8 +73,10 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     if(!affiliates.enabled)return '';
     const direct=verifiedLinks.get(p.id);
     return direct
-      ?link(direct.url,'Voir le modèle exact sur Amazon.fr · lien rémunéré',true,p.id,'product')
-      :link(amazonSearch(p),'Rechercher sur Amazon.fr · lien rémunéré',true,p.id,'search');
+      ?link(direct.url,direct.evidenceType==='amazon_fr_comparator_redirect'
+        ?'Consulter l’ASIN recoupé sur Amazon.fr · lien rémunéré'
+        :'Consulter la fiche Amazon.fr documentée · lien rémunéré',true,p.id,'product')
+      :link(amazonSearch(p),'Rechercher sur Amazon.fr · référence à vérifier · lien rémunéré',true,p.id,'search');
   };
   const detailPaths=buildPopularProductPages({root,products:picks,coreProducts:existingProducts,affiliates,amazonPartnerTag,pageHead,page,e,u,link,amazonSearch,tierNames,affiliateLink,partnerLink,partnerOffers,verifiedLinks,approvedPhotos,aiVisuals,comparisonLinks});
   const movementKind=p=>p.movement.startsWith('Automatique')?'automatic':p.movement.startsWith('Quartz solaire')?'solar':'quartz';
@@ -82,6 +84,26 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     const photo=approvedPhotos.get(p.id);
     const ai=aiVisuals.get(p.id);
     const claim=p.marketEvidence.kind==='editorial'?'Sélection éditoriale':p.marketEvidence.kind==='manufacturer_bestseller'?'Signal marque':'Signal distributeur';
+    const listing=verifiedLinks.get(p.id);
+    // This is a documented mapping, NOT an inspected live Amazon offer.
+    // Do not turn a comparator redirect or a generic search into stock proof.
+    const merchantRoute=affiliates.enabled
+      ?listing?.evidenceType==='amazon_fr_comparator_redirect'?'comparator'
+        :listing?'asin':'search'
+      :partnerOffers.has(p.id)?'partner':'official';
+    const merchantTitle=merchantRoute==='comparator'?'ASIN recoupé via sources tierces'
+      :merchantRoute==='asin'?'Fiche Amazon.fr documentée'
+      :merchantRoute==='search'?'Recherche Amazon.fr, offre non identifiée'
+      :merchantRoute==='partner'?'Référence chez un partenaire':'Fiche de référence constructeur';
+    const merchantNote=listing
+      ?'ASIN '+listing.asin+' · contrôle documentaire '+listing.verifiedAt
+        +' · variante, prix et stock à vérifier'
+      :merchantRoute==='search'
+        ?'Aucun ASIN exact documenté ici ; vérifier le code modèle dans les résultats.'
+        :'Le prix, la variante et la disponibilité restent à vérifier auprès du vendeur.';
+    const merchantGuide='<div class="am-pick-merchant-guide" data-merchant-route="'+merchantRoute+'">'
+      +'<span class="am-pick-merchant-eyebrow">Avant de suivre le lien</span>'
+      +'<strong>'+e(merchantTitle)+'</strong><small>'+e(merchantNote)+'</small></div>';
     return '<article class="am-pick-card am-pick-'+e(p.style)+(verifiedLinks.has(p.id)?' am-pick-direct':'')+'" id="pick-'+e(p.id)+'"'
       +' data-pick-id="'+e(p.id)+'" data-pick-tier="'+e(p.tier)+'" data-pick-style="'+e(p.style)+'"'
       +' data-pick-movement="'+movementKind(p)+'" data-pick-photo="'+(photo?'yes':'no')+'"'
@@ -106,6 +128,7 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
       +(ai?'<figure class="am-pick-ai-preview"><img loading="lazy" decoding="async" width="768" height="768" src="'+e(ai.url)+'" alt="Interprétation artistique générée par IA de la montre '+e(p.brand+' '+p.model)+' ; visuel non contractuel"><figcaption><strong>Création IA</strong> · interprétation non contractuelle. La photo produit réelle figure au-dessus.</figcaption></figure>':'')
       +'<p class="am-pick-lead">'+e(p.lead)+'</p>'
       +'<dl class="am-pick-specs"><div><dt>Mouvement</dt><dd>'+e(p.movement)+'</dd></div><div><dt>Boîtier</dt><dd>'+e(p.case)+'</dd></div><div><dt>Verre</dt><dd>'+e(p.glass)+'</dd></div><div><dt>Étanchéité</dt><dd>'+e(p.water)+'</dd></div></dl>'
+      +merchantGuide
       +(front?'':'<p class="am-pick-caution"><strong>Avant achat :</strong> '+e(p.caution)+'</p>')
       +'<div class="am-pick-actions">'
       +affiliateLink(p)

@@ -132,3 +132,18 @@ Le workflow `test-premium-mobile.yml` exécute déjà la génération et le test
 **Propriété commerciale :** « Référence Amazon.fr documentée » n’est **ni** une garantie de stock, **ni** un prix validé, **ni** une commission ou une commande. Le paiement direct reste inactif. Aucun nouveau lien d'achat ou prix n'est généré.
 
 **Acceptation :** 37 références préservées, filtres combinables, test Android/desktop complet, SEO et WCAG validés. Aucun gain de trafic/vente n'est attribué sans mesure externe.
+
+
+## 9. Lot P2 — 9 novembre 2026 : provenance lisible au moment du départ marchand
+
+**Base inspectée :** `main@485746920971720aa7665a9ff17315ab54c57343`. Les sept contrôles de la précédente livraison (#241) ont réussi après fusion, y compris Render, Lighthouse, SEO et WCAG.
+
+**Constat :** les liens vers les quatorze ASIN documentés étaient présentés comme des « modèles exacts », alors que six références ont une preuve par redirection de comparateur et corroboration indépendante, et que certaines fiches Amazon consultées ou indexées sont historiques. Un lien vers un ASIN n'est pas la preuve d'une offre achetable aujourd'hui.
+
+**Modifications :**
+- `scripts/build-popular-picks.mjs` : libellés marchands distincts (ASIN de source tierce, fiche Amazon.fr documentée, simple recherche). Chaque carte présente la nature de la preuve, l'ASIN et sa date de contrôle quand ils existent, avant le lien rémunéré. Le même traitement s'applique aux huit cartes de l'accueil.
+- `scripts/build-popular-product-pages.mjs` : sur les 37 fiches complémentaires, afficher sous le code modèle un récapitulatif structuré comprenant **destination**, **référence** et **date de preuve documentaire** (ou « Aucun ASIN exact documenté ») ; conserver les avertissements concernant les variantes, les prix et le stock.
+- `site/popular-picks.css` : présentation sobre forêt/ivoire et grille d'informations lisible en une colonne sur mobile, sans JavaScript supplémentaire.
+- `scripts/test-mobile-storefront-v8.mjs` et `scripts/test-popular-product-actions-browser.mjs` : vérifier les trois états, les liens exacts, les libellés, les dates et les dimensions sur Android et ordinateur.
+
+**Critères :** tests et génération SEO verts, accessibilité WCAG, preuve conforme aux registres, aucune redirection commerciale changée, aucun prix ni stock inventé, caisse toujours inactive. L'amélioration de la conversion devra être évaluée à partir d'événements et commissions réellement mesurés, pas postulés.

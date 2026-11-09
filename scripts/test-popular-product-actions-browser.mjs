@@ -190,6 +190,23 @@ try{
     page.on('pageerror',error=>errors.push(error.message));
     await page.goto(new URL('/montres/skmei-1251.html',base).href,
       {waitUntil:'domcontentloaded'});
+    const merchant=page.locator('.am-extra-link-status');
+    assert.equal(await merchant.getAttribute('data-merchant-route'),'comparator');
+    assert.equal(await merchant.locator('.am-extra-merchant-facts dt').count(),3);
+    assert.ok((await merchant.innerText()).includes('B072JTCP5H'),
+      'The documented ASIN must appear before the external CTA');
+    const merchantLayout=await merchant.evaluate(el=>{
+      const r=el.getBoundingClientRect();
+      return {left:r.left,right:r.right,
+        columns:getComputedStyle(el.querySelector('.am-extra-merchant-facts')).gridTemplateColumns,
+        viewport:document.documentElement.clientWidth};
+    });
+    assert.ok(merchantLayout.left>=0&&merchantLayout.right<=merchantLayout.viewport+1,
+      'Merchant proof panel must not overflow the viewport: '+JSON.stringify(merchantLayout));
+    assert.equal(merchantLayout.columns.trim().split(/\s+/).length,width<600?1:3,
+      'Documentary facts must stack on Android and fit a desktop grid');
+    if(width===393)
+      await merchant.screenshot({path:'artifacts/atelier-watch-merchant-proof-393.png'});
     const hint=page.locator('.am-extra-factual-swipe-hint');
     assert.equal(await hint.isVisible(),width<700,
       'Horizontal comparison hint is reserved for mobile screens');

@@ -257,6 +257,34 @@ try{
  const approvedPhotoCount=Object.keys(approvedWatchPhotos).length;
  assert.equal(await popularPage.locator('img.am-pick-licensed-photo').count(),approvedPhotoCount,
    'All and only registered branded images should render in the supplemental catalogue');
+ // All 37 merchant exits need a source-backed type *before* customers click.
+ const merchantRegistry=JSON.parse(readFileSync(
+   'research/amazon-fr-popular-verified.json','utf8')).verifiedProducts;
+ const routeFor=id=>merchantRegistry[id]
+   ?(merchantRegistry[id].evidenceType==='amazon_fr_comparator_redirect'?'comparator':'asin')
+   :'search';
+ const merchantCards=await popularPage.locator('#am-picks-list .am-pick-card').all();
+ assert.equal(merchantCards.length,37,'Merchant status belongs to every supplemental watch');
+ for(const card of merchantCards){
+   const id=await card.getAttribute('data-pick-id'),proof=merchantRegistry[id];
+   const guide=card.locator('.am-pick-merchant-guide');
+   assert.equal(await guide.count(),1,'Exactly one merchant status for '+id);
+   assert.equal(await guide.getAttribute('data-merchant-route'),routeFor(id));
+   const text=await guide.innerText();
+   if(proof){
+     assert.ok(text.includes(proof.asin)&&text.includes(proof.verifiedAt),
+       'Documented ASIN and audit date must be readable: '+id);
+     assert.match(await card.locator('a[data-amazon-product]').innerText(),
+       routeFor(id)==='comparator'?/ASIN recoupé/:/fiche Amazon.fr documentée/i);
+   }else{
+     assert.match(text,/Aucun ASIN exact documenté/i);
+     assert.match(await card.locator('a[data-amazon-search-id]').innerText(),
+       /Rechercher sur Amazon.fr/);
+   }
+ }
+ assert.equal(await popular.locator('.am-pick-merchant-guide').count(),8,
+   'The homepage must show the same honest merchant exits for eight featured watches');
+
  // All 25 rights-registered editorial packshots must use already-generated
  // exact-model responsive WebPs, not force 1080px originals on Android.
  for(const [id,proof] of Object.entries(approvedWatchPhotos)){
@@ -494,6 +522,18 @@ try{
    'The confirmed reference must exist in the verified Amazon registry');
  const verified=verifiedPopular[watch.id];
  const commercial=popularPage.locator(verified?'a[data-amazon-product]':'a[data-amazon-search-id]');
+ const route=verified
+   ?(verified.evidenceType==='amazon_fr_comparator_redirect'?'comparator':'asin'):'search';
+ const evidence=popularPage.locator('.am-extra-link-status');
+ assert.equal(await evidence.getAttribute('data-merchant-route'),route,
+   'Public product page must distinguish an external ASIN check from a generic search: '+watch.id);
+ assert.equal(await evidence.locator('.am-extra-merchant-facts dt').count(),3,
+   'Three merchant evidence fields must remain visible: '+watch.id);
+ const values=await evidence.locator('.am-extra-merchant-facts dd').allInnerTexts();
+ assert.ok(values[1].includes(verified?.marketplaceModel||watch.model),
+   'The manufacturer code or regional variant must match original source: '+watch.id);
+ assert.ok(values[2].includes(verified?.verifiedAt||'Aucun ASIN exact documenté'),
+   'Documentary date must never be misrepresented as live availability: '+watch.id);
  assert.equal(await commercial.count(),1,
    'Paid destination must be exactly one product or search link: '+watch.id);
  assert.equal(await commercial.getAttribute(verified?'data-amazon-product':'data-amazon-search-id'),watch.id);
