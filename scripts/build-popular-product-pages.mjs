@@ -14,26 +14,29 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
     :/numérique|digital/i.test(value)?'digital'
     :/chronographe/i.test(value)?'chrono':'quartz';
   const relatedWatches=p=>{
+    // Editorial ranges are not live prices. Still, keep recommendations
+    // within the same range so a budget shopper never gets a silent upgrade
+    // from Essentielle to Prestige. The source catalogue contains at least
+    // four alternatives in every range.
     const family=movementFamily(p.movement);
-    const ranked=products.filter(q=>q.id!==p.id).sort((a,b)=>{
+    const ranked=products.filter(q=>q.id!==p.id&&q.tier===p.tier).sort((a,b)=>{
       const score=q=>(q.style===p.style?8:0)
-        +(q.brand===p.brand?9:0)
+        +(q.brand===p.brand?6:0)
         +(movementFamily(q.movement)===family?4:0)
-        +(q.tier===p.tier?2:0)
         +(approvedPhotos.has(q.id)?1:0);
       return score(b)-score(a)||a.id.localeCompare(b.id,'fr');
     });
-    // Prioritize up to two different references of this manufacturer and
-    // ensure at least one alternative from another brand when possible.
-    const picks=ranked.filter(q=>q.brand===p.brand).slice(0,2);
-    const brandCounts=new Map(picks.map(q=>[q.brand,(picks.filter(x=>x.brand===q.brand)).length]));
+    const picks=[];
     for(const q of ranked){
       if(picks.length===3)break;
-      if(picks.some(x=>x.id===q.id)||(brandCounts.get(q.brand)||0)>=2)continue;
-      picks.push(q);brandCounts.set(q.brand,(brandCounts.get(q.brand)||0)+1);
+      // Retain brand affinity, while always showing at least one other brand.
+      if(picks.filter(x=>x.brand===q.brand).length>=2)continue;
+      picks.push(q);
     }
-    if(picks.length!==3||new Set(picks.map(q=>q.id)).size!==3||picks.some(q=>q.id===p.id))
-      throw Error('Three distinct source-backed related watches required: '+p.id);
+    if(picks.length!==3||new Set(picks.map(q=>q.id)).size!==3
+      ||picks.some(q=>q.id===p.id||q.tier!==p.tier)
+      ||picks.every(q=>q.brand===p.brand))
+      throw Error('Three distinct same-range, cross-brand suggestions required: '+p.id);
     return picks;
   };
   const paths=[];
@@ -111,13 +114,13 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       const reason=q.brand===p.brand?'Même marque'
         :q.style===p.style?'Style proche'
         :movementFamily(q.movement)===movementFamily(p.movement)?'Mouvement comparable':'Autre approche';
-      return '<li data-related-id="'+e(q.id)+'" data-related-reason="'+e(reason)+'">'
+      return '<li data-related-id="'+e(q.id)+'" data-related-reason="'+e(reason)+'" data-related-tier="'+e(q.tier)+'">'
         +'<a class="am-extra-related-thumb" href="./'+e(q.id)+'.html">'
         +(otherPhoto?'<img loading="lazy" decoding="async" width="'+otherPhoto.width+'" height="'+otherPhoto.height+'" src="../'+e(otherPhoto.url)+'"'
           +responsivePopularAttrs(root,q,otherPhoto,{prefix:'../',sizes:'(max-width: 650px) 42vw, (max-width: 950px) 26vw, 190px',escape:e})
           +' alt="Photographie de '+e(q.brand+' '+q.model)+'">'
           :'<span class="am-extra-related-fallback"><span>'+e(q.brand)+'</span><strong>'+e(q.model)+'</strong><small>Photo chez le vendeur</small></span>')
-        +'</a><span class="am-extra-related-label">'+e(reason)+'</span>'
+        +'</a><span class="am-extra-related-tier">Gamme '+e(tierNames[q.tier])+'</span><span class="am-extra-related-label">'+e(reason)+'</span>'
         +'<a class="am-extra-related-name" href="./'+e(q.id)+'.html">'+e(q.brand+' '+q.model)+'</a>'
         +'<span>'+e(q.movement)+' · '+e(q.case)+'</span></li>';
     }).join('');
@@ -198,7 +201,7 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       +proofLedger
       +'<p>'+(photo?'L’éditeur déclare disposer de l’autorisation commerciale de la marque. Cette autorisation n’a pas été vérifiée indépendamment.':'Les photos sont consultables chez la marque ou le vendeur cité : nous ne les republions pas sans autorisation.')+' La mention de meilleures ventes, lorsqu’elle existe, n’atteste pas le classement de ce modèle sur Amazon.fr.</p></section>'
       +'<section id="comparables" class="am-extra-related" aria-labelledby="am-extra-related-heading">'
-      +'<h2 id="am-extra-related-heading">Trois montres dans le même esprit</h2><p>Suggestions établies à partir de la marque, du style et du mouvement indiqués dans nos fiches. Elles ne constituent ni des essais comparatifs ni un classement de qualité ; seules les photos déclarées autorisées sont affichées.</p>'
+      +'<h2 id="am-extra-related-heading">Trois alternatives dans la même gamme</h2><p>Ces trois modèles appartiennent à la gamme éditoriale '+e(tierNames[p.tier])+'. La sélection rapproche styles, mouvements et marques à partir de données publiées, sans essai comparatif ni prix garanti. Seules les photos déclarées autorisées sont affichées.</p>'
       +'<ul>'+relatedItems+'</ul>'+duelBlock+comparisonTable+'<div class="am-extra-related-cta"><a class="am-extra-compare-cta" href="'+e(compareUrl)+'" data-compare-source="'+e(p.id)+'">Comparer ces références à cette montre</a>'
       +'<a href="./toutes-les-montres.html">Comparer les 52 montres</a></div></section>'
       +'<section id="verifications" class="am-extra-checks"><h2>Avant de commander</h2>'
