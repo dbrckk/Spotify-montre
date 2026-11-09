@@ -165,6 +165,16 @@
 .am-pick-filter-field input::placeholder{color:#647365;opacity:1}
 .am-pick-filter-field input:hover,.am-pick-filter-field select:hover{border-color:#557e5e}
 .am-pick-filter-field input:focus-visible,.am-pick-filter-field select:focus-visible,.am-pick-filter-footer button:focus-visible{outline:3px solid #b9852b;outline-offset:3px}
+/* Source transparency filters, deliberately distinct from live stock filters. */
+.am-pick-filter-proofs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:11px;row-gap:9px;margin:16px 0 0;padding:14px 15px 12px;border:1px solid #c8d6c5;border-radius:6px;background:#eef3eb;min-width:0}
+.am-pick-filter-proofs legend{padding:0 7px;color:#294735;font:750 12px/1.5 system-ui,sans-serif;letter-spacing:.02em}
+.am-pick-proof-option{display:flex;align-items:center;gap:10px;min-height:48px;padding:10px 12px;border:1px solid #c3d2c4;border-radius:5px;background:#fffefa;color:#244a35;font:700 12px/1.5 system-ui,sans-serif;cursor:pointer}
+.am-pick-proof-option:has(input:checked){border-color:#547c5f;background:#e1ece0}
+.am-pick-proof-option:has(input:focus-visible){outline:3px solid #b9852b;outline-offset:2px}
+.am-pick-proof-option input{flex:0 0 auto;width:18px;height:18px;margin:0;accent-color:#24543b}
+.am-pick-proof-option span{min-width:0;overflow-wrap:anywhere}
+.am-pick-filter-explainer{grid-column:1/-1;margin:1px 0 0;color:#4e6252;font:400 12px/1.55 system-ui,sans-serif}
+@media(max-width:710px){.am-pick-filter-proofs{grid-template-columns:1fr;padding:13px}.am-pick-proof-option{min-height:48px}}
 .am-pick-filter-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding-top:16px}
 .am-pick-filter-footer output{font:750 14px/1.5 system-ui,sans-serif;color:#224631}
 .am-pick-filter-footer button{min-height:44px;padding:9px 15px;background:#fff;border:1px solid #65856e;border-radius:4px;color:#225136;font:700 13px/1.5 system-ui,sans-serif;cursor:pointer}
