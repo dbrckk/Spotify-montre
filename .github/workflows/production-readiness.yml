@@ -5,6 +5,9 @@ on:
     paths:
       - 'scripts/report-production-readiness.mjs'
       - 'scripts/check-production-readiness.mjs'
+      - 'scripts/report-r1-evidence.mjs'
+      - 'scripts/check-r1-evidence.mjs'
+      - 'docs/DOSSIER_PREUVES_R1_2026-11-09.md'
       - 'site/selection-affiliation.json'
       - 'site/selection-populaires.json'
       - 'site/popular-photo-rights.json'
@@ -23,6 +26,9 @@ on:
     paths:
       - 'scripts/report-production-readiness.mjs'
       - 'scripts/check-production-readiness.mjs'
+      - 'scripts/report-r1-evidence.mjs'
+      - 'scripts/check-r1-evidence.mjs'
+      - 'docs/DOSSIER_PREUVES_R1_2026-11-09.md'
       - 'site/selection-affiliation.json'
       - 'site/selection-populaires.json'
       - 'site/popular-photo-rights.json'
@@ -54,6 +60,10 @@ jobs:
           node-version: '22'
       - name: Validate read-only report never claims commercial readiness
         run: npm run production:check
+      - name: Check R1 photo and editor evidence inventory
+        run: npm run compliance:r1:check
+      - name: Display aggregated R1 evidence in job summary
+        run: node scripts/report-r1-evidence.mjs --ci-summary > /dev/null
       - name: Display current GO/NO-GO snapshot in the job summary
         run: node scripts/report-production-readiness.mjs --ci-summary > /dev/null
       # Do not run --strict in ordinary PR CI. It intentionally fails while
