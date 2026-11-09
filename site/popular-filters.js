@@ -1,6 +1,6 @@
 /* Atelier Montres — progressive-enhancement discovery of documentary watches.
  * Only local DOM filtering: no network requests, cookies, personal profiles or
- * invented availability. Without JS, all 13 editorial products remain visible.
+ * invented availability. Without JS, all 37 source-backed supplemental models remain visible.
  */
 (() => {
   'use strict';
@@ -15,7 +15,9 @@
   const style=form.elements.namedItem('style');
   const movement=form.elements.namedItem('mouvement');
   const tier=form.elements.namedItem('gamme');
-  if(!cards.length||!sections.length||!count||!empty||!query||!style||!movement||!tier)return;
+  const photoOnly=form.elements.namedItem('photo-publiee');
+  const matchOnly=form.elements.namedItem('asin-documente');
+  if(!cards.length||!sections.length||!count||!empty||!query||!style||!movement||!tier||!photoOnly||!matchOnly)return;
   const normalize=value=>String(value||'').toLocaleLowerCase('fr-FR')
     .normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
   const haystack=new Map(cards.map(card=>[card,normalize(card.dataset.pickSearch||card.textContent)]));
@@ -26,6 +28,8 @@
       const matches=(!style.value||card.dataset.pickStyle===style.value)
         &&(!movement.value||card.dataset.pickMovement===movement.value)
         &&(!tier.value||card.dataset.pickTier===tier.value)
+        &&(!photoOnly.checked||card.dataset.pickPhoto==='yes')
+        &&(!matchOnly.checked||card.dataset.pickMatch==='yes')
         &&tokens.every(token=>haystack.get(card).includes(token));
       card.hidden=!matches;
       if(matches)shown++;
@@ -48,6 +52,8 @@
     style.value='';
     movement.value='';
     tier.value='';
+    photoOnly.checked=false;
+    matchOnly.checked=false;
     apply();
   });
   // Existing tier anchor links must always navigate to a visible section,
