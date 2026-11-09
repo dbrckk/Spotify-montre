@@ -75,6 +75,44 @@ for(const p of picks){
       'Photo CTA must link to the documented manufacturer or seller URL: '+p.id);
   }
 }
+// Priority is based on documentary evidence, not projected affiliate income.
+const exactResearch=JSON.parse(readFileSync('research/amazon-fr-popular-verified.json','utf8')).verifiedProducts;
+const affiliateActive=JSON.parse(readFileSync('site/affiliate-links.json','utf8')).enabled;
+let exactFirst=0,sourceFirst=0,partnerFirst=0;
+for(const watch of picks){
+  const html=readFileSync('site/montres/'+watch.id+'.html','utf8');
+  const match=html.match(/<div class="am-extra-actions" data-action-priority="(amazon|awin|source)"[^>]*>([\s\S]*?)<\/div>/);
+  assert.ok(match,'Customer merchant priority must be explicit on '+watch.id);
+  const first=match[2].match(/<a\b[^>]*>/)?.[0]||'';
+  assert.ok(first,'No outbound model-specific action for '+watch.id);
+  const expected=affiliateActive&&exactResearch[watch.id]?'amazon'
+    :match[2].includes('data-partner-offer-id=')?'awin':'source';
+  assert.equal(match[1],expected,'Do not prioritise a generic search over an actual source: '+watch.id);
+  if(expected==='amazon'){
+    exactFirst++;
+    assert.ok(first.includes('data-amazon-product="'+watch.id+'"'),
+      'Verified ASIN must lead to its documented product page: '+watch.id);
+    assert.ok(first.includes('/dp/'+exactResearch[watch.id].asin),
+      'The first CTA must use the actual documented ASIN: '+watch.id);
+  }else if(expected==='awin'){
+    partnerFirst++;
+    assert.ok(first.includes('data-partner-offer-id="'+watch.id+'"'),
+      'The approved partner source should lead when no exact Amazon ASIN is present: '+watch.id);
+  }else{
+    sourceFirst++;
+    assert.ok(first.includes('data-merchant-official-id="'+watch.id+'"'),
+      'An unverified Amazon search must not appear before the model source: '+watch.id);
+    assert.ok(first.includes('href="'+escapeHtml(watch.officialUrl)+'"'),
+      'The manufacturer / seller URL must match the original source: '+watch.id);
+    if(affiliateActive)assert.ok(match[2].includes('data-amazon-search-id="'+watch.id+'"'),
+      'Research-only sponsored Amazon link remains available but secondary: '+watch.id);
+    assert.ok(html.includes('Recherche Amazon.fr — modèle non garanti'),
+      'A generic search must remain transparently described: '+watch.id);
+  }
+}
+assert.equal(exactFirst+partnerFirst+sourceFirst,37);
+if(affiliateActive)assert.equal(exactFirst,14,'All fourteen verified supplemental ASINs retain priority');
+
 // Comparator proof is the only trusted reason to publish two external
 // documentary sources. Other exact links are NOT silently given fake proof.
 const research=JSON.parse(readFileSync('research/amazon-fr-popular-verified.json','utf8')).verifiedProducts;
@@ -363,6 +401,34 @@ try{
   assert.ok(bounds.scroll<=bounds.client+2,'Unphotographed watch must not overflow Android');
   await noPhoto.close();
 
+
+  // With scripts disabled, a generic Amazon search must never become the
+  // primary action for a watch lacking a documented exact ASIN.
+  const sourceOnly=picks.find(p=>!exactResearch[p.id]);
+  assert.ok(sourceOnly,'An unverified-reference sample is required');
+  for(const [id,firstKind] of [['skmei-1251','amazon'],[sourceOnly.id,'source']]){
+    const viewport=await browser.newPage({
+      javaScriptEnabled:false,viewport:{width:393,height:852},isMobile:true,hasTouch:true
+    });
+    try{
+      await viewport.goto(new URL('/montres/'+id+'.html',base).href);
+      const group=viewport.locator('.am-extra-actions');
+      assert.equal(await group.getAttribute('data-action-priority'),firstKind);
+      const first=group.locator('a').first();
+      const label=await first.innerText();
+      assert.match(label,firstKind==='amazon'?/Amazon.fr/:/modèle exact chez/);
+      const rect=await first.boundingBox();
+      const width=await viewport.evaluate(()=>document.documentElement.scrollWidth);
+      assert.ok(rect&&rect.height>=44&&rect.x>=0&&rect.x+rect.width<=393,
+        'Primary merchant source must be an accessible Android touch target: '+id);
+      assert.ok(width<=395,'Buyer links must not overflow a 393px Android viewport: '+id);
+      if(firstKind==='source') {
+        assert.ok(await group.locator('[data-amazon-search-id="'+id+'"]').count()===1,
+          'Amazon search stays visibly available as a secondary option');
+        assert.match(await group.locator('a').last().innerText(),/Rechercher sur Amazon.fr/);
+      }
+    }finally{await viewport.close();}
+  }
 
   // Browser clipboard/share may both be unavailable or blocked. Users must
   // still be able to manually copy the full, model-specific URL.
