@@ -3,7 +3,7 @@
   "models": 15,
   "totalModels": 52,
   "supplementalPhotos": 25,
-  "files": 277,
+  "files": 279,
   "parts": [
     {
       "file": "deploy-package-01.json",
@@ -63,12 +63,12 @@
     {
       "file": "deploy-package-12.json",
       "count": 50,
-      "bytes": 716988
+      "bytes": 718771
     },
     {
       "file": "deploy-package-13.json",
-      "count": 33,
-      "bytes": 447814
+      "count": 35,
+      "bytes": 452266
     }
   ]
 }
