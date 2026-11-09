@@ -2,6 +2,16 @@ name: Export R1 photo permission packets (unsent)
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/prepare-photo-permission-requests.mjs'
+      - 'scripts/check-photo-permission-requests.mjs'
+      - 'scripts/report-r1-evidence.mjs'
+      - 'site/selection-affiliation.json'
+      - 'site/selection-populaires.json'
+      - 'site/popular-photo-rights.json'
+      - '.github/workflows/r1-photo-requests.yml'
 
 permissions:
   contents: read

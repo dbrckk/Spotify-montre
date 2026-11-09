@@ -52,6 +52,6 @@ npm run compliance:r1:requests -- --all --json
 npm run compliance:r1:requests:check
 ```
 
-Sur Android, utiliser **GitHub → Actions → Export R1 photo permission packets (unsent) → Run workflow**, puis récupérer l’artefact contenant les brouillons Markdown et les données JSON. Ce workflow **n’envoie aucune communication**. Il n’identifie pas non plus les coordonnées d’un titulaire de droits.
+L'export est aussi régénéré automatiquement sur les changements du registre et des scripts concernés. Sur Android, utiliser **GitHub → Actions → Export R1 photo permission packets (unsent)** (ou **Run workflow** pour le renouveler), puis récupérer l’artefact contenant les brouillons Markdown et les données JSON. Ce workflow **n’envoie aucune communication**. Il n’identifie pas non plus les coordonnées d’un titulaire de droits.
 
 Chaque brouillon fournit la référence du modèle, son URL source, le chemin exact du WebP et le SHA-256 pour aider à vérifier le périmètre des autorisations de reproduction. Une source fabricant ou une empreinte de fichier n’est pas une licence. Le message doit être relu, envoyé au véritable ayant droit par l’exploitant, et la réponse doit être contrôlée hors du dépôt avant toute modification du registre ou du jalon R1.

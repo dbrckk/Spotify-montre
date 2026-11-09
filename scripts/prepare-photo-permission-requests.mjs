@@ -98,7 +98,7 @@ const draft=g=>{
     '',
     '> À traiter hors GitHub : conserver la réponse dans un espace privé et vérifier indépendamment l’identité du signataire, le mandat et les usages autorisés. Une réponse n’active pas automatiquement un droit ni le jalon R1.',
     '');
-  return lines.join('\n').replaceAll('§','§');
+  return lines.join('\n');
 };
 const list=[
   '# Atelier Montres — demandes de droits photo R1 (non envoyées)','',
@@ -112,8 +112,8 @@ const list=[
   'Exemple : §npm run compliance:r1:requests -- --brand "SKMEI"§.',
   'Export total : §npm run compliance:r1:requests -- --all§.',
   ''
-].join('\n').replaceAll('§','§');
-if(!selected)process.stdout.write(list.replaceAll('§','§').replaceAll('§',String.fromCharCode(96))+'\n');
+].join('\n');
+if(!selected)process.stdout.write(list.replaceAll('§',String.fromCharCode(96))+'\n');
 else if(args.includes('--json'))process.stdout.write(JSON.stringify({
   schemaVersion:1,reportKind:'unsent-photo-rights-requests',
   automaticSending:false,legalClearanceConfirmed:false,
