@@ -1,5 +1,6 @@
 import {writeFileSync} from 'node:fs';
 import {join} from 'node:path';
+import {responsiveAttrs,responsivePopularAttrs} from './responsive-images.mjs';
 
 // Search-intent collections assembled only from the documented 52-watch
 // catalogue. Core watches may use previously approved local photographs;
@@ -120,17 +121,29 @@ export function buildShopperSelections({root,coreProducts,picks,partners,verifie
     if(!match)throw Error('Missing shopper collection watch '+id);
     const {product:p,core}=match;
     const name=p.brand+' '+p.model;
+    const photoProof=core?p.photoReview:approvedPopularPhotos.get(id);
     const photo=core
-      ?(p.photoReview?.publicUsageApproved===true && p.photoReview?.localUrl==='./assets/watches/'+p.id+'.webp'
+      ?(photoProof?.publicUsageApproved===true&&photoProof.localUrl==='./assets/watches/'+p.id+'.webp'
         ?'../assets/watches/'+p.id+'.webp':null)
-      :(approvedPopularPhotos.get(id)?'../'+approvedPopularPhotos.get(id).url:null);
+      :(photoProof?'../'+photoProof.url:null);
+    const dimensions=photo?(core
+      ?[photoProof.localWidth,photoProof.localHeight]
+      :[photoProof.width,photoProof.height]):[];
+    if(photo&&(!dimensions.every(n=>Number.isInteger(n)&&n>0)||dimensions.length!==2))
+      throw Error('Curated photo dimensions missing for '+id);
     const facts=core
       ?[p.description,p.specs?.movement||p.movement,p.specs?.diameter||p.specs?.caseSize||'Dimensions non documentées']
       :[p.category,p.movement,p.case];
     const link='../montres/'+e(p.id)+'.html';
     const factList=facts.filter(Boolean).map(x=>'<li>'+e(x)+'</li>').join('');
     const stage=photo
-      ?'<img src="'+e(photo)+'" loading="lazy" decoding="async" alt="Montre '+e(name)+'">'
+      ?'<a class="am-shopper-photo-link" href="'+link+'" aria-label="Consulter la fiche et les sources : '+e(name)+'">'
+        +'<img src="'+e(photo)+'" loading="lazy" decoding="async"'
+        +' width="'+dimensions[0]+'" height="'+dimensions[1]+'" alt=""'
+        +(core
+          ?responsiveAttrs(root,p,{prefix:'../',sizes:'(max-width:420px) 75vw, 280px',escape:e})
+          :responsivePopularAttrs(root,p,photoProof,{prefix:'../',sizes:'(max-width:420px) 75vw, 280px',escape:e}))
+        +'></a>'
       :'<span class="am-shopper-art-brand">'+e(p.brand)+'</span><strong>'+e(p.model)+'</strong><span class="am-shopper-art-note">Repère graphique · photo exacte chez le fabricant ou vendeur</span>';
     const paidCore=core?coreLinks.get(p.id):null;
     const paidPopular=!core?verifiedPopularLinks.get(p.id):null;
