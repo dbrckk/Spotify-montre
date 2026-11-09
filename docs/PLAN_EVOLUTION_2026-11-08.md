@@ -162,3 +162,18 @@ Le workflow `test-premium-mobile.yml` exécute déjà la génération et le test
 **Acceptation :** `npm test`, SEO, publication sans Umami, WCAG, Android et Lighthouse ; absence de modifications des liens d'achat, des registres de preuves, du paiement désactivé et des données de prix. Aucun résultat de conversion ni revenu ne sera revendiqué sans export d'événements réel ou rapports marchands.
 
 **Correctif de conformité associé :** `scripts/build-seo.mjs` publie désormais une notice active décrivant explicitement les comparaisons et catégories de filtres mesurées ; sans configuration Umami, la notice et les scripts reviennent à l'état sans suivi. `scripts/check-affiliate-publication.mjs` contrôle les deux versions, la reconstruction idempotente et l'absence de suivi après désactivation. La page légale est datée du 9 novembre 2026 ; les coordonnées de l'éditeur demeurent à compléter avant toute activation effective.
+
+
+## 11. Lot P1 — 9 novembre 2026 : liens de sélection restaurables pour les 37 montres complémentaires
+
+**Audit de départ :** `main@258dfd546707e271aef4b79d6c68f4d0d14ecd4e`. Le catalogue unifié de 52 montres sait déjà conserver ses filtres dans l'URL et restaurer un retour depuis une fiche. La sélection supplémentaire de 37 modèles ne proposait ni URL filtrée durable, ni partage, ni retour vers le sous-ensemble réellement consulté.
+
+**Livraison :**
+- `site/popular-filters.js` : lecture des critères validés `q`, `tier`, `style`, `movement`, `photo` et `asin` depuis la query string (valeurs limitées à celles des contrôles). Synchronisation locale des modifications sans chargement réseau ni collecteur analytique supplémentaire. Un lien partagé restaure les résultats réels.
+- `scripts/build-popular-picks.mjs` et `site/popular-picks.css` : bouton « Partager cette sélection » visible seulement lorsque le JavaScript de filtrage est opérationnel ; Web Share natif Android, repli dans le presse-papiers, puis champ manuel sélectionné si les deux méthodes sont indisponibles. Statut annoncé par `role=status`.
+- `site/catalogue-return.js` : retour sécurisé vers la collection réelle (52 ou 37 références) depuis la fiche, puis depuis les modèles associés. Un seul contexte de navigation, enregistré temporairement côté onglet (30 minutes), URL interne reconstruite à partir d'une **liste blanche stricte** ; les liens canonicals des 52 fiches restent inchangés. Les visites directes n'inventent pas de « retour à ma sélection ».
+- `scripts/test-catalogue-search-browser.mjs` : vérifier sous Chromium Android les URL filtrées, partage natif, copie, repli manuel, restauration de la navigation liée, remise à zéro et fonctionnement sans JavaScript.
+
+**Respect de la vie privée :** le texte libre de recherche n'est transmis ni à un service tiers ni à un compte client par le filtre ; il ne figure dans le lien que lorsque le visiteur choisit explicitement de partager sa sélection. Aucun prix, disponibilité, commission ou correspondance ASIN n'est ajouté. Aucun lien d'affiliation ni paiement n'est modifié.
+
+**Barrières de fusion :** vérification de la syntaxe, tests SEO et publications, parcours Android, audit WCAG, build et contrôle de production sur le commit fusionné ; le gain de conversion ne pourra être estimé qu'à partir de statistiques réelles.

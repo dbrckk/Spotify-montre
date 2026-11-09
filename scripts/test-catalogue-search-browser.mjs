@@ -567,6 +567,118 @@ try{
     assert.equal(await directPage.locator('.am-catalogue-return').count(),0);
   }finally{await directPage.close();}
 
+
+  // The 37-watch supplement must offer the same bookmarkable, recoverable
+  // browsing journey as the full 52-watch catalogue (no tracking or server).
+  const supplementContext=await browser.newContext({viewport:{width:393,height:852},
+    isMobile:true,hasTouch:true,locale:'fr-FR'});
+  const supplement=await supplementContext.newPage();
+  const supplementErrors=[];
+  supplement.on('pageerror',error=>supplementErrors.push(error.message));
+  await supplement.addInitScript(()=>{
+    Object.defineProperty(navigator,'share',{configurable:true,value:async data=>{
+      window.__sharedSupplementSelection=data;
+    }});
+  });
+  try{
+    const selectedUrl=new URL('/montres/modeles-populaires.html?q=1251&photo=1&asin=1',base);
+    await supplement.goto(selectedUrl.href,{waitUntil:'domcontentloaded'});
+    await supplement.locator('#am-pick-filters').waitFor({state:'visible'});
+    assert.equal(await supplement.locator('#am-filter-query').inputValue(),'1251');
+    assert.equal(await supplement.locator('#am-filter-photo').isChecked(),true);
+    assert.equal(await supplement.locator('#am-filter-match').isChecked(),true);
+    assert.equal(await supplement.locator('#am-picks-list .am-pick-card:visible').count(),1);
+    assert.equal(await supplement.locator('#pick-skmei-1251').isVisible(),true);
+    assert.equal(await supplement.locator('#am-pick-filter-count').innerText(),'1 modèle sur 37');
+
+    const share= supplement.locator('#am-pick-share');
+    assert.equal(await share.isVisible(),true);
+    const shareBounds=await share.boundingBox();
+    assert.ok(shareBounds&&shareBounds.height>=44&&shareBounds.x>=0
+      &&shareBounds.x+shareBounds.width<=393,
+      'The share action must have an Android-sized accessible touch target');
+    await share.click();
+    const shared=await supplement.evaluate(()=>window.__sharedSupplementSelection);
+    const shareUrl=new URL(shared.url);
+    assert.equal(shareUrl.pathname,'/montres/modeles-populaires.html');
+    assert.equal(shareUrl.searchParams.get('q'),'1251');
+    assert.equal(shareUrl.searchParams.get('photo'),'1');
+    assert.equal(shareUrl.searchParams.get('asin'),'1');
+    assert.equal(shareUrl.hash,'#am-pick-filter-count');
+    assert.equal(await supplement.locator('#am-pick-share-status').innerText(),'Sélection partagée.');
+
+    // Clipboard support and no-clipboard fallback both use the same URL.
+    await supplement.evaluate(()=>{
+      Object.defineProperty(navigator,'share',{configurable:true,value:undefined});
+      Object.defineProperty(navigator,'clipboard',{configurable:true,value:{
+        writeText:async value=>{window.__copiedSupplementSelection=value;}
+      }});
+    });
+    await share.click();
+    assert.equal(await supplement.evaluate(()=>window.__copiedSupplementSelection),shared.url);
+    assert.equal(await supplement.locator('#am-pick-share-status').innerText(),'Lien de sélection copié.');
+    await supplement.evaluate(()=>{
+      Object.defineProperty(navigator,'clipboard',{configurable:true,value:undefined});
+    });
+    await share.click();
+    assert.equal(await supplement.locator('#am-pick-share-manual').isVisible(),true);
+    assert.equal(await supplement.locator('#am-pick-share-manual').inputValue(),shared.url);
+    assert.ok(await supplement.locator('#am-pick-share-manual')
+      .evaluate(el=>el===document.activeElement),
+      'Manual copy fallback must focus the selected URL');
+
+    // Reopening a shared selection restores its real filters, not a generic
+    // editorial page, and never rewrites the canonical SEO product URL.
+    await supplement.goto(shared.url,{waitUntil:'domcontentloaded'});
+    await supplement.locator('#am-pick-filters').waitFor({state:'visible'});
+    assert.equal(await supplement.locator('#am-picks-list .am-pick-card:visible').count(),1);
+    await supplement.locator('#pick-skmei-1251 .am-pick-detail-link').click();
+    await supplement.locator('.am-catalogue-return a').waitFor({state:'visible'});
+    assert.equal(new URL(supplement.url()).search,'');
+    let back= new URL(await supplement.locator('.am-catalogue-return a').getAttribute('href'));
+    assert.equal(back.pathname,'/montres/modeles-populaires.html');
+    assert.equal(back.searchParams.get('q'),'1251');
+    assert.equal(back.searchParams.get('photo'),'1');
+    assert.equal(back.searchParams.get('asin'),'1');
+    assert.equal(back.hash,'#am-pick-filter-count');
+    assert.match(await supplement.locator('.am-catalogue-return a').getAttribute('aria-label'),
+      /37 montres/);
+    // A second related product preserves this validated 37-watch context.
+    await supplement.locator('.am-extra-related-name').first().click();
+    await supplement.locator('.am-catalogue-return a').waitFor({state:'visible'});
+    back=new URL(await supplement.locator('.am-catalogue-return a').getAttribute('href'));
+    assert.equal(back.pathname,'/montres/modeles-populaires.html');
+    assert.equal(back.searchParams.get('q'),'1251');
+    await supplement.locator('.am-catalogue-return a').click();
+    await supplement.locator('#am-pick-filters').waitFor({state:'visible'});
+    assert.equal(await supplement.locator('#am-picks-list .am-pick-card:visible').count(),1);
+
+    // A valid CSS/JS filter update must alter only explicit local URL
+    // parameters, without inventing affiliate details or paid inventory.
+    await supplement.locator('#am-filter-query').fill('');
+    await supplement.locator('#am-filter-match').uncheck();
+    assert.equal(new URL(supplement.url()).searchParams.get('photo'),'1');
+    assert.equal(new URL(supplement.url()).searchParams.has('asin'),false);
+    await supplement.locator('#am-pick-filters button[type=reset]').click();
+    assert.equal(new URL(supplement.url()).search,'');
+    assert.equal(await supplement.locator('#am-picks-list .am-pick-card:visible').count(),37);
+    const layout=await supplement.evaluate(()=>({
+      width:document.documentElement.clientWidth,
+      scroll:document.documentElement.scrollWidth
+    }));
+    assert.ok(layout.scroll<=layout.width+2,
+      'Sharing tools and restored selection cannot overflow Android');
+    assert.deepEqual(supplementErrors,[]);
+  }finally{await supplementContext.close();}
+
+  const supplementNoJS=await browser.newPage({javaScriptEnabled:false});
+  try{
+    await supplementNoJS.goto(new URL('/montres/modeles-populaires.html?q=1251&photo=1&asin=1',base).href);
+    assert.equal(await supplementNoJS.locator('#am-pick-filters').isVisible(),false);
+    assert.equal(await supplementNoJS.locator('#am-picks-list .am-pick-card:visible').count(),37,
+      'All 37 documented models remain browseable without optional client filtering');
+  }finally{await supplementNoJS.close();}
+
   const noScript=await browser.newPage({javaScriptEnabled:false});
   await noScript.goto(new URL('/montres/toutes-les-montres.html',base).href);
   assert.equal(await noScript.locator('.ud-card').count(),52);

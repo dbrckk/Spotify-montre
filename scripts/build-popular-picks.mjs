@@ -239,7 +239,11 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     +'<label class="am-pick-proof-option" for="am-filter-match"><input type="checkbox" id="am-filter-match" name="asin-documente"><span>Avec correspondance Amazon.fr documentée</span></label>'
     +'<p class="am-pick-filter-explainer">Une correspondance de référence ne garantit ni la variante disponible, ni le vendeur, ni le tarif.</p>'
     +'</fieldset><div class="am-pick-filter-footer"><output id="am-pick-filter-count" for="am-filter-query am-filter-tier am-filter-style am-filter-movement am-filter-photo am-filter-match" aria-live="polite" aria-atomic="true">'+picks.length+' modèles sur '+picks.length+'</output>'
-    +'<button type="reset">Effacer les filtres</button></div></form>';
+    +'<button type="reset">Effacer les filtres</button>'
+    +'<button type="button" id="am-pick-share" class="am-pick-share" hidden>Partager cette sélection</button>'
+    +'<span id="am-pick-share-status" class="am-pick-share-status" role="status" aria-live="polite"></span>'
+    +'<input type="text" id="am-pick-share-manual" class="am-pick-share-manual" aria-label="Lien de sélection à copier" readonly hidden>'
+    +'</div></form>';
   const emptyMessage='<p id="am-pick-filter-empty" class="am-pick-filter-empty" role="status" hidden>Aucun modèle ne correspond à ces critères. Effacez un filtre ou essayez une autre référence.</p>';
   const path='montres/modeles-populaires.html';
   const main='<div class="wrap am-picks-page"><nav class="crumb" aria-label="Fil d’Ariane"><a href="../index.html">Collection</a> / Modèles complémentaires</nav>'

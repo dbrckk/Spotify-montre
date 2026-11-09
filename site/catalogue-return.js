@@ -1,15 +1,16 @@
 'use strict';
-/* Restore an actual local catalogue selection on all 52 SEO product sheets.
- * The destination is ALWAYS the internal 52-watch catalogue: no open redirects,
- * off-site tracking, invented offers, or dependency on a user account.
- * Directly opened product URLs retain their clean, indexable presentation. */
+/* Return from a genuine catalogue journey to its validated, exact filters.
+ * Works with 52-watch catalogue and 37 complementary editorial watches.
+ * Never redirects off-site or appends search queries to canonical product URLs.
+ * A directly opened SEO product sheet receives no invented back-link. */
 (() => {
   const article=document.querySelector(
     'main article.watch-product[data-watch-id], main article.am-extra-product[data-popular-watch-id]');
   const breadcrumb=article?.closest('main')?.querySelector('nav.crumb');
   if(!article||!breadcrumb)return;
 
-  const catalogPath='/montres/toutes-les-montres.html';
+  const mainPath='/montres/toutes-les-montres.html';
+  const extraPath='/montres/modeles-populaires.html';
   const key='atelier-montres-catalogue-return-v1';
   const maxAge=30*60*1000;
   const allowed={
@@ -27,6 +28,13 @@
     prefMovement:['quartz','automatic','eco-drive'],
     prefSize:['compact','medium','large','unknown']
   };
+  const allowedExtra={
+    tier:['essential','signature','prestige'],
+    style:['sport','steel','dress','retro','compact'],
+    movement:['automatic','quartz','solar'],
+    photo:['1'],
+    asin:['1']
+  };
   const validWatchId=id=>/^[a-z0-9-]{4,64}$/.test(id);
   const insideOrigin=input=>{
     try{
@@ -36,34 +44,37 @@
   };
   const catalogueLocation=input=>{
     const source=insideOrigin(input);
-    if(!source||source.pathname!==catalogPath||source.search.length>850)return null;
-    const clean=new URL(catalogPath,location.origin);
+    if(!source||![mainPath,extraPath].includes(source.pathname)
+      ||source.search.length>850)return null;
+    const isExtra=source.pathname===extraPath;
+    const whitelist=isExtra?allowedExtra:allowed;
+    const clean=new URL(source.pathname,location.origin);
     for(const [name,value] of source.searchParams){
       if(source.searchParams.getAll(name).length!==1)continue;
       if(name==='q'){
-        if(value.length>0&&value.length<=100)clean.searchParams.set(name,value);
-      }else if(name==='brand'){
+        const limit=isExtra?80:100;
+        if(value.length>0&&value.length<=limit)clean.searchParams.set(name,value);
+      }else if(!isExtra&&name==='brand'){
         if(value.length>0&&value.length<=48&&/^[\p{L}\p{N} &.'-]+$/u.test(value))
           clean.searchParams.set(name,value);
-      }else if(name==='compare'){
+      }else if(!isExtra&&name==='compare'){
         const ids=value.split(',');
-        if(ids.length<=3&&new Set(ids).size===ids.length&&ids.every(validWatchId))
-          clean.searchParams.set(name,value);
-      }else if(Object.hasOwn(allowed,name)&&allowed[name].includes(value)){
+        if(ids.length>=2&&ids.length<=3&&new Set(ids).size===ids.length
+          &&ids.every(validWatchId))clean.searchParams.set(name,value);
+      }else if(Object.hasOwn(whitelist,name)&&whitelist[name].includes(value)){
         clean.searchParams.set(name,value);
       }
     }
-    clean.hash='#udCount';
+    clean.hash=isExtra?'#am-pick-filter-count':'#udCount';
     return clean;
   };
   const from=insideOrigin(document.referrer);
-  let back=from?.pathname===catalogPath?catalogueLocation(from.href):null;
+  let back=from?catalogueLocation(from.href):null;
   if(back){
     try{sessionStorage.setItem(key,JSON.stringify({href:back.href,time:Date.now()}));}catch(_){}
   }else if(from&&/^\/montres\/[a-z0-9-]{4,64}\.html$/.test(from.pathname)){
-    // The visitor may inspect related watch sheets while retaining their
-    // original local filters. A direct entry without catalogue context never
-    // creates this link.
+    // Keep one last validated selection while navigating between product
+    // sheets. The most recent real catalogue entry wins.
     try{
       const saved=JSON.parse(sessionStorage.getItem(key)||'null');
       if(saved&&Number.isFinite(saved.time)&&Date.now()-saved.time>=0
@@ -73,14 +84,16 @@
   }
   if(!back)return;
 
+  const extra=back.pathname===extraPath;
   const holder=document.createElement('div');
   holder.className='am-catalogue-return';
   const link=document.createElement('a');
   link.href=back.href;
-  link.textContent=back.search?'← Retour à ma sélection':'← Retour aux 52 montres';
+  link.textContent=back.search?'← Retour à ma sélection'
+    :extra?'← Retour aux 37 montres':'← Retour aux 52 montres';
   link.setAttribute('aria-label',back.search
-    ?'Revenir à ma sélection filtrée dans le catalogue des 52 montres'
-    :'Revenir au catalogue des 52 montres');
+    ?'Revenir à ma sélection filtrée dans le catalogue des '+(extra?'37':'52')+' montres'
+    :'Revenir au catalogue des '+(extra?'37':'52')+' montres');
   holder.append(link);
   breadcrumb.after(holder);
 })();

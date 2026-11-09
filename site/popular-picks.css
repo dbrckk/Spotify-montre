@@ -191,6 +191,19 @@
 .am-pick-filter-footer output{font:750 14px/1.5 system-ui,sans-serif;color:#224631}
 .am-pick-filter-footer button{min-height:44px;padding:9px 15px;background:#fff;border:1px solid #65856e;border-radius:4px;color:#225136;font:700 13px/1.5 system-ui,sans-serif;cursor:pointer}
 .am-pick-filter-footer button:hover{background:#eaf0e8}
+
+/* URL sharing is progressive; without JS the collection remains visible. */
+.am-pick-filter-footer .am-pick-share{border-color:#2d5c40;background:#25543b;color:#fff}
+.am-pick-filter-footer .am-pick-share:hover{background:#153d2a;color:#fff}
+.am-pick-filter-footer .am-pick-share[hidden],
+.am-pick-filter-footer .am-pick-share-manual[hidden]{display:none!important}
+.am-pick-share-status{flex-basis:100%;font:600 12px/1.6 system-ui,sans-serif;color:#2c5138}
+.am-pick-share-status:empty{display:none}
+.am-pick-share-manual{width:100%;min-height:44px;padding:9px 12px;min-width:0;
+  border:1px solid #819782;border-radius:5px;background:#fff;
+  color:#244b35;font:500 13px/1.5 system-ui,sans-serif}
+.am-pick-share-manual:focus-visible{outline:3px solid #b9852b;outline-offset:3px}
+
 .am-pick-filter-empty{padding:24px;border:1px dashed #8ca58f;border-radius:5px;background:#f5f6ee;color:#244633;font:500 15px/1.7 system-ui,sans-serif}
 .am-pick-exact{align-self:flex-start;padding:9px 11px;margin:0;border-left:3px solid #4f7553;background:#eef2e9;color:#264d38;font:700 12px/1.55 system-ui,sans-serif}
 
