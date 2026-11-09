@@ -64,7 +64,8 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
     const comparisonRows=[
       ['Mouvement','movement'],['Boîtier','case'],['Verre','glass'],['Étanchéité','water']
     ];
-    const comparisonTable='<div class="am-extra-factual-scroll" role="region" tabindex="0" aria-label="Tableau comparatif des quatre références">'
+    const comparisonTable='<p class="am-extra-factual-swipe-hint">Sur téléphone, faites glisser le tableau horizontalement pour comparer les quatre montres. Les critères restent visibles.</p>'
+      +'<div class="am-extra-factual-scroll" role="region" tabindex="0" aria-label="Tableau comparatif des quatre références">'
       +'<table class="am-extra-factual-table"><caption>Caractéristiques documentées des quatre références</caption>'
       +'<thead><tr><th scope="col">Caractéristique</th>'
       +comparison.map(q=>'<th scope="col"><a href="./'+e(q.id)+'.html">'+e(q.brand+' '+q.model)+'</a>'+(q.id===p.id?'<small>Modèle consulté</small>':'')+'</th>').join('')

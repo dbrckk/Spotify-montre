@@ -88,3 +88,18 @@ WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-unified-recent-hist
 Le workflow `test-premium-mobile.yml` exécute déjà la génération et le test navigateur inclus dans la PR. Le workflow `seo-storefront.yml` vérifie les contrats SEO et le catalogue sur une PR.
 
 **Important :** aucune amélioration de Core Web Vitals, de revenus ou de ventes n'est revendiquée avant une mesure production liée au commit et des preuves commerciales indépendantes.
+
+
+## 6. Lot P1 du 9 novembre 2026 — comparateurs lisibles sur Android
+
+**Base inspectée :** `main@ce7d68dbe92d9a0c3bdaabc355104d9a206ab192`. Les workflows SEO, Lighthouse mobile production et WCAG de `2fdd326fb` ont réussi. Lighthouse mobile observé sur cette base : accueil 100/100, LCP médian 1 083 ms ; catalogue 100/100, LCP 1 432 ms (mesures de laboratoire uniquement).
+
+**Problème d'expérience vérifiable :** les quatre duels présentaient deux fiches détaillées avant les différences techniques, sans accès rapide aux décisions. Les tableaux de comparaison à quatre modèles étaient défilants mais sans repère visuel indiquant le geste horizontal ; le lecteur perdait le nom des caractéristiques pendant le défilement sur téléphone.
+
+**Modifications :**
+- `scripts/build-comparisons.mjs` : deux liens d'ancrage natifs (différences et orientation d'achat) sur les quatre duels, indication du défilement horizontal.
+- `scripts/build-popular-product-pages.mjs` : indication claire du défilement sur les 37 fiches complémentaires ; données et recommandation de la même gamme conservées.
+- `site/seo-guides.css`, `site/extra-factual-comparison.css` : première colonne technique épinglée sur écrans mobiles, raccourcis lisibles et ciblables, focus visible, aucun nouveau JavaScript, aucune photo ou offre ajoutée.
+- `scripts/test-watch-comparisons-browser.mjs`, `scripts/test-popular-product-actions-browser.mjs` : vérification navigateur des ancrages, du scroll réel, de la colonne épinglée, du débordement existant et de la source unique des 52 références.
+
+**Critères de livraison :** `npm test`, génération SEO et validation, navigateur Android et desktop, WCAG ; aucun changement des prix, photos, liens marchands ou du verrou de paiement. **Ne pas attribuer une amélioration de LCP/INP sans mesure liée à la version publiée.**

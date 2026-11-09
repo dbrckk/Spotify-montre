@@ -23,3 +23,19 @@
 .am-extra-duels small{font:400 12px/1.5 system-ui,sans-serif;color:#546957}
 .am-extra-duels a:focus-visible{outline:3px solid #b38843;outline-offset:3px}
 @media(max-width:570px){.am-extra-duels{padding:16px}.am-extra-duel-grid{grid-template-columns:1fr}}
+
+/* The criterion stays readable when four watches extend past a phone screen. */
+.am-extra-factual-swipe-hint{display:none}
+@media(max-width:700px){
+  .am-extra-factual-swipe-hint{
+    display:block;margin:17px 0 7px;padding:10px 13px;
+    border-left:3px solid #a8894f;background:#eef4ea;
+    color:#31523b;font:600 12px/1.55 system-ui,sans-serif
+  }
+  .am-extra-factual-table thead th:first-child,
+  .am-extra-factual-table tbody th:first-child{
+    position:sticky;left:0;z-index:2;
+    background:#f2f5ef;box-shadow:2px 0 0 #c4d2c3
+  }
+  .am-extra-factual-table thead th:first-child{z-index:3;background:#e6eee3}
+}

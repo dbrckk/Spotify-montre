@@ -46,6 +46,26 @@ try{
     }
     const table=page.locator('.headtohead-evidence .spec-matrix');
     assert.equal(await table.locator('tbody tr').count(),4,'Four true catalogue attributes');
+    const shortcuts=page.locator('.headtohead-shortcuts a');
+    assert.equal(await shortcuts.count(),2,'Two direct decision shortcuts required');
+    assert.deepEqual(await shortcuts.evaluateAll(links=>links.map(a=>a.getAttribute('href'))),
+      ['#compare-specs','#duel-choix']);
+    assert.equal(await page.locator('#duel-choix').count(),1);
+    assert.match(await page.locator('.headtohead-scroll-hint').innerText(),
+      /glisser le tableau horizontalement/i);
+    const stickyCheck=await page.locator('.comparison-scroll').evaluate(region=>{
+      region.scrollLeft=150;
+      const label=region.querySelector('tbody th:first-child');
+      const bounds=region.getBoundingClientRect(),criterion=label.getBoundingClientRect();
+      return {position:getComputedStyle(label).position,scroll:region.scrollLeft,
+        within:criterion.left>=bounds.left-2&&criterion.left<=bounds.left+7};
+    });
+    assert.ok(stickyCheck.position==='sticky'&&stickyCheck.scroll>0&&stickyCheck.within,
+      'Mobile comparison criteria must stay pinned while the two watches scroll: '+
+      JSON.stringify(stickyCheck));
+    await shortcuts.nth(1).click();
+    assert.equal(new URL(page.url()).hash,'#duel-choix',
+      'Buyer shortcut must navigate to the decision section without JS');
     const canonical=new URL(await page.locator('link[rel="canonical"]').getAttribute('href'));
     assert.equal(canonical.pathname,url.pathname,'Each comparison canonical must reference the same static path');
     assert.equal(canonical.origin,'https://atelier-montres-selection-fr.onrender.com','SEO canonical targets the public HTTPS domain, not the local test server');

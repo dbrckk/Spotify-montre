@@ -25,6 +25,9 @@ for(const p of picks){
   assert.ok(html.includes('href="../watch-reference-copy.css"'),
     'Dedicated source-copy styling missing on '+p.id);
   assert.ok(html.includes('href="./toutes-les-montres.html?saved=1"'));
+  assert.ok(html.includes('class="am-extra-factual-swipe-hint"')&&
+    html.includes('class="am-extra-factual-scroll"'),
+    'Every supplemental product must explain the same source-backed four-watch comparison: '+p.id);
   const proof=rights[p.id];
   if(proof){
     assert.ok(!html.includes('href="../extra-source-passport.css"'),
@@ -187,6 +190,20 @@ try{
     page.on('pageerror',error=>errors.push(error.message));
     await page.goto(new URL('/montres/skmei-1251.html',base).href,
       {waitUntil:'domcontentloaded'});
+    const hint=page.locator('.am-extra-factual-swipe-hint');
+    assert.equal(await hint.isVisible(),width<700,
+      'Horizontal comparison hint is reserved for mobile screens');
+    if(width<700){
+      const sticky=await page.locator('.am-extra-factual-scroll').evaluate(region=>{
+        region.scrollLeft=160;
+        const label=region.querySelector('tbody th:first-child');
+        const bounds=region.getBoundingClientRect(),criterion=label.getBoundingClientRect();
+        return {position:getComputedStyle(label).position,scroll:region.scrollLeft,
+          within:criterion.left>=bounds.left-2&&criterion.left<=bounds.left+7};
+      });
+      assert.ok(sticky.position==='sticky'&&sticky.scroll>0&&sticky.within,
+        'Four-watch technical labels must stay visible on Android: '+JSON.stringify(sticky));
+    }
     // A genuine watch photo must be entirely separate from its caption.
     // The older dark overlay obscured the bottom portion of the packshot.
     const studio=await page.evaluate(()=>{

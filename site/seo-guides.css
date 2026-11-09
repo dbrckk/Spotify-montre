@@ -339,3 +339,44 @@
   .am-catalogue-return a{width:100%;justify-content:center;text-align:center}
 }
 @media(prefers-reduced-motion:reduce){.am-catalogue-return a{transition:none}}
+
+/* Premium, no-JavaScript shortcuts for documented two-watch decisions. */
+.headtohead-shortcuts{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;max-width:900px;margin:22px 0 12px
+}
+.headtohead-shortcuts a{
+  display:flex;align-items:center;gap:11px;min-height:52px;
+  padding:13px 16px;border:1px solid #c8d6c5;border-radius:5px;
+  background:#edf3ea;color:#244934;text-decoration:none;
+  font:700 13px/1.45 system-ui,sans-serif
+}
+.headtohead-shortcuts a:hover{border-color:#8da88d;background:#e1eddd}
+.headtohead-shortcuts a span:first-child{
+  color:#745b2b;font:750 10px/1 system-ui,sans-serif;
+  letter-spacing:.1em
+}
+.headtohead-shortcuts a span:last-child{margin-left:auto;color:#745b2b;font-size:17px}
+.headtohead-shortcuts a:focus-visible{outline:3px solid #aa7d39;outline-offset:3px}
+.headtohead-evidence #compare-specs,.headtohead-evidence #duel-choix{scroll-margin-top:18px}
+.headtohead-scroll-hint{display:none}
+@media(max-width:780px){
+  .headtohead-scroll-hint{
+    display:block;margin:14px 0 8px;padding:10px 13px;
+    border-left:3px solid #a8894f;background:#eef4ea;
+    color:#31523b;font:600 12px/1.55 system-ui,sans-serif
+  }
+  .headtohead-evidence .spec-matrix{border-collapse:separate;border-spacing:0}
+  .headtohead-evidence .spec-matrix thead th:first-child,
+  .headtohead-evidence .spec-matrix tbody th:first-child{
+    position:sticky;left:0;z-index:2;
+    background:#f5f4ee;box-shadow:2px 0 0 #d4ded0
+  }
+  .headtohead-evidence .spec-matrix thead th:first-child{
+    z-index:3;background:#e8eee4
+  }
+}
+@media(max-width:520px){
+  .headtohead-shortcuts{grid-template-columns:1fr;gap:8px}
+  .headtohead-shortcuts a{min-height:48px;padding:11px 14px}
+}
