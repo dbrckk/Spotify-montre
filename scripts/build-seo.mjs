@@ -9,7 +9,7 @@ import {buildPopularPicks} from './build-popular-picks.mjs';
 import {buildUnifiedDiscovery} from './build-unified-discovery.mjs';
 import {buildCommercialRegistry} from './build-commercial-registry.mjs';
 import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
-import {assertPhotoTakedownSources,maskRetiredStaticPhotos} from './photo-takedowns.mjs';
+import {assertPhotoTakedownSources,maskRetiredStaticPhotos,readPhotoTakedowns} from './photo-takedowns.mjs';
 
 (function buildSeo() {
   const site = new URL(process.env.PUBLIC_SITE_URL || 'https://atelier-montres-selection-fr.onrender.com/');
@@ -20,6 +20,7 @@ import {assertPhotoTakedownSources,maskRetiredStaticPhotos} from './photo-takedo
   const products = data.products;
   const supplementalCatalogue=JSON.parse(readFileSync(join(root,'selection-populaires.json'),'utf8')).products;
   assertPhotoTakedownSources(root,products,supplementalCatalogue);
+  const withdrawnPhotoIds=new Set(readPhotoTakedowns(root).map(record=>record.id));
   // Editorial copy is authored independently; only documented catalogue fields
   // are rendered as numeric facts. Do not infer diameter from case width.
   const editorialData=JSON.parse(readFileSync(join(root,'editorial-insights.json'),'utf8'));
@@ -68,7 +69,8 @@ import {assertPhotoTakedownSources,maskRetiredStaticPhotos} from './photo-takedo
     if(!verified||destination.hostname!=='www.amazon.fr'||destination.pathname!=='/dp/'+verified.asin)
       throw Error('Lien rémunéré bloqué : la référence Amazon doit correspondre au modèle confirmé '+id);
     const model=products.find(p=>p.id===id);
-    if (model?.photoReview?.publicUsageApproved!==true) throw Error('Publication affiliée bloquée : droits commerciaux de la photographie à vérifier pour '+id);
+    if (model?.photoReview?.publicUsageApproved!==true && !withdrawnPhotoIds.has(id))
+      throw Error('Publication affiliée bloquée : photographie ni autorisée ni officiellement retirée pour '+id);
   }
   // The 52-watch source of truth is regenerated from documented supplier,
   // ASIN and image-rights registries before any shopper-facing page renders.
