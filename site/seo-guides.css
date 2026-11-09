@@ -380,3 +380,24 @@
   .headtohead-shortcuts{grid-template-columns:1fr;gap:8px}
   .headtohead-shortcuts a{min-height:48px;padding:11px 14px}
 }
+
+/* Fifteen original product pages: document the purchase route and the
+   exact model caution before any external merchant link. No JS required. */
+.watch-buyer-evidence{margin:18px 0 20px;padding:18px clamp(14px,2vw,22px);
+  border:1px solid #ccd9cd;background:#f0f3eb;border-radius:9px;color:#244331}
+.watch-buyer-evidence h2{font:400 clamp(21px,2.2vw,27px)/1.3 Georgia,serif;
+  letter-spacing:-.02em;margin:0 0 14px;color:#23442f}
+.watch-buyer-evidence dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;margin:0}
+.watch-buyer-evidence dl>div{padding:11px 12px;background:#fffdf9;border:1px solid #dce2d9;
+  min-width:0;border-radius:5px}
+.watch-buyer-evidence dl>div:last-child{grid-column:1/-1}
+.watch-buyer-evidence dt{font:700 11px/1.5 system-ui,sans-serif;color:#567160;margin:0 0 4px}
+.watch-buyer-evidence dd{font:650 12px/1.55 system-ui,sans-serif;color:#234431;
+  overflow-wrap:anywhere;margin:0}
+.watch-buyer-evidence>p{border-top:1px solid #d3dece;padding-top:12px;margin:14px 0 0;
+  font:500 13px/1.65 system-ui,sans-serif;color:#445a4a}
+.watch-buyer-evidence>p strong{color:#254630}
+@media(max-width:520px){.watch-buyer-evidence{padding:15px 13px}
+  .watch-buyer-evidence dl{grid-template-columns:minmax(0,1fr)}
+  .watch-buyer-evidence dl>div:last-child{grid-column:auto}}

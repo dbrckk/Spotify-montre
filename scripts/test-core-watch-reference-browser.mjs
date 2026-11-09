@@ -7,6 +7,7 @@ const base=new URL(process.env.WATCH_STOREFRONT_URL||'http://127.0.0.1:8765');
 if(base.protocol!=='http:'||!['localhost','127.0.0.1'].includes(base.hostname))
   throw Error('Reference copy browser tests must use localhost');
 const products=JSON.parse(readFileSync('site/selection-affiliation.json','utf8')).products;
+const editorial=JSON.parse(readFileSync('site/editorial-insights.json','utf8')).products;
 assert.equal(products.length,15);
 const escapeHtml=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
   .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
@@ -25,6 +26,19 @@ for(const p of products){
   assert.equal((html.match(/src="\.\.\/watch-reference-copy-v2\.js"/g)||[]).length,1);
   assert.equal((html.match(/href="\.\.\/watch-reference-copy\.css"/g)||[]).length,1);
   assert.ok(html.includes('data-watch-ref-status'), 'Accessible copy outcome required: '+p.id);
+  const evidence=html.match(/<aside class="watch-buyer-evidence"[^>]*>/)?.[0]||'';
+  assert.ok(evidence,'A purchase evidence panel is required on every core model: '+p.id);
+  assert.ok(evidence.includes('data-buyer-photo="'+(p.photoReview?.publicUsageApproved?'published':'source')+'"'),
+    'Buyer image status must reflect the exact-model publication registry: '+p.id);
+  assert.ok(html.includes('<strong>Pour cette référence :</strong> '+escapeHtml(editorial[p.id].caution)),
+    'The buyer caution must correspond to the model facts: '+p.id);
+  assert.ok(html.includes('Chez le marchand tiers, jamais sur Atelier Montres'),
+    'The buyer panel must not imply unactivated direct checkout: '+p.id);
+  assert.ok(html.includes('<dt>Photographie</dt>')&&html.includes('<dt>Destination</dt>')
+    &&html.includes('<dt>Paiement et livraison</dt>'),
+    'Buyer panel must cover photo, documented merchant route and checkout: '+p.id);
+  assert.ok((html.match(/class="watch-buyer-evidence"/g)||[]).length===1,
+    'No duplicate buying summary: '+p.id);
 }
 // A guide is not a product page and must not download a nonfunctional copy widget.
 const guide=readFileSync('site/montres/guide-choisir-montre.html','utf8');
@@ -47,6 +61,12 @@ try{
       const p=products.find(x=>x.id==='casio-mtp-1302')||products[0];
       await page.goto(new URL('/montres/'+p.id+'.html',base).href,
         {waitUntil:'domcontentloaded'});
+      const panel=page.locator('article.watch.watch-product .watch-buyer-evidence');
+      assert.equal(await panel.count(),1);
+      assert.equal(await panel.isVisible(),true,'Buyer evidence must be visible before merchant actions');
+      const panelBox=await panel.boundingBox();
+      assert.ok(panelBox&&panelBox.x>=-1&&panelBox.x+panelBox.width<=width+1,
+        'Trust information must fit the real '+width+'px viewport');
       const ref=page.locator('article.watch.watch-product [data-watch-ref-tools]');
       const button=ref.locator('[data-watch-ref-copy]');
       assert.equal(await ref.isVisible(),true);
@@ -98,6 +118,8 @@ try{
     await page.goto(new URL('/montres/'+p.id+'.html',base).href);
     assert.equal(await page.locator('button[data-watch-ref-copy]').isVisible(),false,
       'No-JS visitor must not see a dead copy button');
+    assert.ok(await page.locator('.watch-buyer-evidence').isVisible(),
+      'No-JS visitors must see model-specific purchase disclosures');
     assert.ok(await page.locator('.watch-actions a').count()>=1,
       'Core model destination links must work without JavaScript');
   }finally{await withoutJs.close();}
