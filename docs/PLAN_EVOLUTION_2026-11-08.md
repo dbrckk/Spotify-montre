@@ -177,3 +177,16 @@ Le workflow `test-premium-mobile.yml` exécute déjà la génération et le test
 **Respect de la vie privée :** le texte libre de recherche n'est transmis ni à un service tiers ni à un compte client par le filtre ; il ne figure dans le lien que lorsque le visiteur choisit explicitement de partager sa sélection. Aucun prix, disponibilité, commission ou correspondance ASIN n'est ajouté. Aucun lien d'affiliation ni paiement n'est modifié.
 
 **Barrières de fusion :** vérification de la syntaxe, tests SEO et publications, parcours Android, audit WCAG, build et contrôle de production sur le commit fusionné ; le gain de conversion ne pourra être estimé qu'à partir de statistiques réelles.
+
+
+## 12. Lot P1 — 9 novembre 2026 : photographies premium des six sélections éditoriales
+
+**Base réellement auditée :** `main@ce2afa7e65cc185f5e13996a5747db79d67fc9fc`, après fusion du retour aux sélections #245. Les pages `montres-femme-accessibles`, `montres-homme-style-accessible`, `montres-automatiques-selection`, `montres-skmei`, `montres-pagani-design` et `montres-numeriques` réutilisaient les photos sources en plein format sans `srcset`, `sizes`, ni dimensions dans les vignettes, alors que la vitrine principale livrait déjà les vraies déclinaisons WebP locales.
+
+**Améliorations livrées :**
+- `scripts/build-shopper-selections.mjs` : utiliser `responsiveAttrs` pour les modèles du catalogue principal et `responsivePopularAttrs` pour les images complémentaires, avec URLs et dimensions **tirées des registres autorisés**. Toute photographie sans dimensions sources fiables bloque la génération. Les originaux restent en repli haute résolution ; les modèles sans photographie gardent leur visuel typographique explicitement non contractuel.
+- Chaque photographie publiée est un **lien natif accessible** vers la fiche du modèle exact, identifié par son nom dans l'intitulé accessible ; aucun JavaScript requis. Le texte alternatif de la photo décorative ne duplique pas cet intitulé.
+- `site/shopper-selections.css` : studio photographique ivoire/forêt, cadrage propre, ombrage discret, étiquette « Photo du modèle », cibles cliquables et focus clavier visibles, animation supprimée avec `prefers-reduced-motion`.
+- `scripts/test-intent-collections-browser.mjs` : contrôler **les six pages** et leur nombre de modèles, la correspondance stricte du fichier local à l'ID, les dimensions et le contenu des variantes réellement produites, un chargement WebP mobile sélectionné par Chromium et la navigation par l'image vers la bonne fiche. Garder les validations écran 320/393 px, desktop et sans JavaScript.
+
+**Limites et critères :** ces photos reposent sur les autorisations déclarées par le responsable du site, non confirmées indépendamment ; aucune image de produit manquant n'est recréée comme représentation factuelle. Aucune donnée marchande, prix, ASIN, affiliation, paiement ou inventaire n'est modifiée. Valider les 4 CI de PR puis les 7 CI post-fusion, y compris Lighthouse de production **sans revendiquer de gain causal avant comparaison**.
