@@ -88,7 +88,7 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       :partnerOffers.has(p.id)?'partner':'official';
     const merchantFacts=affiliates.enabled
       ?'<dl class="am-extra-merchant-facts" aria-label="Informations à vérifier avant la visite marchande">'
-        +'<div><dt>Destination</dt><dd>'+(direct?'Page Amazon.fr identifiée par ASIN':'Résultats de recherche Amazon.fr')+'</dd></div>'
+        +'<div><dt>Destination</dt><dd>'+(direct?'Page Amazon.fr · ASIN '+e(direct.asin):'Résultats de recherche Amazon.fr')+'</dd></div>'
         +'<div><dt>Code recherché</dt><dd>'+e(direct?.model||p.model)+'</dd></div>'
         +'<div><dt>Contrôle documentaire</dt><dd>'+e(direct?.verifiedAt||'Aucun ASIN exact documenté')+'</dd></div>'
         +'</dl>'
