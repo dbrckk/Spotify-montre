@@ -126,6 +126,7 @@ jobs:
           # Photo approval is data-driven: official images can be added to the
           # registry without changing the production Lighthouse expectations.
           # This also catches a gallery that silently drops an approved photo.
+          import json
           approved=json.loads(pathlib.Path('site/popular-photo-rights.json').read_text())['photos']
           expected_photo=product in approved
           has_photo_stage='class="am-extra-photo-stage"' in live
@@ -137,7 +138,6 @@ jobs:
           if expected_photo:
               assert approved[product]['file'].split('/')[-1] in live, (
                   'Wrong approved photo file in deployed article: '+product)
-          import json
           affiliate_active=json.loads(pathlib.Path('site/affiliate-links.json').read_text()).get('enabled') is True
           if affiliate_active:
               for model,asin in [('casio-dw5600rl-1','B0DN6LT6FX'),
