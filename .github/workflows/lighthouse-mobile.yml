@@ -123,10 +123,21 @@ jobs:
               start=html.index('<article class="am-extra-product"')
               return html[start:html.index('</article>',start)+len('</article>')]
           assert article(local)==article(live), 'Published product article differs from generated source: '+product
-          expected_photo=product in ('skmei-1251','tissot-prx-35-blue')
-          assert ('class="am-extra-photo-stage"' in live)==expected_photo
-          assert ('class="am-extra-licensed-photo"' in live)==expected_photo
+          # Photo approval is data-driven: official images can be added to the
+          # registry without changing the production Lighthouse expectations.
+          # This also catches a gallery that silently drops an approved photo.
           import json
+          approved=json.loads(pathlib.Path('site/popular-photo-rights.json').read_text())['photos']
+          expected_photo=product in approved
+          has_photo_stage='class="am-extra-photo-stage"' in live
+          has_licensed_photo='class="am-extra-licensed-photo"' in live
+          assert has_photo_stage==expected_photo, (
+              f'Photo stage mismatch for {product}: deployed={has_photo_stage}, approved={expected_photo}')
+          assert has_licensed_photo==expected_photo, (
+              f'Approved image mismatch for {product}: deployed={has_licensed_photo}, approved={expected_photo}')
+          if expected_photo:
+              assert approved[product]['file'].split('/')[-1] in live, (
+                  'Wrong approved photo file in deployed article: '+product)
           affiliate_active=json.loads(pathlib.Path('site/affiliate-links.json').read_text()).get('enabled') is True
           if affiliate_active:
               for model,asin in [('casio-dw5600rl-1','B0DN6LT6FX'),
