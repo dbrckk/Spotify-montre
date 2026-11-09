@@ -27,6 +27,22 @@ try{
       {waitUntil:'domcontentloaded'});
     await page.locator('#udFilters').waitFor({state:'visible'});
     assert.equal(await page.locator('.ud-card').count(),52);
+    const endNav=page.locator('.ud-results-end');
+    assert.equal(await endNav.locator('a').count(),2,
+      'A long 52-watch catalogue must offer clear return and comparison routes');
+    assert.equal(await endNav.locator('a').first().getAttribute('href'),'#udCount');
+    assert.equal(await endNav.locator('a').last().getAttribute('href'),'#comparer');
+    if(width===360){
+      await endNav.locator('a').first().scrollIntoViewIfNeeded();
+      const links=await endNav.locator('a').evaluateAll(items=>items.map(a=>{
+        const r=a.getBoundingClientRect();
+        return {height:r.height,left:r.left,right:r.right};
+      }));
+      assert.ok(links.every(r=>r.height>=44&&r.left>=-1&&r.right<=360+1),
+        'Catalogue end navigation must be tappable and fit 360px Android');
+      await endNav.locator('a').first().click();
+      assert.equal(new URL(page.url()).hash,'#udCount');
+    }
     assert.equal(await page.locator('link[href="../watch-reference-copy.css"]').count(),1,
       'The 52-watch collection must use the cache-isolated reference-copy stylesheet');
     assert.equal(await page.locator('script[src="../watch-reference-copy-v2.js"]').count(),1);
@@ -733,6 +749,10 @@ try{
   const noScript=await browser.newPage({javaScriptEnabled:false});
   await noScript.goto(new URL('/montres/toutes-les-montres.html',base).href);
   assert.equal(await noScript.locator('.ud-card').count(),52);
+  assert.equal(await noScript.locator('.ud-results-end a').count(),2,
+    'No-JS visitors must have a usable escape from the long catalogue');
+  await noScript.locator('.ud-results-end a').first().click();
+  assert.equal(new URL(noScript.url()).hash,'#udCount');
   assert.equal(await noScript.locator('#udActiveFilters').isVisible(),false);
   await noScript.close();
   assert.deepEqual(errors,[]);

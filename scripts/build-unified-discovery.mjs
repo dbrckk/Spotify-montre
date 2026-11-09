@@ -329,6 +329,12 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
     +'<section class="am-unified-recent" data-unified-recent aria-labelledby="udRecentHeading" hidden><div class="am-unified-recent-head"><div><h2 id="udRecentHeading">Vos dernières montres consultées</h2><p>Historique privé sur cet appareil · huit références maximum</p></div><button type="button" class="am-unified-recent-clear" data-unified-recent-clear>Effacer l’historique</button></div><nav class="am-unified-recent-list" aria-label="Montres consultées récemment" data-unified-recent-list></nav></section>'
     +'<p class="ud-count" id="udCount" role="status" aria-live="polite">52 modèles sur 52</p>'
     +'<div class="ud-grid" id="udGrid">'+normalized.map(card).join('')+'</div>'
+    // 52 cards form a long mobile catalogue: give shoppers a no-JS escape
+    // back to the live results count and a direct route to comparison.
+    +'<nav class="ud-results-end" aria-label="Suite du catalogue">'
+    +'<p>Vous avez parcouru les 52 références de cette sélection.</p>'
+    +'<div class="ud-results-end-actions"><a href="#udCount">↑ Revenir aux résultats et aux filtres</a>'
+    +'<a href="#comparer">Comparer mes montres sélectionnées ↓</a></div></nav>'
     +'<p id="udEmpty" hidden>Aucun résultat. Essayez une autre marque, un style différent ou effacez les filtres.</p>'
     +'<aside id="udCompareTray" class="ud-tray" aria-label="Votre sélection de montres" hidden>'
     +'<div class="ud-tray-heading"><strong>Votre comparaison</strong><span id="udTrayCount" aria-live="polite">Aucune montre sélectionnée</span></div>'

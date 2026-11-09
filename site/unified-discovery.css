@@ -557,3 +557,13 @@
   .ud-share-tools button,.ud-share-status{width:100%}
 }
 @media(prefers-reduced-motion:reduce){.ud-share-tools button{transition:none}}
+
+/* Long-list wayfinding: static anchors also work without JavaScript. */
+.ud-results-end{margin:24px 0 30px;padding:22px clamp(15px,3vw,28px);background:#f3f5ed;border:1px solid #cad8c9;border-radius:9px;color:#284a35}
+.ud-results-end p{font:600 14px/1.6 system-ui,sans-serif;margin:0 0 15px}
+.ud-results-end-actions{display:flex;flex-wrap:wrap;gap:12px}
+.ud-results-end-actions a{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:11px 18px;border:2px solid #28553c;border-radius:6px;background:#28553c;color:#fff;text-decoration:none;text-align:center;font:700 13px/1.45 system-ui,sans-serif}
+.ud-results-end-actions a:last-child{background:#fff;color:#28553c}
+.ud-results-end-actions a:hover{filter:brightness(.95)}
+.ud-results-end-actions a:focus-visible{outline:3px solid #b68b49;outline-offset:3px}
+@media(max-width:580px){.ud-results-end-actions{flex-direction:column}.ud-results-end-actions a{width:100%}}
