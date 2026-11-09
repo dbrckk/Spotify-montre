@@ -47,8 +47,8 @@ const checks=[
     'checkoutMode='+config.checkoutMode+' ; produits directs='+(forSale.products?.length??'inconnu'),
     'Pas de paiement public ou offre vendable sans approbation R3','sécurité/commerce',
     'site/config.json ; site/catalogue.json ; vérification serveur live séparée'),
-  item('G03','photos',photoCount===52&&rightsProofCount===52?'EXTERNAL_PROOF_REQUIRED'
-    :'EXTERNAL_PROOF_REQUIRED',
+  // Even a full source register would require independent permission review.
+  item('G03','photos','EXTERNAL_PROOF_REQUIRED',
     photoCount+' photos locales sur 52 ; '+rightsProofCount+' droits prouvés indépendamment dans les registres',
     'Pièces écrites ou contrats contrôlés pour chaque photo, sinon retirer/repli factuel','direction artistique/juridique',
     'site/selection-affiliation.json ; site/popular-photo-rights.json'),
