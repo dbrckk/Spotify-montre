@@ -147,3 +147,16 @@ Le workflow `test-premium-mobile.yml` exécute déjà la génération et le test
 - `scripts/test-mobile-storefront-v8.mjs` et `scripts/test-popular-product-actions-browser.mjs` : vérifier les trois états, les liens exacts, les libellés, les dates et les dimensions sur Android et ordinateur.
 
 **Critères :** tests et génération SEO verts, accessibilité WCAG, preuve conforme aux registres, aucune redirection commerciale changée, aucun prix ni stock inventé, caisse toujours inactive. L'amélioration de la conversion devra être évaluée à partir d'événements et commissions réellement mesurés, pas postulés.
+
+
+## 10. Lot P2 — 9 novembre 2026 : instrumenter un entonnoir sans données personnelles ajoutées
+
+**Base réellement inspectée :** `main@9fbf01c3c28c3716d120637410d1949137bf84a9`. Les sept workflows de la version précédente (#242), y compris production Render et Lighthouse, étaient au vert. `site/analytics.js` documentait déjà 27 associations ASIN et les clics sortants, mais n'observait pas l'utilisation des parcours comparateur ni les filtres documentaires.
+
+**Livrable :**
+- `site/analytics.js` : réutiliser l'Umami **facultatif** déjà connecté au build, sans nouvelle bibliothèque, cookie ou activation implicite. Trois familles d'événements `compare:<référence>:fiche|selection|accueil` n'acceptent que les liens comparateurs internes, sur la bonne origine, avec deux ou trois IDs valides et sans paramètres additionnels.
+- Les changements des deux cases de filtres documentaires déclenchent des signaux catégoriels `proof-filter:photo|asin|both` uniquement lors d'une activation. Le script ne transmet **jamais** le contenu de la recherche libre, les informations d'identité ou des valeurs quelconques des formulaires.
+- `scripts/check-merchant-analytics.mjs` : tests du vrai JavaScript de production sur les clics existants, les trois parcours internes et la combinaison des preuves ; refus des URLs extérieures, IDs incohérents, paramètres additionnels et champs libres. Aucun événement émis en l'absence d'Umami.
+- `docs/analytics-gratuites-et-revenus-amazon.md` : guide mis à jour (52 montres, 27 ASIN documentés), lecture des événements, limites d'échantillonnage, configuration Android optionnelle, conditions de conformité et distinction rigoureuse **clic ≠ vente**.
+
+**Acceptation :** `npm test`, SEO, publication sans Umami, WCAG, Android et Lighthouse ; absence de modifications des liens d'achat, des registres de preuves, du paiement désactivé et des données de prix. Aucun résultat de conversion ni revenu ne sera revendiqué sans export d'événements réel ou rapports marchands.

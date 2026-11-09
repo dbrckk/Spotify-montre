@@ -25,19 +25,24 @@ assert.deepEqual(attributedAsins,Object.fromEntries(Object.entries(approvedAsins
   .sort(([a],[b])=>a.localeCompare(b))),
   'The browser attribution map must equal all 27 actual research ASINs');
 const events=[];
-let click;
+let click,change;
 const context={
   URL,
-  window:{umami:{track:name=>events.push(name)}},
+  window:{
+    location:{origin:'https://atelier-montres-selection-fr.onrender.com'},
+    umami:{track:name=>events.push(name)}
+  },
   document:{addEventListener:(type,listener,opts)=>{
-    assert.equal(type,'click');
+    assert.ok(['click','change'].includes(type),'Only categorical opt-in events may be registered');
     assert.equal(opts.capture,true);
     assert.equal(opts.passive,true);
-    click=listener;
+    if(type==='click')click=listener;
+    else change=listener;
   }}
 };
 runInNewContext(source,context,{timeout:1000,filename:'site/analytics.js'});
 assert.equal(typeof click,'function','The real tracker must register a delegated click listener');
+assert.equal(typeof change,'function','The tracker must register privacy-safe evidence-filter changes');
 
 const trigger=({url,id='skmei-2056',placement='popular',kind='official',rel})=>{
   const names=kind==='official'?['data-merchant-official-id']:
@@ -105,6 +110,68 @@ for(const [modelId,asin] of Object.entries(approvedAsins)){
     'Documented ASIN must track only its own product ID: '+modelId);
 }
 assert.equal(events.length,beforeAll+27,'Exactly the 27 source-backed ASINs must be attributable');
+
+
+// Optional on-site funnel events must never transmit free-text search terms,
+// identifiers from visitors or arbitrary outbound URLs.
+const beforeFunnel=events.length;
+const site='https://atelier-montres-selection-fr.onrender.com';
+const compareLink=site+'/montres/toutes-les-montres.html?compare=skmei-1251%2Cskmei-1257#comparer';
+function compareClick({id='skmei-1251',attribute='data-compare-source',url=compareLink,ambiguous=false}={}){
+  const datasetName={
+    'data-compare-source':'compareSource',
+    'data-focus-compare':'focusCompare',
+    'data-affordable-compare':'affordableCompare'
+  }[attribute];
+  const names=new Set([attribute,...(ambiguous?['data-affordable-compare']:[])]);
+  const el={href:url,dataset:{[datasetName]:id},hasAttribute:name=>names.has(name)};
+  click({target:{closest:()=>el}});
+}
+compareClick();
+assert.equal(events.at(-1),'compare:skmei-1251:fiche');
+compareClick({attribute:'data-focus-compare'});
+assert.equal(events.at(-1),'compare:skmei-1251:selection');
+compareClick({attribute:'data-affordable-compare'});
+assert.equal(events.at(-1),'compare:skmei-1251:accueil');
+assert.equal(events.length,beforeFunnel+3,'Only documented same-site comparison exits count');
+const beforeInvalid=events.length;
+for(const input of [
+  {url:'https://example.net/montres/toutes-les-montres.html?compare=skmei-1251,skmei-1257#comparer'},
+  {url:site+'/montres/toutes-les-montres.html?compare=skmei-1257,skmei-2056#comparer'},
+  {url:site+'/montres/toutes-les-montres.html?compare=skmei-1251,skmei-1257&email=foo#comparer'},
+  {url:site+'/montres/toutes-les-montres.html?compare=skmei-1251,skmei-1251#comparer'},
+  {url:site+'/montres/toutes-les-montres.html?compare=skmei-1251,skmei-1257#incorrect'},
+  {id:'malicious:email'},
+  {ambiguous:true}
+])compareClick(input);
+assert.equal(events.length,beforeInvalid,
+  'Untrusted, mismatched, ambiguous or duplicate comparison IDs must never be tracked');
+
+const proofForm={id:'am-pick-filters',elements:{namedItem:name=>({
+  'photo-publiee':photoProof,'asin-documente':asinProof
+})[name]}};
+const photoProof={type:'checkbox',checked:false};
+const asinProof={type:'checkbox',checked:false};
+photoProof.form=proofForm;asinProof.form=proofForm;
+photoProof.checked=true;
+change({target:photoProof});
+assert.equal(events.at(-1),'proof-filter:photo');
+asinProof.checked=true;
+change({target:asinProof});
+assert.equal(events.at(-1),'proof-filter:both');
+photoProof.checked=false;
+change({target:photoProof});
+assert.equal(events.at(-1),'proof-filter:both','Unchecking must not create a new conversion event');
+asinProof.checked=false;
+asinProof.checked=true;
+change({target:asinProof});
+assert.equal(events.at(-1),'proof-filter:asin');
+const beforeBadProof=events.length;
+change({target:{type:'search',value:'private free text',form:proofForm}});
+change({target:{type:'checkbox',checked:true,form:{id:'unrelated-form'}}});
+change({target:{type:'checkbox',checked:true,form:proofForm}});
+assert.equal(events.length,beforeBadProof,'Raw search or unrelated form actions must never be tracked');
+assert.equal(events.length,beforeFunnel+6,'Three compare and three evidence-category events only');
 
 // An ASIN exists, but it belongs to a DIFFERENT watch. Ignore the event
 // rather than misreport a qualified affiliate exit to the wrong product.
