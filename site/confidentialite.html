@@ -8,6 +8,8 @@
   <title>Vie privée et données locales | Atelier Montres</title>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./base.css">
+  <link rel="stylesheet" href="./privacy-controls.css">
+  <script defer src="./privacy-controls.js"></script>
   <style>
     body{background:#f7f4eb;color:#1b2d22}
     .legal-wrap{max-width:820px;margin:0 auto;padding:clamp(32px,5vw,72px) 20px 90px}
@@ -32,6 +34,16 @@
   <p>Nous n'avons pas installé de système de publicité ciblée, de cookies de suivi ou de régie analytique sur la page.</p>
   <h2>Favoris, comparateur et historique</h2>
   <p>Les favoris, les préférences d'affichage et l'historique récent des montres peuvent être conservés uniquement dans le stockage local du navigateur. La sélection du comparateur peut être conservée dans le stockage de session de l'onglet, afin de retrouver les mêmes modèles au cours de la navigation. Ces éléments ne sont pas envoyés à un compte Atelier Montres. Ils peuvent être supprimés avec les données du site dans les paramètres du navigateur ou via les commandes d'effacement proposées.</p>
+  <section id="amPrivacyControls" class="am-privacy-controls" aria-labelledby="amPrivacyControlsTitle" hidden>
+    <h3 id="amPrivacyControlsTitle">Effacer mes préférences sur cet appareil</h3>
+    <p>Supprime uniquement les favoris de montres et de styles, les préférences du catalogue, l’historique récent et les comparaisons enregistrées par Atelier Montres dans ce navigateur. Aucune information n’est envoyée à notre serveur.</p>
+    <p class="am-privacy-count" id="amPrivacyCount" aria-live="polite">Vérification du stockage local…</p>
+    <label class="am-privacy-check" for="amPrivacyConfirm"><input id="amPrivacyConfirm" type="checkbox"> Je confirme vouloir effacer ces préférences de cet appareil.</label>
+    <button id="amPrivacyDelete" class="am-privacy-delete" type="button" disabled>Effacer mes préférences</button>
+    <p id="amPrivacyStatus" class="am-privacy-status" role="status" aria-live="polite"></p>
+    <p><strong>Commandes protégées :</strong> les identifiants permettant de reprendre une tentative de paiement ou de suivre une éventuelle commande ne sont pas effacés par ce bouton. Supprimer toutes les données du site dans le navigateur peut rendre ce suivi inaccessible ; conservez alors vos informations de commande par un moyen sûr.</p>
+  </section>
+  <p id="amPrivacyFallback">Sans JavaScript ou si le stockage est bloqué, les préférences locales peuvent être supprimées depuis les paramètres du navigateur, dans les données enregistrées pour ce site. Cette opération globale peut aussi supprimer les références nécessaires au suivi de commande.</p>
   <h2>Conseiller et assistant</h2>
   <p>Le conseiller et l'assistant fonctionnent avec du JavaScript local. Ils n'envoient pas votre questionnaire ou vos messages à un modèle d'intelligence artificielle hébergé à distance. Ne saisissez pas de données personnelles sensibles.</p>
   <h2>Liens commerciaux et sites tiers</h2>

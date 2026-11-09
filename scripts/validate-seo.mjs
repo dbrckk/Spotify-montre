@@ -259,6 +259,14 @@ assert.match(privacyDisclosure,/Certains liens Amazon.fr peuvent être rémunér
 assert.doesNotMatch(privacyDisclosure,/Ces liens ne sont actuellement pas rémunérés/,'No obsolete non-affiliate claims');
 assert.match(privacyDisclosure,/stockage de session/,'Comparison persistence must be disclosed');
 assert.match(privacyDisclosure,/Informations légales/,'Legal page accessible from privacy notice');
+assert.match(privacyDisclosure,/id="amPrivacyControls"[^>]*hidden/,'No nonfunctional privacy deletion panel without JS');
+assert.match(privacyDisclosure,/src="\.\/privacy-controls\.js"/,'Local privacy control must be explicitly loaded');
+assert.match(privacyDisclosure,/id="amPrivacyFallback"/,'No-JS deletion guidance must be available');
+const privacyControlJs=read('privacy-controls.js');
+assert.match(privacyControlJs,/atelier-montres-multibrand-favorites-v1/,'Real saved favorites must be covered');
+assert.match(privacyControlJs,/atelier-montres-comparison-v1/,'Session comparison must be covered');
+assert.doesNotMatch(privacyControlJs,/\b(?:localStorage|sessionStorage)\.clear\s*\(/,
+  'No bulk storage clearing: order follow-up access and third-party keys are not preferences');
 for(const path of ['index.html','affiliation.html','conseiller.html','marque.html','montre.html','selection.html','catalogue.html']){
  const page=read(path);
  assert.ok(page.includes('href="./informations-legales.html"'),path+' must link legal information');

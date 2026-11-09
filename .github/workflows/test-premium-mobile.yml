@@ -27,6 +27,10 @@ on:
       - 'site/index.html'
       - 'site/premium-showroom.css'
       - 'site/acheter.html'
+      - 'site/confidentialite.html'
+      - 'site/privacy-controls.js'
+      - 'site/privacy-controls.css'
+      - 'scripts/test-privacy-controls-browser.mjs'
       - 'site/acheter-direct.js'
       - 'site/achat-partenaires.js'
       - 'scripts/test-partner-purchase-browser.mjs'
@@ -135,6 +139,7 @@ jobs:
           WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-home-editorial-browser.mjs
           WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-direct-commerce-browser.mjs
           WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-partner-purchase-browser.mjs
+          WATCH_STOREFRONT_URL=http://127.0.0.1:8765 node scripts/test-privacy-controls-browser.mjs
       - name: Preserve mobile and desktop screenshots
         if: always()
         uses: actions/upload-artifact@v4
