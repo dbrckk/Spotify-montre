@@ -95,7 +95,7 @@ for(const watch of picks){
     'Photo disclosure must match declared image publication: '+watch.id);
   const expectedRoute=affiliateActive&&exactResearch[watch.id]
     ?(exactResearch[watch.id].evidenceType==='amazon_fr_comparator_redirect'?'comparator':'asin')
-    :'source';
+    :affiliateActive?'search':'official';
   assert.ok(summary.includes('data-decision-route="'+expectedRoute+'"'),
     'Buyer summary must reflect source-first merchant evidence: '+watch.id);
   const match=html.match(/<div class="am-extra-actions" data-action-priority="(amazon|awin|source)"[^>]*>([\s\S]*?)<\/div>/);
