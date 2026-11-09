@@ -55,8 +55,36 @@
     'www.currenwatches.com','www.montre.com','www.swatch.com'
   ]);
   document.addEventListener('click',event=>{
-    const el=event.target?.closest?.('a[data-amazon-product],a[data-amazon-search-id],a[data-merchant-official-id],a[data-partner-offer-id]');
+    const el=event.target?.closest?.('a[data-amazon-product],a[data-amazon-search-id],a[data-merchant-official-id],a[data-partner-offer-id],a[data-compare-source],a[data-focus-compare],a[data-affordable-compare]');
     if(!el||typeof window.umami?.track!=='function')return;
+    const compareFields=[
+      ['data-compare-source','compareSource','fiche'],
+      ['data-focus-compare','focusCompare','selection'],
+      ['data-affordable-compare','affordableCompare','accueil']
+    ].filter(([attr])=>el.hasAttribute(attr));
+    if(compareFields.length){
+      if(compareFields.length!==1||el.hasAttribute('data-amazon-product')
+        ||el.hasAttribute('data-amazon-search-id')
+        ||el.hasAttribute('data-merchant-official-id')
+        ||el.hasAttribute('data-partner-offer-id'))return;
+      const [,field,placement]=compareFields[0],modelId=el.dataset[field];
+      if(!idPattern.test(modelId||''))return;
+      let destination;
+      try{destination=new URL(el.href)}catch{return}
+      // Only explicitly linked local comparison journeys count:
+      // never track arbitrary URLs, search text or unvalidated model IDs.
+      if(destination.origin!==window.location?.origin
+        ||destination.pathname!=='/montres/toutes-les-montres.html'
+        ||destination.hash!=='#comparer'
+        ||[...destination.searchParams.keys()].join(',')!=='compare')return;
+      const models=destination.searchParams.get('compare')?.split(',')||[];
+      if(models.length<2||models.length>3
+        ||new Set(models).size!==models.length
+        ||!models.includes(modelId)
+        ||!models.every(model=>idPattern.test(model)))return;
+      try{window.umami.track('compare:'+modelId+':'+placement)}catch{/* Navigation must continue. */}
+      return;
+    }
     const official=el.hasAttribute('data-merchant-official-id');
     const search=el.hasAttribute('data-amazon-search-id');
     const partner=el.hasAttribute('data-partner-offer-id');
@@ -129,5 +157,20 @@
     }
     if(trackingName.length>55)return;
     try {window.umami.track(trackingName)}catch{/* Navigation cannot depend on analytics. */}
+  },{capture:true,passive:true});
+
+  // A filter activation is a category-only signal. Never transmit raw text
+  // search queries, selected URL parameters, user identifiers, or form values.
+  document.addEventListener('change',event=>{
+    if(typeof window.umami?.track!=='function')return;
+    const input=event.target,form=input?.form;
+    if(!input||input.type!=='checkbox'||!input.checked
+      ||form?.id!=='am-pick-filters')return;
+    const photo=form.elements?.namedItem?.('photo-publiee');
+    const asin=form.elements?.namedItem?.('asin-documente');
+    if(!photo||!asin||(input!==photo&&input!==asin)
+      ||photo.type!=='checkbox'||asin.type!=='checkbox')return;
+    const intent=photo.checked&&asin.checked?'both':photo.checked?'photo':'asin';
+    try{window.umami.track('proof-filter:'+intent)}catch{/* Filtering must continue. */}
   },{capture:true,passive:true});
 })();
