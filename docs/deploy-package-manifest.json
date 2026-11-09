@@ -63,12 +63,12 @@
     {
       "file": "deploy-package-12.json",
       "count": 50,
-      "bytes": 715803
+      "bytes": 716439
     },
     {
       "file": "deploy-package-13.json",
       "count": 33,
-      "bytes": 431889
+      "bytes": 433636
     }
   ]
 }
