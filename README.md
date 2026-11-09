@@ -5,6 +5,8 @@
 > **État opérationnel :** vitrine et API commerciale indépendantes déployées sur Render ; 52 références éditoriales ; parcours partenaires avec 13 liens Amazon.fr documentés, sans confirmation de commissions acquises. Le ticket CJ est ouvert mais le devis complet manque. **Paiement direct désactivé côté site et serveur** : aucune vente automatisée n'est encore attestée. Les plans précédents sont des archives de conception et des guides spécialisés ; la charte Production Ready du 9 novembre fixe les critères finaux, tandis que les preuves de production et le code restent déterminants.
 
 
+**R1 — demandes de droits photographiques :** génération de brouillons par marque (sans envoi) avec `npm run compliance:r1:requests -- --all`, et [export téléchargeable depuis GitHub Actions](https://github.com/dbrckk/Spotify-montre/actions/workflows/r1-photo-requests.yml). Les preuves externes restent à obtenir. Voir le [dossier R1](docs/DOSSIER_PREUVES_R1_2026-11-09.md).
+
 **R1 — registre d'actions légales et droits photo :** [dossier de preuve et procédure](docs/DOSSIER_PREUVES_R1_2026-11-09.md). `npm run compliance:r1` fournit les priorités par marque ; `npm run compliance:r1:csv` exporte les 52 modèles avec l'état des photos ; `npm run compliance:r1:check` contrôle la couverture. Ces scripts n'authentifient aucune licence et ne concluent pas à la conformité.
 
 **Nouveau — fiches et conseiller premium :** [refonte photographique, choix rapides par style, fiches interactives et indexables, tests Android et WCAG](docs/REFONTE_FICHES_CONSEILLER_STAR_LIST_2026-11-03.md). Cette mise à jour complète la [refonte de l’accueil et du catalogue](docs/REFONTE_UX_UI_STAR_LIST_2026-11-02.md) ; aucun encaissement n’est activé.

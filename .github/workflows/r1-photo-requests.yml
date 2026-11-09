@@ -1,0 +1,43 @@
+name: Export R1 photo permission packets (unsent)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/prepare-photo-permission-requests.mjs'
+      - 'scripts/check-photo-permission-requests.mjs'
+      - 'scripts/report-r1-evidence.mjs'
+      - 'site/selection-affiliation.json'
+      - 'site/selection-populaires.json'
+      - 'site/popular-photo-rights.json'
+      - '.github/workflows/r1-photo-requests.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  unsent-evidence-packets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate complete source-only evidence
+        run: |
+          npm run compliance:r1:check
+          npm run compliance:r1:requests:check
+      - name: Generate drafts without contacting any rights holders
+        run: |
+          mkdir -p artifacts
+          node scripts/prepare-photo-permission-requests.mjs --all > artifacts/r1-unsent-photo-rights-requests.md
+          node scripts/prepare-photo-permission-requests.mjs --all --json > artifacts/r1-unsent-photo-rights-requests.json
+          node scripts/prepare-photo-permission-requests.mjs --list >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r1-unsent-photo-rights-requests
+          path: artifacts/r1-unsent-photo-rights-requests.*
+          if-no-files-found: error
+          retention-days: 14

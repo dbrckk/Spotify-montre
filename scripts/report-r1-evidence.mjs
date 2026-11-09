@@ -32,7 +32,7 @@ const photoRows=[...core.map(p=>{
     ||typeof item.source!=='string'||!item.source.startsWith('https://')))
     throw Error('Missing core photo source/hash for '+p.id);
   return {id:p.id,brand:p.brand,model:p.model,collection:'core',
-    photoPublished:isPublished,sourcePage:isPublished?item.source:null,
+    photoPublished:isPublished,modelPage:p.officialUrl,sourcePage:isPublished?item.source:null,
     photoPath:isPublished?item.localUrl:null,imageSha256:isPublished?item.localSha256:null,
     rightsBasis:isPublished?(item.licence||'owner_declaration'):null,
     rightsHolder:isPublished?(item.provider||p.brand):null,
@@ -44,7 +44,7 @@ const photoRows=[...core.map(p=>{
     ||item.rightsHolder!==p.brand))
     throw Error('Missing supplemental photo evidence or unexpected holder for '+p.id);
   return {id:p.id,brand:p.brand,model:p.model,collection:'supplemental',
-    photoPublished:!!item,sourcePage:item?.sourcePage||null,
+    photoPublished:!!item,modelPage:p.officialUrl,sourcePage:item?.sourcePage||null,
     photoPath:item?.file||null,imageSha256:item?.imageSha256||null,
     rightsBasis:item?.rightsBasis||null,rightsHolder:item?.rightsHolder||null,
     registryClaimsIndependentVerification:!!item&&item.permissionIndependentlyVerified===true};
@@ -88,7 +88,7 @@ const result={
     'Ce rapport ne retire ni publie de photos et ne modifie aucune offre.']
 };
 const csvValue=x=>'"'+String(x??'').replaceAll('"','""').replace(/[\r\n]+/g,' ')+'"';
-const csvColumns=['id','brand','model','collection','photoPublished','sourcePage',
+const csvColumns=['id','brand','model','collection','photoPublished','modelPage','sourcePage',
   'photoPath','imageSha256','rightsBasis','rightsHolder','registryClaimsIndependentVerification',
   'legalSignOff','nextAction'];
 const csv=[csvColumns.join(','),...photoRows.map(p=>csvColumns.map(k=>csvValue(p[k])).join(','))].join('\n')+'\n';

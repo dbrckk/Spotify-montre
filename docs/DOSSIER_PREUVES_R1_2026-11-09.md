@@ -39,3 +39,19 @@ L’affiliation requiert l’accord du programme/annonceur, le lien attribué r�
 ## Critère de sortie
 
 Le dossier R1 est recevable seulement lorsque toutes les informations légalement requises sont publiées, que chaque photographie publiée dispose d’une permission contrôlée pour son usage réel, que l’exactitude des mentions et des parcours tiers a été auditée et qu’un responsable accepte formellement la conformité. **Le rapport automatisé ne suffit jamais à signer R1.**
+
+## Préparer les demandes de droits par marque (sans envoi)
+
+Le registre peut désormais produire un brouillon spécifique à chaque groupe de marques. Le dossier Casio regroupe Edifice et G-SHOCK pour éviter les doublons, sans prétendre identifier juridiquement le détenteur des images. Le texte différencie les images déjà publiées des modèles encore sans photo.
+
+```sh
+npm run compliance:r1:requests
+npm run compliance:r1:requests -- --brand "SKMEI"
+npm run compliance:r1:requests -- --all
+npm run compliance:r1:requests -- --all --json
+npm run compliance:r1:requests:check
+```
+
+L'export est aussi régénéré automatiquement sur les changements du registre et des scripts concernés. Sur Android, utiliser **GitHub → Actions → Export R1 photo permission packets (unsent)** (ou **Run workflow** pour le renouveler), puis récupérer l’artefact contenant les brouillons Markdown et les données JSON. Ce workflow **n’envoie aucune communication**. Il n’identifie pas non plus les coordonnées d’un titulaire de droits.
+
+Chaque brouillon fournit la référence du modèle, son URL source, le chemin exact du WebP et le SHA-256 pour aider à vérifier le périmètre des autorisations de reproduction. Une source fabricant ou une empreinte de fichier n’est pas une licence. Le message doit être relu, envoyé au véritable ayant droit par l’exploitant, et la réponse doit être contrôlée hors du dépôt avant toute modification du registre ou du jalon R1.
