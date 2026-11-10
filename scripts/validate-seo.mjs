@@ -380,7 +380,7 @@ for(const id of affordableIds){
   const product=JSON.parse(read('selection-populaires.json')).products.find(p=>p.id===id);
   assert.ok(product&&card.includes('href="./montres/'+id+'.html"'),
     'Each affordably styled watch must link to its genuine product detail page: '+id);
-  if(approvedPopularPhotos.has(id)){
+  if(Object.hasOwn(JSON.parse(read('popular-photo-rights.json')).photos,id)){
     assert.ok(card.includes('src="./assets/watches-popular/'+id+'.webp"'),
       'Approved exact-model photo required when its registry entry is active: '+id);
   }else{
