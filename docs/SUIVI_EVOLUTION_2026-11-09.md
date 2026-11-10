@@ -68,3 +68,33 @@ vitrine et n'amenait pas à un modèle.
 atteint réellement les 52 fiches ; contrôle Render post-déploiement.
 Un succès de CI n'est pas une preuve de hausse du trafic Google ni de ventes.
 **Verrou conservé :** `checkoutMode: inactive` ; paiement direct non relancé.
+
+
+
+## 11 novembre 2026 — parcours inspirations → catalogue réel
+
+**Audit :** la page `/selection.html` représente six concepts graphiques (sans
+produits ni photographies réelles), mais son menu renvoyait à une newsletter
+masquée et le visiteur ne pouvait pas découvrir les 52 références publiées
+depuis son en-tête principal. La mention « vitrine en préparation » pouvait
+laisser supposer à tort qu'Atelier Montres n'avait encore aucune sélection.
+
+**Mise à niveau :**
+- Hero éditorial avec composition lumineuse CSS, textes honnêtes,
+  CTA prioritaire vers `/montres/toutes-les-montres.html`, second accès aux
+  six inspirations non commercialisées.
+- Menu orienté client : accueil, 52 montres, conseiller, inspirations ;
+  lien mort vers la newsletter supprimé.
+- URL secondaire `noindex,follow` : elle ne doit pas concurrencer le catalogue
+  indexable. Aucun tarif, stock ou achat n'est attribué à un concept.
+- Version JavaScript désactivé : explication `noscript` et lien fonctionnel
+  vers les 52 cartes HTML pré-rendues.
+- Navigation Android 320/393 px : cibles tactiles de 44 px, défilement
+  intérieur au menu et aucun débordement horizontal attendu.
+- Tests statiques sous `npm test` et tests navigateur mobile (avec/sans JS)
+  ajoutés au workflow ; six inspirations et favoris restent fonctionnels.
+
+**Sans modification** de la vente directe, des sources marchandes et des
+photographies publiées. Les métriques SEO et commerciales doivent être
+mesurées après publication ; le seul passage des tests ne prouve pas une
+hausse de trafic ou de conversions.

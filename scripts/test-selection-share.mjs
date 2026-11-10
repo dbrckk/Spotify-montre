@@ -81,4 +81,55 @@ try{
   assert.equal(await page.locator('#affReset').isVisible(),false,'Reset button hides only after all filters are cleared');
   assert.deepEqual(errors,[],'No browser runtime exceptions');
   console.log('PASS SELECTION JOURNEY: Android restores six URL criteria through exact product, related model, comparison link and canonical sharing');
+
+  // A legacy concept-gallery bookmark must visibly lead to the 52 real
+  // products, not to a hidden newsletter or a fake sale. Test on Android
+  // with scripts disabled so navigation never depends on enhancement.
+  for(const width of [320,393]){
+    const staticPage=await browser.newPage({
+      viewport:{width,height:812},isMobile:true,hasTouch:true,
+      javaScriptEnabled:false,locale:'fr-FR'
+    });
+    try{
+      const response=await staticPage.goto(new URL('/selection.html',base).href,
+        {waitUntil:'load',timeout:30000});
+      assert.ok(response?.ok(),'Concept landing page must be reachable');
+      assert.match(await staticPage.locator('h1').innerText(),/Choisissez/i);
+      assert.match(await staticPage.locator('noscript').innerText(),
+        /52 références publiées/i,'No-JS visitors need a working route');
+      assert.equal(await staticPage.locator('a[href="./index.html#newsletter"]').count(),0);
+      const geometry=await staticPage.evaluate(()=>{
+        const nav=document.querySelector('.navigation');
+        return {
+          width:document.documentElement.clientWidth,
+          scroll:document.documentElement.scrollWidth,
+          navOverflow:getComputedStyle(nav).overflowX,
+          heights:[...nav.querySelectorAll('a')].map(x=>Math.round(x.getBoundingClientRect().height))
+        };
+      });
+      assert.ok(geometry.scroll<=geometry.width+2,
+        'Concept landing overflow at '+width+': '+JSON.stringify(geometry));
+      assert.equal(geometry.navOverflow,'auto');
+      assert.ok(geometry.heights.every(h=>h>=44),'Navigation targets must reach 44px');
+      await staticPage.locator('.selector-hero-actions a.button').click();
+      await staticPage.waitForURL(/\/montres\/toutes-les-montres\.html$/,{timeout:20000});
+      assert.equal(await staticPage.locator('#udGrid .ud-card').count(),52,
+        'The actual indexed catalogue needs all 52 prerendered watch cards');
+    }finally{await staticPage.close()}
+  }
+  // The six clearly marked CSS concepts remain interactive with JavaScript.
+  const concepts=await browser.newPage({viewport:{width:393,height:852},
+    isMobile:true,hasTouch:true,locale:'fr-FR'});
+  try{
+    await concepts.goto(new URL('/selection.html',base).href,
+      {waitUntil:'domcontentloaded',timeout:30000});
+    await concepts.locator('.sel-card').first().waitFor({state:'visible',timeout:10000});
+    assert.equal(await concepts.locator('.sel-card').count(),6);
+    assert.equal(await concepts.locator('.sel-card .sel-tag').count(),6);
+    assert.match(await concepts.locator('.sel-card .sel-tag').first().innerText(),
+      /CONCEPT NON COMMERCIALISÉ/);
+    await concepts.locator('.sel-card .sel-save').first().click();
+    assert.equal(await concepts.locator('#favCount').innerText(),'1');
+  }finally{await concepts.close()}
+  console.log('PASS CONCEPT SHOWROOM: 320/393px, no JavaScript, 52 real references, six clearly labeled concepts');
 }finally{await browser.close()}
