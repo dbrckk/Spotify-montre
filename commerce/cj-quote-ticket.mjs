@@ -97,7 +97,7 @@ function createCaller(accessToken,fetcher){
     // Strict endpoint allowlist: never touch order, wallet or product writes.
     if(!['/ticket/types','/ticket/list','/ticket/create'].includes(path)&&
       !/^\/ticket\/detail\?ticketId=[a-zA-Z0-9_-]{1,64}$/.test(path)&&
-      !/^\/ticket\/messages\?ticketId=[a-zA-Z0-9_-]{1,64}&pageNum=1&pageSize=100$/.test(path))
+      !/^\/ticket\/messages\?ticketId=[a-zA-Z0-9_-]{1,64}&pageNum=[1-5]&pageSize=100$/.test(path))
       throw Error('CJ_TICKET_ENDPOINT_DENIED');
     if(fetcher===fetch){
       const delay=1200-(Date.now()-last);
@@ -167,40 +167,70 @@ async function findExistingQuoteTicket(call){
   }
   throw Error('CJ_TICKET_HISTORY_UNVERIFIED');
 }
-// CJ exposes support messages separately from Ticket Detail. Only inspect
-// sender and timestamps, never copy HTML/text, attachments or account details.
+// Ticket Messages is paginated: "total" is the global count, not the
+// number of entries on page 1. Read all pages before reporting "no reply".
+// Bound the work: any larger history must be checked manually in CJ.
+const MESSAGE_PAGE_SIZE=100;
+const MESSAGE_MAX=500;
 async function readSupplierMessageMetadata(call,privateTicketId){
-  const path='/ticket/messages?ticketId='+encodeURIComponent(privateTicketId)+
-    '&pageNum=1&pageSize=100';
-  const data=await call(path);
-  // Shape-only failure codes: reveal no ticket ID, message body, sender
-  // value, attachments, timestamps, supplier account or customer details.
-  if(!data||typeof data!=='object'||Array.isArray(data)||
-    !Array.isArray(data.list))
-    throw Error('CJ_TICKET_MESSAGES_LIST_SHAPE');
-  if(!Number.isSafeInteger(data.total)||data.total<0||data.total>100)
-    throw Error('CJ_TICKET_MESSAGES_TOTAL_SHAPE');
-  if(data.total!==data.list.length)
-    throw Error('CJ_TICKET_MESSAGES_PAGE_MISMATCH');
-  let supplierMessageCount=0,latestSupplierMessageUtc=null;
-  for(const item of data.list){
-    if(!item||typeof item!=='object'||Array.isArray(item))
-      throw Error('CJ_TICKET_MESSAGES_ITEM_SHAPE');
-    if(!['CJ','CUSTOMER'].includes(item.sender))
-      throw Error('CJ_TICKET_MESSAGES_SENDER_SHAPE');
-    if(!Number.isSafeInteger(item.messageTime)||
-      item.messageTime<1577836800000||
-      item.messageTime>Date.now()+86400000)
-      throw Error('CJ_TICKET_MESSAGES_TIME_SHAPE');
-    if(item.sender==='CJ'){
-      supplierMessageCount++;
-      latestSupplierMessageUtc=latestSupplierMessageUtc===null?
-        item.messageTime:Math.max(latestSupplierMessageUtc,item.messageTime);
+  let total=null,supplierMessageCount=0,latestSupplierMessageUtc=null;
+  const seenMessageIds=new Set();
+  for(let pageNum=1;pageNum<=MESSAGE_MAX/MESSAGE_PAGE_SIZE;pageNum++){
+    const path='/ticket/messages?ticketId='+encodeURIComponent(privateTicketId)+
+      '&pageNum='+pageNum+'&pageSize='+MESSAGE_PAGE_SIZE;
+    const data=await call(path);
+    // Only shape codes escape this function: never supplier text, IDs, account
+    // details, request URL, timestamps or attachments.
+    if(!data||typeof data!=='object'||Array.isArray(data)||
+      !Array.isArray(data.list))
+      throw Error('CJ_TICKET_MESSAGES_LIST_SHAPE');
+    if(!Number.isSafeInteger(data.total)||data.total<0||
+      data.total>MESSAGE_MAX)
+      throw Error('CJ_TICKET_MESSAGES_TOTAL_SHAPE');
+    if(total!==null&&data.total!==total)
+      throw Error('CJ_TICKET_MESSAGES_PAGE_MISMATCH');
+    total=data.total;
+    if((data.pageNum!==undefined&&data.pageNum!==pageNum)||
+       (data.pageSize!==undefined&&data.pageSize!==MESSAGE_PAGE_SIZE))
+      throw Error('CJ_TICKET_MESSAGES_PAGE_MISMATCH');
+    const expected=Math.max(0,Math.min(MESSAGE_PAGE_SIZE,
+      total-(pageNum-1)*MESSAGE_PAGE_SIZE));
+    if(data.list.length!==expected)
+      throw Error('CJ_TICKET_MESSAGES_PAGE_MISMATCH');
+    for(const item of data.list){
+      if(!item||typeof item!=='object'||Array.isArray(item))
+        throw Error('CJ_TICKET_MESSAGES_ITEM_SHAPE');
+      if(!['CJ','CUSTOMER'].includes(item.sender))
+        throw Error('CJ_TICKET_MESSAGES_SENDER_SHAPE');
+      if(!Number.isSafeInteger(item.messageTime)||
+        item.messageTime<1577836800000||
+        item.messageTime>Date.now()+86400000)
+        throw Error('CJ_TICKET_MESSAGES_TIME_SHAPE');
+      // CJ documents a messageId as a string. On multi-page histories it
+      // must be present and unique: repeated pages must never be counted
+      // twice, even if sender and timestamp look plausible.
+      if(total>MESSAGE_PAGE_SIZE&&
+        (typeof item.messageId!=='string'||!item.messageId.trim()||
+         item.messageId.length>128))
+        throw Error('CJ_TICKET_MESSAGES_ITEM_SHAPE');
+      if(typeof item.messageId==='string'&&item.messageId.trim()){
+        if(seenMessageIds.has(item.messageId))
+          throw Error('CJ_TICKET_MESSAGES_DUPLICATE_ID');
+        seenMessageIds.add(item.messageId);
+      }
+      if(item.sender==='CJ'){
+        supplierMessageCount++;
+        latestSupplierMessageUtc=latestSupplierMessageUtc===null?
+          item.messageTime:Math.max(latestSupplierMessageUtc,item.messageTime);
+      }
+    }
+    if(pageNum*MESSAGE_PAGE_SIZE>=total){
+      return {supplierMessageCount,
+        latestSupplierMessageDate:latestSupplierMessageUtc===null?null:
+          new Date(latestSupplierMessageUtc).toISOString().slice(0,10)};
     }
   }
-  return {supplierMessageCount,
-    latestSupplierMessageDate:latestSupplierMessageUtc===null?null:
-      new Date(latestSupplierMessageUtc).toISOString().slice(0,10)};
+  throw Error('CJ_TICKET_MESSAGES_PAGE_MISMATCH');
 }
 // Never expose the private supplier message, ticket ID, agent identity,
 // HTML, attachments or access credentials to GitHub Actions output.
@@ -240,6 +270,7 @@ const safeErrorCode=error=>{
     'CJ_TICKET_MESSAGES_LIST_SHAPE','CJ_TICKET_MESSAGES_TOTAL_SHAPE',
     'CJ_TICKET_MESSAGES_PAGE_MISMATCH','CJ_TICKET_MESSAGES_ITEM_SHAPE',
     'CJ_TICKET_MESSAGES_SENDER_SHAPE','CJ_TICKET_MESSAGES_TIME_SHAPE',
+    'CJ_TICKET_MESSAGES_DUPLICATE_ID',
     'CJ_TICKET_CREATE_HTTP_FAILURE',
     'CJ_TICKET_CREATE_REJECTED','CJ_TICKET_RATE_LIMIT',
     'CJ_API_KEY_GITHUB_SECRET_MISSING','CJ_ACCESS_TOKEN_MISSING'
