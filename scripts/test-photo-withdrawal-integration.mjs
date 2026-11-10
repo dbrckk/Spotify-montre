@@ -74,7 +74,7 @@ try{
   const manifest=load('docs/deploy-package-manifest.json');
   assert.equal(manifest.totalModels,52);
   assert.equal(manifest.models,15-coreIds.length);
-  assert.equal(manifest.supplementalPhotos,Object.keys(rights.photos).length-1);
+  assert.equal(manifest.supplementalPhotos,Object.keys(rights.photos).length);
   const allAssets=manifest.parts.flatMap(part=>
     load('docs/'+part.file).files);
   const paths=allAssets.map(x=>x.path);
