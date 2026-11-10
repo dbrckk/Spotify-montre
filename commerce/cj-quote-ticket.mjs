@@ -97,7 +97,7 @@ function createCaller(accessToken,fetcher){
     // Strict endpoint allowlist: never touch order, wallet or product writes.
     if(!['/ticket/types','/ticket/list','/ticket/create'].includes(path)&&
       !/^\/ticket\/detail\?ticketId=[a-zA-Z0-9_-]{1,64}$/.test(path)&&
-      !/^\/ticket\/messages\?ticketId=[a-zA-Z0-9_-]{1,64}&pageNum=[1-5]&pageSize=100$/.test(path))
+      !/^\/ticket\/messages\?ticketId=[a-zA-Z0-9_-]{1,64}&pageNum=(?:[1-9]|1[0-9]|2[0-5])&pageSize=20$/.test(path))
       throw Error('CJ_TICKET_ENDPOINT_DENIED');
     if(fetcher===fetch){
       const delay=1200-(Date.now()-last);
@@ -170,7 +170,10 @@ async function findExistingQuoteTicket(call){
 // Ticket Messages is paginated: "total" is the global count, not the
 // number of entries on page 1. Read all pages before reporting "no reply".
 // Bound the work: any larger history must be checked manually in CJ.
-const MESSAGE_PAGE_SIZE=100;
+// CJ documents 20 as the default page size. The live Messages API returned
+// a short page when asked for 100; use the documented default instead of
+// assuming that the larger documented maximum is honored in production.
+const MESSAGE_PAGE_SIZE=20;
 const MESSAGE_MAX=500;
 async function readSupplierMessageMetadata(call,privateTicketId){
   let total=null,supplierMessageCount=0,latestSupplierMessageUtc=null;

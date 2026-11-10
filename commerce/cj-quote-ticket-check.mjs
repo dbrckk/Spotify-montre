@@ -46,15 +46,15 @@ function fakeTicketApi({total=0,existingTicket=0,types=[category],truncate=false
     if(path==='/ticket/messages'){
       assert.equal(options.method,'GET');
       const pageNum=Number(parsed.searchParams.get('pageNum'));
-      assert.ok(Number.isInteger(pageNum)&&pageNum>=1&&pageNum<=5);
-      assert.equal(parsed.searchParams.get('pageSize'),'100');
+      assert.ok(Number.isInteger(pageNum)&&pageNum>=1&&pageNum<=25);
+      assert.equal(parsed.searchParams.get('pageSize'),'20');
       assert.ok(parsed.searchParams.get('ticketId'));
       if(pageNum===1&&badMessageResponse)return ok(badMessageResponse);
       if(pageNum===2&&badMessageSecondPage)return ok(badMessageSecondPage);
-      const list=messages.slice((pageNum-1)*100,pageNum*100).map(m=>({...m}));
+      const list=messages.slice((pageNum-1)*20,pageNum*20).map(m=>({...m}));
       if(pageNum===2&&duplicateMessageIdOnSecondPage&&list.length)
         list[0].messageId=messages[0].messageId;
-      return ok({total:messages.length,list,pageNum,pageSize:100});
+      return ok({total:messages.length,list,pageNum,pageSize:20});
     }
     if(path==='/ticket/create'){
       assert.equal(options.method,'POST');
@@ -182,7 +182,7 @@ const pagedReport=await checkWrittenCjQuote({
 assert.equal(pagedReport.supplierMessageCount,2);
 assert.equal(pagedReport.latestSupplierMessageDate,'2026-11-05');
 assert.equal(pagedReport.operatorReviewRequired,true);
-assert.equal(paths(paged).filter(p=>p==='/ticket/messages').length,3);
+assert.equal(paths(paged).filter(p=>p==='/ticket/messages').length,11);
 for(const secret of ['m-205',privateText,'9001',token])
   assert.ok(!JSON.stringify(pagedReport).includes(secret));
 assert.equal(createCount(paged),0);
@@ -220,31 +220,31 @@ const malformedPages=[
   },
   {
     options:{messages:pagedMessages,badMessageSecondPage:{
-      total:206,pageNum:2,pageSize:100,list:pagedMessages.slice(100,200)
+      total:206,pageNum:2,pageSize:20,list:pagedMessages.slice(20,40)
     }},
     code:'CJ_TICKET_MESSAGES_TOTAL_CHANGED'
   },
   {
     options:{messages:pagedMessages,badMessageSecondPage:{
-      total:205,pageNum:1,pageSize:100,list:pagedMessages.slice(100,200)
+      total:205,pageNum:1,pageSize:20,list:pagedMessages.slice(20,40)
     }},
     code:'CJ_TICKET_MESSAGES_PAGE_NUMBER_MISMATCH'
   },
   {
     options:{messages:pagedMessages,badMessageSecondPage:{
-      total:205,pageNum:2,pageSize:100,list:pagedMessages.slice(100,199)
+      total:205,pageNum:2,pageSize:20,list:pagedMessages.slice(20,39)
     }},
     code:'CJ_TICKET_MESSAGES_PAGE_SHORT'
   },
   {
     options:{messages:pagedMessages,badMessageSecondPage:{
-      total:205,pageNum:2,pageSize:20,list:pagedMessages.slice(100,200)
+      total:205,pageNum:2,pageSize:100,list:pagedMessages.slice(20,40)
     }},
     code:'CJ_TICKET_MESSAGES_PAGE_SIZE_MISMATCH'
   },
   {
     options:{messages:pagedMessages,badMessageSecondPage:{
-      total:205,pageNum:2,pageSize:100,list:pagedMessages.slice(100,201)
+      total:205,pageNum:2,pageSize:20,list:pagedMessages.slice(20,41)
     }},
     code:'CJ_TICKET_MESSAGES_PAGE_LONG'
   },
