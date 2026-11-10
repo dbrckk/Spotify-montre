@@ -341,6 +341,14 @@ import {assertPhotoTakedownSources,maskRetiredStaticPhotos,readPhotoTakedowns} f
     }
     // On the second SEO build, preserve exactly the first injected image.
     // A developer build must be safe when repeated against the same directory.
+  }else{
+    // A rights withdrawal must keep a meaningful, static public hero even
+    // with JavaScript disabled. Never display a different model's photograph.
+    const oldHero=/<div class="am-hero-watch" id="heroWatch"[^>]*>(?:<img[^>]*>|<span[^>]*>[^<]*<\/span>)?<\/div>/;
+    const noPhoto='<div class="am-hero-watch" id="heroWatch" role="img" aria-label="Photographie de Citizen Tsuyosa retirée">'
+      +'<span class="am-photo-withdrawn">Photographie retirée · consulter la référence exacte chez le fabricant</span></div>';
+    if(!oldHero.test(collection))throw Error('Photograph-free hero placeholder missing');
+    collection=collection.replace(oldHero,noPhoto);
   }
   // The advisor is an indexable, useful decision aid. Keep its canonical URL,
   // social preview and WebPage semantics consistent with the deployed origin.
