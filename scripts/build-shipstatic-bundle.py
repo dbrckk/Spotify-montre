@@ -51,13 +51,43 @@ def assemble():
         ids.add(id)
         expected='./assets/watches/'+id+'.webp'
         photo=p['photoReview']
+        if photo.get('publicUsageApproved') is not True:
+            assert not photo.get('localUrl'), 'Withdrawn photo must not expose localUrl: '+id
+            assert not photo.get('localSha256'), 'Withdrawn photo must not retain public hash: '+id
+            continue
         assert photo.get('localUrl')==expected, 'No verified local file for '+id
         path=SITE/'assets'/'watches'/(id+'.webp')
         assert path.is_file(), 'Missing physical photo: '+id
         data=path.read_bytes()
         assert data[:4]==b'RIFF' and data[8:12]==b'WEBP', 'Not actual WebP: '+id
         assert hashlib.sha256(data).hexdigest()==photo['localSha256'], 'Photo changed unexpectedly: '+id
-    assert len([a for a in assets if a['path'].startswith('assets/watches/')])==len(products)
+    approved_core={p['id'] for p in products if p['photoReview'].get('publicUsageApproved') is True}
+    approved_popular=set(json.loads((SITE/'popular-photo-rights.json').read_text(encoding='utf-8'))['photos'])
+    for asset in assets:
+        path=asset['path']
+        for folder,approved in (
+            ('watches',approved_core),
+            ('watch-responsive',approved_core),
+            ('watch-thumbs',approved_core),
+            ('watches-popular',approved_popular),
+            ('popular-responsive',approved_popular),
+        ):
+            prefix='assets/'+folder+'/'
+            if not path.startswith(prefix):
+                continue
+            filename=path[len(prefix):]
+            if not filename.endswith('.webp'):
+                raise AssertionError('Unexpected watch media extension: '+path)
+            owner=filename[:-5]
+            if owner not in approved:
+                # Responsive variants are ID-<width>.webp, not arbitrary IDs.
+                import re
+                variant=re.fullmatch(r'([a-z0-9-]+)-(240|360|480|720|800|960)',owner)
+                owner=variant.group(1) if variant else owner
+            assert owner in approved, 'Unapproved or withdrawn photo still packaged: '+path
+    assert {a['path'] for a in assets if a['path'].startswith('assets/watches/')}=={
+        'assets/watches/'+id+'.webp' for id in approved_core
+    }, 'Unregistered or withdrawn core photo detected'
     # Pack the 37 source-backed accessories only after the checksummed registry
     # has been populated. No external images or unregistered files are allowed.
     popular=json.loads((SITE/'selection-populaires.json').read_text(encoding='utf-8'))
@@ -85,7 +115,7 @@ def assemble():
         part.append(a)
     if part:
         chunks.append(part)
-    manifest={'version':1,'models':len(products),'totalModels':len(products)+len(allowed),'supplementalPhotos':len(cached),'files':len(assets),'parts':[]}
+    manifest={'version':1,'models':len(approved_core),'totalModels':len(products)+len(allowed),'supplementalPhotos':len(cached),'files':len(assets),'parts':[]}
     for i,part in enumerate(chunks,1):
         name='deploy-package-%02d.json'%i
         content=compact({'version':1,'files':part})+'\n'
@@ -97,7 +127,7 @@ def assemble():
         if stale.name not in {p['file'] for p in manifest['parts']} and stale.name!='deploy-package-manifest.json':
             stale.unlink()
     (DOCS/'deploy-package-manifest.json').write_text(json.dumps(manifest,indent=2)+'\n',encoding='utf-8')
-    print('Publishable deployment:',len(products),'verified genuine watch photos,',len(assets),'static files in',len(chunks),'GitHub-safe JSON parts')
+    print('Publishable deployment:',len(approved_core),'approved core watch photos,',len(assets),'static files in',len(chunks),'GitHub-safe JSON parts')
     for chunk in manifest['parts']:
         print(chunk['file'],chunk['count'],'files',chunk['bytes'],'bytes')
 
