@@ -188,15 +188,18 @@ async function readSupplierMessageMetadata(call,privateTicketId){
       data.total>MESSAGE_MAX)
       throw Error('CJ_TICKET_MESSAGES_TOTAL_SHAPE');
     if(total!==null&&data.total!==total)
-      throw Error('CJ_TICKET_MESSAGES_PAGE_MISMATCH');
+      throw Error('CJ_TICKET_MESSAGES_TOTAL_CHANGED');
     total=data.total;
-    if((data.pageNum!==undefined&&data.pageNum!==pageNum)||
-       (data.pageSize!==undefined&&data.pageSize!==MESSAGE_PAGE_SIZE))
-      throw Error('CJ_TICKET_MESSAGES_PAGE_MISMATCH');
+    if(data.pageNum!==undefined&&data.pageNum!==pageNum)
+      throw Error('CJ_TICKET_MESSAGES_PAGE_NUMBER_MISMATCH');
+    if(data.pageSize!==undefined&&data.pageSize!==MESSAGE_PAGE_SIZE)
+      throw Error('CJ_TICKET_MESSAGES_PAGE_SIZE_MISMATCH');
     const expected=Math.max(0,Math.min(MESSAGE_PAGE_SIZE,
       total-(pageNum-1)*MESSAGE_PAGE_SIZE));
-    if(data.list.length!==expected)
-      throw Error('CJ_TICKET_MESSAGES_PAGE_MISMATCH');
+    if(data.list.length<expected)
+      throw Error('CJ_TICKET_MESSAGES_PAGE_SHORT');
+    if(data.list.length>expected)
+      throw Error('CJ_TICKET_MESSAGES_PAGE_LONG');
     for(const item of data.list){
       if(!item||typeof item!=='object'||Array.isArray(item))
         throw Error('CJ_TICKET_MESSAGES_ITEM_SHAPE');
@@ -269,6 +272,10 @@ const safeErrorCode=error=>{
     'CJ_TICKET_MESSAGES_REJECTED','CJ_TICKET_MESSAGES_UNVERIFIED',
     'CJ_TICKET_MESSAGES_LIST_SHAPE','CJ_TICKET_MESSAGES_TOTAL_SHAPE',
     'CJ_TICKET_MESSAGES_PAGE_MISMATCH','CJ_TICKET_MESSAGES_ITEM_SHAPE',
+    'CJ_TICKET_MESSAGES_TOTAL_CHANGED',
+    'CJ_TICKET_MESSAGES_PAGE_NUMBER_MISMATCH',
+    'CJ_TICKET_MESSAGES_PAGE_SIZE_MISMATCH',
+    'CJ_TICKET_MESSAGES_PAGE_SHORT','CJ_TICKET_MESSAGES_PAGE_LONG',
     'CJ_TICKET_MESSAGES_SENDER_SHAPE','CJ_TICKET_MESSAGES_TIME_SHAPE',
     'CJ_TICKET_MESSAGES_DUPLICATE_ID',
     'CJ_TICKET_CREATE_HTTP_FAILURE',
