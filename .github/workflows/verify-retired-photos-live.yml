@@ -1,0 +1,60 @@
+name: Verify retired watch photo URLs on Render (read-only)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'site/photo-takedowns.json'
+      - 'scripts/check-retired-photo-live.mjs'
+      - 'scripts/test-retired-photo-live.mjs'
+      - '.github/workflows/verify-retired-photos-live.yml'
+  workflow_dispatch:
+  schedule:
+    - cron: '27 7 * * 1'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: retired-photo-live-check
+  cancel-in-progress: true
+
+jobs:
+  verify-exact-urls:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate URL scope and stale-media detection offline
+        run: node scripts/test-retired-photo-live.mjs
+      - name: Check the actual CDN URLs (no cache purge or mutation)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          for attempt in $(seq 1 10); do
+            if node scripts/check-retired-photo-live.mjs --json > artifacts/retired-photo-live.json; then
+              echo "Retired-photo URL check passed / not applicable on attempt $attempt"
+              node -e "const j=require('./artifacts/retired-photo-live.json');console.log(j.status, j.checked, 'URLs checked');"
+              cat artifacts/retired-photo-live.json >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            echo "Old media may still be reachable on Render CDN (attempt $attempt)"
+            if [ "$attempt" -lt 10 ]; then sleep 30; fi
+          done
+          echo "NOT VERIFIED: one or more retired image URLs still serve media or cannot be checked"
+          cat artifacts/retired-photo-live.json >> "$GITHUB_STEP_SUMMARY"
+          exit 1
+      - name: Preserve post-publication HTTP evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: retired-photo-http-verification
+          path: artifacts/retired-photo-live.json
+          if-no-files-found: ignore
+          retention-days: 30
