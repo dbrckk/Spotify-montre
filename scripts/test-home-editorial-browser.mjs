@@ -153,6 +153,52 @@ try{
   }finally{
     await publicHome.close();
   }
+  // The old /catalogue.html bookmark must never strand buyers in a
+  // supplier-only prelaunch page with dead navigation. Verify the real
+  // customer route, no-JS fallback and 320/393px Android layout.
+  for(const width of [320,393]){
+    const legacy=await browser.newPage({
+      viewport:{width,height:812},isMobile:true,hasTouch:true,
+      javaScriptEnabled:false,locale:'fr-FR'
+    });
+    try{
+      const response=await legacy.goto(new URL('/catalogue.html',base).href,{
+        waitUntil:'load',timeout:30000
+      });
+      assert.ok(response?.ok(),'Legacy catalogue route must be reachable');
+      assert.match(await legacy.locator('h1').innerText(),/52 montres/i);
+      const primary=legacy.locator('.catalog-public-actions a.button');
+      assert.equal(await primary.getAttribute('href'),
+        './montres/toutes-les-montres.html');
+      assert.equal(await legacy.locator('a[href="./index.html#newsletter"]').count(),0,
+        'Legacy page must not advertise a hidden newsletter');
+      const layout=await legacy.evaluate(()=>{
+        const nav=document.querySelector('.navigation');
+        return {
+          pageWidth:document.documentElement.clientWidth,
+          scrollWidth:document.documentElement.scrollWidth,
+          navOverflow:getComputedStyle(nav).overflowX,
+          targetHeights:[...nav.querySelectorAll('a')].map(
+            link=>Math.round(link.getBoundingClientRect().height))
+        };
+      });
+      assert.ok(layout.scrollWidth<=layout.pageWidth+2,
+        'Legacy catalogue overflows Android at '+width+': '+JSON.stringify(layout));
+      assert.equal(layout.navOverflow,'auto',
+        'Legacy Android navigation must scroll within its own container');
+      assert.ok(layout.targetHeights.every(h=>h>=44),
+        'Legacy Android navigation targets must be at least 44px');
+      await primary.click();
+      await legacy.waitForURL(/\/montres\/toutes-les-montres\.html$/,{
+        timeout:20000
+      });
+      assert.equal(await legacy.locator('#udGrid article.ud-card[data-id]').count(),52,
+        'Without JS, the primary route must expose all 52 prerendered watch cards');
+      console.log('PASS LEGACY 52-WATCH GATEWAY: '+width+'px, no JS, no dead nav');
+    }finally{
+      await legacy.close();
+    }
+  }
   assert.deepEqual(failures,[]);
   console.log('Premium editorial comparison showroom OK: 52-watch links, 7 authentic local-photo placements, 3 detailed highlights, responsive menu, no overflow, accurate shipping disclosure');
 }finally{
