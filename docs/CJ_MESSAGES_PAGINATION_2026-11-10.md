@@ -62,3 +62,23 @@ valeur par défaut `pageSize=20`, paginer jusqu'à 25 pages et conserver
 les mêmes vérifications de complétude. Si le fournisseur n'honore toujours
 pas ses propres paramètres, l'API demeure **non vérifiée** et aucun état
 commercial n'est validé.
+
+## Traitement opératoire du ticket expiré (suite du 10/11)
+
+Le contrôle CJ `42907424048` retourne encore `PAGE_SHORT` avec une
+requête de 20 éléments. Ce résultat interdit d'affirmer que tous les
+messages ont été lus. **Il ne faut ni inventer zéro réponse, ni déduire
+un devis à partir du seul statut du ticket.**
+
+Le même compte confirme `supplierState=EXPIRED`. À partir de cet état
+explicite, la surveillance de l'ancien ticket renvoie :
+- `messageVerification=skipped_expired` et `supplierMessageCount=null`
+  (contenu non vérifié, non égal à zéro) ;
+- `operatorReviewRequired=true`, `quoteApproved=false` ;
+- signal `expired_ticket`, `attention=true`, `blocked=true`, repris
+  par l'unique issue opérateur du workflow CJ, sans nouvel envoi fournisseur.
+
+Les autres tickets non expirés continuent à exiger la pagination complète
+et échouent fermés si leur historique n'est pas vérifiable. Tout nouveau
+devis doit provenir d'une revue de l'opérateur, avec coûts France et
+conformité documentés avant toute demande d'activation commerciale.

@@ -14,8 +14,11 @@ export function evaluateQuoteWatchSignal(value){
     value.reference!==QUOTE_REFERENCE||value.sku!==QUOTE_SKU||
     value.orderPlaced!==false||value.walletDebited!==false||
     value.quoteApproved!==false||
-    !Number.isSafeInteger(value.supplierMessageCount)||
-    value.supplierMessageCount<0||value.supplierMessageCount>500||
+    !['complete','skipped_expired','not_applicable'].includes(value.messageVerification)||
+    (value.messageVerification==='skipped_expired'?
+      value.supplierMessageCount!==null:
+      !Number.isSafeInteger(value.supplierMessageCount)||
+      value.supplierMessageCount<0||value.supplierMessageCount>500)||
     (value.latestSupplierMessageDate!==null&&
      (typeof value.latestSupplierMessageDate!=='string'||
       !ISO_DATE.test(value.latestSupplierMessageDate)))||
@@ -24,7 +27,8 @@ export function evaluateQuoteWatchSignal(value){
     throw Error('CJ_WATCH_INVALID_REPORT');
 
   if(value.status==='not_requested'){
-    if(value.supplierStatus!==null||value.supplierMessageCount!==0||
+    if(value.messageVerification!=='not_applicable'||
+      value.supplierStatus!==null||value.supplierMessageCount!==0||
       value.latestSupplierMessageDate!==null||
       value.supplierUnread||value.operatorReviewRequired)
       throw Error('CJ_WATCH_INCONSISTENT_MISSING_TICKET');
@@ -33,6 +37,17 @@ export function evaluateQuoteWatchSignal(value){
   }
   if(value.status!=='ticket_found'||!STATES.has(value.supplierStatus))
     throw Error('CJ_WATCH_UNKNOWN_SUPPLIER_STATE');
+  if(value.supplierStatus==='EXPIRED'){
+    if(value.messageVerification!=='skipped_expired'||
+       value.supplierMessageCount!==null||
+       value.latestSupplierMessageDate!==null||
+       value.operatorReviewRequired!==true)
+      throw Error('CJ_WATCH_EXPIRED_UNVERIFIED');
+    return {state:'expired_ticket',attention:true,blocked:true,
+      note:'Ticket fournisseur expiré. Contrôler le dossier CJ et demander un nouveau devis valide uniquement après revue humaine ; aucun message supposé lu.'};
+  }
+  if(value.messageVerification!=='complete')
+    throw Error('CJ_WATCH_INCOMPLETE_MESSAGE_REVIEW');
   if(value.supplierMessageCount===0&&value.latestSupplierMessageDate!==null||
      value.supplierMessageCount>0&&value.latestSupplierMessageDate===null)
     throw Error('CJ_WATCH_INCONSISTENT_MESSAGE_METADATA');

@@ -3,7 +3,8 @@ import {evaluateQuoteWatchSignal} from './cj-quote-watch-signal.mjs';
 import {QUOTE_REFERENCE,QUOTE_SKU} from './cj-quote-ticket.mjs';
 const base={
   reference:QUOTE_REFERENCE,sku:QUOTE_SKU,status:'ticket_found',
-  supplierStatus:'AWAITING_CJ_REPLY',supplierUnread:false,
+  supplierStatus:'AWAITING_CJ_REPLY',messageVerification:'complete',
+  supplierUnread:false,
   supplierMessageCount:0,latestSupplierMessageDate:null,
   operatorReviewRequired:false,quoteApproved:false,
   orderPlaced:false,walletDebited:false
@@ -21,15 +22,28 @@ assert.equal(evaluateQuoteWatchSignal(unread).state,'supplier_review_required');
 const readReply={...unread,supplierUnread:false};
 assert.equal(evaluateQuoteWatchSignal(readReply).state,'supplier_review_required');
 assert.equal(evaluateQuoteWatchSignal(readReply).attention,true);
-for(const state of ['AWAITING_YOUR_REPLY','COMPLETED','EXPIRED','REVIEWED',
+for(const state of ['AWAITING_YOUR_REPLY','COMPLETED','REVIEWED',
   'ON_HOLD','COLLABORATING','UNKNOWN']){
   const v={...unread,supplierUnread:false,supplierStatus:state};
   assert.equal(evaluateQuoteWatchSignal(v).attention,true);
 }
-const notRequested={...base,status:'not_requested',supplierStatus:null};
+const notRequested={...base,status:'not_requested',supplierStatus:null,
+  messageVerification:'not_applicable'};
 assert.equal(evaluateQuoteWatchSignal(notRequested).blocked,true);
+const expired={...base,supplierStatus:'EXPIRED',
+  messageVerification:'skipped_expired',supplierMessageCount:null,
+  operatorReviewRequired:true};
+const expiredSignal=evaluateQuoteWatchSignal(expired);
+assert.deepEqual({state:expiredSignal.state,attention:expiredSignal.attention,
+  blocked:expiredSignal.blocked},
+  {state:'expired_ticket',attention:true,blocked:true});
 for(const malformed of [
   {...base,reference:'ANOTHER_TICKET'},
+  {...expired,messageVerification:'complete'},
+  {...expired,supplierMessageCount:0},
+  {...expired,operatorReviewRequired:false},
+  {...base,messageVerification:'skipped_expired'},
+  {...notRequested,messageVerification:'complete'},
   {...base,sku:'some_other_model'},
   {...base,quoteApproved:true},
   {...base,walletDebited:true},
@@ -93,6 +107,12 @@ try{
   const missing=run(notRequested);
   assert.equal(missing.status,2,'A missing supplier ticket must block the review');
   assert.match(readFileSync(out,'utf8'),/blocked=true/);
+  const expiredResult=run(expired);
+  assert.equal(expiredResult.status,2,'An expired supplier ticket must block commerce');
+  assert.match(readFileSync(out,'utf8'),/attention=true/);
+  assert.match(readFileSync(out,'utf8'),/blocked=true/);
+  assert.match(readFileSync(out,'utf8'),/state=expired_ticket/);
+  assert.match(readFileSync(summary,'utf8'),/aucun message supposé lu/i);
   const untrusted=run({...base,quoteApproved:true});
   assert.equal(untrusted.status,1);
   assert.doesNotMatch(untrusted.stderr,/at file:|CJ_API_KEY|ticketId/);

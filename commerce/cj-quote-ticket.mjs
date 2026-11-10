@@ -243,16 +243,22 @@ async function readSupplierMessageMetadata(call,privateTicketId){
 export async function checkWrittenCjQuote({accessToken,fetcher=fetch}={}){
   const call=createCaller(accessToken,fetcher);
   const found=await findExistingQuoteTicket(call);
-  const messageMetadata=found?
-    await readSupplierMessageMetadata(call,found.id):
+  // An EXPIRED ticket is already blocked as a quotation source. Do not
+  // depend on CJ's inconsistent Messages endpoint to raise this operator
+  // alert, and never claim zero supplier messages when they were not read.
+  const expired=found?.state==='EXPIRED';
+  const messageMetadata=expired?
+    {supplierMessageCount:null,latestSupplierMessageDate:null}:
+    found?await readSupplierMessageMetadata(call,found.id):
     {supplierMessageCount:0,latestSupplierMessageDate:null};
   const unread=found?.unread===true;
   return {reference:QUOTE_REFERENCE,sku:QUOTE_SKU,
     status:found?'ticket_found':'not_requested',
     supplierStatus:found?.state??null,
+    messageVerification:expired?'skipped_expired':found?'complete':'not_applicable',
     supplierUnread:unread,...messageMetadata,
     operatorReviewRequired:Boolean(found&&
-      (found.state!=='AWAITING_CJ_REPLY'||unread||
+      (expired||found.state!=='AWAITING_CJ_REPLY'||unread||
        messageMetadata.supplierMessageCount>0)),
     orderPlaced:false,walletDebited:false,
     quoteApproved:false};
