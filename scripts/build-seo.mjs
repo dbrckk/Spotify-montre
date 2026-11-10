@@ -322,10 +322,18 @@ import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
   const socialImage=firstPhotoUrl?'<meta property="og:image" content="'+e(firstPhotoUrl)+'"><meta property="og:image:alt" content="Citizen Tsuyosa NJ0150-81X — photographie de la montre au cadran vert"><meta name="twitter:image" content="'+e(firstPhotoUrl)+'">':'';
   const headExtra=`${searchConsoleMeta}${photoPreload}<link rel="canonical" href="${e(homepage)}"><meta name="robots" content="index,follow,max-image-preview:large"><meta property="og:type" content="website"><meta property="og:locale" content="fr_FR"><meta property="og:site_name" content="Atelier Montres"><meta property="og:title" content="52 montres à découvrir · Atelier Montres"><meta property="og:description" content="52 montres documentées à découvrir, dont 15 comparées en profondeur. Casio, SKMEI, Citizen, ADDIESDIVE et autres marques."><meta property="og:url" content="${e(homepage)}">${socialImage}<meta name="twitter:card" content="${firstPhotoUrl?'summary_large_image':'summary'}"><link rel="stylesheet" href="./seo-guides.css"><link rel="stylesheet" href="./popular-picks.css"><link rel="stylesheet" href="./affordable-comparisons.css">${umamiScripts("./")}<script type="application/ld+json">${schema({'@context':'https://schema.org','@graph':[{'@type':'WebSite',name:'Atelier Montres',url:homepage,inLanguage:'fr-FR'},{'@type':'ItemList',name:'15 montres comparées en profondeur parmi 52 références',numberOfItems:products.length,itemListElement:products.map((p,i)=>({'@type':'ListItem',position:i+1,name:p.brand+' '+p.model,url:u('montres/'+p.id+'.html')}))}]})}</script>`;
   collection=collection.replace('</head>','<!-- AM_SEO_HEAD_START -->'+headExtra+'<!-- AM_SEO_HEAD_END --></head>');
+  if(!firstPhotoSrc){
+    // A withdrawn homepage hero must not retain a photograph on rebuild.
+    const previous=/<div class="am-hero-watch" id="heroWatch" role="img" aria-label="Photographie de Citizen Tsuyosa NJ0150-81X"><img class="am-hero-real-photo"[^>]*><\/div>/;
+    collection=collection.replace(previous,'<div class="am-hero-watch" id="heroWatch" role="img" aria-label="Illustration éditoriale de montre, sans photographie du modèle"></div>');
+    collection=collection.replace('<div class="am-hero-watch" id="heroWatch" role="img" aria-label="Photographie de Citizen Tsuyosa NJ0150-81X"></div>','<div class="am-hero-watch" id="heroWatch" role="img" aria-label="Illustration éditoriale de montre, sans photographie du modèle"></div>');
+  }
   if(firstPhotoSrc){
     const emptyHero='<div class="am-hero-watch" id="heroWatch" role="img" aria-label="Photographie de Citizen Tsuyosa NJ0150-81X"></div>';
     const heroWithPhoto='<div class="am-hero-watch" id="heroWatch" role="img" aria-label="Photographie de Citizen Tsuyosa NJ0150-81X"><img class="am-hero-real-photo" src="'+e(firstPhotoSrc)+'"'+responsiveAttrs(root,firstPhoto,{prefix:'./',sizes:'(max-width: 760px) 92vw, 520px',escape:e})+' alt="Citizen Tsuyosa NJ0150-81X — montre automatique au cadran vert" width="520" height="520" decoding="async" fetchpriority="high"></div>';
-    if(collection.includes(emptyHero))collection=collection.replace(emptyHero,heroWithPhoto);
+    const noPhotoHero='<div class="am-hero-watch" id="heroWatch" role="img" aria-label="Illustration éditoriale de montre, sans photographie du modèle"></div>';
+    if(collection.includes(noPhotoHero))collection=collection.replace(noPhotoHero,heroWithPhoto);
+    else if(collection.includes(emptyHero))collection=collection.replace(emptyHero,heroWithPhoto);
     else if(!collection.includes(heroWithPhoto)){
       // Existing generated HTML may contain an older responsive srcset when
       // assets are refreshed or a minimal test fixture omits derivatives.

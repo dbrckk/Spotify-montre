@@ -10,8 +10,12 @@ const catalogue=JSON.parse(read('selection-affiliation.json'));
 assert.equal(catalogue.products.length,15);
 assert.equal(new Set(catalogue.products.map(p=>p.id)).size,15);
 for(const p of catalogue.products){
- assert.ok(p.photoReview?.localUrl==='./assets/watches/'+p.id+'.webp','Actual local photograph is required');
- assert.ok(statSync(resolve(root,'site/assets/watches/'+p.id+'.webp')).size>20000,'Photo should not be tiny or missing');
+ if(p.photoReview?.publicUsageApproved!==true){
+  assert.ok(!p.photoReview?.localUrl&&!p.photoReview?.localSha256,'Withdrawn model must not expose a local photo URL');
+  continue;
+ }
+ assert.ok(p.photoReview?.localUrl==='./assets/watches/'+p.id+'.webp','Approved photograph must match its watch ID');
+ assert.ok(statSync(resolve(root,'site/assets/watches/'+p.id+'.webp')).size>20000,'Approved photo should not be tiny or missing');
 }
 assert.match(aff,/src="\.\/photo-zoom\.js" defer/);
 assert.match(detail,/src="\.\/photo-zoom\.js" defer/);
@@ -32,4 +36,4 @@ assert.match(viewer,/photo\.alt=/);
 assert.doesNotMatch(viewer,/innerHTML\s*=/);
 assert.match(css,/@media\(max-width:650px\)/);
 assert.match(css,/prefers-reduced-motion:reduce/);
-console.log('V9 genuine photograph zoom, movement filtering, differences and 15 local photo assets — OK');
+console.log('V9 genuine photograph zoom, movement filtering, differences and permission-aware local photo assets — OK');
