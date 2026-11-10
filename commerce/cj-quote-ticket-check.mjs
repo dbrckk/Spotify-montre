@@ -14,7 +14,8 @@ const genericCategory={ticketTypeId:1002,ticketTypeName:'Other Consultation',
 const ok=data=>({ok:true,json:async()=>({code:200,success:true,result:true,data})});
 function fakeTicketApi({total=0,existingTicket=0,types=[category],truncate=false,
   changeTotal=false,status='AWAITING_YOUR_REPLY',
-  unread=false,messages=[],badMessageResponse=null}={}){
+  unread=false,messages=[],badMessageResponse=null,
+  badMessageSecondPage=null,duplicateMessageIdOnSecondPage=false}={}){
   const calls=[];
   const fetcher=async(url,options)=>{
     const parsed=new URL(url);
@@ -44,10 +45,16 @@ function fakeTicketApi({total=0,existingTicket=0,types=[category],truncate=false
     }
     if(path==='/ticket/messages'){
       assert.equal(options.method,'GET');
-      assert.equal(parsed.searchParams.get('pageNum'),'1');
+      const pageNum=Number(parsed.searchParams.get('pageNum'));
+      assert.ok(Number.isInteger(pageNum)&&pageNum>=1&&pageNum<=5);
       assert.equal(parsed.searchParams.get('pageSize'),'100');
       assert.ok(parsed.searchParams.get('ticketId'));
-      return ok(badMessageResponse??{total:messages.length,list:messages});
+      if(pageNum===1&&badMessageResponse)return ok(badMessageResponse);
+      if(pageNum===2&&badMessageSecondPage)return ok(badMessageSecondPage);
+      const list=messages.slice((pageNum-1)*100,pageNum*100).map(m=>({...m}));
+      if(pageNum===2&&duplicateMessageIdOnSecondPage&&list.length)
+        list[0].messageId=messages[0].messageId;
+      return ok({total:messages.length,list,pageNum,pageSize:100});
     }
     if(path==='/ticket/create'){
       assert.equal(options.method,'POST');
@@ -158,6 +165,28 @@ for(const privateValue of [privateText,'<script>','private.pdf',
   assert.ok(!JSON.stringify(receivedReport).includes(privateValue));
 }
 assert.equal(createCount(received),0);
+// Read every page of a larger history; a reply on page 2 or 3 must not be
+// missed, and a private message ID/body must never leave the checker.
+const pagedMessages=Array.from({length:205},(_,i)=>({
+  messageId:'m-'+(i+1),
+  sender:i===204||i===101?'CJ':'CUSTOMER',
+  messageTime:nowTime+i*1000,
+  messageText:privateText
+}));
+const paged=fakeTicketApi({
+  total:1,existingTicket:9001,status:'AWAITING_CJ_REPLY',
+  messages:pagedMessages
+});
+const pagedReport=await checkWrittenCjQuote({
+  accessToken:token,fetcher:paged.fetcher});
+assert.equal(pagedReport.supplierMessageCount,2);
+assert.equal(pagedReport.latestSupplierMessageDate,'2026-11-05');
+assert.equal(pagedReport.operatorReviewRequired,true);
+assert.equal(paths(paged).filter(p=>p==='/ticket/messages').length,3);
+for(const secret of ['m-205',privateText,'9001',token])
+  assert.ok(!JSON.stringify(pagedReport).includes(secret));
+assert.equal(createCount(paged),0);
+
 // A support reply may be marked read while CJ leaves the ticket in the
 // old waiting state. The existence of supplier correspondence is still an
 // actionable signal and must never be mistaken for "no response".
@@ -182,6 +211,49 @@ await assert.rejects(checkWrittenCjQuote({
   accessToken:token,fetcher:malformed.fetcher
 }),/CJ_TICKET_MESSAGES_PAGE_MISMATCH/);
 assert.equal(createCount(malformed),0);
+// Do not silently accept duplicate pages, changing totals or missing IDs.
+// All malformed multi-page responses remain blocked without a write.
+const malformedPages=[
+  {
+    options:{messages:pagedMessages,duplicateMessageIdOnSecondPage:true},
+    code:'CJ_TICKET_MESSAGES_DUPLICATE_ID'
+  },
+  {
+    options:{messages:pagedMessages,badMessageSecondPage:{
+      total:206,pageNum:2,pageSize:100,list:pagedMessages.slice(100,200)
+    }},
+    code:'CJ_TICKET_MESSAGES_PAGE_MISMATCH'
+  },
+  {
+    options:{messages:pagedMessages,badMessageSecondPage:{
+      total:205,pageNum:1,pageSize:100,list:pagedMessages.slice(100,200)
+    }},
+    code:'CJ_TICKET_MESSAGES_PAGE_MISMATCH'
+  },
+  {
+    options:{messages:pagedMessages,badMessageSecondPage:{
+      total:205,pageNum:2,pageSize:100,list:pagedMessages.slice(100,199)
+    }},
+    code:'CJ_TICKET_MESSAGES_PAGE_MISMATCH'
+  },
+  {
+    options:{messages:[...pagedMessages.slice(0,204),
+      {sender:'CJ',messageTime:nowTime+204000,messageText:privateText}]},
+    code:'CJ_TICKET_MESSAGES_ITEM_SHAPE'
+  },
+  {
+    options:{messages:Array.from({length:501},(_,i)=>({
+      messageId:'m-'+i,sender:'CJ',messageTime:nowTime}))},
+    code:'CJ_TICKET_MESSAGES_TOTAL_SHAPE'
+  }
+];
+for(const {options,code} of malformedPages){
+  const bad=fakeTicketApi({total:1,existingTicket:9001,...options});
+  await assert.rejects(checkWrittenCjQuote({
+    accessToken:token,fetcher:bad.fetcher
+  }),error=>error.message===code);
+  assert.equal(createCount(bad),0);
+}
 const unknownSender=fakeTicketApi({total:1,existingTicket:9001,
   status:'AWAITING_CJ_REPLY',messages:[{
     sender:'UNTRUSTED',messageTime:nowTime,messageText:'secret'}]});
