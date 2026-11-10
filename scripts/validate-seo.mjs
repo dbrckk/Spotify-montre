@@ -380,8 +380,14 @@ for(const id of affordableIds){
   const product=JSON.parse(read('selection-populaires.json')).products.find(p=>p.id===id);
   assert.ok(product&&card.includes('href="./montres/'+id+'.html"'),
     'Each affordably styled watch must link to its genuine product detail page: '+id);
-  assert.ok(card.includes('src="./assets/watches-popular/'+id+'.webp"'),
-    'Real and approved local model photo required in the public four-model presentation: '+id);
+  if(approvedPopularPhotos.has(id)){
+    assert.ok(card.includes('src="./assets/watches-popular/'+id+'.webp"'),
+      'Approved exact-model photo required when its registry entry is active: '+id);
+  }else{
+    assert.ok(card.includes('am-affordable-no-photo')&&
+      !card.includes('src="./assets/watches-popular/'+id+'.webp"'),
+      'Revoked model must remain discoverable without any unapproved media: '+id);
+  }
   const comparedId=affordableComparePairs[id];
   assert.ok(comparedId&&comparedId!==id&&affordableIds.includes(comparedId),
     'Home comparison must always use a second documented affordable watch: '+id);
