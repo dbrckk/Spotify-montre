@@ -60,6 +60,9 @@ try{
   }
   run('node',['scripts/validate-photo-review.mjs']);
   run('node',['scripts/build-seo.mjs']);
+  // Exercise the same gallery gate as npm test with revoked core images.
+  // This prevents an apparently successful takedown that later breaks CI.
+  run('node',['scripts/validate-gallery-v9.mjs']);
   run('node',['scripts/validate-seo.mjs']);
   run('python',['scripts/build-shipstatic-bundle.py']);
   const manifest=load('docs/deploy-package-manifest.json');
