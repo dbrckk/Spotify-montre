@@ -7,12 +7,14 @@ on:
       - 'scripts/**'
       - 'package.json'
       - '.github/workflows/seo-storefront.yml'
+      - '.github/workflows/lighthouse-mobile.yml'
   pull_request:
     paths:
       - 'site/**'
       - 'scripts/**'
       - 'package.json'
       - '.github/workflows/seo-storefront.yml'
+      - '.github/workflows/lighthouse-mobile.yml'
   workflow_dispatch:
 permissions:
   contents: read
