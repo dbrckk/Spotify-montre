@@ -11,8 +11,10 @@ Documentation fournisseur : https://developers.cjdropshipping.com/en/api/api2/ap
 messages par requête ; limite de 1 appel par seconde).
 
 ## Contrat de lecture déployable
-- Appels GET **uniquement** à `/ticket/messages`, `pageNum=1..5`,
-  `pageSize=100`; 500 messages au maximum (échec fermé au-delà).
+- Appels GET **uniquement** à `/ticket/messages`, `pageNum=1..25`,
+  `pageSize=20` (défaut officiellement documenté) ; 500 messages au maximum
+  (échec fermé au-delà). La taille 100, pourtant annoncée comme maximum,
+  produisait une page courte sur le fournisseur réel.
 - `total` représente la quantité **globale** ; chaque page doit contenir
   exactement la tranche attendue. Un total qui change, une page vide au
   milieu ou une erreur de pagination arrête le contrôle.
@@ -51,3 +53,12 @@ de page divergente, page trop courte, page trop longue. **Seuls les codes
 sont publics ; aucun compteur réel ni échange fournisseur n'est publié.**
 Un ticket expiré ne qualifie pas un devis, et ne doit jamais relancer une
 création de ticket automatiquement.
+
+## Deuxième diagnostic (lecture seule)
+
+Le contrôle `42906955256` a confirmé `CJ_TICKET_MESSAGES_PAGE_SHORT`
+avec `pageSize=100`. Prochaine stratégie : demander explicitement la
+valeur par défaut `pageSize=20`, paginer jusqu'à 25 pages et conserver
+les mêmes vérifications de complétude. Si le fournisseur n'honore toujours
+pas ses propres paramètres, l'API demeure **non vérifiée** et aucun état
+commercial n'est validé.
