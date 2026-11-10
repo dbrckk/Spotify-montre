@@ -87,18 +87,21 @@ const command=(bin,argumentsList)=>{
   if(p.status!==0)throw Error(bin+' '+argumentsList.join(' ')+' failed:\n'+(p.stderr||p.stdout).slice(-3500));
 };
 command(process.execPath,['scripts/build-seo.mjs']);
-command('python3',['scripts/build-shipstatic-bundle.py']);
+// Never publish an archive until every generated storefront file has been
+// checked against the exact withdrawn model's media paths.
+
 const prefix=new RegExp('assets/(?:watches|watches-popular|watch-responsive|popular-responsive|watch-thumbs)/'+id+'(?:-\\d+)?\\.webp');
 const walk=dir=>readdirSync(dir,{withFileTypes:true}).flatMap(d=>
   d.isDirectory()?walk(join(dir,d.name)):d.isFile()?[join(dir,d.name)]:[]);
 for(const file of walk(site)){
   if(file.endsWith('.webp')&&prefix.test(file.slice(file.indexOf('assets/'))))
     throw Error('Withdrawal incomplete, local media still present: '+file);
-  if(/\.(?:html|json|css|xml)$/.test(file)){
+  if(/\.(?:html|js|json|css|xml)$/.test(file)){
     const data=readFileSync(file,'utf8');
     if(prefix.test(data))throw Error('Withdrawal incomplete, published asset referenced: '+file);
   }
 }
+command('python3',['scripts/build-shipstatic-bundle.py']);
 const documents=readdirSync(join(root,'docs')).filter(n=>/^deploy-package-\d+\.json$/.test(n));
 for(const name of documents){
   const data=readFileSync(join(root,'docs',name),'utf8');
