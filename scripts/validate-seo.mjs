@@ -1273,8 +1273,15 @@ for(const product of feed.products){
   assert.ok(html.includes('code exact '+product.model),'Advice must use model-specific reference');
   assert.ok(html.includes(product.specs?.diameter?'Diamètre documenté : '+product.specs.diameter:product.specs?.caseSize?'Dimensions L × l × H indiquées : '+product.specs.caseSize:'Diamètre non renseigné'),'Documented case size must not be confused with a measured diameter');
   assert.ok(html.includes(product.specs?.waterResistance?'Étanchéité indiquée : '+product.specs.waterResistance:'Étanchéité non renseignée'),'Water resistance claims must not be invented');
-  assert.equal((html.match(/class="seo-related-photo"/g)||[]).length,3,'Three photo comparison cards required');
-  assert.equal((html.match(/loading="lazy" decoding="async"/g)||[]).length,3,'Below-fold related images must be lazy-loaded');
+  const relatedHtml=html.match(/<ul class="related seo-related-products">([\s\S]*?)<\/ul>/)?.[1]||'';
+  assert.equal((relatedHtml.match(/<li>/g)||[]).length,3,
+    'Three documented related models must remain, with or without photographs');
+  const relatedPictures=(relatedHtml.match(/class="seo-related-photo"/g)||[]).length;
+  const relatedMissing=(relatedHtml.match(/class="seo-related-photo-placeholder"/g)||[]).length;
+  assert.equal(relatedPictures+relatedMissing,3,
+    'One approved photo or explicit fallback per related model');
+  assert.equal((relatedHtml.match(/loading="lazy" decoding="async"/g)||[]).length,relatedPictures,
+    'Only actual below-fold photographic images need lazy-loading');
   if(product.photoReview?.publicUsageApproved===true){
     assert.ok(html.includes('width="'+product.photoReview.localWidth+'" height="'+product.photoReview.localHeight+'" decoding="async" fetchpriority="high"'),'High priority hero uses real source dimensions');
   }
