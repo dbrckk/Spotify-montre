@@ -5,6 +5,15 @@ import {join,resolve} from 'node:path';
 import {spawnSync} from 'node:child_process';
 
 // Offline contract: verify all Lighthouse routes and guards without Chrome.
+// After "workflow_run" the event SHA can be older than Render's main branch.
+// The production audit must check out the real publishing branch explicitly.
+const workflow=readFileSync(resolve('.github/workflows/lighthouse-mobile.yml'),'utf8');
+assert.match(workflow,/workflow_run:\s*\n\s*workflows:/,
+  'Lighthouse must still run after responsive asset generation');
+assert.match(workflow,/- uses: actions\/checkout@v4\s*\n\s*with:\s*\n\s*ref: main\b/,
+  'Lighthouse must compare deployed Render with the latest main, never stale event SHA');
+assert.match(workflow,/Wait for published CSS and gallery code to match this commit/,
+  'Never claim performance success against unverified deployed content');
 const script=resolve('scripts/report-lighthouse-mobile.mjs');
 const dir=mkdtempSync(join(tmpdir(),'watch-lighthouse-'));
 const folder=join(dir,'artifacts');mkdirSync(folder);
