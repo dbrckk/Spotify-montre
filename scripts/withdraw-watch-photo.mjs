@@ -8,6 +8,7 @@ import {createHash} from 'node:crypto';
 import {existsSync,readFileSync,readdirSync,rmSync,writeFileSync} from 'node:fs';
 import {join,relative,resolve} from 'node:path';
 import {spawnSync} from 'node:child_process';
+import {sanitizeWithdrawnMedia} from './sanitize-withdrawn-media.mjs';
 
 const root=resolve(import.meta.dirname,'..');
 const site=join(root,'site');
@@ -118,6 +119,13 @@ function execute(command,argumentsList){
 }
 execute(process.execPath,['scripts/validate-photo-review.mjs']);
 execute(process.execPath,['scripts/build-seo.mjs']);
+// Historical published HTML (not only SEO-generated product pages) can still
+// contain an image. Replace exact-model tags with a visible no-photo notice.
+for(const file of walk(site).filter(path=>path.endsWith('.html'))){
+  const html=readFileSync(file,'utf8');
+  const sanitized=sanitizeWithdrawnMedia(html,[{...product,photoReview:{publicUsageApproved:false}}]);
+  if(html!==sanitized)writeFileSync(file,sanitized);
+}
 execute(process.execPath,['scripts/validate-gallery-v9.mjs']);
 execute(process.execPath,['scripts/validate-seo.mjs']);
 execute('python3',['scripts/build-shipstatic-bundle.py']);
