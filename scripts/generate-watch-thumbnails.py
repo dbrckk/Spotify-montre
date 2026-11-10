@@ -5,16 +5,23 @@ remains unchanged for full-screen and zoom. This script creates only 200px
 navigation thumbnails to reduce download/decode costs on slower Android devices.
 """
 from pathlib import Path
+import json
 from PIL import Image
 
 ROOT=Path(__file__).resolve().parents[1] / 'site' / 'assets'
 SOURCE=ROOT/'watches'
 DEST=ROOT/'watch-thumbs'
 WATCHES=('citizen-tsuyosa','tissot-prx-quartz','orient-bambino','casio-mtp-b145')
+CATALOGUE=ROOT.parent/'selection-affiliation.json'
 
 def build():
     DEST.mkdir(parents=True,exist_ok=True)
+    products={p['id']:p for p in json.loads(CATALOGUE.read_text(encoding='utf-8'))['products']}
     for watch_id in WATCHES:
+        model=products[watch_id]
+        if model['photoReview'].get('publicUsageApproved') is not True:
+            (DEST/(watch_id+'.webp')).unlink(missing_ok=True)
+            continue
         image_path=SOURCE/(watch_id+'.webp')
         if not image_path.is_file():
             raise FileNotFoundError('Original manufacturer photo missing: '+str(image_path))
