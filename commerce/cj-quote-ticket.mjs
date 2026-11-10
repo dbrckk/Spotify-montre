@@ -173,17 +173,25 @@ async function readSupplierMessageMetadata(call,privateTicketId){
   const path='/ticket/messages?ticketId='+encodeURIComponent(privateTicketId)+
     '&pageNum=1&pageSize=100';
   const data=await call(path);
-  if(!data||!Array.isArray(data.list)||
-    !Number.isSafeInteger(data.total)||data.total<0||
-    data.total!==data.list.length||data.total>100)
-    throw Error('CJ_TICKET_MESSAGES_UNVERIFIED');
+  // Shape-only failure codes: reveal no ticket ID, message body, sender
+  // value, attachments, timestamps, supplier account or customer details.
+  if(!data||typeof data!=='object'||Array.isArray(data)||
+    !Array.isArray(data.list))
+    throw Error('CJ_TICKET_MESSAGES_LIST_SHAPE');
+  if(!Number.isSafeInteger(data.total)||data.total<0||data.total>100)
+    throw Error('CJ_TICKET_MESSAGES_TOTAL_SHAPE');
+  if(data.total!==data.list.length)
+    throw Error('CJ_TICKET_MESSAGES_PAGE_MISMATCH');
   let supplierMessageCount=0,latestSupplierMessageUtc=null;
   for(const item of data.list){
-    if(!item||!['CJ','CUSTOMER'].includes(item.sender)||
-      !Number.isSafeInteger(item.messageTime)||
+    if(!item||typeof item!=='object'||Array.isArray(item))
+      throw Error('CJ_TICKET_MESSAGES_ITEM_SHAPE');
+    if(!['CJ','CUSTOMER'].includes(item.sender))
+      throw Error('CJ_TICKET_MESSAGES_SENDER_SHAPE');
+    if(!Number.isSafeInteger(item.messageTime)||
       item.messageTime<1577836800000||
       item.messageTime>Date.now()+86400000)
-      throw Error('CJ_TICKET_MESSAGES_UNVERIFIED');
+      throw Error('CJ_TICKET_MESSAGES_TIME_SHAPE');
     if(item.sender==='CJ'){
       supplierMessageCount++;
       latestSupplierMessageUtc=latestSupplierMessageUtc===null?
@@ -229,6 +237,9 @@ const safeErrorCode=error=>{
     'CJ_TICKET_LIST_REJECTED','CJ_TICKET_DETAIL_HTTP_FAILURE',
     'CJ_TICKET_DETAIL_REJECTED','CJ_TICKET_MESSAGES_HTTP_FAILURE',
     'CJ_TICKET_MESSAGES_REJECTED','CJ_TICKET_MESSAGES_UNVERIFIED',
+    'CJ_TICKET_MESSAGES_LIST_SHAPE','CJ_TICKET_MESSAGES_TOTAL_SHAPE',
+    'CJ_TICKET_MESSAGES_PAGE_MISMATCH','CJ_TICKET_MESSAGES_ITEM_SHAPE',
+    'CJ_TICKET_MESSAGES_SENDER_SHAPE','CJ_TICKET_MESSAGES_TIME_SHAPE',
     'CJ_TICKET_CREATE_HTTP_FAILURE',
     'CJ_TICKET_CREATE_REJECTED','CJ_TICKET_RATE_LIMIT',
     'CJ_API_KEY_GITHUB_SECRET_MISSING','CJ_ACCESS_TOKEN_MISSING'

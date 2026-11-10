@@ -180,14 +180,31 @@ const malformed=fakeTicketApi({total:1,existingTicket:9001,
     total:100,list:[{sender:'CJ',messageTime:nowTime,messageText:'private'}]}});
 await assert.rejects(checkWrittenCjQuote({
   accessToken:token,fetcher:malformed.fetcher
-}),/CJ_TICKET_MESSAGES_UNVERIFIED/);
+}),/CJ_TICKET_MESSAGES_PAGE_MISMATCH/);
 assert.equal(createCount(malformed),0);
 const unknownSender=fakeTicketApi({total:1,existingTicket:9001,
   status:'AWAITING_CJ_REPLY',messages:[{
     sender:'UNTRUSTED',messageTime:nowTime,messageText:'secret'}]});
 await assert.rejects(checkWrittenCjQuote({
   accessToken:token,fetcher:unknownSender.fetcher
-}),/CJ_TICKET_MESSAGES_UNVERIFIED/);
+}),/CJ_TICKET_MESSAGES_SENDER_SHAPE/);
+
+// Malformed metadata must be rejected without exposing private values.
+// Each diagnostic distinguishes a structural fault, never the actual data.
+for(const [response,code] of [
+  [{total:0,messages:[]},'CJ_TICKET_MESSAGES_LIST_SHAPE'],
+  [{total:'1',list:[]},'CJ_TICKET_MESSAGES_TOTAL_SHAPE'],
+  [{total:1,list:[null]},'CJ_TICKET_MESSAGES_ITEM_SHAPE'],
+  [{total:1,list:[{sender:'CJ',messageTime:'private timestamp'}]},
+    'CJ_TICKET_MESSAGES_TIME_SHAPE']
+]){
+  const probe=fakeTicketApi({total:1,existingTicket:9001,
+    badMessageResponse:response});
+  await assert.rejects(checkWrittenCjQuote({
+    accessToken:token,fetcher:probe.fetcher
+  }),error=>error.message===code);
+  assert.equal(createCount(probe),0);
+}
 
 // Unknown or unverified history always fails closed.
 for(const fake of [
