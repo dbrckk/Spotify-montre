@@ -58,7 +58,7 @@ jobs:
           node scripts/validate-seo.mjs
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -A site/ docs/deploy-package-*.json
+          git add -A site/ docs/
           git diff --cached --quiet && { echo 'No source or asset changes produced'; exit 1; }
           git commit -m "fix(rights): retire exact watch image for $WATCH_ID"
           git push --set-upstream origin "$branch"
