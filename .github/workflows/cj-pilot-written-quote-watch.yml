@@ -17,7 +17,7 @@ permissions:
   issues: write
 
 concurrency:
-  group: cj-pilot-quote-readonly
+  group: cj-landed-quote-supplier-ticket
   cancel-in-progress: false
 
 jobs:
