@@ -67,6 +67,14 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {spawnSync} from 'node:child_process';
 const workflow=readFileSync(new URL('../.github/workflows/cj-pilot-written-quote-watch.yml',import.meta.url),'utf8');
+const readonlyWorkflow=readFileSync(new URL('../.github/workflows/cj-ticket-readonly-check.yml',import.meta.url),'utf8');
+const manualWorkflow=readFileSync(new URL('../.github/workflows/request-cj-landed-quote.yml',import.meta.url),'utf8');
+const concurrencyGroup=source=>/\n\s+group: (cj-[a-z-]+)\n/.exec(source)?.[1];
+assert.ok(concurrencyGroup(workflow),'CJ quote monitor needs a shared concurrency guard');
+assert.equal(concurrencyGroup(workflow),concurrencyGroup(readonlyWorkflow),
+  'CJ supplier polls must run serially under one API QPS guard');
+assert.equal(concurrencyGroup(workflow),concurrencyGroup(manualWorkflow),
+  'CJ manual ticket request must not overlap with background polls');
 for(const required of [
   'workflow_dispatch:',
   "cron: '23 8 * * *'",
