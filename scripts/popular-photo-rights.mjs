@@ -24,6 +24,10 @@ export function loadApprovedPopularPhotos({root,picks}){
     !recoveries.sources||Array.isArray(recoveries.sources))
     throw Error('Invalid official image recovery registry');
   const ids=new Set(picks.map(p=>p.id));
+  for(const p of picks){
+    if(p.photoPublicationBlocked===true&&Object.hasOwn(data.photos,p.id))
+      throw Error('Withdrawn supplemental photo must never have an approved registry entry: '+p.id);
+  }
   for(const [id,source] of Object.entries(recoveries.sources)){
     const product=picks.find(p=>p.id===id);
     if(!product||source.productPage!==product.officialUrl||!product.model.includes(source.modelCode))

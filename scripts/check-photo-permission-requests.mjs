@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
 import {join,resolve} from 'node:path';
+import {readFileSync} from 'node:fs';
 
 const root=resolve(import.meta.dirname,'..');
 const path=join(root,'scripts/prepare-photo-permission-requests.mjs');
@@ -14,12 +15,15 @@ assert.match(list.stdout,/Photos publiées/);
 const result=run('--all','--json');
 assert.equal(result.status,0,result.stderr);
 const data=JSON.parse(result.stdout);
+const core=JSON.parse(readFileSync(join(root,'site/selection-affiliation.json'),'utf8'));
+const rights=JSON.parse(readFileSync(join(root,'site/popular-photo-rights.json'),'utf8'));
+const currentPhotos=core.products.filter(p=>p.photoReview?.publicUsageApproved===true).length+Object.keys(rights.photos).length;
 assert.equal(data.reportKind,'unsent-photo-rights-requests');
 assert.equal(data.automaticSending,false);
 assert.equal(data.legalClearanceConfirmed,false);
 assert.equal(data.totalModels,52);
-assert.equal(data.totalPublished,40);
-assert.equal(data.packets.reduce((n,g)=>n+g.missing,0),12);
+assert.equal(data.totalPublished,currentPhotos);
+assert.equal(data.packets.reduce((n,g)=>n+g.missing,0),52-currentPhotos);
 assert.equal(data.packets.reduce((n,g)=>n+g.total,0),52);
 assert.equal(data.packets.find(g=>g.brand==='Casio').displayedBrands.length,3);
 const allIds=data.packets.flatMap(g=>g.photos.map(p=>p.id));

@@ -70,3 +70,9 @@ npm run compliance:photo:impact:check
 Sur Android, GitHub → Actions → **Preview watch photo withdrawal impact (read-only)** → **Run workflow**, saisir l'identifiant précis du modèle et télécharger les deux rapports Markdown/JSON. L'outil recense les fichiers originaux, les variantes mobiles, les pages HTML/JS/JSON qui pointent vers ces chemins et les anciennes archives du générateur de déploiement.
 
 Si un titulaire de droits conteste un visuel, un opérateur devra contrôler la demande, empêcher toute resynchronisation de la photographie, retirer les fichiers concernés du dépôt et de la livraison, regénérer le site et les paquets, et vérifier les URL directes sur Render et le cache éventuel. Les validateurs historiques demandent encore 15 photographies principales : leur adaptation et des tests de remplacement par une présentation sans photo sont nécessaires avant de pouvoir retirer sans régression une photo principale. **Ce rapport ne réalise pas lui-même le retrait et ne confirme ni purge ni conformité.**
+
+## Contrôle de retrait complet sur copie isolée
+
+`npm run compliance:photo:rehearsal` prépare une copie temporaire de `site/`, `scripts/` et `research/`, puis désactive **uniquement dans cette copie** deux photographies principales (dont l’image de couverture Citizen Tsuyosa) et une complémentaire SKMEI. Le test regénère la vitrine, vérifie les pages et le SEO, assemble les paquets statiques et refuse toute présence des WebP retirés. Les 52 références doivent rester navigables.
+
+Les fiches sans photo sont autorisées par le filtre du catalogue et illustrées sans reprendre le visuel du fabricant. Les synchroniseurs refusent de republier un visuel explicitement retiré. **Ce contrôle ne supprime aucun fichier de la version publique ni ses caches précédents**. La procédure de retrait réel nécessite toujours un incident dûment identifié et une modification ciblée sur branche de publication, suivie de la vérification des URLs publiques.

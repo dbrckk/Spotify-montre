@@ -363,6 +363,12 @@ def main() -> int:
         pid, source = p["id"], p["officialUrl"]
         original = rights["photos"].get(pid)
         file = DEST / (pid + ".webp")
+        if p.get("photoPublicationBlocked") is True:
+            if original or file.exists():
+                raise ValueError("Revoked supplemental image still present in registry or cache: " + pid)
+            report["missing"].append({"id": pid, "reason": "Photo publication explicitly blocked"})
+            print("SKIP revoked", pid, flush=True)
+            continue
         if original:
             if not file.is_file():
                 raise ValueError("Registered photo missing; refusing silent replacement: " + pid)

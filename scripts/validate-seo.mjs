@@ -327,15 +327,26 @@ assert.equal(methodGraph['@graph'][0].url,manifest.siteUrl+methodPath);
 assert.ok(read('montres/guide-choisir-montre.html').includes('./methode-selection.html'),'Method linked from guide navigation');
 assert.ok(read('montres/montres-casio.html').includes('./methode-selection.html'),'Method linked from collection navigation');
 
-assert.match(home,/id="heroWatch"[^>]*><img class="am-hero-real-photo"/,'First genuine watch must render in initial HTML for early LCP');
-const first=feed.products.find(p=>p.id==='citizen-tsuyosa');
-assert.equal(first.photoReview.publicUsageApproved,true);
-const heroPhoto='./assets/watches/'+first.id+'.webp?v='+first.photoReview.localSha256.slice(0,12);
-assert.ok(home.includes('src="'+heroPhoto+'"'),'HTML hero must use exact locally versioned image');
-assert.ok(home.includes('<link rel="preload" as="image" fetchpriority="high" href="'+heroPhoto+'" imagesrcset="'),'Matching responsive LCP preload must be present');
-assert.ok(home.includes('imagesizes="(max-width: 760px) 92vw, 520px"'),'Preloaded LCP must match image sizes');
-assert.ok(home.includes('<meta property="og:image" content="'+manifest.siteUrl+'assets/watches/'+first.id+'.webp">'),'Social sharing must use the real published photograph');
-assert.ok(home.includes('<meta name="twitter:card" content="summary_large_image">'),'Large social image requested');
+const heroPreferred=feed.products.find(p=>p.id==='citizen-tsuyosa');
+const hero=heroPreferred?.photoReview?.publicUsageApproved===true
+  ?heroPreferred:feed.products.find(p=>p.photoReview?.publicUsageApproved===true);
+if(hero){
+  assert.match(home,/id="heroWatch"[^>]*><img class="am-hero-real-photo"/,
+    'Homepage must show only an approved real watch photo before JS');
+  const heroPhoto='./assets/watches/'+hero.id+'.webp?v='+hero.photoReview.localSha256.slice(0,12);
+  assert.ok(home.includes('src="'+heroPhoto+'"'),'Early homepage image must match an approved model');
+  assert.ok(home.includes('<link rel="preload" as="image" fetchpriority="high" href="'+heroPhoto+'" imagesrcset="'),
+    'LCP preload must match approved homepage hero');
+  assert.ok(home.includes('imagesizes="(max-width: 760px) 92vw, 520px"'),
+    'LCP preload responsive sizes must match displayed image');
+  assert.ok(home.includes('<meta property="og:image" content="'+manifest.siteUrl+'assets/watches/'+hero.id+'.webp">'),
+    'Social image must be approved and exact-model');
+  assert.ok(home.includes('<meta name="twitter:card" content="summary_large_image">'));
+}else{
+  assert.ok(home.includes('aria-label="Illustration éditoriale sans photographie publiée"'),
+    'Fallback to documented editorial art when every photograph is withdrawn');
+  assert.ok(!home.includes('class="am-hero-real-photo"'),'No withdrawn hero photo');
+}
 for(const marker of ['AM_SEO_LINKS_START','AM_SEO_LINKS_END','AM_SEO_HEAD_START','AM_SEO_HEAD_END','AM_SEO_GUIDES_START','AM_SEO_GUIDES_END','AM_SEO_CATEGORIES_START','AM_SEO_CATEGORIES_END','AM_SEO_COMPARISONS_START','AM_SEO_COMPARISONS_END']){
  assert.equal(home.split(marker).length-1,1,'Idempotent build marker: '+marker);
 }

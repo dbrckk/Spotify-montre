@@ -109,6 +109,14 @@ def main():
         id=p['id']
         photo=p['photoReview']
         output=OUTPUT/(id+'.webp')
+        if photo.get('publicUsageApproved') is not True:
+            output.unlink(missing_ok=True)
+            for field in ('localUrl','localSha256','localWidth','localHeight','localBytes','originalFetchedFrom'):
+                photo.pop(field,None)
+            report['items'].append({'id':id,'ok':False,'withdrawn':True})
+            report['unavailable'].append(id)
+            print('SKIP withdrawn or unapproved image',id,flush=True)
+            continue
         attempts=[]
         ok=False
         for url in dict.fromkeys([photo['url'],*ALTERNATES.get(id,[])]):
