@@ -22,7 +22,7 @@ assert.equal(report.records.length,52);
 assert.equal(new Set(report.records.map(r=>r.id)).size,52);
 assert.equal(report.records.filter(r=>r.published).length,
   publishedMain.length+Object.keys(inventory).length);
-assert.equal(report.records.filter(r=>!r.published).length,12);
+assert.equal(report.records.filter(r=>!r.published).length,52-publishedMain.length-Object.keys(inventory).length);
 const ids=new Set();
 for(const record of report.records){
   assert.ok(!ids.has(record.id));ids.add(record.id);

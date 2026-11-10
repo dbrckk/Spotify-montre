@@ -11,6 +11,13 @@ on:
       - 'scripts/check-photo-permission-requests.mjs'
       - 'scripts/report-photo-withdrawal.mjs'
       - 'scripts/check-photo-withdrawal.mjs'
+      - 'scripts/test-photo-withdrawal-integration.mjs'
+      - 'scripts/sync-watch-images.py'
+      - 'scripts/sync-popular-watch-images.py'
+      - 'scripts/validate-photo-review.mjs'
+      - 'scripts/build-seo.mjs'
+      - 'scripts/validate-seo.mjs'
+      - 'site/affiliation.js'
       - '.github/workflows/photo-withdrawal-impact.yml'
       - '.github/workflows/r1-photo-requests.yml'
       - 'docs/DOSSIER_PREUVES_R1_2026-11-09.md'
@@ -38,6 +45,13 @@ on:
       - 'scripts/check-photo-permission-requests.mjs'
       - 'scripts/report-photo-withdrawal.mjs'
       - 'scripts/check-photo-withdrawal.mjs'
+      - 'scripts/test-photo-withdrawal-integration.mjs'
+      - 'scripts/sync-watch-images.py'
+      - 'scripts/sync-popular-watch-images.py'
+      - 'scripts/validate-photo-review.mjs'
+      - 'scripts/build-seo.mjs'
+      - 'scripts/validate-seo.mjs'
+      - 'site/affiliation.js'
       - '.github/workflows/photo-withdrawal-impact.yml'
       - '.github/workflows/r1-photo-requests.yml'
       - 'docs/DOSSIER_PREUVES_R1_2026-11-09.md'
@@ -78,6 +92,8 @@ jobs:
         run: npm run compliance:r1:requests:check
       - name: Verify photo-withdrawal incident map, 52 watches
         run: npm run compliance:photo:impact:check
+      - name: Rehearse end-to-end withdrawal without touching the published catalogue
+        run: npm run compliance:photo:rehearsal
       - name: Display aggregated R1 evidence in job summary
         run: node scripts/report-r1-evidence.mjs --ci-summary > /dev/null
       - name: Display current GO/NO-GO snapshot in the job summary

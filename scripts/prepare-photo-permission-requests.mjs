@@ -35,7 +35,7 @@ const groups=[...map.values()].map(g=>({
   published:g.photos.filter(p=>p.photoPublished).length,
   missing:g.photos.filter(p=>!p.photoPublished).length
 })).sort((a,b)=>a.brand.localeCompare(b.brand,'fr'));
-if(groups.reduce((n,g)=>n+g.total,0)!==52||groups.reduce((n,g)=>n+g.published,0)!==40)
+if(groups.reduce((n,g)=>n+g.total,0)!==52||groups.reduce((n,g)=>n+g.published,0)!==evidence.totals.published)
   throw Error('R1 photo baseline changed; review the original evidence register');
 
 const args=process.argv.slice(2);

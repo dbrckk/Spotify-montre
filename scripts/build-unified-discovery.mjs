@@ -180,15 +180,31 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
       +'<button type="button" class="ud-select" data-compare-id="'+e(p.id)+'" aria-pressed="false" hidden>Ajouter à la comparaison</button>'
       +'</div></article>';
   };
-  // Explicit editorial choices, not a sales ranking. Both the six real photos
-  // and all merchant exits come from the same validated 52-model registry.
+  // The curated showcase remains a six-model collection even if an owner
+  // withdraws a photograph. Choose still-approved exact model photos first.
+  // Missing photos never become generated counterfeit product images.
   const featureIds=['skmei-2056','skmei-2514','addiesdive-ad2030',
     'pagani-pd1701','casio-mtp-1302','citizen-tsuyosa'];
-  const featured=featureIds.map(id=>normalized.find(p=>p.id===id));
-  if(featured.some(p=>!p||!p.photoUrl||!p.detailUrl||!p.officialUrl))
-    throw Error('Editorial showroom must contain six documented, photographed references');
-  if(affiliates.enabled&&featured.filter(p=>p.merchantKind==='direct').length<3)
-    throw Error('Editorial showroom requires at least three identified merchant listings');
+  const preferred=featureIds.map(id=>normalized.find(p=>p.id===id)).filter(Boolean);
+  const candidates=[
+    ...preferred.filter(p=>p.photoUrl),
+    ...normalized.filter(p=>p.photoUrl&&['direct','awin'].includes(p.merchantKind)),
+    ...normalized.filter(p=>p.photoUrl),
+    ...preferred,
+    ...normalized
+  ];
+  const featured=[];
+  const selected=new Set();
+  for(const p of candidates){
+    if(selected.has(p.id))continue;
+    selected.add(p.id);featured.push(p);
+    if(featured.length===6)break;
+  }
+  if(featured.length!==6||featured.some(p=>!p.detailUrl||!p.officialUrl))
+    throw Error('Editorial showcase requires six real, documented watches');
+  const availablePaid=normalized.filter(p=>p.photoUrl&&p.merchantKind==='direct').length;
+  if(affiliates.enabled&&availablePaid>=3&&featured.filter(p=>p.merchantKind==='direct').length<3)
+    throw Error('Showcase must retain three documented merchant listings when available');
   const featureCard=p=>{
     const direct=p.merchantKind==='direct';
     const awin=p.merchantKind==='awin';
@@ -201,7 +217,7 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
     const kind=direct?'Fiche marchande identifiée':awin?'Variante partenaire identifiée':'Fiche du fabricant';
     const exit=direct?'Consulter sur Amazon.fr · lien rémunéré':awin?'Voir chez le partenaire via Awin · lien rémunéré':'Voir chez la marque · lien non rémunéré';
     const detail=p.detailUrl.replace('./montres/','./');
-    const visual='../'+p.photoUrl.slice(2);
+    const visual=p.photoUrl?'../'+p.photoUrl.slice(2):null;
     const featureSizes='(max-width: 365px) 88vw, (max-width: 660px) 33vw, (max-width: 1100px) 44vw, 29vw';
     // Reuse the approved source registry and all available 240–960px WebPs.
     // Never hard-code source widths or publish nonexistent derivatives.
@@ -210,10 +226,13 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
         prefix:'../',sizes:featureSizes,escape:e}):'';
     return '<article class="ud-feature-card" data-feature-id="'+e(p.id)+'">'
       +'<a class="ud-feature-photo" href="'+e(detail)+'" aria-label="Découvrir '+e(p.brand+' '+p.model)+'">'
-      +'<img src="'+e(visual)+'"'
-      +(p.kind==='core'?responsiveAttrs(root,coreById.get(p.id),{
-        prefix:'../',sizes:featureSizes,escape:e}):popularAttrs)
-      +' width="540" height="540" loading="lazy" decoding="async" alt="Photographie du modèle '+e(p.brand+' '+p.model)+'"></a>'
+      +(visual
+        ?'<img src="'+e(visual)+'"'
+          +(p.kind==='core'?responsiveAttrs(root,coreById.get(p.id),{
+            prefix:'../',sizes:featureSizes,escape:e}):popularAttrs)
+          +' width="540" height="540" loading="lazy" decoding="async" alt="Photographie du modèle '+e(p.brand+' '+p.model)+'">'
+        :'<span class="ud-art-fallback"><span class="ud-art-fallback-brand">'+e(p.brand)+'</span><strong>'+e(p.model)+'</strong><small>Photo exacte non publiée</small></span>')
+      +'</a>'
       +'<div class="ud-feature-info"><span class="ud-feature-type">'+e(styleLabels[p.style])+' · '+e(tierLabels[p.tier])+'</span>'
       +'<h3><a href="'+e(detail)+'">'+e(p.brand+' '+p.model)+'</a></h3>'
       +'<p class="ud-feature-lead">'+e(p.lead)+'</p>'
@@ -227,7 +246,7 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
     +'<h2 id="udSpotlightTitle">Six pièces à découvrir en premier.</h2></div>'
     +'<p>Rétro digital, cadran travaillé ou chronographe : six références choisies pour leur style et leurs caractéristiques documentées, sans classement de ventes inventé.</p></div>'
     +'<div class="ud-feature-grid">'+featured.map(featureCard).join('')+'</div>'
-    +'<p class="ud-showroom-note">Les photographies correspondent aux modèles présentés, selon les déclarations de droits de l’éditeur. Une fiche marchande identifiée ne garantit ni le stock ni la variante disponible. Les liens rémunérés sont signalés. Les achats partenaires sont conclus chez le vendeur externe ; une commande directe n’est possible que si un prix TTC et une disponibilité vérifiés sont explicitement affichés sur Atelier Montres.</p>'
+    +'<p class="ud-showroom-note">Les photographies publiées correspondent aux modèles indiqués, sous réserve des droits déclarés par l’éditeur ; les autres modèles restent sans photo. Une fiche marchande identifiée ne garantit ni le stock ni la variante disponible. Les liens rémunérés sont signalés. Les achats partenaires sont conclus chez le vendeur externe ; une commande directe n’est possible que si un prix TTC et une disponibilité vérifiés sont explicitement affichés sur Atelier Montres.</p>'
     +'</section>';
   const shortcuts='<nav class="ud-discovery-links" aria-label="Parcourir la collection selon votre envie">'
     +'<a href="?brand=SKMEI#udCount"><span>01 / Marque</span><strong>Découvrir SKMEI ↗</strong></a>'

@@ -14,16 +14,23 @@ for(const p of catalogue.products){
   const photo=p.photoReview;
   assert.ok(photo,'Missing official photo research for '+p.id);
   assert.equal(photo.accuracy,'exact');
-  assert.equal(photo.publicUsageApproved,true,'The site owner has explicitly authorized publication in this revision');
-  assert.equal(photo.licence,'permission_declared_by_site_owner');
-  assert.equal(photo.permissionDeclaration,'site_owner_explicit_confirmation_2026-10-30');
-  assert.equal(photo.permissionIndependentlyVerified,false,'Do not invent third-party proof');
-  assert.equal(p.photoRights,'permission_declared_by_site_owner');
-  assert.equal(p.imageMode,'manufacturer_product_photo','User-declared authorized photos should be served');
-  for(const field of ['url','source']){
-    const url=new URL(photo[field]);
-    assert.equal(url.protocol,'https:');
-    assert.ok(url.hostname && !url.username && !url.password);
+  if(photo.publicUsageApproved===true){
+    assert.equal(photo.licence,'permission_declared_by_site_owner');
+    assert.equal(photo.permissionDeclaration,'site_owner_explicit_confirmation_2026-10-30');
+    assert.equal(photo.permissionIndependentlyVerified,false);
+    assert.equal(p.photoRights,'permission_declared_by_site_owner');
+    assert.equal(p.imageMode,'manufacturer_product_photo');
+    for(const field of ['url','source']){
+      const url=new URL(photo[field]);
+      assert.equal(url.protocol,'https:');
+      assert.ok(url.hostname&&!url.username&&!url.password);
+    }
+  }else{
+    assert.equal(photo.publicUsageApproved,false);
+    assert.equal(p.photoRights,'publication_withdrawn');
+    assert.equal(p.imageMode,'editorial_illustration');
+    assert.equal(photo.localUrl,undefined);
+    assert.equal(photo.localSha256,undefined);
   }
 }
 assert.deepEqual(tiers,{essential:6,signature:6,prestige:3});

@@ -9,6 +9,7 @@ import {buildPopularPicks} from './build-popular-picks.mjs';
 import {buildUnifiedDiscovery} from './build-unified-discovery.mjs';
 import {buildCommercialRegistry} from './build-commercial-registry.mjs';
 import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
+import {sanitizeWithdrawnMedia} from './sanitize-withdrawn-media.mjs';
 
 (function buildSeo() {
   const site = new URL(process.env.PUBLIC_SITE_URL || 'https://atelier-montres-selection-fr.onrender.com/');
@@ -64,8 +65,8 @@ import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
     const destination=new URL(affiliate.url);
     if(!verified||destination.hostname!=='www.amazon.fr'||destination.pathname!=='/dp/'+verified.asin)
       throw Error('Lien rémunéré bloqué : la référence Amazon doit correspondre au modèle confirmé '+id);
-    const model=products.find(p=>p.id===id);
-    if (model?.photoReview?.publicUsageApproved!==true) throw Error('Publication affiliée bloquée : droits commerciaux de la photographie à vérifier pour '+id);
+    // An exact merchant referral does not depend on image publication rights.
+    // Withdrawing a photograph must not resurrect media or erase a verified link.
   }
   // The 52-watch source of truth is regenerated from documented supplier,
   // ASIN and image-rights registries before any shopper-facing page renders.
@@ -274,7 +275,7 @@ import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
   }
   const selection = `<section class="seo-links" aria-labelledby="seo-links-title"><div class="wrap"><p class="overline kicker">Explorer avant de choisir</p><h2 id="seo-links-title">Les 15 montres, modèle par modèle</h2><p>Des fiches éditoriales avec caractéristiques documentées et liens vers les fabricants. Aucun prix ou stock non vérifié.</p><ul>${allLinks()}</ul><p><a href="./montres/guide-choisir-montre.html">Notre guide pour choisir une montre : mouvements et tailles</a></p></div></section>`;
   const guideCards = `<section class="seo-guides" aria-labelledby="seo-guides-title"><div class="wrap"><p class="overline kicker">Conseils pour choisir</p><h2 id="seo-guides-title">Avant de choisir sa montre.</h2><p class="seo-guides-lead">Comparer un boîtier, comprendre le mouvement ou choisir une belle mécanique : trois guides pour affiner votre sélection à partir des informations documentées.</p><div class="seo-guide-grid"><article><span>01 / MOUVEMENT</span><h3>Quartz ou automatique ?</h3><p>Les différences de fonctionnement et d’entretien, illustrées par les modèles de notre collection.</p><a href="./montres/quartz-ou-automatique.html">Comparer les mouvements →</a></article><article><span>02 / PROPORTIONS</span><h3>Choisir le bon diamètre.</h3><p>Mesures confirmées, confort et proportions : comprendre ce qui compte vraiment au poignet.</p><a href="./montres/taille-boitier-montre.html">Consulter le guide des tailles →</a></article><article><span>03 / MÉCANIQUE</span><h3>${products.filter(p=>p.movement==='automatic').length} montres automatiques.</h3><p>Citizen, Orient, Seiko, Tissot et Hamilton : comparer leurs lignes et caractéristiques documentées.</p><a href="./montres/montres-automatiques.html">Découvrir les automatiques →</a></article></div></div></section>`;
-  let collection = readFileSync(join(root,'affiliation.html'),'utf8');
+  let collection = sanitizeWithdrawnMedia(readFileSync(join(root,'affiliation.html'),'utf8'),products);
   // Publishing twice must not duplicate canonical tags, structured data or internal links.
   collection=collection.replace(/<!-- AM_SEO_LINKS_START -->[\s\S]*?<!-- AM_SEO_LINKS_END -->\s*/g,'');
   collection=collection.replace(/<!-- AM_SEO_GUIDES_START -->[\s\S]*?<!-- AM_SEO_GUIDES_END -->\s*/g,'');
@@ -310,32 +311,30 @@ import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
   const homepage=u('');
   // Feature the original, owner-declared exact product photograph before
   // client-side catalogue JavaScript, improving early image discovery and LCP.
-  const firstPhoto=products.find(p=>p.id==='citizen-tsuyosa');
-  const firstPhotoApproved=firstPhoto?.photoReview?.publicUsageApproved===true&&
-    firstPhoto.photoReview.localUrl==='./assets/watches/citizen-tsuyosa.webp';
-  const firstPhotoSrc=firstPhotoApproved?'./assets/watches/citizen-tsuyosa.webp'+
+  const heroEligible=p=>p?.photoReview?.publicUsageApproved===true&&
+    p.photoReview.localUrl==='./assets/watches/'+p.id+'.webp';
+  const preferredHero=products.find(p=>p.id==='citizen-tsuyosa');
+  const firstPhoto=heroEligible(preferredHero)?preferredHero:products.find(heroEligible);
+  const firstPhotoName=firstPhoto?firstPhoto.brand+' '+firstPhoto.model:'montre';
+  const firstPhotoSrc=firstPhoto?'./assets/watches/'+firstPhoto.id+'.webp'+
     (typeof firstPhoto.photoReview.localSha256==='string'&&/^[a-f0-9]{64}$/i.test(firstPhoto.photoReview.localSha256)
       ?'?v='+firstPhoto.photoReview.localSha256.slice(0,12):''):'';
-  const firstPhotoUrl=firstPhotoApproved?u('assets/watches/citizen-tsuyosa.webp'):undefined;
-  const firstPhotoResponsive=firstPhotoApproved?responsiveSrcset(root,firstPhoto,'./'):'';
+  const firstPhotoUrl=firstPhoto?u('assets/watches/'+firstPhoto.id+'.webp'):undefined;
+  const firstPhotoResponsive=firstPhoto?responsiveSrcset(root,firstPhoto,'./'):'';
   const photoPreload=firstPhotoSrc?'<link rel="preload" as="image" fetchpriority="high" href="'+e(firstPhotoSrc)+'"'+(firstPhotoResponsive?' imagesrcset="'+e(firstPhotoResponsive)+'" imagesizes="(max-width: 760px) 92vw, 520px"':'')+'>':'';
-  const socialImage=firstPhotoUrl?'<meta property="og:image" content="'+e(firstPhotoUrl)+'"><meta property="og:image:alt" content="Citizen Tsuyosa NJ0150-81X — photographie de la montre au cadran vert"><meta name="twitter:image" content="'+e(firstPhotoUrl)+'">':'';
+  const socialImage=firstPhotoUrl?'<meta property="og:image" content="'+e(firstPhotoUrl)+'"><meta property="og:image:alt" content="'+e(firstPhotoName+' — photographie du modèle exact')+'"><meta name="twitter:image" content="'+e(firstPhotoUrl)+'">':'';
   const headExtra=`${searchConsoleMeta}${photoPreload}<link rel="canonical" href="${e(homepage)}"><meta name="robots" content="index,follow,max-image-preview:large"><meta property="og:type" content="website"><meta property="og:locale" content="fr_FR"><meta property="og:site_name" content="Atelier Montres"><meta property="og:title" content="52 montres à découvrir · Atelier Montres"><meta property="og:description" content="52 montres documentées à découvrir, dont 15 comparées en profondeur. Casio, SKMEI, Citizen, ADDIESDIVE et autres marques."><meta property="og:url" content="${e(homepage)}">${socialImage}<meta name="twitter:card" content="${firstPhotoUrl?'summary_large_image':'summary'}"><link rel="stylesheet" href="./seo-guides.css"><link rel="stylesheet" href="./popular-picks.css"><link rel="stylesheet" href="./affordable-comparisons.css">${umamiScripts("./")}<script type="application/ld+json">${schema({'@context':'https://schema.org','@graph':[{'@type':'WebSite',name:'Atelier Montres',url:homepage,inLanguage:'fr-FR'},{'@type':'ItemList',name:'15 montres comparées en profondeur parmi 52 références',numberOfItems:products.length,itemListElement:products.map((p,i)=>({'@type':'ListItem',position:i+1,name:p.brand+' '+p.model,url:u('montres/'+p.id+'.html')}))}]})}</script>`;
   collection=collection.replace('</head>','<!-- AM_SEO_HEAD_START -->'+headExtra+'<!-- AM_SEO_HEAD_END --></head>');
-  if(firstPhotoSrc){
-    const emptyHero='<div class="am-hero-watch" id="heroWatch" role="img" aria-label="Photographie de Citizen Tsuyosa NJ0150-81X"></div>';
-    const heroWithPhoto='<div class="am-hero-watch" id="heroWatch" role="img" aria-label="Photographie de Citizen Tsuyosa NJ0150-81X"><img class="am-hero-real-photo" src="'+e(firstPhotoSrc)+'"'+responsiveAttrs(root,firstPhoto,{prefix:'./',sizes:'(max-width: 760px) 92vw, 520px',escape:e})+' alt="Citizen Tsuyosa NJ0150-81X — montre automatique au cadran vert" width="520" height="520" decoding="async" fetchpriority="high"></div>';
-    if(collection.includes(emptyHero))collection=collection.replace(emptyHero,heroWithPhoto);
-    else if(!collection.includes(heroWithPhoto)){
-      // Existing generated HTML may contain an older responsive srcset when
-      // assets are refreshed or a minimal test fixture omits derivatives.
-      // Regenerate only the exact expected Citizen cover, never arbitrary HTML.
-      const previous=/\<div class="am-hero-watch" id="heroWatch" role="img" aria-label="Photographie de Citizen Tsuyosa NJ0150-81X"\>\<img class="am-hero-real-photo"[^>]*\>\<\/div\>/;
-      if(!previous.test(collection))throw Error('Public hero photo insertion point missing or unexpectedly modified');
-      collection=collection.replace(previous,heroWithPhoto);
-    }
-    // On the second SEO build, preserve exactly the first injected image.
-    // A developer build must be safe when repeated against the same directory.
+  // Citizen can lose publication rights without breaking no-JS first paint.
+  {
+    const original='<div class="am-hero-watch" id="heroWatch" role="img" aria-label="Photographie de Citizen Tsuyosa NJ0150-81X"></div>';
+    const generated=/<div class="am-hero-watch" id="heroWatch" role="img" aria-label="[^"]*"><img class="am-hero-real-photo"[^>]*><\/div>/;
+    const replacement=firstPhotoSrc
+      ?'<div class="am-hero-watch" id="heroWatch" role="img" aria-label="'+e('Photographie de '+firstPhotoName)+'"><img class="am-hero-real-photo" src="'+e(firstPhotoSrc)+'"'+responsiveAttrs(root,firstPhoto,{prefix:'./',sizes:'(max-width: 760px) 92vw, 520px',escape:e})+' alt="'+e(firstPhotoName+' — photographie du modèle exact')+'" width="520" height="520" decoding="async" fetchpriority="high"></div>'
+      :'<div class="am-hero-watch" id="heroWatch" role="img" aria-label="Illustration éditoriale sans photographie publiée"></div>';
+    if(collection.includes(original))collection=collection.replace(original,replacement);
+    else if(generated.test(collection))collection=collection.replace(generated,replacement);
+    else if(!collection.includes(replacement))throw Error('Homepage hero insertion point missing or unexpectedly altered');
   }
   // The advisor is an indexable, useful decision aid. Keep its canonical URL,
   // social preview and WebPage semantics consistent with the deployed origin.
@@ -375,7 +374,7 @@ import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
   // regenerate a comparison-only index. Only the production repository owns
   // the separate customer homepage.
   if(root===resolve(import.meta.dirname,'..','site')){
-  let publicHome=readFileSync(publicHomeFile,'utf8');
+  let publicHome=sanitizeWithdrawnMedia(readFileSync(publicHomeFile,'utf8'),products);
   if(!publicHome.includes('<link rel="stylesheet" href="./public-home.css">')||
      !publicHome.includes('id="collection"')||!publicHome.includes('id="faq"'))
     throw Error('Public homepage template missing: refusing to publish an outdated prelaunch page');

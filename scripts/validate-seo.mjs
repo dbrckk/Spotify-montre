@@ -327,15 +327,26 @@ assert.equal(methodGraph['@graph'][0].url,manifest.siteUrl+methodPath);
 assert.ok(read('montres/guide-choisir-montre.html').includes('./methode-selection.html'),'Method linked from guide navigation');
 assert.ok(read('montres/montres-casio.html').includes('./methode-selection.html'),'Method linked from collection navigation');
 
-assert.match(home,/id="heroWatch"[^>]*><img class="am-hero-real-photo"/,'First genuine watch must render in initial HTML for early LCP');
-const first=feed.products.find(p=>p.id==='citizen-tsuyosa');
-assert.equal(first.photoReview.publicUsageApproved,true);
-const heroPhoto='./assets/watches/'+first.id+'.webp?v='+first.photoReview.localSha256.slice(0,12);
-assert.ok(home.includes('src="'+heroPhoto+'"'),'HTML hero must use exact locally versioned image');
-assert.ok(home.includes('<link rel="preload" as="image" fetchpriority="high" href="'+heroPhoto+'" imagesrcset="'),'Matching responsive LCP preload must be present');
-assert.ok(home.includes('imagesizes="(max-width: 760px) 92vw, 520px"'),'Preloaded LCP must match image sizes');
-assert.ok(home.includes('<meta property="og:image" content="'+manifest.siteUrl+'assets/watches/'+first.id+'.webp">'),'Social sharing must use the real published photograph');
-assert.ok(home.includes('<meta name="twitter:card" content="summary_large_image">'),'Large social image requested');
+const heroPreferred=feed.products.find(p=>p.id==='citizen-tsuyosa');
+const hero=heroPreferred?.photoReview?.publicUsageApproved===true
+  ?heroPreferred:feed.products.find(p=>p.photoReview?.publicUsageApproved===true);
+if(hero){
+  assert.match(home,/id="heroWatch"[^>]*><img class="am-hero-real-photo"/,
+    'Homepage must show only an approved real watch photo before JS');
+  const heroPhoto='./assets/watches/'+hero.id+'.webp?v='+hero.photoReview.localSha256.slice(0,12);
+  assert.ok(home.includes('src="'+heroPhoto+'"'),'Early homepage image must match an approved model');
+  assert.ok(home.includes('<link rel="preload" as="image" fetchpriority="high" href="'+heroPhoto+'" imagesrcset="'),
+    'LCP preload must match approved homepage hero');
+  assert.ok(home.includes('imagesizes="(max-width: 760px) 92vw, 520px"'),
+    'LCP preload responsive sizes must match displayed image');
+  assert.ok(home.includes('<meta property="og:image" content="'+manifest.siteUrl+'assets/watches/'+hero.id+'.webp">'),
+    'Social image must be approved and exact-model');
+  assert.ok(home.includes('<meta name="twitter:card" content="summary_large_image">'));
+}else{
+  assert.ok(home.includes('aria-label="Illustration éditoriale sans photographie publiée"'),
+    'Fallback to documented editorial art when every photograph is withdrawn');
+  assert.ok(!home.includes('class="am-hero-real-photo"'),'No withdrawn hero photo');
+}
 for(const marker of ['AM_SEO_LINKS_START','AM_SEO_LINKS_END','AM_SEO_HEAD_START','AM_SEO_HEAD_END','AM_SEO_GUIDES_START','AM_SEO_GUIDES_END','AM_SEO_CATEGORIES_START','AM_SEO_CATEGORIES_END','AM_SEO_COMPARISONS_START','AM_SEO_COMPARISONS_END']){
  assert.equal(home.split(marker).length-1,1,'Idempotent build marker: '+marker);
 }
@@ -369,8 +380,14 @@ for(const id of affordableIds){
   const product=JSON.parse(read('selection-populaires.json')).products.find(p=>p.id===id);
   assert.ok(product&&card.includes('href="./montres/'+id+'.html"'),
     'Each affordably styled watch must link to its genuine product detail page: '+id);
-  assert.ok(card.includes('src="./assets/watches-popular/'+id+'.webp"'),
-    'Real and approved local model photo required in the public four-model presentation: '+id);
+  if(Object.hasOwn(JSON.parse(read('popular-photo-rights.json')).photos,id)){
+    assert.ok(card.includes('src="./assets/watches-popular/'+id+'.webp"'),
+      'Approved exact-model photo required when its registry entry is active: '+id);
+  }else{
+    assert.ok(card.includes('am-affordable-no-photo')&&
+      !card.includes('src="./assets/watches-popular/'+id+'.webp"'),
+      'Revoked model must remain discoverable without any unapproved media: '+id);
+  }
   const comparedId=affordableComparePairs[id];
   assert.ok(comparedId&&comparedId!==id&&affordableIds.includes(comparedId),
     'Home comparison must always use a second documented affordable watch: '+id);
@@ -562,7 +579,7 @@ assert.equal((unifiedHtml.match(/class="ud-card"/g)||[]).length,52,
 assert.equal((unifiedHtml.match(/class="ud-select"/g)||[]).length,52,
   'Each watch must have an opt-in local comparison button');
 const photoCount=unified.products.filter(p=>p.photoUrl!==null).length;
-const expectedPhotoCount=15+approvedPopularPhotos.size;
+const expectedPhotoCount=feed.products.filter(p=>p.photoReview?.publicUsageApproved===true).length+approvedPopularPhotos.size;
 const missingPhotoCount=52-expectedPhotoCount;
 assert.ok(approvedPopularPhotos.size<=37,'More approved photos than documented models');
 assert.equal(photoCount,expectedPhotoCount,
@@ -637,34 +654,41 @@ for(const watch of unified.products){
   if(watch.merchantKind===null)assert.ok(!card.includes('lien rémunéré</a>'),
     'Source-only cards must not imply payable merchant offers: '+watch.id);
 }
-// The visible editorial showroom is generated from six real, photographed
-// models, never a purported bestseller or a synthetic product offer.
-const spotlightIds=['skmei-2056','skmei-2514','addiesdive-ad2030',
+// Six real references remain visible even when a photograph is withdrawn;
+// published photographs must always match the exact SKU.
+const requestedSpotlight=['skmei-2056','skmei-2514','addiesdive-ad2030',
   'pagani-pd1701','casio-mtp-1302','citizen-tsuyosa'];
-assert.equal((unifiedHtml.match(/class="ud-feature-card"/g)||[]).length,6,
-  'Exactly six real watch photographs must appear in the editorial showroom');
-assert.ok(unifiedHtml.includes('id="udSpotlightTitle"'),'Editorial showroom must be accessible');
-assert.ok(!unifiedHtml.includes('Meilleures ventes garanties')&&!unifiedHtml.includes('Stock confirmé'),
-  'A curated visual collection cannot invent sales or inventory');
+const spotlightIds=[...unifiedHtml.matchAll(/class="ud-feature-card" data-feature-id="([^"]+)"/g)]
+  .map(m=>m[1]);
+assert.equal(spotlightIds.length,6,'Exactly six documented editorial picks required');
+assert.equal(new Set(spotlightIds).size,6,'No duplicate showcase model');
+assert.ok(unifiedHtml.includes('id="udSpotlightTitle"'),'Editorial showcase must be accessible');
+assert.ok(!unifiedHtml.includes('Meilleures ventes garanties')&&!unifiedHtml.includes('Stock confirmé'));
+for(const id of requestedSpotlight){
+  const model=unified.products.find(x=>x.id===id);
+  if(model?.photoUrl)assert.ok(spotlightIds.includes(id),
+    'Originally preferred photographed model should remain in the showcase: '+id);
+}
 for(const id of spotlightIds){
   const p=unified.products.find(item=>item.id===id);
-  assert.ok(p?.photoUrl,'Spotlight must only use a source-attested exact photograph: '+id);
+  assert.ok(p&&p.detailUrl&&p.officialUrl,'Featured model must be real: '+id);
   const start=unifiedHtml.indexOf('<article class="ud-feature-card" data-feature-id="'+id+'"');
   const end=unifiedHtml.indexOf('</article>',start);
   assert.ok(start>=0&&end>start,'Missing editorial card: '+id);
   const card=unifiedHtml.slice(start,end);
-  assert.ok(card.includes('../'+p.photoUrl.slice(2)),'Model photo must match the exact SKU: '+id);
-  assert.ok(card.includes('href="./'+id+'.html"'),'Model facts and sources must remain accessible: '+id);
-  if(p.merchantKind==='direct'){
+  if(p.photoUrl)
+    assert.ok(card.includes('../'+p.photoUrl.slice(2)),'Showcase photo must match exact SKU: '+id);
+  else
+    assert.ok(card.includes('Photo exacte non publiée')&&!card.includes('<img'),
+      'Withdrawn photo must become a no-image editorial card: '+id);
+  assert.ok(card.includes('href="./'+id+'.html"'),'Model facts remain navigable: '+id);
+  if(p.merchantKind==='direct'||p.merchantKind==='awin'){
     assert.ok(card.includes(p.merchantUrl.replaceAll('&','&amp;'))||card.includes(p.merchantUrl),
-      'Exact merchant destination must not be substituted: '+id);
-    assert.ok(card.includes('nofollow sponsored')&&card.includes('lien rémunéré'),
-      'Confirmed direct referrals must be visibly marked compensated: '+id);
+      'Verified merchant destination must not be substituted: '+id);
+    assert.ok(card.includes('nofollow sponsored')&&card.includes('lien rémunéré'));
   }else{
-    assert.ok(card.includes(p.officialUrl.replaceAll('&','&amp;'))||card.includes(p.officialUrl),
-      'The manufacturer, not an unverified Amazon search, is the primary exit: '+id);
-    assert.ok(!card.includes('sponsored')&&card.includes('lien non rémunéré'),
-      'A manufacturer-only exit cannot be labelled as paid: '+id);
+    assert.ok(card.includes(p.officialUrl.replaceAll('&','&amp;'))||card.includes(p.officialUrl));
+    assert.ok(!card.includes('sponsored')&&card.includes('lien non rémunéré'));
   }
 }
 assert.ok(unifiedHtml.includes('id="udViewTools" class="ud-view-tools" hidden'),
@@ -1249,8 +1273,15 @@ for(const product of feed.products){
   assert.ok(html.includes('code exact '+product.model),'Advice must use model-specific reference');
   assert.ok(html.includes(product.specs?.diameter?'Diamètre documenté : '+product.specs.diameter:product.specs?.caseSize?'Dimensions L × l × H indiquées : '+product.specs.caseSize:'Diamètre non renseigné'),'Documented case size must not be confused with a measured diameter');
   assert.ok(html.includes(product.specs?.waterResistance?'Étanchéité indiquée : '+product.specs.waterResistance:'Étanchéité non renseignée'),'Water resistance claims must not be invented');
-  assert.equal((html.match(/class="seo-related-photo"/g)||[]).length,3,'Three photo comparison cards required');
-  assert.equal((html.match(/loading="lazy" decoding="async"/g)||[]).length,3,'Below-fold related images must be lazy-loaded');
+  const relatedHtml=html.match(/<ul class="related seo-related-products">([\s\S]*?)<\/ul>/)?.[1]||'';
+  assert.equal((relatedHtml.match(/<li>/g)||[]).length,3,
+    'Three documented related models must remain, with or without photographs');
+  const relatedPictures=(relatedHtml.match(/class="seo-related-photo"/g)||[]).length;
+  const relatedMissing=(relatedHtml.match(/class="seo-related-photo-placeholder"/g)||[]).length;
+  assert.equal(relatedPictures+relatedMissing,3,
+    'One approved photo or explicit fallback per related model');
+  assert.equal((relatedHtml.match(/loading="lazy" decoding="async"/g)||[]).length,relatedPictures,
+    'Only actual below-fold photographic images need lazy-loading');
   if(product.photoReview?.publicUsageApproved===true){
     assert.ok(html.includes('width="'+product.photoReview.localWidth+'" height="'+product.photoReview.localHeight+'" decoding="async" fetchpriority="high"'),'High priority hero uses real source dimensions');
   }
