@@ -127,7 +127,6 @@ const privateReviewSources=privateReviewNames.map(name=>{
 });
 execute(process.execPath,['scripts/validate-photo-review.mjs']);
 execute(process.execPath,['scripts/build-seo.mjs']);
-for(const [file,bytes] of privateReviewSources)if(bytes!==null)writeFileSync(file,bytes);
 // Historical published HTML (not only SEO-generated product pages) can still
 // contain an image. Replace exact-model tags with a visible no-photo notice.
 for(const file of walk(site).filter(path=>path.endsWith('.html'))){
@@ -158,5 +157,8 @@ for(const file of walk(join(root,'docs')).filter(f=>/deploy-package-\d+\.json$/.
 const manifest=read('docs/deploy-package-manifest.json');
 if(manifest.totalModels!==52||!existsSync(join(site,'montres',id+'.html')))
   throw Error('A catalogue page was lost during photo removal: '+id);
+// Restore repository-only review fixtures AFTER public-output and package checks.
+// The production build deletes them again; never expose them in published HTML.
+for(const [file,bytes] of privateReviewSources)if(bytes!==null)writeFileSync(file,bytes);
 process.stdout.write(JSON.stringify({...status,sourceRemoved:true,
   pagesRebuilt:true,packageValidated:true},null,2)+'\n');
