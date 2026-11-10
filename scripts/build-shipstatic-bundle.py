@@ -9,6 +9,7 @@ from __future__ import annotations
 import base64
 import hashlib
 import json
+import re
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parent.parent
@@ -49,7 +50,7 @@ def assemble():
             })
         else:
             raise ValueError('Unexpected site asset format: '+relative)
-    if any(a['path'].startswith(('assets/watches/','assets/watches-popular/','assets/watch-responsive/','assets/popular-responsive/','assets/watch-thumbs/')) and any(a['path'].rsplit('/',1)[-1]==id+'.webp' or a['path'].rsplit('/',1)[-1].startswith(id+'-') for id in removed) for a in assets):
+    if any(a['path'].startswith(('assets/watches/','assets/watches-popular/','assets/watch-responsive/','assets/popular-responsive/','assets/watch-thumbs/')) and any(re.fullmatch(re.escape(id)+r'(?:-\d+)?\.webp',a['path'].rsplit('/',1)[-1]) for id in removed) for a in assets):
         raise ValueError('Retired photograph would be published by the bundle')
     assets.append({'path':'index.html','content':(SITE/'affiliation.html').read_text(encoding='utf-8')})
     ids=set()
