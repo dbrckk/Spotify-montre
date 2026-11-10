@@ -9,6 +9,7 @@ import {buildPopularPicks} from './build-popular-picks.mjs';
 import {buildUnifiedDiscovery} from './build-unified-discovery.mjs';
 import {buildCommercialRegistry} from './build-commercial-registry.mjs';
 import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
+import {sanitizeWithdrawnMedia} from './sanitize-withdrawn-media.mjs';
 
 (function buildSeo() {
   const site = new URL(process.env.PUBLIC_SITE_URL || 'https://atelier-montres-selection-fr.onrender.com/');
@@ -274,7 +275,7 @@ import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
   }
   const selection = `<section class="seo-links" aria-labelledby="seo-links-title"><div class="wrap"><p class="overline kicker">Explorer avant de choisir</p><h2 id="seo-links-title">Les 15 montres, modèle par modèle</h2><p>Des fiches éditoriales avec caractéristiques documentées et liens vers les fabricants. Aucun prix ou stock non vérifié.</p><ul>${allLinks()}</ul><p><a href="./montres/guide-choisir-montre.html">Notre guide pour choisir une montre : mouvements et tailles</a></p></div></section>`;
   const guideCards = `<section class="seo-guides" aria-labelledby="seo-guides-title"><div class="wrap"><p class="overline kicker">Conseils pour choisir</p><h2 id="seo-guides-title">Avant de choisir sa montre.</h2><p class="seo-guides-lead">Comparer un boîtier, comprendre le mouvement ou choisir une belle mécanique : trois guides pour affiner votre sélection à partir des informations documentées.</p><div class="seo-guide-grid"><article><span>01 / MOUVEMENT</span><h3>Quartz ou automatique ?</h3><p>Les différences de fonctionnement et d’entretien, illustrées par les modèles de notre collection.</p><a href="./montres/quartz-ou-automatique.html">Comparer les mouvements →</a></article><article><span>02 / PROPORTIONS</span><h3>Choisir le bon diamètre.</h3><p>Mesures confirmées, confort et proportions : comprendre ce qui compte vraiment au poignet.</p><a href="./montres/taille-boitier-montre.html">Consulter le guide des tailles →</a></article><article><span>03 / MÉCANIQUE</span><h3>${products.filter(p=>p.movement==='automatic').length} montres automatiques.</h3><p>Citizen, Orient, Seiko, Tissot et Hamilton : comparer leurs lignes et caractéristiques documentées.</p><a href="./montres/montres-automatiques.html">Découvrir les automatiques →</a></article></div></div></section>`;
-  let collection = readFileSync(join(root,'affiliation.html'),'utf8');
+  let collection = sanitizeWithdrawnMedia(readFileSync(join(root,'affiliation.html'),'utf8'),products);
   // Publishing twice must not duplicate canonical tags, structured data or internal links.
   collection=collection.replace(/<!-- AM_SEO_LINKS_START -->[\s\S]*?<!-- AM_SEO_LINKS_END -->\s*/g,'');
   collection=collection.replace(/<!-- AM_SEO_GUIDES_START -->[\s\S]*?<!-- AM_SEO_GUIDES_END -->\s*/g,'');
@@ -373,7 +374,7 @@ import {responsiveSrcset,responsiveAttrs} from './responsive-images.mjs';
   // regenerate a comparison-only index. Only the production repository owns
   // the separate customer homepage.
   if(root===resolve(import.meta.dirname,'..','site')){
-  let publicHome=readFileSync(publicHomeFile,'utf8');
+  let publicHome=sanitizeWithdrawnMedia(readFileSync(publicHomeFile,'utf8'),products);
   if(!publicHome.includes('<link rel="stylesheet" href="./public-home.css">')||
      !publicHome.includes('id="collection"')||!publicHome.includes('id="faq"'))
     throw Error('Public homepage template missing: refusing to publish an outdated prelaunch page');

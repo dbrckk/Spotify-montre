@@ -89,6 +89,14 @@ try{
     assert.equal(row.photoReview.url,undefined);
     assert.equal(row.photoReview.source,undefined);
   }
+  const publicHome=readFileSync(join(scratch,'site/index.html'),'utf8');
+  for(const id of coreIds){
+    assert.ok(!publicHome.includes('assets/watches/'+id+'.webp')&&
+      !publicHome.includes('assets/watch-responsive/'+id+'-'),
+      'Public homepage must contain no media URL for withdrawn model: '+id);
+  }
+  assert.ok(publicHome.includes('am-withdrawn-photo-fallback'),
+    'Previously photo-backed cards must become accessible no-photo editorial tiles');
   const home=readFileSync(join(scratch,'site/affiliation.html'),'utf8');
   assert.ok(home.includes('class="am-hero-real-photo"'));
   assert.ok(!home.includes('assets/watches/citizen-tsuyosa.webp'),
