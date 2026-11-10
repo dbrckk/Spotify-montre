@@ -579,7 +579,7 @@ assert.equal((unifiedHtml.match(/class="ud-card"/g)||[]).length,52,
 assert.equal((unifiedHtml.match(/class="ud-select"/g)||[]).length,52,
   'Each watch must have an opt-in local comparison button');
 const photoCount=unified.products.filter(p=>p.photoUrl!==null).length;
-const expectedPhotoCount=15+approvedPopularPhotos.size;
+const expectedPhotoCount=feed.products.filter(p=>p.photoReview?.publicUsageApproved===true).length+approvedPopularPhotos.size;
 const missingPhotoCount=52-expectedPhotoCount;
 assert.ok(approvedPopularPhotos.size<=37,'More approved photos than documented models');
 assert.equal(photoCount,expectedPhotoCount,
