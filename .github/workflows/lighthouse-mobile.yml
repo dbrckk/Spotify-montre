@@ -69,7 +69,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      # workflow_run carries the triggering asset job's older SHA. Render
+      # deploys main, including authenticated WebP commits made afterwards.
+      # Always build/compare Lighthouse inputs from the current public branch.
       - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Record deployed source revision
+        run: echo "Production Lighthouse uses main at $(git rev-parse --short HEAD)"
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
