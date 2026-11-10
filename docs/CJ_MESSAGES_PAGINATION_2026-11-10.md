@@ -37,3 +37,17 @@ des pièces officielles hors GitHub avant toute vente.
 Le checkout `site/config.json: checkoutMode=inactive` reste inchangé.
 Aucune transaction, commande CJ, remboursement, création de ticket ou
 débit n'est effectué par cette lecture.
+
+## Retour d'exécution sur le fournisseur réel
+
+Après fusion de la lecture paginée, le workflow CJ en lecture seule
+`42906491809` constate : ticket identifié, catégorie support éligible,
+mais état fournisseur `EXPIRED`. La lecture des messages reste
+non vérifiable : `CJ_TICKET_MESSAGES_PAGE_MISMATCH`.
+
+Pour éviter toute adaptation approximative de l'API, le diagnostic classe
+maintenant les erreurs en : total changé, numéro de page incorrect, taille
+de page divergente, page trop courte, page trop longue. **Seuls les codes
+sont publics ; aucun compteur réel ni échange fournisseur n'est publié.**
+Un ticket expiré ne qualifie pas un devis, et ne doit jamais relancer une
+création de ticket automatiquement.
