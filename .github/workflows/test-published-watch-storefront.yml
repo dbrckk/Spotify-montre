@@ -50,6 +50,8 @@ on:
       - 'site/popular-filters.js'
       - 'scripts/build-popular-picks.mjs'
       - 'scripts/build-seo.mjs'
+      - 'scripts/test-photo-withdrawal-integration.mjs'
+      - 'scripts/validate-gallery-v9.mjs'
       - 'research/amazon-fr-popular-verified.json'
       - 'scripts/popular-verified-affiliate.mjs'
       - 'site/analytics.js'
@@ -74,7 +76,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
+      # workflow_run may finish after newer commits were deployed on Render.
+      # Verify the current production source, not the workflow's stale event SHA.
       - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Record production source revision
+        run: echo "Checking current main $(git rev-parse HEAD) against Render"
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
