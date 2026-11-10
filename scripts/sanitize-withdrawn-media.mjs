@@ -11,7 +11,7 @@ export function sanitizeWithdrawnMedia(html,products){
   for(const product of revoked){
     if(!/^[a-z0-9-]{4,64}$/.test(product.id))throw Error('Invalid withdrawn model ID');
     const id=product.id;
-    const path=new RegExp('assets/(?:watches|watch-responsive|watch-thumbs)/'+id+
+    const path=new RegExp('assets/(?:watches|watch-responsive|watch-thumbs|watches-popular|popular-responsive)/'+id+
       '(?:-(?:240|360|480|720|800|960))?\\.webp(?:\\?[^"\\s<>]*)?','i');
     const fallback='<span class="am-withdrawn-photo-fallback" role="img" aria-label="Photographie non publiée de '+
       escapeHtml(product.brand+' '+product.model)+'"><span class="am-withdrawn-photo-fallback-label">'+
