@@ -16,9 +16,8 @@ const project=resolve(import.meta.dirname,'..');
 const scratch=mkdtempSync(join(tmpdir(),'atelier-withdrawal-rehearsal-'));
 const load=p=>JSON.parse(readFileSync(join(scratch,p),'utf8'));
 const save=(p,value)=>writeFileSync(join(scratch,p),JSON.stringify(value,null,2)+'\n');
-const coreIds=['citizen-tsuyosa','casio-mtp-b145'];
-const extraId='skmei-1251';
-const retired=[...coreIds,extraId];
+// Select images still published, so this rehearsal also runs after a real withdrawal.
+// Prefer testing the homepage hero when it remains approved.
 const folders=['watches','watch-responsive','watch-thumbs','watches-popular','popular-responsive'];
 function run(command,args){
   const result=spawnSync(command,args,{
@@ -36,6 +35,13 @@ try{
   const core=load('site/selection-affiliation.json');
   const extra=load('site/selection-populaires.json');
   const rights=load('site/popular-photo-rights.json');
+  const coreIds=['citizen-tsuyosa','casio-mtp-b145',...core.products.map(p=>p.id)]
+    .filter((id,i,array)=>array.indexOf(id)===i)
+    .filter(id=>core.products.some(p=>p.id===id&&p.photoReview?.publicUsageApproved===true))
+    .slice(0,2);
+  const extraId=rights.photos['skmei-1251']?'skmei-1251':Object.keys(rights.photos)[0];
+  assert.ok(coreIds.length>0&&extraId,'Rehearsal requires at least one published core and supplemental image');
+  const retired=[...coreIds,extraId];
   for(const id of coreIds){
     const p=core.products.find(x=>x.id===id);
     assert.ok(p?.photoReview?.publicUsageApproved===true);
@@ -67,8 +73,8 @@ try{
   run('python',['scripts/build-shipstatic-bundle.py']);
   const manifest=load('docs/deploy-package-manifest.json');
   assert.equal(manifest.totalModels,52);
-  assert.equal(manifest.models,13);
-  assert.equal(manifest.supplementalPhotos,24);
+  assert.equal(manifest.models,15-coreIds.length);
+  assert.equal(manifest.supplementalPhotos,Object.keys(rights.photos).length);
   const allAssets=manifest.parts.flatMap(part=>
     load('docs/'+part.file).files);
   const paths=allAssets.map(x=>x.path);
@@ -102,14 +108,14 @@ try{
     'Previously photo-backed cards must become accessible no-photo editorial tiles');
   const home=readFileSync(join(scratch,'site/affiliation.html'),'utf8');
   assert.ok(home.includes('class="am-hero-real-photo"'));
-  assert.ok(!home.includes('assets/watches/citizen-tsuyosa.webp'),
-    'Withdrawn original cannot be the homepage hero or OG image');
+  for(const id of coreIds)assert.ok(!home.includes('assets/watches/'+id+'.webp'),
+    'Withdrawn core original cannot appear in homepage hero or OG image: '+id);
   assert.match(home,/aria-label="Photographie de [^"]+"/);
   const manifestSeo=load('site/seo-manifest.json');
-  assert.equal(manifestSeo.licensedImageCount,13);
+  assert.equal(manifestSeo.licensedImageCount,15-coreIds.length);
   assert.ok(readFileSync(join(scratch,'site/affiliation.js'),'utf8').includes('publication_withdrawn'),
     'Catalogue must keep watch without the photograph');
-  console.log('PHOTO WITHDRAWAL REHEARSAL PASSED: 52 models, 3 source photos removed, 13 core photos/24 supplementary photos, packaging and SEO checked; production untouched.');
+  console.log('PHOTO WITHDRAWAL REHEARSAL PASSED: 52 models, '+retired.length+' source photos removed; packaging and SEO checked; production untouched.');
 }finally{
   rmSync(scratch,{recursive:true,force:true});
 }

@@ -114,7 +114,7 @@
    const hero=document.getElementById('advisorHeroArt');
    const featured=catalogue.find(p=>p.id==='citizen-tsuyosa');
    if(hero&&featured){
-     if(featured.photoUrl==='./assets/watches/citizen-tsuyosa.webp'){
+     if(featured.photoUrl==='./assets/watches/'+featured.id+'.webp'){
        const img=node('img','advisor-hero-photo');img.src=featured.photoUrl;
        img.alt='Citizen Tsuyosa — photographie de la référence exacte';
        img.width=540;img.height=540;img.decoding='async';img.fetchPriority='high';
