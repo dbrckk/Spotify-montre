@@ -12,6 +12,17 @@ on:
       - 'site/selection.css'
       - 'site/selection.js'
       - '.github/workflows/test-selection-share.yml'
+  pull_request:
+    paths:
+      - 'site/selection-share.js'
+      - 'site/affiliation.js'
+      - 'site/affiliation.html'
+      - 'site/selection-affiliation.json'
+      - 'scripts/test-selection-share.mjs'
+      - 'site/selection.html'
+      - 'site/selection.css'
+      - 'site/selection.js'
+      - '.github/workflows/test-selection-share.yml'
   workflow_dispatch:
 concurrency:
   group: shared-selection-${{ github.ref }}
