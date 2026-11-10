@@ -42,7 +42,7 @@ for(const malformed of [
   {...notRequested,supplierMessageCount:2},
   {...notRequested,operatorReviewRequired:true},
   {...base,status:'ticket_unknown'},
-  {...base,supplierMessageCount:101},
+  {...base,supplierMessageCount:501},
   {...base,supplierMessageCount:-1}
 ]){
   assert.throws(()=>evaluateQuoteWatchSignal(malformed),
