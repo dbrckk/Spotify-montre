@@ -13,7 +13,7 @@ const vectorJS=read('watch-illustrations.js');
 const stylesPage=read('selection.html');
 assert.match(stylesPage,/<meta name="robots" content="noindex,follow">/);
 assert.match(stylesPage,/href="\.\/montres\/toutes-les-montres\.html">Découvrir les 52 montres/);
-assert.match(stylesPage,/ce ne sont ni des produits en vente ni des photographies/);
+assert.match(stylesPage,/ce ne sont ni des produits en vente ni des photographies/i);
 assert.match(stylesPage,/<noscript>[\s\S]*parcourez directement les 52 références publiées/);
 assert.doesNotMatch(stylesPage,/href="\.\/index\.html#newsletter"/);
 assert.match(read('selection.css'),/selector-public \.navigation a/);
