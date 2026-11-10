@@ -17,7 +17,7 @@ permissions:
   issues: write
 
 concurrency:
-  group: cj-pilot-quote-readonly
+  group: cj-landed-quote-supplier-ticket
   cancel-in-progress: false
 
 jobs:
@@ -60,7 +60,7 @@ jobs:
         run: |
           set -euo pipefail
           MARKER='AM-CJ-FR-QUOTE-20261104-CJZBNSET00031'
-          EXISTING="$(gh issue list --state all --search "$MARKER in:title" --json number --jq '.[0].number // empty' --limit 100)"
+          EXISTING="$(gh issue list --state all --search "$MARKER in:title,body" --json number --jq '.[0].number // empty' --limit 100)"
           if [[ -z "$EXISTING" ]]; then
             gh issue create \
               --title "CJ pilot quote requires review — $MARKER" \
