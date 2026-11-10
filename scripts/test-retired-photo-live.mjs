@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
+import {readFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {inspectRemoteMedia,plannedLiveUrls,verifyRetiredPhotoUrls,liveOrigin}
   from './check-retired-photo-live.mjs';
@@ -62,10 +63,15 @@ await assert.rejects(()=>verifyRetiredPhotoUrls([row,row],fake(()=>new Response(
 
 // No real network call is made when the active registry contains no retirements.
 const root=resolve(import.meta.dirname,'..');
-const command=spawnSync(process.execPath,['scripts/check-retired-photo-live.mjs','--json'],
-  {cwd:root,encoding:'utf8',timeout:10000});
-assert.equal(command.status,0,command.stderr);
-const report=JSON.parse(command.stdout);
-assert.equal(report.status,'not_applicable');
-assert.equal(report.verified,false);
+const active=JSON.parse(readFileSync(resolve(root,'site/photo-takedowns.json'),'utf8')).retired;
+if(active.length===0){
+  const command=spawnSync(process.execPath,['scripts/check-retired-photo-live.mjs','--json'],
+    {cwd:root,encoding:'utf8',timeout:10000});
+  assert.equal(command.status,0,command.stderr);
+  const report=JSON.parse(command.stdout);
+  assert.equal(report.status,'not_applicable');
+  assert.equal(report.verified,false);
+}
+// After a real withdrawal, the actual site may still be deploying. The live
+// checker runs separately in GitHub Actions, not in offline npm test.
 console.log('R1 live retirement verification: exact trusted origin, HTML fallback, old WEBP bytes and bad CDN responses validated offline');
