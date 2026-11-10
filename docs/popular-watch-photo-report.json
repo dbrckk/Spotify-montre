@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "reviewedOn": "2026-11-08",
+  "reviewedOn": "2026-11-10",
   "total": 37,
   "photos": [
     {
@@ -55,10 +55,8 @@
     },
     {
       "id": "orient-bambino-38-cream",
-      "status": "created",
-      "source": "https://orient-watch.com/en/orient/collection/classic/classic-and-simple-style-38/RA-AC0M04Y/",
-      "image": "https://orient-watch.com/en/orient/collection/classic/classic-and-simple-style-38/RA-AC0M04Y/product_en_file/file/RA-AC0M04Y_main.webp",
-      "sha256": "2a9aafb9aaf7a074c0ffe77031d807f766abe6435fdd2e4c701b5118f013c057"
+      "status": "preserved",
+      "source": "https://orient-watch.com/en/orient/collection/classic/classic-and-simple-style-38/RA-AC0M04Y/"
     },
     {
       "id": "tissot-prx-35-blue",
@@ -77,10 +75,8 @@
     },
     {
       "id": "tissot-gentleman-auto",
-      "status": "created",
-      "source": "https://www.tissotwatches.com/fr-fr/T1274071104100.html",
-      "image": "https://www.tissotwatches.com/on/demandware.static/-/Sites-Tissot-Catalogue/default/dw71cff7f4/product-pictures/778fa7b2-de38-441e-bb28-f179037ebb29_T127-407-11-041-00_shadow.png",
-      "sha256": "dbd14f2b677de2e4b7fd720f39150539cfe4385e8793be2f1ee134f472da3ae2"
+      "status": "preserved",
+      "source": "https://www.tissotwatches.com/fr-fr/T1274071104100.html"
     },
     {
       "id": "hamilton-jazzmaster-viewmatic",
@@ -94,10 +90,8 @@
     },
     {
       "id": "orient-mako40-black",
-      "status": "created",
-      "source": "https://orient-watch.com/en/orient/collection/sports/diver-design-40/RA-AC0Q01B/",
-      "image": "https://orient-watch.com/en/orient/collection/sports/diver-design-40/RA-AC0Q01B/product_en_file/file/RA-AC0Q01B_main.webp",
-      "sha256": "a161dca1c96325210cafa9617275ede69f56908dfd5c0242ec19400e5c11d9ee"
+      "status": "preserved",
+      "source": "https://orient-watch.com/en/orient/collection/sports/diver-design-40/RA-AC0Q01B/"
     },
     {
       "id": "seiko-speedtimer-ssc813",
