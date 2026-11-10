@@ -90,7 +90,7 @@ if(process.env.AM_WITHDRAWAL_SANDBOX!=='1'&&
 if(git.status===0&&['main','master'].includes(git.stdout.trim()))
   throw Error('Refusing to modify main even with sandbox flag');
 
-ledger.retired.push({id,kind,sourceSha256:hash.toLowerCase(),
+ledger.retired.push({id,kind,sourceSha256:hash.toLowerCase(),media:[...media],
   recordedOn:new Date().toISOString().slice(0,10),reason:'publication_rights_review'});
 ledger.retired.sort((a,b)=>a.id.localeCompare(b.id));
 save(ledgerPath,ledger);
