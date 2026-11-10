@@ -1,0 +1,68 @@
+name: Prepare exact watch-photo retirement PR (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      watch_id:
+        description: 'Exact catalogue ID (example: skmei-1251)'
+        required: true
+        type: string
+      confirmation:
+        description: 'Type RETIRER:<watch_id> exactly'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: retire-watch-photo-${{ inputs.watch_id }}
+  cancel-in-progress: false
+
+jobs:
+  prepare-retirement:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    env:
+      WATCH_ID: ${{ inputs.watch_id }}
+      CONFIRMATION: ${{ inputs.confirmation }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout current public source (no mutation)
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate exact watch, checksum, and explicit confirmation
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/withdraw-watch-photo.mjs --id "$WATCH_ID"
+          test "$CONFIRMATION" = "RETIRER:$WATCH_ID"
+      - name: Build and verify complete isolated retirement
+        shell: bash
+        run: |
+          set -euo pipefail
+          branch="rights/retire-watch-$WATCH_ID-$GITHUB_RUN_ID"
+          git switch -c "$branch"
+          node scripts/withdraw-watch-photo.mjs --id "$WATCH_ID" --apply --confirm "$CONFIRMATION" > "$RUNNER_TEMP/retirement.json"
+          npm test
+          node scripts/build-seo.mjs
+          node scripts/validate-seo.mjs
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A site/ docs/deploy-package-*.json
+          git diff --cached --quiet && { echo 'No source or asset changes produced'; exit 1; }
+          git commit -m "fix(rights): retire exact watch image for $WATCH_ID"
+          git push --set-upstream origin "$branch"
+          gh pr create --base main --head "$branch" \
+            --title "fix(rights): retirer la photographie $WATCH_ID" \
+            --body "Retrait exact demandé pour $WATCH_ID. SHA-256 contrôlé, originaux et dérivés supprimés, 52 fiches conservées, site/SEO et archives reconstruits. **PR à examiner ; fusion et vérification des anciennes URLs/CDN distinctes.** Aucune purge CDN ou validation juridique n'est attestée."
+          cat "$RUNNER_TEMP/retirement.json" >> "$GITHUB_STEP_SUMMARY"
