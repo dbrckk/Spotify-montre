@@ -116,8 +116,8 @@ function execute(command,argumentsList){
   if(result.status!==0)throw Error('Build/validation failed: '+command+' '+argumentsList.join(' ')+
     '\n'+(result.stdout+'\n'+result.stderr).slice(-6000));
 }
-execute(process.execPath,['scripts/build-seo.mjs']);
 execute(process.execPath,['scripts/validate-photo-review.mjs']);
+execute(process.execPath,['scripts/build-seo.mjs']);
 execute(process.execPath,['scripts/validate-gallery-v9.mjs']);
 execute(process.execPath,['scripts/validate-seo.mjs']);
 execute('python3',['scripts/build-shipstatic-bundle.py']);
