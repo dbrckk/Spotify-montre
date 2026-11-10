@@ -346,8 +346,9 @@ if(first.photoReview?.publicUsageApproved===true){
   assert.ok(!home.includes('assets/watches/'+first.id+'.webp'),
     'Withdrawn hero image cannot appear in any local HTML URL');
 }
-assert.ok(home.includes('<meta name="twitter:card" content="summary_large_image">'),
-  'Public preview must still have explicit sharing metadata');
+assert.ok(home.includes('<meta name="twitter:card" content="'+
+  (first.photoReview?.publicUsageApproved===true?'summary_large_image':'summary')+'">'),
+  'Public preview must be accurate about the available approved hero photograph');
 for(const marker of ['AM_SEO_LINKS_START','AM_SEO_LINKS_END','AM_SEO_HEAD_START','AM_SEO_HEAD_END','AM_SEO_GUIDES_START','AM_SEO_GUIDES_END','AM_SEO_CATEGORIES_START','AM_SEO_CATEGORIES_END','AM_SEO_COMPARISONS_START','AM_SEO_COMPARISONS_END']){
  assert.equal(home.split(marker).length-1,1,'Idempotent build marker: '+marker);
 }
