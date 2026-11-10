@@ -36,3 +36,35 @@ Ce suivi complète [le plan directeur](./OBJECTIF_GLOBAL_ET_PLAN_DIRECTEUR_2026-
 4. **P3 commerce réel** — ne pas activer le paiement direct avant devis CJ final livré France, conformité vendeur, marge vérifiée, PSP réel et parcours de remboursement contrôlé.
 
 **Verrou préservé :** `site/config.json` → `checkoutMode: "inactive"`. Aucune vente directe, aucun prix ou stock fictif, aucune nouvelle photo ni lien affilié inventé.
+
+
+
+## Lot public du 10 novembre — ancienne URL du catalogue et navigation mobile
+
+**Constat dans `main@e007cc52e` :** la route publique historique `/catalogue.html`
+affichait « collection en préparation » sans orienter le lecteur vers le
+**catalogue éditorial déjà publié de 52 références**. Sa navigation contenait
+un lien vers `/#newsletter` alors que cette section est masquée. Pour un
+visiteur arrivant via un ancien lien, le parcours contredisait l'état de la
+vitrine et n'amenait pas à un modèle.
+
+**Correction :**
+- La page historique reste **distincte** du commerce direct : l'identité
+  de la sélection éditoriale et du vendeur est explicitée, sans panier fictif
+  ni promesse de stock/commission.
+- Bouton accessible et utilisable sans JavaScript vers
+  `/montres/toutes-les-montres.html`, lien secondaire vers les marchands
+  documentés, navigation « Accueil / 52 montres / Conseiller / Vendeurs ».
+- Métadonnées **`noindex,follow`** pour garder cette URL historique hors
+  des résultats de recherche tout en conservant la découverte des liens.
+- Sur Android 320/393 px, navigation tactile horizontale à zones d'au moins
+  44 px, focus natif, aucun débordement de page attendu.
+- Test de contrat sous `npm test` et contrôle Chromium **sans JavaScript**
+  de `/catalogue.html → /montres/toutes-les-montres.html → 52 cartes pré-rendues`.
+  La CI mobile est désormais déclenchée aussi sur les changements de cette
+  route et de sa feuille de style.
+
+**Critère de succès :** tests et build SEO verts ; navigateur sans JavaScript
+atteint réellement les 52 fiches ; contrôle Render post-déploiement.
+Un succès de CI n'est pas une preuve de hausse du trafic Google ni de ventes.
+**Verrou conservé :** `checkoutMode: inactive` ; paiement direct non relancé.

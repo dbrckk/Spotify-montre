@@ -30,6 +30,20 @@ for(const c of registry.candidates) {
  assert.ok(Array.isArray(c.issues) && c.issues.length>=3);
  assert.ok(!c.sellingPrice && !c.approved && !c.inventory);
 }
+// The legacy supplier-catalogue URL must guide public visitors into the
+// actual 52-model editorial collection, even with JavaScript disabled.
+assert.match(markup,/<meta name="robots" content="noindex,follow">/,
+  'Legacy commerce route must not compete in search but its links remain followable');
+assert.match(markup,/<a class="button" href="\.\/montres\/toutes-les-montres\.html">Explorer les 52 montres/,
+  'An above-fold direct route to the 52 real references is mandatory');
+assert.match(markup,/Les achats se font auprès des vendeurs indiqués/,
+  'No implication of direct payment while checkout is inactive');
+assert.match(markup,/href="\.\/acheter\.html#amPartnerSelection">Les vendeurs/,
+  'Show the real public vendor route, not the disabled checkout');
+assert.doesNotMatch(markup,/href="\.\/index\.html#newsletter"/,
+  'Never link shoppers to a hidden, unimplemented newsletter');
+assert.match(css,/catalogue-legacy \.navigation a/,
+  'Android legacy route needs accessible 44px navigation targets');
 assert.match(markup,/id="catalogEmpty"[^>]* hidden/);
 assert.match(markup,/id="catalogError"[^>]* hidden/);
 assert.match(markup,/src="\.\/catalogue\.js" defer/);
