@@ -15,7 +15,7 @@ export function evaluateQuoteWatchSignal(value){
     value.orderPlaced!==false||value.walletDebited!==false||
     value.quoteApproved!==false||
     !Number.isSafeInteger(value.supplierMessageCount)||
-    value.supplierMessageCount<0||value.supplierMessageCount>100||
+    value.supplierMessageCount<0||value.supplierMessageCount>500||
     (value.latestSupplierMessageDate!==null&&
      (typeof value.latestSupplierMessageDate!=='string'||
       !ISO_DATE.test(value.latestSupplierMessageDate)))||
