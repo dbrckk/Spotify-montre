@@ -86,6 +86,8 @@ for(const required of [
 ])assert.ok(workflow.includes(required),'CJ watch needs '+required);
 assert.match(workflow,/gh issue list --state all/,
   'Supplier alerts and missing-ticket alerts must reuse the same issue');
+assert.match(workflow,/in:title,body/,
+  'Issue deduplication must survive title edits; search the stable marker in body too');
 assert.match(workflow,/steps.quote.outputs.blocked == 'true'/,
   'A missing CJ ticket must generate operator action despite a nonzero prior step');
 assert.ok(!workflow.includes('node commerce/cj-quote-ticket.mjs send'),
