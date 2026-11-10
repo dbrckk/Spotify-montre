@@ -34,3 +34,59 @@
 .catalog-promise p{font-size:13px;color:#58695a;line-height:1.75;margin:11px 0 0}
 @media(max-width:910px){.catalog-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.catalog-promise .wrap{grid-template-columns:1fr;gap:20px}}
 @media(max-width:620px){.catalog-hero{padding:70px 0 75px}.catalog-content{padding:65px 0}.catalog-head{grid-template-columns:1fr;gap:20px}.catalog-grid{grid-template-columns:1fr}.catalog-empty{padding:36px 22px 55px}.catalog-product img{height:260px}}
+
+
+/* The legacy /catalogue.html route must direct shoppers to the real,
+   public 52-watch catalogue rather than trapping them in prelaunch UI. */
+.catalogue-legacy .catalog-hero{
+  background:
+    radial-gradient(ellipse at 92% 25%,rgba(216,185,135,.19),transparent 46%),
+    linear-gradient(145deg,#1b2925,#294438);
+}
+.catalogue-legacy .catalog-hero h1{max-width:900px}
+.catalogue-legacy .catalog-public-actions{
+  display:flex;align-items:center;gap:18px 26px;flex-wrap:wrap;
+  margin-top:28px
+}
+.catalogue-legacy .catalog-public-actions .button{min-height:50px}
+.catalogue-legacy .catalog-secondary-link{
+  min-height:44px;display:inline-flex;align-items:center;
+  color:#f3dfbc;font-size:14px;font-weight:650;text-decoration:underline;
+  text-underline-offset:5px
+}
+.catalogue-legacy .catalog-secondary-link:hover{color:#fff}
+.catalogue-legacy .catalog-public-note{
+  margin-top:24px!important;font-size:13px!important;line-height:1.65!important;
+  color:#dce8dd!important
+}
+.catalogue-legacy .catalog-head>p a{
+  color:#22583d;text-decoration:underline;text-underline-offset:3px;
+  font-weight:650
+}
+@media(max-width:780px){
+  .catalogue-legacy .header-inner{
+    height:auto;min-height:90px;padding:15px 0 11px;
+    display:flex;flex-wrap:wrap;gap:9px 18px
+  }
+  .catalogue-legacy .header-inner .brand{flex:1 1 100%;font-size:26px}
+  .catalogue-legacy .navigation{
+    flex:1 1 100%;min-width:0;display:flex;flex-wrap:nowrap;
+    gap:12px;overflow-x:auto;overscroll-behavior-x:contain;
+    -webkit-overflow-scrolling:touch;scrollbar-width:thin
+  }
+  .catalogue-legacy .navigation a{
+    flex:0 0 auto;display:inline-flex;align-items:center;
+    min-height:44px;padding:8px 4px
+  }
+  .catalogue-legacy .header-inner .tag{display:none}
+}
+@media(max-width:620px){
+  .catalogue-legacy .catalog-hero{padding:54px 0 62px}
+  .catalogue-legacy .catalog-hero h1{font-size:clamp(40px,11vw,58px)}
+  .catalogue-legacy .catalog-public-actions{align-items:stretch;flex-direction:column}
+  .catalogue-legacy .catalog-public-actions .button{width:100%;text-align:center}
+  .catalogue-legacy .catalog-secondary-link{justify-content:center;text-align:center}
+}
+@media(prefers-reduced-motion:reduce){
+  .catalogue-legacy .catalog-public-actions .button:hover{transform:none}
+}
