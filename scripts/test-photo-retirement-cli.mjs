@@ -9,14 +9,20 @@ import {join,resolve} from 'node:path';
 import {spawnSync} from 'node:child_process';
 
 const origin=resolve(import.meta.dirname,'..');
-const scenarios=['citizen-tsuyosa','skmei-1251'];
+const currentCore=JSON.parse(readFileSync(join(origin,'site/selection-affiliation.json'),'utf8')).products;
+const currentExtra=JSON.parse(readFileSync(join(origin,'site/popular-photo-rights.json'),'utf8')).photos;
+const coreId=currentCore.find(p=>p.id==='citizen-tsuyosa'&&p.photoReview?.publicUsageApproved===true)?.id||
+  currentCore.find(p=>p.photoReview?.publicUsageApproved===true)?.id;
+const supplementalId=currentExtra['skmei-1251']?'skmei-1251':Object.keys(currentExtra)[0];
+assert.ok(coreId&&supplementalId,'Retirement CLI checks need a published model in both classes');
+const scenarios=[{id:coreId,kind:'core'},{id:supplementalId,kind:'supplemental'}];
 const load=(dir,name)=>JSON.parse(readFileSync(join(dir,name),'utf8'));
 const run=(dir,id,extra=[],sandbox=false)=>spawnSync(process.execPath,
   ['scripts/withdraw-watch-photo.mjs','--id',id,...extra],{
     cwd:dir,encoding:'utf8',timeout:180000,maxBuffer:20*1024*1024,
     env:{...process.env,AM_WITHDRAWAL_SANDBOX:sandbox?'1':'0'}
   });
-for(const id of scenarios){
+for(const {id,kind} of scenarios){
   const scratch=mkdtempSync(join(tmpdir(),'atelier-photo-action-'));
   try{
     for(const name of ['site','scripts','research'])
@@ -25,7 +31,7 @@ for(const id of scenarios){
     const catalogue=load(scratch,'site/selection-affiliation.json');
     const rights=load(scratch,'site/popular-photo-rights.json');
     const originalPhoto=readFileSync(join(scratch,'site/assets/'+
-      (id==='citizen-tsuyosa'?'watches/':'watches-popular/')+id+'.webp'));
+      (kind==='core'?'watches/':'watches-popular/')+id+'.webp'));
     const report=run(scratch,id);
     assert.equal(report.status,0,report.stderr);
     const preview=JSON.parse(report.stdout);
@@ -56,7 +62,7 @@ for(const id of scenarios){
       'Source photo or derivative survived: '+path);
     const updated=load(scratch,'site/selection-affiliation.json');
     const updatedRights=load(scratch,'site/popular-photo-rights.json');
-    if(id==='citizen-tsuyosa'){
+    if(kind==='core'){
       assert.equal(updated.products.length,catalogue.products.length);
       const p=updated.products.find(x=>x.id===id);
       assert.equal(p.imageMode,'editorial_illustration');
@@ -75,7 +81,7 @@ for(const id of scenarios){
     assert.equal(paths.some(p=>preview.media.some(m=>p===m.replace(/^site\//,''))),false,
       'Deploy package cannot contain withdrawn media');
     assert.ok(existsSync(join(origin,'site/assets/'+
-      (id==='citizen-tsuyosa'?'watches/':'watches-popular/')+id+'.webp')),
+      (kind==='core'?'watches/':'watches-popular/')+id+'.webp')),
       'Source repository must remain unchanged');
     assert.notEqual(run(scratch,id).status,0,'A retired watch cannot be retired twice');
     console.log('ISOLATED PHOTO RETIREMENT OK: '+id+', '+preview.media.length+' media assets removed');
