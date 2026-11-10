@@ -209,7 +209,7 @@ const malformed=fakeTicketApi({total:1,existingTicket:9001,
     total:100,list:[{sender:'CJ',messageTime:nowTime,messageText:'private'}]}});
 await assert.rejects(checkWrittenCjQuote({
   accessToken:token,fetcher:malformed.fetcher
-}),/CJ_TICKET_MESSAGES_PAGE_MISMATCH/);
+}),/CJ_TICKET_MESSAGES_PAGE_SHORT/);
 assert.equal(createCount(malformed),0);
 // Do not silently accept duplicate pages, changing totals or missing IDs.
 // All malformed multi-page responses remain blocked without a write.
@@ -222,19 +222,31 @@ const malformedPages=[
     options:{messages:pagedMessages,badMessageSecondPage:{
       total:206,pageNum:2,pageSize:100,list:pagedMessages.slice(100,200)
     }},
-    code:'CJ_TICKET_MESSAGES_PAGE_MISMATCH'
+    code:'CJ_TICKET_MESSAGES_TOTAL_CHANGED'
   },
   {
     options:{messages:pagedMessages,badMessageSecondPage:{
       total:205,pageNum:1,pageSize:100,list:pagedMessages.slice(100,200)
     }},
-    code:'CJ_TICKET_MESSAGES_PAGE_MISMATCH'
+    code:'CJ_TICKET_MESSAGES_PAGE_NUMBER_MISMATCH'
   },
   {
     options:{messages:pagedMessages,badMessageSecondPage:{
       total:205,pageNum:2,pageSize:100,list:pagedMessages.slice(100,199)
     }},
-    code:'CJ_TICKET_MESSAGES_PAGE_MISMATCH'
+    code:'CJ_TICKET_MESSAGES_PAGE_SHORT'
+  },
+  {
+    options:{messages:pagedMessages,badMessageSecondPage:{
+      total:205,pageNum:2,pageSize:20,list:pagedMessages.slice(100,200)
+    }},
+    code:'CJ_TICKET_MESSAGES_PAGE_SIZE_MISMATCH'
+  },
+  {
+    options:{messages:pagedMessages,badMessageSecondPage:{
+      total:205,pageNum:2,pageSize:100,list:pagedMessages.slice(100,201)
+    }},
+    code:'CJ_TICKET_MESSAGES_PAGE_LONG'
   },
   {
     options:{messages:[...pagedMessages.slice(0,204),
