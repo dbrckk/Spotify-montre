@@ -108,6 +108,7 @@ assert.equal(createCount(secondPage),0);
 const none=fakeTicketApi();
 const missing=await checkWrittenCjQuote({accessToken:token,fetcher:none.fetcher});
 assert.equal(missing.status,'not_requested');
+assert.equal(missing.messageVerification,'not_applicable');
 assert.equal(missing.quoteApproved,false);
 assert.equal(supplierTicketNeedsAttention(missing),true,
   'Missing supplier ticket requires attention after confirmed submission');
@@ -119,6 +120,7 @@ assert.deepEqual(paths(none),['/ticket/list']);
 const pending=fakeTicketApi({total:1,existingTicket:9001,status:'AWAITING_CJ_REPLY'});
 const waiting=await checkWrittenCjQuote({accessToken:token,fetcher:pending.fetcher});
 assert.equal(waiting.status,'ticket_found');
+assert.equal(waiting.messageVerification,'complete');
 assert.equal(waiting.supplierStatus,'AWAITING_CJ_REPLY');
 assert.equal(waiting.operatorReviewRequired,false);
 assert.equal(waiting.quoteApproved,false);
@@ -128,6 +130,25 @@ assert.equal(supplierTicketNeedsAttention(waiting),false,
   'Waiting for CJ requires no operator action');
 assert.ok(!JSON.stringify(waiting).includes('9001'));
 assert.ok(!JSON.stringify(waiting).includes(token));
+// The real CJ pilot is EXPIRED. Never pretend its supplier message list is
+// complete when the documented Messages API yields inconsistent pages.
+const expiredTicket=fakeTicketApi({
+  total:1,existingTicket:9001,status:'EXPIRED',unread:true,
+  badMessageResponse:{total:100,list:[]}
+});
+const expiredReport=await checkWrittenCjQuote({
+  accessToken:token,fetcher:expiredTicket.fetcher});
+assert.equal(expiredReport.supplierStatus,'EXPIRED');
+assert.equal(expiredReport.messageVerification,'skipped_expired');
+assert.equal(expiredReport.supplierMessageCount,null);
+assert.equal(expiredReport.latestSupplierMessageDate,null);
+assert.equal(expiredReport.operatorReviewRequired,true);
+assert.equal(expiredReport.quoteApproved,false);
+assert.equal(createCount(expiredTicket),0);
+assert.deepEqual(paths(expiredTicket),
+  ['/ticket/list','/ticket/detail'],
+  'Expired ticket must alert without reading an unreliable message endpoint');
+
 const replied=fakeTicketApi({total:1,existingTicket:9001});
 const seen=await checkWrittenCjQuote({accessToken:token,fetcher:replied.fetcher});
 assert.equal(seen.supplierStatus,'AWAITING_YOUR_REPLY');
