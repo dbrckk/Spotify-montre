@@ -648,34 +648,41 @@ for(const watch of unified.products){
   if(watch.merchantKind===null)assert.ok(!card.includes('lien rémunéré</a>'),
     'Source-only cards must not imply payable merchant offers: '+watch.id);
 }
-// The visible editorial showroom is generated from six real, photographed
-// models, never a purported bestseller or a synthetic product offer.
-const spotlightIds=['skmei-2056','skmei-2514','addiesdive-ad2030',
+// Six real references remain visible even when a photograph is withdrawn;
+// published photographs must always match the exact SKU.
+const requestedSpotlight=['skmei-2056','skmei-2514','addiesdive-ad2030',
   'pagani-pd1701','casio-mtp-1302','citizen-tsuyosa'];
-assert.equal((unifiedHtml.match(/class="ud-feature-card"/g)||[]).length,6,
-  'Exactly six real watch photographs must appear in the editorial showroom');
-assert.ok(unifiedHtml.includes('id="udSpotlightTitle"'),'Editorial showroom must be accessible');
-assert.ok(!unifiedHtml.includes('Meilleures ventes garanties')&&!unifiedHtml.includes('Stock confirmé'),
-  'A curated visual collection cannot invent sales or inventory');
+const spotlightIds=[...unifiedHtml.matchAll(/class="ud-feature-card" data-feature-id="([^"]+)"/g)]
+  .map(m=>m[1]);
+assert.equal(spotlightIds.length,6,'Exactly six documented editorial picks required');
+assert.equal(new Set(spotlightIds).size,6,'No duplicate showcase model');
+assert.ok(unifiedHtml.includes('id="udSpotlightTitle"'),'Editorial showcase must be accessible');
+assert.ok(!unifiedHtml.includes('Meilleures ventes garanties')&&!unifiedHtml.includes('Stock confirmé'));
+for(const id of requestedSpotlight){
+  const model=unified.products.find(x=>x.id===id);
+  if(model?.photoUrl)assert.ok(spotlightIds.includes(id),
+    'Originally preferred photographed model should remain in the showcase: '+id);
+}
 for(const id of spotlightIds){
   const p=unified.products.find(item=>item.id===id);
-  assert.ok(p?.photoUrl,'Spotlight must only use a source-attested exact photograph: '+id);
+  assert.ok(p&&p.detailUrl&&p.officialUrl,'Featured model must be real: '+id);
   const start=unifiedHtml.indexOf('<article class="ud-feature-card" data-feature-id="'+id+'"');
   const end=unifiedHtml.indexOf('</article>',start);
   assert.ok(start>=0&&end>start,'Missing editorial card: '+id);
   const card=unifiedHtml.slice(start,end);
-  assert.ok(card.includes('../'+p.photoUrl.slice(2)),'Model photo must match the exact SKU: '+id);
-  assert.ok(card.includes('href="./'+id+'.html"'),'Model facts and sources must remain accessible: '+id);
-  if(p.merchantKind==='direct'){
+  if(p.photoUrl)
+    assert.ok(card.includes('../'+p.photoUrl.slice(2)),'Showcase photo must match exact SKU: '+id);
+  else
+    assert.ok(card.includes('Photo exacte non publiée')&&!card.includes('<img'),
+      'Withdrawn photo must become a no-image editorial card: '+id);
+  assert.ok(card.includes('href="./'+id+'.html"'),'Model facts remain navigable: '+id);
+  if(p.merchantKind==='direct'||p.merchantKind==='awin'){
     assert.ok(card.includes(p.merchantUrl.replaceAll('&','&amp;'))||card.includes(p.merchantUrl),
-      'Exact merchant destination must not be substituted: '+id);
-    assert.ok(card.includes('nofollow sponsored')&&card.includes('lien rémunéré'),
-      'Confirmed direct referrals must be visibly marked compensated: '+id);
+      'Verified merchant destination must not be substituted: '+id);
+    assert.ok(card.includes('nofollow sponsored')&&card.includes('lien rémunéré'));
   }else{
-    assert.ok(card.includes(p.officialUrl.replaceAll('&','&amp;'))||card.includes(p.officialUrl),
-      'The manufacturer, not an unverified Amazon search, is the primary exit: '+id);
-    assert.ok(!card.includes('sponsored')&&card.includes('lien non rémunéré'),
-      'A manufacturer-only exit cannot be labelled as paid: '+id);
+    assert.ok(card.includes(p.officialUrl.replaceAll('&','&amp;'))||card.includes(p.officialUrl));
+    assert.ok(!card.includes('sponsored')&&card.includes('lien non rémunéré'));
   }
 }
 assert.ok(unifiedHtml.includes('id="udViewTools" class="ud-view-tools" hidden'),
