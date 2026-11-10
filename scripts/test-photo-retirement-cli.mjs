@@ -58,6 +58,7 @@ for(const {id,kind} of scenarios){
     const ledger=load(scratch,'site/photo-takedowns.json');
     assert.equal(ledger.retired.length,1);
     assert.equal(ledger.retired[0].id,id);
+    assert.deepEqual(ledger.retired[0].media,preview.media,'CDN URL inventory must persist for future checks');
     for(const path of preview.media)assert.ok(!existsSync(join(scratch,path)),
       'Source photo or derivative survived: '+path);
     const updated=load(scratch,'site/selection-affiliation.json');
