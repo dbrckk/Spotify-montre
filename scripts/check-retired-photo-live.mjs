@@ -87,12 +87,18 @@ export async function inspectRemoteMedia(url,fetcher=fetch){
 export async function verifyRetiredPhotoUrls(records,fetcher=fetch){
   if(!Array.isArray(records))throw Error('Retirement records must be an array');
   if(!records.length)return {status:'not_applicable',verified:false,checked:0,failures:0,results:[]};
-  const ids=new Set(),results=[];
+  const ids=new Set(),tasks=[],results=[];
   for(const record of records){
     if(ids.has(record.id))throw Error('Duplicate retired watch ID');
     ids.add(record.id);
-    for(const url of plannedLiveUrls(record))
-      results.push({...await inspectRemoteMedia(url,fetcher),id:record.id});
+    for(const url of plannedLiveUrls(record))tasks.push({id:record.id,url});
+  }
+  // Bound network concurrency: responsive CDN checks should remain cheap.
+  for(let offset=0;offset<tasks.length;offset+=4){
+    const batch=await Promise.all(tasks.slice(offset,offset+4).map(async task=>({
+      ...await inspectRemoteMedia(task.url,fetcher),id:task.id
+    })));
+    results.push(...batch);
   }
   const failures=results.filter(x=>!x.ok).length;
   return {status:failures?'failed':'passed',verified:!failures,
