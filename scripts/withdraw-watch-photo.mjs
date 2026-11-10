@@ -117,8 +117,17 @@ function execute(command,argumentsList){
   if(result.status!==0)throw Error('Build/validation failed: '+command+' '+argumentsList.join(' ')+
     '\n'+(result.stdout+'\n'+result.stderr).slice(-6000));
 }
+// Three noindex source-only review assets are removed by the SEO publisher.
+// Keep them in the *repository* for future npm test runs, but the packager
+// excludes them and Render removes them when building the deployed site.
+const privateReviewNames=['revue-photo.html','revue-photo.js','revue-photo.css'];
+const privateReviewSources=privateReviewNames.map(name=>{
+  const path=join(site,name);
+  return [path,existsSync(path)?readFileSync(path):null];
+});
 execute(process.execPath,['scripts/validate-photo-review.mjs']);
 execute(process.execPath,['scripts/build-seo.mjs']);
+for(const [file,bytes] of privateReviewSources)if(bytes!==null)writeFileSync(file,bytes);
 // Historical published HTML (not only SEO-generated product pages) can still
 // contain an image. Replace exact-model tags with a visible no-photo notice.
 for(const file of walk(site).filter(path=>path.endsWith('.html'))){
