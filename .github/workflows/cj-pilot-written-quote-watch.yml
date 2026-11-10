@@ -9,6 +9,8 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/cj-pilot-written-quote-watch.yml'
+      - 'commerce/cj-quote-ticket.mjs'
+      - 'commerce/cj-quote-watch-signal.mjs'
 
 permissions:
   contents: read
