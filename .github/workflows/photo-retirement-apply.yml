@@ -54,7 +54,6 @@ jobs:
           git switch -c "$branch"
           node scripts/withdraw-watch-photo.mjs --id "$WATCH_ID" --apply --confirm "$CONFIRMATION" > "$RUNNER_TEMP/retirement.json"
           npm test
-          node scripts/build-seo.mjs
           node scripts/validate-seo.mjs
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
