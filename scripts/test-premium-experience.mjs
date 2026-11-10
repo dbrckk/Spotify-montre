@@ -7,6 +7,16 @@ const read=(name)=>readFileSync(resolve(dir,name),'utf8');
 const data=JSON.parse(read('selection-affiliation.json'));
 const aff=read('affiliation.html'),js=read('affiliation.js'),css=read('horlogerie.css'),detail=read('montre.html'),detailJS=read('fiche.js');
 const vectorJS=read('watch-illustrations.js');
+// The six conceptual designs have a separate, clearly labeled showroom.
+ // Visitors must have an immediate route to the factual 52-watch collection,
+ // including without JavaScript; never promote concepts as actual offers.
+const stylesPage=read('selection.html');
+assert.match(stylesPage,/<meta name="robots" content="noindex,follow">/);
+assert.match(stylesPage,/href="\.\/montres\/toutes-les-montres\.html">Découvrir les 52 montres/);
+assert.match(stylesPage,/ce ne sont ni des produits en vente ni des photographies/);
+assert.match(stylesPage,/<noscript>[\s\S]*parcourez directement les 52 références publiées/);
+assert.doesNotMatch(stylesPage,/href="\.\/index\.html#newsletter"/);
+assert.match(read('selection.css'),/selector-public \.navigation a/);
 assert.equal(data.products.length,15);
 assert.equal(data.affiliateEnabled,false);
 assert.match(aff,/id="heroWatch"/);
