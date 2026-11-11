@@ -23,13 +23,23 @@ class OfficialProductSources(unittest.TestCase):
         products = json.loads(sync.SOURCE.read_text(encoding="utf-8"))["products"]
         by_id = {p["id"]: p for p in products}
         self.assertEqual(research["version"], 1)
-        self.assertEqual(len(research["sources"]), 13)
+        self.assertEqual(len(research["sources"]), 14)
         for pid, evidence in research["sources"].items():
             item = by_id[pid]
             actual = sync.official_recovery(item, research["sources"])
             self.assertEqual(sync.re.sub(r"[^A-Z0-9]", "", actual["modelCode"]),
                 sync.model_key(item["model"]))
             self.assertEqual(actual["productPage"], item["officialUrl"])
+        locle=research["sources"]["tissot-le-locle-white"]
+        self.assertEqual(locle["modelCode"],"T0064071103300")
+        self.assertIn("T006-407-11-033-00_shadow.png",locle["officialImage"])
+        self.assertTrue(sync.host_allowed(locle["officialImage"],
+            by_id["tissot-le-locle-white"]["officialUrl"]))
+        changed={"tissot-le-locle-white":{**locle,
+            "officialImage":locle["officialImage"].replace(
+                "T006-407-11-033-00","T006-407-11-053-00")}}
+        with self.assertRaisesRegex(ValueError,"packshot or model mismatch"):
+            sync.official_recovery(by_id["tissot-le-locle-white"],changed)
         image = research["sources"]["tissot-gentleman-auto"]["officialImage"]
         self.assertTrue(sync.host_allowed(image, by_id["tissot-gentleman-auto"]["officialUrl"]))
         self.assertIn("T127-407-11-041-00_shadow.png", image)
