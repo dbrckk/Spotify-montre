@@ -26,8 +26,12 @@ for(const p of feed.products){
  const insight=insightData.products[p.id];
  assert.ok(insight,'No editorial copy for '+p.id);
  const pageHtml=read('montres/'+p.id+'.html');
-  assert.ok(pageHtml.includes('data-watch-id="'+p.id+'"'
-    +' data-brand="'+htmlEscape(p.brand)+'" data-model="'+htmlEscape(p.model)+'"'),
+  const articleOpen=pageHtml.match(/<article class="watch watch-product"[^>]*>/)?.[0]||'';
+  assert.ok([
+    'data-watch-id="'+p.id+'"',
+    'data-brand="'+htmlEscape(p.brand)+'"',
+    'data-model="'+htmlEscape(p.model)+'"'
+  ].every(attribute=>articleOpen.includes(attribute)),
     'Core watch reference must use documented brand and model: '+p.id);
   assert.equal((pageHtml.match(/data-watch-ref-copy=/g)||[]).length,1,
     'One exact source-only model copy control per historical watch: '+p.id);
