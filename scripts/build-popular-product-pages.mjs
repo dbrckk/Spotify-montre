@@ -174,16 +174,27 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
           +e(item.title)+'</a><small>Face à '+e(item.other)+' · faits et limites documentés</small></div>').join('')
         +'</div></div>'
       :'';
-    // Source-backed premium typographic reference: never imply that a model
-    // photograph has been published, or draw an unverified watch silhouette.
+    // No invented watch shape, photo or specification: this source-first
+    // editorial passport only reflects the four documented catalogue fields.
+    // Its layout is deliberately distinctive from a photographic product card.
+    const passportFacts=[
+      ['01','Mouvement',p.movement],
+      ['02','Boîtier',p.case],
+      ['03','Verre',p.glass],
+      ['04','Étanchéité',p.water]
+    ];
     const referencePassport=photo?''
       :'<div class="am-extra-reference-passport" role="group" aria-label="Repères documentaires de '+e(name)+'">'
-        +'<div class="am-extra-passport-head"><span>DOCUMENTATION / RÉFÉRENCE</span><span>ÉDITION ATELIER</span></div>'
+        +'<div class="am-extra-passport-head"><span>FICHE DOCUMENTAIRE · 04 REPÈRES</span><span>ÉDITION ATELIER</span></div>'
+        +'<div class="am-extra-passport-identity"><span>CODE DU MODÈLE</span><strong>'+e(p.model)+'</strong>'
+        +'<span class="am-extra-passport-photo-status">Photo non publiée</span></div>'
         +'<dl class="am-extra-passport-facts">'
-        +'<div><dt>Mouvement</dt><dd>'+e(p.movement)+'</dd></div>'
-        +'<div><dt>Boîtier</dt><dd>'+e(p.case)+'</dd></div>'
+        +passportFacts.map(([number,label,value])=>
+          '<div><span class="am-extra-passport-number" aria-hidden="true">'+number+'</span>'
+          +'<dt>'+e(label)+'</dt><dd>'+e(value)+'</dd></div>').join('')
         +'</dl>'
-        +'<p>Présentation typographique uniquement. L’aspect exact de cette montre est à consulter sur la fiche officielle ci-dessous.</p>'
+        +'<p>Ces quatre indications proviennent de la documentation de cette référence. '
+        +'Il ne s’agit pas d’une image du produit : consultez sa fiche officielle pour vérifier l’aspect exact.</p>'
         +'</div>';
     const main='<div class="wrap am-extra-page">'
       +'<nav class="crumb" aria-label="Fil d’Ariane"><a href="../index.html">Collection</a> / <a href="./modeles-populaires.html">'+products.length+' modèles complémentaires</a> / '+e(name)+'</nav>'

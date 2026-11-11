@@ -111,6 +111,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Validate browser scripts before installing Chromium
+        run: |
+          node --check scripts/test-popular-product-actions-browser.mjs
+          node --check scripts/test-mobile-storefront-v8.mjs
       - name: Install only the browser test runtime
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.64.1
