@@ -8,6 +8,9 @@ on:
       - scripts/test_popular_photo_sources.py
       - scripts/popular-photo-rights.mjs
       - research/official-watch-photo-sources.json
+      - research/commons-watch-photo-candidates.json
+      - scripts/review-commons-watch-photos.mjs
+      - scripts/test-commons-watch-photo-review.mjs
       - .github/workflows/source-popular-watch-photos.yml
   pull_request:
     paths:
@@ -15,6 +18,9 @@ on:
       - scripts/test_popular_photo_sources.py
       - scripts/popular-photo-rights.mjs
       - research/official-watch-photo-sources.json
+      - research/commons-watch-photo-candidates.json
+      - scripts/review-commons-watch-photos.mjs
+      - scripts/test-commons-watch-photo-review.mjs
       - .github/workflows/source-popular-watch-photos.yml
   workflow_dispatch:
   # A weekly, low-frequency exact-source recheck; 403/ambiguous SKUs stay
@@ -47,6 +53,10 @@ jobs:
         run: python -m pip install --disable-pip-version-check --quiet 'requests>=2.31,<3' 'beautifulsoup4>=4.12,<5' 'Pillow>=11,<13'
       - name: Verify exact-model page and gallery extraction offline
         run: python -m unittest discover -s scripts -p test_popular_photo_sources.py -v
+      - name: Check Commons licences without publishing unidentified variants
+        run: |
+          node --check scripts/review-commons-watch-photos.mjs
+          node scripts/test-commons-watch-photo-review.mjs
       - name: Download and resize exact-model official product photos
         run: python scripts/sync-popular-watch-images.py
       # GITHUB_TOKEN-generated commits do not trigger other push workflows.
@@ -76,6 +86,7 @@ jobs:
         id: photo_delta
         run: |
           python scripts/report-photo-sourcing.py --github-summary >> "$GITHUB_STEP_SUMMARY"
+          node scripts/review-commons-watch-photos.mjs --markdown >> "$GITHUB_STEP_SUMMARY"
           echo "count=$(python scripts/report-photo-sourcing.py --new-count)" >> "$GITHUB_OUTPUT"
       - name: Commit reviewed images, provenance and refreshed deployment package
         # A scheduled scan with no new exact photo must not rewrite Git history,
