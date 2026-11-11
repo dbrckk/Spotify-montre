@@ -51,6 +51,9 @@
     title.textContent=p.brand+' · '+p.model;
     position.textContent=(index+1)+' / '+items.length;
     prev.disabled=items.length<2;next.disabled=items.length<2;
+    // An exact-model product sheet usually has one approved photograph;
+    // keep disabled gallery arrows out of its mobile purchase experience.
+    prev.hidden=items.length<2;next.hidden=items.length<2;position.hidden=items.length<2;
     expanded=false;canvas.classList.remove('am-photo-expanded');
     zoom.textContent='Agrandir ×2';zoom.disabled=!url;
     photo.hidden=true;loaded=false;message.hidden=false;
