@@ -423,7 +423,7 @@ try{
     const photo=page.locator('#modele-casio-mdv107 .ud-photo img');
     const sizes=await photo.getAttribute('sizes');
     assert.ok(sizes?.startsWith('auto, ')&&
-      sizes.includes('(max-width: 420px) 90vw')&&
+      sizes.includes('(max-width: 480px) 90vw')&&
       sizes.includes('(max-width: 650px) 46vw'),
       'Adaptive image sizes must support the Android gallery and compact fallback');
     const columns=await page.locator('#udGrid').evaluate(el=>
