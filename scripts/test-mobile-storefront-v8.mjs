@@ -544,6 +544,17 @@ try{
        assert.ok(await full.evaluate((image,id)=>image.naturalWidth>300&&
          image.currentSrc.includes('/assets/watches-popular/'+id+'.webp'),watch.id),
          'The photo viewer must display a local exact-model WebP, never an IA illustration: '+watch.id);
+       if(watch.brand==='SKMEI')assert.match(
+         await dlg.locator('.am-photo-official').innerText(),/chez le vendeur/,
+         'SKMEI seller link must not be presented as a manufacturer page');
+       if((popularPage.viewportSize()?.width||1024)<=650){
+         const controls=await dlg.locator('.am-photo-bottom').evaluate(el=>({
+           position:getComputedStyle(el).position,bottom:getComputedStyle(el).bottom
+         }));
+         assert.equal(controls.position,'sticky',
+           'Photo actions must remain reachable while the Android modal scrolls');
+         assert.equal(controls.bottom,'0px');
+       }
        if(watch.id==='skmei-2056'){
          const photoCanvas=dlg.locator('.am-photo-canvas');
          const normalWidth=await full.evaluate(img=>img.getBoundingClientRect().width);
