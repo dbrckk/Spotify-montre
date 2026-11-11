@@ -549,7 +549,7 @@ try{
        if(watch.brand==='SKMEI')assert.match(
          await dlg.locator('.am-photo-official').innerText(),/chez le vendeur/,
          'The photo viewer must not mislabel a SKMEI seller as its manufacturer');
-       if(width<=650){
+       if((popularPage.viewportSize()?.width||1024)<=650){
          const controls=await dlg.locator('.am-photo-bottom').evaluate(el=>({
            position:getComputedStyle(el).position,bottom:getComputedStyle(el).bottom
          }));
