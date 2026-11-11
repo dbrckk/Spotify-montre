@@ -8,11 +8,17 @@ const isAllowedPhoto=(url,id)=>{
     const resource=new URL(url),site=new URL(base);
     return resource.origin===site.origin && (
       resource.pathname==='/assets/watches/'+id+'.webp' ||
-      resource.pathname==='/assets/watch-responsive/'+id+'-480.webp' ||
-      resource.pathname==='/assets/watch-responsive/'+id+'-800.webp'
+      [480,640,720,800].some(width=>
+        resource.pathname==='/assets/watch-responsive/'+id+'-'+width+'.webp')
     );
   }catch{return false;}
 };
+// Only approved, model-specific local WebP widths are valid. Unlisted widths
+// or cross-origin images must never pass this public deployment check.
+for(const width of [480,640,720,800])
+  assert.ok(isAllowedPhoto(new URL('/assets/watch-responsive/citizen-tsuyosa-'+width+'.webp',base).href,'citizen-tsuyosa'));
+assert.ok(!isAllowedPhoto(new URL('/assets/watch-responsive/citizen-tsuyosa-999.webp',base).href,'citizen-tsuyosa'));
+assert.ok(!isAllowedPhoto('https://example.org/assets/watches/citizen-tsuyosa.webp','citizen-tsuyosa'));
 const root=new URL(base);
 assert.equal(root.protocol,'https:');
 const browser=await chromium.launch({headless:true});
