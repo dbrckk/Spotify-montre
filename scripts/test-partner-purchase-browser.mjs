@@ -230,8 +230,8 @@ try{
   assert.match(await home.locator('h1').innerText(),/quartz/i,
     'The editorial category must open a real search-indexable watch guide');
   await home.goto(new URL('index.html',base).href,{waitUntil:'domcontentloaded'});
-  assert.equal(await home.locator('.home-choice[href="./affiliation.html#selection-accessible"]').count(),1,
-    'Budget shoppers must land on the photographed affordable collection');
+  assert.equal(await home.locator('.home-choice[href="./montres/toutes-les-montres.html?tier=essential#udCount"]').count(),1,
+    'Budget shoppers must open the full 52-watch catalogue filtered to accessible models');
   assert.equal(await home.getByRole('button',{name:/Une question \?/}).count(),1,
     'Visible question button must have a matching accessible name');
   assert.deepEqual(homeErrors,[]);
