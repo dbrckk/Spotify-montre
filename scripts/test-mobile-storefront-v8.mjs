@@ -547,7 +547,8 @@ try{
        if(watch.id==='skmei-2056'){
          const photoCanvas=dlg.locator('.am-photo-canvas');
          const normalWidth=await full.evaluate(img=>img.getBoundingClientRect().width);
-         await dlg.locator('.am-photo-zoom').click();
+         assert.equal(await dlg.locator('.am-photo-zoom').getAttribute('aria-pressed'),'false');
+         await full.click();
          await popularPage.waitForFunction(()=>{
            const stage=document.querySelector('#amPhotoDialog .am-photo-canvas');
            return stage?.classList.contains('am-photo-expanded')&&stage.scrollLeft>0;
@@ -567,7 +568,9 @@ try{
            'Photo zoom must actually enlarge and center an inspectable original: '+
              JSON.stringify(actualZoom));
          assert.equal(await dlg.locator('.am-photo-zoom').innerText(),'Réduire ×1');
+         assert.equal(await dlg.locator('.am-photo-zoom').getAttribute('aria-pressed'),'true');
          await dlg.locator('.am-photo-zoom').click();
+         assert.equal(await dlg.locator('.am-photo-zoom').getAttribute('aria-pressed'),'false');
          assert.ok(!await photoCanvas.evaluate(el=>el.classList.contains('am-photo-expanded')),
            'Photo zoom must return to the fitted view');
          assert.equal(await photoCanvas.evaluate(el=>el.scrollLeft),0,

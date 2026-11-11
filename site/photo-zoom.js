@@ -55,12 +55,12 @@
     // keep disabled gallery arrows out of its mobile purchase experience.
     prev.hidden=items.length<2;next.hidden=items.length<2;position.hidden=items.length<2;
     expanded=false;canvas.classList.remove('am-photo-expanded');
-    zoom.textContent='Agrandir ×2';zoom.disabled=!url;
+    zoom.textContent='Agrandir ×2';zoom.setAttribute('aria-pressed','false');zoom.disabled=true;
     photo.hidden=true;loaded=false;message.hidden=false;
     message.textContent=url?'Chargement de la photographie…':'Photographie indisponible. Consultez le fabricant.';
     photo.alt='Photographie authentique de '+p.brand+' '+p.model;
-    if(url){photo.onload=()=>{loaded=true;photo.hidden=false;message.hidden=true};
-      photo.onerror=()=>{loaded=false;photo.hidden=true;message.hidden=false;message.textContent='Photo indisponible. Voir la fiche fabricant.'};
+    if(url){photo.onload=()=>{loaded=true;photo.hidden=false;message.hidden=true;zoom.disabled=false};
+      photo.onerror=()=>{loaded=false;photo.hidden=true;zoom.disabled=true;message.hidden=false;message.textContent='Photo indisponible. Voir la fiche fabricant.'};
       photo.src=url;
     }else photo.removeAttribute('src');
     const raw=p.officialUrl;
@@ -70,11 +70,12 @@
   close.addEventListener('click',()=>dialog.close());
   prev.addEventListener('click',()=>navigate(-1));
   next.addEventListener('click',()=>navigate(1));
-  zoom.addEventListener('click',()=>{
+  const toggleZoom=()=>{
     if(!loaded)return;
     expanded=!expanded;
     canvas.classList.toggle('am-photo-expanded',expanded);
     zoom.textContent=expanded?'Réduire ×1':'Agrandir ×2';
+    zoom.setAttribute('aria-pressed',String(expanded));
     if(!expanded){
       canvas.scrollLeft=0;
       canvas.scrollTop=0;
@@ -87,7 +88,11 @@
       canvas.scrollLeft=(canvas.scrollWidth-canvas.clientWidth)/2;
       canvas.scrollTop=(canvas.scrollHeight-canvas.clientHeight)/2;
     });
-  });
+  };
+  zoom.addEventListener('click',toggleZoom);
+  // A watch photograph itself is a discoverable zoom target on touch and
+  // desktop. The adjacent labelled button remains keyboard accessible.
+  photo.addEventListener('click',toggleZoom);
   dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
   dialog.addEventListener('keydown',event=>{
     if(event.key==='ArrowLeft'){event.preventDefault();navigate(-1)}
