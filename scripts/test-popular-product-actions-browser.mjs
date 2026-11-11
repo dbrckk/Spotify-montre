@@ -250,6 +250,19 @@ try{
     assert.equal(await officialFallbackPage.locator('.am-extra-licensed-photo').count(),0,
       'No fabricated F-91W photograph may appear');
   }finally{await officialFallbackPage.close();}
+  const noJsShortcuts=await browser.newPage({viewport:{width:360,height:740},
+    isMobile:true,hasTouch:true,javaScriptEnabled:false});
+  try{
+    await noJsShortcuts.goto(new URL('/montres/casio-f91w-1.html',base).href,
+      {waitUntil:'load'});
+    assert.equal(await noJsShortcuts.locator('.am-extra-quicklinks a').count(),3,
+      'Source-first product cards must preserve shortcuts without scripts');
+    await noJsShortcuts.locator('.am-extra-quicklinks a[href="#vendeurs"]').click();
+    assert.equal(new URL(noJsShortcuts.url()).hash,'#vendeurs');
+    assert.ok(await noJsShortcuts.locator('.am-extra-actions a').count()>=1,
+      'The official supplier remains reachable without JavaScript');
+  }finally{await noJsShortcuts.close();}
+
   for(const width of [360,393,1366]){
     const context=await browser.newContext({viewport:{width,height:870},
       isMobile:width<600,hasTouch:width<600,locale:'fr-FR'});
@@ -263,6 +276,32 @@ try{
     page.on('pageerror',error=>errors.push(error.message));
     await page.goto(new URL('/montres/skmei-1251.html',base).href,
       {waitUntil:'domcontentloaded'});
+    const shortcuts=page.locator('.am-extra-quicklinks');
+    assert.equal(await shortcuts.locator('a').count(),3,
+      'Watch sheet must expose technical, seller and evidence shortcuts');
+    const shortcutLayout=await shortcuts.evaluate(nav=>{
+      const rect=nav.getBoundingClientRect();
+      return {left:rect.left,right:rect.right,scroll:nav.scrollWidth,
+        viewport:nav.clientWidth,screen:document.documentElement.clientWidth,
+        documentScroll:document.documentElement.scrollWidth};
+    });
+    assert.ok(shortcutLayout.left>=-1&&shortcutLayout.right<=width+1
+      &&shortcutLayout.documentScroll<=shortcutLayout.screen+2,
+      'Shortcut navigation may scroll internally but must not overflow the Android page: '+
+        JSON.stringify(shortcutLayout));
+    if(width<600)assert.ok(shortcutLayout.scroll>shortcutLayout.viewport,
+      'Mobile 3-part navigation should be swipeable without compressing labels');
+    const buttons=await shortcuts.locator('a').evaluateAll(els=>els.map(el=>{
+      const r=el.getBoundingClientRect();return {height:r.height,width:r.width};
+    }));
+    assert.ok(buttons.every(rect=>rect.height>=48&&rect.width>=120),
+      'Each navigation link must remain comfortably tappable: '+JSON.stringify(buttons));
+    await shortcuts.locator('a[href="#vendeurs"]').click();
+    assert.equal(new URL(page.url()).hash,'#vendeurs',
+      'The seller shortcut must jump to the actual model reference before outbound links');
+    await shortcuts.locator('a[href="#sources"]').click();
+    assert.equal(new URL(page.url()).hash,'#sources',
+      'Source provenance must remain directly accessible without a new request');
     const decision=page.locator('.am-extra-decision');
     assert.equal(await decision.count(),1);
     assert.ok(await decision.isVisible(),'Decision evidence must be readable before merchant actions');
