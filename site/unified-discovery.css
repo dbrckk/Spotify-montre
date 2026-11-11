@@ -520,7 +520,7 @@
 /* Premium photo-first mobile mode: when a shopper asks for large visuals,
    show the real watch and both documented facts without requiring a detail tap.
    Compact grid remains selectable and remembered by the viewer. */
-@media(max-width:420px){
+@media(max-width:480px){
   .ud-page .ud-grid.ud-view-large{grid-template-columns:minmax(0,1fr);gap:19px}
   .ud-page .ud-grid.ud-view-large .ud-card{border-radius:11px;box-shadow:0 13px 30px rgba(26,47,30,.12)}
   .ud-page .ud-grid.ud-view-large .ud-photo{height:clamp(310px,88vw,370px);padding:clamp(14px,4vw,22px)}
