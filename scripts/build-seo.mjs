@@ -383,6 +383,37 @@ import {sanitizeWithdrawnMedia} from './sanitize-withdrawn-media.mjs';
   // the separate customer homepage.
   if(root===resolve(import.meta.dirname,'..','site')){
   let publicHome=sanitizeWithdrawnMedia(readFileSync(publicHomeFile,'utf8'),products);
+  // The authored homepage is a stable source template, while approved WebP
+  // derivatives change as the photo pipeline progresses. Refresh every local
+  // homepage image from the exact model's current rights-gated srcset at build.
+  // Otherwise older 480/800-only markup ignores published 640/720px photos.
+  const approvedHomePhotos=new Map(products.filter(heroEligible).map(p=>[p.id,p]));
+  const currentHomeSrcset=id=>{
+    const product=approvedHomePhotos.get(id);
+    return product?responsiveSrcset(root,product,'./'):'';
+  };
+  publicHome=publicHome.replace(/<img\\b[^>]*>/gi,tag=>{
+    const match=tag.match(/\\bsrc="\\.\\/assets\\/watches\\/([a-z0-9-]+)\\.webp(?:\\?[^"]*)?"/);
+    if(!match||!/\\bsizes="[^"]+"/.test(tag))return tag;
+    const srcset=currentHomeSrcset(match[1]);
+    if(!srcset)return tag;
+    const attribute=' srcset="'+e(srcset)+'"';
+    return /\\ssrcset="[^"]*"/.test(tag)
+      ?tag.replace(/\\ssrcset="[^"]*"/,attribute)
+      :tag.replace(/>$/,attribute+'>');
+  });
+  // A mismatched image preload can download the wrong candidate before the
+  // actual LCP hero requests its correctly sized variant.
+  publicHome=publicHome.replace(/<link\\b[^>]*\\brel="preload"[^>]*\\bas="image"[^>]*>/gi,tag=>{
+    const match=tag.match(/\\bhref="\\.\\/assets\\/watches\\/([a-z0-9-]+)\\.webp(?:\\?[^"]*)?"/);
+    if(!match)return tag;
+    const srcset=currentHomeSrcset(match[1]);
+    if(!srcset)return tag;
+    const attribute=' imagesrcset="'+e(srcset)+'"';
+    return /\\simagesrcset="[^"]*"/.test(tag)
+      ?tag.replace(/\\simagesrcset="[^"]*"/,attribute)
+      :tag.replace(/>$/,attribute+'>');
+  });
   if(!publicHome.includes('<link rel="stylesheet" href="./public-home.css">')||
      !publicHome.includes('id="collection"')||!publicHome.includes('id="faq"'))
     throw Error('Public homepage template missing: refusing to publish an outdated prelaunch page');
