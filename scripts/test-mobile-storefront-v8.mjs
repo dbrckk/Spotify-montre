@@ -538,6 +538,35 @@ try{
        assert.ok(await full.evaluate((image,id)=>image.naturalWidth>300&&
          image.currentSrc.includes('/assets/watches-popular/'+id+'.webp'),watch.id),
          'The photo viewer must display a local exact-model WebP, never an IA illustration: '+watch.id);
+       if(watch.id==='skmei-2056'){
+         const photoCanvas=dlg.locator('.am-photo-canvas');
+         const normalWidth=await full.evaluate(img=>img.getBoundingClientRect().width);
+         await dlg.locator('.am-photo-zoom').click();
+         await popularPage.waitForFunction(()=>{
+           const stage=document.querySelector('#amPhotoDialog .am-photo-canvas');
+           return stage?.classList.contains('am-photo-expanded')&&stage.scrollLeft>0;
+         });
+         const actualZoom=await photoCanvas.evaluate(stage=>{
+           const image=stage.querySelector('.am-photo-large');
+           return {
+             imageWidth:image.getBoundingClientRect().width,
+             visibleWidth:stage.clientWidth,contentWidth:stage.scrollWidth,
+             scrollLeft:stage.scrollLeft,scrollTop:stage.scrollTop,
+             flexShrink:getComputedStyle(image).flexShrink
+           };
+         });
+         assert.ok(actualZoom.imageWidth>normalWidth*1.5&&
+           actualZoom.contentWidth>actualZoom.visibleWidth*1.5&&
+           actualZoom.scrollLeft>0&&actualZoom.flexShrink==='0',
+           'Photo zoom must actually enlarge and center an inspectable original: '+
+             JSON.stringify(actualZoom));
+         assert.equal(await dlg.locator('.am-photo-zoom').innerText(),'Réduire ×1');
+         await dlg.locator('.am-photo-zoom').click();
+         assert.ok(!await photoCanvas.evaluate(el=>el.classList.contains('am-photo-expanded')),
+           'Photo zoom must return to the fitted view');
+         assert.equal(await photoCanvas.evaluate(el=>el.scrollLeft),0,
+           'Closing zoom must reset the horizontal pan');
+       }
        await popularPage.keyboard.press('Escape');
        await dlg.waitFor({state:'hidden'});
      }
