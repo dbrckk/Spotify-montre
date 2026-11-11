@@ -10,6 +10,7 @@ import base64
 import hashlib
 import json
 from pathlib import Path
+from urllib.parse import urlsplit
 
 ROOT=Path(__file__).resolve().parent.parent
 SITE=ROOT/'site'
@@ -31,7 +32,7 @@ def assemble():
         if not path.is_file():
             continue
         relative=path.relative_to(SITE).as_posix()
-        if relative in EXCLUDED or relative=='index.html':
+        if relative in EXCLUDED:
             continue
         if path.suffix.lower() in TEXT_SUFFIXES:
             assets.append({'path':relative,'content':path.read_text(encoding='utf-8')})
@@ -43,7 +44,30 @@ def assemble():
             })
         else:
             raise ValueError('Unexpected site asset format: '+relative)
-    assets.append({'path':'index.html','content':(SITE/'affiliation.html').read_text(encoding='utf-8')})
+    # Fail closed: the exported root must be the actual premium public homepage,
+    # never a copy of the 15-watch editorial/affiliate comparison page.
+    paths={item['path'] for item in assets}
+    assert 'index.html' in paths, 'Missing public homepage index.html'
+    assert 'affiliation.html' in paths, 'Missing editorial comparison page'
+    seo_file=SITE/'seo-manifest.json'
+    assert seo_file.is_file(), 'Missing generated SEO manifest: run build-seo.mjs first'
+    seo=json.loads(seo_file.read_text(encoding='utf-8'))
+    assert seo.get('unifiedCount')==52 and seo.get('productCount')==15, 'Incomplete SEO catalog'
+    origin=seo.get('siteUrl')
+    assert isinstance(origin,str) and origin.startswith('https://') and origin.endswith('/'), 'Invalid canonical site URL'
+    home=next(item['content'] for item in assets if item['path']=='index.html')
+    assert '<link rel="canonical" href="'+origin+'">' in home, 'Public homepage canonical mismatch'
+    assert 'class="home-hero-visual"' in home, 'Public premium homepage replaced by editorial page'
+    routes=seo.get('paths')
+    assert isinstance(routes,list) and routes, 'No generated SEO routes'
+    missing=[]
+    for url in routes:
+        assert isinstance(url,str) and url.startswith(origin), 'Unexpected SEO route origin'
+        route=urlsplit(url).path.lstrip('/') or 'index.html'
+        if route not in paths:
+            missing.append(route)
+    assert not missing, 'Missing generated SEO routes: '+', '.join(missing[:10])
+
     ids=set()
     for p in products:
         id=p['id']

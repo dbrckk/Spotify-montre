@@ -22,6 +22,20 @@ class PackageRightsGateTests(unittest.TestCase):
         self.docs = self.root / 'docs'
         self.site.mkdir()
         self.docs.mkdir()
+        origin='https://atelier-montres-selection-fr.onrender.com/'
+        (self.site/'index.html').write_text(
+            '<!doctype html><html><head><link rel="canonical" href="'+origin+'">'
+            '</head><body><main id="contenu"><a class="home-hero-visual" '
+            'href="./montre.html?id=watch-00">Découvrir</a></main></body></html>',
+            encoding='utf-8')
+        (self.site/'montres').mkdir()
+        (self.site/'montres'/'toutes-les-montres.html').write_text(
+            '<!doctype html><title>52 montres</title>',encoding='utf-8')
+        (self.site/'seo-manifest.json').write_text(json.dumps({
+            'siteUrl':origin,'unifiedCount':52,'productCount':15,
+            'paths':[origin,origin+'montres/toutes-les-montres.html']
+        }),encoding='utf-8')
+
         (self.site/'assets'/'watches').mkdir(parents=True)
         self.models=[]
         for i in range(15):
@@ -51,6 +65,25 @@ class PackageRightsGateTests(unittest.TestCase):
         manifest,files=self._assemble()
         self.assertEqual(manifest['models'],15)
         self.assertEqual(len([f for f in files if f['path'].startswith('assets/watches/')]),15)
+    def test_package_keeps_premium_home_and_separate_comparison(self):
+        _,files=self._assemble()
+        by_path={f['path']:f['content'] for f in files}
+        self.assertEqual(by_path['index.html'],(self.site/'index.html').read_text())
+        self.assertEqual(by_path['affiliation.html'],(self.site/'affiliation.html').read_text())
+        self.assertNotEqual(by_path['index.html'],by_path['affiliation.html'])
+
+    def test_missing_generated_catalog_page_fails_closed(self):
+        (self.site/'montres'/'toutes-les-montres.html').unlink()
+        with self.assertRaisesRegex(AssertionError,'Missing generated SEO routes'):
+            self._assemble()
+
+    def test_incorrect_public_home_canonical_fails_closed(self):
+        (self.site/'index.html').write_text(
+            '<link rel="canonical" href="https://wrong.example/">'
+            '<a class="home-hero-visual"></a>',encoding='utf-8')
+        with self.assertRaisesRegex(AssertionError,'Public homepage canonical mismatch'):
+            self._assemble()
+
     def test_withdrawn_photo_not_shipped_and_product_stays(self):
         photo=self.models[0]['photoReview']
         photo.update(publicUsageApproved=False,localUrl=None,localSha256=None)

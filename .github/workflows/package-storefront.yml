@@ -19,7 +19,7 @@ concurrency:
 jobs:
   build-package:
     runs-on: ubuntu-latest
-    timeout-minutes: 6
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:
@@ -27,6 +27,17 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      # /site/montres is generated; it does not exist in the committed source.
+      # Without this step, published links to all 52 watches would be broken.
+      - name: Generate all catalog, product and SEO pages
+        run: node scripts/build-seo.mjs
+      - name: Verify public landing and fail-closed package regression tests
+        run: |
+          node scripts/check-public-landing-seo.mjs
+          python -m unittest discover -s scripts -p 'test_photo_package_gate.py' -v
       - name: Build complete HTML, CSS, JS and genuine WebP deployment chunks
         run: python scripts/build-shipstatic-bundle.py
       - name: Save reproducible package files
