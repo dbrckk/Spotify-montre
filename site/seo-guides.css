@@ -225,6 +225,8 @@
 .watch-actions .primary,.watch-actions .secondary{display:flex;align-items:center;justify-content:center;min-height:48px;padding:12px 15px;margin:0;font-size:12px;line-height:1.5}
 .watch-actions .primary{grid-column:1/-1}
 .watch-actions .secondary{border-color:#b4c1b4;background:#fdfcf7}
+.watch-actions .am-interactive-detail-link{border-color:#a98d63;background:#f5f0e6;color:#294332}
+.watch-actions .am-interactive-detail-link:hover{background:#e9ddc9;border-color:#83683e}
 .watch-section-nav{display:flex;align-items:center;gap:8px;overflow-x:auto;padding:4px 0 24px;scrollbar-color:#b7a180 #f0ece4;scrollbar-width:thin;scroll-snap-type:x proximity}
 .watch-section-nav a{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;white-space:nowrap;min-height:44px;padding:10px 15px;background:#eee8dc;border:1px solid #d7c9b2;color:#2a4c37;font:700 12px/1.4 system-ui,sans-serif;scroll-snap-align:start}
 .watch-section-nav a:hover{background:#e3dbc9}

@@ -1311,6 +1311,10 @@ for(const product of feed.products){
   }
 
   assert.ok(html.includes('montre.html?id='+encodeURIComponent(product.id)), 'Interactive product page must remain accessible');
+  const buyerActions=html.match(/<div class="watch-actions">([\s\S]*?)<\/div>/)?.[1]||'';
+  assert.ok(buyerActions.includes('class="secondary am-interactive-detail-link"')&&
+    buyerActions.includes('href="../montre.html?id='+encodeURIComponent(product.id)+'"'),
+    'Premium product hero must offer interactive favorites and comparison near the main buying decision: '+product.id);
   assert.equal(html.includes('cloud.umami.is/script.js'),analyticsConfigured,'SEO page Umami opt-in only');
   if(analyticsConfigured)assert.match(html,/data-watch-id=/);
   const amazonMatch=amazon.links[product.id];

@@ -111,7 +111,12 @@ try{
   const editorial=await page.goto(new URL('/montres/citizen-tsuyosa.html',base).href,{waitUntil:'domcontentloaded',timeout:30000});
   assert.ok(editorial?.ok(),'The canonical Citizen editorial product page should respond HTTP 2xx');
   assert.equal(await page.locator('article.watch-product').count(),1,'Search-indexable product must use the premium editorial layout');
-  const sourcePhotoStage=page.locator('article.watch-product .watch-photo');
+  const interactiveBridge=page.locator('article.watch-product .watch-actions .am-interactive-detail-link');
+  assert.equal(await interactiveBridge.count(),1,
+    'Canonical watch product must feature a prominent link to interactive favorites and comparison');
+  assert.equal(await interactiveBridge.getAttribute('href'),'../montre.html?id=citizen-tsuyosa',
+    'Interactive bridge must preserve exact model identification');
+    const sourcePhotoStage=page.locator('article.watch-product .watch-photo');
   // On a cold CDN/browser navigation, DOMContentLoaded can precede the
   // final stylesheet paint. Measure photo reservation only once our actual
   // mobile product CSS has been applied (before awaiting photo decoding).
