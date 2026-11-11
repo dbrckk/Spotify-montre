@@ -23,7 +23,7 @@ class OfficialProductSources(unittest.TestCase):
         products = json.loads(sync.SOURCE.read_text(encoding="utf-8"))["products"]
         by_id = {p["id"]: p for p in products}
         self.assertEqual(research["version"], 1)
-        self.assertEqual(len(research["sources"]), 9)
+        self.assertEqual(len(research["sources"]), 13)
         for pid, evidence in research["sources"].items():
             item = by_id[pid]
             actual = sync.official_recovery(item, research["sources"])
@@ -44,7 +44,7 @@ class OfficialProductSources(unittest.TestCase):
           json.loads(sync.SOURCE.read_text(encoding="utf-8"))["products"]}
         casios={pid:entry for pid,entry in research["sources"].items()
                 if pid.startswith("casio-")}
-        self.assertEqual(len(casios),6)
+        self.assertEqual(len(casios),10)
         for pid,entry in casios.items():
             model=products[pid]
             self.assertEqual(sync.official_recovery(model,casios),entry)
