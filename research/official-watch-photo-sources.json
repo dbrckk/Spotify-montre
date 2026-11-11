@@ -46,6 +46,26 @@
       "modelCode": "DW-5600RL-1",
       "productPage": "https://www.casio.com/fr/watches/gshock/product.DW-5600RL-1/",
       "alternateManufacturerPage": "https://www.casio.com/intl/watches/gshock/product.DW-5600RL-1/"
+    },
+    "casio-gw-m5610u-1": {
+      "modelCode": "GW-M5610U-1",
+      "productPage": "https://www.casio.com/fr/watches/gshock/product.GW-M5610U-1/",
+      "alternateManufacturerPage": "https://www.casio.com/europe/watches/gshock/product.GW-M5610U-1/"
+    },
+    "casio-edifice-efr-s108d": {
+      "modelCode": "EFR-S108D-2AV",
+      "productPage": "https://www.casio.com/fr/watches/edifice/product.EFR-S108D-2AV/",
+      "alternateManufacturerPage": "https://www.casio.com/europe/watches/edifice/product.EFR-S108D-2AV/"
+    },
+    "casio-a168wg-9": {
+      "modelCode": "A168WG-9",
+      "productPage": "https://www.casio.com/fr/watches/casio/vintage/product.A168WG-9/",
+      "alternateManufacturerPage": "https://www.casio.com/europe/watches/casio/product.A168WG-9/"
+    },
+    "casio-ae1200wh-1av": {
+      "modelCode": "AE-1200WH-1AV",
+      "productPage": "https://www.casio.com/fr/watches/casio/product.AE-1200WH-1AV/",
+      "alternateManufacturerPage": "https://www.casio.com/europe/watches/casio/product.AE-1200WH-1AV/"
     }
   }
 }
