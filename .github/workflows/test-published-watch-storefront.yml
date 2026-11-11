@@ -89,7 +89,9 @@ jobs:
       - name: Install browser testing
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.64.1
-          npx playwright install --with-deps chromium
+          # GitHub-hosted runner already has browser system libraries; avoid
+          # apt dependency downloads that can fail on transient Ubuntu DNS outages.
+          npx playwright install chromium
       # The six SEO selection pages are GENERATED, not committed Git files.
       # Regenerate them before comparing their customer-visible content with
       # the deployed CDN; otherwise the readiness loop can never succeed.
