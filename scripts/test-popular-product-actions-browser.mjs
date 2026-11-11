@@ -61,7 +61,7 @@ for(const p of picks){
       'Verified watch must have an unobstructed photo stage and separate metadata: '+p.id);
     assert.ok(hero.includes('width="'+proof.width+'"')&&
       hero.includes('height="'+proof.height+'"'),'Original aspect dimensions missing: '+p.id);
-    for(const size of [240,360,480,720,960].filter(size=>size<proof.width))
+    for(const size of [240,360,480,640,720,960].filter(size=>size<proof.width))
       assert.ok(hero.includes('popular-responsive/'+p.id+'-'+size+'.webp '+size+'w'),
         'Detailed watch hero must expose the verified '+size+'px WebP: '+p.id);
     assert.ok(hero.includes('watches-popular/'+p.id+'.webp '+proof.width+'w'),
