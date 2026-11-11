@@ -14,8 +14,12 @@ const escapeHtml=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
 for(const p of products){
   const html=readFileSync('site/montres/'+p.id+'.html','utf8');
   const name=p.brand+' '+p.model;
-  assert.ok(html.includes('class="watch watch-product" data-watch-id="'+p.id+'"'
-    +' data-brand="'+escapeHtml(p.brand)+'" data-model="'+escapeHtml(p.model)+'"'),
+  const article=html.match(/<article class="watch watch-product"[^>]*>/)?.[0]||'';
+  assert.ok([
+    'data-watch-id="'+p.id+'"',
+    'data-brand="'+escapeHtml(p.brand)+'"',
+    'data-model="'+escapeHtml(p.model)+'"'
+  ].every(attribute=>article.includes(attribute)),
     'Only the source catalogue may identify historical SEO model '+p.id);
   assert.equal((html.match(/data-watch-ref-copy=/g)||[]).length,1,
     'Exactly one source-matched copy button per historical model: '+p.id);
