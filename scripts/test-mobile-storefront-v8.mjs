@@ -142,7 +142,7 @@ try{
  assert.equal(await facts.count(),2,'Every compact watch card needs movement and case size');
  assert.ok(await facts.nth(1).isVisible(),
    'The watch case size must remain visible on a 393px Android screen');
- assert.match(await facts.nth(1).innerText(),/Boîtier/,
+ assert.match(await facts.nth(1).innerText(),/boîtier/i,
    'The second compact fact must identify case dimensions');
  assert.equal(await allWatches.locator('#udCompareTable table').count(),1,
    'Advisor links must be able to compare mixed core and supplementary watches');
