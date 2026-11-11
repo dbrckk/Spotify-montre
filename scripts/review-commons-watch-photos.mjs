@@ -8,6 +8,8 @@
  * download files, add srcset entries, or mark a product as photographed.
  */
 import {readFileSync} from 'node:fs';
+import {resolve} from 'node:path';
+import {fileURLToPath} from 'node:url';
 
 const read=path=>JSON.parse(readFileSync(new URL('../'+path,import.meta.url),'utf8'));
 const norm=value=>String(value).toUpperCase().replace(/[^A-Z0-9]/g,'');
@@ -37,7 +39,7 @@ export function reviewCommonsCandidates({catalogue,rights,register}){
     if(!item||typeof item!=='object'||Array.isArray(item))
       throw Error('Invalid Commons candidate record');
     const p=models.get(item.modelId);
-    if(!p||rights.photos[item.modelId]||seen.has(item.modelId)||
+    if(!p||seen.has(item.modelId)||
        item.catalogModel!==p.model)
       throw Error('Commons candidate is unknown, published, duplicated or mismatched: '+item.modelId);
     seen.add(item.modelId);
@@ -63,14 +65,16 @@ export function reviewCommonsCandidates({catalogue,rights,register}){
       modelId:item.modelId,catalogModel:p.model,candidateModel:item.candidateModel,
       filePage:item.filePage,creator:item.creator,license:item.license,
       licenseUrl:item.licenseUrl,sourceSha1:item.sourceSha1,
-      identityStatus:item.identityStatus,reason:item.reason,publicationAllowed:false
+      identityStatus:item.identityStatus,reason:item.reason,publicationAllowed:false,
+      alreadyPublishedFromIndependentSource:Boolean(rights.photos[item.modelId])
     });
   }
-  if(candidates.length>unpublished)
+  const active=candidates.filter(c=>!c.alreadyPublishedFromIndependentSource).length;
+  if(active>unpublished)
     throw Error('Commons research exceeds the actual no-photo catalogue');
   const published=Object.keys(rights.photos).length;
   return {reviewedOn:register.reviewedOn,models:catalogue.products.length,
-    published,unpublished,possibleCandidates:candidates.length,
+    published,unpublished,possibleCandidates:active,
     publicationAllowed:0,usage:'RESEARCH_ONLY_NO_AUTO_PUBLICATION',
     note:'These photos have Commons licence claims, not proof of an exact retail variant. Commercial use of a CC BY-SA image requires attribution, licence links and share-alike compliance for adaptations; this manifest does not publish photos or certify authorship.',
     candidates};
@@ -85,7 +89,7 @@ export function markdownCommonsReview(report){
     '- Cleared for publication: **0** (full product SKU not yet independently verified)','',
     '| Exact catalogue reference | Commons family-level candidate | Licence | Decision |',
     '| --- | --- | --- | --- |',
-    ...report.candidates.map(c=>'| '+c.catalogModel+' | [Photo by '+
+    ...report.candidates.filter(c=>!c.alreadyPublishedFromIndependentSource).map(c=>'| '+c.catalogModel+' | [Photo by '
       c.creator.replaceAll('|','/')+']('+c.filePage+') | ['+
       c.license+']('+c.licenseUrl+') | No publication: exact variant unverified |'),
     '',report.note,''
@@ -94,7 +98,7 @@ export function markdownCommonsReview(report){
 }
 
 if(process.argv[1]&&
-   new URL('file://'+process.argv[1]).pathname===new URL(import.meta.url).pathname){
+   resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   const args=process.argv.slice(2);
   if(args.length!==1||!['--markdown','--json'].includes(args[0]))
     throw Error('Usage: node scripts/review-commons-watch-photos.mjs --markdown|--json');
