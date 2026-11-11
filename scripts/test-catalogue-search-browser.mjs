@@ -423,7 +423,7 @@ try{
     const photo=page.locator('#modele-casio-mdv107 .ud-photo img');
     const sizes=await photo.getAttribute('sizes');
     assert.ok(sizes?.startsWith('auto, ')&&
-      sizes.includes('(max-width: 420px) 90vw')&&
+      sizes.includes('(max-width: 480px) 90vw')&&
       sizes.includes('(max-width: 650px) 46vw'),
       'Adaptive image sizes must support the Android gallery and compact fallback');
     const columns=await page.locator('#udGrid').evaluate(el=>
@@ -750,6 +750,46 @@ try{
     assert.equal(await supplementNoJS.locator('#am-picks-list .am-pick-card:visible').count(),37,
       'All 37 documented models remain browseable without optional client filtering');
   }finally{await supplementNoJS.close();}
+
+  // Phones wider than 420px must offer the same photographic first impression.
+  const widePhone=await browser.newPage({
+    viewport:{width:430,height:900},deviceScaleFactor:2,isMobile:true,
+    hasTouch:true,locale:'fr-FR'
+  });
+  try{
+    await widePhone.goto(new URL('/montres/toutes-les-montres.html',base).href,
+      {waitUntil:'domcontentloaded'});
+    await widePhone.locator('#udViewTools').waitFor({state:'visible'});
+    assert.equal(await widePhone.locator('#udViewLarge').getAttribute('aria-pressed'),'true',
+      '430px Android should open the large editorial photograph layout');
+    const mobileLayout=await widePhone.evaluate(()=>{
+      const grid=document.querySelector('#udGrid');
+      const photo=document.querySelector('#modele-casio-mdv107 .ud-photo');
+      const rect=photo.getBoundingClientRect();
+      return {columns:getComputedStyle(grid).gridTemplateColumns.split(' ').length,
+        width:rect.width,height:rect.height,
+        scroll:document.documentElement.scrollWidth,
+        client:document.documentElement.clientWidth};
+    });
+    assert.equal(mobileLayout.columns,1,'430px Android needs one readable card per row');
+    assert.ok(mobileLayout.width>=350&&mobileLayout.height>=300,
+      '430px photographs must be inspectable: '+JSON.stringify(mobileLayout));
+    assert.ok(mobileLayout.scroll<=mobileLayout.client+2,
+      '430px catalogue must not overflow horizontally');
+    assert.match(await widePhone.locator('#modele-casio-mdv107 .ud-photo img').getAttribute('sizes'),
+      /\(max-width: 480px\) 90vw/,
+      'Responsive photographs must match their displayed mobile width');
+    await widePhone.locator('#udViewCompact').click();
+    assert.equal(await widePhone.locator('#udGrid').evaluate(el=>
+      getComputedStyle(el).gridTemplateColumns.split(' ').length),2,
+      'The existing two-column compact grid must remain selectable');
+    await widePhone.reload({waitUntil:'domcontentloaded'});
+    await widePhone.locator('#udViewTools').waitFor({state:'visible'});
+    assert.equal(await widePhone.locator('#udViewCompact').getAttribute('aria-pressed'),'true',
+      'Explicit compact preference must survive reload on 430px Android');
+    await widePhone.locator('#udViewLarge').click();
+    assert.equal(await widePhone.locator('#udViewLarge').getAttribute('aria-pressed'),'true');
+  }finally{await widePhone.close();}
 
   const noScript=await browser.newPage({javaScriptEnabled:false});
   await noScript.goto(new URL('/montres/toutes-les-montres.html',base).href);

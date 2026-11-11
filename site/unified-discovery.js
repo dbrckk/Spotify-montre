@@ -533,7 +533,7 @@
     const requestedView=params.get('view');
     const selectedView=requestedView==='grid'||requestedView==='large'
       ?requestedView
-      :storedView()||(window.matchMedia('(max-width: 420px)').matches?'large':'grid');
+      :storedView()||(window.matchMedia('(max-width: 480px)').matches?'large':'grid');
     changeView(selectedView);
     const initial=params.get('compare')?.split(',').filter(validId)||[];
     selected=[...new Set(initial)].filter(x=>watches.has(x)).slice(0,3);
