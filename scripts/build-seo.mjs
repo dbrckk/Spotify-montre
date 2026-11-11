@@ -289,7 +289,7 @@ import {sanitizeWithdrawnMedia} from './sanitize-withdrawn-media.mjs';
   collection=collection.replace(/<!-- AM_AFFORDABLE_SHOWROOM_START -->[\s\S]*?<!-- AM_AFFORDABLE_SHOWROOM_END -->\s*/g,'');
   collection=collection.replace(/<!-- AM_SEO_COMPARISONS_START -->[\s\S]*?<!-- AM_SEO_COMPARISONS_END -->\s*/g,'');
   collection=collection.replace(/<!-- AM_SEO_CATEGORIES_START -->[\s\S]*?<!-- AM_SEO_CATEGORIES_END -->\s*/g,'');
-  collection=collection.replace(/<!-- AM_SEO_HEAD_START -->[\\s\\S]*?<!-- AM_SEO_HEAD_END -->/g,'');
+  collection=collection.replace(/<!-- AM_SEO_HEAD_START -->[\s\S]*?<!-- AM_SEO_HEAD_END -->/g,'');
   collection=removeSourceLandingSeo(collection);
   collection=collection.replace(/<!-- AM_EDITORIAL_POLICY_START -->[\s\S]*?<!-- AM_EDITORIAL_POLICY_END -->\s*/g,'');
   if (partners.enabled) {
@@ -351,7 +351,7 @@ import {sanitizeWithdrawnMedia} from './sanitize-withdrawn-media.mjs';
   // Enrich the adviser when present; full published-site validation requires it.
   if(existsSync(advisorFile)) {
   let advisor=readFileSync(advisorFile,'utf8');
-  advisor=advisor.replace(/<!-- AM_ADVISOR_SEO_START -->[\\s\\S]*?<!-- AM_ADVISOR_SEO_END -->/g,'');
+  advisor=advisor.replace(/<!-- AM_ADVISOR_SEO_START -->[\s\S]*?<!-- AM_ADVISOR_SEO_END -->/g,'');
   advisor=removeSourceLandingSeo(advisor);
   if(!advisor.includes('</head>')||!advisor.includes('<h1>')) throw Error('Conseiller : structure HTML introuvable');
   const advisorTitle='Trouver sa montre : conseiller en 4 critères | Atelier Montres';
