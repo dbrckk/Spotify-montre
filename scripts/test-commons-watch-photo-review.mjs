@@ -48,6 +48,8 @@ check(x=>x.candidates[0].licenseUrl='https://creativecommons.org/licenses/by-nc/
 check(x=>x.candidates[0].publicationAllowed=true,/unpublished/);
 check(x=>x.candidates[0].identityStatus='exact_sku_verified',/unpublished/);
 check(x=>x.candidates[0].candidateModel=x.candidates[0].catalogModel,/variant review/);
+check(x=>x.candidates[0].candidateModel='JPG',/unrelated/);
+check(x=>x.candidates[0].candidateModel='A158W',/unrelated/);
 check(x=>x.candidates[0].sourceSha1='0'.repeat(39),/SHA-1/);
 check(x=>x.candidates[0].modelId='other-casio',/unknown/);
 check(x=>x.candidates[0].filePage='https://attacker.example/wiki/File:Casio_F-91W.jpg',/Untrusted/);
