@@ -61,7 +61,7 @@ try{
     const dir=join(scratch,'site/assets',folder);
     if(!existsSync(dir))continue;
     for(const file of readdirSync(dir))
-      if(retired.some(id=>new RegExp('^'+id+'(?:-(?:240|360|480|720|800|960))?\\.webp$').test(file)))
+      if(retired.some(id=>new RegExp('^'+id+'(?:-(?:240|360|480|640|720|800|960))?\\.webp$').test(file)))
         rmSync(join(dir,file));
   }
   run('node',['scripts/validate-photo-review.mjs']);
@@ -82,7 +82,7 @@ try{
     assert.ok(paths.includes('montres/'+id+'.html'),
       'The existing model page must survive the photo withdrawal: '+id);
     assert.ok(!paths.some(p=>folders.some(folder=>
-      new RegExp('^assets/'+folder+'/'+id+'(?:-(?:240|360|480|720|800|960))?\\.webp$').test(p))),
+      new RegExp('^assets/'+folder+'/'+id+'(?:-(?:240|360|480|640|720|800|960))?\\.webp$').test(p))),
       'Photo original or responsive derivatives leaked into package: '+id);
     const html=readFileSync(join(scratch,'site/montres',id+'.html'),'utf8');
     assert.ok(html.includes(id),'Product identity must remain visible: '+id);

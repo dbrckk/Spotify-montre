@@ -65,7 +65,7 @@ for(const folder of folders){
   const directory=join(site,'assets',folder);
   if(!existsSync(directory))continue;
   for(const filename of readdirSync(directory)){
-    if(filename===id+'.webp'||new RegExp('^'+id+'-(?:240|360|480|720|800|960)\\.webp$').test(filename))
+    if(filename===id+'.webp'||new RegExp('^'+id+'-(?:240|360|480|640|720|800|960)\\.webp$').test(filename))
       media.push('site/assets/'+folder+'/'+filename);
   }
 }
@@ -140,7 +140,7 @@ execute('python3',['scripts/build-shipstatic-bundle.py']);
 execute('python3',['-m','unittest','discover','-s','scripts','-p','test_photo_package_gate.py','-q']);
 
 const pathPattern=new RegExp('assets/(?:watches|watch-responsive|watch-thumbs|watches-popular|popular-responsive)/'+
-  id+'(?:-(?:240|360|480|720|800|960))?\\.webp','i');
+  id+'(?:-(?:240|360|480|640|720|800|960))?\\.webp','i');
 function walk(directory){
   return readdirSync(directory,{withFileTypes:true}).flatMap(entry=>
     entry.isDirectory()?walk(join(directory,entry.name)):entry.isFile()?[join(directory,entry.name)]:[]);
