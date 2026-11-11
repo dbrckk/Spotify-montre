@@ -51,7 +51,7 @@ export function reviewCommonsCandidates({catalogue,rights,register}){
     const actualSku=norm(p.model);
     if(candidateCode===actualSku)
       throw Error('Claim of precise SKU requires independent variant review: '+item.modelId);
-    if(candidateCode.length<5||!actualSku.startsWith(candidateCode))
+    if(candidateCode.length<4||!actualSku.startsWith(candidateCode))
       throw Error('Commons candidate family code is unrelated to the catalogue SKU: '+item.modelId);
     if(!licenses.has(item.license)||item.licenseUrl!==licenses.get(item.license))
       throw Error('Commercially incompatible or unverified Commons licence: '+item.modelId);
