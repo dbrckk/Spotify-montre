@@ -79,7 +79,7 @@ def summary(result: dict) -> str:
                 raise ValueError("Unexpected product identifier")
             reason = item["reason"].replace("|", "/").replace("\n", " ")
             reason = reason.replace("<", "&lt;").replace(">", "&gt;")
-            lines.append(f"| \`{model}\` | {reason[:190]} |")
+            lines.append(f"| {model} | {reason[:190]} |")
         lines.append("")
     return "\n".join(lines)
 
