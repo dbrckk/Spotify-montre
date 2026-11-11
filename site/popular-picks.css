@@ -797,3 +797,24 @@
   .am-extra-quicklinks{display:flex;gap:9px;overflow-x:auto;scroll-snap-type:x proximity;overscroll-behavior-x:contain;scrollbar-width:thin;scrollbar-color:#9aad95 #eeeee5;padding:3px 3px 12px;margin:0 0 13px}
   .am-extra-quicklinks a{flex:0 0 clamp(140px,43vw,195px);scroll-snap-align:start;min-height:58px;font-size:12px}
 }
+/* Mobile identity before the editorial stage; tiers shade only actual approved photos. */
+.am-extra-mobile-prelude{display:none}
+.am-extra-product[data-extra-photo="published"][data-extra-tier="essential"] .am-extra-photo-stage{
+  background:radial-gradient(ellipse at 47% 35%,#fffdf8 0%,#eee9dc 62%,#d5cbb9 100%);
+}
+.am-extra-product[data-extra-photo="published"][data-extra-tier="signature"] .am-extra-photo-stage{
+  background:radial-gradient(ellipse at 47% 35%,#fafff9 0%,#e3ebe1 62%,#b7cebc 100%);
+}
+.am-extra-product[data-extra-photo="published"][data-extra-tier="prestige"] .am-extra-photo-stage{
+  background:radial-gradient(ellipse at 47% 35%,#fcfdff 0%,#e3e9f1 62%,#bdcbdc 100%);
+}
+.am-extra-product[data-extra-tier="essential"] .am-extra-reference-passport{border-top:3px solid #a18a64}
+.am-extra-product[data-extra-tier="signature"] .am-extra-reference-passport{border-top:3px solid #71927c}
+.am-extra-product[data-extra-tier="prestige"] .am-extra-reference-passport{border-top:3px solid #7c93ac}
+@media(max-width:760px){
+ .am-extra-mobile-prelude{display:grid;gap:6px;min-width:0;padding:3px 0 0;color:#213e2c}
+ .am-extra-mobile-prelude span{color:#795f3d;font:750 11px/1.5 system-ui,sans-serif;letter-spacing:.10em;text-transform:uppercase}
+ .am-extra-mobile-prelude strong{font:400 clamp(27px,6.5vw,39px)/1.14 Georgia,serif;letter-spacing:-.035em;text-wrap:balance;overflow-wrap:anywhere}
+ .am-extra-hero{gap:16px}
+}
+@media(max-width:365px){.am-extra-mobile-prelude strong{font-size:27px}}

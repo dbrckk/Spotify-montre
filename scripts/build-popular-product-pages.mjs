@@ -198,8 +198,9 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
         +'</div>';
     const main='<div class="wrap am-extra-page">'
       +'<nav class="crumb" aria-label="Fil d’Ariane"><a href="../index.html">Collection</a> / <a href="./modeles-populaires.html">'+products.length+' modèles complémentaires</a> / '+e(name)+'</nav>'
-      +'<article class="am-extra-product" data-popular-watch-id="'+e(p.id)+'" data-brand="'+e(p.brand)+'" data-model="'+e(p.model)+'" data-official-url="'+e(p.officialUrl)+'">'
+      +'<article class="am-extra-product" data-popular-watch-id="'+e(p.id)+'" data-brand="'+e(p.brand)+'" data-model="'+e(p.model)+'" data-official-url="'+e(p.officialUrl)+'" data-extra-tier="'+e(p.tier)+'" data-extra-photo="'+(photo?'published':'source')+'">'
       +'<div class="am-extra-hero">'
+      +'<div class="am-extra-mobile-prelude" aria-hidden="true"><span>Gamme '+e(tierNames[p.tier])+' · '+(photo?'Photographie du modèle':'Photo non publiée')+'</span><strong>'+e(name)+'</strong></div>'
       +'<div class="am-extra-art am-pick-'+e(p.style)+(photo?' am-extra-art-with-photo':' am-extra-art-no-photo')+'" role="group" aria-label="'+(photo?'Photo du modèle exact, droits de publication déclarés':'Fiche documentaire typographique, aucune photographie de cette montre publiée ici')+'">'
       +(photo?'<div class="am-extra-photo-stage"><img class="am-extra-licensed-photo" src="../'+e(photo.url)+'"'
         +responsivePopularAttrs(root,p,photo,{prefix:'../',sizes:'(max-width: 760px) 78vw, (max-width: 1200px) 40vw, 520px',escape:e})

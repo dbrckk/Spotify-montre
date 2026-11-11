@@ -46,6 +46,19 @@ for(const p of picks){
   assert.ok(html.includes('class="am-extra-factual-swipe-hint"')&&
     html.includes('class="am-extra-factual-scroll"'),
     'Every supplemental product must explain the same source-backed four-watch comparison: '+p.id);
+  assert.ok(html.includes('<div class="am-extra-mobile-prelude" aria-hidden="true">'),
+    'Every source-backed watch needs a visual mobile title: '+p.id);
+  assert.ok(html.includes('<strong>'+escapeHtml(p.brand+' '+p.model)+'</strong>'),
+    'Mobile title must contain exact documented watch identity: '+p.id);
+  assert.equal((html.match(/class="am-extra-mobile-prelude"/g)||[]).length,1,
+    'One mobile prelude required per exact-model page: '+p.id);
+  assert.equal((html.match(/<h1>/g)||[]).length,1,
+    'One semantic h1 remains after mobile prelude: '+p.id);
+  const article=html.match(/<article class="am-extra-product"[^>]*>/)?.[0]||'';
+  assert.ok(article.includes('data-extra-tier="'+p.tier+'"'),
+    'Editorial tier must be present for the exact model: '+p.id);
+  assert.ok(article.includes('data-extra-photo="'+(rights[p.id]?'published':'source')+'"'),
+    'Real photographs and source-only fallbacks must never share the same photo state: '+p.id);
   const proof=rights[p.id];
   if(proof){
     assert.ok(!html.includes('href="../extra-source-passport.css"'),
@@ -195,6 +208,34 @@ for(const p of picks){
 mkdirSync('artifacts',{recursive:true});
 const browser=await chromium.launch({headless:true});
 try{
+  const examples=['essential','signature','prestige'].map(tier=>picks.find(p=>p.tier===tier&&rights[p.id]));
+  assert.ok(examples.every(Boolean),'Each editorial tier has a registered exact-model photo');
+  const studioPhone=await browser.newPage({viewport:{width:393,height:852},isMobile:true,
+    hasTouch:true,javaScriptEnabled:false,locale:'fr-FR'});
+  try{
+    const backgrounds=[];
+    for(const watch of examples){
+      await studioPhone.goto(new URL('/montres/'+watch.id+'.html',base).href,{waitUntil:'load'});
+      const label=studioPhone.locator('.am-extra-mobile-prelude');
+      assert.ok(await label.isVisible(),'Mobile watch identity must be visible before photo: '+watch.id);
+      assert.ok((await label.innerText()).includes(watch.model),'Mobile watch name must match source: '+watch.id);
+      const rects=await studioPhone.evaluate(()=>{
+        const a=document.querySelector('.am-extra-mobile-prelude').getBoundingClientRect();
+        const b=document.querySelector('.am-extra-art').getBoundingClientRect();
+        return {end:a.bottom,start:b.top,overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth};
+      });
+      assert.ok(rects.end<=rects.start+2&&rects.overflow<=2,'393px photo must follow title without overflow: '+watch.id+' '+JSON.stringify(rects));
+      backgrounds.push(await studioPhone.locator('.am-extra-photo-stage').evaluate(el=>getComputedStyle(el).backgroundImage));
+    }
+    assert.equal(new Set(backgrounds).size,3,'Photographic studios must have three range-specific backgrounds');
+    await studioPhone.goto(new URL('/montres/casio-f91w-1.html',base).href,{waitUntil:'load'});
+    assert.ok(await studioPhone.locator('.am-extra-mobile-prelude').isVisible(),'No-photo product also gets a mobile identity');
+    assert.match(await studioPhone.locator('.am-extra-mobile-prelude').innerText(),/Photo non publiée/);
+    assert.equal(await studioPhone.locator('.am-extra-photo-stage').count(),0,'Never invent a photo stage for an unphotographed watch');
+    await studioPhone.setViewportSize({width:320,height:740});
+    const narrow=await studioPhone.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
+    assert.ok(narrow.scroll<=narrow.client+2,'320px documentary page must not overflow '+JSON.stringify(narrow));
+  }finally{await studioPhone.close();}
   // Source transparency remains readable and usable on a 393px phone.
   // Do not follow external merchant or evidence links in automated checks.
   const auditPhone=await browser.newPage({viewport:{width:393,height:852},isMobile:true,hasTouch:true,locale:'fr-FR'});
