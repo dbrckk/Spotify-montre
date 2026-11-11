@@ -51,6 +51,9 @@
     title.textContent=p.brand+' · '+p.model;
     position.textContent=(index+1)+' / '+items.length;
     prev.disabled=items.length<2;next.disabled=items.length<2;
+    // An exact-model product sheet usually has one approved photograph;
+    // keep disabled gallery arrows out of its mobile purchase experience.
+    prev.hidden=items.length<2;next.hidden=items.length<2;position.hidden=items.length<2;
     expanded=false;canvas.classList.remove('am-photo-expanded');
     zoom.textContent='Agrandir ×2';zoom.disabled=!url;
     photo.hidden=true;loaded=false;message.hidden=false;
@@ -67,7 +70,24 @@
   close.addEventListener('click',()=>dialog.close());
   prev.addEventListener('click',()=>navigate(-1));
   next.addEventListener('click',()=>navigate(1));
-  zoom.addEventListener('click',()=>{if(!loaded)return;expanded=!expanded;canvas.classList.toggle('am-photo-expanded',expanded);zoom.textContent=expanded?'Réduire ×1':'Agrandir ×2'});
+  zoom.addEventListener('click',()=>{
+    if(!loaded)return;
+    expanded=!expanded;
+    canvas.classList.toggle('am-photo-expanded',expanded);
+    zoom.textContent=expanded?'Réduire ×1':'Agrandir ×2';
+    if(!expanded){
+      canvas.scrollLeft=0;
+      canvas.scrollTop=0;
+      return;
+    }
+    // Open on the centre of the actual watch rather than the top-left corner
+    // of a 2x photo. Both axes remain scrollable with mouse or touch.
+    requestAnimationFrame(()=>{
+      if(!expanded||!dialog.open)return;
+      canvas.scrollLeft=(canvas.scrollWidth-canvas.clientWidth)/2;
+      canvas.scrollTop=(canvas.scrollHeight-canvas.clientHeight)/2;
+    });
+  });
   dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
   dialog.addEventListener('keydown',event=>{
     if(event.key==='ArrowLeft'){event.preventDefault();navigate(-1)}

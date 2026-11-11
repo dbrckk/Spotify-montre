@@ -535,9 +535,44 @@ try{
          'The modal must identify the exact original product: '+watch.id);
        const full=dlg.locator('img.am-photo-large');
        await full.waitFor({state:'visible'});
+       assert.equal(await dlg.locator('.am-photo-prev').isVisible(),false,
+         'A single-product photo viewer must not show inactive previous navigation');
+       assert.equal(await dlg.locator('.am-photo-next').isVisible(),false,
+         'A single-product photo viewer must not show inactive next navigation');
+       assert.ok(await dlg.locator('.am-photo-official').isVisible(),
+         'The official manufacturer source stays accessible beside the photo zoom');
        assert.ok(await full.evaluate((image,id)=>image.naturalWidth>300&&
          image.currentSrc.includes('/assets/watches-popular/'+id+'.webp'),watch.id),
          'The photo viewer must display a local exact-model WebP, never an IA illustration: '+watch.id);
+       if(watch.id==='skmei-2056'){
+         const photoCanvas=dlg.locator('.am-photo-canvas');
+         const normalWidth=await full.evaluate(img=>img.getBoundingClientRect().width);
+         await dlg.locator('.am-photo-zoom').click();
+         await popularPage.waitForFunction(()=>{
+           const stage=document.querySelector('#amPhotoDialog .am-photo-canvas');
+           return stage?.classList.contains('am-photo-expanded')&&stage.scrollLeft>0;
+         });
+         const actualZoom=await photoCanvas.evaluate(stage=>{
+           const image=stage.querySelector('.am-photo-large');
+           return {
+             imageWidth:image.getBoundingClientRect().width,
+             visibleWidth:stage.clientWidth,contentWidth:stage.scrollWidth,
+             scrollLeft:stage.scrollLeft,scrollTop:stage.scrollTop,
+             flexShrink:getComputedStyle(image).flexShrink
+           };
+         });
+         assert.ok(actualZoom.imageWidth>normalWidth*1.5&&
+           actualZoom.contentWidth>actualZoom.visibleWidth*1.5&&
+           actualZoom.scrollLeft>0&&actualZoom.flexShrink==='0',
+           'Photo zoom must actually enlarge and center an inspectable original: '+
+             JSON.stringify(actualZoom));
+         assert.equal(await dlg.locator('.am-photo-zoom').innerText(),'Réduire ×1');
+         await dlg.locator('.am-photo-zoom').click();
+         assert.ok(!await photoCanvas.evaluate(el=>el.classList.contains('am-photo-expanded')),
+           'Photo zoom must return to the fitted view');
+         assert.equal(await photoCanvas.evaluate(el=>el.scrollLeft),0,
+           'Closing zoom must reset the horizontal pan');
+       }
        await popularPage.keyboard.press('Escape');
        await dlg.waitFor({state:'hidden'});
      }
@@ -793,6 +828,22 @@ try{
  await checkPhoto(cards.first().locator('.aff-illustration'));
  assert.equal(await page.locator('.aff-card img.aff-product-photo').count(),15,'All 15 owner-authorized images must render');
  assert.equal(await page.locator('.aff-photo-expand').count(),15,'All 15 photo zoom controls must be usable');
+ // One-photo product pages hide pointless arrows, but the editorial catalogue
+ // must still navigate between distinct licensed exact-model photographs.
+ await page.locator('.aff-photo-expand').first().click();
+ const multiPhoto=page.locator('#amPhotoDialog');
+ await multiPhoto.waitFor({state:'visible'});
+ assert.equal(await multiPhoto.locator('.am-photo-prev').isVisible(),true,
+   'A multi-watch collection must retain previous photo navigation');
+ assert.equal(await multiPhoto.locator('.am-photo-next').isVisible(),true,
+   'A multi-watch collection must retain next photo navigation');
+ const firstName=await multiPhoto.locator('.am-photo-title').innerText();
+ await multiPhoto.locator('.am-photo-next').click();
+ assert.notEqual(await multiPhoto.locator('.am-photo-title').innerText(),firstName,
+   'Next must navigate to a different approved exact-model photograph');
+ await multiPhoto.locator('.am-photo-close').click();
+ await multiPhoto.waitFor({state:'hidden'});
+
 
 
  // Discover filters must work, including the most expensive collection.
