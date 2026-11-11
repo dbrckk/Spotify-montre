@@ -255,7 +255,7 @@ try{
     const specGeometry=await passport.evaluate(el=>{
       const rect=el.getBoundingClientRect(),grid=el.querySelector('.am-extra-passport-facts');
       return {width:rect.width,left:rect.left,right:rect.right,
-        columns:getComputedStyle(grid).gridTemplateColumns.split(/\\s+/).filter(Boolean).length,
+        columns:getComputedStyle(grid).gridTemplateColumns.split(/\s+/).filter(Boolean).length,
         children:[...grid.children].map(node=>{
           const r=node.getBoundingClientRect();return {left:r.left,right:r.right,height:r.height};
         })};
@@ -293,6 +293,21 @@ try{
     assert.equal(new URL(noJsShortcuts.url()).hash,'#vendeurs');
     assert.ok(await noJsShortcuts.locator('.am-extra-actions a').count()>=1,
       'The official supplier remains reachable without JavaScript');
+    const withoutJs=await noJsShortcuts.evaluate(()=>{
+      const passport=document.querySelector('.am-extra-reference-passport');
+      const rect=passport.getBoundingClientRect();
+      return {scroll:document.documentElement.scrollWidth,
+        client:document.documentElement.clientWidth,
+        passportLeft:rect.left,passportRight:rect.right,
+        count:passport.querySelectorAll('.am-extra-passport-facts>div').length};
+    });
+    assert.equal(withoutJs.count,4,
+      'The four source-backed facts must remain visible without JS');
+    assert.ok(withoutJs.scroll<=withoutJs.client+2
+      &&withoutJs.passportLeft>=-1&&withoutJs.passportRight<=withoutJs.client+1,
+      '360px no-JS documentary studio must not cause horizontal overflow: '+
+        JSON.stringify(withoutJs));
+
   }finally{await noJsShortcuts.close();}
 
   for(const width of [360,393,1366]){
