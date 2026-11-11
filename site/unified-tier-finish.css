@@ -71,3 +71,35 @@
  .ud-tier-shortcut,.ud-page .ud-card{transition:none}
  .ud-tier-shortcut:hover{transform:none}
 }
+
+/* Art-directed lighting applies only to approved, exact-model photos.
+   Models without a published photo retain their explicit fallback. */
+.ud-page .ud-card[data-visual="photo"][data-tier="essential"] .ud-photo{
+  background:radial-gradient(ellipse at 47% 35%,#fffdf8 0%,#eee8dc 62%,#d5c8b4 100%);
+}
+.ud-page .ud-card[data-visual="photo"][data-tier="signature"] .ud-photo{
+  background:radial-gradient(ellipse at 47% 35%,#f8fcf7 0%,#e2e9df 62%,#b7cbbc 100%);
+}
+.ud-page .ud-card[data-visual="photo"][data-tier="prestige"] .ud-photo{
+  background:radial-gradient(ellipse at 47% 35%,#fbfcfe 0%,#e2e7ef 62%,#bfccdb 100%);
+}
+.ud-page .ud-card[data-visual="photo"] .ud-photo::before{
+  content:"";position:absolute;inset:11px;border:1px solid rgba(255,255,255,.60);
+  border-radius:5px;pointer-events:none;
+}
+/* Preserve the case size as well as the movement on compact Android cards.
+   Long model dimensions can wrap rather than escaping the viewport. */
+@media(max-width:650px){
+  .ud-page .ud-grid:not(.ud-view-large) .ud-card-main>dl{
+    grid-template-columns:minmax(0,1fr);gap:6px;
+  }
+  .ud-page .ud-grid:not(.ud-view-large) .ud-card-main>dl>div:last-child{
+    display:block;
+  }
+  .ud-page .ud-grid:not(.ud-view-large) .ud-card-main>dl>div{
+    min-width:0;padding:8px 10px;
+  }
+  .ud-page .ud-grid:not(.ud-view-large) .ud-card-main>dl dd{
+    overflow-wrap:anywhere;line-height:1.45;
+  }
+}

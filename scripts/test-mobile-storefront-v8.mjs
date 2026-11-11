@@ -136,6 +136,14 @@ try{
  assert.ok((await allWatches.goto(allUrl,{waitUntil:'domcontentloaded'}))?.ok());
  assert.equal(await allWatches.locator('article.ud-card').count(),52,'All 52 real models must exist as static HTML');
  await allWatches.locator('#udFilters:visible').waitFor({timeout:20000});
+ // On Android the secondary fact (case dimensions) must stay visible.
+ const firstWatch=allWatches.locator('#udGrid .ud-card[data-tier="essential"]').first();
+ const facts=firstWatch.locator('.ud-card-main>dl>div');
+ assert.equal(await facts.count(),2,'Every compact watch card needs movement and case size');
+ assert.ok(await facts.nth(1).isVisible(),
+   'The watch case size must remain visible on a 393px Android screen');
+ assert.match(await facts.nth(1).innerText(),/Boîtier/,
+   'The second compact fact must identify case dimensions');
  assert.equal(await allWatches.locator('#udCompareTable table').count(),1,
    'Advisor links must be able to compare mixed core and supplementary watches');
  assert.equal(await allWatches.locator('#udCompareTable th[scope=col]').count(),3,
@@ -158,6 +166,24 @@ try{
  const allNoJs=await browser.newPage({viewport:{width:393,height:852},isMobile:true,hasTouch:true,javaScriptEnabled:false});
  await allNoJs.goto(new URL('/montres/toutes-les-montres.html',base).href,{waitUntil:'domcontentloaded'});
  assert.equal(await allNoJs.locator('.ud-card:visible').count(),52,'52 model links must remain usable without JS');
+ await allNoJs.waitForLoadState('load');
+ assert.ok(await allNoJs.locator('.ud-card[data-tier="signature"] .ud-card-main>dl>div').nth(1).isVisible(),
+   'Case size must remain visible without JavaScript');
+ const studioTones=await allNoJs.evaluate(()=>['essential','signature','prestige'].map(tier=>{
+   const stage=document.querySelector('.ud-card[data-visual="photo"][data-tier="'+tier+'"] .ud-photo');
+   return stage&&getComputedStyle(stage).backgroundImage;
+ }));
+ assert.equal(studioTones.filter(Boolean).length,3,'Each editorial tier needs a genuine published watch photo');
+ assert.equal(new Set(studioTones).size,3,'The three watch tiers should have distinct photographic stages');
+ await allNoJs.setViewportSize({width:320,height:852});
+ assert.ok(await allNoJs.locator('.ud-card[data-tier="essential"] .ud-card-main>dl>div').nth(1).isVisible(),
+   'A 320px phone must expose both essential watch facts');
+ const pocketWidth=await allNoJs.evaluate(()=>({
+   viewport:document.documentElement.clientWidth,
+   content:document.documentElement.scrollWidth
+ }));
+ assert.ok(pocketWidth.content<=pocketWidth.viewport+2,
+   'Expanded mobile facts must not create horizontal overflow: '+JSON.stringify(pocketWidth));
  assert.equal(await allNoJs.locator('#udFilters:visible').count(),0,'No-JS filters must not be presented as functional');
  await allNoJs.close();
  const unifiedAdvisor=await browser.newPage({viewport:{width:393,height:852},isMobile:true,hasTouch:true});
