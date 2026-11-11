@@ -1,0 +1,55 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {resolve} from 'node:path';
+
+const site = resolve(process.cwd(), 'site');
+const origin = 'https://atelier-montres-selection-fr.onrender.com';
+const read = path => readFileSync(resolve(site, path), 'utf8');
+
+for (const [file, route] of [
+  ['index.html', '/'],
+  ['conseiller.html', '/conseiller.html'],
+  ['affiliation.html', '/affiliation.html'],
+]) {
+  const html = read(file);
+  const head = html.match(/<head>([\s\S]*?)<\/head>/i)?.[1];
+  assert.ok(head, file + ': missing head');
+  const url = origin + route;
+  assert.equal((head.match(/rel="canonical"/g) || []).length, 1,
+    file + ': exactly one canonical');
+  assert.ok(head.includes('<link rel="canonical" href="' + url + '">'),
+    file + ': canonical URL must be the deployed absolute URL');
+  assert.ok(head.includes('<meta property="og:url" content="' + url + '">'),
+    file + ': OG URL must match the canonical URL');
+  assert.match(head, /<meta name="robots" content="index,follow(?:,[^"]*)?">/,
+    file + ': public landing must be indexable');
+  assert.match(head, /<meta name="description" content="[^"]{80,}">/,
+    file + ': meaningful search description required');
+  for (const property of ['og:type', 'og:site_name', 'og:locale', 'og:title', 'og:description']) {
+    assert.ok(head.includes('<meta property="' + property + '" content="'),
+      file + ': missing ' + property);
+  }
+}
+
+const adviser = read('conseiller.html');
+assert.match(adviser, /<noscript>[\s\S]*?href="\.\/montres\/toutes-les-montres\.html"[\s\S]*?<\/noscript>/,
+  'Advisor needs a working JS-free route to the 52 watches');
+
+const affiliate = read('affiliation.html');
+for (const obsolete of [
+  'ACHAT DIRECT · QUAND DISPONIBLE',
+  'Commander sur Atelier Montres.',
+  'Si un bouton « Acheter sur Atelier Montres » apparaît',
+  'Un achat direct n’est proposé sur Atelier Montres',
+]) {
+  assert.ok(!affiliate.includes(obsolete), 'Inactive checkout must not be marketed: ' + obsolete);
+}
+assert.match(affiliate, /n’encaisse actuellement aucun paiement/,
+  'Prominent merchant disclosure must describe actual payment state');
+assert.match(affiliate, /ne prend pas de commande/,
+  'Editorial purchasing guide must not imply live direct sale');
+
+const config = JSON.parse(read('config.json'));
+assert.equal(config.checkoutMode, 'inactive', 'Storefront must remain in safe no-checkout mode');
+
+console.log('OK: 3 indexable landing pages, advisor no-JS route, clear third-party purchase wording');
