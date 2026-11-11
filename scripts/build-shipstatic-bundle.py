@@ -82,7 +82,7 @@ def assemble():
             if owner not in approved:
                 # Responsive variants are ID-<width>.webp, not arbitrary IDs.
                 import re
-                variant=re.fullmatch(r'([a-z0-9-]+)-(240|360|480|720|800|960)',owner)
+                variant=re.fullmatch(r'([a-z0-9-]+)-(240|360|480|640|720|800|960)',owner)
                 owner=variant.group(1) if variant else owner
             assert owner in approved, 'Unapproved or withdrawn photo still packaged: '+path
     assert {a['path'] for a in assets if a['path'].startswith('assets/watches/')}=={
