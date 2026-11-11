@@ -351,6 +351,20 @@
       "imageSha256": "a161dca1c96325210cafa9617275ede69f56908dfd5c0242ec19400e5c11d9ee",
       "width": 480,
       "height": 720
+    },
+    "tissot-le-locle-white": {
+      "rightsBasis": "site_owner_attested_brand_authorization",
+      "rightsHolder": "Tissot",
+      "scope": "commercial_affiliate_website_display_and_local_hosting",
+      "approvedOn": "2026-11-11",
+      "attestationSource": "site_owner_declaration_2026-10-31",
+      "permissionIndependentlyVerified": false,
+      "sourcePage": "https://www.tissotwatches.com/fr-fr/T0064071103300.html",
+      "sourceImageUrl": "https://www.tissotwatches.com/dw/image/v2/BKKD_PRD/on/demandware.static/-/Sites-Tissot-Catalogue/default/dw1af9d0f4/product-pictures/8c99426a-3edc-4e15-ae24-ef8e49f73757_T006-407-11-033-00_shadow.png",
+      "file": "assets/watches-popular/tissot-le-locle-white.webp",
+      "imageSha256": "0b9429760a8a88cf706af43479c262955556fab8c53ca4e3da6e2ad122f3001c",
+      "width": 1200,
+      "height": 1200
     }
   }
 }

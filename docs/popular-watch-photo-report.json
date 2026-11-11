@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "reviewedOn": "2026-11-10",
+  "reviewedOn": "2026-11-11",
   "total": 37,
   "photos": [
     {
@@ -99,6 +99,13 @@
       "source": "https://www.seikowatches.com/fr-fr/products/prospex/ssc813"
     },
     {
+      "id": "tissot-le-locle-white",
+      "status": "created",
+      "source": "https://www.tissotwatches.com/fr-fr/T0064071103300.html",
+      "image": "https://www.tissotwatches.com/dw/image/v2/BKKD_PRD/on/demandware.static/-/Sites-Tissot-Catalogue/default/dw1af9d0f4/product-pictures/8c99426a-3edc-4e15-ae24-ef8e49f73757_T006-407-11-033-00_shadow.png",
+      "sha256": "0b9429760a8a88cf706af43479c262955556fab8c53ca4e3da6e2ad122f3001c"
+    },
+    {
       "id": "hamilton-ventura-h24411732",
       "status": "preserved",
       "source": "https://www.hamiltonwatch.com/fr-fr/h24411732-ventura-quartz.html"
@@ -132,47 +139,43 @@
   "missing": [
     {
       "id": "casio-ga-2100-1a1",
-      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/gshock/product.GA-2100-1A1/"
+      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/gshock/product.GA-2100-1A1/; 403 Client Error: Forbidden for url: https://www.casio.com/intl/watches/gshock/product.GA-2100-1A1/"
     },
     {
       "id": "casio-a158wea-1",
-      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/casio/vintage/product.A158WEA-1/"
+      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/casio/vintage/product.A158WEA-1/; 403 Client Error: Forbidden for url: https://www.casio.com/intl/watches/casio/product.A158WEA-1/"
     },
     {
       "id": "casio-la-20wh-4a1",
-      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/casio/product.LA-20WH-4A1/"
+      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/casio/product.LA-20WH-4A1/; 403 Client Error: Forbidden for url: https://www.casio.com/intl/watches/casio/product.LA-20WH-4A1/"
     },
     {
       "id": "casio-ltp-1234pgl-7a",
-      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/casio/product.LTP-1234PGL-7A/"
+      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/casio/product.LTP-1234PGL-7A/; 403 Client Error: Forbidden for url: https://www.casio.com/europe/watches/casio/product.LTP-1234PGL-7A/"
     },
     {
       "id": "casio-gw-m5610u-1",
-      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/gshock/product.GW-M5610U-1/"
+      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/gshock/product.GW-M5610U-1/; 403 Client Error: Forbidden for url: https://www.casio.com/europe/watches/gshock/product.GW-M5610U-1/"
     },
     {
       "id": "casio-edifice-efr-s108d",
-      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/edifice/product.EFR-S108D-2AV/"
+      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/edifice/product.EFR-S108D-2AV/; 403 Client Error: Forbidden for url: https://www.casio.com/europe/watches/edifice/product.EFR-S108D-2AV/"
     },
     {
       "id": "casio-f91w-1",
-      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/casio/product.F-91W-1/"
+      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/casio/product.F-91W-1/; 403 Client Error: Forbidden for url: https://www.casio.com/intl/watches/casio/product.F-91W-1/"
     },
     {
       "id": "casio-a168wg-9",
-      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/casio/vintage/product.A168WG-9/"
+      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/casio/vintage/product.A168WG-9/; 403 Client Error: Forbidden for url: https://www.casio.com/europe/watches/casio/product.A168WG-9/"
     },
     {
       "id": "casio-dw5600rl-1",
-      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/gshock/product.DW-5600RL-1/"
-    },
-    {
-      "id": "tissot-le-locle-white",
-      "reason": "No trusted exact-model front packshot in official product gallery"
+      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/gshock/product.DW-5600RL-1/; 403 Client Error: Forbidden for url: https://www.casio.com/intl/watches/gshock/product.DW-5600RL-1/"
     },
     {
       "id": "casio-ae1200wh-1av",
-      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/casio/product.AE-1200WH-1AV/"
+      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/casio/product.AE-1200WH-1AV/; 403 Client Error: Forbidden for url: https://www.casio.com/europe/watches/casio/product.AE-1200WH-1AV/"
     },
     {
       "id": "curren-cur210",
