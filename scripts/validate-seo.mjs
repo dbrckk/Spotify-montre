@@ -127,6 +127,30 @@ for(const name of ['citizen-tsuyosa','tissot-prx-quartz','orient-bambino','casio
 assert.match(read('editorial-photo.js'),/assets\/watch-thumbs\/.*item\.id/,'Featured picker must request smaller local thumbnails');
 assert.match(read('affiliation.js'),/assets\/watch-responsive\/.*p\.id/,'Dynamic catalogue must prefer responsive photos');
 const publicHome=read('index.html');
+// The public LCP and product cards must use the exact rights-approved widths
+// emitted by the current photo generator, not a stale 480/800px snapshot.
+const approvedHomeModels=new Map(feed.products
+  .filter(p=>p.photoReview?.publicUsageApproved===true).map(p=>[p.id,p]));
+const homeImgTags=[...publicHome.matchAll(/<img\b[^>]*\bsrc="\.\/assets\/watches\/([a-z0-9-]+)\.webp(?:\?[^\"]*)?"[^>]*>/g)];
+for(const [tag,id] of homeImgTags.map(match=>[match[0],match[1]])){
+  const product=approvedHomeModels.get(id);
+  assert.ok(product,'Public home must only reference approved watch photo: '+id);
+  const expected=responsiveSrcset(root,product,'./');
+  if(!expected)continue;
+  assert.ok(tag.includes('srcset="'+htmlEscape(expected)+'"'),
+    'Homepage model must use every verified local WebP width: '+id);
+  assert.match(tag,/\bsizes="[^"]+"/,'Homepage responsive image needs display sizes: '+id);
+}
+const homePreloads=[...publicHome.matchAll(/<link\b[^>]*\brel="preload"[^>]*\bas="image"[^>]*>/g)];
+for(const preload of homePreloads){
+  const tag=preload[0],match=tag.match(/\bhref="\.\/assets\/watches\/([a-z0-9-]+)\.webp(?:\?[^\"]*)?"/);
+  if(!match)continue;
+  const product=approvedHomeModels.get(match[1]);
+  assert.ok(product,'Homepage must not preload a photo without publication rights');
+  const expected=responsiveSrcset(root,product,'./');
+  if(expected)assert.ok(tag.includes('imagesrcset="'+htmlEscape(expected)+'"'),
+    'Homepage preload must agree with the visible hero photo srcset: '+match[1]);
+}
 const home=read('affiliation.html');
 const affordableDuels=JSON.parse(read('comparaisons-accessibles.json'));
 const escapeEditorialHtml=value=>String(value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
