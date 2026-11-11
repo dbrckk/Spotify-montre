@@ -828,6 +828,22 @@ try{
  await checkPhoto(cards.first().locator('.aff-illustration'));
  assert.equal(await page.locator('.aff-card img.aff-product-photo').count(),15,'All 15 owner-authorized images must render');
  assert.equal(await page.locator('.aff-photo-expand').count(),15,'All 15 photo zoom controls must be usable');
+ // One-photo product pages hide pointless arrows, but the editorial catalogue
+ // must still navigate between distinct licensed exact-model photographs.
+ await page.locator('.aff-photo-expand').first().click();
+ const multiPhoto=page.locator('#amPhotoDialog');
+ await multiPhoto.waitFor({state:'visible'});
+ assert.equal(await multiPhoto.locator('.am-photo-prev').isVisible(),true,
+   'A multi-watch collection must retain previous photo navigation');
+ assert.equal(await multiPhoto.locator('.am-photo-next').isVisible(),true,
+   'A multi-watch collection must retain next photo navigation');
+ const firstName=await multiPhoto.locator('.am-photo-title').innerText();
+ await multiPhoto.locator('.am-photo-next').click();
+ assert.notEqual(await multiPhoto.locator('.am-photo-title').innerText(),firstName,
+   'Next must navigate to a different approved exact-model photograph');
+ await multiPhoto.locator('.am-photo-close').click();
+ await multiPhoto.waitFor({state:'hidden'});
+
 
 
  // Discover filters must work, including the most expensive collection.
