@@ -89,7 +89,7 @@ export function markdownCommonsReview(report){
     '- Cleared for publication: **0** (full product SKU not yet independently verified)','',
     '| Exact catalogue reference | Commons family-level candidate | Licence | Decision |',
     '| --- | --- | --- | --- |',
-    ...report.candidates.filter(c=>!c.alreadyPublishedFromIndependentSource).map(c=>'| '+c.catalogModel+' | [Photo by '
+    ...report.candidates.filter(c=>!c.alreadyPublishedFromIndependentSource).map(c=>'| '+c.catalogModel+' | [Photo by '+
       c.creator.replaceAll('|','/')+']('+c.filePage+') | ['+
       c.license+']('+c.licenseUrl+') | No publication: exact variant unverified |'),
     '',report.note,''
