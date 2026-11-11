@@ -24,8 +24,8 @@ for(const id of cards){
   assert.ok(existsSync(new URL(asset,site))&&statSync(new URL(asset,site)).size>1000,
     id+': product image is missing');
   assert.ok(home.includes('src="./'+asset+'"'),id+': product image not displayed');
-  assert.ok(home.includes('href="./montre.html?id='+id+'"'),
-    id+': product must open its own verified detail');
+  assert.ok(home.includes('href="./montres/'+id+'.html"'),
+    id+': product must open the canonical, JS-free, indexable detail page');
 }
 // The photo-led homepage uses only approved local exact-reference WebPs.
 // Every responsive candidate must exist and the LCP preload must match the
