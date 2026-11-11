@@ -76,6 +76,25 @@ class PackageRightsGateTests(unittest.TestCase):
         self._save()
         with self.assertRaisesRegex(AssertionError,'Unapproved or withdrawn'):
             self._assemble()
+    def test_approved_intermediate_responsive_widths_ship(self):
+        responsive=self.site/'assets'/'watch-responsive'
+        responsive.mkdir()
+        for width in (640,720):
+            (responsive/f'watch-00-{width}.webp').write_bytes(WEBP)
+        _,files=self._assemble()
+        paths={f['path'] for f in files}
+        for width in (640,720):
+            self.assertIn(f'assets/watch-responsive/watch-00-{width}.webp',paths)
+    def test_withdrawn_intermediate_responsive_fails_closed(self):
+        self.models[0]['photoReview'].update(
+            publicUsageApproved=False,localUrl=None,localSha256=None)
+        (self.site/'assets'/'watches'/'watch-00.webp').unlink()
+        responsive=self.site/'assets'/'watch-responsive'
+        responsive.mkdir()
+        (responsive/'watch-00-640.webp').write_bytes(WEBP)
+        self._save()
+        with self.assertRaisesRegex(AssertionError,'Unapproved or withdrawn'):
+            self._assemble()
     def test_unregistered_extra_media_fails_closed(self):
         extra=self.site/'assets'/'watches-popular'
         extra.mkdir()
