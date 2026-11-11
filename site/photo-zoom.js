@@ -67,7 +67,24 @@
   close.addEventListener('click',()=>dialog.close());
   prev.addEventListener('click',()=>navigate(-1));
   next.addEventListener('click',()=>navigate(1));
-  zoom.addEventListener('click',()=>{if(!loaded)return;expanded=!expanded;canvas.classList.toggle('am-photo-expanded',expanded);zoom.textContent=expanded?'Réduire ×1':'Agrandir ×2'});
+  zoom.addEventListener('click',()=>{
+    if(!loaded)return;
+    expanded=!expanded;
+    canvas.classList.toggle('am-photo-expanded',expanded);
+    zoom.textContent=expanded?'Réduire ×1':'Agrandir ×2';
+    if(!expanded){
+      canvas.scrollLeft=0;
+      canvas.scrollTop=0;
+      return;
+    }
+    // Open on the centre of the actual watch rather than the top-left corner
+    // of a 2x photo. Both axes remain scrollable with mouse or touch.
+    requestAnimationFrame(()=>{
+      if(!expanded||!dialog.open)return;
+      canvas.scrollLeft=(canvas.scrollWidth-canvas.clientWidth)/2;
+      canvas.scrollTop=(canvas.scrollHeight-canvas.clientHeight)/2;
+    });
+  });
   dialog.addEventListener('click',event=>{if(event.target===dialog)dialog.close()});
   dialog.addEventListener('keydown',event=>{
     if(event.key==='ArrowLeft'){event.preventDefault();navigate(-1)}
