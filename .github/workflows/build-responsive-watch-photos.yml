@@ -103,7 +103,7 @@ jobs:
             assert.ok(end>start,'Missing card close: '+id);
             const card=html.slice(start,end);
             const detail=readFileSync('site/montres/'+id+'.html','utf8');
-            for(const width of [240,360,480,720,960].filter(w=>w<proof.width)){
+            for(const width of [240,360,480,640,720,960].filter(w=>w<proof.width)){
               const descriptor='popular-responsive/'+id+'-'+width+'.webp '+width+'w';
               assert.ok(card.includes(descriptor),
                 'Verified derivative missing from catalogue: '+id+'/'+width);
@@ -115,7 +115,7 @@ jobs:
               'Full-resolution authorized fallback missing: '+id);
           }
           const expected=Object.values(rights).reduce((sum,proof)=>
-            sum+[240,360,480,720,960].filter(w=>w<proof.width).length,0);
+            sum+[240,360,480,640,720,960].filter(w=>w<proof.width).length,0);
           assert.equal(total,expected,'Expected one verified derivative per eligible width');
           console.log('PASS: '+Object.keys(rights).length+' approved photos -> '+total+
             ' SHA-verified responsive WebPs on catalogue and detailed pages');
