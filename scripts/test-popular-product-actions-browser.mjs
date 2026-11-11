@@ -16,6 +16,24 @@ for(const p of picks){
   assert.match(html,/src="\.\.\/extra-product-actions\.js"/);
   assert.ok(html.includes('data-extra-favorite="'+p.id+'"'));
   assert.ok(html.includes('data-extra-share="'+p.id+'"'));
+  // All 37 pages must offer meaningful no-JS in-page navigation, including
+  // photos-withdrawn references. Never duplicate IDs or invent merchant URLs.
+  assert.equal((html.match(/class="am-extra-quicklinks"/g)||[]).length,1,
+    'One buyer-facing shortcuts rail per product sheet: '+p.id);
+  for(const [target,label] of [
+    ['caracteristiques','Caractéristiques'],
+    ['vendeurs','Vendeurs et références'],
+    ['sources','Sources et preuves']
+  ]){
+    assert.ok(html.includes('href="#'+target+'"><span aria-hidden="true">'),
+      'Direct no-JS shortcut missing for '+target+': '+p.id);
+    assert.ok(html.includes(label+'</a>'),
+      'Public buyer label missing on '+p.id+': '+label);
+    assert.equal((html.match(new RegExp('id="'+target+'"','g'))||[]).length,1,
+      'Shortcut target must be unique: '+target+' '+p.id);
+  }
+  assert.ok(html.includes('id="caracteristiques">Repères techniques documentés</h2>'),
+    'Technical facts heading must remain documented and discoverable: '+p.id);
   assert.ok(html.includes('data-watch-ref-copy="'+p.id+'"'),
     'Every supplemental watch must expose its actual model reference: '+p.id);
   assert.ok(html.includes('data-watch-ref-tools hidden'),
