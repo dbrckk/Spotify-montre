@@ -35,6 +35,34 @@ try{
   assert.ok(response?.ok(),'Home page must respond HTTP 2xx');
   assert.ok(await page.locator('a[href="./montres/toutes-les-montres.html"]').count()>0,
     'Public homepage must provide a direct link to all 52 models');
+  // Every featured model on the public homepage should open its
+  // canonical search-indexable detail instead of a noindex JS-only route.
+  const featured=['casio-mtp-1302','casio-mdv107','citizen-tsuyosa',
+    'seiko-5','tissot-prx-auto','hamilton-khaki'];
+  const homeLinks=page.locator('.home-product-card a.home-product-image');
+  assert.equal(await homeLinks.count(),6,'Public showroom must feature six exact watches');
+  for(const [i,id] of featured.entries()){
+    assert.equal(await homeLinks.nth(i).getAttribute('href'),
+      './montres/'+id+'.html','Featured model must use canonical static detail: '+id);
+  }
+  assert.equal(await page.locator('.home-hero-visual').getAttribute('href'),
+    './montres/citizen-tsuyosa.html','Hero must link to canonical Citizen detail');
+  const noJs=await browser.newPage({
+    viewport:{width:393,height:852},isMobile:true,hasTouch:true,
+    locale:'fr-FR',javaScriptEnabled:false
+  });
+  try{
+    const noJsPage=await noJs.goto(new URL('/montres/citizen-tsuyosa.html',base).href,
+      {waitUntil:'domcontentloaded',timeout:30000});
+    assert.ok(noJsPage?.ok(),'Canonical detail must be accessible without JavaScript');
+    assert.match(await noJs.locator('article.watch-product h1').innerText(),
+      /Citizen Tsuyosa/,'A JS-free buyer must see the exact model');
+    assert.ok(await noJs.locator('article.watch-product .watch-facts').count()===1,
+      'JS-free canonical detail must show documented specifications');
+  }finally{
+    await noJs.close();
+  }
+  console.log('PASS MOBILE HOME: all six featured watches link to canonical pages and Citizen is readable without JavaScript');
   // The premium landing page intentionally has no legacy 15-card grid.
   // Validate the original 15 actual photos on the dedicated comparison page.
   const collectionResponse=await page.goto(new URL('/affiliation.html',base).href,
