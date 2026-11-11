@@ -23,19 +23,82 @@ class OfficialProductSources(unittest.TestCase):
         products = json.loads(sync.SOURCE.read_text(encoding="utf-8"))["products"]
         by_id = {p["id"]: p for p in products}
         self.assertEqual(research["version"], 1)
-        self.assertEqual(len(research["sources"]), 3)
+        self.assertEqual(len(research["sources"]), 14)
         for pid, evidence in research["sources"].items():
             item = by_id[pid]
             actual = sync.official_recovery(item, research["sources"])
             self.assertEqual(sync.re.sub(r"[^A-Z0-9]", "", actual["modelCode"]),
                 sync.model_key(item["model"]))
             self.assertEqual(actual["productPage"], item["officialUrl"])
+        locle=research["sources"]["tissot-le-locle-white"]
+        self.assertEqual(locle["modelCode"],"T0064071103300")
+        self.assertIn("T006-407-11-033-00_shadow.png",locle["officialImage"])
+        self.assertTrue(sync.host_allowed(locle["officialImage"],
+            by_id["tissot-le-locle-white"]["officialUrl"]))
+        changed={"tissot-le-locle-white":{**locle,
+            "officialImage":locle["officialImage"].replace(
+                "T006-407-11-033-00","T006-407-11-053-00")}}
+        with self.assertRaisesRegex(ValueError,"packshot or model mismatch"):
+            sync.official_recovery(by_id["tissot-le-locle-white"],changed)
         image = research["sources"]["tissot-gentleman-auto"]["officialImage"]
         self.assertTrue(sync.host_allowed(image, by_id["tissot-gentleman-auto"]["officialUrl"]))
         self.assertIn("T127-407-11-041-00_shadow.png", image)
         self.assertIn("orient-watch.com",
             research["sources"]["orient-mako40-black"]["alternateManufacturerPage"])
         self.assertNotIn("amazon.", str(research))
+
+    def test_new_photos_ship_with_derivatives_even_after_bot_push(self):
+        workflow=(sync.ROOT / ".github" / "workflows"
+                  / "source-popular-watch-photos.yml").read_text()
+        self.assertIn("python scripts/sync-popular-watch-images.py",workflow)
+        self.assertIn("python scripts/build-popular-editorial-thumbnails.py",workflow)
+        self.assertLess(workflow.index("python scripts/sync-popular-watch-images.py"),
+                        workflow.index("python scripts/build-popular-editorial-thumbnails.py"))
+        self.assertLess(workflow.index("python scripts/build-popular-editorial-thumbnails.py"),
+                        workflow.index("node scripts/build-seo.mjs"))
+        self.assertIn("git add -A site/assets/watches-popular/ site/assets/popular-responsive/",
+                      workflow)
+
+    def test_casio_alternate_sources_require_manufacturer_and_exact_sku(self):
+        import json
+        research=json.loads(sync.RECOVERY_SOURCE.read_text(encoding="utf-8"))
+        products={p["id"]:p for p in
+          json.loads(sync.SOURCE.read_text(encoding="utf-8"))["products"]}
+        casios={pid:entry for pid,entry in research["sources"].items()
+                if pid.startswith("casio-")}
+        self.assertEqual(len(casios),10)
+        for pid,entry in casios.items():
+            model=products[pid]
+            self.assertEqual(sync.official_recovery(model,casios),entry)
+            self.assertTrue(entry["alternateManufacturerPage"].startswith(
+                "https://www.casio.com/"))
+            bad={**entry,
+                 "alternateManufacturerPage":entry["alternateManufacturerPage"]
+                     .replace("https://www.casio.com/",
+                              "https://casio-photography.example/")}
+            with self.assertRaisesRegex(ValueError,"Untrusted alternative"):
+                sync.official_recovery(model,{pid:bad})
+            bad={**entry,
+                 "alternateManufacturerPage":entry["alternateManufacturerPage"]
+                     .replace("product.", "product.UNRELATED-")}
+            with self.assertRaisesRegex(ValueError,"Untrusted alternative"):
+                sync.official_recovery(model,{pid:bad})
+            bad={**entry,
+                 "alternateManufacturerPage":entry["alternateManufacturerPage"]
+                     +"?redirect=https://example.org/"}
+            with self.assertRaisesRegex(ValueError,"Untrusted alternative"):
+                sync.official_recovery(model,{pid:bad})
+        self.assertTrue(sync.is_exact_casio_photo(
+            "https://www.casio.com/content/dam/CASIO-F-91W-1_front.png","F-91W-1"))
+        self.assertTrue(sync.is_exact_casio_photo(
+            "https://www.casio.com/product/F91W1_01.webp","F-91W-1"))
+        for near_match in (
+            "F-91W-1Y.jpg","F-91W-11.webp","F-91W-1A_02.png",
+            "F-91W-1B.jpg","F-91W-3.webp","another-product.png"
+        ):
+            self.assertFalse(sync.is_exact_casio_photo(
+                "https://www.casio.com/assets/"+near_match,"F-91W-1"),
+                "Colourway or unrelated photo must not be mistaken: "+near_match)
 
     def test_only_exact_orient_front_is_eligible_for_mobile_cards(self):
         base = "https://orient-watch.com/en/orient/collection/sports/diver-design-40/RA-AC0Q01B/product_en_file/file/"

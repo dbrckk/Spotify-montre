@@ -35,10 +35,20 @@ export function loadApprovedPopularPhotos({root,picks}){
     const alt=source.alternateManufacturerPage;
     if(alt){
       const uri=new URL(alt);
-      if(product.brand!=='Orient'||uri.protocol!=='https:'||
-        uri.hostname!=='orient-watch.com'||uri.username||uri.password||
-        uri.search||uri.hash||uri.port||
-        !uri.pathname.toUpperCase().includes(source.modelCode.toUpperCase()))
+      const normalized=value=>value.toUpperCase().replace(/[^A-Z0-9]/g,'');
+      const orient=product.brand==='Orient'&&uri.hostname==='orient-watch.com'
+        &&uri.pathname.toUpperCase().includes(source.modelCode.toUpperCase());
+      const casioCategory={
+        'Casio':'casio','Casio G-SHOCK':'gshock','Casio Edifice':'edifice'
+      }[product.brand];
+      const casioPath=/^\/(?:intl|europe|us)\/watches\/(casio|gshock|edifice)\/product\.([A-Za-z0-9-]+)\/$/
+        .exec(uri.pathname);
+      const casio=!!casioCategory&&uri.hostname==='www.casio.com'
+        &&casioPath?.[1]===casioCategory
+        &&normalized(casioPath[2])===normalized(source.modelCode)
+        &&normalized(source.modelCode)===normalized(product.model);
+      if(uri.protocol!=='https:'||uri.username||uri.password||
+        uri.search||uri.hash||uri.port||(!orient&&!casio))
         throw Error('Untrusted alternate manufacturer photo source: '+id);
     }
     if(source.officialImage){
@@ -101,10 +111,21 @@ export function loadApprovedPopularPhotos({root,picks}){
     if(documentedManufacturer){
       const src=new URL(item.sourceImageUrl);
       const expected='/'+alternate.modelCode+'_main.webp';
-      if(model.brand!=='Orient'||src.protocol!=='https:'||
-        src.hostname!=='orient-watch.com'||!src.pathname.endsWith(expected)||
-        src.hash||src.username||src.password||src.port)
-        throw Error('Only the official exact-model Orient front view is permitted: '+id);
+      if(model.brand==='Orient'){
+        if(src.protocol!=='https:'||src.hostname!=='orient-watch.com'
+          ||!src.pathname.endsWith(expected)||src.hash
+          ||src.username||src.password||src.port)
+          throw Error('Only the official exact-model Orient front view is permitted: '+id);
+      }else if(['Casio','Casio G-SHOCK','Casio Edifice'].includes(model.brand)){
+        // A regional Casio page can show multiple dial colourways.
+        // Require a full, delimited code in the source photo URL as well.
+        const code=alternate.modelCode.toUpperCase().replace(/-/g,'[-_]?');
+        if(src.hostname!=='www.casio.com'||src.protocol!=='https:'
+          ||src.username||src.password||src.port||src.hash
+          ||!new RegExp('(?:^|[^A-Z0-9])'+code+'(?![A-Z0-9])')
+            .test(decodeURIComponent(src.pathname).toUpperCase()))
+          throw Error('Only exact full-SKU Casio official photos are permitted: '+id);
+      }else throw Error('Untrusted alternate photo manufacturer: '+id);
     }
     let photoHost, pageHost;
     try{
