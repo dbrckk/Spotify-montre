@@ -1257,6 +1257,8 @@ for(const product of feed.products){
     assert.ok(facts[1].includes('<dt>'+label+'</dt>'),'Missing quick-fact label '+label+' on '+product.id);
     if(label!=='Mouvement')assert.ok(facts[1].includes(documented||'Non documenté'),'Quick-fact must not invent '+label+' on '+product.id);
   }
+  assert.ok(html.includes('href="./toutes-les-montres.html?tier='+product.tier+'#udCount"'),
+    'The product breadcrumb should return to its exact filtered collection: '+product.id);
   assert.match(html,/class="watch-actions"/,'Accessible purchase/compare actions remain grouped');
   assert.ok(html.includes('href="../affiliation.html#montres">Comparer avec les 14 autres modèles</a>'),
     'Canonical watch comparison must open all 15 detailed models, not six homepage selections');
