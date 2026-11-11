@@ -31,6 +31,23 @@ for (const [file, route] of [
   }
 }
 
+// The customer homepage must link to indexable, server-rendered product pages.
+// The interactive JS-only detail remains reachable from each canonical product page.
+const home = read('index.html');
+const featuredModels = [
+  'casio-mtp-1302', 'casio-mdv107', 'citizen-tsuyosa',
+  'seiko-5', 'tissot-prx-auto', 'hamilton-khaki'
+];
+assert.ok(!home.includes('href="./montre.html?id='),
+  'Homepage must not link to noindex JS-only product detail pages');
+for (const id of featuredModels) {
+  const canonical = './montres/' + id + '.html';
+  assert.ok(home.includes('href="' + canonical + '"'),
+    'Missing canonical product landing link for ' + id);
+}
+assert.match(home, /<a class="home-hero-visual" href="\.\/montres\/citizen-tsuyosa\.html">/,
+  'Hero must lead to the crawlable Citizen Tsuyosa detail page');
+
 const adviser = read('conseiller.html');
 assert.match(adviser, /<noscript>[\s\S]*?href="\.\/montres\/toutes-les-montres\.html"[\s\S]*?<\/noscript>/,
   'Advisor needs a working JS-free route to the 52 watches');

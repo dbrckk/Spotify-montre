@@ -225,3 +225,32 @@ body.am-showroom-home{background:var(--show-paper)}
   .am-showroom-home .home-hero-visual img{padding:4% 11% 7%}
   .am-showroom-home .home-hero-visual-caption{padding:12px 14px}
 }
+
+/* Editorial, photography-led color grading per collection.
+   Subtle stages support the genuine watch photos without replacing them. */
+.am-showroom-home #collection-accessible .home-product-image{
+  background:radial-gradient(circle at 45% 38%,#f6f1e4 0%,#e7dfd0 57%,#d3c8b5 100%);
+}
+.am-showroom-home #collection-intermediaire .home-product-image{
+  background:radial-gradient(circle at 45% 38%,#eff4ec 0%,#dbe5d9 57%,#c2d0c0 100%);
+}
+.am-showroom-home #collection-prestige .home-product-image{
+  background:radial-gradient(circle at 45% 38%,#f0f2f5 0%,#dbe1e9 57%,#bac8d5 100%);
+}
+.am-showroom-home .home-product-card{
+  transition:border-color .2s ease,box-shadow .2s ease;
+}
+@media(hover:hover){
+  .am-showroom-home .home-product-card:hover{
+    border-color:#b7976c;
+    box-shadow:0 18px 40px rgba(27,39,27,.12);
+  }
+}
+.am-showroom-home .home-product-card:focus-within{
+  border-color:#a47b3e;
+  box-shadow:0 0 0 2px rgba(164,123,62,.18),0 16px 34px rgba(27,39,27,.11);
+}
+@media(prefers-reduced-motion:reduce){
+  .am-showroom-home .home-product-card{transition:none}
+}
+
