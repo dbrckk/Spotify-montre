@@ -3,14 +3,17 @@ import {mkdirSync} from 'node:fs';
 import {chromium} from 'playwright';
 
 const base=process.env.WATCH_STOREFRONT_URL||'https://atelier-montres-selection-fr.onrender.com';
+// Only accept the exact local original or responsive widths emitted by
+// scripts/responsive-images.mjs. Query parameters are allowed for cache busting.
 const isAllowedPhoto=(url,id)=>{
   try {
+    if(!/^[a-z0-9-]{4,64}$/.test(id))return false;
     const resource=new URL(url),site=new URL(base);
-    return resource.origin===site.origin && (
-      resource.pathname==='/assets/watches/'+id+'.webp' ||
-      resource.pathname==='/assets/watch-responsive/'+id+'-480.webp' ||
-      resource.pathname==='/assets/watch-responsive/'+id+'-800.webp'
-    );
+    if(resource.origin!==site.origin)return false;
+    const pathname=resource.pathname;
+    return pathname==='/assets/watches/'+id+'.webp' ||
+      [480,640,720,800].some(width=>
+        pathname==='/assets/watch-responsive/'+id+'-'+width+'.webp');
   }catch{return false;}
 };
 const root=new URL(base);
