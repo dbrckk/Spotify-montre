@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {readFileSync,existsSync} from 'node:fs';
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {reviewCommonsCandidates,markdownCommonsReview} from './review-commons-watch-photos.mjs';
@@ -23,15 +23,20 @@ for(const c of baseline.candidates){
   assert.equal(c.identityStatus,'family_only_exact_variant_not_verified');
   assert.ok(c.filePage.startsWith('https://commons.wikimedia.org/wiki/File:'));
   assert.ok(c.licenseUrl.startsWith('https://creativecommons.org/'));
-  const html=readFileSync(new URL('../site/montres/'+c.modelId+'.html',import.meta.url),'utf8');
-  if(!rights.photos[c.modelId]){
-    assert.ok(html.includes('am-extra-art-no-photo'),
-      'Family-level candidate must never become a fake photo on the shop: '+c.modelId);
-    assert.ok(!html.includes('class="am-extra-licensed-photo"'),
-      'No photo source without exact SKU confirmation: '+c.modelId);
+  // The manufacturer sourcing job runs BEFORE HTML generation. Other jobs
+  // inspect the actual generated pages; check them here when available.
+  const path=new URL('../site/montres/'+c.modelId+'.html',import.meta.url);
+  if(existsSync(path)){
+    const html=readFileSync(path,'utf8');
+    if(!rights.photos[c.modelId]){
+      assert.ok(html.includes('am-extra-art-no-photo'),
+        'Family-level candidate must never become a fake photo on the shop: '+c.modelId);
+      assert.ok(!html.includes('class="am-extra-licensed-photo"'),
+        'No photo source without exact SKU confirmation: '+c.modelId);
+    }
+    assert.ok(!html.includes(c.filePage),
+      'Research URLs must not leak into the public product sheet: '+c.modelId);
   }
-  assert.ok(!html.includes(c.filePage),
-    'Research URLs must not leak into the public product sheet: '+c.modelId);
 }
 const check=(change,expected)=>{
   const bad=structuredClone(register);
