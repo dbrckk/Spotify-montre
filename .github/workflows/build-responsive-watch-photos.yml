@@ -52,6 +52,34 @@ jobs:
         run: |
           python scripts/build-responsive-watch-photos.py
           python scripts/build-popular-editorial-thumbnails.py
+      - name: Check exact core-photo srcsets at intermediate sizes
+        if: github.event_name == 'pull_request'
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import {existsSync,readFileSync} from 'node:fs';
+          const core=JSON.parse(readFileSync('site/selection-affiliation.json','utf8')).products;
+          const mobileSizes='(max-width: 480px) calc(100vw - 52px), (max-width: 800px) calc(100vw - 72px), 500px';
+          let count=0;
+          for(const watch of core){
+            const proof=watch.photoReview;
+            if(proof?.publicUsageApproved!==true)continue;
+            const html=readFileSync('site/montres/'+watch.id+'.html','utf8');
+            const image=html.match(/<img[^>]+src="\.\.\/assets\/watches\/[a-z0-9-]+\.webp"[^>]*>/)?.[0];
+            assert.ok(image,'Approved model must have an exact image: '+watch.id);
+            if(proof.localWidth>480){
+              assert.ok(image.includes('sizes="'+mobileSizes+'"'), 'Real viewport-based mobile sizes: '+watch.id);
+            }
+            for(const width of [480,640,720,800].filter(w=>w<proof.localWidth)){
+              const file='site/assets/watch-responsive/'+watch.id+'-'+width+'.webp';
+              assert.ok(existsSync(file),'Missing verified intermediate image '+file);
+              assert.ok(image.includes('watch-responsive/'+watch.id+'-'+width+'.webp'), 'Missing image candidate '+file);
+              count++;
+            }
+          }
+          assert.ok(count>0,'Expected at least one genuine optimized photo');
+          console.log('PASS: '+count+' reproducibly generated 480/640/720/800px product candidates');
+          NODE
       - name: Verify every approved derivative in the catalogue and product detail pages
         if: github.event_name == 'pull_request'
         run: |
