@@ -81,6 +81,16 @@ for(const p of picks){
       'Editorial passport movement must match the exact source field: '+p.id);
     assert.ok(html.includes('<dt>Boîtier</dt><dd>'+escapeHtml(p.case)+'</dd>'),
       'Editorial passport case description must remain documented: '+p.id);
+    assert.equal((html.match(/class="am-extra-passport-number"/g)||[]).length,4,
+      'Unphotographed reference needs exactly four real specification cells: '+p.id);
+    for(const [label,value] of [['Verre',p.glass],['Étanchéité',p.water]]){
+      assert.ok(html.includes('<dt>'+label+'</dt><dd>'+escapeHtml(value)+'</dd>'),
+        'Editorial passport must retain exact source-backed '+label+': '+p.id);
+    }
+    assert.ok(html.includes('<span class="am-extra-passport-photo-status">Photo non publiée</span>'),
+      'Do not make a documentary visual look like verified product photography: '+p.id);
+    assert.ok(html.includes('<strong>'+escapeHtml(p.model)+'</strong>'),
+      'Documentary visual must display the exact manufacturer's reference: '+p.id);
     assert.ok(!html.includes('class="am-budget-dial"'),
       'Do not simulate an unsupported product dial on a no-photo model: '+p.id);
     assert.ok(!html.includes('class="am-extra-licensed-photo"'),
@@ -235,6 +245,26 @@ try{
     assert.ok(fallbackModel,'Documented Casio F-91W-1 missing');
     assert.ok((await passport.innerText()).includes(fallbackModel.movement));
     assert.ok((await passport.innerText()).includes(fallbackModel.case));
+    assert.equal(await passport.locator('.am-extra-passport-facts>div').count(),4);
+    assert.ok((await passport.innerText()).includes(fallbackModel.glass),
+      'The four-fact studio must display the real source-registered crystal');
+    assert.ok((await passport.innerText()).includes(fallbackModel.water),
+      'The four-fact studio must display the actual waterproofness wording');
+    assert.equal(await passport.locator('.am-extra-passport-photo-status').innerText(),
+      'Photo non publiée');
+    const specGeometry=await passport.evaluate(el=>{
+      const rect=el.getBoundingClientRect(),grid=el.querySelector('.am-extra-passport-facts');
+      return {width:rect.width,left:rect.left,right:rect.right,
+        columns:getComputedStyle(grid).gridTemplateColumns.split(/\\s+/).filter(Boolean).length,
+        children:[...grid.children].map(node=>{
+          const r=node.getBoundingClientRect();return {left:r.left,right:r.right,height:r.height};
+        })};
+    });
+    assert.equal(specGeometry.columns,2,
+      '393px Android should show two columns of legible documentary facts');
+    assert.ok(specGeometry.children.every(rect=>rect.left>=specGeometry.left-2
+      &&rect.right<=specGeometry.right+2&&rect.height>=80),
+      'Real watch fact tiles must remain inside the studio: '+JSON.stringify(specGeometry));
     assert.equal(await officialFallbackPage.locator('.am-extra-seller-path').isVisible(),true);
     const studio=await officialFallbackPage.locator('.am-extra-art-no-photo').boundingBox();
     const panel=await passport.boundingBox();
