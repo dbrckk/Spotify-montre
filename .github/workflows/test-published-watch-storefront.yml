@@ -116,7 +116,7 @@ jobs:
           # A healthy homepage can belong to the PREVIOUS deploy. Compare the
           # bytes of assets the browser scenario actually exercises so a stale
           # CDN build never produces a false failure or false success.
-          for attempt in $(seq 1 42); do
+          for attempt in $(seq 1 72); do
             ready=1
             reason=''
             for file in affiliation.js selection-share.js affiliate-ui.js catalogue-view.css premium-system.css fiche.js fiche.css seo-guides.css editorial-photo.js editorial-photo.css popular-filters.js popular-picks.css extra-source-passport.css merchant-proof-ledger.css affordable-comparisons.css extra-factual-comparison.css shopper-selections.css unified-discovery.js unified-discovery.css unified-trust-markers.css watch-reference-copy.css watch-reference-copy-v2.js unified-recent-history.js unified-recent-history.css unified-tier-finish.css unified-shopper-paths.css privacy-controls.js privacy-controls.css; do
@@ -151,7 +151,8 @@ jobs:
                 elif ! grep -Fq 'data-watch-ref-copy="'"${watch_id}"'"' "$RUNNER_TEMP/live-core-$watch_id.html" ||
                      ! grep -Fq 'data-watch-id="'"${watch_id}"'"' "$RUNNER_TEMP/live-core-$watch_id.html" ||
                      ! grep -Fq 'href="../watch-reference-copy.css"' "$RUNNER_TEMP/live-core-$watch_id.html" ||
-                     ! grep -Fq 'src="../watch-reference-copy-v2.js"' "$RUNNER_TEMP/live-core-$watch_id.html"; then
+                     ! grep -Fq 'src="../watch-reference-copy-v2.js"' "$RUNNER_TEMP/live-core-$watch_id.html" ||
+                      ! grep -Fq "class=\"secondary am-interactive-detail-link\" href=\"../montre.html?id=$watch_id\"" "$RUNNER_TEMP/live-core-$watch_id.html"; then
                   ready=0
                   reason="$reason [old or mismatched original reference control: $watch_id]"
                   break
@@ -296,10 +297,10 @@ jobs:
               echo "Render serves exact JS/CSS, the unified 52-watch filter, and purchase-intent collections (attempt $attempt)."
               exit 0
             fi
-            if [ "$attempt" -eq 1 ] || [ "$attempt" -eq 8 ] || [ "$attempt" -eq 20 ] || [ "$attempt" -eq 42 ]; then
+            if [ "$attempt" -eq 1 ] || [ "$attempt" -eq 8 ] || [ "$attempt" -eq 20 ] || [ "$attempt" -eq 72 ]; then
               echo "Render not ready at attempt $attempt:$reason"
             fi
-            if [ "$attempt" -lt 42 ]; then sleep 5; fi
+            if [ "$attempt" -lt 72 ]; then sleep 5; fi
           done
           echo "Render publication verification failed. Last mismatches:$reason"
           exit 1
