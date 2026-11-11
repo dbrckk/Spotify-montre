@@ -544,6 +544,19 @@ try{
        assert.ok(await full.evaluate((image,id)=>image.naturalWidth>300&&
          image.currentSrc.includes('/assets/watches-popular/'+id+'.webp'),watch.id),
          'The photo viewer must display a local exact-model WebP, never an IA illustration: '+watch.id);
+       assert.equal(await dlg.locator('.am-photo-zoom').isEnabled(),true,
+         'Photo magnification must become enabled only after the local original loads');
+       if(watch.brand==='SKMEI')assert.match(
+         await dlg.locator('.am-photo-official').innerText(),/chez le vendeur/,
+         'The photo viewer must not mislabel a SKMEI seller as its manufacturer');
+       if(width<=650){
+         const controls=await dlg.locator('.am-photo-bottom').evaluate(el=>({
+           position:getComputedStyle(el).position,bottom:getComputedStyle(el).bottom
+         }));
+         assert.equal(controls.position,'sticky',
+           'Photo viewer actions must remain accessible when the Android dialog scrolls');
+         assert.equal(controls.bottom,'0px');
+       }
        if(watch.id==='skmei-2056'){
          const photoCanvas=dlg.locator('.am-photo-canvas');
          const normalWidth=await full.evaluate(img=>img.getBoundingClientRect().width);
