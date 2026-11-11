@@ -17,6 +17,7 @@
 .am-photo-bottom button,.am-photo-official{font:650 12px system-ui,sans-serif;border:1px solid #c9c2b3;background:#fffefa;color:#23432f;padding:11px 15px;min-height:44px;cursor:pointer;border-radius:2px;text-decoration:none}
 .am-photo-bottom button:hover,.am-photo-official:hover{background:#e7e8df}
 .am-photo-bottom button:disabled{opacity:.4;cursor:default}
+.am-photo-bottom [hidden]{display:none!important}
 .am-photo-position{font-size:12px;letter-spacing:.12em;color:#6d756e;min-width:43px;text-align:center}
 .am-photo-official{background:#244532;color:#fff;border-color:#244532}
 .am-photo-official:hover{background:#315740;color:#fff}
