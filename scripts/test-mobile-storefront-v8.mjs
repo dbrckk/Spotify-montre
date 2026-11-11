@@ -535,6 +535,12 @@ try{
          'The modal must identify the exact original product: '+watch.id);
        const full=dlg.locator('img.am-photo-large');
        await full.waitFor({state:'visible'});
+       assert.equal(await dlg.locator('.am-photo-prev').isVisible(),false,
+         'A single-product photo viewer must not show inactive previous navigation');
+       assert.equal(await dlg.locator('.am-photo-next').isVisible(),false,
+         'A single-product photo viewer must not show inactive next navigation');
+       assert.ok(await dlg.locator('.am-photo-official').isVisible(),
+         'The official manufacturer source stays accessible beside the photo zoom');
        assert.ok(await full.evaluate((image,id)=>image.naturalWidth>300&&
          image.currentSrc.includes('/assets/watches-popular/'+id+'.webp'),watch.id),
          'The photo viewer must display a local exact-model WebP, never an IA illustration: '+watch.id);
