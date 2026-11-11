@@ -1225,6 +1225,12 @@ for(const product of feed.products){
   // Production detail layout remains factual, navigable and useful on mobile.
   assert.match(html,/class="watch watch-product"/,'Premium product layout required: '+product.id);
   assert.match(html,/class="photo watch-photo"/,'Photo stage must preserve the real product photo');
+  assert.ok(html.includes('data-tier="'+product.tier+'" data-visual="'+(product.photoReview?.publicUsageApproved===true?'photo':'no-photo')+'"'),
+    'Product studio lighting must use verified category and photo state: '+product.id);
+  assert.ok(html.includes('<div class="watch-mobile-prelude" aria-hidden="true">'),
+    'Mobile shoppers must see an exact-model identification before the photo: '+product.id);
+  assert.equal((html.match(/class="watch-mobile-prelude"/g)||[]).length,1,
+    'Use one non-semantic mobile model prelude; keep the unique h1: '+product.id);
   assert.match(html,/class="watch-photo-caption"/,'Exact model photograph needs a source caption');
   // Real-source zoom is a progressive enhancement on indexable pages:
   // the exact local photo URL remains a working link without JavaScript.

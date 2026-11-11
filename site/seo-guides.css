@@ -403,3 +403,37 @@
 @media(max-width:520px){.watch-buyer-evidence{padding:15px 13px}
   .watch-buyer-evidence dl{grid-template-columns:minmax(0,1fr)}
   .watch-buyer-evidence dl>div:last-child{grid-column:auto}}
+ 
+/* Mobile product identity: show the exact model name immediately before its
+   genuine photograph; the semantic h1 remains unique in the normal intro. */
+.watch-product .watch-mobile-prelude{display:none}
+.watch-product[data-visual="photo"][data-tier="essential"] .watch-photo{
+  background:radial-gradient(ellipse at 48% 35%,#fffdf7 0%,#eee8db 62%,#d8c8b4 100%);
+}
+.watch-product[data-visual="photo"][data-tier="signature"] .watch-photo{
+  background:radial-gradient(ellipse at 48% 35%,#fcfefa 0%,#e5ece4 62%,#c1d3c3 100%);
+}
+.watch-product[data-visual="photo"][data-tier="prestige"] .watch-photo{
+  background:radial-gradient(ellipse at 48% 35%,#fdfefe 0%,#e6eaf1 62%,#bbcbdc 100%);
+}
+@media(max-width:800px){
+  .watch-product .watch-mobile-prelude{
+    display:grid;gap:7px;min-width:0;margin:0;
+    padding:4px 0 1px;color:#23412e;
+  }
+  .watch-product .watch-mobile-prelude span{
+    color:#816743;font:750 11px/1.45 system-ui,sans-serif;
+    letter-spacing:.12em;text-transform:uppercase;
+  }
+  .watch-product .watch-mobile-prelude strong{
+    font:400 clamp(27px,6.5vw,38px)/1.16 Georgia,serif;
+    letter-spacing:-.035em;overflow-wrap:anywhere;text-wrap:balance;
+  }
+  .watch-product .watch-photo{margin-top:0}
+  .watch-product .watch-quickfact dd{font-size:14px;line-height:1.48}
+}
+@media(max-width:360px){
+  .watch-product .watch-mobile-prelude strong{font-size:28px}
+  .watch-product .watch-facts dl{grid-template-columns:minmax(0,1fr)}
+  .watch-product .watch-quickfact{padding:9px 0}
+}

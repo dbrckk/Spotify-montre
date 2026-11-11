@@ -116,6 +116,27 @@ try{
     'Canonical watch product must feature a prominent link to interactive favorites and comparison');
   assert.equal(await interactiveBridge.getAttribute('href'),'../montre.html?id=citizen-tsuyosa',
     'Interactive bridge must preserve exact model identification');
+  // The large photo should no longer hide the watch identity on a short
+  // Android screen. This visual duplicate is aria-hidden; the h1 stays unique.
+  const mobileIdentity=page.locator('article.watch-product .watch-mobile-prelude');
+  assert.equal(await mobileIdentity.getAttribute('aria-hidden'),'true',
+    'Visual mobile identity must not duplicate the semantic h1 for screen readers');
+  await page.waitForFunction(()=>{
+    const identity=document.querySelector('.watch-mobile-prelude');
+    return identity&&getComputedStyle(identity).display==='grid';
+  },null,{timeout:20000});
+  assert.match(await mobileIdentity.innerText(),/Citizen Tsuyosa/,
+    'Show the exact model above the photographed watch on Android');
+  const identityBox=await mobileIdentity.boundingBox();
+  const photoBox=await page.locator('article.watch-product .watch-photo').boundingBox();
+  assert.ok(identityBox&&photoBox&&identityBox.y+identityBox.height<=photoBox.y+3,
+    'The model identity must precede the photo without overlapping it');
+  assert.equal(await page.locator('article.watch-product h1').count(),1,
+    'The canonical product needs exactly one semantic main heading');
+  assert.equal(await page.locator('article.watch-product').getAttribute('data-tier'),'signature',
+    'Citizen product must use its verified editorial tier');
+  assert.equal(await page.locator('article.watch-product').getAttribute('data-visual'),'photo',
+    'Photographed Citizen must not use an unsupported placeholder stage');
     const sourcePhotoStage=page.locator('article.watch-product .watch-photo');
   // On a cold CDN/browser navigation, DOMContentLoaded can precede the
   // final stylesheet paint. Measure photo reservation only once our actual
