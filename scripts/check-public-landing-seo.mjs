@@ -48,6 +48,11 @@ for (const id of featuredModels) {
 assert.match(home, /<a class="home-hero-visual" href="\.\/montres\/citizen-tsuyosa\.html">/,
   'Hero must lead to the crawlable Citizen Tsuyosa detail page');
 
+assert.ok(home.includes('href="./montres/toutes-les-montres.html?tier=essential#udCount" class="home-choice"'),
+  'Budget guidance must open the actual filtered 52-watch catalogue');
+assert.ok(!home.includes('affiliation.html#selection-accessible'),
+  'Homepage must not send shoppers to the removed 15-watch budget anchor');
+
 const adviser = read('conseiller.html');
 assert.match(adviser, /<noscript>[\s\S]*?href="\.\/montres\/toutes-les-montres\.html"[\s\S]*?<\/noscript>/,
   'Advisor needs a working JS-free route to the 52 watches');

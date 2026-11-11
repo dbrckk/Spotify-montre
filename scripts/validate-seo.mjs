@@ -1258,6 +1258,8 @@ for(const product of feed.products){
     if(label!=='Mouvement')assert.ok(facts[1].includes(documented||'Non documenté'),'Quick-fact must not invent '+label+' on '+product.id);
   }
   assert.match(html,/class="watch-actions"/,'Accessible purchase/compare actions remain grouped');
+  assert.ok(html.includes('href="../affiliation.html#montres">Comparer avec les 14 autres modèles</a>'),
+    'Canonical watch comparison must open all 15 detailed models, not six homepage selections');
   // Product facts need model-specific, inspectable manufacturer provenance.
   const review=product.specReview;
   assert.match(html,/class="watch-evidence"/,'Every SEO product page must expose source evidence or a missing-proof disclaimer');
