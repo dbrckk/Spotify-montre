@@ -3,47 +3,47 @@
   "models": 15,
   "totalModels": 52,
   "supplementalPhotos": 26,
-  "files": 336,
+  "files": 417,
   "parts": [
     {
       "file": "deploy-package-01.json",
-      "count": 31,
-      "bytes": 714718
+      "count": 29,
+      "bytes": 696534
     },
     {
       "file": "deploy-package-02.json",
-      "count": 34,
-      "bytes": 719295
+      "count": 32,
+      "bytes": 712682
     },
     {
       "file": "deploy-package-03.json",
       "count": 30,
-      "bytes": 706842
+      "bytes": 718893
     },
     {
       "file": "deploy-package-04.json",
       "count": 35,
-      "bytes": 701006
+      "bytes": 705938
     },
     {
       "file": "deploy-package-05.json",
-      "count": 26,
-      "bytes": 682520
+      "count": 28,
+      "bytes": 703040
     },
     {
       "file": "deploy-package-06.json",
-      "count": 22,
-      "bytes": 689646
+      "count": 23,
+      "bytes": 685817
     },
     {
       "file": "deploy-package-07.json",
       "count": 18,
-      "bytes": 709529
+      "bytes": 711665
     },
     {
       "file": "deploy-package-08.json",
-      "count": 19,
-      "bytes": 643684
+      "count": 20,
+      "bytes": 688905
     },
     {
       "file": "deploy-package-09.json",
@@ -77,13 +77,28 @@
     },
     {
       "file": "deploy-package-15.json",
-      "count": 55,
-      "bytes": 711552
+      "count": 46,
+      "bytes": 717555
     },
     {
       "file": "deploy-package-16.json",
+      "count": 39,
+      "bytes": 628090
+    },
+    {
+      "file": "deploy-package-17.json",
       "count": 29,
-      "bytes": 337755
+      "bytes": 710763
+    },
+    {
+      "file": "deploy-package-18.json",
+      "count": 29,
+      "bytes": 714104
+    },
+    {
+      "file": "deploy-package-19.json",
+      "count": 22,
+      "bytes": 195960
     }
   ]
 }
