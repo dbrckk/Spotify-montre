@@ -275,6 +275,12 @@ import {sanitizeWithdrawnMedia} from './sanitize-withdrawn-media.mjs';
   }
   const selection = `<section class="seo-links" aria-labelledby="seo-links-title"><div class="wrap"><p class="overline kicker">Explorer avant de choisir</p><h2 id="seo-links-title">Les 15 montres, modèle par modèle</h2><p>Des fiches éditoriales avec caractéristiques documentées et liens vers les fabricants. Aucun prix ou stock non vérifié.</p><ul>${allLinks()}</ul><p><a href="./montres/guide-choisir-montre.html">Notre guide pour choisir une montre : mouvements et tailles</a></p></div></section>`;
   const guideCards = `<section class="seo-guides" aria-labelledby="seo-guides-title"><div class="wrap"><p class="overline kicker">Conseils pour choisir</p><h2 id="seo-guides-title">Avant de choisir sa montre.</h2><p class="seo-guides-lead">Comparer un boîtier, comprendre le mouvement ou choisir une belle mécanique : trois guides pour affiner votre sélection à partir des informations documentées.</p><div class="seo-guide-grid"><article><span>01 / MOUVEMENT</span><h3>Quartz ou automatique ?</h3><p>Les différences de fonctionnement et d’entretien, illustrées par les modèles de notre collection.</p><a href="./montres/quartz-ou-automatique.html">Comparer les mouvements →</a></article><article><span>02 / PROPORTIONS</span><h3>Choisir le bon diamètre.</h3><p>Mesures confirmées, confort et proportions : comprendre ce qui compte vraiment au poignet.</p><a href="./montres/taille-boitier-montre.html">Consulter le guide des tailles →</a></article><article><span>03 / MÉCANIQUE</span><h3>${products.filter(p=>p.movement==='automatic').length} montres automatiques.</h3><p>Citizen, Orient, Seiko, Tissot et Hamilton : comparer leurs lignes et caractéristiques documentées.</p><a href="./montres/montres-automatiques.html">Découvrir les automatiques →</a></article></div></div></section>`;
+  // The source HTML can already contain crawlable canonical/social metadata.
+  // Generated SEO owns those tags, so remove source-level duplicates before
+  // inserting the idempotent, delimited generated head.
+  const removeSourceLandingSeo = html => html
+    .replace(/<link rel="canonical" href="[^"]*">/g,'')
+    .replace(/<meta property="og:(?:type|locale|site_name|url|title|description)" content="[^"]*">/g,'');
   let collection = sanitizeWithdrawnMedia(readFileSync(join(root,'affiliation.html'),'utf8'),products);
   // Publishing twice must not duplicate canonical tags, structured data or internal links.
   collection=collection.replace(/<!-- AM_SEO_LINKS_START -->[\s\S]*?<!-- AM_SEO_LINKS_END -->\s*/g,'');
@@ -284,6 +290,7 @@ import {sanitizeWithdrawnMedia} from './sanitize-withdrawn-media.mjs';
   collection=collection.replace(/<!-- AM_SEO_COMPARISONS_START -->[\s\S]*?<!-- AM_SEO_COMPARISONS_END -->\s*/g,'');
   collection=collection.replace(/<!-- AM_SEO_CATEGORIES_START -->[\s\S]*?<!-- AM_SEO_CATEGORIES_END -->\s*/g,'');
   collection=collection.replace(/<!-- AM_SEO_HEAD_START -->[\s\S]*?<!-- AM_SEO_HEAD_END -->/g,'');
+  collection=removeSourceLandingSeo(collection);
   collection=collection.replace(/<!-- AM_EDITORIAL_POLICY_START -->[\s\S]*?<!-- AM_EDITORIAL_POLICY_END -->\s*/g,'');
   if (partners.enabled) {
     collection=collection.replace(/<div class="aff-disclosure">[\s\S]*?<\/div>/,'<div class="aff-disclosure"><strong>Transparence commerciale</strong><p>Certains modèles proposent un lien Amazon.fr clairement indiqué « lien rémunéré ». Les autres liens fabricants restent non rémunérés. Le paiement et les retours sont gérés par le vendeur externe. '+e(amazonStatement)+'</p></div>');
@@ -345,6 +352,7 @@ import {sanitizeWithdrawnMedia} from './sanitize-withdrawn-media.mjs';
   if(existsSync(advisorFile)) {
   let advisor=readFileSync(advisorFile,'utf8');
   advisor=advisor.replace(/<!-- AM_ADVISOR_SEO_START -->[\s\S]*?<!-- AM_ADVISOR_SEO_END -->/g,'');
+  advisor=removeSourceLandingSeo(advisor);
   if(!advisor.includes('</head>')||!advisor.includes('<h1>')) throw Error('Conseiller : structure HTML introuvable');
   const advisorTitle='Trouver sa montre : conseiller en 4 critères | Atelier Montres';
   const advisorDescription='Conseiller gratuit parmi 52 montres réelles : style, mouvement, gamme et diamètre documenté, sans tarifs ni disponibilité inventés.';
