@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {readFileSync,mkdirSync} from 'node:fs';
+import {readFileSync,mkdirSync,statSync} from 'node:fs';
 import {chromium} from 'playwright';
 
 // Local-only verification. Do not follow merchant links or invoke payments.
@@ -56,12 +56,14 @@ for(const p of picks){
       'Photographed product must not use the no-photo treatment: '+p.id);
     const hero=html.match(/<img class="am-extra-licensed-photo"[^>]+>/)?.[0]||'';
     assert.ok(hero,'Published exact-model photograph missing: '+p.id);
+    assert.ok(hero.includes('fetchpriority="high"')&&hero.includes('loading="eager"'),
+      'The genuine first-viewport photograph must be prioritized, not lazy: '+p.id);
     assert.ok(html.includes('class="am-extra-photo-stage"')&&
       html.includes('class="am-extra-photo-meta"'),
       'Verified watch must have an unobstructed photo stage and separate metadata: '+p.id);
     assert.ok(hero.includes('width="'+proof.width+'"')&&
       hero.includes('height="'+proof.height+'"'),'Original aspect dimensions missing: '+p.id);
-    for(const size of [240,360,480,720,960].filter(size=>size<proof.width))
+    for(const size of [240,360,480,640,720,960].filter(size=>size<proof.width))
       assert.ok(hero.includes('popular-responsive/'+p.id+'-'+size+'.webp '+size+'w'),
         'Detailed watch hero must expose the verified '+size+'px WebP: '+p.id);
     assert.ok(hero.includes('watches-popular/'+p.id+'.webp '+proof.width+'w'),
@@ -430,6 +432,42 @@ try{
     assert.deepEqual(errors,[]);
     await context.close();
   }
+
+  // A 393px Android at DPR 2 needs ~613 image pixels (78vw * 2).
+  // A source-verified 640px candidate should avoid loading the 720px file
+  // while preserving detail and the unchanged full original for zoom.
+  const middleDensity=await browser.newContext({viewport:{width:393,height:852},
+    isMobile:true,hasTouch:true,deviceScaleFactor:2,locale:'fr-FR'});
+  try{
+    const page=await middleDensity.newPage();
+    const response=await page.goto(new URL('/montres/skmei-1251.html',base).href,
+      {waitUntil:'load'});
+    assert.ok(response?.ok(),'Two-density Android product sheet loads');
+    const image=page.locator('.am-extra-photo-stage img.am-extra-licensed-photo');
+    await image.evaluate(el=>el.decode());
+    const info=await image.evaluate(el=>({
+      chosen:new URL(el.currentSrc).pathname,
+      sizes:el.getAttribute('sizes'),priority:el.getAttribute('fetchpriority'),
+      renderedWidth:el.getBoundingClientRect().width,
+      naturalWidth:el.naturalWidth
+    }));
+    assert.equal(info.chosen,'/assets/popular-responsive/skmei-1251-640.webp',
+      'DPR2 Android should select the 640px source-verified WebP: '+JSON.stringify(info));
+    assert.equal(info.priority,'high','First viewport watch photo should have high fetch priority');
+    assert.ok(info.renderedWidth>250&&info.naturalWidth>0,
+      'Selected watch image must decode and remain visually inspectable');
+    const compactBytes=statSync('site/assets/popular-responsive/skmei-1251-640.webp').size;
+    const largeBytes=statSync('site/assets/popular-responsive/skmei-1251-720.webp').size;
+    assert.ok(compactBytes<largeBytes,
+      '640px WebP must transfer fewer bytes than equivalent 720px photo');
+    await page.locator('.am-extra-zoom').click();
+    const original=page.locator('#amPhotoDialog img.am-photo-large');
+    await original.waitFor({state:'visible'});
+    assert.match(await original.getAttribute('src'),
+      /\/assets\/watches-popular\/skmei-1251\.webp$/,
+      'Full original source remains available for photo zoom');
+    await page.locator('#amPhotoDialog .am-photo-close').click();
+  }finally{await middleDensity.close();}
 
   // High-density Android screens must not jump straight from a 480px card
   // image to the full 1080px SKMEI original. Full original stays for zoom.

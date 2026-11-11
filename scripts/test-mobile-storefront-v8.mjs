@@ -320,7 +320,7 @@ try{
    assert.equal(await img.getAttribute('height'),String(proof.height));
    assert.equal(await img.getAttribute('loading'),'lazy');
    const srcset=await img.getAttribute('srcset')||'';
-   const variants=[240,360,480,720,960].filter(size=>size<proof.width&&
+   const variants=[240,360,480,640,720,960].filter(size=>size<proof.width&&
      existsSync('site/assets/popular-responsive/'+id+'-'+size+'.webp'));
    if(variants.length){
      for(const size of variants)

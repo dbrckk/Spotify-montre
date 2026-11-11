@@ -192,7 +192,7 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       +'<div class="am-extra-art am-pick-'+e(p.style)+(photo?' am-extra-art-with-photo':' am-extra-art-no-photo')+'" role="group" aria-label="'+(photo?'Photo du modèle exact, droits de publication déclarés':'Fiche documentaire typographique, aucune photographie de cette montre publiée ici')+'">'
       +(photo?'<div class="am-extra-photo-stage"><img class="am-extra-licensed-photo" src="../'+e(photo.url)+'"'
         +responsivePopularAttrs(root,p,photo,{prefix:'../',sizes:'(max-width: 760px) 78vw, (max-width: 1200px) 40vw, 520px',escape:e})
-        +' width="'+photo.width+'" height="'+photo.height+'" alt="Montre '+e(name)+'" decoding="async" loading="eager">'
+        +' width="'+photo.width+'" height="'+photo.height+'" alt="Montre '+e(name)+'" decoding="async" loading="eager" fetchpriority="high">'
         +'<button type="button" class="am-extra-zoom" data-extra-zoom-id="'+e(p.id)+'" aria-label="Agrandir la photo du modèle '+e(name)+'" hidden>Agrandir la photo</button>'
         +'</div><div class="am-extra-photo-meta">':'')
       +'<span class="am-extra-art-kicker">'+e(p.category)+'</span><span class="am-extra-art-brand">'+e(p.brand)+'</span>'
