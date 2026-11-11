@@ -19,7 +19,7 @@ assert.doesNotMatch(markup, /squareLink|storeState|Square Online/, 'No outbound 
 assert.match(markup, /Achat, paiement et livraison chez le vendeur/, 'The public homepage must identify who sells');
 assert.doesNotMatch(markup, /class="home-hero-visual"[^>]*aria-label=/, 'Product cover accessible name must include its visible text');
 assert.match(markup, /id="chatLauncher"[^>]*aria-label="Une question \? Ouvrir le guide de montres"/, 'Visible chat button label must be part of its accessible name');
-assert.match(markup, /href="\.\/affiliation\.html#selection-accessible" class="home-choice"/, 'Budget shopping entry must target budget watches, not the complete popular range');
+assert.match(markup, /href="\.\/montres\/toutes-les-montres\.html\?tier=essential#udCount" class="home-choice"/, 'Budget shopping entry must open the 52-watch catalog filtered to essential models');
 assert.doesNotMatch(markup, /Aucune commande n'est encore acceptée|Projet en préparation|Notre sélection se prépare|Stock et préparation des commandes en France à l'ouverture/, 'Do not expose obsolete launch banners or unverified delivery promises');
 assert.match(markup, /id="homePurchaseAnswer"/, 'Public FAQ needs to stay synchronized with conditional direct checkout');
 const editorialPurchase=readFileSync(resolve(root,'affiliation.html'),'utf8');
