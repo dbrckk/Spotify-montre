@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "policy": "research_only_no_auto_publishing",
+  "reviewedOn": "2026-11-11",
+  "sourceType": "Wikimedia_Commons_file_pages_not_manufacturer_packshots",
+  "notes": "Page Commons et licence déclarée ne prouvent pas à elles seules l'identité de la variante vendue, une licence irrévocable ou les droits sur d'éventuelles marques. Aucun fichier de cette liste ne doit être intégré au site sans vérification supplémentaire et mise à jour explicite des droits, crédits et obligations de partage à l'identique.",
+  "candidates": [
+    {
+      "modelId": "casio-f91w-1",
+      "catalogModel": "F-91W-1",
+      "candidateModel": "F-91W",
+      "filePage": "https://commons.wikimedia.org/wiki/File:Casio_F-91W.jpg",
+      "creator": "NotFromUtrecht",
+      "license": "CC-BY-SA-3.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+      "sourceSha1": "873bc5e7001800492db1c190747de782d6f80463",
+      "reason": "La page décrit la famille F-91W sans certifier le suffixe commercial -1 de la fiche vendue.",
+      "identityStatus": "family_only_exact_variant_not_verified",
+      "publicationAllowed": false
+    },
+    {
+      "modelId": "casio-gw-m5610u-1",
+      "catalogModel": "GW-M5610U-1",
+      "candidateModel": "GW-M5610U",
+      "filePage": "https://commons.wikimedia.org/wiki/File:CASIO_G-Shock_GW-M5610U.jpg",
+      "creator": "Md. Rifat Hasan Jihan",
+      "license": "CC-BY-SA-4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "sourceSha1": "1fff84bb869981e40136ac1dd3381e9a6e72eefc",
+      "reason": "La photographie porte la référence GW-M5610U, sans preuve du code de variante -1.",
+      "identityStatus": "family_only_exact_variant_not_verified",
+      "publicationAllowed": false
+    },
+    {
+      "modelId": "casio-a158wea-1",
+      "catalogModel": "A158WEA-1",
+      "candidateModel": "A158W",
+      "filePage": "https://commons.wikimedia.org/wiki/File:Casio_A158W.jpg",
+      "creator": "Casiolink",
+      "license": "CC-BY-SA-4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "sourceSha1": "73468409b5649326e9b512460fb102f421952c09",
+      "reason": "A158W ne certifie ni A158WEA-1 ni les détails de cette variante commerciale.",
+      "identityStatus": "family_only_exact_variant_not_verified",
+      "publicationAllowed": false
+    }
+  ]
+}
