@@ -47,8 +47,12 @@ export function reviewCommonsCandidates({catalogue,rights,register}){
        item.publicationAllowed!==false||
        !safeText(item.candidateModel)||!safeText(item.creator)||!safeText(item.reason))
       throw Error('Candidate must remain an unpublished, unverified variant: '+item.modelId);
-    if(norm(item.candidateModel)===norm(p.model))
+    const candidateCode=norm(item.candidateModel);
+    const actualSku=norm(p.model);
+    if(candidateCode===actualSku)
       throw Error('Claim of precise SKU requires independent variant review: '+item.modelId);
+    if(candidateCode.length<5||!actualSku.startsWith(candidateCode))
+      throw Error('Commons candidate family code is unrelated to the catalogue SKU: '+item.modelId);
     if(!licenses.has(item.license)||item.licenseUrl!==licenses.get(item.license))
       throw Error('Commercially incompatible or unverified Commons licence: '+item.modelId);
     if(!/^[0-9a-f]{40}$/.test(item.sourceSha1||''))
@@ -59,7 +63,7 @@ export function reviewCommonsCandidates({catalogue,rights,register}){
     if(url.protocol!=='https:'||url.hostname!=='commons.wikimedia.org'||
        url.port||url.username||url.password||url.search||url.hash||
        !/^\/wiki\/File:[A-Za-z0-9_()-]+\.(?:jpe?g|png|webp)$/i.test(filePath)||
-       !norm(filePath).includes(norm(item.candidateModel)))
+       !norm(filePath.split('/').at(-1).replace(/\.[^.]+$/,'')).includes(candidateCode))
       throw Error('Untrusted Commons file page or irrelevant photo: '+item.modelId);
     candidates.push({
       modelId:item.modelId,catalogModel:p.model,candidateModel:item.candidateModel,
