@@ -90,7 +90,7 @@ for(const p of picks){
     assert.ok(html.includes('<span class="am-extra-passport-photo-status">Photo non publiée</span>'),
       'Do not make a documentary visual look like verified product photography: '+p.id);
     assert.ok(html.includes('<strong>'+escapeHtml(p.model)+'</strong>'),
-      'Documentary visual must display the exact manufacturer's reference: '+p.id);
+      'Documentary visual must display the exact manufacturer model reference: '+p.id);
     assert.ok(!html.includes('class="am-budget-dial"'),
       'Do not simulate an unsupported product dial on a no-photo model: '+p.id);
     assert.ok(!html.includes('class="am-extra-licensed-photo"'),
