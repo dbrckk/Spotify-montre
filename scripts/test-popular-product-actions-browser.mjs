@@ -230,7 +230,7 @@ try{
     assert.equal(new Set(backgrounds).size,3,'Photographic studios must have three range-specific backgrounds');
     await studioPhone.goto(new URL('/montres/casio-f91w-1.html',base).href,{waitUntil:'load'});
     assert.ok(await studioPhone.locator('.am-extra-mobile-prelude').isVisible(),'No-photo product also gets a mobile identity');
-    assert.match(await studioPhone.locator('.am-extra-mobile-prelude').innerText(),/Photo non publiée/);
+    assert.match(await studioPhone.locator('.am-extra-mobile-prelude').innerText(),/photo non publiée/i);
     assert.equal(await studioPhone.locator('.am-extra-photo-stage').count(),0,'Never invent a photo stage for an unphotographed watch');
     await studioPhone.setViewportSize({width:320,height:740});
     const narrow=await studioPhone.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
