@@ -7,11 +7,13 @@
 .am-photo-title{font:400 clamp(19px,3vw,30px)/1.2 Georgia,serif;color:#fff;overflow-wrap:anywhere;margin:0}
 .am-photo-close{width:44px;height:44px;flex:none;border:1px solid #e1cfaf66;border-radius:50%;background:transparent;color:#fff;font:400 30px/1 system-ui;cursor:pointer}
 .am-photo-canvas{height:clamp(300px,59dvh,650px);background:radial-gradient(circle at center,#fffefa 0%,#eeeae1 80%);position:relative;display:flex;align-items:center;justify-content:center;overflow:auto;overscroll-behavior:contain;padding:16px}
-.am-photo-large{width:auto;height:auto;max-height:100%;max-width:100%;object-fit:contain;mix-blend-mode:multiply;filter:drop-shadow(0 15px 25px #071c1324);transition:width .18s ease,max-width .18s ease}
-.am-photo-canvas.am-photo-expanded{justify-content:flex-start;align-items:flex-start}
+ .am-photo-large{width:auto;height:auto;max-height:100%;max-width:100%;object-fit:contain;mix-blend-mode:multiply;filter:drop-shadow(0 15px 25px #071c1324);transition:width .18s ease,max-width .18s ease}
+ .am-photo-canvas.am-photo-expanded{justify-content:flex-start;align-items:flex-start}
 /* Prevent the image from shrinking to the flex viewport: enlarged details must
    really be scrollable, not just a cosmetic button state. */
 .am-photo-canvas.am-photo-expanded .am-photo-large{flex:0 0 auto;max-width:none;max-height:none;width:200%;height:auto;margin:0}
+ .am-photo-large:not([hidden]){cursor:zoom-in}
+.am-photo-canvas.am-photo-expanded .am-photo-large{cursor:zoom-out}
 .am-photo-status{max-width:250px;text-align:center;font-size:13px;color:#617063}
 .am-photo-bottom{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;padding:17px 22px 8px}
 .am-photo-bottom button,.am-photo-official{font:650 12px system-ui,sans-serif;border:1px solid #c9c2b3;background:#fffefa;color:#23432f;padding:11px 15px;min-height:44px;cursor:pointer;border-radius:2px;text-decoration:none}
