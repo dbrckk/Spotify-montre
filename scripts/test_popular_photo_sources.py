@@ -47,6 +47,18 @@ class OfficialProductSources(unittest.TestCase):
             research["sources"]["orient-mako40-black"]["alternateManufacturerPage"])
         self.assertNotIn("amazon.", str(research))
 
+    def test_new_photos_ship_with_derivatives_even_after_bot_push(self):
+        workflow=(sync.ROOT / ".github" / "workflows"
+                  / "source-popular-watch-photos.yml").read_text()
+        self.assertIn("python scripts/sync-popular-watch-images.py",workflow)
+        self.assertIn("python scripts/build-popular-editorial-thumbnails.py",workflow)
+        self.assertLess(workflow.index("python scripts/sync-popular-watch-images.py"),
+                        workflow.index("python scripts/build-popular-editorial-thumbnails.py"))
+        self.assertLess(workflow.index("python scripts/build-popular-editorial-thumbnails.py"),
+                        workflow.index("node scripts/build-seo.mjs"))
+        self.assertIn("git add -A site/assets/watches-popular/ site/assets/popular-responsive/",
+                      workflow)
+
     def test_casio_alternate_sources_require_manufacturer_and_exact_sku(self):
         import json
         research=json.loads(sync.RECOVERY_SOURCE.read_text(encoding="utf-8"))
