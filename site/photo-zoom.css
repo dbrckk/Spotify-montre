@@ -36,7 +36,7 @@
  .am-photo-dialog{width:calc(100vw - 12px);max-height:96dvh}
  .am-photo-top{padding:12px 14px}
  .am-photo-canvas{height:clamp(280px,54dvh,560px)}
- .am-photo-bottom{gap:7px;padding:12px 9px 7px}
+ .am-photo-bottom{position:sticky;bottom:0;z-index:2;gap:7px;padding:12px 9px 11px;background:#f8f6ef;border-top:1px solid #ded7c9;box-shadow:0 -8px 20px #172e2212}
  .am-photo-bottom button,.am-photo-official{font-size:11px;padding:9px 11px}
  .am-photo-note{padding-inline:12px}
 }
