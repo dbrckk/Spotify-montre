@@ -783,3 +783,17 @@
 @media(max-width:540px){.am-extra-decision{padding:15px 13px}
   .am-extra-decision dl{grid-template-columns:minmax(0,1fr)}
   .am-extra-decision dl>div:last-child{grid-column:auto}}
+
+/* Source-first wayfinding: useful on long 37-model product sheets even without
+   JavaScript, with a swipeable, keyboard-accessible rail on small Androids. */
+.am-extra-quicklinks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:0 0 19px;min-width:0}
+.am-extra-quicklinks a{display:flex;flex-direction:column;justify-content:center;gap:5px;min-width:0;min-height:58px;padding:11px 13px;background:#f8f7f0;border:1px solid #d5dfd1;border-bottom:3px solid #8aa791;border-radius:5px;text-decoration:none;color:#284b35;font:750 12px/1.35 system-ui,sans-serif;overflow-wrap:anywhere}
+.am-extra-quicklinks a span{font:750 10px/1 system-ui,sans-serif;color:#8b6539;letter-spacing:.08em}
+.am-extra-quicklinks a:hover{background:#eaf1e8;border-bottom-color:#42664a}
+.am-extra-quicklinks a:focus-visible{outline:3px solid #bd8e42;outline-offset:3px}
+.am-extra-spec-heading{margin:0 0 11px;color:#234532;font:400 clamp(20px,2.1vw,25px)/1.25 Georgia,serif;letter-spacing:-.02em}
+#caracteristiques,#vendeurs{scroll-margin-top:22px}
+@media(max-width:570px){
+  .am-extra-quicklinks{display:flex;gap:9px;overflow-x:auto;scroll-snap-type:x proximity;overscroll-behavior-x:contain;scrollbar-width:thin;scrollbar-color:#9aad95 #eeeee5;padding:3px 3px 12px;margin:0 0 13px}
+  .am-extra-quicklinks a{flex:0 0 clamp(140px,43vw,195px);scroll-snap-align:start;min-height:58px;font-size:12px}
+}
