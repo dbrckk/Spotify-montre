@@ -1,8 +1,8 @@
 """Create documented responsive WebP variants of the 15 locally published watches.
 
 Uses original source bytes only, with no network image requests. The full-quality
-WebP remains unchanged for zooming. Never upscale: 480px variants for all images
-and an 800px variant only when the original supports it. Reproducible output.
+WebP remains unchanged for zooming. Never upscale: provide 480, 640, 720
+and 800px variants only when the original is larger. Reproducible output.
 """
 import hashlib
 import json
@@ -37,8 +37,8 @@ def build():
                 raise ValueError(f"Source is not a WebP: {model_id}")
             source.load()
             source = ImageOps.exif_transpose(source)
-            for width in (480, 800):
-                if source.width < width:
+            for width in (480, 640, 720, 800):
+                if source.width <= width:
                     continue
                 target = source.resize(
                     (width, round(source.height * width / source.width)),
