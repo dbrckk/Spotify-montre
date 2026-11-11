@@ -1301,7 +1301,7 @@ for(const product of feed.products){
     // Do not upscale the narrow 399px Swatch source just to force srcset.
     if(product.photoReview.localWidth>480){
       assert.ok(set&&html.includes('srcset="'+set+'"'),'Published model must expose responsive local photo variants: '+product.id);
-      assert.ok(html.includes('sizes="(max-width: 760px) 92vw, 540px"'),'Responsive model image must declare realistic display sizes');
+      assert.ok(html.includes('sizes="(max-width: 480px) calc(100vw - 52px), (max-width: 800px) calc(100vw - 72px), 500px"'),'Responsive model image must declare realistic display sizes');
     }else{
       assert.equal(set,'','A narrow original photo must not be artificially upscaled');
     }

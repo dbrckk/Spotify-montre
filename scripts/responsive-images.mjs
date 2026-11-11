@@ -14,7 +14,7 @@ export function responsiveSrcset(root,product,prefix='../'){
   if(!Number.isInteger(width)||width<=0||!existsSync(join(root,'assets/watches',product.id+'.webp')))return '';
   const version=typeof photo.localSha256==='string'&&/^[a-f0-9]{64}$/.test(photo.localSha256)
     ?'?v='+photo.localSha256.slice(0,12):'';
-  const variants=[480,800].filter(w=>w<width&&existsSync(join(root,'assets/watch-responsive',product.id+'-'+w+'.webp')));
+  const variants=[480,640,720,800].filter(w=>w<width&&existsSync(join(root,'assets/watch-responsive',product.id+'-'+w+'.webp')));
   if(!variants.length)return '';
   return [...variants.map(w=>prefix+'assets/watch-responsive/'+product.id+'-'+w+'.webp'+version+' '+w+'w'),
     prefix+'assets/watches/'+product.id+'.webp'+version+' '+width+'w'].join(', ');
