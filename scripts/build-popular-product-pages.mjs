@@ -204,9 +204,16 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       +'</div>'
       +'<div class="am-extra-intro"><p class="am-extra-overline">'+e(tierNames[p.tier])+' / '+e(category)+'</p>'
       +'<h1>'+e(name)+'</h1><p class="am-extra-subtitle">'+e(p.lead)+'</p>'
+      // Internal, no-JS shortcuts to existing facts, merchant checks and
+      // evidence. These never create paid links or imply direct checkout.
+      +'<nav class="am-extra-quicklinks" aria-label="Accès rapide aux informations de cette montre">'
+      +'<a href="#caracteristiques"><span aria-hidden="true">01</span>Caractéristiques</a>'
+      +'<a href="#vendeurs"><span aria-hidden="true">02</span>Vendeurs et références</a>'
+      +'<a href="#sources"><span aria-hidden="true">03</span>Sources et preuves</a></nav>'
       +decision
-      +'<dl class="am-extra-facts">'+facts+'</dl>'
-      +'<p class="am-extra-reference"><span>Référence à retrouver chez le marchand</span><strong>'+e(name)+'</strong></p>'
+      +'<h2 class="am-extra-spec-heading" id="caracteristiques">Repères techniques documentés</h2>'
+      +'<dl class="am-extra-facts" aria-label="Mouvement, boîtier, verre et étanchéité">'+facts+'</dl>'
+      +'<p class="am-extra-reference" id="vendeurs"><span>Référence à retrouver chez le marchand</span><strong>'+e(name)+'</strong></p>'
       +'<div class="am-ref-copy-tools" data-watch-ref-tools hidden><button type="button" class="am-ref-copy-button" data-watch-ref-copy="'+e(p.id)+'" hidden>Copier la référence</button><span class="am-ref-copy-status" role="status" aria-live="polite" data-watch-ref-status></span></div>'
       +'<p class="am-extra-approval">À vérifier auprès du vendeur : référence exacte, variante, prix, disponibilité, garantie et conditions de retour. Nous ne vendons pas directement ce produit.</p>'
       +(affiliates.enabled?'<div class="am-extra-link-status '+(direct?'am-extra-link-direct':'am-extra-link-search')+'" data-merchant-route="'+merchantRoute+'"><strong>'+(direct?'Fiche Amazon.fr correspondant au code modèle'
