@@ -119,15 +119,7 @@ export function loadApprovedPopularPhotos({root,picks}){
       }else if(['Casio','Casio G-SHOCK','Casio Edifice'].includes(model.brand)){
         // A regional Casio page can show multiple dial colourways.
         // Require a full, delimited code in the source photo URL as well.
-        const code=alternate.modelCode.toUpperCase()
-          .replace(/[.*+?^${}()|[\]\\]/g,'\\    if(documentedManufacturer){
-      const src=new URL(item.sourceImageUrl);
-      const expected='/'+alternate.modelCode+'_main.webp';
-      if(model.brand!=='Orient'||src.protocol!=='https:'||
-        src.hostname!=='orient-watch.com'||!src.pathname.endsWith(expected)||
-        src.hash||src.username||src.password||src.port)
-        throw Error('Only the official exact-model Orient front view is permitted: '+id);
-    }').replace(/-/g,'[-_]?');
+        const code=alternate.modelCode.toUpperCase().replace(/-/g,'[-_]?');
         if(src.hostname!=='www.casio.com'||src.protocol!=='https:'
           ||src.username||src.password||src.port||src.hash
           ||!new RegExp('(?:^|[^A-Z0-9])'+code+'(?![A-Z0-9])')
