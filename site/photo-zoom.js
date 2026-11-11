@@ -55,15 +55,16 @@
     // keep disabled gallery arrows out of its mobile purchase experience.
     prev.hidden=items.length<2;next.hidden=items.length<2;position.hidden=items.length<2;
     expanded=false;canvas.classList.remove('am-photo-expanded');
-    zoom.textContent='Agrandir ×2';zoom.disabled=!url;
+    zoom.textContent='Agrandir ×2';zoom.disabled=true;
     photo.hidden=true;loaded=false;message.hidden=false;
     message.textContent=url?'Chargement de la photographie…':'Photographie indisponible. Consultez le fabricant.';
     photo.alt='Photographie authentique de '+p.brand+' '+p.model;
-    if(url){photo.onload=()=>{loaded=true;photo.hidden=false;message.hidden=true};
-      photo.onerror=()=>{loaded=false;photo.hidden=true;message.hidden=false;message.textContent='Photo indisponible. Voir la fiche fabricant.'};
+    if(url){photo.onload=()=>{loaded=true;zoom.disabled=false;photo.hidden=false;message.hidden=true};
+      photo.onerror=()=>{loaded=false;zoom.disabled=true;photo.hidden=true;message.hidden=false;message.textContent='Photo indisponible. Consultez la source du modèle.'};
       photo.src=url;
     }else photo.removeAttribute('src');
     const raw=p.officialUrl;
+    link.textContent=p.brand==='SKMEI'?'Voir le modèle chez le vendeur ↗':'Voir le modèle chez le fabricant ↗';
     try{const u=new URL(raw);link.href=u.protocol==='https:'?u.href:'#'}catch(_){link.href='#'}
   };
   const navigate=delta=>{if(items.length<2)return;index=(index+delta+items.length)%items.length;render()};
