@@ -108,9 +108,9 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
   const photoMarkup=p=>p.photoUrl
     ?'<img src="../'+e(p.photoUrl.slice(2))+'"'
       +(p.kind==='core'?responsiveAttrs(root,coreById.get(p.id),{
-        prefix:'../',sizes:'auto, (max-width: 420px) 90vw, (max-width: 650px) 46vw, (max-width: 850px) 46vw, (max-width: 1220px) 30vw, 23vw',escape:e})
+        prefix:'../',sizes:'auto, (max-width: 480px) 90vw, (max-width: 650px) 46vw, (max-width: 850px) 46vw, (max-width: 1220px) 30vw, 23vw',escape:e})
         :responsivePopularAttrs(root,p,approvedPhotos.get(p.id),{
-          prefix:'../',sizes:'auto, (max-width: 420px) 90vw, (max-width: 650px) 46vw, (max-width: 850px) 46vw, (max-width: 1220px) 30vw, 23vw',escape:e}))
+          prefix:'../',sizes:'auto, (max-width: 480px) 90vw, (max-width: 650px) 46vw, (max-width: 850px) 46vw, (max-width: 1220px) 30vw, 23vw',escape:e}))
       +' alt="Photographie du modèle '+e(p.brand+' '+p.model)+'" width="'+(approvedPhotos.get(p.id)?.width||540)+'" height="'+(approvedPhotos.get(p.id)?.height||540)+'" loading="lazy" decoding="async">'
     :'<span class="ud-art-fallback"><span class="ud-art-fallback-kicker">Fiche produit documentée</span><span class="ud-art-fallback-brand">'+e(p.brand)+'</span><strong>'+e(p.model)+'</strong><small>Aucune photographie publiée pour cette référence</small></span>';
   const card=p=>{
