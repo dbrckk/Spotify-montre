@@ -17,6 +17,10 @@ on:
       - research/official-watch-photo-sources.json
       - .github/workflows/source-popular-watch-photos.yml
   workflow_dispatch:
+  # A weekly, low-frequency exact-source recheck; 403/ambiguous SKUs stay
+  # documented instead of triggering any unverified image substitution.
+  schedule:
+    - cron: '41 5 * * 2'
 
 permissions:
   contents: write
@@ -68,8 +72,15 @@ jobs:
           if amount == 0:
               raise SystemExit("No real packshot could be sourced: do not publish an empty batch as a success")
           PY
+      - name: Classify blocked models and count newly verified photographs
+        id: photo_delta
+        run: |
+          python scripts/report-photo-sourcing.py --github-summary >> "$GITHUB_STEP_SUMMARY"
+          echo "count=$(python scripts/report-photo-sourcing.py --new-count)" >> "$GITHUB_OUTPUT"
       - name: Commit reviewed images, provenance and refreshed deployment package
-        if: github.event_name != 'pull_request'
+        # A scheduled scan with no new exact photo must not rewrite Git history,
+        # trigger an unnecessary Render build, or alter an existing photograph.
+        if: github.event_name != 'pull_request' && steps.photo_delta.outputs.count != '0'
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
