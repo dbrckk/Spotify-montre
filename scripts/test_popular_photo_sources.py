@@ -59,6 +59,52 @@ class OfficialProductSources(unittest.TestCase):
         self.assertIn("git add -A site/assets/watches-popular/ site/assets/popular-responsive/",
                       workflow)
 
+    def test_weekly_photo_rechecks_have_a_reproducible_noop_gate(self):
+        import json
+        from copy import deepcopy
+        p = sync.ROOT / "scripts" / "report-photo-sourcing.py"
+        module = importlib.util.spec_from_file_location("watch_photo_status", p)
+        status = importlib.util.module_from_spec(module)
+        module.loader.exec_module(status)
+        products = json.loads(sync.SOURCE.read_text(encoding="utf-8"))["products"]
+        rights = json.loads(sync.RIGHTS.read_text(encoding="utf-8"))
+        report = json.loads(status.REPORT.read_text(encoding="utf-8"))
+        summary = status.assess(products, rights, report)
+        self.assertEqual(summary["total"], 37)
+        self.assertEqual(summary["published"], len(rights["photos"]))
+        self.assertEqual(summary["missing"], 37-len(rights["photos"]))
+        markdown = status.summary(summary)
+        self.assertIn("not been independently verified", markdown)
+        self.assertIn("| Model | Blocking reason |", markdown)
+        self.assertIn("casio-f91w-1", markdown)
+        changed = deepcopy(report)
+        changed["missing"][0]["id"] = changed["photos"][0]["id"]
+        with self.assertRaisesRegex(ValueError, "exactly once"):
+            status.assess(products, rights, changed)
+        changed = deepcopy(report)
+        changed["photos"][0]["source"] = "https://wrong-brand.example/photo"
+        with self.assertRaisesRegex(ValueError, "source mismatch"):
+            status.assess(products, rights, changed)
+        changed = deepcopy(report)
+        changed["photos"][0]["status"] = "invented"
+        with self.assertRaisesRegex(ValueError, "Unverified photo status"):
+            status.assess(products, rights, changed)
+        changed = deepcopy(report)
+        changed["photos"][0]["status"] = "created"
+        changed["photos"][0]["sha256"] = "0" * 64
+        with self.assertRaisesRegex(ValueError, "checksum mismatch"):
+            status.assess(products, rights, changed)
+        # Status is generated from the current run, not stale committed JSON.
+        current = deepcopy(report)
+        for record in current["photos"]:
+            record["status"] = "preserved"
+        self.assertEqual(status.assess(products, rights, current)["new"], 0)
+        workflow = (sync.ROOT / ".github/workflows/source-popular-watch-photos.yml").read_text()
+        self.assertIn("cron: '41 5 * * 2'", workflow)
+        self.assertIn("python scripts/report-photo-sourcing.py --new-count", workflow)
+        self.assertIn("steps.photo_delta.outputs.count != '0'", workflow)
+        self.assertIn("github.event_name != 'pull_request'", workflow)
+
     def test_casio_alternate_sources_require_manufacturer_and_exact_sku(self):
         import json
         research=json.loads(sync.RECOVERY_SOURCE.read_text(encoding="utf-8"))
