@@ -24,12 +24,12 @@ for(const site of sites){
   const imageAssetPaths=requests.map(x=>{
    try{return new URL(x.url).pathname;}catch{return null;}
   }).filter(x=>typeof x==='string');
-  // Browsers on dense screens may choose the original exact-model image
-  // rather than 240/480px derivatives. All three variants are trusted,
-  // and the image-byte limit below still prevents heavy regressions.
+  // Accept only registered exact-model WebP variants produced by the verified
+  // local photo generator, including intermediate 360/640px Android widths.
+  // The full source remains available for high-DPI zoom and fallback.
   const exactPhotoFiles=site.photoId?[
    '/assets/watches-popular/'+site.photoId+'.webp',
-   ...[240,480,720,960].map(width=>'/assets/popular-responsive/'+site.photoId+'-'+width+'.webp')
+   ...[240,360,480,640,720,960].map(width=>'/assets/popular-responsive/'+site.photoId+'-'+width+'.webp')
   ]:[];
   const loadedPhotoPaths=imageAssetPaths.filter(x=>exactPhotoFiles.includes(x));
   if(site.expectedPath){
@@ -43,8 +43,8 @@ for(const site of sites){
    // falsely claimed to depict this unphotographed product.
    if(site.forbidPhotoId&&imageAssetPaths.some(x=>
      x==='/assets/watches-popular/'+site.forbidPhotoId+'.webp'||
-     x==='/assets/popular-responsive/'+site.forbidPhotoId+'-240.webp'||
-     x==='/assets/popular-responsive/'+site.forbidPhotoId+'-480.webp'))
+     [240,360,480,640,720,960].some(width=>
+       x==='/assets/popular-responsive/'+site.forbidPhotoId+'-'+width+'.webp')))
     throw Error(site.name+': unsupported photo for the unphotographed model was fetched');
   }
   const thumbRequests=requests.filter(x=>x.url?.includes('/assets/watch-thumbs/'));

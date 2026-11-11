@@ -80,6 +80,23 @@ try{
   write(cases[5][0],hdpi);
   assert.equal(run().status,0,'Verified full-resolution image must pass on high-DPI screens');
   write(...cases[5]);
+  // A 393px DPR2 Android legitimately requests the new source-approved
+  // 640px WebP. A report must count it as the original model, not a missing
+  // image, while still rejecting any different model.
+  const dpr2=structuredClone(cases[5][1]);
+  dpr2.audits['network-requests'].details.items=
+    dpr2.audits['network-requests'].details.items.map(item=>
+      item.resourceType==='Image'?{
+        ...item,url:host+'/assets/popular-responsive/skmei-1251-640.webp'
+      }:item);
+  write(cases[5][0],dpr2);
+  result=run();
+  assert.equal(result.status,0,'Verified 640px image must pass mobile Lighthouse: '+result.stderr);
+  summary=JSON.parse(readFileSync(join(folder,'lighthouse-mobile-summary.json'),'utf8'));
+  assert.deepEqual(summary.reports[3].runs[0].verifiedPhotoVariants,
+    ['/assets/popular-responsive/skmei-1251-640.webp'],
+    'The report must preserve exact model and derivative identity');
+  write(...cases[5]);
   const mismatched=structuredClone(cases[5][1]);
   mismatched.audits['network-requests'].details.items=
     mismatched.audits['network-requests'].details.items.map(item=>
@@ -90,6 +107,16 @@ try{
   assert.notEqual(run().status,0,'Another watch model must never pass as the verified photo');
   write(...cases[5]);
 
+  const wrong640=structuredClone(dpr2);
+  wrong640.audits['network-requests'].details.items=
+    wrong640.audits['network-requests'].details.items.map(item=>
+      item.resourceType==='Image'?{
+        ...item,url:host+'/assets/popular-responsive/skmei-1257-640.webp'
+      }:item);
+  write(cases[5][0],wrong640);
+  assert.notEqual(run().status,0,
+    'A different watch photographed in 640px must not pass exact-model Lighthouse');
+  write(...cases[5]);
   let missing=structuredClone(cases[5][1]);
   missing.audits['network-requests'].details.items=
     missing.audits['network-requests'].details.items.filter(x=>x.resourceType!=='Image');
@@ -109,6 +136,14 @@ try{
     url:host+'/assets/popular-responsive/casio-f91w-1-240.webp',resourceType:'Image',transferSize:2000});
   write(cases[6][0],wrong);
   assert.notEqual(run().status,0,'Invented F-91W photo on no-photo page must fail');
+  write(...cases[6]);
+  const wronglyPublished=structuredClone(cases[6][1]);
+  wronglyPublished.audits['network-requests'].details.items.push({
+    url:host+'/assets/popular-responsive/casio-f91w-1-640.webp',
+    resourceType:'Image',transferSize:19000});
+  write(cases[6][0],wronglyPublished);
+  assert.notEqual(run().status,0,
+    'No-photo model must reject fake 640px derivatives as well as originals');
   write(...cases[6]);
   let shift=structuredClone(cases[5][1]);
   shift.audits['cumulative-layout-shift'].numericValue=0.45;
