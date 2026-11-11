@@ -53,10 +53,21 @@ def official_recovery(model: dict, registry: dict) -> dict:
     alternate = entry.get("alternateManufacturerPage")
     if alternate:
         alt = urlparse(alternate)
-        if (model["brand"] != "Orient" or alt.scheme != "https"
-            or alt.hostname != "orient-watch.com" or alt.query or alt.fragment
+        trusted_orient = (model["brand"] == "Orient"
+            and alt.hostname == "orient-watch.com"
+            and model_key(model["model"]) in re.sub(r"[^A-Z0-9]", "", alt.path.upper()))
+        casio_kind = {"Casio": "casio", "Casio G-SHOCK": "gshock",
+                      "Casio Edifice": "edifice"}.get(model["brand"])
+        casio_match = re.fullmatch(
+            r"/(?:intl|europe|us)/watches/(casio|gshock|edifice)/product\.([A-Za-z0-9-]+)/",
+            alt.path)
+        trusted_casio = (bool(casio_kind) and alt.hostname == "www.casio.com"
+            and casio_match is not None and casio_match.group(1) == casio_kind
+            and re.sub(r"[^A-Z0-9]", "", casio_match.group(2).upper())
+                == model_key(model["model"]))
+        if (alt.scheme != "https" or alt.query or alt.fragment
             or alt.username or alt.password or alt.port
-            or model_key(model["model"]) not in re.sub(r"[^A-Z0-9]", "", alt.path.upper())):
+            or not (trusted_orient or trusted_casio)):
             raise ValueError("Untrusted alternative manufacturer image page")
     picture = entry.get("officialImage")
     if picture:
@@ -287,6 +298,23 @@ def is_official_orient_front(url: str, model_code: str) -> bool:
         return False
 
 
+def is_exact_casio_photo(url: str, model_code: str) -> bool:
+    """Reject near-identical Casio colour suffixes (F-91W-1Y is not F-91W-1).
+
+    Brand and exact product page are checked separately. This gate limits
+    international-page candidates to asset paths explicitly bearing the
+    same complete SKU; anonymous or promotional images remain unpublished.
+    """
+    try:
+        parsed = urlparse(url)
+        code = re.escape(model_code.upper()).replace(r"\-", r"[-_]?")
+        return bool(re.search(
+            r"(?<![A-Z0-9])" + code + r"(?![A-Z0-9])",
+            unquote(parsed.path).upper()))
+    except (ValueError, TypeError):
+        return False
+
+
 def download(session: requests.Session, url: str, source: str,
              *, exact_orient_front: bool = False) -> tuple[bytes, int, int]:
     if not host_allowed(url, source):
@@ -415,6 +443,13 @@ def main() -> int:
                 if exact_orient_front:
                     candidates = [item for item in candidates
                         if is_official_orient_front(item, source_config["modelCode"])]
+                if (source_config.get("alternateManufacturerPage") == photo_page
+                    and p["brand"] in {"Casio", "Casio G-SHOCK", "Casio Edifice"}):
+                    # An international catalogue may show sibling colourways.
+                    # Only a complete SKU in the manufacturer's image path is
+                    # strong enough evidence to publish the exact model.
+                    candidates = [item for item in candidates
+                        if is_exact_casio_photo(item, source_config["modelCode"])]
                 if not candidates:
                     raise ValueError("No trusted exact-model front packshot in official product gallery")
                 print("CANDIDATES", pid, len(candidates), photo_page, flush=True)
