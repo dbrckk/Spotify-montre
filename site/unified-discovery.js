@@ -475,7 +475,7 @@
       // Explain the strength and limits of historical evidence before the
       // customer opens an external destination. No live-stock claims.
       const checked=typeof p.sourceCheckedOn==='string'
-        &&/^\\d{4}-\\d{2}-\\d{2}$/.test(p.sourceCheckedOn)
+        &&/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(p.sourceCheckedOn)
         ?p.sourceCheckedOn.split('-').reverse().join('/'):null;
       const proofText=approvedMerchant
         ?p.merchantEvidenceType==='amazon_fr_comparator_redirect'
