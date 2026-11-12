@@ -348,6 +348,8 @@ try{
     'For search-only products the model source must come before generic Amazon results');
   assert.equal(await searchJourney.locator('.ud-next-search').getAttribute('data-route'),'search');
   assert.match(await searchJourney.locator('.ud-next-search').innerText(),/modèle à confirmer/);
+  assert.match(await searchJourney.locator('.ud-next-search').innerText(),/^3 · Recherche Amazon/,
+    'The optional search must follow the exact model source as the third step');
   assert.match(await searchJourney.locator('.ud-next-search').getAttribute('rel'),/sponsored/);
   assert.equal(await searchJourney.locator('.ud-next-search').getAttribute('data-amazon-search-id'),searchId);
   assert.equal(await searchJourney.locator('.ud-next-search').getAttribute('data-amazon-placement'),'comparison');
