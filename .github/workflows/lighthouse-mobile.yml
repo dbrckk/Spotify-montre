@@ -179,7 +179,7 @@ jobs:
               return html[start:html.index('</article>',start)+len('</article>')]
           assert article(local)==article(live), 'Stale core model article: '+watch_id
           assert 'data-watch-ref-copy="'+watch_id+'"' in live
-           assert 'class="secondary am-interactive-detail-link" href="../montre.html?id='+watch_id+'"' in live
+          assert 'class="secondary am-interactive-detail-link" href="../montre.html?id='+watch_id+'"' in live
           assert 'href="../watch-reference-copy.css"' in live
           assert 'src="../watch-reference-copy-v2.js"' in live
           PY
