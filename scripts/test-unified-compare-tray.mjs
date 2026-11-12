@@ -38,6 +38,28 @@ try{
   phone.on('pageerror',e=>errors.push('mobile: '+e.message));
   await phone.goto(new URL('/montres/toutes-les-montres.html',base).href,{waitUntil:'domcontentloaded'});
   await phone.locator('#udFilters').waitFor({state:'visible'});
+  // The four source-backed comparisons are immediately useful without
+  // requiring a visitor to choose from the entire 52-watch catalogue.
+  const starters=phone.locator('.ud-pair-starter');
+  assert.equal(await starters.count(),4,'Four direct factual comparisons should be offered');
+  await phone.locator('[data-ud-pair-interactive]').first().waitFor({state:'visible'});
+  const firstPair=starters.first();
+  const compareHref=await firstPair.locator('[data-ud-pair-interactive]').getAttribute('href');
+  assert.equal(compareHref,'?compare=tissot-prx-quartz,tissot-prx-auto#comparer',
+    'Direct pair route must keep both exact Tissot model codes');
+  assert.equal(await firstPair.locator('.ud-pair-starter-static').getAttribute('href'),
+    './comparer-tissot-prx-quartz-vs-powermatic-80.html',
+    'Static pair must link to an indexable source-backed editorial analysis');
+  await checkOverflow(phone,'Mobile preselected comparison shortcuts');
+  const pairPage=await browser.newPage({viewport:{width:393,height:852},isMobile:true,hasTouch:true,locale:'fr-FR'});
+  try{
+    await pairPage.goto(new URL('/montres/toutes-les-montres.html'+compareHref,base).href,
+      {waitUntil:'domcontentloaded'});
+    await pairPage.locator('#udTrayOpen').waitFor({state:'visible'});
+    assert.equal(await pairPage.locator('#udCompareTable th[scope=col]').count(),3,
+      'A preselected comparison must open a real two-watch factual table on Android');
+    await checkOverflow(pairPage,'Mobile one-tap two-watch comparison');
+  }finally{await pairPage.close()}
   const tray=phone.locator('#udCompareTray');
   assert.equal(await tray.isVisible(),false,'The dock must not obstruct browsing before selection');
   assert.equal(await phone.locator('.ud-card').count(),52);
@@ -441,7 +463,11 @@ try{
   const noJs=await browser.newPage({viewport:{width:393,height:852},
     javaScriptEnabled:false,isMobile:true,hasTouch:true});
   await noJs.goto(new URL('/montres/toutes-les-montres.html',base).href,{waitUntil:'domcontentloaded'});
-  assert.equal(await noJs.locator('.ud-feature-card:visible').count(),6,
+  assert.equal(await noJs.locator('.ud-pair-starter-static:visible').count(),4,
+    'The four editorial comparisons must remain usable without JavaScript');
+  assert.equal(await noJs.locator('[data-ud-pair-interactive]:visible').count(),0,
+    'A non-functional interactive comparison must stay hidden without JavaScript');
+    assert.equal(await noJs.locator('.ud-feature-card:visible').count(),6,
     'Source-backed editorial watches remain navigable with JavaScript disabled');
   assert.equal(await noJs.locator('.ud-card:visible').count(),52,
     'All factual watch cards must remain visible without JS or feed fetching');

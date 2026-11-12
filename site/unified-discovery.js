@@ -523,6 +523,11 @@
     form.hidden=false;
     viewTools.hidden=false;
     favoriteTools.hidden=false;
+    // Never show interactive deep links before source IDs have been validated.
+    document.querySelectorAll('[data-ud-pair-interactive]').forEach(link=>{
+      const compare=new URL(link.href,location.href).searchParams.get('compare')?.split(',')||[];
+      if(compare.length===2&&compare.every(id=>watches.has(id))){link.hidden=false}
+    });
     installShareTools();
     for(const card of cards){
       card.querySelector('button.ud-save')?.removeAttribute('hidden');

@@ -248,6 +248,31 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
     +'<div class="ud-feature-grid">'+featured.map(featureCard).join('')+'</div>'
     +'<p class="ud-showroom-note">Les photographies publiées correspondent aux modèles indiqués, sous réserve des droits déclarés par l’éditeur ; les autres modèles restent sans photo. Une fiche marchande identifiée ne garantit ni le stock ni la variante disponible. Les liens rémunérés sont signalés. Les achats partenaires sont conclus chez le vendeur externe ; une commande directe n’est possible que si un prix TTC et une disponibilité vérifiés sont explicitement affichés sur Atelier Montres.</p>'
     +'</section>';
+  // Offer four genuine, source-backed comparisons before the 52-card grid.
+  // The static editorial article always works; the live table link is
+  // progressively revealed only after the validated catalogue JSON loads.
+  const sourcePairs=JSON.parse(readFileSync(join(root,'comparaisons-montres.json'),'utf8'));
+  if(sourcePairs.version!==1||sourcePairs.comparisons?.length!==4)
+    throw Error('Four documented editorial comparisons are required');
+  const comparePairs='<section class="ud-pair-starters" aria-labelledby="udPairStartersTitle">'
+    +'<div class="ud-pair-starters-heading"><div><span>Face à face · modèles documentés</span>'
+    +'<h2 id="udPairStartersTitle">Comparez directement deux montres.</h2></div>'
+    +'<p>Quatre confrontations rédigées à partir des références exactes : aucun prix ni classement de ventes supposé.</p></div>'
+    +'<div class="ud-pair-starters-list">'+sourcePairs.comparisons.map((pair,index)=>{
+      const left=normalized.find(p=>p.id===pair.left),right=normalized.find(p=>p.id===pair.right);
+      if(!left||!right||left.id===right.id||
+        !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(pair.slug)||
+        !String(pair.title||'').trim())throw Error('Invalid factual pair: '+pair.slug);
+      return '<article class="ud-pair-starter" data-pair-slug="'+e(pair.slug)+'">'
+        +'<span class="ud-pair-starter-index">DUEL '+String(index+1).padStart(2,'0')+'</span>'
+        +'<h3>'+e(pair.title)+'</h3>'
+        +'<p>'+e(left.brand+' '+left.model)+' <span aria-hidden="true">/</span> '+e(right.brand+' '+right.model)+'</p>'
+        +'<div class="ud-pair-starter-actions"><a class="ud-pair-starter-static" href="./comparer-'+e(pair.slug)+'.html">Lire le comparatif documenté</a>'
+        +'<a class="ud-pair-starter-interactive" data-ud-pair-interactive hidden href="?compare='+e(left.id+','+right.id)+'#comparer">Tableau interactif <span aria-hidden="true">↗</span></a></div>'
+        +'</article>';
+    }).join('')+'</div>'
+    +'<p class="ud-pair-starters-note">Les comparatifs restent accessibles sans JavaScript. Le tableau interactif se débloque uniquement quand les données des 52 références sont chargées.</p>'
+    +'</section>';
   const shortcuts='<nav class="ud-discovery-links" aria-label="Parcourir la collection selon votre envie">'
     +'<a href="?brand=SKMEI#udCount"><span>01 / Marque</span><strong>Découvrir SKMEI ↗</strong></a>'
     +'<a href="?movement=automatic#udCount"><span>02 / Mouvement</span><strong>Automatiques ↗</strong></a>'
@@ -325,7 +350,7 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
     +'<div class="ud-heading-actions"><a class="ud-heading-primary" href="#udCount">Explorer les 52 montres <span aria-hidden="true">↘</span></a><a class="ud-heading-secondary" href="../conseiller.html">Me guider dans mon choix <span aria-hidden="true">↗</span></a></div>'
     +'<ul class="ud-heading-highlights" aria-label="Les avantages du catalogue"><li>52 modèles à comparer</li><li>Caractéristiques documentées</li><li>Photos de modèle quand disponibles</li></ul>'
     +'<p class="ud-disclosure"><strong>Avant votre achat :</strong> consultez le prix, la disponibilité et les conditions de livraison chez le marchand. Certains liens partenaires peuvent nous rémunérer. Une recherche Amazon ne garantit pas le modèle exact : vérifiez la référence auprès du vendeur.</p></header>'
-    +shortcuts+showroom+tierNavigation+merchantNavigation
+    +shortcuts+comparePairs+showroom+tierNavigation+merchantNavigation
     +'<div class="ud-favorite-tools" id="udFavoriteTools" hidden><div><strong>Votre sélection, à votre rythme.</strong><p>Gardez vos modèles préférés sur cet appareil, puis comparez-les parmi les 52 montres.</p></div><button id="udSavedToggle" type="button" aria-pressed="false"><span aria-hidden="true">♡</span> <span id="udSavedButtonLabel">Voir mes favoris</span> <span class="ud-favorite-total">(<span id="udSavedCount">0</span>)</span></button></div>'
     +'<form id="udFilters" class="ud-filters" role="search" aria-label="Affiner les 52 montres" hidden>'
     +'<label>Recherche<input id="udSearch" type="search" maxlength="100" placeholder="Marque, modèle, caractéristiques…"></label>'

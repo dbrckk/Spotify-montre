@@ -600,6 +600,20 @@ for(const watch of JSON.parse(read('selection-populaires.json')).products){
   assert.ok(table.includes('Modèle consulté'),'Current model label required: '+watch.id);
 }
 const unifiedHtml=read(unifiedPath);
+const editorialPairs=JSON.parse(read('comparaisons-montres.json')).comparisons;
+assert.equal(editorialPairs.length,4,'Four curated, factual watch comparisons should be selectable');
+assert.equal((unifiedHtml.match(/class="ud-pair-starter" data-pair-slug=/g)||[]).length,4,
+  '52-watch catalogue must expose four ready-made comparisons');
+for(const pair of editorialPairs){
+  assert.ok(unifiedHtml.includes('href="./comparer-'+pair.slug+'.html"'),
+    'Static comparison must be usable without JavaScript: '+pair.slug);
+  assert.ok(unifiedHtml.includes('data-ud-pair-interactive hidden href="?compare='+pair.left+','+pair.right+'#comparer"'),
+    'Interactive pair must be initially hidden and use exact IDs: '+pair.slug);
+  assert.ok(unifiedHtml.includes(pair.title.replaceAll('&','&amp;')),
+    'Pair title must match the source editorial comparison: '+pair.slug);
+}
+assert.match(read('unified-discovery.js'),/querySelectorAll\('\[data-ud-pair-interactive\]'\)/,
+  'Interactive comparison shortcuts must only activate after trusted catalogue load');
 assert.ok(manifest.paths.includes(manifest.siteUrl+unifiedPath),'Unified page canonical in sitemap');
 assert.ok(unifiedHtml.includes('rel="canonical" href="'+manifest.siteUrl+unifiedPath+'"'));
 assert.equal((unifiedHtml.match(/class="ud-card"/g)||[]).length,52,
