@@ -8,7 +8,7 @@
     {
       "file": "deploy-package-01.json",
       "count": 29,
-      "bytes": 696534
+      "bytes": 696639
     },
     {
       "file": "deploy-package-02.json",
@@ -98,7 +98,7 @@
     {
       "file": "deploy-package-19.json",
       "count": 23,
-      "bytes": 218914
+      "bytes": 219415
     }
   ]
 }
