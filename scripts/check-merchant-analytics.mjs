@@ -95,6 +95,33 @@ trigger({url:'https://www.amazon.fr/dp/B07B6ML1VJ?tag=drackk04-21',kind:'direct'
   placement:'showroom',id:'skmei-1257'});
 assert.equal(events.at(-1),'amazon:skmei-1257:showroom',
   'New conversion landing must be measurable separately from older popular watch placements');
+// Exact model choices in the 52-watch comparison have their own source-safe
+// placement. A click is intent only, never a confirmed commission or order.
+trigger({url:'https://www.shopskmei.com/product/skmei-2056-digital-sport-watch/',
+  placement:'comparison'});
+assert.equal(events.at(-1),'merchant:skmei-2056:comparison',
+  'Comparison source click must be distinguishable from catalogue clicks');
+trigger({url:'https://www.amazon.fr/dp/B0BG7VD5YL?tag=drackk04-21',
+  id:'citizen-tsuyosa',kind:'direct',placement:'comparison'});
+assert.equal(events.at(-1),'amazon:citizen-tsuyosa:comparison',
+  'Exact Amazon listing in comparison should be measurable without calling it a sale');
+trigger({url:awin.href,kind:'partner',id:'addiesdive-ad2030',placement:'comparison'});
+assert.equal(events.at(-1),'awin:addiesdive-ad2030:comparison',
+  'Allowlisted Awin comparison should preserve a separate attribution');
+trigger({url:'https://www.amazon.fr/s?k=SKMEI%202056&tag=drackk04-21',
+  kind:'search',placement:'comparison'});
+assert.equal(events.at(-1),'amazon-search:skmei-2056:comparison',
+  'Unverified searches must never be conflated with exact Amazon listings');
+const trackedComparisonCount=events.length;
+trigger({url:'https://www.amazon.fr/dp/B0BG7VD5YL?tag=drackk04-21',
+  id:'casio-mtp-1302',kind:'direct',placement:'comparison'});
+trigger({url:'https://www.amazon.fr/s?k=SKMEI%202056&tag=invalid-21',
+  kind:'search',placement:'comparison'});
+trigger({url:'https://example.com/product/skmei-2056-digital-sport-watch/',
+  kind:'official',placement:'comparison'});
+assert.equal(events.length,trackedComparisonCount,
+  'Forged comparative merchant destinations cannot increase intent metrics');
+
 // An untagged exact Amazon product link is NOT a compensated referral.
 trigger({url:'https://www.amazon.fr/dp/B0BG7VD5YL',
   kind:'direct',placement:'fiche',id:'citizen-tsuyosa'});

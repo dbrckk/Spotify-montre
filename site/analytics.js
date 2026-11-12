@@ -42,7 +42,7 @@
     "tissot-gentleman-auto": "B07XTVQ3W7",
     "tissot-prx-quartz": "B08TB1MF6F"
   });
-  const placements=new Set(['catalogue','fiche','seo','popular','showroom']);
+  const placements=new Set(['catalogue','fiche','seo','popular','showroom','comparison']);
   // An exact host allowlist prevents counting arbitrary destinations as
   // approved watch merchants; tracking still never proves an affiliate sale.
   const merchantHosts=new Set([
@@ -106,7 +106,7 @@
     }
     if(partner){
       if(target.hostname!=='www.awin1.com'||target.pathname!=='/cread.php'
-        ||placement!=='popular')return;
+        ||!['popular','comparison'].includes(placement))return;
       const qs=target.searchParams,keys=[...qs.keys()];
       if(keys.length!==new Set(keys).size||keys.some(key=>!['awinmid','awinaffid','ued','clickref','campaign'].includes(key))
         ||!['26009','94513'].includes(qs.get('awinmid'))
@@ -131,12 +131,12 @@
     if(search){
       // Amazon searches are separate from exact product exits and never
       // constitute proof of a commission or of an Amazon product match.
-      if(placement!=='popular'||target.pathname!=='/s'||
+      if(!['popular','comparison'].includes(placement)||target.pathname!=='/s'||
         target.searchParams.getAll('k').length!==1||
         tags.length!==1||tags[0]!==ownerAmazonTag||
         keys.length!==new Set(keys).size||
         keys.some(key=>!['k','tag'].includes(key)))return;
-      try {window.umami.track('amazon-search:'+id)}catch{/* best effort */}
+      try {window.umami.track('amazon-search:'+id+(placement==='comparison'?':comparison':''))}catch{/* best effort */}
       return;
     }
     if(!asinPattern.test(target.pathname)||keys.length!==new Set(keys).size||

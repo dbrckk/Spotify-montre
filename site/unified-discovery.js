@@ -495,6 +495,13 @@
         outbound.className='ud-next-outbound';
         outbound.target='_blank';outbound.rel='noopener noreferrer nofollow sponsored';
         outbound.dataset.route=kind;
+        if(kind==='direct'){
+          outbound.dataset.amazonProduct=id;
+          outbound.dataset.amazonPlacement='comparison';
+        }else if(kind==='awin'){
+          outbound.dataset.partnerOfferId=id;
+          outbound.dataset.partnerPlacement='comparison';
+        }
         actions.append(outbound);
       }
       // Preserve the independent, source-registered manufacturer/supplier URL
@@ -506,6 +513,8 @@
         official.className=approvedMerchant?'ud-next-source':'ud-next-outbound';
         official.target='_blank';official.rel='noopener noreferrer nofollow';
         official.dataset.route='official';
+        official.dataset.merchantOfficialId=id;
+        official.dataset.merchantPlacement='comparison';
         actions.append(official);
       }
       // A generic paid search may still help research a model, but only
@@ -517,6 +526,8 @@
           linkSearch.className='ud-next-search';
           linkSearch.target='_blank';linkSearch.rel='noopener noreferrer nofollow sponsored';
           linkSearch.dataset.route='search';
+          linkSearch.dataset.amazonSearchId=id;
+          linkSearch.dataset.amazonPlacement='comparison';
           actions.append(linkSearch);
         }
       }

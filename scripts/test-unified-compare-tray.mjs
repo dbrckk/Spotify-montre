@@ -234,16 +234,23 @@ try{
   assert.ok((await sourceWatch.locator('.ud-next-outbound').getAttribute('href'))
     .startsWith('https://www.shopskmei.com/product/'));
   assert.equal((await sourceWatch.locator('.ud-next-outbound').getAttribute('rel')).includes('sponsored'),false);
+  assert.equal(await sourceWatch.locator('.ud-next-outbound').getAttribute('data-merchant-official-id'),
+    'skmei-2056','Official comparison visits must reuse the existing safe analytics identifier');
+  assert.equal(await sourceWatch.locator('.ud-next-outbound').getAttribute('data-merchant-placement'),'comparison');
   const paidWatch=nextSteps.locator('[data-watch-id="citizen-tsuyosa"]');
   assert.equal(await paidWatch.locator('.ud-next-detail').getAttribute('href'),'./citizen-tsuyosa.html');
   assert.equal(await paidWatch.locator('.ud-next-outbound').getAttribute('data-route'),'direct');
   assert.match(await paidWatch.locator('.ud-next-outbound').getAttribute('href'),
     /^https:\/\/www\.amazon\.fr\/dp\/[A-Z0-9]{10}\?tag=/);
   assert.match(await paidWatch.locator('.ud-next-outbound').getAttribute('rel'),/sponsored/);
+  assert.equal(await paidWatch.locator('.ud-next-outbound').getAttribute('data-amazon-product'),'citizen-tsuyosa');
+  assert.equal(await paidWatch.locator('.ud-next-outbound').getAttribute('data-amazon-placement'),'comparison');
   assert.equal(await paidWatch.locator('.ud-next-source').count(),1,
     'An identified Amazon listing must never displace the independent manufacturer source');
   assert.match(await paidWatch.locator('.ud-next-source').getAttribute('href'),/^https:\/\//);
   assert.equal(await paidWatch.locator('.ud-next-source').getAttribute('data-route'),'official');
+  assert.equal(await paidWatch.locator('.ud-next-source').getAttribute('data-merchant-official-id'),'citizen-tsuyosa');
+  assert.equal(await paidWatch.locator('.ud-next-source').getAttribute('data-merchant-placement'),'comparison');
   assert.equal((await paidWatch.locator('.ud-next-source').getAttribute('rel')).includes('sponsored'),false);
   assert.match(await paidWatch.locator('.ud-next-proof').innerText(),/Fiche Amazon.fr associée/);
   assert.equal(await sourceWatch.locator('.ud-next-source').count(),0,
@@ -338,6 +345,8 @@ try{
   assert.equal(await searchJourney.locator('.ud-next-search').getAttribute('data-route'),'search');
   assert.match(await searchJourney.locator('.ud-next-search').innerText(),/modèle à confirmer/);
   assert.match(await searchJourney.locator('.ud-next-search').getAttribute('rel'),/sponsored/);
+  assert.equal(await searchJourney.locator('.ud-next-search').getAttribute('data-amazon-search-id'),searchId);
+  assert.equal(await searchJourney.locator('.ud-next-search').getAttribute('data-amazon-placement'),'comparison');
   assert.match(await searchJourney.locator('.ud-next-proof').innerText(),/aucun résultat ni modèle exact garanti/);
   assert.equal(await searchJourney.locator('.ud-next-source').count(),0,
     'A search-only watch must have one official model source, not duplicate links');
