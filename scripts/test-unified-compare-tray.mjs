@@ -338,7 +338,11 @@ try{
   const searchId=await searchCard.getAttribute('data-id');
   assert.ok(searchId,'At least one unverified Amazon search must be represented in the feed');
   await searchCard.locator('button.ud-select').click();
-  await phone.locator('#modele-skmei-2056 button.ud-select').click();
+  // The first generic-search model can itself be SKMEI 2056; selecting it
+  // twice would toggle it off and falsely report a broken comparison.
+  assert.notEqual(searchId,'citizen-tsuyosa',
+    'The fixture companion must remain a distinct documented model');
+  await phone.locator('#modele-citizen-tsuyosa button.ud-select').click();
   const searchJourney=phone.locator('#udCompareTable .ud-next-watch[data-watch-id="'+searchId+'"]');
   assert.equal(await searchJourney.locator('.ud-next-outbound').getAttribute('data-route'),'official',
     'For search-only products the model source must come before generic Amazon results');
