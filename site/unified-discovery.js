@@ -522,7 +522,8 @@
       if(!approvedMerchant&&kind==='search'){
         const search=validateTarget(p.merchantUrl);
         if(search){
-          const linkSearch=link('3 · Recherche Amazon · modèle à confirmer',search);
+          const nextStep=source?'3':'2';
+          const linkSearch=link(nextStep+' · Recherche Amazon · modèle à confirmer',search);
           linkSearch.className='ud-next-search';
           linkSearch.target='_blank';linkSearch.rel='noopener noreferrer nofollow sponsored';
           linkSearch.dataset.route='search';
