@@ -601,6 +601,11 @@ for(const watch of JSON.parse(read('selection-populaires.json')).products){
 }
 const unifiedHtml=read(unifiedPath);
 const editorialPairs=JSON.parse(read('comparaisons-montres.json')).comparisons;
+for(const pair of editorialPairs){
+  const html=read('montres/comparer-'+pair.slug+'.html');
+  assert.ok(html.includes('href="./toutes-les-montres.html?compare='+pair.left+','+pair.right+'#comparer"'),
+    'Each standalone comparison should lead to the real 52-watch interactive table: '+pair.slug);
+}
 assert.equal(editorialPairs.length,4,'Four curated, factual watch comparisons should be selectable');
 assert.equal((unifiedHtml.match(/class="ud-pair-starter" data-pair-slug=/g)||[]).length,4,
   '52-watch catalogue must expose four ready-made comparisons');
@@ -760,6 +765,13 @@ for(const id of ['udTrayItems','udTrayCount','udTrayOpen','udTrayClear'])
 assert.ok(unifiedHtml.includes('id="udTrayOpen" class="ud-tray-open" href="#comparer" hidden'),
   'Compare action must navigate to the existing real data table after at least two watches');
 const trayJS=read('unified-discovery.js');
+assert.match(trayJS,/ud-next-steps/,'The compare table must expose direct product follow-up routes');
+assert.match(trayJS,/validateTarget\(p\.officialUrl\)/,
+  'Official source action must validate the HTTPS URL before displaying');
+assert.match(trayJS,/approvedMerchant\?kind:'official'/,
+  'Buyer journeys must distinguish a documented merchant from an official source');
+assert.match(read('unified-discovery.css'),/\.ud-next-grid/,
+  'Comparison buying steps must have a responsive layout');
 assert.match(trayJS,/selected\.length<2/,'One watch must not unlock comparison');
 assert.match(trayJS,/catalogue\.classList\.toggle\('ud-has-tray'/,
   'Selected models need safe extra page padding for fixed mobile dock');

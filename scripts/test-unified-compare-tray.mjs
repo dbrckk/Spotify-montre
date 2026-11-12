@@ -220,6 +220,31 @@ try{
   assert.equal(new URL(phone.url()).hash,'#comparer',
     'Opening the dock must navigate to the actual on-page table');
   assert.equal(await phone.locator('#udCompareTable th[scope=col]').count(),3);
+  // An actual source-first buyer route must appear below the swipeable
+  // comparison for each watch. Never substitute a generic Amazon search.
+  const nextSteps=phone.locator('#udCompareTable .ud-next-steps');
+  assert.ok(await nextSteps.isVisible(),'Buyer next steps should be immediately accessible');
+  const nextCards=nextSteps.locator('.ud-next-watch');
+  assert.equal(await nextCards.count(),2,'Exactly two selected watches get follow-up routes');
+  const sourceWatch=nextSteps.locator('[data-watch-id="skmei-2056"]');
+  assert.equal(await sourceWatch.locator('.ud-next-detail').getAttribute('href'),
+    './skmei-2056.html','Follow-up detail must use the exact SKMEI model');
+  assert.equal(await sourceWatch.locator('.ud-next-outbound').getAttribute('data-route'),
+    'official','Unverified SKMEI must route to its official source instead of Amazon search');
+  assert.ok((await sourceWatch.locator('.ud-next-outbound').getAttribute('href'))
+    .startsWith('https://www.shopskmei.com/product/'));
+  assert.equal((await sourceWatch.locator('.ud-next-outbound').getAttribute('rel')).includes('sponsored'),false);
+  const paidWatch=nextSteps.locator('[data-watch-id="citizen-tsuyosa"]');
+  assert.equal(await paidWatch.locator('.ud-next-detail').getAttribute('href'),'./citizen-tsuyosa.html');
+  assert.equal(await paidWatch.locator('.ud-next-outbound').getAttribute('data-route'),'direct');
+  assert.match(await paidWatch.locator('.ud-next-outbound').getAttribute('href'),
+    /^https:\/\/www\.amazon\.fr\/dp\/[A-Z0-9]{10}\?tag=/);
+  assert.match(await paidWatch.locator('.ud-next-outbound').getAttribute('rel'),/sponsored/);
+  for(const a of await nextSteps.locator('.ud-next-actions a').all()){
+    const bounds=await a.boundingBox();
+    assert.ok(bounds&&bounds.height>=44,'All buyer next steps must be touch-accessible on Android');
+  }
+  await checkOverflow(phone,'Android source-first next steps');
   // The visitor can decide based on factual movement/size/style preferences,
   // not a fabricated price or bestseller rank.
   assert.ok(await phone.locator('#udDecisionForm').isVisible(),
@@ -280,6 +305,8 @@ try{
   assert.equal(await phone.locator('#udTrayItems li').count(),3);
   assert.equal(await phone.locator('#udCompareTable th[scope=col]').count(),4,
     'Three real references must be compared');
+  assert.equal(await phone.locator('#udCompareTable .ud-next-watch').count(),3,
+    'Each selected watch needs its own model-specific buyer route');
   assert.match(await phone.locator('#udTrayOpen').innerText(),/Comparer 3/);
   // Selecting a fourth is explicitly denied rather than silently replacing a watch.
   await phone.locator('#modele-skmei-2056 button.ud-select').click();
@@ -471,6 +498,8 @@ try{
     'Source-backed editorial watches remain navigable with JavaScript disabled');
   assert.equal(await noJs.locator('.ud-card:visible').count(),52,
     'All factual watch cards must remain visible without JS or feed fetching');
+  assert.equal(await noJs.locator('.ud-next-steps').count(),0,
+    'Do not render broken purchase steps before a validated JavaScript comparison');
   assert.equal(await noJs.locator('#udCompareTray:visible').count(),0,
     'The new dock must never appear as a broken control without JS');
   assert.equal(await noJs.locator('#udDecisionForm:visible').count(),0,

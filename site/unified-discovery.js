@@ -443,7 +443,56 @@
       result.setAttribute('aria-live','polite');
       summaries.unshift(result);
     }
-    compareTable.replaceChildren(...summaries,table);compareTable.hidden=false;
+    // Buyer journey after the swipeable factual matrix. Keep these actions
+    // outside the table so they are touch-accessible on narrow Android screens.
+    // Never promote generic marketplace searches as identified model offers.
+    const journey=node('section',null,'ud-next-steps');
+    journey.setAttribute('aria-label','Suite du choix des montres comparées');
+    const journeyTitle=node('h3','Et maintenant, où vérifier ces montres ?');
+    const journeyLead=node('p','Ouvrez la fiche du modèle exact, puis contrôlez la référence, la variante, le prix, le vendeur et la livraison sur le site tiers.');
+    const options=node('div',null,'ud-next-grid');
+    for(const id of selected){
+      const p=watches.get(id),card=node('article',null,'ud-next-watch');
+      card.dataset.watchId=id;
+      card.append(node('h4',p.brand+' '+p.model));
+      const actions=node('div',null,'ud-next-actions');
+      const detail=link('1 · Voir la fiche détaillée','./'+id+'.html');
+      detail.className='ud-next-detail';
+      actions.append(detail);
+      const kind=p.merchantKind;
+      const exact=kind==='direct'||kind==='awin';
+      // The signed catalogue is static but still treat external targets as
+      // untrusted before creating a new-tab action.
+      const validateTarget=value=>{
+        try{
+          const u=new URL(value);
+          return u.protocol==='https:'&&!u.username&&!u.password&&
+            !u.port&&!u.hash&&u.hostname.includes('.')?u.href:null;
+        }catch(_){return null}
+      };
+      const approvedMerchant=exact?validateTarget(p.merchantUrl):null;
+      const source=validateTarget(p.officialUrl);
+      const url=approvedMerchant||source;
+      if(url){
+        const label=approvedMerchant
+          ?kind==='direct'?'2 · Voir la fiche Amazon associée':'2 · Voir la référence partenaire'
+          :'2 · Consulter la source officielle';
+        const outbound=link(label,url);
+        outbound.className='ud-next-outbound';
+        outbound.target='_blank';
+        outbound.rel=approvedMerchant?'noopener noreferrer nofollow sponsored':'noopener noreferrer';
+        outbound.dataset.route=approvedMerchant?kind:'official';
+        actions.append(outbound);
+      }
+      card.append(actions);
+      const caveat=approvedMerchant
+        ?'Lien potentiellement rémunéré · référence, variante, prix, stock et vendeur à confirmer chez le marchand.'
+        :'Pas d’offre exacte documentée pour cet accès · consultez la référence à sa source, sans achat direct sur Atelier Montres.';
+      card.append(node('p',caveat,'ud-next-evidence'));
+      options.append(card);
+    }
+    journey.append(journeyTitle,journeyLead,options);
+    compareTable.replaceChildren(...summaries,table,journey);compareTable.hidden=false;
     persist();
   };
   decisionForm?.addEventListener('submit',event=>event.preventDefault());

@@ -82,6 +82,7 @@ export function buildComparisonPages({root,products,amazonLinks,partners,pageHea
         '<a href="#compare-specs"><span aria-hidden="true">01</span> Voir les différences techniques <span aria-hidden="true">↓</span></a>',
         '<a href="#duel-choix"><span aria-hidden="true">02</span> Quel modèle choisir ? <span aria-hidden="true">↓</span></a>',
       '</nav>',
+      '<p class="headtohead-live-link"><a class="primary" href="./toutes-les-montres.html?compare='+e(left.id+','+right.id)+'#comparer">Ouvrir le tableau interactif pour ces deux références →</a> <small>Le comparatif éditorial ci-dessous reste disponible sans JavaScript.</small></p>',
       '<section class="headtohead-grid" aria-label="Les deux montres à comparer">',
         buyerCard(left,pair.leftAdvice,0),buyerCard(right,pair.rightAdvice,1),
       '</section>',

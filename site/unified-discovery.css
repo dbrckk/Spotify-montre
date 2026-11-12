@@ -598,3 +598,24 @@
  .ud-pair-starter-actions{flex-direction:column}
  .ud-pair-starter-actions a{flex:auto}
 }
+/* Source-backed next steps after the horizontally swipable comparison:
+   actual watch details first, external merchants or official sources second. */
+.ud-next-steps{margin-top:17px;padding:clamp(15px,2.5vw,25px);border:1px solid #cdd9cb;border-radius:9px;background:linear-gradient(135deg,#f5f7ef,#eef3ec);color:#284935}
+.ud-next-steps h3{margin:0 0 8px;font:400 clamp(23px,2.8vw,31px)/1.2 Georgia,serif;color:#20442e}
+.ud-next-steps>p{margin:0 0 17px;color:#4b604f;font:450 13px/1.65 system-ui,sans-serif}
+.ud-next-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,235px),1fr));gap:12px}
+.ud-next-watch{display:flex;flex-direction:column;min-width:0;padding:17px;background:#fffefa;border:1px solid #d7dfd4;border-top:3px solid #9e875b;border-radius:6px}
+.ud-next-watch h4{margin:0 0 14px;font:400 clamp(20px,2vw,26px)/1.24 Georgia,serif;color:#254632;overflow-wrap:anywhere}
+.ud-next-actions{display:flex;flex-direction:column;gap:9px;margin-top:auto}
+.ud-next-actions a{display:grid;place-items:center;min-height:48px;padding:11px 13px;border-radius:5px;text-align:center;text-decoration:none;font:750 12px/1.45 system-ui,sans-serif;overflow-wrap:anywhere}
+.ud-next-detail{background:#26523a;color:#fff;border:1px solid #26523a}
+.ud-next-outbound{background:#fff9ee;color:#244d35;border:1px solid #bda986}
+.ud-next-actions a:hover{filter:brightness(.95)}
+.ud-next-actions a:focus-visible{outline:3px solid #b68a44;outline-offset:3px}
+.ud-next-evidence{margin:12px 0 0!important;color:#566657;font:450 11px/1.6 system-ui,sans-serif!important;overflow-wrap:anywhere}
+@media(max-width:600px){
+ .ud-next-steps{padding:15px 12px}
+ .ud-next-grid{grid-template-columns:minmax(0,1fr)}
+ .ud-next-watch{padding:15px}
+ .ud-next-actions a{min-height:48px}
+}
