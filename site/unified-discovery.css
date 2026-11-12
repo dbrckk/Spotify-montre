@@ -619,3 +619,15 @@
  .ud-next-watch{padding:15px}
  .ud-next-actions a{min-height:48px}
 }
+/* Consumer evidence hierarchy: identified listing ≠ verified live offer.
+   All outbound actions retain accessible 48px targets and honest labels. */
+.ud-next-proof{margin:0 0 13px!important;padding:10px 12px;border-left:3px solid #8a9e89;
+  background:#f1f4ef;color:#395340;font:650 12px/1.6 system-ui,sans-serif!important}
+.ud-next-proof[data-confidence="direct"]{border-color:#548062;background:#eaf2e8}
+.ud-next-proof[data-confidence="awin"]{border-color:#637ca5;background:#edf0f7}
+.ud-next-proof[data-confidence="search"]{border-color:#b18a49;background:#faf3e7}
+.ud-next-source{border:1px solid #aab9a9;background:#f5f7f2;color:#24503a}
+.ud-next-search{border:1px dashed #b29a6f;background:#fffaf0;color:#76522c}
+.ud-next-checked{margin:11px 0 0!important;color:#506455;
+  font:500 11px/1.6 system-ui,sans-serif!important;overflow-wrap:anywhere}
+.ud-next-evidence{padding-top:11px;border-top:1px solid #e0e5db}

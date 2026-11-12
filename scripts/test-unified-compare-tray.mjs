@@ -240,6 +240,14 @@ try{
   assert.match(await paidWatch.locator('.ud-next-outbound').getAttribute('href'),
     /^https:\/\/www\.amazon\.fr\/dp\/[A-Z0-9]{10}\?tag=/);
   assert.match(await paidWatch.locator('.ud-next-outbound').getAttribute('rel'),/sponsored/);
+  assert.equal(await paidWatch.locator('.ud-next-source').count(),1,
+    'An identified Amazon listing must never displace the independent manufacturer source');
+  assert.match(await paidWatch.locator('.ud-next-source').getAttribute('href'),/^https:\/\//);
+  assert.equal(await paidWatch.locator('.ud-next-source').getAttribute('data-route'),'official');
+  assert.equal((await paidWatch.locator('.ud-next-source').getAttribute('rel')).includes('sponsored'),false);
+  assert.match(await paidWatch.locator('.ud-next-proof').innerText(),/Fiche Amazon.fr associée/);
+  assert.equal(await sourceWatch.locator('.ud-next-source').count(),0,
+    'Source-only products must not show the same official route twice');
   for(const a of await nextSteps.locator('.ud-next-actions a').all()){
     const bounds=await a.boundingBox();
     assert.ok(bounds&&bounds.height>=44,'All buyer next steps must be touch-accessible on Android');
@@ -319,6 +327,25 @@ try{
   assert.equal(await phone.locator('#udCompareTable table').count(),0);
   assert.equal(new URL(phone.url()).searchParams.has('compare'),false,
     'Clearing selection also removes the shareable comparison URL');
+  const searchCard=phone.locator('.ud-card[data-merchant="search"]').first();
+  const searchId=await searchCard.getAttribute('data-id');
+  assert.ok(searchId,'At least one unverified Amazon search must be represented in the feed');
+  await searchCard.locator('button.ud-select').click();
+  await phone.locator('#modele-skmei-2056 button.ud-select').click();
+  const searchJourney=phone.locator('#udCompareTable .ud-next-watch[data-watch-id="'+searchId+'"]');
+  assert.equal(await searchJourney.locator('.ud-next-outbound').getAttribute('data-route'),'official',
+    'For search-only products the model source must come before generic Amazon results');
+  assert.equal(await searchJourney.locator('.ud-next-search').getAttribute('data-route'),'search');
+  assert.match(await searchJourney.locator('.ud-next-search').innerText(),/modèle à confirmer/);
+  assert.match(await searchJourney.locator('.ud-next-search').getAttribute('rel'),/sponsored/);
+  assert.match(await searchJourney.locator('.ud-next-proof').innerText(),/aucun résultat ni modèle exact garanti/);
+  assert.equal(await searchJourney.locator('.ud-next-source').count(),0,
+    'A search-only watch must have one official model source, not duplicate links');
+  await checkOverflow(phone,'Android honest search vs official source');
+  await phone.setViewportSize({width:320,height:740});
+  await checkOverflow(phone,'320px honest merchant journey');
+  await phone.setViewportSize({width:393,height:852});
+  await phone.locator('#udTrayClear').click();
 
   // Compare the rendered photo/fallback split with the exact-model rights
   // registry; newly approved photos must not break consumer-side filters.

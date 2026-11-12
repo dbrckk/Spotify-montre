@@ -768,8 +768,16 @@ const trayJS=read('unified-discovery.js');
 assert.match(trayJS,/ud-next-steps/,'The compare table must expose direct product follow-up routes');
 assert.match(trayJS,/validateTarget\(p\.officialUrl\)/,
   'Official source action must validate the HTTPS URL before displaying');
-assert.match(trayJS,/approvedMerchant\?kind:'official'/,
+assert.match(trayJS,/outbound\.dataset\.route=kind/,
   'Buyer journeys must distinguish a documented merchant from an official source');
+assert.match(trayJS,/ud-next-proof/,
+  'Comparison buyers must see the evidence status before visiting third-party listings');
+assert.match(trayJS,/linkSearch\.dataset\.route='search'/,
+  'Search-only Amazon destinations must not masquerade as exact listings');
+assert.match(trayJS,/ud-next-source/,
+  'Documented merchant links must retain an independently linked reference source');
+assert.match(read('unified-discovery.css'),/\.ud-next-proof/,
+  'Merchant proof text must have a dedicated legible treatment');
 assert.match(read('unified-discovery.css'),/\.ud-next-grid/,
   'Comparison buying steps must have a responsive layout');
 assert.match(trayJS,/selected\.length<2/,'One watch must not unlock comparison');

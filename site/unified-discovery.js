@@ -472,22 +472,64 @@
       };
       const approvedMerchant=exact?validateTarget(p.merchantUrl):null;
       const source=validateTarget(p.officialUrl);
-      const url=approvedMerchant||source;
-      if(url){
-        const label=approvedMerchant
-          ?kind==='direct'?'2 · Voir la fiche Amazon associée':'2 · Voir la référence partenaire'
-          :'2 · Consulter la source officielle';
-        const outbound=link(label,url);
+      // Explain the strength and limits of historical evidence before the
+      // customer opens an external destination. No live-stock claims.
+      const checked=typeof p.sourceCheckedOn==='string'
+        &&/^\\d{4}-\\d{2}-\\d{2}$/.test(p.sourceCheckedOn)
+        ?p.sourceCheckedOn.split('-').reverse().join('/'):null;
+      const proofText=approvedMerchant
+        ?p.merchantEvidenceType==='amazon_fr_comparator_redirect'
+          ?'ASIN recoupé via un comparateur et une autre source : la fiche Amazon.fr n’a pas été consultée directement.'
+          :kind==='awin'?'Variante partenaire associée à la référence du catalogue.'
+            :'Fiche Amazon.fr associée à la référence du catalogue.'
+        :kind==='search'
+          ?'Recherche Amazon générique : aucun résultat ni modèle exact garanti.'
+          :'Aucune offre marchande exacte documentée pour cette référence.';
+      const proof=node('p',proofText,'ud-next-proof');
+      proof.dataset.confidence=approvedMerchant?kind:kind==='search'?'search':'official';
+      card.append(proof);
+      if(approvedMerchant){
+        const outbound=link(kind==='direct'
+          ?'2 · Ouvrir la fiche Amazon associée'
+          :'2 · Consulter la variante partenaire',approvedMerchant);
         outbound.className='ud-next-outbound';
-        outbound.target='_blank';
-        outbound.rel=approvedMerchant?'noopener noreferrer nofollow sponsored':'noopener noreferrer';
-        outbound.dataset.route=approvedMerchant?kind:'official';
+        outbound.target='_blank';outbound.rel='noopener noreferrer nofollow sponsored';
+        outbound.dataset.route=kind;
         actions.append(outbound);
       }
+      // Preserve the independent, source-registered manufacturer/supplier URL
+      // even when a commercial listing is already documented.
+      if(source){
+        const official=link(approvedMerchant
+          ?'3 · Vérifier la référence à la source'
+          :'2 · Vérifier la référence à la source',source);
+        official.className=approvedMerchant?'ud-next-source':'ud-next-outbound';
+        official.target='_blank';official.rel='noopener noreferrer nofollow';
+        official.dataset.route='official';
+        actions.append(official);
+      }
+      // A generic paid search may still help research a model, but only
+      // AFTER the exact reference source, with unambiguous search wording.
+      if(!approvedMerchant&&kind==='search'){
+        const search=validateTarget(p.merchantUrl);
+        if(search){
+          const linkSearch=link('3 · Recherche Amazon · modèle à confirmer',search);
+          linkSearch.className='ud-next-search';
+          linkSearch.target='_blank';linkSearch.rel='noopener noreferrer nofollow sponsored';
+          linkSearch.dataset.route='search';
+          actions.append(linkSearch);
+        }
+      }
       card.append(actions);
+      if(checked){
+        const observation=p.observedAvailability==='unavailable_at_check'
+          ?'Indisponibilité observée lors de ce contrôle ; disponibilité actuelle inconnue.'
+          :'Ce contrôle ne confirme ni le prix ni le stock actuel.';
+        card.append(node('p','Correspondance relevée le '+checked+'. '+observation,'ud-next-checked'));
+      }
       const caveat=approvedMerchant
-        ?'Lien potentiellement rémunéré · référence, variante, prix, stock et vendeur à confirmer chez le marchand.'
-        :'Pas d’offre exacte documentée pour cet accès · consultez la référence à sa source, sans achat direct sur Atelier Montres.';
+        ?'Lien potentiellement rémunéré. Vérifiez le code modèle, la variante, le prix, le vendeur, la garantie et la livraison avant achat.'
+        :'Aucun achat direct sur Atelier Montres. Une recherche ne garantit ni la référence exacte ni la disponibilité.';
       card.append(node('p',caveat,'ud-next-evidence'));
       options.append(card);
     }
