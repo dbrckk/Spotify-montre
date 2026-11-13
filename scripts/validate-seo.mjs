@@ -706,9 +706,14 @@ for(const watch of unified.products){
   if(watch.merchantKind==='search')assert.deepEqual(linkOrder,
     ['ud-details','ud-source','ud-merchant'],
     'The exact reference source must precede non-exact Amazon searches: '+watch.id);
-  if(watch.merchantKind==='direct')assert.deepEqual(linkOrder,
-    ['ud-details','ud-merchant','ud-source'],
-    'Direct Amazon model and official source must both remain accessible: '+watch.id);
+  if(watch.merchantKind==='direct'){
+    const sourceFirst=watch.observedAvailability==='unavailable_at_check'||
+      watch.merchantEvidenceType==='amazon_fr_comparator_redirect';
+    assert.deepEqual(linkOrder,sourceFirst
+      ?['ud-details','ud-source','ud-merchant']
+      :['ud-details','ud-merchant','ud-source'],
+      'Direct Amazon model and official source must remain accessible in proof-based order: '+watch.id);
+  }
   if(!watch.merchantKind)assert.deepEqual(linkOrder,
     ['ud-details','ud-source'],
     'Unpaid models must not claim an Amazon purchase link: '+watch.id);
