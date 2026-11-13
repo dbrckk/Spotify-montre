@@ -30,7 +30,9 @@
     "compliance:photo:package:check": "python -m unittest discover -s scripts -p 'test_photo_package_gate.py' -v",
     "compliance:photo:rehearsal": "node scripts/test-photo-withdrawal-integration.mjs",
     "compliance:photo:retire:preview": "node scripts/withdraw-watch-photo.mjs",
-    "compliance:photo:retire:check": "node scripts/test-photo-retirement-cli.mjs"
+    "compliance:photo:retire:check": "node scripts/test-photo-retirement-cli.mjs",
+    "merchant:evidence": "node scripts/report-merchant-evidence.mjs",
+    "merchant:evidence:check": "node scripts/test-source-evidence-review.mjs && node scripts/test-merchant-evidence-action-plan.mjs"
   },
   "engines": {
     "node": ">=20"
