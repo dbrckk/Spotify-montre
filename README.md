@@ -1,5 +1,7 @@
 # Atelier Montres — boutique de montres indépendante
 
+> **Audit de maturité du 13 novembre 2026 :** [notes, preuves, blocages réels et backlog ordonné](docs/AUDIT_SITE_SCORE_ET_RESTANT_2026-11-13.md).
+>
 > **Objectif final Production Ready (9 novembre 2026) :** [charte d'agence, jalons R0 → R4, rôles, critères Go/No-Go, backlog priorisé](docs/OBJECTIF_FINAL_PRODUCTION_READY_2026-11-09.md). Le [plan AM-00 → AM-18](docs/OBJECTIF_GLOBAL_ET_PLAN_DIRECTEUR_2026-11-05.md) reste une base historique et technique. Voir l'état auditable avec `npm run production:status`.
 >
 > **État opérationnel :** vitrine et API commerciale indépendantes déployées sur Render ; 52 références éditoriales ; parcours partenaires avec 13 liens Amazon.fr documentés, sans confirmation de commissions acquises. Le ticket CJ est ouvert mais le devis complet manque. **Paiement direct désactivé côté site et serveur** : aucune vente automatisée n'est encore attestée. Les plans précédents sont des archives de conception et des guides spécialisés ; la charte Production Ready du 9 novembre fixe les critères finaux, tandis que les preuves de production et le code restent déterminants.
