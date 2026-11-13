@@ -13,6 +13,9 @@ on:
       - 'scripts/test-merchant-evidence-action-plan.mjs'
       - 'scripts/report-merchant-evidence.mjs'
       - 'scripts/merchant-evidence-action-plan.mjs'
+      - 'scripts/official-source-http-probe.mjs'
+      - 'scripts/probe-official-sources.mjs'
+      - 'scripts/test-official-source-http-probe.mjs'
       - 'scripts/test-source-evidence-review.mjs'
       - 'research/amazon-fr-popular-verified.json'
       - '.github/workflows/audit-live-seo.yml'
@@ -28,6 +31,9 @@ on:
       - 'scripts/test-merchant-evidence-action-plan.mjs'
       - 'scripts/report-merchant-evidence.mjs'
       - 'scripts/merchant-evidence-action-plan.mjs'
+      - 'scripts/official-source-http-probe.mjs'
+      - 'scripts/probe-official-sources.mjs'
+      - 'scripts/test-official-source-http-probe.mjs'
       - 'scripts/test-source-evidence-review.mjs'
       - 'research/amazon-fr-popular-verified.json'
       - '.github/workflows/audit-live-seo.yml'
@@ -55,6 +61,12 @@ jobs:
           node --check scripts/report-merchant-evidence.mjs
           node scripts/test-merchant-evidence-action-plan.mjs
           node scripts/report-merchant-evidence.mjs --write-artifacts --ci-summary
+      - name: Check priority official source URLs without asserting stock
+        run: |
+          node --check scripts/official-source-http-probe.mjs
+          node --check scripts/probe-official-sources.mjs
+          node scripts/test-official-source-http-probe.mjs
+          node scripts/probe-official-sources.mjs --write-artifacts --ci-summary
       - name: Audit sitemap, canonical URLs and crawlability in production
         env:
           SEO_AUDIT_BASE_URL: https://atelier-montres-selection-fr.onrender.com/
@@ -69,5 +81,7 @@ jobs:
             artifacts/merchant-evidence-action-plan.json
             artifacts/merchant-evidence-action-plan.csv
             artifacts/merchant-evidence-action-plan.md
+            artifacts/official-source-http-probe.json
+            artifacts/official-source-http-probe.md
           retention-days: 14
           if-no-files-found: warn

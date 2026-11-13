@@ -53,5 +53,21 @@ assert.throws(()=>buildMerchantEvidenceActionPlan({...params,extraProducts:[...e
 assert.throws(()=>buildMerchantEvidenceActionPlan({...params,coreProducts:[
   {...core[0],officialUrl:'javascript:alert(1)'},...core.slice(1)
 ]}),/official URL/);
+// Future ASIN research must not require hardcoding today's 27 matches.
+const futureResearch={...supplemental,
+  'skmei-2056':{asin:'B012345678',verifiedAt:'2026-11-13',
+    evidenceType:'amazon_fr_product_page'}};
+const futureReview=buildSourceEvidenceReview({coreResearch,
+  supplemental:futureResearch,catalogIds:ids,asOf:'2026-11-13'});
+const future=buildMerchantEvidenceActionPlan({...params,sourceReview:futureReview});
+assert.equal(future.totals.documentedAsins,28);
+assert.equal(future.rows.find(p=>p.id==='skmei-2056').documentedAsin,'B012345678');
+const reducedResearch=Object.fromEntries(Object.entries(supplemental)
+  .filter(([id])=>id!=='skmei-1251'));
+const reducedReview=buildSourceEvidenceReview({coreResearch,
+  supplemental:reducedResearch,catalogIds:ids,asOf:'2026-11-13'});
+const reduced=buildMerchantEvidenceActionPlan({...params,sourceReview:reducedReview});
+assert.equal(reduced.totals.documentedAsins,26);
+assert.equal(reduced.rows.find(p=>p.id==='skmei-1251').documentedAsin,null);
 assert.ok(plan.limitations.some(x=>x.includes('not a purchase')));
 console.log('PASS: read-only 52-model merchant evidence plan, 27 historical ASINs, priority queue and 11 photo gaps.');

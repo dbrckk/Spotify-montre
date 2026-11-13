@@ -36,3 +36,18 @@ node scripts/report-merchant-evidence.mjs --as-of=2026-12-09 --json
 ### Garde-fous
 
 Aucune exécution ne traite les clics comme des ventes ou les correspondances ASIN comme des offres. Le rapport n'est pas un justificatif de droits d'auteur. Les éléments légaux P0 (éditeur, permissions, éligibilité du compte) restent en attente de preuves réelles. Le paiement direct reste désactivé.
+
+## Extension du 13/11 — contrôle HTTP prudent des sources officielles
+
+Le workflow vérifie désormais, après la construction du rapport documentaire, jusqu'à **10 URLs de sources officielles prioritaires** (P1/P2, puis suivantes selon les besoins). Le contrôle public suit uniquement les redirections **sur le même hôte HTTPS**, avec un maximum de deux redirections, trois requêtes simultanées et une limite de temps par requête. Il ne suit pas les destinations tierces inattendues.
+
+Le résultat est conservé dans `official-source-http-probe.json` et `official-source-http-probe.md` à côté du rapport marchand. Les réponses sont classées ainsi :
+
+- **HTTP 2xx** : page joignable, mais la référence exacte, le stock et le vendeur restent inconnus ;
+- **HTTP 404/410** : URL source à examiner humainement, sans retirer le produit ;
+- **HTTP 401/403/429** : site inaccessible à l'automate ou restriction ; état commercial inconnu ;
+- **Redirection vers un autre hôte, erreur serveur ou délai** : contrôle indéterminé ; aucune suppression ni mise à jour automatique.
+
+Les pages Amazon **ne sont pas sondées** par ce mécanisme : la correspondance historique des ASIN est maintenue dans sa file documentaire distincte. Les dates de preuve ne sont jamais rafraîchies sur simple réponse HTTP.
+
+Commandes : `npm run merchant:evidence:scan` (audit réseau limité et artefacts locaux) ; `npm run merchant:evidence:check` (tests sans réseau). Le générateur accepte désormais un nombre de correspondances ASIN évolutif (pas de blocage codé en dur sur 27) tout en maintenant les 52 références uniques du catalogue.

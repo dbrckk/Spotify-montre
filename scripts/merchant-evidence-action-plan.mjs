@@ -15,9 +15,8 @@ export function buildMerchantEvidenceActionPlan({
   const products=[...coreProducts.map(p=>({...p,collection:'core'})),
     ...extraProducts.map(p=>({...p,collection:'supplemental'}))];
   const ids=new Set(products.map(p=>p.id));
-  if(ids.size!==52||sourceReview.records.length!==sourceReview.documentedAsins||
-     sourceReview.documentedAsins!==27)
-    throw Error('Evidence action plan requires 52 unique models and 27 documentary matches');
+  if(ids.size!==52||sourceReview.records.length!==sourceReview.documentedAsins)
+    throw Error('Evidence action plan requires 52 unique models and a consistent evidence register');
   const extraIds=new Set(extraProducts.map(p=>p.id));
   if(Object.keys(photoRights).some(id=>!extraIds.has(id)))
     throw Error('Photo register references an unknown supplemental model');

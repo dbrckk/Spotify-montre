@@ -32,7 +32,8 @@
     "compliance:photo:retire:preview": "node scripts/withdraw-watch-photo.mjs",
     "compliance:photo:retire:check": "node scripts/test-photo-retirement-cli.mjs",
     "merchant:evidence": "node scripts/report-merchant-evidence.mjs",
-    "merchant:evidence:check": "node scripts/test-source-evidence-review.mjs && node scripts/test-merchant-evidence-action-plan.mjs"
+    "merchant:evidence:check": "node scripts/test-source-evidence-review.mjs && node scripts/test-merchant-evidence-action-plan.mjs && node scripts/test-official-source-http-probe.mjs",
+    "merchant:evidence:scan": "node scripts/report-merchant-evidence.mjs --write-artifacts && node scripts/probe-official-sources.mjs --write-artifacts"
   },
   "engines": {
     "node": ">=20"
