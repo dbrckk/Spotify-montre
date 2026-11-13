@@ -148,7 +148,23 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
       +' data-merchant-official-id="'+e(p.id)+'" data-merchant-placement="popular"'
       +' aria-label="'+e(sourceLabel+' — '+p.brand+' '+p.model)+'"'
       +' href="'+e(p.officialUrl)+'">'+e(sourceLabel)+'</a>';
-    const actions=p.merchantKind==='search'?source+merchant:merchant+source;
+    // A historically unavailable Amazon listing or a comparator-derived
+    // ASIN is a weaker buying path: show the registered model source FIRST.
+    // The paid listing remains accessible for an independent recheck.
+    const sourceFirst=p.merchantKind==='direct'&&(
+      p.observedAvailability==='unavailable_at_check'||
+      p.merchantEvidenceType==='amazon_fr_comparator_redirect');
+    const actions=p.merchantKind==='search'||sourceFirst
+      ?source+merchant:merchant+source;
+    const sourceFirstNote=sourceFirst
+      ?'<p class="ud-source-priority">'+e(
+        p.observedAvailability==='unavailable_at_check'
+          ?'Offre Amazon signalée indisponible lors du contrôle'+
+            (observedDate?' du '+observedDate:'')+
+            '. Vérifiez d’abord le modèle à sa source ; le stock actuel est inconnu.'
+          :'Correspondance Amazon issue de sources indirectes. Vérifiez d’abord la référence exacte chez la marque ou le vendeur.'
+      )+'</p>':'';
+
     const variant=p.merchantKind==='direct'&&p.marketplaceVariant
       ?'<p class="ud-exact-variant"><strong>Variante Amazon à vérifier :</strong> '+e(p.marketplaceVariant)+'</p>':'';
     const partnerVariant=p.merchantKind==='awin'&&p.partnerVariant
@@ -158,7 +174,7 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
 
     return '<article class="ud-card" id="modele-'+e(p.id)+'" data-id="'+e(p.id)+'"'
       +' data-brand="'+e(p.brand)+'" data-model="'+e(p.model)+'" data-tier="'+e(p.tier)+'" data-style="'+e(p.style)+'"'
-      +' data-movement="'+e(p.movement)+'" data-merchant="'+merchantType+'" data-commerce-status="'+e(p.commercialStatus)+'" data-visual="'+(p.photoUrl?'photo':'no-photo')+'" data-search="'+e([p.brand,p.model,p.description,p.lead,p.caseText,p.movement].join(' '))+'">'
+      +' data-movement="'+e(p.movement)+'" data-merchant="'+merchantType+'" data-source-priority="'+String(sourceFirst)+'" data-commerce-status="'+e(p.commercialStatus)+'" data-visual="'+(p.photoUrl?'photo':'no-photo')+'" data-search="'+e([p.brand,p.model,p.description,p.lead,p.caseText,p.movement].join(' '))+'">'
       +'<div class="ud-media '+(p.photoUrl?'ud-media-verified':'ud-media-no-photo')+'">'
       +'<a class="ud-photo" href="'+e(p.detailUrl.replace('./montres/','./'))+'">'+photoMarkup(p)+'</a>'
       +(!p.photoUrl?'<a class="ud-photo-official" data-official-photo-id="'+e(p.id)+'" href="'+e(p.officialUrl)+'" target="_blank" rel="noopener noreferrer nofollow" aria-label="Voir les photos du modèle exact '+e(p.brand+' '+p.model)+' chez la marque ou le vendeur (nouvel onglet)">Voir les photos du modèle exact <span aria-hidden="true">↗</span></a>':'')
@@ -173,7 +189,7 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
       +'<div class="ud-offer-context" role="group" aria-label="Informations du vendeur et de la référence">'
       +'<p class="ud-merchant-kind">'+e(merchantLabel)+'</p>'
       +'<p class="ud-commercial-proof">'+e(evidenceMessage)+'</p>'
-      +variant+partnerVariant+redirectProof
+      +variant+partnerVariant+redirectProof+sourceFirstNote
       +'</div>'
       +'<div class="ud-actions"><a class="ud-details" href="'+e(p.detailUrl.replace('./montres/','./'))+'">Voir la fiche et les sources</a>'
       +actions+'</div>'

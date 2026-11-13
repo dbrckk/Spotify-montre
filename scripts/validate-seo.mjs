@@ -600,6 +600,33 @@ for(const watch of JSON.parse(read('selection-populaires.json')).products){
   assert.ok(table.includes('Modèle consulté'),'Current model label required: '+watch.id);
 }
 const unifiedHtml=read(unifiedPath);
+const coreUnavailability=JSON.parse(read('amazon-product-links.json')).links;
+const indirectAsins=JSON.parse(readFileSync(resolve(root,
+  '../research/amazon-fr-popular-verified.json'),'utf8')).verifiedProducts;
+const sourceFirstDocumentaryIds=new Set([
+  ...Object.entries(coreUnavailability).filter(([,p])=>
+    p.availabilityAtCheck==='unavailable_at_check').map(([id])=>id),
+  ...Object.entries(indirectAsins).filter(([,p])=>
+    p.evidenceType==='amazon_fr_comparator_redirect').map(([id])=>id)
+]);
+for(const p of unified.products){
+  const rendered=unifiedHtml.split('id="modele-'+p.id+'"')[1]?.split('</article>')[0];
+  assert.ok(rendered,'Missing source-first buyer card '+p.id);
+  const needsSourceFirst=manifest.affiliateActive&&sourceFirstDocumentaryIds.has(p.id);
+  assert.ok(rendered.includes('data-source-priority="'+String(Boolean(needsSourceFirst))+'"'),
+    'Documentary risk classification must match published listing '+p.id);
+  const actions=rendered.split('<div class="ud-actions">')[1]?.split('</div>')[0];
+  assert.ok(actions,'Buyer actions must be available without JS '+p.id);
+  if(needsSourceFirst){
+    assert.ok(rendered.includes('class="ud-source-priority"'),
+      'Risky evidence needs a visible caution '+p.id);
+    assert.ok(actions.indexOf('class="ud-source"')>=0&&
+      actions.indexOf('class="ud-source"')<actions.indexOf('class="ud-merchant"'),
+      'Source must precede paid Amazon link for historical/indirect proof '+p.id);
+  }
+}
+assert.match(read('unified-discovery.js'),/const sourceFirst=Boolean\(source&&approvedMerchant/,
+  'Interactive comparisons must retain the source-first risk ordering');
 const editorialPairs=JSON.parse(read('comparaisons-montres.json')).comparisons;
 for(const pair of editorialPairs){
   const html=read('montres/comparer-'+pair.slug+'.html');

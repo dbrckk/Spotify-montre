@@ -472,6 +472,10 @@
       };
       const approvedMerchant=exact?validateTarget(p.merchantUrl):null;
       const source=validateTarget(p.officialUrl);
+      const sourceFirst=Boolean(source&&approvedMerchant&&kind==='direct'&&(
+        p.observedAvailability==='unavailable_at_check'||
+        p.merchantEvidenceType==='amazon_fr_comparator_redirect'));
+      if(sourceFirst)card.dataset.sourcePriority='true';
       // Explain the strength and limits of historical evidence before the
       // customer opens an external destination. No live-stock claims.
       const checked=typeof p.sourceCheckedOn==='string'
@@ -488,9 +492,16 @@
       const proof=node('p',proofText,'ud-next-proof');
       proof.dataset.confidence=approvedMerchant?kind:kind==='search'?'search':'official';
       card.append(proof);
+      if(sourceFirst){
+        card.append(node('p',p.observedAvailability==='unavailable_at_check'
+          ?'Cette fiche Amazon était indisponible lors du contrôle. Vérifiez d’abord la référence officielle ; le stock actuel est inconnu.'
+          :'Cette correspondance Amazon est indirecte. Vérifiez d’abord la référence officielle et la variante.',
+          'ud-next-risk'));
+      }
+      let merchantAction=null;
       if(approvedMerchant){
         const outbound=link(kind==='direct'
-          ?'2 · Ouvrir la fiche Amazon associée'
+          ?(sourceFirst?'3 · Vérifier la fiche Amazon associée':'2 · Ouvrir la fiche Amazon associée')
           :'2 · Consulter la variante partenaire',approvedMerchant);
         outbound.className='ud-next-outbound';
         outbound.target='_blank';outbound.rel='noopener noreferrer nofollow sponsored';
@@ -502,12 +513,13 @@
           outbound.dataset.partnerOfferId=id;
           outbound.dataset.partnerPlacement='comparison';
         }
-        actions.append(outbound);
+        if(sourceFirst)merchantAction=outbound;
+        else actions.append(outbound);
       }
       // Preserve the independent, source-registered manufacturer/supplier URL
       // even when a commercial listing is already documented.
       if(source){
-        const official=link(approvedMerchant
+        const official=link(approvedMerchant&&!sourceFirst
           ?'3 · Vérifier la référence à la source'
           :'2 · Vérifier la référence à la source',source);
         official.className=approvedMerchant?'ud-next-source':'ud-next-outbound';
@@ -517,6 +529,7 @@
         official.dataset.merchantPlacement='comparison';
         actions.append(official);
       }
+      if(merchantAction)actions.append(merchantAction);
       // A generic paid search may still help research a model, but only
       // AFTER the exact reference source, with unambiguous search wording.
       if(!approvedMerchant&&kind==='search'){

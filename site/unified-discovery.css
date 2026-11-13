@@ -631,3 +631,16 @@
 .ud-next-checked{margin:11px 0 0!important;color:#506455;
   font:500 11px/1.6 system-ui,sans-serif!important;overflow-wrap:anywhere}
 .ud-next-evidence{padding-top:11px;border-top:1px solid #e0e5db}
+
+/* Source-first checkout caution: an old unavailable listing or indirect ASIN
+   is not the first actionable route. Do not style it as live stock. */
+.ud-source-priority{margin:0;padding:9px 11px;border-left:3px solid #987b50;
+  background:#fff8eb;color:#695332;font:550 11px/1.6 system-ui,sans-serif;
+  overflow-wrap:anywhere}
+.ud-card[data-source-priority="true"] .ud-source{background:#ebf3e9;
+  border-color:#64836d;color:#1c4b34!important}
+.ud-next-risk{margin:0 0 14px!important;padding:10px 11px;
+  border-left:3px solid #b28b50;background:#fff8eb;color:#644c2d;
+  font:550 12px/1.6 system-ui,sans-serif!important;overflow-wrap:anywhere}
+.ud-next-watch[data-source-priority="true"] .ud-next-source{background:#e7f2e9;
+  border-color:#64866f;color:#234d36}

@@ -14,6 +14,18 @@ const documentedSupplementalPhotos=Object.keys(JSON.parse(readFileSync(
   new URL('../site/popular-photo-rights.json',import.meta.url),'utf8')).photos).length;
 const approvedPhotoCount=15+documentedSupplementalPhotos;
 const noPhotoCount=52-approvedPhotoCount;
+const coreAmazon=JSON.parse(readFileSync(new URL(
+  '../site/amazon-product-links.json',import.meta.url),'utf8')).links;
+const supplementalAmazon=JSON.parse(readFileSync(new URL(
+  '../research/amazon-fr-popular-verified.json',import.meta.url),'utf8')).verifiedProducts;
+const sourceFirstIds=new Set([
+  ...Object.entries(coreAmazon).filter(([,p])=>
+    p.availabilityAtCheck==='unavailable_at_check').map(([id])=>id),
+  ...Object.entries(supplementalAmazon).filter(([,p])=>
+    p.evidenceType==='amazon_fr_comparator_redirect').map(([id])=>id)
+]);
+assert.equal(sourceFirstIds.size,10,
+  'Current documentary risk sample includes four historic gaps and six indirect matches');
 const checkOverflow=async(page,label)=>{
   const w=await page.evaluate(()=>{
     const client=document.documentElement.clientWidth;
@@ -129,6 +141,8 @@ try{
       sourceLabel:source?.getAttribute('aria-label')||'',
       sourceTracking:source?.getAttribute('data-merchant-official-id')||'',
       sourcePlacement:source?.getAttribute('data-merchant-placement')||'',
+      sourcePriority:card.dataset.sourcePriority,
+      warningCount:card.querySelectorAll('.ud-source-priority').length,
       links:actions.map(a=>a.className),
       searchTracking:card.querySelectorAll('a[data-amazon-search-id]').length,
       directTracking:card.querySelectorAll('a[data-amazon-product]').length
@@ -148,8 +162,15 @@ try{
         'Model-specific source must appear BEFORE an unverified Amazon search '+exit.id);
       assert.equal(exit.searchTracking,1,'One clearly labelled compensated search '+exit.id);
     }else if(exit.merchant==='direct'){
-      assert.deepEqual(exit.links,['ud-details','ud-merchant','ud-source'],
-        'Identified product listing takes priority without hiding the source '+exit.id);
+      const sourceFirst=sourceFirstIds.has(exit.id);
+      assert.equal(exit.sourcePriority,String(sourceFirst),
+        'Only historically unavailable or indirect-ASIN listings must require source-first verification '+exit.id);
+      assert.equal(exit.warningCount,sourceFirst?1:0,
+        'Every source-first case needs a visible buyer caution '+exit.id);
+      assert.deepEqual(exit.links,sourceFirst
+        ?['ud-details','ud-source','ud-merchant']
+        :['ud-details','ud-merchant','ud-source'],
+        'Buyer actions must prioritize the manufacturer for uncertain Amazon evidence '+exit.id);
       assert.equal(exit.directTracking,1,'Only identified product pages use ASIN tracking '+exit.id);
     }else{
       assert.deepEqual(exit.links,['ud-details','ud-source'],
@@ -253,6 +274,33 @@ try{
   assert.equal(await paidWatch.locator('.ud-next-source').getAttribute('data-merchant-placement'),'comparison');
   assert.equal((await paidWatch.locator('.ud-next-source').getAttribute('rel')).includes('sponsored'),false);
   assert.match(await paidWatch.locator('.ud-next-proof').innerText(),/Fiche Amazon.fr associée/);
+  const cautionPage=await browser.newPage({viewport:{width:393,height:852},
+    deviceScaleFactor:1,isMobile:true,hasTouch:true,locale:'fr-FR'});
+  try{
+    await cautionPage.goto(new URL(
+      '/montres/toutes-les-montres.html?compare=casio-mtp-1302,skmei-1251#comparer',base).href,
+      {waitUntil:'domcontentloaded'});
+    await cautionPage.locator('#udCompareTable .ud-next-watch').first().waitFor({state:'visible'});
+    for(const id of ['casio-mtp-1302','skmei-1251']){
+      const card=cautionPage.locator('#udCompareTable .ud-next-watch[data-watch-id="'+id+'"]');
+      assert.equal(await card.getAttribute('data-source-priority'),'true',
+        'Historical stock uncertainty and indirect ASIN proof must prioritize manufacturer: '+id);
+      assert.equal(await card.locator('.ud-next-risk').count(),1,
+        'Source-first routes need an explicit reason before opening an affiliate link');
+      assert.deepEqual(await card.locator('.ud-next-actions a').evaluateAll(
+        links=>links.map(x=>x.dataset.route||'detail')),
+        ['detail','official','direct']);
+      assert.match(await card.locator('.ud-next-source').innerText(),/^2 ·/);
+      assert.match(await card.locator('.ud-next-outbound').innerText(),/^3 ·/);
+      assert.match(await card.locator('.ud-next-outbound').getAttribute('rel'),/sponsored/);
+      assert.equal((await card.locator('.ud-next-source').getAttribute('rel')).includes('sponsored'),false);
+    }
+    assert.match(await cautionPage.locator(
+      '#udCompareTable [data-watch-id="casio-mtp-1302"] .ud-next-risk').innerText(),/stock actuel est inconnu/);
+    assert.match(await cautionPage.locator(
+      '#udCompareTable [data-watch-id="skmei-1251"] .ud-next-risk').innerText(),/indirecte/);
+    await checkOverflow(cautionPage,'Android source-first historic and comparator-based ASIN');
+  }finally{await cautionPage.close()}
   assert.equal(await sourceWatch.locator('.ud-next-source').count(),0,
     'Source-only products must not show the same official route twice');
   for(const a of await nextSteps.locator('.ud-next-actions a').all()){
