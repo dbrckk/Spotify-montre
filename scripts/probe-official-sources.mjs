@@ -18,6 +18,8 @@ const counts=response.counts;
 const needsReview=response.results.filter(p=>
   ['source_http_not_found','invalid_source_url','redirect_requires_manual_review',
     'redirect_without_location','redirect_limit'].includes(p.outcome));
+const inconclusive=response.results.filter(p=>p.outcome!=='reachable_http'&&
+  !needsReview.includes(p));
 const markdown=[
   '# Atelier Montres — disponibilité HTTP des pages source prioritaires',
   '',
@@ -36,6 +38,12 @@ const markdown=[
   ...(needsReview.length?needsReview.map(p=>'- '+p.brand+' '+p.model+' ('+p.id+
     ') — '+p.outcome+' ; URL enregistrée : '+p.originalUrl):
     ['Aucune anomalie de destination confirmée dans cet échantillon.']),
+  '',
+  '## Sources à contrôler manuellement (réponse HTTP non concluante)',
+  ...(inconclusive.length?inconclusive.map(p=>'- '+p.brand+' '+p.model+
+    ' ([fiche Atelier Montres](https://atelier-montres-selection-fr.onrender.com/montres/'+p.id+'.html))'+
+    ' — '+p.outcome+' ; source : '+p.originalUrl):
+    ['Aucune restriction ou erreur réseau détectée dans cet échantillon.']),
   '',
   '**Attention :** Amazon, le prix, les stocks, la variante vendue, les taxes et les commissions n’ont pas été vérifiés. Les sites sources peuvent bloquer les robots ; un refus ne déclenche aucune modification de fiche.',
 ].join('\n')+'\n';
