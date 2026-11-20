@@ -165,9 +165,13 @@ export function buildPopularPicks({root,existingProducts,affiliates,amazonPartne
     const compareLink='./montres/toutes-les-montres.html?compare='+encodeURIComponent(p.id+','+other.id)+'#comparer';
     const label=viaComparator?'ASIN recoupé via comparateur'
       :direct?'Fiche Amazon.fr documentée':'Référence et vendeur documentés';
-    const merchant=direct
-      ?link(direct.url,'Voir la fiche Amazon.fr · lien rémunéré',true,p.id,'product','showroom')
-      :link(p.officialUrl,'Voir la fiche de la marque · lien non rémunéré',false,p.id,'official','showroom');
+    const source=!direct||viaComparator
+      ?link(p.officialUrl,'Vérifier la référence chez la marque ou le vendeur',false,p.id,'official','showroom')
+      :'';
+    const amazon=direct
+      ?link(direct.url,(viaComparator?'Vérifier l’ASIN sur Amazon.fr':'Voir la fiche Amazon.fr')+' · lien rémunéré',true,p.id,'product','showroom')
+      :'';
+    const merchant=source+amazon;
     return '<article class="am-affordable-card" data-affordable-id="'+e(p.id)+'"'
       +' data-affordable-proof="'+(viaComparator?'comparator':direct?'listing':'source')+'">'
       +'<a class="am-affordable-media" href="./montres/'+e(p.id)+'.html" aria-label="Voir la fiche de '+e(p.brand+' '+p.model)+'">'

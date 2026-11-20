@@ -84,15 +84,18 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
     const direct=verifiedLinks.get(p.id);
     const alternatePartner=partnerOffers.get(p.id);
     const comparator=direct?.evidenceType==='amazon_fr_comparator_redirect';
+    const actionPriority=comparator?'source':direct?'amazon':alternatePartner?'awin':'source';
     const merchantRoute=affiliates.enabled
       ?comparator?'comparator':direct?'asin':alternatePartner?'partner':'search'
       :alternatePartner?'partner':'official';
     const merchantFacts=affiliates.enabled
       ?'<dl class="am-extra-merchant-facts" aria-label="Informations à vérifier avant la visite marchande">'
-        +'<div><dt>Destination prioritaire</dt><dd>'+(direct?'Page Amazon.fr · ASIN '+e(direct.asin)
-          :alternatePartner?'Lien partenaire Awin · référence à vérifier'
-            :'Fiche du modèle chez la marque ou le vendeur')+'</dd></div>'
-        +'<div><dt>Code recherché</dt><dd>'+e(direct?.model||p.model)+'</dd></div>'
+        +'<div><dt>Première destination</dt><dd>'+(
+          actionPriority==='amazon'?'Page Amazon.fr · ASIN '+e(direct.asin)
+            :actionPriority==='awin'?'Lien partenaire Awin · référence à vérifier'
+              :'Fiche du modèle chez la marque ou le vendeur')+'</dd></div>'
+        +'<div><dt>Code recherché</dt><dd>'+e(direct?.model||p.model)
+        +(comparator?' · ASIN '+e(direct.asin):'')+'</dd></div>'
         +'<div><dt>Contrôle documentaire</dt><dd>'+e(direct?.verifiedAt||'Aucun ASIN exact documenté')+'</dd></div>'
         +'</dl>'
       :'';
@@ -126,10 +129,9 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
     const officialAction=link(p.officialUrl,
       p.brand==='SKMEI'?'Voir le modèle exact chez le vendeur'
         :'Voir le modèle exact chez le fabricant',false,p.id,'official');
-    const actionPriority=affiliates.enabled&&direct?'amazon':alternatePartner?'awin':'source';
     const actions=actionPriority==='amazon'?amazonAction+awinAction+officialAction
       :actionPriority==='awin'?awinAction+officialAction+amazonAction
-      :officialAction+amazonAction;
+      :officialAction+amazonAction+awinAction;
     // A model-specific customer summary is visible without JS and derived only
     // from the same validated photo and merchant routing as the purchase links.
     // This is NOT a price/stock widget or an independently checked license.
@@ -228,9 +230,10 @@ export function buildPopularProductPages({root,products,coreProducts,affiliates,
       +'<p class="am-extra-reference" id="vendeurs"><span>Référence à retrouver chez le marchand</span><strong>'+e(name)+'</strong></p>'
       +'<div class="am-ref-copy-tools" data-watch-ref-tools hidden><button type="button" class="am-ref-copy-button" data-watch-ref-copy="'+e(p.id)+'" hidden>Copier la référence</button><span class="am-ref-copy-status" role="status" aria-live="polite" data-watch-ref-status></span></div>'
       +'<p class="am-extra-approval">À vérifier auprès du vendeur : référence exacte, variante, prix, disponibilité, garantie et conditions de retour. Nous ne vendons pas directement ce produit.</p>'
-      +(affiliates.enabled?'<div class="am-extra-link-status '+(direct?'am-extra-link-direct':'am-extra-link-search')+'" data-merchant-route="'+merchantRoute+'"><strong>'+(direct?'Fiche Amazon.fr correspondant au code modèle'
-          :alternatePartner?'Lien partenaire documenté · vérifier la variante'
-          :'Fiche du modèle à consulter avant toute recherche')+'</strong><span>'+(direct
+      +(affiliates.enabled?'<div class="am-extra-link-status '+(direct?'am-extra-link-direct':'am-extra-link-search')+'" data-merchant-route="'+merchantRoute+'"><strong>'+(comparator?'Vérifiez d’abord la référence chez la marque ou le vendeur'
+          :direct?'Fiche Amazon.fr correspondant au code modèle'
+            :alternatePartner?'Lien partenaire documenté · vérifier la variante'
+              :'Fiche du modèle à consulter avant toute recherche')+'</strong><span>'+(direct
           ?(comparator?'ASIN recoupé via un comparateur et une source indépendante ; fiche Amazon.fr non consultée directement. Vérifiez la variante, le vendeur et le stock.':'Lien associé à un ASIN documenté. Contrôlez la variante, le vendeur et le stock.')
           :alternatePartner?'Le lien Awin concerne cette référence documentée, sans garantir le stock ni la variante. La recherche Amazon.fr reste facultative.'
             :'Recherche Amazon.fr — modèle non garanti. Aucun ASIN exact établi : consultez d’abord la fiche fabricant ou vendeur, puis contrôlez tout résultat marchand.')+'</span>'

@@ -64,8 +64,14 @@ try{
     assert.ok(note.includes(evidenceDate),'All historical stock observations need an explicit date');
     assert.match(note,unavailable?/Indisponible lors du contrôle/:/Disponibilité non vérifiée/,
       'Never imply a live stock check or buyable offer');
-    if(unavailable)assert.match(await a.innerText(),/stock à vérifier/i,
-      'Historically unavailable products must not use the normal buy CTA label');
+    const first=card.locator('.am-partner-actions a').first();
+    if(unavailable){
+      assert.match(await a.innerText(),/stock à vérifier/i,
+        'Historically unavailable products must not use the normal buy CTA label');
+      assert.equal(await first.getAttribute('data-merchant-official-id'),id);
+    }else{
+      assert.equal(await first.getAttribute('data-amazon-product'),id);
+    }
   }
   for(const product of extra){
     const card=page.locator('.am-partner-card[data-watch-id="'+product.id+'"]');
@@ -94,6 +100,10 @@ try{
     if(product.merchantEvidenceType==='amazon_fr_comparator_redirect'){
       assert.match(note,/non consultée directement/);
       assert.match(await action.innerText(),/modèle à confirmer/);
+      const source=card.locator('.am-partner-actions a').first();
+      assert.equal(await source.getAttribute('href'),product.officialUrl);
+      assert.equal(await source.getAttribute('data-merchant-official-id'),product.id);
+      assert.doesNotMatch(await source.getAttribute('rel'),/sponsored/);
     }
   }
   const first=cards.first().locator('img');
@@ -319,6 +329,18 @@ try{
   assert.equal(await referred.locator('.am-partner-card').first().getAttribute('data-watch-id'),
     referredId);
   await referred.close();
+
+  const sourceForgery=structuredClone(feed);
+  sourceForgery.products.find(p=>p.id===referredId).officialUrl='https://malicious.invalid/watch';
+  const forgedSource=await browser.newPage();
+  await forgedSource.route('**/selection-affiliation.json',route=>route.fulfill({json:sourceForgery}));
+  await forgedSource.goto(new URL('acheter.html?modele='+referredId,base).href);
+  const fallbackActions=forgedSource.locator('[data-watch-id="'+referredId+'"] .am-partner-actions a');
+  await fallbackActions.first().waitFor();
+  assert.equal(await fallbackActions.first().getAttribute('href'),'./montre.html?id='+referredId,
+    'An untrusted source falls back to the internal product detail before Amazon');
+  assert.equal(await forgedSource.locator('a[href*="malicious.invalid"]').count(),0);
+  await forgedSource.close();
 
   // Supplemental deep links must highlight the exact researched product,
   // never an unrelated watch from the older 13-watch checkout selection.

@@ -211,11 +211,18 @@ try{
   }
   for(const id of ['addiesdive-ad2030','pagani-pd1701','casio-mtp-1302','citizen-tsuyosa']){
     const feature=spotlight.locator('[data-feature-id="'+id+'"]');
-    assert.match(await feature.locator('.ud-feature-exit').innerText(),/lien rémunéré/);
-    assert.match(await feature.locator('.ud-feature-exit').getAttribute('href'),
-      /^https:\/\/www\.amazon\.fr\/dp\/[A-Z0-9]{10}\?tag=/);
-    assert.equal(await feature.locator('.ud-feature-exit').getAttribute('data-amazon-product'),id);
-    assert.match(await feature.locator('.ud-feature-exit').getAttribute('rel'),/sponsored/);
+    const paid=feature.locator('.ud-feature-exit[data-amazon-product]');
+    assert.match(await paid.innerText(),/lien rémunéré/);
+    assert.match(await paid.getAttribute('href'),/^https:\/\/www\.amazon\.fr\/dp\/[A-Z0-9]{10}\?tag=/);
+    assert.equal(await paid.getAttribute('data-amazon-product'),id);
+    assert.match(await paid.getAttribute('rel'),/sponsored/);
+    const first=feature.locator('.ud-feature-exit').first();
+    if(sourceFirstIds.has(id)){
+      assert.equal(await first.getAttribute('data-merchant-official-id'),id);
+      assert.doesNotMatch(await first.getAttribute('rel'),/sponsored/);
+    }else{
+      assert.equal(await first.getAttribute('data-amazon-product'),id);
+    }
   }
   const heroPhoto=spotlight.locator('[data-feature-id="skmei-2056"] img');
   await heroPhoto.scrollIntoViewIfNeeded();

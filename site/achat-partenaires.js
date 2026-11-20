@@ -32,6 +32,19 @@
         [...u.searchParams.keys()].every(k=>['tag','th','psc'].includes(k));
     }catch{return false}
   };
+  const modelSourceHosts=new Set([
+    'www.casio.com','www.swatch.com','citizenwatch.eu','fr.citizenwatch.eu',
+    'www.orientwatch.fr','www.seikowatches.com','www.tissotwatches.com','www.hamiltonwatch.com',
+    'www.shopskmei.com','skmei-egy.com','www.addiesdivewatches.com',
+    'www.paganidesignwatch.com','paganidesign.com','www.currenwatches.com'
+  ]);
+  const modelSource=value=>{
+    try{
+      const url=new URL(value);
+      return url.protocol==='https:'&&!url.username&&!url.password&&
+        !url.port&&!url.hash&&modelSourceHosts.has(url.hostname)?url.href:null;
+    }catch{return null}
+  };
   const enrollmentConfirmed=config=>config?.approved===true&&
     (!config.enrollmentStatus||config.enrollmentStatus==='approved')||
     config?.approved===false&&config.enrollmentStatus==='registered_pending_review'&&
@@ -213,7 +226,24 @@
       purchase.dataset.amazonPlacement='showroom';
       const detail=link(productDetail,
         'Consulter la fiche et les caractéristiques','am-partner-detail');
-      actions.append(purchase,detail);
+      if(previousUnavailable||viaComparison){
+        const source=modelSource(p.officialUrl);
+        if(source){
+          const official=link(source,'Vérifier la référence à la source','am-partner-source');
+          official.target='_blank';
+          official.rel='noopener noreferrer nofollow';
+          official.dataset.merchantOfficialId=p.id;
+          official.dataset.merchantPlacement='showroom';
+          actions.append(official);
+        }else{
+          actions.append(detail);
+        }
+        purchase.classList.add('am-partner-buy-secondary');
+        actions.append(purchase);
+        if(source)actions.append(detail);
+      }else{
+        actions.append(purchase,detail);
+      }
       content.append(actions);
       const date=checkedOn.split('-').reverse().join('/');
       const note=kind==='supplemental'

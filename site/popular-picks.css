@@ -437,7 +437,8 @@
 .am-affordable-comparator{border-left:3px solid #b68e59;padding-left:9px}
 .am-affordable-actions{display:grid;gap:7px;margin-top:auto}
 .am-affordable-actions a{display:grid;place-items:center;text-align:center;min-height:45px;border:1px solid #9bb39d;padding:10px 9px;text-decoration:none;border-radius:3px;font:750 12px/1.4 system-ui,sans-serif;color:#20452f;background:#f4f7f0;overflow-wrap:anywhere}
-.am-affordable-actions a[data-amazon-product]{background:#244b36;border-color:#244b36;color:#fff}
+.am-affordable-card[data-affordable-proof="comparator"] .am-affordable-actions a[data-merchant-official-id],
+.am-affordable-card:not([data-affordable-proof="comparator"]) .am-affordable-actions a[data-amazon-product]{background:#244b36;border-color:#244b36;color:#fff}
 .am-affordable-actions a:hover{filter:brightness(.95)}
 .am-affordable :is(a):focus-visible{outline:3px solid #af8340;outline-offset:3px}
 .am-affordable-footer{display:flex;align-items:center;flex-wrap:wrap;gap:10px 18px;border-top:1px solid #d3cbbb;margin-top:25px;padding-top:19px}

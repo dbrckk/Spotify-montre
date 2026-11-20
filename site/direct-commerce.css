@@ -101,14 +101,16 @@ body{background:var(--am-cream);color:var(--am-ink);margin:0}
 .am-partner-tier{font-size:11px;line-height:1.4;letter-spacing:.12em;text-transform:uppercase;font-weight:750;color:#657966}
 .am-partner-name{font:400 clamp(22px,2.4vw,29px)/1.18 Georgia,serif;color:#203b2d;letter-spacing:-.02em;overflow-wrap:anywhere;margin:0}
 .am-partner-actions{margin-top:auto;display:flex;flex-direction:column;gap:10px}
-.am-partner-buy{display:flex;align-items:center;justify-content:center;min-height:48px;text-align:center;background:#204f35;color:#fff;text-decoration:none;padding:10px;border-radius:8px;box-sizing:border-box;font:700 14px/1.35 system-ui,sans-serif}
-.am-partner-buy:hover{background:#113b26}
+.am-partner-buy,.am-partner-source{display:flex;align-items:center;justify-content:center;min-height:48px;text-align:center;background:#204f35;color:#fff;text-decoration:none;padding:10px;border-radius:8px;box-sizing:border-box;font:700 14px/1.35 system-ui,sans-serif}
+.am-partner-buy:hover,.am-partner-source:hover{background:#113b26}
+.am-partner-buy-secondary{background:#f0f3eb;color:#204f35;border:1px solid #9bb39d}
+.am-partner-buy-secondary:hover{background:#e5eddf}
 .am-partner-detail{display:block;text-align:center;padding:5px;font:650 13px/1.45 system-ui,sans-serif;text-decoration:underline;text-underline-offset:4px;color:#286044}
 .am-partner-card-note{font-size:12px;color:#5b6c5e;line-height:1.55;margin:0}
 .am-partner-fine{border-top:1px solid #ddd4c4;margin:24px 0 0;padding:19px 0 0;font-size:13px;line-height:1.7;color:#526454}
 @media(max-width:860px){.am-partner-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.am-partner-heading{grid-template-columns:1fr}.am-partner-heading>p{max-width:720px}}
-@media(max-width:480px){.am-partner-cards{grid-template-columns:1fr;gap:15px}.am-partner-card{display:grid;grid-template-columns:minmax(0,.72fr) minmax(0,1fr)}.am-partner-cover img{height:100%;aspect-ratio:1;object-fit:contain}.am-partner-card-content{padding:14px 12px;gap:10px}.am-partner-name{font-size:20px}.am-partner-buy{min-height:44px;font-size:12px;padding:8px}.am-partner-detail,.am-partner-card-note{font-size:11px}.am-partner-disclosure{font-size:12px;padding:13px}.am-partner-tier{font-size:10px}.am-partner-filters button{padding-inline:13px}}
-@media(max-width:350px){.am-partner-card{grid-template-columns:1fr}.am-partner-cover img{max-height:210px}.am-partner-card-content{padding:15px}.am-partner-buy{font-size:13px}}
+@media(max-width:480px){.am-partner-cards{grid-template-columns:1fr;gap:15px}.am-partner-card{display:grid;grid-template-columns:minmax(0,.72fr) minmax(0,1fr)}.am-partner-cover img{height:100%;aspect-ratio:1;object-fit:contain}.am-partner-card-content{padding:14px 12px;gap:10px}.am-partner-name{font-size:20px}.am-partner-buy,.am-partner-source{min-height:44px;font-size:12px;padding:8px}.am-partner-detail,.am-partner-card-note{font-size:11px}.am-partner-disclosure{font-size:12px;padding:13px}.am-partner-tier{font-size:10px}.am-partner-filters button{padding-inline:13px}}
+@media(max-width:350px){.am-partner-card{grid-template-columns:1fr}.am-partner-cover img{max-height:210px}.am-partner-card-content{padding:15px}.am-partner-buy,.am-partner-source{font-size:13px}}
 
 /* Exact Amazon matches can be shown without inventing missing product photos. */
 .am-partner-no-photo{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;min-height:245px;aspect-ratio:1;background:radial-gradient(circle at 50% 40%,#f2f0e5,#dfe5da);color:#284331;line-height:1.3;text-align:center;padding:22px;box-sizing:border-box}
