@@ -948,8 +948,6 @@ assert.ok(popularHtml.includes('Ce n’est ni un classement des ventes en France
   'Editorial readiness must not be mistaken for sales ranking or verified popularity');
 assert.equal(commercialShortlist.filter(item=>Boolean(exactPopularLinks[item.id])).length,6,
   'Six source-confirmed listings and four explicitly uncertain source-only models in this editorial mix');
-assert.equal(commercialShortlist.filter(item=>approvedPopularPhotos.has(item.id)).length,7,
-  'Seven shortlist watches have declared-authorised local model photos');
 assert.equal((popularHtml.match(/class="am-focus-detail"/g)||[]).length,10,
   'Every shortlist entry needs its own direct internal source-and-merchant action');
 for(const item of commercialShortlist){
@@ -957,6 +955,10 @@ for(const item of commercialShortlist){
   assert.ok(p,'Shortlist model must originate from the 37-watch catalogue');
   const html=popularHtml.match(new RegExp('<li class="am-focus-item" data-focus-id="'+item.id+'"[\\s\\S]*?<\\/li>'))?.[0];
   assert.ok(html,'Shortlist card missing: '+item.id);
+  const photo=approvedPopularPhotos.get(item.id);
+  assert.equal(html.includes('class="am-focus-visual am-focus-with-photo"'),Boolean(photo),
+    'The shortlist photo must follow the current rights registry: '+item.id);
+  if(photo)assert.ok(html.includes('src="../'+photo.url+'"'),'Shortlist photograph must match its model: '+item.id);
   assert.ok(html.includes('href="./'+item.id+'.html"'),'The genuine model detail page must be linked: '+item.id);
   const alt=popularFeed.products.find(x=>x.id===item.compareWith);
   assert.ok(alt&&alt.id!==item.id,'Only real distinct catalog models can be compared: '+item.id);

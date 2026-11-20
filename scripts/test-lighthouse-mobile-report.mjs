@@ -39,7 +39,7 @@ const cases=[
   ['lighthouse-mobile-catalogue.json',fixture('/montres/toutes-les-montres.html')],
   ['lighthouse-mobile-product.json',fixture('/montres/casio-mtp-1302.html')],
   ['lighthouse-mobile-studio-photo.json',fixture('/montres/skmei-1251.html',true)],
-  ['lighthouse-mobile-no-photo.json',fixture('/montres/casio-f91w-1.html')],
+  ['lighthouse-mobile-no-photo.json',fixture('/montres/curren-cur210.html')],
   ['lighthouse-mobile-curated-femme.json',fixture('/montres/montres-femme-accessibles.html',true)]
 ];
 const write=(name,report)=>writeFileSync(join(folder,name),JSON.stringify(report));
@@ -51,7 +51,7 @@ try{
   let summary=JSON.parse(readFileSync(join(folder,'lighthouse-mobile-summary.json'),'utf8'));
   assert.deepEqual(summary.reports.map(x=>x.name),[
     'Accueil','Catalogue 52 montres','Fiche Casio','Fiche SKMEI avec photo',
-    'Fiche Casio sans photo','Sélection femme — photos responsives']);
+    'Fiche Curren sans photo','Sélection femme — photos responsives']);
   assert.equal(summary.reports[3].responsiveCount,1);
   assert.equal(summary.reports[4].imagesTransferred,0);
   assert.equal(summary.reports[5].imagesTransferred,14000);
@@ -133,13 +133,13 @@ try{
   write(...cases[6]);
   let wrong=structuredClone(cases[6][1]);
   wrong.audits['network-requests'].details.items.push({
-    url:host+'/assets/popular-responsive/casio-f91w-1-240.webp',resourceType:'Image',transferSize:2000});
+    url:host+'/assets/popular-responsive/curren-cur210-240.webp',resourceType:'Image',transferSize:2000});
   write(cases[6][0],wrong);
-  assert.notEqual(run().status,0,'Invented F-91W photo on no-photo page must fail');
+  assert.notEqual(run().status,0,'Invented CUR210 photo on no-photo page must fail');
   write(...cases[6]);
   const wronglyPublished=structuredClone(cases[6][1]);
   wronglyPublished.audits['network-requests'].details.items.push({
-    url:host+'/assets/popular-responsive/casio-f91w-1-640.webp',
+    url:host+'/assets/popular-responsive/curren-cur210-640.webp',
     resourceType:'Image',transferSize:19000});
   write(cases[6][0],wronglyPublished);
   assert.notEqual(run().status,0,

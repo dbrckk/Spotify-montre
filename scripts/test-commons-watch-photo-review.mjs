@@ -17,7 +17,7 @@ assert.equal(baseline.possibleCandidates,
 assert.equal(baseline.publicationAllowed,0);
 assert.equal(baseline.usage,'RESEARCH_ONLY_NO_AUTO_PUBLICATION');
 assert.equal(register.candidates.length,3);
-assert.match(markdownCommonsReview(baseline),/exact variant/i);
+assert.match(markdownCommonsReview(baseline),/exact (?:retail )?variant/i);
 for(const c of baseline.candidates){
   assert.equal(c.publicationAllowed,false);
   assert.equal(c.identityStatus,'family_only_exact_variant_not_verified');
@@ -60,10 +60,14 @@ check(x=>x.candidates[0].creator='<script>alert(1)</script>',/unpublished/);
 check(x=>x.candidates[0].catalogModel='F-91W-1Y',/mismatched/);
 // A later new OFFICIAL photo must safely archive the research candidate,
 // never require a fake Commons approval or break weekly photo sourcing.
-const futureRights=structuredClone(rights);
-futureRights.photos[register.candidates[0].modelId]={sourcePage:'https://www.casio.com/'};
+const candidateId=register.candidates[0].modelId;
+const priorRights=structuredClone(rights);
+delete priorRights.photos[candidateId];
+const prior=reviewCommonsCandidates({catalogue,rights:priorRights,register});
+const futureRights=structuredClone(priorRights);
+futureRights.photos[candidateId]={sourcePage:'https://www.casio.com/'};
 const future=reviewCommonsCandidates({catalogue,rights:futureRights,register});
-assert.equal(future.possibleCandidates,baseline.possibleCandidates-1);
+assert.equal(future.possibleCandidates,prior.possibleCandidates-1);
 assert.equal(future.publicationAllowed,0);
 
 const cli=fileURLToPath(new URL('./review-commons-watch-photos.mjs',import.meta.url));
