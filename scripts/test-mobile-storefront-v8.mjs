@@ -641,8 +641,10 @@ try{
  assert.equal(merchant.origin,'https://www.amazon.fr');
  assert.equal(merchant.searchParams.get('tag'),'drackk04-21');
  if(verified){
-   assert.match(await popularPage.locator('.am-extra-link-status').innerText(),/Fiche Amazon.fr correspondant au code modèle/,
-     'A documented exact listing must be identified to the visitor: '+watch.id);
+   const comparator=verified.evidenceType==='amazon_fr_comparator_redirect';
+   assert.match(await popularPage.locator('.am-extra-link-status').innerText(),
+     comparator?/Vérifiez d’abord la référence/:/Fiche Amazon.fr correspondant au code modèle/,
+     'The shopper must be able to distinguish direct and indirect evidence: '+watch.id);
    assert.equal(merchant.pathname,'/dp/'+verified.asin,'Use only a source-verified exact ASIN: '+watch.id);
    assert.equal(await popularPage.locator('a[data-amazon-search-id]').count(),0,
      'Never mix a direct link and a search CTA for the same confirmed model: '+watch.id);
@@ -661,9 +663,10 @@ try{
    const officialSource=merchantActions.locator('a[data-merchant-official-id="'+watch.id+'"]');
    assert.equal(await officialSource.getAttribute('href'),watch.officialUrl,
      'Actual manufacturer or vendor source must remain model-specific: '+watch.id);
+   const amazonFirst=verified?.evidenceType==='amazon_fr_product_page';
    assert.equal(await merchantActions.locator('a').first().getAttribute('href'),
-     verified?merchant.href:watch.officialUrl,
-     'An exact ASIN leads when documented; otherwise the manufacturer or vendor source must lead: '+watch.id);
+     amazonFirst?merchant.href:watch.officialUrl,
+     'The source must precede generic searches and indirect ASINs: '+watch.id);
    const overflow=await popularPage.evaluate(()=>({
      client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth
    }));

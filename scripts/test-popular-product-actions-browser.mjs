@@ -145,7 +145,7 @@ for(const watch of picks){
   assert.ok(match,'Customer merchant priority must be explicit on '+watch.id);
   const first=match[2].match(/<a\b[^>]*>/)?.[0]||'';
   assert.ok(first,'No outbound model-specific action for '+watch.id);
-  const expected=affiliateActive&&exactResearch[watch.id]?'amazon'
+  const expected=expectedRoute==='comparator'?'source':expectedRoute==='asin'?'amazon'
     :match[2].includes('data-partner-offer-id=')?'awin':'source';
   assert.equal(match[1],expected,'Do not prioritise a generic search over an actual source: '+watch.id);
   if(expected==='amazon'){
@@ -164,14 +164,21 @@ for(const watch of picks){
       'An unverified Amazon search must not appear before the model source: '+watch.id);
     assert.ok(first.includes('href="'+escapeHtml(watch.officialUrl)+'"'),
       'The manufacturer / seller URL must match the original source: '+watch.id);
-    if(affiliateActive)assert.ok(match[2].includes('data-amazon-search-id="'+watch.id+'"'),
-      'Research-only sponsored Amazon link remains available but secondary: '+watch.id);
-    assert.ok(html.includes('Recherche Amazon.fr — modèle non garanti'),
-      'A generic search must remain transparently described: '+watch.id);
+    if(expectedRoute==='comparator'){
+      assert.ok(match[2].includes('data-amazon-product="'+watch.id+'"'),
+        'The exact associated ASIN remains available as a secondary option: '+watch.id);
+    }else{
+      if(affiliateActive)assert.ok(match[2].includes('data-amazon-search-id="'+watch.id+'"'),
+        'Research-only sponsored Amazon link remains available as a secondary option: '+watch.id);
+      assert.ok(html.includes('Recherche Amazon.fr — modèle non garanti'),
+        'A generic search must remain transparently described: '+watch.id);
+    }
   }
 }
 assert.equal(exactFirst+partnerFirst+sourceFirst,37);
-if(affiliateActive)assert.equal(exactFirst,14,'All fourteen verified supplemental ASINs retain priority');
+if(affiliateActive)assert.equal(exactFirst,Object.values(exactResearch).filter(
+  p=>p.evidenceType==='amazon_fr_product_page').length,
+  'Only ASINs documented from an Amazon product page retain first priority');
 
 // Comparator proof is the only trusted reason to publish two external
 // documentary sources. Other exact links are NOT silently given fake proof.
@@ -611,7 +618,7 @@ try{
   // primary action for a watch lacking a documented exact ASIN.
   const sourceOnly=picks.find(p=>!exactResearch[p.id]);
   assert.ok(sourceOnly,'An unverified-reference sample is required');
-  for(const [id,firstKind] of [['skmei-1251','amazon'],[sourceOnly.id,'source']]){
+  for(const [id,firstKind] of [['skmei-1257','amazon'],['skmei-1251','source'],[sourceOnly.id,'source']]){
     const viewport=await browser.newPage({
       javaScriptEnabled:false,viewport:{width:393,height:852},isMobile:true,hasTouch:true
     });
@@ -627,10 +634,11 @@ try{
       assert.ok(rect&&rect.height>=44&&rect.x>=0&&rect.x+rect.width<=393,
         'Primary merchant source must be an accessible Android touch target: '+id);
       assert.ok(width<=395,'Buyer links must not overflow a 393px Android viewport: '+id);
-      if(firstKind==='source') {
-        assert.ok(await group.locator('[data-amazon-search-id="'+id+'"]').count()===1,
-          'Amazon search stays visibly available as a secondary option');
-        assert.match(await group.locator('a').last().innerText(),/Rechercher sur Amazon.fr/);
+      if(firstKind==='source'){
+        const match=exactResearch[id];
+        const secondary=group.locator(match?'[data-amazon-product]':'[data-amazon-search-id]');
+        assert.equal(await secondary.count(),1,'Amazon stays available as a secondary option');
+        assert.match(await secondary.innerText(),match?/ASIN recoupé/:/Rechercher sur Amazon.fr/);
       }
     }finally{await viewport.close();}
   }

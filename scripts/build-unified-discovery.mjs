@@ -11,6 +11,9 @@ const styleLabels={sport:'Sport',classic:'Élégant',minimal:'Minimaliste',retro
 const tierLabels={essential:'Essentielle',signature:'Signature',prestige:'Prestige'};
 const movementLabels={quartz:'Quartz',automatic:'Automatique','eco-drive':'Solaire'};
 const safePath=(id,folder)=>'./assets/'+folder+'/'+id+'.webp';
+const prioritizesSource=p=>p.merchantKind==='direct'&&(
+  p.observedAvailability==='unavailable_at_check'||
+  p.merchantEvidenceType==='amazon_fr_comparator_redirect');
 const exactNumericDiameter=(p)=>{
   // A rectangular width/height is NOT a round-case diameter.
   const input=p.case||'';
@@ -151,9 +154,7 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
     // A historically unavailable Amazon listing or a comparator-derived
     // ASIN is a weaker buying path: show the registered model source FIRST.
     // The paid listing remains accessible for an independent recheck.
-    const sourceFirst=p.merchantKind==='direct'&&(
-      p.observedAvailability==='unavailable_at_check'||
-      p.merchantEvidenceType==='amazon_fr_comparator_redirect');
+    const sourceFirst=prioritizesSource(p);
     const actions=p.merchantKind==='search'||sourceFirst
       ?source+merchant:merchant+source;
     const sourceFirstNote=sourceFirst
@@ -230,8 +231,16 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
     const tracking=direct?'data-amazon-product="'+e(p.id)+'" data-amazon-placement="popular"'
       :awin?'data-partner-offer-id="'+e(p.id)+'" data-partner-placement="popular"'
         :'data-merchant-official-id="'+e(p.id)+'" data-merchant-placement="popular"';
-    const kind=direct?'Fiche marchande identifiée':awin?'Variante partenaire identifiée':'Fiche du fabricant';
-    const exit=direct?'Consulter sur Amazon.fr · lien rémunéré':awin?'Voir chez le partenaire via Awin · lien rémunéré':'Voir chez la marque · lien non rémunéré';
+    const sourceFirst=prioritizesSource(p);
+    const kind=sourceFirst
+      ?p.observedAvailability==='unavailable_at_check'?'Stock actuel inconnu sur Amazon.fr':'ASIN recoupé via des sources tierces'
+      :direct?'Fiche marchande identifiée':awin?'Variante partenaire identifiée':'Fiche de la marque ou du vendeur';
+    const exit=direct?(sourceFirst?'Vérifier la fiche Amazon.fr':'Consulter sur Amazon.fr')+' · lien rémunéré'
+      :awin?'Voir chez le partenaire via Awin · lien rémunéré':'Voir chez la marque ou le vendeur · lien non rémunéré';
+    const sourceAction=sourceFirst
+      ?'<a class="ud-feature-exit" href="'+e(p.officialUrl)+'" rel="noopener noreferrer nofollow" target="_blank"'
+        +' data-merchant-official-id="'+e(p.id)+'" data-merchant-placement="popular">Vérifier la référence à la source</a>'
+      :'';
     const detail=p.detailUrl.replace('./montres/','./');
     const visual=p.photoUrl?'../'+p.photoUrl.slice(2):null;
     const featureSizes='(max-width: 365px) 88vw, (max-width: 660px) 33vw, (max-width: 1100px) 44vw, 29vw';
@@ -254,7 +263,7 @@ export function buildUnifiedDiscovery({root,coreProducts,affiliates,amazonPartne
       +'<p class="ud-feature-lead">'+e(p.lead)+'</p>'
       +'<span class="ud-feature-proof">'+e(kind)+'</span>'
       +'<div class="ud-feature-actions"><a class="ud-feature-detail" href="'+e(detail)+'">Voir les détails</a>'
-      +'<a class="ud-feature-exit" href="'+e(target)+'" rel="'+rel+'" target="_blank" '+tracking+'>'+e(exit)+'</a></div>'
+      +sourceAction+'<a class="ud-feature-exit'+(sourceFirst?' ud-feature-exit-secondary':'')+'" href="'+e(target)+'" rel="'+rel+'" target="_blank" '+tracking+'>'+e(exit)+'</a></div>'
       +'</div></article>';
   };
   const showroom='<section class="ud-showroom" aria-labelledby="udSpotlightTitle">'

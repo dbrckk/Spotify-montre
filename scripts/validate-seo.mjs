@@ -97,7 +97,7 @@ for(const [id,entry] of Object.entries(amazon.links)){
  assert.ok(indexedProduct.includes(amazon.checkedOn.split('-').reverse().join('/')),
    'Indexed watch page must show the actual observation date: '+id);
  if(entry.availabilityAtCheck==='unavailable_at_check'){
-   assert.ok(indexedProduct.includes('stock à vérifier'),
+   assert.ok(indexedProduct.includes('stock inconnu'),
      'Previously unavailable product must not be advertised as a live buyable offer: '+id);
    assert.ok(indexedProduct.includes('Indisponible lors du contrôle'),
      'Historically unavailable observation must be labeled and dated: '+id);
@@ -219,9 +219,14 @@ for(const pair of affordableDuels.comparisons){
       if(amazonEntry.marketplaceVariant)
         assert.ok(html.includes(escapeEditorialHtml(amazonEntry.marketplaceVariant)),
           'Variant disclosures must not disappear on editorial duels: '+p.id);
-      if(amazonEntry.evidenceType==='amazon_fr_comparator_redirect')
-        assert.ok(html.includes('Amazon.fr non consulté directement'),
+      if(amazonEntry.evidenceType==='amazon_fr_comparator_redirect'){
+        const card=html.split('data-duel-model="'+p.id+'">')[1]?.split('</article>')[0]||'';
+        assert.ok(card.includes('Amazon.fr non consulté directement'),
           'Comparator-only ASIN must not claim direct Amazon inspection: '+p.id);
+        const source=card.indexOf('data-merchant-official-id="'+p.id+'"');
+        assert.ok(source>=0&&source<card.indexOf('data-amazon-product="'+p.id+'"'),
+          'The model source precedes the indirect ASIN on the comparison: '+p.id);
+      }
     }else{
       assert.ok(html.includes('href="'+p.officialUrl.replace(/&/g,'&amp;')+'"'),
         'No verified ASIN means manufacturer source, never invented direct purchase: '+p.id);
@@ -426,8 +431,13 @@ for(const id of affordableIds){
     'Buyer comparison actions must retain their exact source watch ID: '+id);
   assert.equal((card.match(/data-amazon-product=/g)||[]).length,manifest.affiliateActive?1:0,
     'No extra or unapproved sponsored exit can appear in the affordable showroom: '+id);
-  assert.equal((card.match(/data-merchant-official-id=/g)||[]).length,manifest.affiliateActive?0:1,
-    'Non-monetized fixture must show the real manufacturer/supplier source: '+id);
+  const comparator=affordableASIN[id]?.evidenceType==='amazon_fr_comparator_redirect';
+  const source=card.indexOf('data-merchant-official-id="'+id+'"');
+  assert.equal(source>=0,!manifest.affiliateActive||comparator,
+    'The homepage links to the source for undocumented or indirect offers: '+id);
+  if(manifest.affiliateActive&&comparator)
+    assert.ok(source<card.indexOf('data-amazon-product="'+id+'"'),
+      'The homepage must place the source before the indirect ASIN: '+id);
 }
 if(manifest.affiliateActive){
   for(const [id,asin] of [
@@ -765,6 +775,11 @@ for(const id of spotlightIds){
     assert.ok(card.includes(p.merchantUrl.replaceAll('&','&amp;'))||card.includes(p.merchantUrl),
       'Verified merchant destination must not be substituted: '+id);
     assert.ok(card.includes('nofollow sponsored')&&card.includes('lien rémunéré'));
+    if(sourceFirstDocumentaryIds.has(id)){
+      const source=card.indexOf('data-merchant-official-id="'+id+'"');
+      assert.ok(source>=0&&source<card.indexOf('data-amazon-product="'+id+'"'),
+        'The showcase must put the source before the weaker Amazon listing: '+id);
+    }
   }else{
     assert.ok(card.includes(p.officialUrl.replaceAll('&','&amp;'))||card.includes(p.officialUrl));
     assert.ok(!card.includes('sponsored')&&card.includes('lien non rémunéré'));
@@ -1227,7 +1242,14 @@ for(const p of popularFeed.products){
       'Distinct product vs search tracking required: '+p.id);
     assert.match(detailHtml,/rel="noopener noreferrer nofollow sponsored"/,'Paid merchant exit must be clearly marked: '+p.id);
     if(direct){
-      assert.ok(detailHtml.includes('Fiche Amazon.fr correspondant au code modèle'),'Direct link must visibly identify a documented matching listing: '+p.id);
+      const actions=detailHtml.match(/<div class="am-extra-actions"[^>]*>([\s\S]*?)<\/div>/)?.[1]||'';
+      const source=actions.indexOf('data-merchant-official-id="'+p.id+'"');
+      const listing=actions.indexOf('data-amazon-product="'+p.id+'"');
+      const comparator=direct.evidenceType==='amazon_fr_comparator_redirect';
+      assert.ok(source>=0&&listing>=0&&(comparator?source<listing:listing<source),
+        'The product page must order the primary actions by the evidence type: '+p.id);
+      assert.ok(detailHtml.includes(comparator?'Vérifiez d’abord la référence chez la marque ou le vendeur':'Fiche Amazon.fr correspondant au code modèle'),
+        'The shopper should see why the first action takes priority: '+p.id);
       assert.ok(detailHtml.includes('Correspondance du code modèle vérifiée'),'Direct link must document model evidence: '+p.id);
       assert.ok(detailHtml.includes('prix, vendeur et disponibilité restent à contrôler'),'No unverified stock claim: '+p.id);
       assert.ok(!detailHtml.includes('data-amazon-search-id="'+p.id+'"'),'Verified product must not masquer search results: '+p.id);
@@ -1403,6 +1425,13 @@ for(const product of feed.products){
     assert.ok(html.includes('href="'+selected+'"'),'Exact Amazon URL should be crawlable: '+product.id);
     assert.ok(html.includes(config.enabled&&config.links[product.id]?'lien rémunéré':'sans lien rémunéré'));
     assert.ok(html.includes('data-amazon-product="'+product.id+'"'),'SEO click event needs exact watch id');
+    if(amazonMatch.availabilityAtCheck==='unavailable_at_check'){
+      const primary=buyerActions.match(/^<a class="primary" href="([^"]+)"/)?.[1];
+      assert.equal(primary,escapeEditorialHtml(product.officialUrl),
+        'The manufacturer must be the primary action after a historical stock gap: '+product.id);
+      assert.ok(buyerActions.includes('<a class="secondary" data-amazon-product="'+product.id+'"'),
+        'The historic Amazon link remains available for a secondary check: '+product.id);
+    }
   }
   if(product.photoReview?.publicUsageApproved===true){
     const set=responsiveSrcset(root,product,'../');

@@ -39,8 +39,14 @@ export function buildAffordableComparisons({root,affiliates,amazonPartnerTag,pag
   };
   const merchant=p=>{
     const match=exactLinks.get(p.id);
-    if(!match)return '<a class="am-duel-merchant" href="'+e(external(p))+'" data-merchant-official-id="'+e(p.id)+'" data-merchant-placement="seo" target="_blank" rel="noopener noreferrer nofollow">Consulter la fiche du fabricant · non rémunéré</a>';
-    return '<a class="am-duel-merchant" href="'+e(match.url)+'" data-amazon-product="'+e(p.id)+'" data-amazon-placement="seo" target="_blank" rel="noopener noreferrer nofollow sponsored">Voir la fiche Amazon.fr documentée · lien rémunéré</a>';
+    const comparator=match?.evidenceType==='amazon_fr_comparator_redirect';
+    const source=!match||comparator
+      ?'<a class="am-duel-merchant" href="'+e(external(p))+'" data-merchant-official-id="'+e(p.id)+'" data-merchant-placement="seo" target="_blank" rel="noopener noreferrer nofollow">Vérifier la référence chez la marque ou le vendeur</a>'
+      :'';
+    const amazon=match
+      ?'<a class="'+(comparator?'am-duel-details':'am-duel-merchant')+'" href="'+e(match.url)+'" data-amazon-product="'+e(p.id)+'" data-amazon-placement="seo" target="_blank" rel="noopener noreferrer nofollow sponsored">'+(comparator?'Vérifier l’ASIN sur Amazon.fr':'Voir la fiche Amazon.fr documentée')+' · lien rémunéré</a>'
+      :'';
+    return source+amazon;
   };
   const evidence=p=>{
     const match=exactLinks.get(p.id);

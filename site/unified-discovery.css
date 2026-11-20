@@ -185,6 +185,7 @@
 .ud-feature-actions a{min-height:44px;display:grid;place-items:center;border-radius:4px;text-align:center;text-decoration:none;padding:10px 7px;font:750 12px/1.4 system-ui,sans-serif}
 .ud-feature-detail{background:#254b36;color:#fff!important}
 .ud-feature-exit{background:#f0f3eb;border:1px solid #b3c2b1;color:#254a33!important}
+.ud-feature-exit-secondary{background:#fff;border-color:#c4ccbf}
 .ud-showroom-note{margin:17px 0 0;color:#566657;font:400 11px/1.65 system-ui,sans-serif}
 .ud-showroom a:focus-visible{outline:3px solid #b88c43;outline-offset:3px}
 @media(max-width:1100px){
