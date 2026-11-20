@@ -8,7 +8,7 @@
     {
       "file": "deploy-package-01.json",
       "count": 29,
-      "bytes": 696639
+      "bytes": 698330
     },
     {
       "file": "deploy-package-02.json",
@@ -78,27 +78,27 @@
     {
       "file": "deploy-package-15.json",
       "count": 46,
-      "bytes": 717546
+      "bytes": 717767
     },
     {
       "file": "deploy-package-16.json",
       "count": 39,
-      "bytes": 635936
+      "bytes": 637436
     },
     {
       "file": "deploy-package-17.json",
       "count": 29,
-      "bytes": 714896
+      "bytes": 715147
     },
     {
       "file": "deploy-package-18.json",
       "count": 28,
-      "bytes": 717363
+      "bytes": 718248
     },
     {
       "file": "deploy-package-19.json",
       "count": 23,
-      "bytes": 221133
+      "bytes": 221199
     }
   ]
 }
