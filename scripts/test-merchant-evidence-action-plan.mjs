@@ -14,11 +14,12 @@ const sourceReview=buildSourceEvidenceReview({
 });
 const params={coreProducts:core,extraProducts:extra,photoRights,sourceReview,coreResearch};
 const plan=buildMerchantEvidenceActionPlan(params);
+const published=core.filter(p=>p.photoReview?.publicUsageApproved===true).length+Object.keys(photoRights).length;
 assert.equal(plan.schemaVersion,1);
 assert.equal(plan.asOf,'2026-11-13');
 assert.deepEqual(plan.totals,{
-  watches:52,documentedAsins:27,noDocumentedAsin:25,photosPublished:41,
-  photosMissing:11,independentRightsClaims:0,historicallyUnavailable:4,
+  watches:52,documentedAsins:27,noDocumentedAsin:25,photosPublished:published,
+  photosMissing:52-published,independentRightsClaims:0,historicallyUnavailable:4,
   comparatorOnly:6,documentaryDue:0,documentaryDueSoon:0
 });
 assert.equal(plan.rows.length,52);
@@ -32,8 +33,9 @@ assert.equal(plan.rows.find(p=>p.id==='casio-mtp-1302').documentedAsin,'B0BRPD1F
 assert.equal(plan.rows.find(p=>p.id==='skmei-1251').merchantPriority,2);
 assert.equal(plan.rows.find(p=>p.id==='skmei-2056').documentedAsin,null);
 assert.equal(plan.rows.find(p=>p.id==='skmei-2056').merchantPriority,4);
-assert.equal(plan.rows.filter(p=>!p.photoPublished).length,11);
-assert.equal(plan.rows.find(p=>p.id==='casio-ga-2100-1a1').photoPublished,false);
+assert.equal(plan.rows.filter(p=>!p.photoPublished).length,52-published);
+for(const watch of extra)
+  assert.equal(plan.rows.find(p=>p.id===watch.id).photoPublished,Object.hasOwn(photoRights,watch.id));
 const near=buildSourceEvidenceReview({
   coreResearch,supplemental,catalogIds:ids,asOf:'2026-12-09'
 });
@@ -70,4 +72,4 @@ const reduced=buildMerchantEvidenceActionPlan({...params,sourceReview:reducedRev
 assert.equal(reduced.totals.documentedAsins,26);
 assert.equal(reduced.rows.find(p=>p.id==='skmei-1251').documentedAsin,null);
 assert.ok(plan.limitations.some(x=>x.includes('not a purchase')));
-console.log('PASS: read-only 52-model merchant evidence plan, 27 historical ASINs, priority queue and 11 photo gaps.');
+console.log('PASS: read-only 52-model merchant evidence plan, 27 historical ASINs, priority queue and current photo coverage.');

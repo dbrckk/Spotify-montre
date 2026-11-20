@@ -10,9 +10,9 @@ assert.ok(origin.protocol==='https:'||(origin.protocol==='http:'&&
   ['localhost','127.0.0.1'].includes(origin.hostname)),'Only localhost HTTP or real HTTPS');
 const browser=await chromium.launch({headless:true});
 const errors=[];
-const documentedSupplementalPhotos=Object.keys(JSON.parse(readFileSync(
-  new URL('../site/popular-photo-rights.json',import.meta.url),'utf8')).photos).length;
-const approvedPhotoCount=15+documentedSupplementalPhotos;
+const supplementalPhotos=JSON.parse(readFileSync(
+  new URL('../site/popular-photo-rights.json',import.meta.url),'utf8')).photos;
+const approvedPhotoCount=15+Object.keys(supplementalPhotos).length;
 const noPhotoCount=52-approvedPhotoCount;
 const coreAmazon=JSON.parse(readFileSync(new URL(
   '../site/amazon-product-links.json',import.meta.url),'utf8')).links;
@@ -540,8 +540,9 @@ try{
   await smallDuel.goto(new URL('/montres/comparer-skmei-1257-vs-casio-f91w.html',base).href,
     {waitUntil:'load'});
   assert.equal(await smallDuel.locator('.am-duel-model').count(),2);
-  assert.equal(await smallDuel.locator('.am-duel-model img').count(),1,
-    'Without JS, absent manufacturer photo is text, never a fake Casio packshot');
+  assert.equal(await smallDuel.locator('.am-duel-model img').count(),
+    ['skmei-1257','casio-f91w-1'].filter(id=>Object.hasOwn(supplementalPhotos,id)).length,
+    'The no-JS duel must show exactly the two models’ approved photos');
   assert.equal(await smallDuel.locator('.am-duel-model a.am-duel-merchant').count(),2,
     'Source-backed outbound links must work without JavaScript');
   await checkOverflow(smallDuel,'No-JS 320px buyer duel layout');

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "reviewedOn": "2026-11-11",
+  "reviewedOn": "2026-11-20",
   "total": 37,
   "photos": [
     {
@@ -49,6 +49,48 @@
       "source": "https://www.shopskmei.com/product/skmei-1220-dual-time-digital-sport-watch/"
     },
     {
+      "id": "casio-ga-2100-1a1",
+      "status": "created",
+      "source": "https://www.casio.com/fr/watches/gshock/product.GA-2100-1A1/",
+      "image": "https://www.casio.com/content/dam/casio/product-info/locales/fr/fr/timepiece/product/watch/G/GA/GA2/GA-2100-1A1/assets/GA-2100-1A1_Seq01.png",
+      "sha256": "b6a3d81fbf9265bbf56ab2c2c719bd6b899772298ba4b361c3573ac17f44a27e"
+    },
+    {
+      "id": "casio-a158wea-1",
+      "status": "created",
+      "source": "https://www.casio.com/fr/watches/casio/vintage/product.A158WEA-1/",
+      "image": "https://www.casio.com/content/dam/casio/product-info/locales/fr/fr/timepiece/product/watch/A/A1/A15/A158WEA-1/assets/A158WEA-1.png",
+      "sha256": "559e4862ec7766d3054e0e85ffd989e5f57b899d7ccacc061fb5ee89cb0038ef"
+    },
+    {
+      "id": "casio-la-20wh-4a1",
+      "status": "created",
+      "source": "https://www.casio.com/fr/watches/casio/product.LA-20WH-4A1/",
+      "image": "https://www.casio.com/content/dam/casio/product-info/locales/fr/fr/timepiece/product/watch/L/LA/LA2/LA-20WH-4A1/local-assets/LA-20WH-4A1_2000x2000.png",
+      "sha256": "5cbd2796f06f9612a82a888991925aaa91f7c813a76cdc6125509db91ab7ad98"
+    },
+    {
+      "id": "casio-ltp-1234pgl-7a",
+      "status": "created",
+      "source": "https://www.casio.com/fr/watches/casio/product.LTP-1234PGL-7A/",
+      "image": "https://www.casio.com/content/dam/casio/product-info/locales/fr/fr/timepiece/product/watch/L/LT/LTP/LTP-1234PGL-7A/assets/LTP-1234PGL-7A_1.png",
+      "sha256": "2c78b56f0f2ea4fe8b1bd949442af7f66824b7ad7f60de62f0029b765bfed2d3"
+    },
+    {
+      "id": "casio-gw-m5610u-1",
+      "status": "created",
+      "source": "https://www.casio.com/fr/watches/gshock/product.GW-M5610U-1/",
+      "image": "https://www.casio.com/content/dam/casio/product-info/locales/fr/fr/timepiece/product/watch/G/GW/GWM/GW-M5610U-1/assets/GW-M5610U-1.png",
+      "sha256": "442ecfbce90e9130121141acdf962ee31294924874964271ea5f7efd5cc34b24"
+    },
+    {
+      "id": "casio-edifice-efr-s108d",
+      "status": "created",
+      "source": "https://www.casio.com/fr/watches/edifice/product.EFR-S108D-2AV/",
+      "image": "https://www.casio.com/content/dam/casio/product-info/locales/fr/fr/timepiece/product/watch/E/EF/EFR/efr-s108d-2av/assets/EFR-S108D-2AVU.png",
+      "sha256": "0289abb97932a800930b8d19e47e9d98ace079fb77e0dc582bb2b416f42171b0"
+    },
+    {
       "id": "citizen-tsuyosa-37-blue",
       "status": "preserved",
       "source": "https://fr.citizenwatch.eu/fr/p/nj0200-50m/"
@@ -84,6 +126,27 @@
       "source": "https://www.hamiltonwatch.com/fr-fr/h32515555-jazzmaster-day-date-auto.html"
     },
     {
+      "id": "casio-f91w-1",
+      "status": "created",
+      "source": "https://www.casio.com/fr/watches/casio/product.F-91W-1/",
+      "image": "https://www.casio.com/content/dam/casio/product-info/locales/fr/fr/timepiece/product/watch/F/F9/F91/F-91W-1/assets/F-91W-1_Seq1.png",
+      "sha256": "b539f730de6dbb3b18cd48bd08377e2f84c84c0d74be3fa92a452d52edd5e2d2"
+    },
+    {
+      "id": "casio-a168wg-9",
+      "status": "created",
+      "source": "https://www.casio.com/fr/watches/casio/vintage/product.A168WG-9/",
+      "image": "https://www.casio.com/content/dam/casio/product-info/locales/fr/fr/timepiece/product/watch/A/A1/A16/A168WG-9/assets/A168WG-9.png",
+      "sha256": "c090c3b51ee2e81d3e359af0b4efb7c30e62048787553b2ae67e1b4be3908d7f"
+    },
+    {
+      "id": "casio-dw5600rl-1",
+      "status": "created",
+      "source": "https://www.casio.com/fr/watches/gshock/product.DW-5600RL-1/",
+      "image": "https://www.casio.com/content/dam/casio/product-info/locales/fr/fr/timepiece/product/watch/D/DW/DW5/dw-5600rl-1/assets/DW-5600RL-1.png",
+      "sha256": "6d3d103cde9c410be45b770d24089e6fc43f1922f1ca37e3bdcc4fe49dfdd51d"
+    },
+    {
       "id": "citizen-promaster-bn0150",
       "status": "preserved",
       "source": "https://citizenwatch.eu/en/p/bn0150-10e/"
@@ -100,15 +163,20 @@
     },
     {
       "id": "tissot-le-locle-white",
-      "status": "created",
-      "source": "https://www.tissotwatches.com/fr-fr/T0064071103300.html",
-      "image": "https://www.tissotwatches.com/dw/image/v2/BKKD_PRD/on/demandware.static/-/Sites-Tissot-Catalogue/default/dw1af9d0f4/product-pictures/8c99426a-3edc-4e15-ae24-ef8e49f73757_T006-407-11-033-00_shadow.png",
-      "sha256": "0b9429760a8a88cf706af43479c262955556fab8c53ca4e3da6e2ad122f3001c"
+      "status": "preserved",
+      "source": "https://www.tissotwatches.com/fr-fr/T0064071103300.html"
     },
     {
       "id": "hamilton-ventura-h24411732",
       "status": "preserved",
       "source": "https://www.hamiltonwatch.com/fr-fr/h24411732-ventura-quartz.html"
+    },
+    {
+      "id": "casio-ae1200wh-1av",
+      "status": "created",
+      "source": "https://www.casio.com/fr/watches/casio/product.AE-1200WH-1AV/",
+      "image": "https://www.casio.com/content/dam/casio/product-info/locales/fr/fr/timepiece/product/watch/A/AE/AE1/AE-1200WH-1AV/assets/AE-1200WH-1AV.png",
+      "sha256": "553e91535849eea2ac81a31613cd72974e8f73011e52bb2e56960ba3c8404f9d"
     },
     {
       "id": "addiesdive-ad2030",
@@ -138,48 +206,8 @@
   ],
   "missing": [
     {
-      "id": "casio-ga-2100-1a1",
-      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/gshock/product.GA-2100-1A1/; 403 Client Error: Forbidden for url: https://www.casio.com/intl/watches/gshock/product.GA-2100-1A1/"
-    },
-    {
-      "id": "casio-a158wea-1",
-      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/casio/vintage/product.A158WEA-1/; 403 Client Error: Forbidden for url: https://www.casio.com/intl/watches/casio/product.A158WEA-1/"
-    },
-    {
-      "id": "casio-la-20wh-4a1",
-      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/casio/product.LA-20WH-4A1/; 403 Client Error: Forbidden for url: https://www.casio.com/intl/watches/casio/product.LA-20WH-4A1/"
-    },
-    {
-      "id": "casio-ltp-1234pgl-7a",
-      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/casio/product.LTP-1234PGL-7A/; 403 Client Error: Forbidden for url: https://www.casio.com/europe/watches/casio/product.LTP-1234PGL-7A/"
-    },
-    {
-      "id": "casio-gw-m5610u-1",
-      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/gshock/product.GW-M5610U-1/; 403 Client Error: Forbidden for url: https://www.casio.com/europe/watches/gshock/product.GW-M5610U-1/"
-    },
-    {
-      "id": "casio-edifice-efr-s108d",
-      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/edifice/product.EFR-S108D-2AV/; 403 Client Error: Forbidden for url: https://www.casio.com/europe/watches/edifice/product.EFR-S108D-2AV/"
-    },
-    {
-      "id": "casio-f91w-1",
-      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/casio/product.F-91W-1/; 403 Client Error: Forbidden for url: https://www.casio.com/intl/watches/casio/product.F-91W-1/"
-    },
-    {
-      "id": "casio-a168wg-9",
-      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/casio/vintage/product.A168WG-9/; 403 Client Error: Forbidden for url: https://www.casio.com/europe/watches/casio/product.A168WG-9/"
-    },
-    {
-      "id": "casio-dw5600rl-1",
-      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/gshock/product.DW-5600RL-1/; 403 Client Error: Forbidden for url: https://www.casio.com/intl/watches/gshock/product.DW-5600RL-1/"
-    },
-    {
-      "id": "casio-ae1200wh-1av",
-      "reason": "403 Client Error: Forbidden for url: https://www.casio.com/fr/watches/casio/product.AE-1200WH-1AV/; 403 Client Error: Forbidden for url: https://www.casio.com/europe/watches/casio/product.AE-1200WH-1AV/"
-    },
-    {
       "id": "curren-cur210",
-      "reason": "Page title/content does not confirm exact model"
+      "reason": "Page title/content does not confirm exact model (redirected to https://www.currenwatches.com/collections/women-fashion-watches)"
     }
   ]
 }

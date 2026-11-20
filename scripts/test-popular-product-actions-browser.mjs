@@ -8,6 +8,9 @@ if(base.protocol!=='http:'||!['localhost','127.0.0.1'].includes(base.hostname))
   throw Error('Supplemental product browser tests must run on localhost');
 const picks=JSON.parse(readFileSync('site/selection-populaires.json','utf8')).products;
 const rights=JSON.parse(readFileSync('site/popular-photo-rights.json','utf8')).photos;
+const fallbackModel=picks.find(p=>!rights[p.id]);
+assert.ok(fallbackModel,'Use a currently unphotographed reference for the fallback checks');
+const fallbackPath='/montres/'+fallbackModel.id+'.html';
 const escapeHtml=value=>String(value).replace(/&/g,'&amp;').replace(/</g,'&lt;')
   .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 assert.equal(picks.length,37);
@@ -235,7 +238,7 @@ try{
       backgrounds.push(await studioPhone.locator('.am-extra-photo-stage').evaluate(el=>getComputedStyle(el).backgroundImage));
     }
     assert.equal(new Set(backgrounds).size,3,'Photographic studios must have three range-specific backgrounds');
-    await studioPhone.goto(new URL('/montres/casio-f91w-1.html',base).href,{waitUntil:'load'});
+    await studioPhone.goto(new URL(fallbackPath,base).href,{waitUntil:'load'});
     assert.ok(await studioPhone.locator('.am-extra-mobile-prelude').isVisible(),'No-photo product also gets a mobile identity');
     assert.match(await studioPhone.locator('.am-extra-mobile-prelude').innerText(),/photo non publiée/i);
     assert.equal(await studioPhone.locator('.am-extra-photo-stage').count(),0,'Never invent a photo stage for an unphotographed watch');
@@ -276,10 +279,10 @@ try{
   // Verify the honest fallback is actually usable at mobile viewport width.
   const officialFallbackPage=await browser.newPage({viewport:{width:393,height:852},isMobile:true,hasTouch:true,locale:'fr-FR'});
   try{
-    await officialFallbackPage.goto(new URL('/montres/casio-f91w-1.html',base).href,{waitUntil:'domcontentloaded'});
+    await officialFallbackPage.goto(new URL(fallbackPath,base).href,{waitUntil:'domcontentloaded'});
     const cta=officialFallbackPage.locator('.am-extra-official-photo>a');
     await cta.waitFor({state:'visible'});
-    assert.equal(await cta.getAttribute('href'),'https://www.casio.com/fr/watches/casio/product.F-91W-1/');
+    assert.equal(await cta.getAttribute('href'),fallbackModel.officialUrl);
     assert.equal(await cta.getAttribute('target'),'_blank');
     assert.equal(await cta.getAttribute('rel'),'noopener noreferrer');
     const bounds=await cta.boundingBox();
@@ -289,8 +292,6 @@ try{
     const passport=officialFallbackPage.locator('.am-extra-reference-passport');
     assert.equal(await passport.isVisible(),true,
       'No-photo model must display source-backed technical facts in the hero');
-    const fallbackModel=picks.find(p=>p.id==='casio-f91w-1');
-    assert.ok(fallbackModel,'Documented Casio F-91W-1 missing');
     assert.ok((await passport.innerText()).includes(fallbackModel.movement));
     assert.ok((await passport.innerText()).includes(fallbackModel.case));
     assert.equal(await passport.locator('.am-extra-passport-facts>div').count(),4);
@@ -328,12 +329,12 @@ try{
       path:'artifacts/atelier-no-photo-editorial-393.png'
     });
     assert.equal(await officialFallbackPage.locator('.am-extra-licensed-photo').count(),0,
-      'No fabricated F-91W photograph may appear');
+      'No fabricated product photograph may appear');
   }finally{await officialFallbackPage.close();}
   const noJsShortcuts=await browser.newPage({viewport:{width:360,height:740},
     isMobile:true,hasTouch:true,javaScriptEnabled:false});
   try{
-    await noJsShortcuts.goto(new URL('/montres/casio-f91w-1.html',base).href,
+    await noJsShortcuts.goto(new URL(fallbackPath,base).href,
       {waitUntil:'load'});
     assert.equal(await noJsShortcuts.locator('.am-extra-quicklinks a').count(),3,
       'Source-first product cards must preserve shortcuts without scripts');
@@ -600,7 +601,7 @@ try{
   await noScript.close();
   // A model blocked by the manufacturer stays a typographic composition.
   const noPhoto=await browser.newPage({viewport:{width:393,height:852},isMobile:true,hasTouch:true});
-  await noPhoto.goto(new URL('/montres/casio-f91w-1.html',base).href,
+  await noPhoto.goto(new URL(fallbackPath,base).href,
     {waitUntil:'domcontentloaded'});
   assert.equal(await noPhoto.locator('.am-extra-photo-stage').count(),0,
     'Never substitute another watch photograph for an inaccessible source');

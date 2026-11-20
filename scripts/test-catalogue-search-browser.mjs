@@ -573,7 +573,7 @@ try{
 
     // All 52 SEO product pages embed the same tiny enhancement.
     const core=readFileSync('site/montres/casio-mdv107.html','utf8');
-    const photoMissing=readFileSync('site/montres/casio-f91w-1.html','utf8');
+    const photoMissing=readFileSync('site/montres/curren-cur210.html','utf8');
     assert.match(core,/src="\.\.\/catalogue-return\.js"/);
     assert.match(photoMissing,/src="\.\.\/catalogue-return\.js"/);
     assert.deepEqual(returnErrors,[]);
@@ -583,7 +583,7 @@ try{
   // has a previous local selection.
   const directPage=await browser.newPage({viewport:{width:393,height:852}});
   try{
-    await directPage.goto(new URL('/montres/casio-f91w-1.html',base).href,
+    await directPage.goto(new URL('/montres/curren-cur210.html',base).href,
       {waitUntil:'domcontentloaded'});
     assert.equal(await directPage.locator('.am-catalogue-return').count(),0);
   }finally{await directPage.close();}

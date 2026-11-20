@@ -6,6 +6,7 @@ const base=process.env.WATCH_STOREFRONT_URL||'http://127.0.0.1:8765';
 const origin=new URL(base);
 assert.ok(origin.protocol==='https:'||(origin.protocol==='http:'&&['localhost','127.0.0.1'].includes(origin.hostname)),'Local HTTP is allowed only for loopback E2E tests');
 const browser=await chromium.launch({headless:true});
+const approvedWatchPhotos=JSON.parse(readFileSync('site/popular-photo-rights.json','utf8')).photos;
 const errors=[];
 mkdirSync('artifacts',{recursive:true});
 const page=await browser.newPage({viewport:{width:393,height:852},deviceScaleFactor:1,isMobile:true,hasTouch:true,locale:'fr-FR'});
@@ -227,8 +228,11 @@ try{
  assert.match(await adAmazon.getAttribute('rel'),/sponsored/);
  assert.match(await focus.locator('[data-focus-id="addiesdive-ad2030"]').innerText(),
    /Variante de la fiche Amazon/,'Verify the advertised variant before visiting Amazon');
- assert.equal(await focus.locator('.am-focus-with-photo img').count(),7,
-   'Seven shortlist photos must match declared-rights model assets');
+ const focusIds=await focus.locator('[data-focus-id]').evaluateAll(items=>
+   items.map(item=>item.dataset.focusId));
+ assert.equal(await focus.locator('.am-focus-with-photo img').count(),
+   focusIds.filter(id=>Object.hasOwn(approvedWatchPhotos,id)).length,
+   'Shortlist photos must match declared-rights model assets');
  for(const id of ['skmei-1257','skmei-2056','skmei-2256','skmei-2514','addiesdive-ad2030','pagani-pd1701']){
    const item=focus.locator('[data-focus-id="'+id+'"]');
    assert.equal(await item.count(),1,'High-priority affordable model represented once: '+id);
@@ -303,7 +307,6 @@ try{
    assert.match(await exact.locator('.am-pick-exact').innerText(),/non consultée directement/);
  }
  assert.match(await confirmedGshock.getAttribute('rel'),/sponsored/);
- const approvedWatchPhotos=JSON.parse(readFileSync('site/popular-photo-rights.json','utf8')).photos;
  const approvedPhotoCount=Object.keys(approvedWatchPhotos).length;
  assert.equal(await popularPage.locator('img.am-pick-licensed-photo').count(),approvedPhotoCount,
    'All and only registered branded images should render in the supplemental catalogue');

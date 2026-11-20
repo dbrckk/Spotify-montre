@@ -60,7 +60,8 @@ const skmeiRow=JSON.parse(skmei.stdout).records[0];
 assert.equal(skmeiRow.kind,'supplemental');
 assert.ok(skmeiRow.assets.includes('site/assets/watches-popular/skmei-1251.webp'));
 assert.ok(skmeiRow.assets.some(p=>p.includes('popular-responsive/')));
-const noPhoto=run('--id','casio-f91w-1','--json');
+const missing=report.records.find(record=>!record.published);
+const noPhoto=run('--id',missing.id,'--json');
 assert.equal(noPhoto.status,0,noPhoto.stderr);
 assert.equal(JSON.parse(noPhoto.stdout).records[0].published,false);
 assert.deepEqual(JSON.parse(noPhoto.stdout).records[0].assets,[]);
@@ -74,4 +75,4 @@ for(const args of [
   ['--all','--id','skmei-1251'],['--all','--all'],
   ['--all','--secret'],['--id','skmei-1251','garbage']
 ])assert.notEqual(run(...args).status,0,'Invalid input must fail: '+args.join(' '));
-console.log('Photo withdrawal impact: 52 models, 40 published media groups, 12 no-photo cases; assets and source references audited read-only.');
+console.log('Photo withdrawal impact: 52 models, photo and no-photo cases; assets and source references audited read-only.');

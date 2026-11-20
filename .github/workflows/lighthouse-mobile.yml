@@ -120,7 +120,7 @@ jobs:
             # The 2026 studio refresh changes generated product HTML, not
             # merely CSS. Confirm both real-photo and honest no-photo routes
             # have been deployed before auditing them.
-            for product in skmei-1251 casio-f91w-1 tissot-prx-35-blue casio-dw5600rl-1 tissot-le-locle-white casio-la-20wh-4a1 tissot-gentleman-auto; do
+            for product in skmei-1251 curren-cur210 tissot-prx-35-blue casio-dw5600rl-1 tissot-le-locle-white casio-la-20wh-4a1 tissot-gentleman-auto; do
               if ! curl -fsSL --max-time 15 "$base/montres/$product.html" -o "$RUNNER_TEMP/lh-$product.html"; then
                 ready=0
               elif ! python3 - "$product" "$RUNNER_TEMP/lh-$product.html" <<'PY'
@@ -206,7 +206,7 @@ jobs:
           npx --yes lighthouse@12 "https://atelier-montres-selection-fr.onrender.com/montres/toutes-les-montres.html" --chrome-path="$CHROME" --chrome-flags="--headless --no-sandbox" --only-categories=performance --form-factor=mobile --max-wait-for-load=45000 --output=json --output-path=artifacts/lighthouse-mobile-catalogue.json --quiet
           npx --yes lighthouse@12 "https://atelier-montres-selection-fr.onrender.com/montres/casio-mtp-1302.html" --chrome-path="$CHROME" --chrome-flags="--headless --no-sandbox" --only-categories=performance --form-factor=mobile --max-wait-for-load=45000 --output=json --output-path=artifacts/lighthouse-mobile-product.json --quiet
           npx --yes lighthouse@12 "https://atelier-montres-selection-fr.onrender.com/montres/skmei-1251.html" --chrome-path="$CHROME" --chrome-flags="--headless --no-sandbox" --only-categories=performance --form-factor=mobile --max-wait-for-load=45000 --output=json --output-path=artifacts/lighthouse-mobile-studio-photo.json --quiet
-          npx --yes lighthouse@12 "https://atelier-montres-selection-fr.onrender.com/montres/casio-f91w-1.html" --chrome-path="$CHROME" --chrome-flags="--headless --no-sandbox" --only-categories=performance --form-factor=mobile --max-wait-for-load=45000 --output=json --output-path=artifacts/lighthouse-mobile-no-photo.json --quiet
+          npx --yes lighthouse@12 "https://atelier-montres-selection-fr.onrender.com/montres/curren-cur210.html" --chrome-path="$CHROME" --chrome-flags="--headless --no-sandbox" --only-categories=performance --form-factor=mobile --max-wait-for-load=45000 --output=json --output-path=artifacts/lighthouse-mobile-no-photo.json --quiet
           npx --yes lighthouse@12 "https://atelier-montres-selection-fr.onrender.com/montres/montres-femme-accessibles.html" --chrome-path="$CHROME" --chrome-flags="--headless --no-sandbox" --only-categories=performance --form-factor=mobile --max-wait-for-load=45000 --output=json --output-path=artifacts/lighthouse-mobile-curated-femme.json --quiet
       - name: Build median-based, inspectable report
         run: node scripts/report-lighthouse-mobile.mjs

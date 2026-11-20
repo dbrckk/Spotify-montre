@@ -5,8 +5,8 @@ const sites=[
  {name:'Fiche Casio',files:['artifacts/lighthouse-mobile-product.json']},
  {name:'Fiche SKMEI avec photo',files:['artifacts/lighthouse-mobile-studio-photo.json'],
   expectedPath:'/montres/skmei-1251.html',photoId:'skmei-1251'},
- {name:'Fiche Casio sans photo',files:['artifacts/lighthouse-mobile-no-photo.json'],
-  expectedPath:'/montres/casio-f91w-1.html',forbidPhotoId:'casio-f91w-1'},
+ {name:'Fiche Curren sans photo',files:['artifacts/lighthouse-mobile-no-photo.json'],
+  expectedPath:'/montres/curren-cur210.html',forbidPhotoId:'curren-cur210'},
  {name:'Sélection femme — photos responsives',
   files:['artifacts/lighthouse-mobile-curated-femme.json'],
   expectedPath:'/montres/montres-femme-accessibles.html'}
@@ -86,7 +86,7 @@ const budgets={
   // The small verified WebP must stay inexpensive; a Casio with no photo
   // must not download an invented model image.
   'Fiche SKMEI avec photo':{scoreMin:75,lcpMax:4500,clsMax:0.2,imageBytesMax:160000},
-  'Fiche Casio sans photo':{scoreMin:75,lcpMax:4500,clsMax:0.2,imageBytesMax:160000},
+  'Fiche Curren sans photo':{scoreMin:75,lcpMax:4500,clsMax:0.2,imageBytesMax:160000},
   // Curated page has six true watch cards, some below the fold. This mobile
   // first-load budget blocks full-resolution image regressions without
   // pretending the single simulated run represents field Core Web Vitals.

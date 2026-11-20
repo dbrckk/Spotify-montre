@@ -307,10 +307,15 @@ def is_exact_casio_photo(url: str, model_code: str) -> bool:
     """
     try:
         parsed = urlparse(url)
+        asset_path = unquote(parsed.path).upper().split(".TRANSFORM/", 1)[0]
+        filename = asset_path.rsplit("/", 1)[-1]
+        if (model_code == "EFR-S108D-2AV"
+            and asset_path.endswith("/EFR-S108D-2AV/ASSETS/EFR-S108D-2AVU.PNG")):
+            # The French Edifice page identifies this exact pale-blue
+            # reference and uses the U-suffixed original as its main photo.
+            return True
         code = re.escape(model_code.upper()).replace(r"\-", r"[-_]?")
-        return bool(re.search(
-            r"(?<![A-Z0-9])" + code + r"(?![A-Z0-9])",
-            unquote(parsed.path).upper()))
+        return bool(re.search(r"(?<![A-Z0-9])" + code + r"(?![A-Z0-9])", filename))
     except (ValueError, TypeError):
         return False
 
@@ -355,6 +360,8 @@ def download(session: requests.Session, url: str, source: str,
                 im = im.resize((target_width, round(im.height * target_width / im.width)),
                                Image.Resampling.LANCZOS)
             im.thumbnail((1200, 1200), Image.Resampling.LANCZOS)
+            if im.width < 480:
+                raise ValueError("WebP width is below the publication minimum of 480px")
             buf = io.BytesIO()
             im.save(buf, "WEBP", quality=86, method=5)
             webp = buf.getvalue()
@@ -416,7 +423,10 @@ def main() -> int:
             try:
                 html, page_url = fetch_page(session, photo_page)
                 if not is_exact_page(html, page_url, p):
-                    raise ValueError("Page title/content does not confirm exact model")
+                    message = "Page title/content does not confirm exact model"
+                    if page_url != photo_page:
+                        message += " (redirected to " + page_url + ")"
+                    raise ValueError(message)
                 key = model_key(p["model"])
                 candidates = src_candidates(html, page_url, key)
                 # Only independently researched, exact-SKU Tissot media.
@@ -443,13 +453,12 @@ def main() -> int:
                 if exact_orient_front:
                     candidates = [item for item in candidates
                         if is_official_orient_front(item, source_config["modelCode"])]
-                if (source_config.get("alternateManufacturerPage") == photo_page
-                    and p["brand"] in {"Casio", "Casio G-SHOCK", "Casio Edifice"}):
-                    # An international catalogue may show sibling colourways.
-                    # Only a complete SKU in the manufacturer's image path is
-                    # strong enough evidence to publish the exact model.
+                if p["brand"] in {"Casio", "Casio G-SHOCK", "Casio Edifice"}:
                     candidates = [item for item in candidates
-                        if is_exact_casio_photo(item, source_config["modelCode"])]
+                        if is_exact_casio_photo(item, p["model"])]
+                    # Casio's product JSON-LD can point to a 408px preview.
+                    # Prefer the originals declared by the same product page.
+                    candidates.sort(key=lambda url: ".transform/" in urlparse(url).path)
                 if not candidates:
                     raise ValueError("No trusted exact-model front packshot in official product gallery")
                 print("CANDIDATES", pid, len(candidates), photo_page, flush=True)

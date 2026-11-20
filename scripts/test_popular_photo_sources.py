@@ -76,7 +76,8 @@ class OfficialProductSources(unittest.TestCase):
         markdown = status.summary(summary)
         self.assertIn("not been independently verified", markdown)
         self.assertIn("| Model | Blocking reason |", markdown)
-        self.assertIn("casio-f91w-1", markdown)
+        for model in report["missing"]:
+            self.assertIn(model["id"], markdown)
         changed = deepcopy(report)
         changed["missing"][0]["id"] = changed["photos"][0]["id"]
         with self.assertRaisesRegex(ValueError, "exactly once"):
@@ -143,7 +144,7 @@ class OfficialProductSources(unittest.TestCase):
             "F-91W-1B.jpg","F-91W-3.webp","another-product.png"
         ):
             self.assertFalse(sync.is_exact_casio_photo(
-                "https://www.casio.com/assets/"+near_match,"F-91W-1"),
+                "https://www.casio.com/F-91W-1/assets/"+near_match,"F-91W-1"),
                 "Colourway or unrelated photo must not be mistaken: "+near_match)
 
     def test_only_exact_orient_front_is_eligible_for_mobile_cards(self):
