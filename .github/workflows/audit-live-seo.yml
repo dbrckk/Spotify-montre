@@ -67,7 +67,25 @@ jobs:
           node --check scripts/probe-official-sources.mjs
           node scripts/test-official-source-http-probe.mjs
           node scripts/probe-official-sources.mjs --write-artifacts --ci-summary
+      - name: Wait for the published photo registry after a merge
+        if: github.event_name == 'push'
+        run: |
+          set -eu
+          url='https://atelier-montres-selection-fr.onrender.com/popular-photo-rights.json'
+          live="$RUNNER_TEMP/atelier-live-photo-rights.json"
+          for attempt in $(seq 1 36); do
+            if curl -fsS --max-time 8 "$url" -o "$live" &&
+              cmp -s site/popular-photo-rights.json "$live"; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo 'Render did not publish the photo registry from this revision.'
+          exit 1
+      # PR builds validate their own generated HTML. The public site still
+      # serves main and cannot contain the images proposed by the PR.
       - name: Audit sitemap, canonical URLs and crawlability in production
+        if: github.event_name != 'pull_request'
         env:
           SEO_AUDIT_BASE_URL: https://atelier-montres-selection-fr.onrender.com/
         run: node scripts/audit-live-seo.mjs
